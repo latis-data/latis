@@ -1,5 +1,16 @@
 package latis.dm
 
-class Tuple(variables: Seq[Variable]) extends Variable {
+import scala.collection.immutable._
 
+/**
+ * A Variable that represents a collection of Variables.
+ */
+class Tuple(val variables: Seq[Variable]) extends Variable {
+
+}
+
+object Tuple {
+  
+  //expose the Variables that this Tuple contains
+  def unapply(tup: Tuple): Option[Seq[Variable]] = Some(tup.variables)
 }
