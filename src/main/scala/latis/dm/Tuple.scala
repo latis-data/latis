@@ -11,6 +11,6 @@ class Tuple(val variables: Seq[Variable]) extends Variable {
 
 object Tuple {
   
-  //expose the Variables that this Tuple contains
+  //expose the Variables that the given Tuple contains
   def unapply(tup: Tuple): Option[Seq[Variable]] = Some(tup.variables)
 }

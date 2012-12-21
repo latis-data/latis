@@ -10,8 +10,8 @@ class Function(val domain: Variable, val range: Variable) extends Variable {
 
 object Function {
   
-  /**
-   * Expose a Functions domain and range Variables as a pair.
-   */
-  def unapply(f: Function) = (f.domain, f.range)
+//  /**
+//   * Expose a Functions domain and range Variables as a pair.
+//   */
+//  def unapply(f: Function): Option[(Variable, Variable)] = Some(f.domain, f.range)
 }
