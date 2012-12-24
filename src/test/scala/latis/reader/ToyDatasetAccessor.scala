@@ -7,16 +7,13 @@ import latis.writer.AsciiWriter
 /**
  * Make a toy Dataset to test the LaTiS API against. 
  */
-class ToyDatasetAccessor extends DatasetAccessor {
+class ToyDatasetAccessor(val variable: Variable) extends DatasetAccessor {
 
   /**
    * Make a Dataset.
    */
   def getDataset() = {
-    //
-    val v1 = new Real
-    val v2 = new Real
-    new Dataset(this, Seq(v1, v2))
+    Dataset(this, variable)
   }
   
   def close() {}
@@ -25,8 +22,20 @@ class ToyDatasetAccessor extends DatasetAccessor {
 
 object ToyDatasetAccessor extends App {
   
-  //make a DatasetAccessor
-  val da = new ToyDatasetAccessor()
+  def real = {
+    Real()
+  }
+  
+  def realTuple = {
+    Tuple(real, real, real)
+  }
+  
+  //make Variable for toy dataset
+  //val v = real
+  val v = realTuple
+  
+  //make a DatasetAccessor for this variable
+  val da = new ToyDatasetAccessor(v)
   
   //get the Dataset
   val ds = da.getDataset()
