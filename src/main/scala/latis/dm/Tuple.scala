@@ -7,6 +7,8 @@ import scala.collection.immutable._
  */
 class Tuple(val variables: Seq[Variable]) extends Variable {
 
+  //Set parentage
+  variables.map(_.setParent(this))
 }
 
 object Tuple {

@@ -6,9 +6,16 @@ package latis.dm
  */
 class Function(val domain: Variable, val range: Variable) extends Variable {
 
+  //Set parentage
+  domain.setParent(this)
+  range.setParent(this)
+  
+  def iterator() = FunctionIterator(this)
 }
 
 object Function {
+  
+  def apply(domain: Variable, range: Variable) = new Function(domain, range)
   
 //  /**
 //   * Expose a Functions domain and range Variables as a pair.
