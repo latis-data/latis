@@ -11,6 +11,8 @@ class Tuple(val variables: Seq[Variable]) extends Variable {
 
 object Tuple {
   
+  def apply(vars: Variable*) = new Tuple(vars.toIndexedSeq) //need an immutable Seq
+  
   //expose the Variables that the given Tuple contains
   def unapply(tup: Tuple): Option[Seq[Variable]] = Some(tup.variables)
 }
