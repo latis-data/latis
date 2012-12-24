@@ -10,7 +10,8 @@ class Function(val domain: Variable, val range: Variable) extends Variable {
   domain.setParent(this)
   range.setParent(this)
   
-  //def iterator() = FunctionIterator(this)
+  def iterator() = getDataset().getAccessor().getIterator(this)
+    //FunctionIterator(this)
 }
 
 object Function {

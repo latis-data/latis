@@ -31,13 +31,14 @@ class AsciiWriter(out: OutputStream) extends Writer {
       _writer.print(")")
     }
     
-//    case f: Function => {
-//      for ((domain, range) <- f.iterator) {
-//        writeVariable(domain)
-//        _writer.print(" -> ")
-//        writeVariable(range)
-//      }
-//    }
+    case f: Function => {
+      for ((domain, range) <- f.iterator) {
+        writeVariable(domain)
+        _writer.print(" -> ")
+        writeVariable(range)
+        _writer.println()
+      }
+    }
   }
 
   /**

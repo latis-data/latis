@@ -18,6 +18,8 @@ abstract class DatasetAccessor {
   
   def getValue(real: Real): Option[Double] 
   
+  def getIterator(function: Function): FunctionIterator
+  
   
   /**
    * Release any resources that this accessor acquired.
