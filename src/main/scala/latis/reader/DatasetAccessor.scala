@@ -1,6 +1,6 @@
 package latis.reader
 
-import latis.dm.Dataset
+import latis.dm._
 
 /**
  * Base for classes that provide data access for a Dataset.
@@ -14,6 +14,10 @@ abstract class DatasetAccessor {
    * This may involve considerable construction.
    */
   def getDataset(): Dataset
+  
+  
+  def getValue(real: Real): Option[Double] 
+  
   
   /**
    * Release any resources that this accessor acquired.

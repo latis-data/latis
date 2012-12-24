@@ -16,6 +16,10 @@ class ToyDatasetAccessor(val variable: Variable) extends DatasetAccessor {
     Dataset(this, variable)
   }
   
+  
+  def getValue(real: Real): Option[Double] = Some(scala.util.Random.nextDouble() * 100)
+  
+  
   def close() {}
 
 }

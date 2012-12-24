@@ -11,6 +11,7 @@ import scala.collection.immutable._
  */
 class Dataset(accessor: DatasetAccessor, vars: Seq[Variable]) extends Tuple(vars) {
 
+  def getAccessor() = accessor
 }
 
 object Dataset {
