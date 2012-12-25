@@ -54,6 +54,18 @@ class ToyDatasetAccessor(val variable: Variable) extends DatasetAccessor {
 }
 
 object ToyDatasetAccessor extends App {
+
+  def writeVariable(v: Variable) {
+    //make a DatasetAccessor for this variable
+    val da = new ToyDatasetAccessor(v)
+
+    //get the Dataset
+    val ds = da.getDataset()
+
+    //write the Dataset
+    val writer = new AsciiWriter(System.out)
+    writer.write(ds)
+  }
   
   def real = {
     Real()
@@ -65,20 +77,9 @@ object ToyDatasetAccessor extends App {
   
   def function = Function(Index(), real)
   
-  
-  //make Variable for toy dataset
-  //val v = real
-  //val v = realTuple
-  val v = function
-  
-  //make a DatasetAccessor for this variable
-  val da = new ToyDatasetAccessor(v)
-  
-  //get the Dataset
-  val ds = da.getDataset()
-  
-  //write the Dataset
-  val writer = new AsciiWriter(System.out)
-  writer.write(ds)
+  //test Variables for toy dataset
+  writeVariable(real)
+  writeVariable(realTuple)
+  writeVariable(function)
   
 }
