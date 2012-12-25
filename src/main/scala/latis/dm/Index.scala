@@ -1,11 +1,7 @@
 package latis.dm
 
-class Index extends Scalar
+class Index extends Scalar[Int]
 
 object Index {
   def apply() = new Index()
-  
-  def unapply(v: Index): Option[Int] = {
-    v.getDataset().getAccessor().getValue(v)
-  }
 }

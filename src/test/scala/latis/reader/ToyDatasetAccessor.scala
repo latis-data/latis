@@ -10,22 +10,28 @@ import scala.util.Random
  */
 class ToyDatasetAccessor(val variable: Variable) extends DatasetAccessor {
 
-  val random = new Random(0)
+  //random number generator with a fixed seed so we get the same results each time
+  val random = new Random(0) 
+  
+  //keep count of what sample we are on, by the nature of the algorithm we need to start early
   private[this] var _index: Int = -2
   
   /**
-   * Make a Dataset.
+   * Make a Dataset around the Variable we were constructed with.
    */
   def getDataset() = {
     Dataset(this, variable)
   }
   
   /**
-   * Return random value for each Real.
+   * Make up data:
+   *   random value for each Real
+   *   int from 0 until 10 for Index
    */
-  def getValue(real: Real): Option[Double] = Some(random.nextDouble() * 100)
-  
-  def getValue(index: Index): Option[Int] = Some(_index)
+  def getValue(v: Scalar[_]): Option[_] = v match {
+    case r: Real => Some(random.nextDouble() * 100)
+    case i: Index => Some(_index)
+  }
   
   /**
    * Ten random samples

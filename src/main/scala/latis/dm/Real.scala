@@ -1,14 +1,7 @@
 package latis.dm
 
-class Real extends Scalar {
-
-}
+class Real extends Scalar[Double] 
 
 object Real {
   def apply() = new Real()
-  
-  
-  def unapply(v: Real): Option[Double] = {
-    v.getDataset().getAccessor().getValue(v)
-  }
 }
