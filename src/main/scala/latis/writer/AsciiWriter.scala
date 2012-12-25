@@ -10,6 +10,7 @@ class AsciiWriter(out: OutputStream) extends Writer {
   
   def write(dataset: Dataset) = {
     writeVariable(dataset)
+    _writer.println()
     _writer.flush()
   }
   
