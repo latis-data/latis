@@ -3,12 +3,16 @@ package latis.reader
 import latis.dm._
 import scala.collection.immutable._
 import latis.writer.AsciiWriter
+import scala.util.Random
 
 /**
  * Make a toy Dataset to test the LaTiS API against. 
  */
 class ToyDatasetAccessor(val variable: Variable) extends DatasetAccessor {
 
+  val random = new Random(0)
+  private[this] var _index: Int = -2
+  
   /**
    * Make a Dataset.
    */
@@ -19,22 +23,19 @@ class ToyDatasetAccessor(val variable: Variable) extends DatasetAccessor {
   /**
    * Return random value for each Real.
    */
-  def getValue(real: Real): Option[Double] = Some(scala.util.Random.nextDouble() * 100)
+  def getValue(real: Real): Option[Double] = Some(random.nextDouble() * 100)
+  
+  def getValue(index: Index): Option[Int] = Some(_index)
   
   /**
    * Ten random samples
    */
   def getIterator(function: Function) = new FunctionIterator() {
-    //val vals = 0 until 10
-    private[this] var _index = 0
-    println("making iterator")
     
     override def getNextSample() = {
-      if (_index >= 10) null
-      else {
-        _index += 1
-        (function.domain, function.range)
-      }
+      _index += 1
+      if (_index >= 9) null
+      else (function.domain, function.range)
     }
     
     //prime the next cache
@@ -56,7 +57,7 @@ object ToyDatasetAccessor extends App {
     Tuple(real, real, real)
   }
   
-  def function = Function(real, real)
+  def function = Function(Index(), real)
   
   
   //make Variable for toy dataset

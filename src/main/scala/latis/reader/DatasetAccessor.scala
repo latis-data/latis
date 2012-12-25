@@ -17,6 +17,7 @@ abstract class DatasetAccessor {
   
   
   def getValue(real: Real): Option[Double] 
+  def getValue(index: Index): Option[Int] 
   
   def getIterator(function: Function): FunctionIterator
   

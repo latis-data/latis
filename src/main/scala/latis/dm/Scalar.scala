@@ -14,5 +14,5 @@ object Scalar {
    * For now, return a random int from 0 until 100.
    * TODO: delegate to parent Dataset's Accessor to get data values
    */
-  def unapply(scalar: Scalar): Option[_] = Some(scala.util.Random.nextInt(100))
+  //def unapply(v: Scalar): Option[_] = Some(v.getDataset().getAccessor().getValue(v)) //Some(scala.util.Random.nextInt(100))
 }
