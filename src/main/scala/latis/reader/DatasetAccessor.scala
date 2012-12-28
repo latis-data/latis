@@ -15,15 +15,15 @@ abstract class DatasetAccessor {
    */
   def getDataset(): Dataset
   
-  /**
-   * Return the value of the datum represented by the given Scalar.
-   */
-  def getValue(v: Scalar[_]): Option[_]
-  
-  /**
-   * Return an Iterator for Function samples as domain,range Pairs.
-   */
-  def getIterator(function: Function): FunctionIterator
+//  /**
+//   * Return the value of the datum represented by the given Scalar.
+//   */
+//  def getValue(v: Scalar[_]): Option[_]
+//  
+//  /**
+//   * Return an Iterator for Function samples as domain,range Pairs.
+//   */
+//  def getIterator(function: Function): FunctionIterator
   
   
   /**

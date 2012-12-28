@@ -11,5 +11,5 @@ object Scalar {
    * Expose the datum value that the given Scalar represents.
    * Delegate to parent Dataset's Accessor to get data values.
    */
-  def unapply[T](v: Scalar[T]): Option[_] = v.getDataset().getAccessor().getValue(v) 
+  //def unapply[T](v: Scalar[T]): Option[_] = v.getDataset().getAccessor().getValue(v) 
 }
