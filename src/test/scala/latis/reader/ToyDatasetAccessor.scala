@@ -8,46 +8,44 @@ import scala.util.Random
 /**
  * Make a toy Dataset to test the LaTiS API against. 
  */
-class ToyDatasetAccessor(val variable: Variable) extends DatasetAccessor {
-
-  //random number generator with a fixed seed so we get the same results each time
-//  val random = new Random(0) 
+class ToyDatasetAccessor() extends DatasetAccessor {
   
-  //keep count of what sample we are on, by the nature of the algorithm we need to start early
-//  private[this] var _index: Int = -2
+  //random number generator with a fixed seed so we get the same results each time
+  val random = new Random(0) 
   
   /**
-   * Make a Dataset around the Variable we were constructed with.
+   * Make a Dataset.
    */
   def getDataset() = {
-    Dataset(this, variable)
+    //val v = Real(3.14)
+    //val v = Tuple(Integer(1), Real(1), Text("1"))
+    //val v = index_function
+    //val v = random_function(10)
+    //val v = function_from_iterators
+    val v = nested_function
+    
+    Dataset(this, v)
   }
   
-//  /**
-//   * Make up data:
-//   *   random value for each Real
-//   *   int from 0 until 10 for Index
-//   */
-//  def getValue(v: Scalar[_]): Option[_] = v match {
-//    case r: Real => Some(random.nextDouble() * 100)
-//    case i: Index => Some(_index)
-//  }
-//  
-//  /**
-//   * Ten random samples
-//   */
-//  def getIterator(function: Function) = new FunctionIterator() {
-//    
-//    override def getNextSample() = {
-//      _index += 1
-//      if (_index >= 9) null
-//      else (function.domain, function.range)
-//    }
-//    
-//    //prime the next cache
-//    _next = getNextSample()
-//  }
   
+  def index_function = Function(IndexSet(10), (1 to 10).map(Real(_)) )
+  
+  def random_function(length: Int) = {
+    Function(IndexSet(length), (1 to length).map(x => Real(random.nextDouble())) )
+  }
+  
+  def function_from_iterators = {
+    val domain = DomainSet((0 until 10).map(Index(_)).iterator)
+    val range = VariableSeq((1 to 10).map(Real(_)).iterator)
+    Function(domain, range)
+  }
+  
+  def nested_function = {
+    val domain = IndexSet(3)
+    val range = Seq(random_function(3), random_function(3), random_function(3))
+    Function(domain, range)
+  }
+
   
   def close() {}
 
@@ -55,34 +53,9 @@ class ToyDatasetAccessor(val variable: Variable) extends DatasetAccessor {
 
 object ToyDatasetAccessor extends App {
 
-  def writeVariable(v: Variable) {
-    //make a DatasetAccessor for this variable
-    val da = new ToyDatasetAccessor(v)
-
-    //get the Dataset
-    val ds = da.getDataset()
-
-    //write the Dataset
-    val writer = new AsciiWriter(System.out)
-    writer.write(ds)
-  }
-  
-//  def real = {
-//    Real()
-//  }
-//  
-//  def realTuple = {
-//    Tuple(real, real, real)
-//  }
-  
-  def function = Function(IndexSet(10), (1 to 10).map(Real(_)) )
-  
-
-  //def nestedFunction = 
-  
-  //test Variables for toy dataset
-  //writeVariable(real)
-  //writeVariable(realTuple)
-  writeVariable(function)
+  val da = new ToyDatasetAccessor()
+  val ds = da.getDataset()
+  val writer = new AsciiWriter(System.out)
+  writer.write(ds)
   
 }
