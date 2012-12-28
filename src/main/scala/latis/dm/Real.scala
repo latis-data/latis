@@ -1,7 +1,7 @@
 package latis.dm
 
-class Real extends Scalar[Double] 
+class Real(value: Double) extends Scalar[Double](value)
 
 object Real {
-  def apply() = new Real()
+  def apply(value: Double) = new Real(value)
 }

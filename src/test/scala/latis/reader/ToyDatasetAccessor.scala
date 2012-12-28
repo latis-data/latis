@@ -75,7 +75,7 @@ object ToyDatasetAccessor extends App {
 //    Tuple(real, real, real)
 //  }
   
-  def function = Function(IndexSet(10), IndexSet(10))
+  def function = Function(IndexSet(10), (1 to 10).map(Real(_)) )
   
 
   //def nestedFunction = 

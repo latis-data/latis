@@ -16,7 +16,7 @@ class AsciiWriter(out: OutputStream) extends Writer {
   
   def writeVariable(variable: Variable): Unit = variable match {
     
-    case Index(v) => _writer.print(v)
+    case Scalar(v) => _writer.print(v)
     
     case Tuple(vars) => {
       //surround Tuple's Variables with parens
