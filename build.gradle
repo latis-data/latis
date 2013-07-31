@@ -1,10 +1,12 @@
 apply plugin: 'scala'
+apply plugin: 'war'
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
+dependencies {    
+    compile "javax.servlet:servlet-api:2.5"
     compile 'org.scala-lang:scala-library:2.10.2'
     testCompile 'junit:junit:4.11'
 }
