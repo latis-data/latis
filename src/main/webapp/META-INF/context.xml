@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<Context>
+
+  <Resource name="jdbc/maven"
+            auth="Container"
+            type="javax.sql.DataSource"
+            username="mavendevdb"
+            password="mav3nd3vbus3r"
+            driverClassName="org.postgresql.Driver"
+            url="jdbc:postgresql://lasp-db-dev:5432/maven_development"
+            maxActive="8"
+            maxIdle="4"/>
+            
+  <Resource name="jdbc/mms"
+            auth="Container"
+            type="javax.sql.DataSource"
+            username="rupa5530"
+            password="reset1"
+            driverClassName="oracle.jdbc.OracleDriver"
+            url="jdbc:oracle:thin:@lasp-db-dev:1521:oradev11g"
+            maxActive="8"
+            maxIdle="4"/>
+
+</Context>
