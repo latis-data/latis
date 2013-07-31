@@ -4,6 +4,7 @@ import java.util.Properties
 import java.io.File
 import java.io.FileInputStream
 import java.net.URL
+import javax.servlet.ServletConfig
 
 class LatisProperties extends Properties {
   //TODO: enforce immutabily? disable setters? extend immutable Map?
@@ -48,8 +49,7 @@ class LatisProperties extends Properties {
     else scala.util.Properties.userDir + File.separator + path //prepend current working directory
   }
 }
-
-
+  
 /*
  * Just using LatisProperties.getProperty will cause the singleton to be generated.
  * If first invoked with init(config), then the instance will be a LatisServerProperties
@@ -59,27 +59,21 @@ class LatisProperties extends Properties {
  */
 object LatisProperties {
   
-  private lazy val instance = new LatisProperties()
+  //Manage singleton instance.
+  private var _instance: LatisProperties = null
   
-//  def instance: LatisProperties = {
-//    if (_instance == null) _instance = new LatisProperties()
-//    _instance
-//  }
-
-/*
- * TODO: had to get server stuff out of core, but now the server can't use this
- * only diff is how it finds the properties file
- * 
- */ 
-//  //alternate path to create the LatisProperties for the server
-//  def init(config: ServletConfig) {
-//    _instance = new LatisServerProperties(config)
-//  }
+  def instance: LatisProperties= {
+    if (_instance == null) _instance = new LatisProperties
+    _instance
+  }
+  
+  def init(config: ServletConfig) {_instance = new LatisServerProperties(config)}
+  
   
   //direct access, could be null
   def apply(name: String): String = instance.getProperty(name)
   
-  //use the Option monad
+  //get an Option
   def get(name: String): Option[String] = {
     instance.getProperty(name) match {
       case value: String => Some(value)
