@@ -1,0 +1,10 @@
+apply plugin: 'scala'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.10.2'
+    //testCompile 'junit:junit:4.11'
+}

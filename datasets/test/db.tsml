@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset>
+    <metadata name="Database Test"/>
+    <adapter class="latis.reader.tsml.JdbcAdapter"
+             url="jdbc:postgresql://winp179:45432/maven_development" 
+             driver="org.postgresql.Driver"
+             table="kp_files_metadata"
+             user="maven_development"
+             password="password"
+             predicate="id &lt; 150"/>
+             
+    <?filter file_size > 3000000?>
+    <?filter file_size < 6000000?>
+             
+    <time id="id" />
+    
+    <real id="file_size"/>
+
+  </dataset>
+
+</tsml>
