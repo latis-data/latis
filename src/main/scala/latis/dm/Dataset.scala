@@ -14,7 +14,7 @@ class Dataset(vars: Seq[Variable]) extends Tuple(vars) with BasicMath {
   //convenient method, get number of samples in top level Function
   def length: Int = vars.find(_.isInstanceOf[Function]) match {
     case Some(f: Function) => f.length
-    case None => if (vars.isEmpty) 0 else 1
+    case _ => if (vars.isEmpty) 0 else 1
   }
   
   /*
