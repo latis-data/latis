@@ -2,7 +2,6 @@ package latis.ops.math
 
 import BinOp._
 import latis.dm._
-import latis.ops.math.BinOp
 
 trait BasicMath { this: Dataset =>
   //TODO: ComplexMath (Complex extends Scalar[(Float,Float)]), VectorMath (Vector extends Tuple), MatrixMath?
