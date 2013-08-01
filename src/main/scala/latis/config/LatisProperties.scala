@@ -12,7 +12,11 @@ class LatisProperties extends Properties {
   //Tempted to use any URL, but could open up complications.
 
   //Load properties
-  val file = getPropertyFileName() //TODO: deal with potential exceptions
+  val file = getPropertyFileName()
+  //Resolve path
+  if (file.startsWith(File.separator)) file //already fully resolved
+  else resolvePath(file)
+  
   try {
     val in = new FileInputStream(file)
     load(in)
@@ -37,16 +41,14 @@ class LatisProperties extends Properties {
       if (url != null) file = url.getPath
     }
 
-    //Prepend absolute path if file is relative.
-    resolvePath(file);
+    file
   }
     
   /**
    * Return the full file system path for the given relative path.
    */
   def resolvePath(path: String): String = {
-    if (path.startsWith(File.separator)) path //already fully resolved
-    else scala.util.Properties.userDir + File.separator + path //prepend current working directory
+    scala.util.Properties.userDir + File.separator + path //prepend current working directory
   }
 }
   
