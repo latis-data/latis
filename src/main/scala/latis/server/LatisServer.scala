@@ -9,9 +9,9 @@ import latis.writer.HttpServletWriter
 
 class LatisServer extends HttpServlet {
 
-//  override def init() {
-//    
-//  }
+  override def init() {
+    LatisProperties.init(getServletConfig)
+  }
   
   override def doGet(request : HttpServletRequest, response : HttpServletResponse) {
     //TODO: error handling
