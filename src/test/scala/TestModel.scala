@@ -5,6 +5,7 @@ import org.junit._
 import Assert._
 import latis.writer._
 import java.nio.ByteBuffer
+import latis.data.buffer.ByteBufferData
 
 class TestModel  {
   

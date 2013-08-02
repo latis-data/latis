@@ -4,6 +4,7 @@ import latis.dm._
 import latis.ops.math._
 import java.nio.ByteBuffer
 import latis.data.value._
+import latis.data.buffer.ByteBufferData
 
 /*
  * TODO: 2013-05-30
@@ -117,10 +118,6 @@ object Data {
 //    //TODO: deal with recordSize, length..., unknown
 //  }
 }
-// 
-//class StringDatum(string: String) extends Datum[String](string) with TextData {
-//  override def toString = string
-//}
 //
 ////class DoubleDatum(val value: Double) extends AnyVal with Data with Datum {
 ////note, Double instead of Real to keep it closer to the implementation

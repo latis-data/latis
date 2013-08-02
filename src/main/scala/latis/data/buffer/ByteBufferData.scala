@@ -1,8 +1,13 @@
-package latis.data
+package latis.data.buffer
 
 import java.nio.ByteBuffer
 import latis.data.value.DoubleValue
+import latis.data.Data
 
+/**
+ * Implement Data with a ByteBuffer.
+ * A record size is required for iteration.
+ */
   //construct with record size so we can iterate over a sample
 class ByteBufferData(val buffer: ByteBuffer, recSize: Int) extends Data {
   
@@ -41,14 +46,3 @@ class ByteBufferData(val buffer: ByteBuffer, recSize: Int) extends Data {
    * getDouble(index),...?
    * how many of these should be part of Data or Number or TextData?
    */
-
-  //TODO: use "flip" instead of rewind to set limit to end of data instead of capacity, also sets pointer to zero
-
-class DoubleBufferData(buffer: ByteBuffer) extends ByteBufferData(buffer, 8) {
-  
-  override def iterator = new Iterator[Data] {
-    val dbuf = buffer.asDoubleBuffer()
-    override def hasNext = dbuf.hasRemaining() 
-    override def next = DoubleValue(dbuf.get())
-  }
-}
