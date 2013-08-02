@@ -107,6 +107,7 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   }
   
   def makeIterableData(sampleTemplate: Sample): Data = new Data {
+    //TODO: abstract class IterableData, length is undefined?...
     override def iterator = new Iterator[Data] {
       override def hasNext = recordIterator.hasNext
       override def next = {
