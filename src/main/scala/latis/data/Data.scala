@@ -32,10 +32,11 @@ trait Data extends Any {
   //defaults assume Data with a single Double.NaN
   //TODO: make them abstract?
   
-  def getByteBuffer: ByteBuffer = {
-    val d = doubleValue
-    ByteBuffer.allocate(8).putDouble(d).flip.asInstanceOf[ByteBuffer]
-  }
+  def getByteBuffer: ByteBuffer 
+//  = {
+//    val d = doubleValue
+//    ByteBuffer.allocate(8).putDouble(d).flip.asInstanceOf[ByteBuffer]
+//  }
   
   
   def doubleValue: Double = getDouble match {
@@ -48,15 +49,15 @@ trait Data extends Any {
     case _ => throw new Error("No Data")
   }
     
-  def getDouble: Option[Double] = None
-  def getString: Option[String] = None
+  def getDouble: Option[Double] //= None
+  def getString: Option[String] //= None
   
   //TODO: word = Array of 4 chars, 8 bytes
   //TODO: String as Index array of Char, or Word?
   //TODO: Blob: fixed length byte array
 
   //TODO: beware of mixing getters that increment with iterator
-  def iterator: Iterator[Data] = List(DoubleValue(doubleValue)).iterator
+  def iterator: Iterator[Data] //= List(DoubleValue(doubleValue)).iterator
 
   //TODO: support foreach, (d <- data)
 //  def foreach(f: (Data) => Unit) = {
@@ -76,8 +77,8 @@ trait Data extends Any {
   //  seems like we should capture at least that much when constructing Data, e.g. support iteration of records
   //avoid having to put length in metadata?
   
-  def length: Int = 1 //number of records
-  def recordSize: Int = 8 //bytes
+  def length: Int //= 1 //number of records
+  def recordSize: Int //= 8 //bytes
   def size = length * recordSize
   
   //TODO: is byte buffer equality sufficient?
@@ -96,6 +97,7 @@ object Data {
   val empty = EmptyData
   
   def apply(d: Double): Data = DoubleValue(d)
+  def apply(s: String): Data = StringValue(s)
   def apply(ds: Seq[Double]): Data = SeqData(ds)
   
   def apply(bb: ByteBuffer): Data = new ByteBufferData(bb, bb.limit) //one sample

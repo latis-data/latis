@@ -13,14 +13,21 @@ abstract class SeqData extends Data { //TODO: extends Seq[Data]?
 
 case class DoubleSeqData(ds: immutable.Seq[Double]) extends SeqData {
   
-  override def getByteBuffer: ByteBuffer = ds.foldLeft(ByteBuffer.allocate(size))(_.putDouble(_))
+  def getByteBuffer: ByteBuffer = ds.foldLeft(ByteBuffer.allocate(size))(_.putDouble(_))
   
-  override def doubleValue = if (length == 1) ds(0) else Double.NaN
-  //TODO: length=0? error? 
-//TODO: impl getDouble:Option instead?
+  def getDouble: Option[Double] = length match {
+    case 0 => None
+    case 1 => Some(ds(0))
+    case _ => Some(Double.NaN)
+  }
   
-  override def length = ds.length
-  override def iterator = ds.map(DoubleValue(_)).iterator
+  def getString: Option[String] = ???
+
+  
+  def length = ds.length
+  def recordSize = 8
+  
+  def iterator = ds.iterator.map(DoubleValue(_))
 }
 
 //inner, faster varying array is over Tuple elements

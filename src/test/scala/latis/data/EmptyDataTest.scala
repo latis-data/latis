@@ -31,11 +31,7 @@ class EmptyDataTest {
   def zero_size = assertEquals(0, EmptyData.size)
   
   @Test
-  def empty_iterator {
-    var count = 0
-    for (d <- EmptyData.iterator) count += 1
-    assertEquals(0, count)
-  }
+  def empty_iterator = assert(EmptyData.iterator.toList.isEmpty)
   
   @Test
   def empty_byte_buffer = assertEquals(0, EmptyData.getByteBuffer.limit)
@@ -45,5 +41,7 @@ class EmptyDataTest {
   
   @Test
   def get_string = assertEquals(None, EmptyData.getString)
+  
+  //TODO: doubleValue, stringValue, errors
 
 }

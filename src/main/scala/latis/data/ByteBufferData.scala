@@ -7,13 +7,18 @@ class ByteBufferData(val buffer: ByteBuffer, recSize: Int) extends Data {
   
   override def getByteBuffer = buffer
   
-  override def doubleValue = if (length == 1) buffer.getDouble(0) else Double.NaN
-  //TODO: what about length = 0? error?
+  def getDouble: Option[Double] = length match {
+    case 0 => None
+    case 1 => Some(buffer.getDouble(0))
+    case _ => Some(Double.NaN)
+  }
   
-  override def iterator = new Iterator[Data] {
+  def getString: Option[String] = ???
+  
+  def iterator = new Iterator[Data] {
     private var _index = 0
     
-    override def hasNext = _index  < ByteBufferData.this.length
+    override def hasNext = _index < ByteBufferData.this.length
     
     override def next = {
       val bb = ByteBuffer.wrap(buffer.array, _index * recordSize, recordSize)
@@ -22,14 +27,10 @@ class ByteBufferData(val buffer: ByteBuffer, recSize: Int) extends Data {
     }
   }
   
-  override def recordSize = recSize
-  override def length = buffer.limit / recordSize
+  def recordSize = recSize
+  def length = buffer.limit / recordSize
 }
 
-  /*
-   * iterator
-   * wrap orig BB with offset and length?
-   */
   
   /*
    * TODO:
