@@ -72,6 +72,8 @@ object LatisProperties {
   def init(config: ServletConfig) {_instance = new LatisServerProperties(config)}
   
   
+  //TODO: look at system properties and env vars
+  
   //direct access, could be null
   def apply(name: String): String = instance.getProperty(name)
   
