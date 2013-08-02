@@ -3,6 +3,7 @@ package latis.data
 import latis.dm._
 import latis.ops.math._
 import java.nio.ByteBuffer
+import latis.data.value._
 
 /*
  * TODO: 2013-05-30
@@ -116,48 +117,6 @@ object Data {
 //    //TODO: deal with recordSize, length..., unknown
 //  }
 }
-
-//=============================================================================
-
-//abstract class Datum[T](val value: T) extends Data 
-/* 
- * TODO: benefit to constructing with the value?
- * def value, more flexible than val value
- * make special subclass that holds data?
- * Cache?
- * how would cache work in general?
- *   must store data somewhere
- *   it must be realized and not just backed by the orig source
- *   but any persistent store could be the source of the cached data
- *   e.g. ehcache, memcache?, hdf5
- *   just a Dataset with a new source
- *   since it has to have all the data, it makes sense to pass it to the constructor
- *   so no diff that what we are doing with Datum(3.14)
- * cache only Datasets?
- *   variable can't live in isolation, needs context of Dataset, monadically?
- *   implicit Dataset wrapper, add history metadata to capture its birth
- * what about caching Data instead of Variable/Dataset?
- *   seems like that is what we need here
- *   not really a persistent store since it would need metadata...
- *   
- *   
- * avoid type issues
- * still hope for value class?
- * but must subclass AnyVal with base trait that extends Any
- * keep in mind that pattern matching will instantiate too
- * use case?
- *   iterating on function, each value wrapped as served
- * Use *Value for value classes
- *   DoubleValue
- */
-
-
-
-//abstract class NumericDatum(v: AnyVal) extends Datum(v) with NumericData {
-//  def toDouble: Double
-//  def toLong: Long
-//  def doubleIterator: Iterator[Double] = List(toDouble).iterator
-//}
 // 
 //class StringDatum(string: String) extends Datum[String](string) with TextData {
 //  override def toString = string

@@ -2,6 +2,7 @@ package latis.data
 
 import scala.collection._
 import java.nio.ByteBuffer
+import latis.data.value.DoubleValue
 
 //abstract class SeqData(val seq: Seq[Data]) extends Data {
 abstract class SeqData extends Data { //TODO: extends Seq[Data]?

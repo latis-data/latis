@@ -1,10 +1,12 @@
 package latis.data
 
+import latis.data.value._
 import latis.dm._
 import latis.dm.implicits._
 import latis.writer._
 import org.junit._
 import Assert._
+import latis.data.value.DoubleValue
 
 class DoubleValueTest {
 

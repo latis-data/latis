@@ -1,6 +1,7 @@
 package latis.data
 
 import java.nio.ByteBuffer
+import latis.data.value.DoubleValue
 
   //construct with record size so we can iterate over a sample
 class ByteBufferData(val buffer: ByteBuffer, recSize: Int) extends Data {

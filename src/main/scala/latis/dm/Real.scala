@@ -4,7 +4,7 @@ import latis.data._
 import latis.metadata.VariableMetadata
 import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
-import latis.data.DoubleValue
+import latis.data.value.DoubleValue
 
 //class Real(metadata: Metadata, data: Data) extends Scalar(metadata, data) with Number {
 class Real extends Scalar with Number {

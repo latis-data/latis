@@ -3,7 +3,7 @@ package latis.time
 import latis.dm.Real
 import java.util.Date
 import latis.metadata.Metadata
-import latis.data.DoubleValue
+import latis.data.value.DoubleValue
 import latis.data.EmptyData
 import latis.data.Data
 import latis.metadata.EmptyMetadata
