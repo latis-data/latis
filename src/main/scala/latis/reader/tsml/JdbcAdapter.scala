@@ -127,27 +127,13 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     buffer.filter(_.nonEmpty).mkString(" AND ")
   }
   
-  def makeIterableData(sampleTemplate: Sample): Data = new Data {
+  def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
+    def recordSize = sampleTemplate.size
     
     override def iterator = new NextIterator[Data] {
-      
-      val sampleSize = sampleTemplate.size
       val md = resultSet.getMetaData
       val vars = dataset.toSeq //Seq of Variables as ordered in the dataset
- /*
-  * TODO: 2013-07-26 Projection needs to be applied to the model also
-  * should Adapters be responsible for applying Projection to Data?
-  *   this one effectively does
-  * should we munge model in this adapter or at a higher level?
-  *   we did say we are handling it
-  * if we do it outside the context of this adapter, 
-  *   the projection will want to munge the data
-  *   in this case by wrapping the Function
-  *   redundant, but not broken
-  * Need solution that avoids consistency violations by subclasses
-  * 
-  */
-      
+
       val types = vars.map(v => md.getColumnType(resultSet.findColumn(v.name)))
       val varsWithTypes = vars zip types
       
@@ -155,7 +141,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
       val cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
       
       def getNext: Data = {
-        val bb = ByteBuffer.allocate(sampleSize) 
+        val bb = ByteBuffer.allocate(recordSize) 
         //TODO: reuse bb? but the previous sample is in the wild, memory resource issue, will gc help?
         if (resultSet.next) {
           for (vt <- varsWithTypes) vt match {

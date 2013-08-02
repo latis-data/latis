@@ -6,6 +6,7 @@ import scala.collection._
 import latis.data.Data
 import latis.util.Util
 import java.nio.ByteBuffer
+import latis.data.IterableData
 
 class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   
@@ -106,9 +107,10 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     (variableNames zip record(0).split(" ")).toMap
   }
   
-  def makeIterableData(sampleTemplate: Sample): Data = new Data {
-    //TODO: abstract class IterableData, length is undefined?...
-    override def iterator = new Iterator[Data] {
+  def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
+    def recordSize = sampleTemplate.size
+    
+    def iterator = new Iterator[Data] {
       override def hasNext = recordIterator.hasNext
       override def next = {
         val record = recordIterator.next
