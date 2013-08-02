@@ -1,7 +1,7 @@
 package latis.ops
 
 import latis.dm._
-import latis.config.LatisProperties
+import latis.util.LatisProperties
 
 trait Operation {
 

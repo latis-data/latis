@@ -1,10 +1,10 @@
 package latis.server
 
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import latis.config.LatisProperties
+import latis.util.LatisProperties
 import latis.reader.tsml.TsmlReader
 import latis.metadata.Registry
-import latis.config.LatisServerProperties
+import latis.util.LatisServerProperties
 import latis.writer.HttpServletWriter
 
 class LatisServer extends HttpServlet {

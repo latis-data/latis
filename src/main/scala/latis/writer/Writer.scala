@@ -2,7 +2,7 @@ package latis.writer
 
 import latis.dm.Dataset
 import java.io.OutputStream
-import latis.config.LatisProperties
+import latis.util.LatisProperties
 
 /**
  * Base class for Dataset writers.

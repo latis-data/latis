@@ -1,7 +1,7 @@
 package latis.ops.xform
 
 import latis.dm._
-import latis.config.LatisProperties
+import latis.util.LatisProperties
 import latis.ops.Operation
 
 abstract class Transformation extends Operation {

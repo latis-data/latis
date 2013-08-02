@@ -1,7 +1,6 @@
-package latis.config
+package latis.util
 
 import javax.servlet.ServletConfig
-import java.net.URL
 
 class LatisServerProperties(config: ServletConfig) extends LatisProperties {
 

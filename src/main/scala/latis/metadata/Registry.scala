@@ -1,5 +1,5 @@
 package latis.metadata
-import latis.config.LatisProperties
+import latis.util.LatisProperties
 import java.net.URL
 import java.io.File
 

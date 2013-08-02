@@ -1,4 +1,4 @@
-package latis.config
+package latis.util
 
 import java.util.Properties
 import java.io.File

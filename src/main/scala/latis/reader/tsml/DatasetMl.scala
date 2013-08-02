@@ -2,6 +2,9 @@ package latis.reader.tsml
 
 import scala.xml._
 import scala.collection.immutable.HashMap
+import scala.util.matching.Regex.Match
+import latis.util.LatisProperties
+import latis.util.Util
 
 class DatasetMl(xml: Node) extends TupleMl(xml) {
   
@@ -23,10 +26,13 @@ class DatasetMl(xml: Node) extends TupleMl(xml) {
     }
   }
   
+  /**
+   * Put the XML attributes from the "adapter" element into a Map.
+   * Any properties parameterized with "${property} will be resolved.
+   */
   def getAdapterAttributes(): Map[String,String] = {
     val atts = (xml \ "adapter").head.attributes
-    val seq = for (att <- atts) yield (att.key, att.value.text)
+    val seq = for (att <- atts) yield (att.key, Util.resolveParameterizedString(att.value.text))
     seq.toMap
-    //atts.foldLeft(HashMap[String,String]())((map, att) => map + ((att.key, att.value.text)))
   }
 }
