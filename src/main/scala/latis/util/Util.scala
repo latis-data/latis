@@ -4,7 +4,6 @@ import latis.data._
 import latis.dm._
 import java.nio.ByteBuffer
 import latis.time.Time
-import latis.util.LatisProperties
 
 object Util {
 
@@ -23,8 +22,8 @@ object Util {
         case i2: Int => {
           val prop = s.substring(i1 + 2, i2)
           LatisProperties.get(prop) match {
-            case Some(p) => p + s.substring(i2 + 1)
-            case None => s //TODO: error, property not found?
+            case Some(p) => s.substring(0,i1) + p + s.substring(i2 + 1)
+            case None => s //TODO: error, property not found? but would disallow legit values of that form
           }
         }
       }
