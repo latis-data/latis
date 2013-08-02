@@ -10,3 +10,15 @@ dependencies {
     compile 'org.scala-lang:scala-library:2.10.2'
     testCompile 'junit:junit:4.11'
 }
+
+war {
+  //destinationDir = '/opt/tomcat/webapps'
+  baseName = 'latis'
+}
+
+task deploy(dependsOn: 'war') << {
+    copy {
+        from war.archivePath
+        into "/opt/tomcat/webapps"
+    }
+}
