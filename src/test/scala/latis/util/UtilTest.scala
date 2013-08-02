@@ -26,8 +26,29 @@ class UtilTest {
     val a = "Hi ${z1x2c3v4}!" 
     assertEquals(a, s)
   }
+    
+  @Test
+  def resolve_string_with_latis_property {
+    val s = Util.resolveParameterizedString("Hi ${test.name}!")
+    val a = "Hi George!"
+    assertEquals(a, s)
+  }
   
-  //TODO: test from properties file
+  @Test //TODO: move to properties test?
+  def resolve_string_with_latis_property_with_space {
+    val s = Util.resolveParameterizedString("Hi ${test.name.with.space}!")
+    val a = "Hi George !"
+    assertEquals(a, s)
+  }
+  
+  @Test //TODO: move to properties test?
+  def resolve_string_with_latis_property_without_new_line {
+    val s = Util.resolveParameterizedString("Hi ${test.name.without.nl}!")
+    val a = "Hi George!"
+    assertEquals(a, s)
+  }
+  
+  
   
   //----//
   
