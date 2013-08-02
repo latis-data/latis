@@ -1,6 +1,6 @@
 package latis.dm
 
-import latis.data._
+import latis.data.value._
 import latis.metadata.VariableMetadata
 import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata

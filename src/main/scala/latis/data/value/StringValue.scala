@@ -3,6 +3,8 @@ package latis.data.value
 import latis.data.Data
 import java.nio.ByteBuffer
 
+//TODO: beware, scala has a StringValue?
+
 case class StringValue(val value: String) extends AnyVal with Data {
   //TODO: treat as Array of type Char? Word = Char(4)
   def length = 1
