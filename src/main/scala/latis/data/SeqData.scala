@@ -16,15 +16,6 @@ case class DoubleSeqData(ds: immutable.Seq[Double]) extends SeqData {
   
   def getByteBuffer: ByteBuffer = ds.foldLeft(ByteBuffer.allocate(size))(_.putDouble(_)).rewind.asInstanceOf[ByteBuffer]
   
-  def getDouble: Option[Double] = length match {
-    case 0 => None
-    case 1 => Some(ds(0))
-    case _ => Some(Double.NaN)
-  }
-  
-  def getString: Option[String] = ???
-
-  
   def length = ds.length
   def recordSize = 8
   

@@ -142,11 +142,10 @@ class ByteBufferTest {
   @Test def char_datum_equals               = assertTrue(charDatum.equals(Data("A")))
   @Test def string_datum_equals             = assertTrue(stringDatum.equals(Data("Hello")))
   //@Test def string_data_records_equals      = assertTrue(stringDataRecord.equals()) //TODO: support TextSeqData
-    //assertTrue(stringDataRecords.equals()) //TODO: but Data from Seq assumes one datum per record
-  
+   //TODO: but Data from Seq assumes one datum per record
   
   // Test Data.iterator
-  @Test def empty_data_iterate               = assertEquals(List.empty, emptyData.iterator.toList)
+  @Test def empty_data_iterate = assertEquals(List.empty, emptyData.iterator.toList)
   @Test def double_datum_iterate = {
     val expected = List(Data(3.14).getByteBuffer)
     val result = doubleDatum.iterator.map(_.getByteBuffer).toList
@@ -182,7 +181,7 @@ class ByteBufferTest {
     val result = stringDatum.iterator.map(_.getByteBuffer).toList
     assertEquals(expected, result)
   }
-  //@Test def string_data_record_iterate       = assertEquals(List(Data(Seq("Hello", "World"))), stringDataRecord.iterator.toList) //TODO: support construction from Seq of strings
+  //@Test def string_data_record_iterate = assertEquals(List(Data(Seq("Hello", "World"))), stringDataRecord.iterator.toList) //TODO: support construction from Seq of strings
   @Test def string_data_records_iterate = {
     val expected = List(Data("Hello"), Data("World")).map(_.getByteBuffer)
     val result = stringDataRecords.iterator.map(_.getByteBuffer).toList
