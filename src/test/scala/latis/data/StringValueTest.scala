@@ -26,16 +26,16 @@ class StringValueTest {
   def string_value = assertEquals("hello", data.stringValue)
   
   @Test
-  def get_double_value = assert(data.getDouble.get.isNaN)
+  def get_double_value = assertTrue(data.getDouble.get.isNaN)
   
   @Test
   def get_string_value = assertEquals(Some("hello"), data.getString)
   
   @Test
-  def not_empty = assert(data.notEmpty)
+  def not_empty = assertTrue(data.notEmpty)
   
   @Test
-  def not_is_empty = assert(!data.isEmpty)
+  def not_is_empty = assertTrue(!data.isEmpty)
   
   @Test
   def length = assertEquals(1, data.length)

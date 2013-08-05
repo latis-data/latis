@@ -16,10 +16,10 @@ class EmptyDataTest {
   }
   
   @Test
-  def is_empty = assert(EmptyData.isEmpty)
+  def is_empty = assertTrue(EmptyData.isEmpty)
   
   @Test
-  def not_not_empty = assert(! EmptyData.notEmpty)
+  def not_not_empty = assertTrue(! EmptyData.notEmpty)
   
   @Test
   def zero_length = assertEquals(0, EmptyData.length)
@@ -31,7 +31,7 @@ class EmptyDataTest {
   def zero_size = assertEquals(0, EmptyData.size)
   
   @Test
-  def empty_iterator = assert(EmptyData.iterator.toList.isEmpty)
+  def empty_iterator = assertTrue(EmptyData.iterator.toList.isEmpty)
   
   @Test
   def empty_byte_buffer = assertEquals(0, EmptyData.getByteBuffer.limit)

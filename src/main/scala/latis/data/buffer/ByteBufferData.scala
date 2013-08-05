@@ -16,10 +16,21 @@ class ByteBufferData(val buffer: ByteBuffer, recSize: Int) extends Data {
   def getDouble: Option[Double] = length match {
     case 0 => None
     case 1 => Some(buffer.getDouble(0))
-    case _ => Some(Double.NaN)
+    case _ => Some(Double.NaN) //TODO: or None?
   }
   
-  def getString: Option[String] = ???
+  def getString: Option[String] = {
+    //If length = 1 (one record) return it as a string
+    if (length == 1) Some(buffer.asCharBuffer().toString) 
+    else None
+  }
+  /*
+   * TODO: how should this behave? no info on how long a string can be
+   * just interpret the whole record as a string?
+   * if not a single string (e.g. multiple records) None or ""? vs NaN
+   *   "" doesn't have not-a-string semantics
+   * or error if trying to get single datum from data?
+   */
   
   def iterator = new Iterator[Data] {
     private var _index = 0
@@ -34,7 +45,11 @@ class ByteBufferData(val buffer: ByteBuffer, recSize: Int) extends Data {
   }
   
   def recordSize = recSize
-  def length = buffer.limit / recordSize
+  
+  def length = {
+    if (recordSize == 0) 0
+    else buffer.limit / recordSize //TODO: consider incomplete final record, truncate to int, drop incomplete record?
+  }
 }
 
   

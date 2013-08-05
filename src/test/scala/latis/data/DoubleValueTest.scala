@@ -32,10 +32,10 @@ class DoubleValueTest {
   def get_string_value = assertEquals(Some("3.14"), data.getString)
   
   @Test
-  def not_empty = assert(data.notEmpty)
+  def not_empty = assertTrue(data.notEmpty)
   
   @Test
-  def not_is_empty = assert(!data.isEmpty)
+  def not_is_empty = assertTrue(!data.isEmpty)
   
   @Test
   def length = assertEquals(1, data.length)
