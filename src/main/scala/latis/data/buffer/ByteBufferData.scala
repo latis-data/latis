@@ -10,43 +10,23 @@ import latis.data.Data
  */
   //construct with record size so we can iterate over a sample
 class ByteBufferData(val buffer: ByteBuffer, recSize: Int) extends Data {
-  /*
-   * TODO: impl with Buffer, CharBuffer is not a ByteBuffer but convertable
-   * ByteBuffer has conversion methods
-   * *need to use ByteBuffer since Buffer doesn't have byte[] api
-   */
+//TODO: take number of samples instead of record size?
   
   override def getByteBuffer = buffer
   
-  //TODO: should getDouble advance position?
-//  def getDouble: Option[Double] = length match {
-//    case 0 => None
-//    case 1 => Some(buffer.getDouble(0))
-//    case _ => Some(Double.NaN) //TODO: or None?
-//  }
-//  
-//  def getString: Option[String] = {
-//    //If length = 1 (one record) return it as a string
-//    if (length == 1) Some(buffer.asCharBuffer().toString) 
-//    else None
-//  }
-  /*
-   * TODO: how should this behave? no info on how long a string can be
-   * just interpret the whole record as a string?
-   * if not a single string (e.g. multiple records) None or ""? vs NaN
-   *   "" doesn't have not-a-string semantics
-   * or error if trying to get single datum from data?
-   */
+  //TODO: support getDouble, advance position?
   
   def iterator = new Iterator[Data] {
+    //Uses absolute get so buffer isn't modified
     private var _index = 0
     
     override def hasNext = _index < ByteBufferData.this.length
     
     override def next = {
-      val bb = ByteBuffer.wrap(buffer.array, _index * recordSize, recordSize)
+      val range = _index * recordSize until (_index + 1) * recordSize
+      val bytes = range.map(buffer.get(_)).toArray
       _index += 1
-      Data(bb)
+      Data(bytes)
     }
   }
   
@@ -57,13 +37,3 @@ class ByteBufferData(val buffer: ByteBuffer, recSize: Int) extends Data {
     else buffer.limit / recordSize //TODO: consider incomplete final record, truncate to int, drop incomplete record?
   }
 }
-
-  
-  /*
-   * TODO:
-   * diff subtypes for numeric, text, mixed?
-   * longValue, charValue, stringValue(length),...?
-   * getNextDouble,...?
-   * getDouble(index),...?
-   * how many of these should be part of Data or Number or TextData?
-   */

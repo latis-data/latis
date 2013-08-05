@@ -24,7 +24,7 @@ class ByteBufferTest {
   val emptyData = Data(ByteBuffer.allocate(0))
   
   //one record of one double, explicitly rewound
-  val doubleDatum = Data(ByteBuffer.allocate(8).putDouble(3.14).flip)
+  val doubleDatum = Data(ByteBuffer.allocate(8).putDouble(3.14).rewind)
   
   //one record of one double, rewound by constructor
   val doubleDatumNotRewound = Data(ByteBuffer.allocate(8).putDouble(3.14))
@@ -43,185 +43,151 @@ class ByteBufferTest {
   
   
   //one record of one char
-  //val charDatum = Data(ByteBuffer.allocate(2).putChar('A'))
-  val charDatum = Data(CharBuffer.wrap(Array('A')))
+  val charDatum = Data(ByteBuffer.allocate(2).putChar('A'))
+  //val charDatum = Data(CharBuffer.wrap(Array('A'))) //needs to be BB.asCB
       
   //one record of one string
-  //val stringDatum = Data("Hello".foldLeft(ByteBuffer.allocate(10))(_.putChar(_)))
-  val stringDatum = Data(CharBuffer.wrap("Hello"))
+  val stringDatum = Data("Hello".foldLeft(ByteBuffer.allocate(10))(_.putChar(_)))
+  //val stringDatum = Data(ByteBuffer.allocate(10).asCharBuffer.put("Hello"))
   
   //one record of two strings //TODO: but no way to specify length of strings
-  val stringDataRecord = Data(CharBuffer.wrap("HelloWorld"))
+  val stringDataRecord = Data("HelloWorld".foldLeft(ByteBuffer.allocate(20))(_.putChar(_)))
   
   //two records of one string
-  val stringDataRecords = Data(CharBuffer.wrap("HelloWorld"), 10)
+  val stringDataRecords = Data("HelloWorld".foldLeft(ByteBuffer.allocate(20))(_.putChar(_)), 10)
   
 
-  @Test
-  def byte_buffer {
-    //just confirming we get out what we put in, not needed for all
+  @Test def empty_byte_buffer = {
     assertEquals(ByteBuffer.allocate(0), emptyData.getByteBuffer)
-    assertEquals(ByteBuffer.allocate(8).putDouble(3.14).flip, doubleDatum.getByteBuffer)
-    assertEquals(ByteBuffer.allocate(8).putDouble(3.14).flip, doubleDatumNotRewound.getByteBuffer)
   }
-  
-  @Test
-  def double_value = {
-    //TODO: exception assertEquals( , emptyData.doubleValue)
-    assertEquals(3.14 , doubleDatum.doubleValue, 0.0)
-    assertEquals(3.14 , doubleDatumNotRewound.doubleValue, 0.0)
-    assertTrue(doubleDataRecord.doubleValue.isNaN)
-    assertTrue(doubleDatumRecords.doubleValue.isNaN)
-    assertTrue(doubleDataRecords.doubleValue.isNaN)
-    assertTrue(charDatum.doubleValue.isNaN)
-    assertTrue(stringDatum.doubleValue.isNaN)
-    assertTrue(stringDataRecord.doubleValue.isNaN)
-    assertTrue(stringDataRecords.doubleValue.isNaN)
+  @Test def double_byte_buffer = {
+    assertEquals(ByteBuffer.allocate(8).putDouble(3.14).rewind, doubleDatum.getByteBuffer)
   }
-  
-  @Test
-  def string_value = {
-    //TODO: still need to consider what is correct behavior, ""? need same semantics a NaN, "getX" tests should cover it
-    //TODO: error assertEquals( , emptyData.stringValue)
-    //note not the same as toString
-    assertEquals("3.14" , doubleDatum.stringValue)
-    assertEquals("3.14" , doubleDatumNotRewound.stringValue)
-    assertEquals("" , doubleDataRecord.stringValue)
-    assertEquals("" , doubleDatumRecords.stringValue)
-    assertEquals("" , doubleDataRecords.stringValue)
-    assertEquals("A" , charDatum.stringValue)
-    assertEquals("Hello" , stringDatum.stringValue)
-    assertEquals("" , stringDataRecord.stringValue) //TODO: no way to diff from single string without length
-    assertEquals("" , stringDataRecords.stringValue)
+  @Test def double_byte_buffer_not_rewound = {
+    assertEquals(ByteBuffer.allocate(8).putDouble(3.14).rewind, doubleDatumNotRewound.getByteBuffer)
   }
-  
-  @Test
-  def get_double_value = {
-    assertEquals(None, emptyData.getDouble)
-    assertEquals(Some(3.14), doubleDatum.getDouble)
-    assertEquals(Some(3.14), doubleDatumNotRewound.getDouble)
-    assertTrue(doubleDataRecord.getDouble.get.isNaN)
-    assertTrue(doubleDatumRecords.getDouble.get.isNaN)
-    assertTrue(doubleDataRecords.getDouble.get.isNaN)
-    assertTrue(charDatum.getDouble.get.isNaN)
-    assertTrue(stringDatum.getDouble.get.isNaN)
-    assertTrue(stringDataRecord.getDouble.get.isNaN)
-    assertTrue(stringDataRecords.getDouble.get.isNaN)
+  @Test def string_byte_buffer = {
+    assertEquals("Hello".foldLeft(ByteBuffer.allocate(10))(_.putChar(_)).rewind, stringDatum.getByteBuffer)
   }
+  //TODO: buffer capacity > limit, flip vs rewind
   
-  @Test
-  def get_string_value = {
-    //TODO: expect None if not a string? compare to NaN above
-    assertEquals(None, emptyData.getString)
-    assertEquals(Some("3.14"), doubleDatum.getString)
-    assertEquals(Some("3.14"), doubleDatumNotRewound.getString)
-    assertEquals(Some(""), doubleDataRecord.getString)
-    assertEquals(Some(""), doubleDatumRecords.getString)
-    assertEquals(Some(""), doubleDataRecords.getString)
-    assertEquals(Some("A"), charDatum.getString)
-    assertEquals(Some("Hello"), stringDatum.getString)
-    assertEquals(Some(""), stringDataRecord.getString)  //TODO: no way to diff from single string without length
-    assertEquals(Some(""), stringDataRecords.getString)
-  }
+  // Test Data.notEmpty
+  @Test def empty_data_not_empty               = assertFalse(emptyData.notEmpty)
+  @Test def double_datum_not_empty             = assertTrue(doubleDatum.notEmpty)
+  @Test def double_datum_not_rewound_not_empty = assertTrue(doubleDatumNotRewound.notEmpty)
+  @Test def double_data_record_not_empty       = assertTrue(doubleDataRecord.notEmpty)
+  @Test def double_datum_records_not_empty     = assertTrue(doubleDatumRecords.notEmpty)
+  @Test def double_data_records_not_empty      = assertTrue(doubleDataRecords.notEmpty)
+  @Test def char_datum_not_empty               = assertTrue(charDatum.notEmpty)
+  @Test def string_datum_not_empty             = assertTrue(stringDatum.notEmpty)
+  @Test def string_data_record_not_empty       = assertTrue(stringDataRecord.notEmpty)
+  @Test def string_data_records_not_empty      = assertTrue(stringDataRecords.notEmpty)
   
-  @Test
-  def not_empty = {
-    assertFalse(emptyData.notEmpty)
-    assertTrue(doubleDatum.notEmpty)
-    assertTrue(doubleDatumNotRewound.notEmpty)
-    assertTrue(doubleDataRecord.notEmpty)
-    assertTrue(doubleDatumRecords.notEmpty)
-    assertTrue(doubleDataRecords.notEmpty)
-    assertTrue(charDatum.notEmpty)
-    assertTrue(stringDatum.notEmpty)
-    assertTrue(stringDataRecord.notEmpty)
-    assertTrue(stringDataRecords.notEmpty)
-  }
+  // Test Data.isEmpty
+  @Test def empty_data_is_empty               = assertTrue(emptyData.isEmpty)
+  @Test def double_datum_is_empty             = assertFalse(doubleDatum.isEmpty)
+  @Test def double_datum_not_rewound_is_empty = assertFalse(doubleDatumNotRewound.isEmpty)
+  @Test def double_data_record_is_empty       = assertFalse(doubleDataRecord.isEmpty)
+  @Test def double_datum_records_is_empty     = assertFalse(doubleDatumRecords.isEmpty)
+  @Test def double_data_records_is_empty      = assertFalse(doubleDataRecords.isEmpty)
+  @Test def char_datum_is_empty               = assertFalse(charDatum.isEmpty)
+  @Test def string_datum_is_empty             = assertFalse(stringDatum.isEmpty)
+  @Test def string_data_record_is_empty       = assertFalse(stringDataRecord.isEmpty)
+  @Test def string_data_records_is_empty      = assertFalse(stringDataRecords.isEmpty)
+
+  // Test Data.length
+  @Test def empty_data_length               = assertEquals(0, emptyData.length)
+  @Test def double_datum_length             = assertEquals(1, doubleDatum.length)
+  @Test def double_datum_not_rewound_length = assertEquals(1, doubleDatumNotRewound.length)
+  @Test def double_data_record_length       = assertEquals(1, doubleDataRecord.length)
+  @Test def double_datum_records_length     = assertEquals(3, doubleDatumRecords.length)
+  @Test def double_data_records_length      = assertEquals(2, doubleDataRecords.length)
+  @Test def char_datum_length               = assertEquals(1, charDatum.length)
+  @Test def string_datum_length             = assertEquals(1, stringDatum.length)
+  @Test def string_data_record_length       = assertEquals(1, stringDataRecord.length)
+  @Test def string_data_records_length      = assertEquals(2, stringDataRecords.length)
   
-  @Test
-  def not_is_empty = {
-    assertTrue(emptyData.isEmpty)
-    assertFalse(doubleDatum.isEmpty)
-    assertFalse(doubleDatumNotRewound.isEmpty)
-    assertFalse(doubleDataRecord.isEmpty)
-    assertFalse(doubleDatumRecords.isEmpty)
-    assertFalse(doubleDataRecords.isEmpty)
-    assertFalse(charDatum.isEmpty)
-    assertFalse(stringDatum.isEmpty)
-    assertFalse(stringDataRecord.isEmpty)
-    assertFalse(stringDataRecords.isEmpty)
-  }
+  // Test Data.recordSize
+  @Test def empty_data_record_size               = assertEquals(0, emptyData.recordSize)
+  @Test def double_datum_record_size             = assertEquals(8, doubleDatum.recordSize)
+  @Test def double_datum_not_rewound_record_size = assertEquals(8, doubleDatumNotRewound.recordSize)
+  @Test def double_data_record_record_size       = assertEquals(24, doubleDataRecord.recordSize)
+  @Test def double_datum_records_record_size     = assertEquals(8, doubleDatumRecords.recordSize)
+  @Test def double_data_records_record_size      = assertEquals(16, doubleDataRecords.recordSize)
+  @Test def char_datum_record_size               = assertEquals(2, charDatum.recordSize)
+  @Test def string_datum_record_size             = assertEquals(10, stringDatum.recordSize)
+  @Test def string_data_record_record_size       = assertEquals(20, stringDataRecord.recordSize)
+  @Test def string_data_records_record_size      = assertEquals(10, stringDataRecords.recordSize)
   
-  @Test
-  def length = {
-    assertEquals(0, emptyData.length)
-    assertEquals(1, doubleDatum.length)
-    assertEquals(1, doubleDatumNotRewound.length)
-    assertEquals(1, doubleDataRecord.length)
-    assertEquals(3, doubleDatumRecords.length)
-    assertEquals(2, doubleDataRecords.length)
-    assertEquals(1, charDatum.length)
-    assertEquals(1, stringDatum.length)
-    assertEquals(1, stringDataRecord.length)
-    assertEquals(2, stringDataRecords.length)
-  }
-  
-  @Test
-  def recordSize = {
-    assertEquals(0, emptyData.recordSize)
-    assertEquals(8, doubleDatum.recordSize)
-    assertEquals(8, doubleDatumNotRewound.recordSize)
-    assertEquals(24, doubleDataRecord.recordSize)
-    assertEquals(8, doubleDatumRecords.recordSize)
-    assertEquals(16, doubleDataRecords.recordSize)
-    assertEquals(2, charDatum.recordSize)
-    assertEquals(10, stringDatum.recordSize)
-    assertEquals(20, stringDataRecord.recordSize)
-    assertEquals(10, stringDataRecords.recordSize)
-  }
-  
-  @Test
-  def size = {
-    assertEquals(0, emptyData.size)
-    assertEquals(8, doubleDatum.size)
-    assertEquals(8, doubleDatumNotRewound.size)
-    assertEquals(24, doubleDataRecord.size)
-    assertEquals(24, doubleDatumRecords.size)
-    assertEquals(32, doubleDataRecords.size)
-    assertEquals(2, charDatum.size)
-    assertEquals(10, stringDatum.size)
-    assertEquals(20, stringDataRecord.size)
-    assertEquals(20, stringDataRecords.size)
-  }
-  
-  @Test
-  def equals = {
-    //TODO: consider equality issues, e.g. record size assumptions
-    assertTrue(emptyData.equals(EmptyData))
-    assertTrue(doubleDatum.equals(Data(3.14)))
-    assertTrue(doubleDatumNotRewound.equals(Data(3.14)))
-    //assertTrue(doubleDataRecord.equals(Data(Seq(1.0, 2.0, 3.0)))) //TODO: but Data from Seq assumes one datum per record
-    assertTrue(doubleDatumRecords.equals(Data(Seq(1.0, 2.0, 3.0))))
+  // Test Data.size
+  @Test def empty_data_size               = assertEquals(0, emptyData.size)
+  @Test def double_datum_size             = assertEquals(8, doubleDatum.size)
+  @Test def double_datum_not_rewound_size = assertEquals(8, doubleDatumNotRewound.size)
+  @Test def double_data_record_size       = assertEquals(24, doubleDataRecord.size)
+  @Test def double_datum_records_size     = assertEquals(24, doubleDatumRecords.size)
+  @Test def double_data_records_size      = assertEquals(32, doubleDataRecords.size)
+  @Test def char_datum_size               = assertEquals(2, charDatum.size)
+  @Test def string_datum_size             = assertEquals(10, stringDatum.size)
+  @Test def string_data_record_size       = assertEquals(20, stringDataRecord.size)
+  @Test def string_data_records_size      = assertEquals(20, stringDataRecords.size)
+
+  // Test Data.equals
+  //TODO: consider equality issues, e.g. record size assumptions
+  @Test def empty_data_equals               = assertTrue(emptyData.equals(EmptyData))
+  @Test def double_datum_equals             = assertTrue(doubleDatum.equals(Data(3.14)))
+  @Test def double_datum_not_rewound_equals = assertTrue(doubleDatumNotRewound.equals(Data(3.14)))
+    //assertTrue(doubleDataRecord.equals(Data(Seq(1.0, 2.0, 3.0)))) //TODO: but Data from Seq assumes one datum per record, need support for Tuple data?
+  @Test def double_datum_records_equals     = assertTrue(doubleDatumRecords.equals(Data(Seq(1.0, 2.0, 3.0))))
     //assertTrue(doubleDataRecords.equals()) //TODO: but Data from Seq assumes one datum per record
-    assertTrue(charDatum.equals(Data("A")))
-    assertTrue(stringDatum.equals(Data("Hello")))
-    //assertTrue(stringDataRecord.equals())
+  @Test def char_datum_equals               = assertTrue(charDatum.equals(Data("A")))
+  @Test def string_datum_equals             = assertTrue(stringDatum.equals(Data("Hello")))
+  //@Test def string_data_records_equals      = assertTrue(stringDataRecord.equals()) //TODO: support TextSeqData
     //assertTrue(stringDataRecords.equals()) //TODO: but Data from Seq assumes one datum per record
+  
+  
+  // Test Data.iterator
+  @Test def empty_data_iterate               = assertEquals(List.empty, emptyData.iterator.toList)
+  @Test def double_datum_iterate = {
+    val expected = List(Data(3.14).getByteBuffer)
+    val result = doubleDatum.iterator.map(_.getByteBuffer).toList
+    assertEquals(expected, result)
+  }
+  @Test def double_datum_not_rewound_iterate = {
+    val expected = List(Data(3.14).getByteBuffer)
+    val result = doubleDatumNotRewound.iterator.map(_.getByteBuffer).toList
+    assertEquals(expected, result)
+  }
+  @Test def double_data_record_iterate = {
+    val expected = List(Data(Seq(1.0, 2.0, 3.0)).getByteBuffer)
+    val result = doubleDataRecord.iterator.map(_.getByteBuffer).toList
+    assertEquals(expected, result)
+  }
+  @Test def double_datum_records_iterate = {
+    val expected = List(Data(1.0), Data(2.0), Data(3.0)).map(_.getByteBuffer)
+    val result = doubleDatumRecords.iterator.map(_.getByteBuffer).toList
+    assertEquals(expected, result)
+  }
+  @Test def double_data_records_iterate = {
+    val expected = List(Data(Seq(1.0, 2.0)), Data(Seq(3.0, 4.0))).map(_.getByteBuffer) //TODO: SeqData not rewound?
+    val result = doubleDataRecords.iterator.map(_.getByteBuffer).toList
+    assertEquals(expected, result)
+  }
+  @Test def char_datum_iterate = {
+    val expected = List(Data("A").getByteBuffer)
+    val result = charDatum.iterator.map(_.getByteBuffer).toList
+    assertEquals(expected, result)
+  }
+  @Test def string_datum_iterate = {
+    val expected = List(Data("Hello").getByteBuffer)
+    val result = stringDatum.iterator.map(_.getByteBuffer).toList
+    assertEquals(expected, result)
+  }
+  //@Test def string_data_record_iterate       = assertEquals(List(Data(Seq("Hello", "World"))), stringDataRecord.iterator.toList) //TODO: support construction from Seq of strings
+  @Test def string_data_records_iterate = {
+    val expected = List(Data("Hello"), Data("World")).map(_.getByteBuffer)
+    val result = stringDataRecords.iterator.map(_.getByteBuffer).toList
+    assertEquals(expected, result)
   }
   
-  @Test
-  def iterate = {
-    assertEquals(List.empty, emptyData.iterator.toList)
-    assertTrue(List(Data(3.14)) equals doubleDatum.iterator.toList)
-    assertEquals(List(Data(3.14)), doubleDatumNotRewound.iterator.toList)
-    assertEquals(List(Data(Seq(1.0, 2.0, 3.0))), doubleDataRecord.iterator.toList)
-    assertEquals(List(Data(1.0), Data(2.0), Data(3.0)), doubleDatumRecords.iterator.toList)
-    assertEquals(List(Data(Seq(1.0, 2.0)), Data(Seq(3.0, 4.0))), doubleDataRecords.iterator.toList)
-    assertEquals(List(Data("A")), charDatum.iterator.toList)
-    assertEquals(List(Data("Hello")), stringDatum.iterator.toList)
-    //assertEquals(List(Data(Seq("Hello", "World"))), stringDataRecord.iterator.toList) //TODO: support construction from Seq of strings
-    assertEquals(List(Data("Hello"), Data("World")), stringDataRecords.iterator.toList)
-  }
-  
-  //def iterate_twice
+  //TODO: def iterate_twice
 }

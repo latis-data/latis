@@ -35,13 +35,5 @@ class EmptyDataTest {
   
   @Test
   def empty_byte_buffer = assertEquals(0, EmptyData.getByteBuffer.limit)
-  
-  @Test
-  def get_double = assertEquals(None, EmptyData.getDouble)
-  
-  @Test
-  def get_string = assertEquals(None, EmptyData.getString)
-  
-  //TODO: doubleValue, stringValue, errors
 
 }

@@ -23,15 +23,6 @@ class DoubleValueTest {
   def double_value = assertEquals(3.14, data.doubleValue, 0.0)
   
   @Test
-  def string_value = assertEquals("3.14", data.stringValue)
-  
-  @Test
-  def get_double_value = assertEquals(Some(3.14), data.getDouble)
-  
-  @Test
-  def get_string_value = assertEquals(Some("3.14"), data.getString)
-  
-  @Test
   def not_empty = assertTrue(data.notEmpty)
   
   @Test

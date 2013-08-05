@@ -15,21 +15,12 @@ class StringValueTest {
   def byte_buffer {
     val bb = data.getByteBuffer
     assertEquals(10, bb.limit)
-    assertEquals("hello", bb.toString)
+    assertEquals("hello", bb.asCharBuffer.toString)
   }
   
-  @Test
-  def double_value = assert(data.doubleValue.isNaN())
-  //TODO: StringValue("3.14")?
   
   @Test
   def string_value = assertEquals("hello", data.stringValue)
-  
-  @Test
-  def get_double_value = assertTrue(data.getDouble.get.isNaN)
-  
-  @Test
-  def get_string_value = assertEquals(Some("hello"), data.getString)
   
   @Test
   def not_empty = assertTrue(data.notEmpty)

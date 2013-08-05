@@ -14,7 +14,7 @@ abstract class SeqData extends Data { //TODO: extends Seq[Data]?
 
 case class DoubleSeqData(ds: immutable.Seq[Double]) extends SeqData {
   
-  def getByteBuffer: ByteBuffer = ds.foldLeft(ByteBuffer.allocate(size))(_.putDouble(_))
+  def getByteBuffer: ByteBuffer = ds.foldLeft(ByteBuffer.allocate(size))(_.putDouble(_)).rewind.asInstanceOf[ByteBuffer]
   
   def getDouble: Option[Double] = length match {
     case 0 => None

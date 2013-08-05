@@ -72,6 +72,10 @@ trait Data extends Any {
   
   
   //TODO: is byte buffer equality sufficient?
+  /*
+   * The hash code of a byte buffer depends only upon its remaining elements; 
+   * that is, upon the elements from position() up to, and including, the element at limit() - 1.
+   */
   override def equals(that: Any) = that match {
     case d: Data => d.getByteBuffer == getByteBuffer
     case _ => false
@@ -91,29 +95,31 @@ object Data {
   def apply(ds: Seq[Double]): Data = SeqData(ds)
   //TODO: varargs?
   
-  //takes Buffer so user's don't have to cast after "flip"
-//TODO: take number of samples instead of record size?
+  //takes Buffer so user's don't have to cast after "rewind"
   def apply(buffer: Buffer, sampleSize: Int): Data = {
-    //flip if not positioned at 0
-    val b = if (buffer.limit > 0 && buffer.position != 0) buffer.flip() else buffer
+    //flip if not positioned at 0, sets limit to current position and rewinds
+    //If position is 0, assume the provider already flipped it.
+    //TODO: potential for buffer capacity to be larger than desired, e.g. rewind called instead of flip
+    //  but most cases should allocate just the right size: limit = capacity
+    val b = if (buffer.limit > 0 && buffer.position != 0) buffer.flip else buffer
     b match {
       case bb: ByteBuffer => new ByteBufferData(bb, sampleSize)
-//TODO:      case cb: CharBuffer => 
-      /*
-       * TODO: do we ever want any other subclass of Buffer?
-       * YES, CharBuffer, and DoubleBuffer might be handy
-       */
+      case _ => throw new RuntimeException("Data buffer must be a ByteBuffer")
+      //Note, can't take CharBuffer, need to start with a ByteBuffer and use asFooBuffer only as a wrapper
     }
   }
   
   //to be used for a single sample: sampleSize = limit
   def apply(buffer: Buffer): Data = Data(buffer, buffer.limit)
   
+  //def apply(bytes: Seq[Byte]): Data = Data(ByteBuffer.wrap(bytes.toArray))
+  def apply(bytes: Array[Byte]): Data = Data(ByteBuffer.wrap(bytes))
+  
   //Concatenate Data
   def apply(data: Seq[Data])(implicit ignore: Data): Data = { //implicit hack for type erasure ambiguity
     val size = data.foldLeft(0)(_ + _.size) //total size of all elements
     val buffer = data.foldLeft(ByteBuffer.allocate(size))(_ put _.getByteBuffer) //build ByteBuffer with all Data
-    val bb = buffer.flip.asInstanceOf[ByteBuffer] //reset to the beginning and set the "limit" to the actual size
+    val bb = buffer.rewind.asInstanceOf[ByteBuffer] //reset to the beginning
     Data(bb)
   }
   
