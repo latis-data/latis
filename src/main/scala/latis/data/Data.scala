@@ -48,23 +48,24 @@ trait Data extends Any {
   def size = length * recordSize //total number of bytes
   
   def getByteBuffer: ByteBuffer 
+  //TODO: just byteBuffer?
   
   //TODO: beware of mixing getters that increment with iterator
   def iterator: Iterator[Data] //= List(DoubleValue(doubleValue)).iterator
   //TODO: support foreach, (d <- data)
   
-  def getDouble: Option[Double]
-  def getString: Option[String]
-  
-  def doubleValue: Double = getDouble match {
-    case Some(d) => d
-    case None => throw new Error("No Data") //null
-  }
-  
-  def stringValue: String = getString match {
-    case Some(s) => s
-    case _ => throw new Error("No Data")
-  }
+//  def getDouble: Option[Double]
+//  def getString: Option[String]
+//  
+//  def doubleValue: Double = getDouble match {
+//    case Some(d) => d
+//    case None => throw new Error("No Data") //null
+//  }
+//  
+//  def stringValue: String = getString match {
+//    case Some(s) => s
+//    case _ => throw new Error("No Data")
+//  }
     
   def isEmpty: Boolean = length == 0
   def notEmpty = ! isEmpty

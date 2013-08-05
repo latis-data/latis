@@ -10,20 +10,26 @@ import latis.data.Data
  */
   //construct with record size so we can iterate over a sample
 class ByteBufferData(val buffer: ByteBuffer, recSize: Int) extends Data {
+  /*
+   * TODO: impl with Buffer, CharBuffer is not a ByteBuffer but convertable
+   * ByteBuffer has conversion methods
+   * *need to use ByteBuffer since Buffer doesn't have byte[] api
+   */
   
   override def getByteBuffer = buffer
   
-  def getDouble: Option[Double] = length match {
-    case 0 => None
-    case 1 => Some(buffer.getDouble(0))
-    case _ => Some(Double.NaN) //TODO: or None?
-  }
-  
-  def getString: Option[String] = {
-    //If length = 1 (one record) return it as a string
-    if (length == 1) Some(buffer.asCharBuffer().toString) 
-    else None
-  }
+  //TODO: should getDouble advance position?
+//  def getDouble: Option[Double] = length match {
+//    case 0 => None
+//    case 1 => Some(buffer.getDouble(0))
+//    case _ => Some(Double.NaN) //TODO: or None?
+//  }
+//  
+//  def getString: Option[String] = {
+//    //If length = 1 (one record) return it as a string
+//    if (length == 1) Some(buffer.asCharBuffer().toString) 
+//    else None
+//  }
   /*
    * TODO: how should this behave? no info on how long a string can be
    * just interpret the whole record as a string?

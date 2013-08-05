@@ -20,13 +20,13 @@ class Time extends Real {
   }
   
   def toIso: String = {
-    val time = convert(TimeScale.JAVA).toDouble.toLong //TODO: get long from Data
+    val time = convert(TimeScale.JAVA).doubleValue.toLong //TODO: get long from Data
     val date = new java.util.Date(time)
     TimeFormat.DATETIME.format(date)
   }
   
   def format: String = {
-    TimeFormat(metadata("format")).format(toDouble)
+    TimeFormat(metadata("format")).format(doubleValue)
   }
   
   //override to deal with formatted time strings  
@@ -44,7 +44,7 @@ class Time extends Real {
     RegEx.TIME findFirstIn that match {
       case Some(s) => {
         val t = Time(javax.xml.bind.DatatypeConverter.parseDateTime(s).getTimeInMillis().toDouble)
-        val other = t.convert(timeScale).toDouble
+        val other = t.convert(timeScale).doubleValue
         compare(other)
       }
       case _ => compare(that.toDouble) //TODO: potential parse error

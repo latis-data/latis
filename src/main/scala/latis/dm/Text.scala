@@ -4,15 +4,15 @@ import latis.data.value._
 import latis.metadata.VariableMetadata
 import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
+import latis.data.TextData
 
-//class Text(metadata: Metadata, data: Data) extends Scalar(metadata, data) {
 class Text extends Scalar {
   //TODO: accept only Text Data
   
-  //TODO: use get Option
-  def compare(that: Double): Int = data.doubleValue.compareTo(that) //TODO: error comparing Text to double?
-    
-  def compare(that: String): Int = data.stringValue.compareTo(that)
+  def stringValue: String = data.asInstanceOf[TextData].stringValue
+  
+  //support lexical ordering
+  def compare(that: String): Int = stringValue.compareTo(that)
   
 }
 
@@ -31,5 +31,5 @@ object Text {
     t
   }
   
-  def unapply(v: Text) = Some(v.data.toString)
+  def unapply(v: Text): Option[String] = Some(v.stringValue)
 }

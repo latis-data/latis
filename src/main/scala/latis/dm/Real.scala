@@ -8,19 +8,11 @@ import latis.data.value.DoubleValue
 
 //class Real(metadata: Metadata, data: Data) extends Scalar(metadata, data) with Number {
 class Real extends Scalar with Number {
-  //TODO: enforce NumericData, but value class can't extend it
+  //TODO: enforce NumericData, but type check requires instance of value class
   
-  def toDouble = data.doubleValue //TODO: get Option?
-  
-  
-  def compare(that: Double): Int = this.toDouble.compareTo(that)
-  //TODO: add epsilon for equality?
-  //TODO: compare(Real), units...
-    
-  def compare(that: String): Int = compare(that.toDouble)
-  
+  def doubleValue = data.asInstanceOf[DoubleValue].doubleValue //TODO: will this require instance of value class?
+  //TODO: get Option?
 }
-
 
 
 object Real {

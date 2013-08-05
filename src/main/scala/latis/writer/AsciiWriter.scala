@@ -22,7 +22,7 @@ class AsciiWriter(out: OutputStream) extends Writer {
   def writeVariable(variable: Variable): Unit = variable match {
     //TODO: build string instead of writing directly?
     
-    case Scalar(v) => _writer.print(v.toString)
+    case Scalar(v) => _writer.print(v)
     
     case Tuple(vars) => {
       //surround Tuple's Variables with parens

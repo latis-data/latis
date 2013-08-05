@@ -22,7 +22,7 @@ class BasicTimeConverter(scale1: TimeScale, scale2: TimeScale) extends TimeConve
   
   def convert(time: Time): Time = {
     //TODO: assert time.scale == scale1
-    val t = convert(time.toDouble)
+    val t = convert(time.doubleValue)
     Time(t, scale2)
   }
 }

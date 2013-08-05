@@ -14,8 +14,8 @@ abstract class IterableData extends Data {
   //TODO: support unknown length, "-n" where n is current length?
   
   //TODO: should "get" advance to next?
-  def getDouble: Option[Double] = ???
-  def getString: Option[String] = ???
+  //def getDouble: Option[Double] = ???
+  //def getString: Option[String] = ???
   def getByteBuffer: ByteBuffer = ???
   
   //TODO: abstract up iterator logic

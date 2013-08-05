@@ -13,32 +13,17 @@ trait NumberData extends Any with Data {
    * 
    */
   
-  def toDouble: Double = doubleValue
+  def doubleValue: Double //= ???//doubleValue
+  
   //def toLong: Long = doubleValue.toLong //truncates
-  def toLong: Long = Math.round(toDouble) //rounds
+  //def toLong: Long = Math.round(toDouble) //rounds
   
-  //TODO: do we need ordering?
-//  def compare(that: Number)(implicit ord: DoubleOrdering) = {
-//    ord.compare(toDouble, that.toDouble)
-//  }
-  
-  //TODO: do we need equality tests?
-//  /**
-//   * Number equality is based on the Double values.
-//   */
-//  override def equals(that: Any): Boolean = {
-//    that.isInstanceOf[Number] && that.asInstanceOf[Number].toDouble == toDouble
-//  }
-//  
-//  /**
-//   * Override to be consistent with equals.
-//   */
-//  override def hashCode() = toDouble.hashCode()
 }
 
 /**
  * Object for pattern matching and exposing the data value as a Double.
  */
-object NumberData {
-  def unapply(num: NumberData) = Some(num.toDouble) //always expose double? use subclass if we want other type
-}
+//just encourages instantiation of value class
+//object NumberData {
+//  def unapply(num: NumberData) = Some(num.doubleValue) //always expose double? use subclass if we want other type
+//}

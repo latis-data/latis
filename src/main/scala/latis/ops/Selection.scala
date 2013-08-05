@@ -28,15 +28,7 @@ protected class Selection(val vname: String, val op: String, val value: String) 
   def filterScalar(scalar: Scalar): Option[Scalar] = {
     if (vname == scalar.name) {
       if (isValid(scalar.compare(value))) Some(scalar) else None
-      
-//      scalar match {
-//        case Number(d) =>  {
-//          if (isValid(d.compare(value.toDouble))) Some(scalar) else None //TODO: cache Double value?
-//          //TODO: formatted time to double
-//        }
-//        //TODO: Text, also regex?
-//      }
-    } else Some(scalar) //doesn't apply to this Scalar Variable, no-op
+    } else Some(scalar) //operation doesn't apply to this Scalar Variable, no-op
   }
   
   /**

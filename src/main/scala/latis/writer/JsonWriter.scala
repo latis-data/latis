@@ -7,14 +7,7 @@ import scala.collection.mutable.MapBuilder
 class JsonWriter(out: OutputStream) extends Writer {
 
   /*
-   * TODO: consider using arrays for tuples and samples instead of objects
-   * less verbose, no labels, directly usable by Highcharts
-   * effectively a multi-dim array
-   * not a bad abstraction to map to since that's what so many deal with
-   * Make Long and Short impls?
-   *   brief, compact
-   * 
-   * Include metadata in this form with objects...
+   * TODO: Include metadata in this long form with objects...
    */
   
   private val _writer = new PrintWriter(out)
@@ -46,10 +39,24 @@ class JsonWriter(out: OutputStream) extends Writer {
   }
 
   
-  private def varToString(variable: Variable): String = variable match {
-    case Scalar(v) => "\"" + variable.name + "\":" + v.toString
-    case Tuple(vars) => vars.map(varToString(_)).mkString(",")
-    case f: Function => ???
+  private def varToString(variable: Variable): String = {
+    //TODO: impl for Function
+    //TODO: what if Tuple has name? need to wrap it as an object in "{}"
+    
+    val label = variable.name match {
+      case name: String => "\"" + name + "\":"
+      case _ => ""
+    } 
+    
+    val value = variable match { 
+      case Number(d) => d.toString //TODO: format?
+      //TODO: Integer vs Real?
+      case Text(s) => "\"" + s + "\"" //put quotes around text data
+      case Tuple(vars) => vars.map(varToString(_)).mkString(",")
+      case f: Function => ???
+    }
+    
+    label + value
   }
   
   
