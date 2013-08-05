@@ -12,8 +12,8 @@ class SelectionTest {
   
   // time -> value, column oriented data
   lazy val scalarFunction: Function = {
-    val domain = Real("time", Seq(1.,2.,3.,4.,5.))
-    val range = Real("value", Seq(1.,2.,3.,4.,3.))
+    val domain = Real("time", Seq(1.0,2.0,3.0,4.0,5.0))
+    val range = Real("value", Seq(1.0,2.0,3.0,4.0,3.0))
     Function(domain, range)
   }
   
@@ -31,7 +31,7 @@ class SelectionTest {
   
   @Test
   def select_equal_value {
-    val expected = Function(Real("time", Seq(3.,5.)), Real("value", Seq(3.,3.)))
+    val expected = Function(Real("time", Seq(3.0,5.0)), Real("value", Seq(3.0,3.0)))
     testSelection(scalarFunction, "value=3", expected)
   }
   
