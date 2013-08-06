@@ -6,8 +6,12 @@ import latis.metadata._
 import java.nio.ByteBuffer
 import latis.util.Util
 
-class Function(val domain: Variable, val range: Variable) extends Variable {
+class Function(_domain: Variable, _range: Variable) extends Variable {
 
+  //expose domain and range vis defs only so we can override (e.g. ProjectedFunction)
+  def domain: Variable = _domain
+  def range: Variable = _range
+  
   def iterator: Iterator[Sample] = {
     if (data.isEmpty) iterateFromKids
     else dataIterator.map(Util.dataToSample(_, Sample(domain, range)))

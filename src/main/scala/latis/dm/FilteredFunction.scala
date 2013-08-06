@@ -3,7 +3,6 @@ package latis.dm
 import latis.metadata._
 import latis.ops._
 import latis.util.NextIterator
-import latis.ops.filter.Filter
 
 /**
  * Wrapper for a Function that applies a boolean filter to each sample.
@@ -37,9 +36,13 @@ class FilteredFunction(function: Function, val selection: Selection) extends Fun
     override def getNext: Sample = {
       if (it.hasNext) {
         val nxt = it.next()
-        selection.filterSample(nxt) match {
+        selection.filter(nxt) match {
+          //TODO: could just use "filter" and treat it as Tuple, but need to return Sample here
+          //  let next be any Variable?
+          //assume that we are getting a 2-tuple, for now
           case None => getNext //keep trying until we get a valid sample
-          case Some(sample) => sample
+          case Some(tup: Tuple) => Sample(tup(0), tup(1)) //TODO: assert size = 2
+          case _ => throw new Error("Filtered sample should be a 2-Tuple.")
         }
       } else null //no more valid samples
     }

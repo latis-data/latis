@@ -45,9 +45,9 @@ protected class Selection(val vname: String, val op: String, val value: String) 
   
   def filterFunction(f: Function): Option[Function] = Some(FilteredFunction(f, this))
 
-  def filterSample(sample: Sample): Option[Sample] = {
-    for (d <- filter(sample.domain); r <- filter(sample.range)) yield Sample(d,r)
-  }
+//  def filterSample(sample: Sample): Option[Sample] = {
+//    for (d <- filter(sample.domain); r <- filter(sample.range)) yield Sample(d,r)
+//  }
   
   
   private def isValid(comparison: Int): Boolean = {

@@ -6,7 +6,6 @@ import latis.writer._
 import org.junit._
 import Assert._
 import latis.reader.tsml.TsmlReader
-import latis.ops.filter._
 
 class SelectionTest {
   

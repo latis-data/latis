@@ -6,7 +6,7 @@ import latis.data.Data
 import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
 import latis.ops.math.BasicMath
-import latis.ops.Operation
+import latis.ops._
 
 class Dataset(vars: Seq[Variable]) extends Tuple(vars) with BasicMath {
 //class Dataset(vars: Seq[Variable], operations: Seq[Operation]) extends Tuple(vars) with BasicMath {
@@ -65,6 +65,15 @@ class Dataset(vars: Seq[Variable]) extends Tuple(vars) with BasicMath {
   
   //TODO: apply operations, or just do in adapter?
   //operations.foldRight(this)(_(_)) //operation.apply(ds)
+  
+  //convenience methods for transforming Dataset
+  def filter(selection: Selection): Dataset = selection(this)
+  def filter(expression: String): Dataset = Selection(expression)(this)
+  
+  def project(proj: Projection): Dataset = proj(this)
+  def project(varNames: Seq[String]): Dataset = Projection(varNames)(this)
+  
+  //TODO: map? operate?
   
   
   //def foreach(f: (Variable,Variable) => (Variable,Variable)): Unit
