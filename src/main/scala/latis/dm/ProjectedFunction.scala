@@ -35,6 +35,7 @@ class ProjectedFunction(function: Function, val projection: Projection) extends 
       if (it.hasNext) {
         val nxt = it.next()
         projection.projectSample(nxt) match {
+          //TODO: keep index counter and pass that in so proj can replace a non-projected domain? yikes
           case Some(sample: Sample) => sample
           case _ => throw new Error("Projected sample should be a 2-Tuple.")
         }

@@ -35,10 +35,22 @@ class Projection(val names: Seq[String]) extends Operation {
   }
     
   def projectFunction(function: Function): Option[Function] = {
-    //if function does not have the data, delegate to the kids
-    //  saves having to parse data 
+    //if function does not have the data, delegate to the kids, saves having to parse data 
     if (function.data.isEmpty) { //delegate to kids
-//TODO: if domain not projected, replace with Index
+      //only an optimization for column oriented data?
+/*
+ * TODO: 
+ * 1) if domain not projected, replace with Index
+ * 2) if range not projected, make domain the range of a function of index
+ * 
+ * wrapper is problematic because projectSample doesn't know index
+ *   pass in index from iterator?
+ *   projectSample is only used by ProjectedFunction, so we can take some liberties
+ * NullVariable?
+ *   or some other indicator that the iterator can interpret and replace
+ * 
+ * 
+ */
       for (d <- project(function.domain); r <- project(function.range)) yield Function(d,r) //TODO: metadata
     } else { //wrap function
       Some(ProjectedFunction(function, this))
@@ -46,7 +58,12 @@ class Projection(val names: Seq[String]) extends Operation {
   }
       
   def projectSample(sample: Sample): Option[Sample] = {
-    //TODO: if domain not projected, replace with Index
+//TODO: if domain not projected, replace with Index
+//    val domain = project(sample.domain) match {
+//      case Some(v) => v
+//      case None => ??? //TODO: we don't know what sample (index) we are on!
+    //but at this point we shouldn't need the index value?
+//    }
     for (d <- project(sample.domain); r <- project(sample.range)) yield Sample(d,r) //TODO: metadata
   }
   

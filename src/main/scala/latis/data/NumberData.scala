@@ -13,7 +13,10 @@ trait NumberData extends Any with Data {
    * 
    */
   
-  def doubleValue: Double //= ???//doubleValue
+  def intValue: Int
+  def longValue: Long
+  def floatValue: Float
+  def doubleValue: Double
   
   //def toLong: Long = doubleValue.toLong //truncates
   //def toLong: Long = Math.round(toDouble) //rounds

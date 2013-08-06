@@ -12,6 +12,8 @@ class Real extends Scalar with Number {
   
   def doubleValue = data.asInstanceOf[DoubleValue].doubleValue //TODO: will this require instance of value class?
   //TODO: get Option?
+  //TODO: what about DoubleValue vs SeqData?
+  //  pattern match but want to keep benefits of value class
 }
 
 
