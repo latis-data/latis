@@ -104,11 +104,13 @@ object Data {
   val empty = EmptyData
   
   def apply(d: Double): Data = DoubleValue(d)
+  def apply(l: Long): Data   = LongValue(l)
   def apply(s: String): Data = StringValue(s)
   
   //pattern match to deal with type erasure
   def apply(seq: Seq[Any]): Data = seq(0) match {
     case _: Double => new DoubleSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Double]])
+    case _: Long =>   new LongSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Long]])
     case _: String => new StringSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[String]])
     case _ => throw new RuntimeException("Unsupported data sequence type.")
   }

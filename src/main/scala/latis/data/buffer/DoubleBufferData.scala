@@ -8,7 +8,7 @@ import latis.data.value.DoubleValue
  * ByteBufferData where every sample/record is a single Double.
  */
 class DoubleBufferData(buffer: ByteBuffer) extends ByteBufferData(buffer, 8) {
-  //TODO: do we have a use case for this?
+  //TODO: no current use case for this, is there a benefit?
   
   override def iterator = new Iterator[Data] {
     val dbuf = buffer.asDoubleBuffer()

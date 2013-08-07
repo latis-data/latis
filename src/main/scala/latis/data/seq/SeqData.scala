@@ -29,6 +29,11 @@ abstract class SeqData extends Data { //TODO: extends Seq[Data]?
  *   ArrayData?
  *   better performance?
  *   but not immutable
+ * 
+ * TODO: mixed Data
+ *   can't maintain seq of primitives
+ *   seq of Any then convert on demand with pattern matching?
+ *   or just make Seq of Data eagerly?
  */
 
 

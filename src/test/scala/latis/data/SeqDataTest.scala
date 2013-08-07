@@ -68,5 +68,7 @@ class SeqDataTest {
     }
   }
   
+  //TODO: String and mixed data
+  
   //def iterate_twice
 }
