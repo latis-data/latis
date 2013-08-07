@@ -8,9 +8,30 @@ import latis.ops.xform.Transformation
 
 class TransformedFunction(function: Function, val xform: Transformation) extends Function(function.domain, function.range) {
   //TODO: override domain, range, metadata, data ?
+  
   /*
-   * TODO: 2113-07-15
+   * 2013-08-07
+   * projection and selection are now unique
+   *   selection: filters samples, same type, low level metadata won't change, only provenenance? maybe function (e.g. length)
+   *   projection: "filters" variables, changes type, scalar metadata won't change
+   * two types of other ops:
+   *   modify values: same types, model won't change but scalar metadata might
+   *     e.g. units
+   *     other use cases?
+   *       scale, offset - still essentially units
+   *       replace missing... - still very similar
+   *       replace wavelength with frequency? too much? effectively changes type? even if still Real
+   *   transform model: could be entirely different
+   * need more than just "Transformation" to capture above 2 cases
+   *   can we get by with one? too much special logic?
+   * 
+   * Other ops just to munge/enhance metadata?
+   */
+  
+  /*
+   * TODO: 2013-07-15
    * feels wrong to pass orig domain, range to super
+   * ++ see ProjectedFunction, override domain, range defs
    * this will likely change the model
    * should we drop all constructor args in favor of methods?
    *   internal state inserted by factory constructors
@@ -33,7 +54,7 @@ class TransformedFunction(function: Function, val xform: Transformation) extends
    *   but need to capture orig ds md
    * so how does this iterator get in place?
    *   at a high level, it is the dataset being operated on
-   *   is this internal enough that directly wrapping a FUnction is OK
+   *   is this internal enough that directly wrapping a Function is OK
    *   assuming the code doing that will make sure the Dataset comes back together?
    *   the op needs to be in place when we start iterating on the Function
    *   can't look to parent Dataset to see it there is an operation for it
