@@ -26,6 +26,7 @@ object Tuple {
   def apply(v: Variable, vars: Variable*): Tuple = Tuple(v +: vars) 
   
   def apply(vals: Seq[Seq[Double]])(implicit ignore: Double): Tuple = Tuple(vals.map(Real(_))) //resolve type erasure ambiguity with implicit
+  //TODO: apply(vals: Seq[_]) = vals(0) match ...
   //def apply(vals: Seq[Double]*): Tuple = Tuple(vals.map(Real(_)))  //same after erasure
   def apply(ds: Seq[Double], vals: Seq[Double]*): Tuple = {
     val t = Tuple(Real(ds) +: vals.map(Real(_)))

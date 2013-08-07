@@ -5,13 +5,17 @@ import java.nio.ByteBuffer
 import latis.data.value.DoubleValue
 import latis.data.Data
 
-//abstract class SeqData(val seq: Seq[Data]) extends Data {
-abstract class SeqData extends Data { //TODO: extends Seq[Data]?
+/**
+ * Data that represents multiple data records.
+ * Not multiple data values in a single record.
+ * Each element is assumed to have the same type.
+ */
+abstract class SeqData extends Data  //TODO: extends Seq[Data]?
   //def value = seq
 //  override def iterator = seq.iterator
   //def isEmpty = length == 0
 //  def length = seq.length
-}
+
 
 /*
  * 2013-08-07
@@ -30,11 +34,8 @@ abstract class SeqData extends Data { //TODO: extends Seq[Data]?
  *   better performance?
  *   but not immutable
  * 
- * TODO: mixed Data
- *   can't maintain seq of primitives
- *   seq of Any then convert on demand with pattern matching?
- *   or just make Seq of Data eagerly?
  */
+
 
 
 //TODO: 2D Seq data for Tuple?

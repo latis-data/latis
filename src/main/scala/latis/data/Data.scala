@@ -38,17 +38,16 @@ import latis.data.seq._
  */
 
 trait Data extends Any {
-  //TODO: head::tail semantics? Stream?
+  //TODO: head::tail semantics? Stream? View?
   //TODO: word = Array of 4 chars, 8 bytes
   //TODO: String as Index array of Char, or Word?
   //TODO: Blob: fixed length byte array
-  //TODO: def apply(index: Int): Any = value if 0 else IOOB?
   
   //try Set behavior
   //def indexToRecord(index: Int): Data
   def apply(index: Int): Data
   //TODO: or Index? could encapsulate n-D
-  //TODO: valueToIndex?
+  //TODO: valueToIndex? indexOf?
   
   def length: Int  //number of records, Experimental: "-n" is unlimited, currently n
   def recordSize: Int //bytes per record
@@ -60,23 +59,9 @@ trait Data extends Any {
   //TODO: beware of mixing getters that increment with iterator
   def iterator: Iterator[Data] //= List(DoubleValue(doubleValue)).iterator
   //TODO: support foreach, (d <- data)
-  
-//  def getDouble: Option[Double]
-//  def getString: Option[String]
-//  
-//  def doubleValue: Double = getDouble match {
-//    case Some(d) => d
-//    case None => throw new Error("No Data") //null
-//  }
-//  
-//  def stringValue: String = getString match {
-//    case Some(s) => s
-//    case _ => throw new Error("No Data")
-//  }
     
   def isEmpty: Boolean = length == 0
   def notEmpty = ! isEmpty
-  
   
   /*
    * TODO: is byte buffer equality sufficient?
@@ -107,7 +92,13 @@ object Data {
   def apply(l: Long): Data   = LongValue(l)
   def apply(s: String): Data = StringValue(s)
   
+  /**
+   * Construct Data with a record for each Seq element.
+   * Assumes all of the same type which each sample should be.
+   */
   //pattern match to deal with type erasure
+  //TODO: assert all of the same type
+  //TODO: use primitive Arrays?
   def apply(seq: Seq[Any]): Data = seq(0) match {
     case _: Double => new DoubleSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Double]])
     case _: Long =>   new LongSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Long]])
@@ -137,6 +128,9 @@ object Data {
   def apply(bytes: Array[Byte]): Data = Data(ByteBuffer.wrap(bytes))
   
   //Concatenate Data, used by Variable.concatData
+  //Use to create a single record with multiple variables (e.g. tuple)
+  //TODO: allow Seq[Any]? need diff method
+  //  or should the SeqData constructor be the special case?
   def apply(data: Seq[Data])(implicit ignore: Data): Data = { //implicit hack for type erasure ambiguity
   //def apply(head: Data, tail: Data*): Data = { 
     //val data = head +: tail
