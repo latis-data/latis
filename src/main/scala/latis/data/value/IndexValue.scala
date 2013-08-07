@@ -19,4 +19,10 @@ case class IndexValue(val value: Int) extends AnyVal with NumberData {
   def getByteBuffer: ByteBuffer = ByteBuffer.allocate(recordSize).putInt(value).rewind.asInstanceOf[ByteBuffer]
   
   def iterator = List(this).iterator
+
+    //TODO: abstract up for all value classes
+  def apply(index: Int): Data = index match {
+    case 1 => this
+    case _ => throw new IndexOutOfBoundsException()
+  }
 }

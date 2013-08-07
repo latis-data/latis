@@ -14,7 +14,7 @@ class Index extends Scalar with Number {
    * What about IndexData vs IndexValue?
    * pattern match? but don't want to instantiate value class
    * same issue with other scalars
-   * 
+   * Index is a single model component, Index with IndexData is an implicit Function
    */
   
   //needed for Number

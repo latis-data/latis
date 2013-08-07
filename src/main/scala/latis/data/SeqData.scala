@@ -12,6 +12,19 @@ abstract class SeqData extends Data { //TODO: extends Seq[Data]?
 //  def length = seq.length
 }
 
+/*
+ * 2013-08-07
+ * TODO: still uncomfortable about a Scalar (type) having multiple Data values
+ * implicitly equivalent to Function: Index -> Scalar?
+ * the graph of the model is the model is the same, just hanging the data off a diff node
+ * 
+ * How can we emulate domain sets with various topologies?
+ * it would need to BE-A Variable
+ * need indexToValue and valueToIndex?
+ * would that be generally useful for Data?
+ *   take advantage of recordSize
+ */
+
 case class DoubleSeqData(ds: immutable.Seq[Double]) extends SeqData {
   
   def getByteBuffer: ByteBuffer = ds.foldLeft(ByteBuffer.allocate(size))(_.putDouble(_)).rewind.asInstanceOf[ByteBuffer]
@@ -20,6 +33,8 @@ case class DoubleSeqData(ds: immutable.Seq[Double]) extends SeqData {
   def recordSize = 8
   
   def iterator = ds.iterator.map(DoubleValue(_))
+  
+  def apply(index: Int): Data = DoubleValue(ds(index))
 }
 
 //inner, faster varying array is over Tuple elements

@@ -9,4 +9,6 @@ object EmptyData extends Data {
   //def getString = None
   def length = 0
   def recordSize = 0
+  
+  def apply(index: Int): Data = throw new RuntimeException("EmptyData")
 }

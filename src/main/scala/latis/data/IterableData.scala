@@ -10,6 +10,10 @@ abstract class IterableData extends Data {
   //TODO: should all Data extend this since they impl iterator?
   //TODO: or make DataIterator? complication with "length"
   
+  //To get record/sample by index, need to manage iterator ourselves, as Stream.
+  lazy val stream: Stream[Data] = iterator.toStream
+  def apply(index: Int): Data = stream(index)
+  
   def length = -1 //unknown
   //TODO: support unknown length, "-n" where n is current length?
   

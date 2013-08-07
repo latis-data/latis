@@ -22,6 +22,8 @@ class IndexData(val start: Int, val stop: Int, val stride: Int) extends Data {
     }
   }
   
+  def apply(index: Int): Data = IndexValue(start + stride * index)
+  
   
   override def equals(that: Any) = that match {
     case d: IndexData => d.start == start && d.stop == stop && d.stride == stride

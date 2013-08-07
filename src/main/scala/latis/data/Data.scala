@@ -43,6 +43,12 @@ trait Data extends Any {
   //TODO: Blob: fixed length byte array
   //TODO: def apply(index: Int): Any = value if 0 else IOOB?
   
+  //try Set behavior
+  //def indexToRecord(index: Int): Data
+  def apply(index: Int): Data
+  //TODO: or Index? could encapsulate n-D
+  //TODO: valueToIndex?
+  
   def length: Int  //number of records, Experimental: "-n" is unlimited, currently n
   def recordSize: Int //bytes per record
   def size = length * recordSize //total number of bytes

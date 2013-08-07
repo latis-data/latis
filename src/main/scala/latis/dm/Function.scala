@@ -7,6 +7,17 @@ import java.nio.ByteBuffer
 import latis.util.Util
 
 class Function(_domain: Variable, _range: Variable) extends Variable {
+  
+  /*
+   * 2013-08-07
+   * TODO: Continuous vs Sampled Function
+   * now that Data is separable, how can we support continuous function (e.g. exp model)
+   * ContinuousFunction:
+   *   apply(domainVal: Variable) => range val
+   *   apply(domainSet: Seq[Variable] or Var with SeqData) => SampledFunction
+   *   length = -1?
+   *   iterator => error
+   */
 
   //expose domain and range vis defs only so we can override (e.g. ProjectedFunction)
   def domain: Variable = _domain

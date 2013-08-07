@@ -20,7 +20,7 @@ trait NumberData extends Any with Data {
   
   //def toLong: Long = doubleValue.toLong //truncates
   //def toLong: Long = Math.round(toDouble) //rounds
-  
+    
 }
 
 /**
