@@ -1,8 +1,9 @@
-package latis.data
+package latis.data.seq
 
 import scala.collection._
 import java.nio.ByteBuffer
 import latis.data.value.DoubleValue
+import latis.data.Data
 
 //abstract class SeqData(val seq: Seq[Data]) extends Data {
 abstract class SeqData extends Data { //TODO: extends Seq[Data]?
@@ -23,20 +24,15 @@ abstract class SeqData extends Data { //TODO: extends Seq[Data]?
  * need indexToValue and valueToIndex?
  * would that be generally useful for Data?
  *   take advantage of recordSize
+ *   
+ * Use Array?
+ *   ArrayData?
+ *   better performance?
+ *   but not immutable
  */
 
-case class DoubleSeqData(ds: immutable.Seq[Double]) extends SeqData {
-  
-  def getByteBuffer: ByteBuffer = ds.foldLeft(ByteBuffer.allocate(size))(_.putDouble(_)).rewind.asInstanceOf[ByteBuffer]
-  
-  def length = ds.length
-  def recordSize = 8
-  
-  def iterator = ds.iterator.map(DoubleValue(_))
-  
-  def apply(index: Int): Data = DoubleValue(ds(index))
-}
 
+//TODO: 2D Seq data for Tuple?
 //inner, faster varying array is over Tuple elements
 //assume doubles for now
 //case class TupleSeqData(ts: Seq[Seq[Double]]) extends SeqData {
@@ -45,16 +41,3 @@ case class DoubleSeqData(ds: immutable.Seq[Double]) extends SeqData {
 //  def length = ts.length
 //  def iterator = ts.map(DoubleValue(_)).iterator
 //}
-
-
-object SeqData {
-  import scala.collection.Seq //Allow mutable inputs, convert to immutable for construction.
-  
-  def apply(ds: Seq[Double]): SeqData = DoubleSeqData(ds.toIndexedSeq)
-  
-//  def apply(ds1: Seq[Double], ds2: Seq[Double]): SeqData = {
-//    TupleSeqData((ds1 zip ds2).map(p => Vector(p._1, p._2)).toIndexedSeq)
-//  }
-  
-  //TODO: def apply(ds1: Seq[Double], ds2: Seq[Double]*): SeqData 
-}

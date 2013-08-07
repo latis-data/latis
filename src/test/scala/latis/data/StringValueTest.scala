@@ -45,5 +45,20 @@ class StringValueTest {
     assertEquals(List("hello"), data.iterator.map(_.stringValue).toList)
   }
   
+  @Test
+  def index = {
+    assertEquals(data, data(0))
+  }
+  
+  @Test
+  def index_out_of_bounds = {
+    try{
+      data(1)
+      fail
+    } catch {
+      case e: Exception => assertTrue(true)
+    }
+  }
+  
   //def iterate_twice
 }

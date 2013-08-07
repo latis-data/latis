@@ -56,7 +56,10 @@ class ByteBufferTest {
   //two records of one string
   val stringDataRecords = Data("HelloWorld".foldLeft(ByteBuffer.allocate(20))(_.putChar(_)), 10)
   
-
+  //TODO: mixed types (double, string,...) in same buffer
+  //TODO: test diff size strings
+  
+  
   @Test def empty_byte_buffer = {
     assertEquals(ByteBuffer.allocate(0), emptyData.getByteBuffer)
   }
@@ -141,8 +144,8 @@ class ByteBufferTest {
     //assertTrue(doubleDataRecords.equals()) //TODO: but Data from Seq assumes one datum per record
   @Test def char_datum_equals               = assertTrue(charDatum.equals(Data("A")))
   @Test def string_datum_equals             = assertTrue(stringDatum.equals(Data("Hello")))
-  //@Test def string_data_records_equals      = assertTrue(stringDataRecord.equals()) //TODO: support TextSeqData
-   //TODO: but Data from Seq assumes one datum per record
+  @Test def string_data_records_equals      = assertTrue(stringDataRecords.equals(Data(Seq("Hello", "World"))))
+  
   
   // Test Data.iterator
   @Test def empty_data_iterate = assertEquals(List.empty, emptyData.iterator.toList)
@@ -188,5 +191,18 @@ class ByteBufferTest {
     assertEquals(expected, result)
   }
   
+  // Test Data.apply
+  @Test def empty_data_by_index               = assertEquals(emptyData, emptyData(0))
+  @Test def double_datum_by_index             = assertEquals(doubleDatum, doubleDatum(0))
+  @Test def double_datum_not_rewound_by_index = assertEquals(doubleDatumNotRewound, doubleDatumNotRewound(0))
+  @Test def double_data_record_by_index       = assertEquals(doubleDataRecord, doubleDataRecord(0))
+  @Test def double_datum_records_by_index     = assertEquals(Data(Seq(2.0)), doubleDatumRecords(1)) //can't override equals for value classes, so use Seq
+  @Test def double_data_records_by_index      = assertEquals(Data(Seq(3.0, 4.0)), doubleDataRecords(1)) //TODO: but SeqData here has 2 samples
+  @Test def char_datum_by_index               = assertEquals(charDatum, charDatum(0))
+  @Test def string_datum_by_index             = assertEquals(stringDatum, stringDatum(0))
+  @Test def string_data_record_by_index       = assertEquals(stringDataRecord, stringDataRecord(0))
+  @Test def string_data_records_by_index      = assertEquals(Data(Seq("World")), stringDataRecords(1))
+  //TODO: test out of bounds
+
   //TODO: def iterate_twice
 }

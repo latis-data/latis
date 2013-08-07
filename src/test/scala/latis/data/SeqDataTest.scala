@@ -7,10 +7,11 @@ import latis.writer._
 import org.junit._
 import Assert._
 import latis.data.value.DoubleValue
+import latis.data.seq.SeqData
 
 class SeqDataTest {
 
-  val doubleSeq = SeqData(Seq(1.0, 2.0, 3.0))
+  val doubleSeq = Data(Seq(1.0, 2.0, 3.0))
   
   @Test
   def byte_buffer {
@@ -50,6 +51,21 @@ class SeqDataTest {
     val expected = List(Data(1.0), Data(2.0), Data(3.0)).map(_.getByteBuffer)
     val result = doubleSeq.iterator.map(_.getByteBuffer).toList
     assertEquals(expected, result)
+  }
+  
+  @Test
+  def index = {
+    assertEquals(Data(2.0), doubleSeq(1))
+  }
+  
+  @Test
+  def index_out_of_bounds = {
+    try{
+      doubleSeq(3)
+      fail
+    } catch {
+      case e: Exception => assertTrue(true)
+    }
   }
   
   //def iterate_twice

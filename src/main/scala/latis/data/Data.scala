@@ -6,6 +6,7 @@ import java.nio.ByteBuffer
 import latis.data.value._
 import latis.data.buffer.ByteBufferData
 import java.nio.Buffer
+import latis.data.seq._
 
 /*
  * TODO: 2013-05-30
@@ -77,10 +78,15 @@ trait Data extends Any {
   def notEmpty = ! isEmpty
   
   
-  //TODO: is byte buffer equality sufficient?
   /*
-   * The hash code of a byte buffer depends only upon its remaining elements; 
-   * that is, upon the elements from position() up to, and including, the element at limit() - 1.
+   * TODO: is byte buffer equality sufficient?
+   * should also consider number of records
+   * 
+   * From javadoc:
+   *   The hash code of a byte buffer depends only upon its remaining elements; 
+   *   that is, upon the elements from position() up to, and including, the element at limit() - 1.
+   *   
+   * Note: value classes cannot override equals, so our value data will not inherit this
    */
   override def equals(that: Any) = that match {
     case d: Data => d.getByteBuffer == getByteBuffer
@@ -93,16 +99,23 @@ trait Data extends Any {
 //-----------------------------------------------------------------------------
 
 object Data {
+  import scala.collection._
   
   val empty = EmptyData
   
   def apply(d: Double): Data = DoubleValue(d)
   def apply(s: String): Data = StringValue(s)
-  def apply(ds: Seq[Double]): Data = SeqData(ds)
-  //TODO: varargs?
+  
+  //pattern match to deal with type erasure
+  def apply(seq: Seq[Any]): Data = seq(0) match {
+    case _: Double => new DoubleSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Double]])
+    case _: String => new StringSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[String]])
+    case _ => throw new RuntimeException("Unsupported data sequence type.")
+  }
   
   //takes Buffer so user's don't have to cast after "rewind"
   def apply(buffer: Buffer, sampleSize: Int): Data = {
+    //TODO: if buffer is empty, return EmptyData?
     //flip if not positioned at 0, sets limit to current position and rewinds
     //If position is 0, assume the provider already flipped it.
     //TODO: potential for buffer capacity to be larger than desired, e.g. rewind called instead of flip
@@ -121,8 +134,10 @@ object Data {
   //def apply(bytes: Seq[Byte]): Data = Data(ByteBuffer.wrap(bytes.toArray))
   def apply(bytes: Array[Byte]): Data = Data(ByteBuffer.wrap(bytes))
   
-  //Concatenate Data
+  //Concatenate Data, used by Variable.concatData
   def apply(data: Seq[Data])(implicit ignore: Data): Data = { //implicit hack for type erasure ambiguity
+  //def apply(head: Data, tail: Data*): Data = { 
+    //val data = head +: tail
     val size = data.foldLeft(0)(_ + _.size) //total size of all elements
     val buffer = data.foldLeft(ByteBuffer.allocate(size))(_ put _.getByteBuffer) //build ByteBuffer with all Data
     val bb = buffer.rewind.asInstanceOf[ByteBuffer] //reset to the beginning

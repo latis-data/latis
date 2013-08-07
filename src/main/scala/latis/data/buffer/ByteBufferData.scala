@@ -10,7 +10,7 @@ import latis.data.Data
  */
   //construct with record size so we can iterate over a sample
 class ByteBufferData(val buffer: ByteBuffer, recSize: Int) extends Data {
-//TODO: take number of samples instead of record size?
+  //TODO: take number of samples instead of record size?
   
   override def getByteBuffer = buffer
   

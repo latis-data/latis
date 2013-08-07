@@ -4,6 +4,7 @@ import java.nio.ByteBuffer
 import latis.data._
 
 //TODO: test if we are getting the benefit of value classes
+//TODO: ValueData trait?
 
 case class DoubleValue(val value: Double) extends AnyVal with NumberData {
   def length = 1
@@ -21,7 +22,8 @@ case class DoubleValue(val value: Double) extends AnyVal with NumberData {
 
     //TODO: abstract up for all value classes
   def apply(index: Int): Data = index match {
-    case 1 => this
+    case 0 => this
     case _ => throw new IndexOutOfBoundsException()
   }
+  
 }

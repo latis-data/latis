@@ -23,7 +23,8 @@ case class StringValue(val value: String) extends AnyVal with TextData {
   
     //TODO: abstract up for all value classes
   def apply(index: Int): Data = index match {
-    case 1 => this
+    case 0 => this
     case _ => throw new IndexOutOfBoundsException()
   }
+  
 }

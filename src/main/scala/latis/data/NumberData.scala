@@ -11,6 +11,7 @@ trait NumberData extends Any with Data {
    * but do we want to say that a byte buffer is all numbers? probably not
    * always just one number?
    * 
+   * assume a single number, for now, use for numeric value classes
    */
   
   def intValue: Int
