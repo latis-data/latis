@@ -6,19 +6,19 @@ repositories {
 }
 
 dependencies {    
-    compile "javax.servlet:servlet-api:2.5"
+    providedCompile "javax.servlet:servlet-api:2.5" //not deployed
     compile 'org.scala-lang:scala-library:2.10.2'
     testCompile 'junit:junit:4.11'
 }
 
 war {
-  //destinationDir = '/opt/tomcat/webapps'
   baseName = 'latis'
 }
 
 task deploy(dependsOn: 'war') << {
     copy {
         from war.archivePath
+        //into "/opt/glassfish3/glassfish/domains/domain1/autodeploy"
         into "/opt/tomcat/webapps"
     }
 }
