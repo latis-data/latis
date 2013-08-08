@@ -44,7 +44,8 @@ object Registry {
     //  need to use servlet context to resolve relative path
     
     //val url = "file:" + LatisProperties.resolvePath("datasets/" + dataset + ".tsml")
-    val base = LatisProperties.getOrElse("dataset.dir", LatisProperties.resolvePath("datasets"))
+    var base = LatisProperties.getOrElse("dataset.dir", "datasets")
+    if (! base.startsWith(File.separator)) base = LatisProperties.resolvePath(base)
     val url = "file:" + base + File.separator + dataset + ".tsml"
     new URL(url)
   }
