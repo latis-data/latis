@@ -4,7 +4,8 @@ import org.junit._
 import Assert._
 
 class UtilTest {
-
+  //TODO: load special properties file, controlled environment
+  
   @Test
   def resolve_string_with_system_property {
     val s = Util.resolveParameterizedString("Hi ${user.name}!")

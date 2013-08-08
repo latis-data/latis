@@ -39,11 +39,6 @@ import java.io.File
 object Registry {
 
   def getTsmlUrl(dataset: String): URL = {
-    //TODO: get dataset.dir from properties
-    //  need absolute path for now, complications with LatisProperties singleton not knowing about server
-    //  need to use servlet context to resolve relative path
-    
-    //val url = "file:" + LatisProperties.resolvePath("datasets/" + dataset + ".tsml")
     var base = LatisProperties.getOrElse("dataset.dir", "datasets")
     if (! base.startsWith(File.separator)) base = LatisProperties.resolvePath(base)
     val url = "file:" + base + File.separator + dataset + ".tsml"

@@ -11,6 +11,7 @@ class LatisServerProperties(config: ServletConfig) extends LatisProperties {
     //Try the init parameters in the web.xml before delegating to super.
     config.getInitParameter("config") match {
       case s: String => s
+      //TODO: try loading as resource from classpath?
       case null => super.getPropertyFileName() //delegate to super
     }
   }
