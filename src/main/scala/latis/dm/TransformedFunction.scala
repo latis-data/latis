@@ -26,6 +26,17 @@ class TransformedFunction(function: Function, val xform: Transformation) extends
    *   can we get by with one? too much special logic?
    * 
    * Other ops just to munge/enhance metadata?
+   * 
+   * Derived Field as Operation
+   * tsml variable type vs PI
+   *   applicable beyond tsml
+   *   equation in projection clause? or "function"?
+   * but derived field makes (i.e. returns) a new Variable
+   *   operation takes input ds, returns new ds with the result
+   *   adding it to a Dataset is another step, aggregation
+   *   
+   * CompositeOperation
+   *   
    */
   
   /*
