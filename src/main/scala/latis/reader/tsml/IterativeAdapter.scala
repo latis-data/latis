@@ -19,7 +19,7 @@ abstract class IterativeAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   
   //TODO: move to Function?
   lazy val sampleSize = {
-    val f = dataset.getVariableByIndex(0).asInstanceOf[Function] //assume single top-level Function
+    val f = dataset(0).asInstanceOf[Function] //assume single top-level Function
     f.domain.size + f.range.size
   }
   
