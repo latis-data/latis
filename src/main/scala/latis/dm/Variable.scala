@@ -11,6 +11,7 @@ abstract class Variable {
   protected var _metadata: Metadata = EmptyMetadata
   protected var _data: Data = EmptyData
   
+  //allow subclasses to override, e.g. ProjectedFunction
   def metadata: Metadata = _metadata
   def data: Data = _data
   

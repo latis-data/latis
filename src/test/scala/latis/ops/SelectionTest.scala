@@ -87,7 +87,7 @@ class SelectionTest {
     //AsciiWriter().write(ds)
     //NOTE: iterable once issues
     
-    val f = ds.getVariableByIndex(0).asInstanceOf[Function]
+    val f = ds(0).asInstanceOf[Function]
     val n = f.length
     assertEquals(5, n)
   }
