@@ -8,7 +8,7 @@ import scala.Option.option2Iterable
  */
 class Projection(val names: Seq[String]) extends Operation {
   //TODO: support long names  
-  //TODO: support aliases
+  //TODO: support aliases, see Variable.hasAlias
   //TODO: preserve order of requested variables
   //TODO: what if only part of nD domain is selected? only if it is a product set
   //TODO: return domain as IndexFunction if only it is projected?

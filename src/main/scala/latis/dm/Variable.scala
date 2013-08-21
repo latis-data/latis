@@ -69,30 +69,62 @@ abstract class Variable {
   }
   
   
-  def getVariableByName(name: String): Variable = this match {
-    //TODO: support fully qualified names
-    case s: Scalar if (s.name == name) =>  s //else error?
-    case t @ Tuple(vars) => {
-      if (t.name == name) t
-      //TODO: keep tuple level? consider namespace
-      //TODO: deal with data defined in tuple
-      else Tuple(vars.map(_.getVariableByName(name)))
-    }
-    case f @ Function(domain, range) => {
-      if (f.name == name) f
-      else {
-        //TODO: if domain.name, what if domain is tuple
-        //TODO: deal with data defined in function
-        Function(domain, range.getVariableByName(name))
-      }
-    }
+//TODO: just delegate to Projection operator?
+  /*
+   * TODO: do we need to stay within the Dataset monad here? 
+   *   yes, since this will be exposed in the DSL
+   *   but we are already acting on a Variable
+   *   only expose vie Dataset API?
+   */
+  //TODO: support fully qualified names
+  def getVariableByName(name: String): Option[Variable] = {
+    val ds = Dataset(this).project(name) 
+    if (ds.variables.isEmpty) None
+    else Some(ds.variables(0))
   }
+//  def getVariableByName(name: String): Option[Variable] = {
+//    if (this.name == name || this.hasAlias(name)) Some(this)
+//    else this match {
+//      case s: Scalar => None  //didn't match above
+//      case t @ Tuple(vars) => {
+//        //keep tuple level, consider namespace
+//        Some(Tuple(vars.flatMap(_.getVariableByName(name))))
+//        //TODO: deal with empty Tuple?
+//        //TODO: deal with data defined in tuple
+//      }
+//      case f @ Function(domain, range) => {
+//        domain.getVariableByName(name) match {
+//          case Some(v) => {
+//            //assume 1D domain, for now
+//            //TODO: make Index Function, make sure it gets Data 
+//            //  only if the Function does not have the data
+//            //  otherwise, need a Function wrapper
+//            //TODO: compare to Projection
+//            ???
+//            //TODO: multi-dimensional, must be product set to extract just those values, or generalize by repeating for all domain samples?
+//          }
+//          case None => range.getVariableByName(name) match {
+//            //TODO: deal with Data defined in function
+//            case Some(v) => Some(Function(domain, v))
+//            case None => None
+//          }
+//        }
+//      }
+//    }
+//  }
   
   
   def containsVariable(name: String): Boolean = this match {
     case s: Scalar => if (s.name == name) true else false
     case Tuple(vars) => vars.exists(_.containsVariable(name))
     case Function(domain, range) => domain.containsVariable(name) || range.containsVariable(name)
+  }
+  
+  def hasAlias(alias: String): Boolean = {
+    metadata.get("alias") match {
+      case Some(s) => s.split(",").contains(alias)
+      case None => false
+    }
   }
   
   //replaced by toSeq
