@@ -8,6 +8,7 @@ repositories {
 dependencies {    
     providedCompile "javax.servlet:servlet-api:2.5" //not deployed
     compile 'org.scala-lang:scala-library:2.10.2'
+    //runtime 'org.scala-lang:scala-library:2.10.2'
     testCompile 'junit:junit:4.11'
 }
 
@@ -15,10 +16,24 @@ war {
   baseName = 'latis'
 }
 
-task deploy(dependsOn: 'war') << {
+
+task deploy(dependsOn: 'jar') << {
+    copy {
+        from jar.archivePath
+        into "/data_systems/tools"
+    }
+}
+
+task deploy_tomcat(dependsOn: 'war') << {
     copy {
         from war.archivePath
-        //into "/opt/glassfish3/glassfish/domains/domain1/autodeploy"
         into "/opt/tomcat/webapps"
+    }
+}
+
+task deploy_glassfish(dependsOn: 'war') << {
+    copy {
+        from war.archivePath
+        into "/opt/glassfish3/glassfish/domains/domain1/autodeploy"
     }
 }
