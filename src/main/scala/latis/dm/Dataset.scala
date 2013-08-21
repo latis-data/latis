@@ -72,6 +72,7 @@ class Dataset(vars: Seq[Variable]) extends Tuple(vars) with BasicMath {
   
   def project(proj: Projection): Dataset = proj(this)
   def project(varNames: Seq[String]): Dataset = Projection(varNames)(this)
+  def project(vname: String): Dataset = Projection(Seq(vname))(this)
   
   //TODO: map? operate?
   
