@@ -55,18 +55,18 @@ abstract class Variable {
   }
   
   
-  def getVariableByIndex(index: Int): Variable = this match {
-    case s: Scalar => {
-      if (index == 0) s
-      else throw new IndexOutOfBoundsException()
-    }
-    
-    case Tuple(vars) => vars(index)
-    //TODO: if Tuple had data, need to split it up? or expose slice via WrappedData
-    
-    case Function(domain, range) => Function(domain, range.getVariableByIndex(index))
-    //TODO: deal with Data if higher level structures have data, e.g. FilteredFunction?
-  }
+//  def getVariableByIndex(index: Int): Variable = this match {
+//    case s: Scalar => {
+//      if (index == 0) s
+//      else throw new IndexOutOfBoundsException()
+//    }
+//    
+//    case Tuple(vars) => vars(index)
+//    //TODO: if Tuple had data, need to split it up? or expose slice via WrappedData
+//    
+//    case Function(domain, range) => Function(domain, range.getVariableByIndex(index))
+//    //TODO: deal with Data if higher level structures have data, e.g. FilteredFunction?
+//  }
   
   
 //TODO: just delegate to Projection operator?
@@ -74,14 +74,14 @@ abstract class Variable {
    * TODO: do we need to stay within the Dataset monad here? 
    *   yes, since this will be exposed in the DSL
    *   but we are already acting on a Variable
-   *   only expose vie Dataset API?
+   *   only expose via Dataset API?
    */
   //TODO: support fully qualified names
-  def getVariableByName(name: String): Option[Variable] = {
-    val ds = Dataset(this).project(name) 
-    if (ds.variables.isEmpty) None
-    else Some(ds.variables(0))
-  }
+//  def getVariableByName(name: String): Option[Variable] = {
+//    val ds = Dataset(this).project(name) 
+//    if (ds.variables.isEmpty) None
+//    else Some(ds.variables(0))
+//  }
 //  def getVariableByName(name: String): Option[Variable] = {
 //    if (this.name == name || this.hasAlias(name)) Some(this)
 //    else this match {
