@@ -46,6 +46,8 @@ class LatisServer extends HttpServlet {
     val writer = HttpServletWriter(response, suffix)
     
     writer.write(dataset)
+    
+    //Let Reader know that it can release resource (e.g. open files, database connections).
     reader.close()
   }
 
