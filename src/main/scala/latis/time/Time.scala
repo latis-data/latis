@@ -134,6 +134,30 @@ object Time {
      * TODO: units vs format
      * units is prime metadata (within "metadata" element)
      * format could just be an instruction to the adapter (xml attribute?)
+     * Does it make sense to have "format" in the metadata?
+     *   maybe for ascii output
+     *   or is it just an instruction to the writer
+     *   consider "Name (units)" header, format makes sense for units here
+     *     special case: if hasFormat...
+     *   mechanism for user request to inform format
+     *     TSS1 problem, format filter sets units, writer doesn't know if filter set it or if to use writer default
+     *   formatted time akin to diff grid project - refers to same thing, just diff representation?
+     *     converting string to unix time like projecting onto standard grid
+     *     might lose something in the conversion
+     * So does format_time become a true filter like re-gridding?
+     *   
+     *     
+     * should format in md suggest that binary have string representation?
+     *   consider idl api where user wants yyyyDDD, otherwise need converter from unix time
+     * do we store string in Time Data?
+     *   Time extends Real
+     *   but could always behave by supplying double
+     *   
+     * What about Integer time?
+     *   avoid round off problems
+     * Should Time extend Scalar and support double, long, or String?
+     *   Real, Integer, Text as traits?
+     *   
      */
     md.get("units") match {
       case Some(u) => {
@@ -148,10 +172,6 @@ object Time {
         //throw new RuntimeException("Time Metadata is missing units.")
     }
   }
-  
-  /*
-   * TODO: use "format" if formatted, default to java units, override by also setting "units"?
-   */
   
   /**
    * Milliseconds since 1970, native Java time.
