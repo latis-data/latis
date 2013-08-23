@@ -91,6 +91,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //  so they'll need to be lazy
     
     val ds = dataset //TODO: make sure this is the waking up of the lazy dataset
+    //Note, the original dataset will not be mutated
     
     //Apply remaining operations to the Dataset.
     ops.foldRight(ds)(_(_)) //op(ds)

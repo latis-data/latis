@@ -23,6 +23,19 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   override def handleOperation(op: Operation): Boolean = op match {
     case Projection(p) => {this.projection = p; true}
     case Selection(s) => {this.selections += s; true}
+    /*
+     * TODO: support aliases (e.g. "time")
+     * 
+     * resolveName? 
+     *   implies getting full name
+     * getSourceName? 
+     * getShortName?
+     *   but variable could have been renamed
+     *   but the (immutable) Dataset this guy know about won't be renamed?
+     *   or will processing instructions be applied mutably?
+     * 
+     */
+    
  /*
   * TODO: time format for sql
   * dataset.findTimeVariable? 
@@ -31,6 +44,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   *   will be converted to java time
   *   but we need to know if the db uses datatime so we can form sql
   *   units="ISO"?
+  *   use "format", save units for numeric times, default to java
+  *   
   */
  
     case _ => false
@@ -113,6 +128,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
       
     //add processing instructions
     //TODO: diff PI name? unfortunate that "filter" is more intuitive for a relational algebra "selection"
+//TODO: should PIs mutate the dataset?
     buffer ++= tsml.getProcessingInstructions("filter")
     
     //get "predicate" if defined in the adapter attributes
@@ -127,14 +143,22 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     buffer.filter(_.nonEmpty).mkString(" AND ")
   }
   
+  //No query should be made until the iterator is called
   def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
     def recordSize = sampleTemplate.size
     
     override def iterator = new NextIterator[Data] {
       val md = resultSet.getMetaData
       val vars = dataset.toSeq //Seq of Variables as ordered in the dataset
-
+/*
+ * TODO: has the dataset been projected yet??? e.g. model or metadata munged
+ * this should be the orig dataset
+ * but we are taking responsibility for handling Selections and Projections
+ * note, we are only access the dataset here so we can match name with db type
+ */
+      
       val types = vars.map(v => md.getColumnType(resultSet.findColumn(v.name)))
+//TODO: how does this handle Projection? vars from orig dataset shouldn't be in result set
       val varsWithTypes = vars zip types
       
       //Define a Calendar so we get our times in the GMT time zone.
