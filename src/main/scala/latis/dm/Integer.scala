@@ -75,4 +75,6 @@ object Integer {
     r
   }
   
+  
+  def unapply(int: Integer): Option[Long] = Some(int.longValue)
 }

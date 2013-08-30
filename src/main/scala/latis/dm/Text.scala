@@ -31,5 +31,11 @@ object Text {
     t
   }
   
+  def apply(md: Metadata): Text = {
+    val t = new Text
+    t._metadata = md
+    t
+  }
+  
   def unapply(v: Text): Option[String] = Some(v.stringValue)
 }

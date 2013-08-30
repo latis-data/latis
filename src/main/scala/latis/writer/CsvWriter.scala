@@ -59,14 +59,20 @@ class CsvWriter(out: OutputStream) extends Writer {
     
     //TODO: handle time format better, use general getStringValue? see TSS1
     //  units vs format?
-    case Scalar(v) => {
-//      if (variable.isInstanceOf[Time]) variable.metadata.get("format") match {
-//        case Some(format) => variable.asInstanceOf[Time].format + delimiter
-//        case None => v + delimiter
-//      }
-//      else 
-        v + delimiter
-    }
+//    case Scalar(v) => {
+////      if (variable.isInstanceOf[Time]) variable.metadata.get("format") match {
+////        case Some(format) => variable.asInstanceOf[Time].format + delimiter
+////        case None => v + delimiter
+////      }
+////      else 
+//        v + delimiter
+//    }
+    
+    case Real(d) => d.toString + delimiter
+    
+    case Integer(l) => l.toString + delimiter
+    
+    case Text(s) => s + delimiter
     
     case Tuple(vars) => {
       val sb = new StringBuilder

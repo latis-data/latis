@@ -80,6 +80,6 @@ object Real {
     r
   }
   
-  //def unapply(real: Real): Option[Double] = Some(real.data.doubleValue)
+  def unapply(real: Real): Option[Double] = Some(real.doubleValue)
   //use Number to expose double
 }

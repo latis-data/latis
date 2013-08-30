@@ -156,9 +156,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     
     sml.label match {
       case "real" => Some(Real(md))
+      case "integer" => Some(Integer(md))
+      case "text" => Some(Text(md))
       case "time" => Some(Time(md))
       
-      //TODO: *** other types ***
+      //TODO: allow Time to have any one of the types
       
       case _ => None
     }

@@ -55,11 +55,12 @@ object Util {
 
   def buildVarFromBuffer(bb: ByteBuffer, template: Variable): Variable = template match {
 
+    //TODO: use builder?
     case v: Time => Time(template.metadata, bb.getDouble)
     case v: Real => Real(template.metadata, bb.getDouble)
-    //TODO: use builder?
+    case v: Integer => Integer(template.metadata, bb.getLong)
 
-    //TODO: other types
+    //TODO: Text
 
     case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _))) //TODO:, template.metadata)
 

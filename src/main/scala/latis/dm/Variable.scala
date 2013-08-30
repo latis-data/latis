@@ -23,7 +23,9 @@ abstract class Variable {
   lazy val size: Int = getSize
   protected def getSize = this match {
     case r: Real => 8 //TODO: override for Scalars to support custom?
-    //TODO: other types
+    case i: Integer => 8 //long
+    //TODO: Text, default to 8 (4 chars), use metadata "length"
+    
     case Tuple(vars) => vars.foldLeft(0)(_ + _.size)
     case f @ Function(d,r) => f.length * (d.size + r.size)
   }

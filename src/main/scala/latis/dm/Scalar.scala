@@ -21,10 +21,10 @@ abstract class Scalar extends Variable { //TODO: with Ordered or Ordering? {
     
 }
 
-object Scalar {
-  //handy for ASCII Writers
-  def unapply(s: Scalar) = s match {
-    case Number(n) => Some(n.toString)
-    case Text(t) => Some(t)
-  }
-}
+//object Scalar {
+//  //handy for ASCII Writers
+//  def unapply(s: Scalar) = s match {
+//    case Number(n) => Some(n.toString)
+//    case Text(t) => Some(t)
+//  }
+//}
