@@ -72,6 +72,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     val statement = connection.createStatement() //(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
     
     //Apply optional limit to the number of rows
+    //TODO: Figure out how to warn the user if the limit is exceeded
     properties.get("limit") match {
       case Some(limit) => statement.setMaxRows(limit.toInt)
       case _ => 
@@ -95,24 +96,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     
     //sort by the domain variable (e.g. time) 
     //TODO: generalize for n-D domains, get Function domain...
-    //dataset.toSeq.find(_.isInstanceOf[Time]) //TODO: Variable.findTimeVariable?
     //TODO: assuming that the first variable is the one to sort on
     //  make sure that tsml lists that variable first
     sb append " ORDER BY " + dataset.toSeq.head.name + " ASC"
-    
-    //Apply optional limit to the number of rows
-//    properties.get("limit") match {
-//      case Some(limit) => sb append " LIMIT " + limit
-//      case _ => 
-//    }
-    /*
-     * TODO: limit is not standard in sql
-     * http://www.w3schools.com/sql/sql_top.asp
-     * sybase: select top n * from ...
-     * oracle: where rownum <= n
-     * mysql: limit n
-     * try statement.setMaxRows above
-     */
     
     sb.toString
   }
@@ -171,9 +157,15 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
           for (vt <- varsWithTypes) vt match {
             case (v: Time, t: Int) if (t == java.sql.Types.TIMESTAMP) => 
                   bb.putDouble(resultSet.getTimestamp(v.name, cal).getTime)
-            case (n: Number, _) => bb.putDouble(resultSet.getDouble(n.name)) //TODO: support diff source name
-            //TODO: Text
-            //TODO: other types, preserve integers?
+            //case (n: Number, _) => bb.putDouble(resultSet.getDouble(n.name))
+            case (r: Real, _) => bb.putDouble(resultSet.getDouble(r.name))
+            case (i: Integer, _) => {
+              //println(resultSet.getLong(i.name))
+              bb.putLong(resultSet.getLong(i.name))
+            }
+            //TODO: Text, series of chars? or convert to CharBuffer? require fixed length, default to 8 bytes (4 chars)
+            //case (t: Text, _) => resultSet.getString(t.name).foldLeft(bb)(_.putChar(_))
+            
             //TODO: error if column not found
           }
         
@@ -201,8 +193,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   
   private def getConnectionViaJndi(jndiName: String): Connection = {
     val initCtx = new InitialContext();
-    val envCtx = initCtx.lookup("java:comp/env").asInstanceOf[Context];
-    val ds = envCtx.lookup(jndiName).asInstanceOf[DataSource];
+    val ds = initCtx.lookup(jndiName).asInstanceOf[DataSource];
     ds.getConnection();
   }
   
