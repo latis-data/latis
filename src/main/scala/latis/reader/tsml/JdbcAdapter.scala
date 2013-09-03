@@ -23,6 +23,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   override def handleOperation(op: Operation): Boolean = op match {
     case Projection(p) => {this.projection = p; true}
     case Selection(s) => {this.selections += s; true}
+    //TODO: handle exception, return false (not handled)?
+    
     /*
      * TODO: support aliases (e.g. "time")
      * 
@@ -31,8 +33,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
      * getSourceName? 
      * getShortName?
      *   but variable could have been renamed
-     *   but the (immutable) Dataset this guy know about won't be renamed?
+     *   but the (immutable) Dataset this guy knows about won't be renamed?
      *   or will processing instructions be applied mutably?
+     * but we don't keep sourceDataset, even if it is immutable
      * 
      */
     
@@ -42,16 +45,20 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   * numeric units: if query string matched TIME regex, convert iso to var's timeScale
   * datetime: what should tsml units be?
   *   will be converted to java time
-  *   but we need to know if the db uses datatime so we can form sql
+  *   but we need to know if the db uses datetime so we can form sql
   *   units="ISO"?
   *   use "format", save units for numeric times, default to java
-  *   
+  * Support Time as real, integer or string
+  *   for the db datetime case, use string
+  *   until then, use "format"
   */
  
     case _ => false
   }
   
   //Override to apply projection to the model, scalars only, for now.
+//TODO: keep original Dataset (e.g. so we can select on non-projected variables)
+  //TODO: maintain projection order, this means modifying the model higher up
   //TODO: deal with composite names for nested vars
   override def makeScalar(sml: ScalarMl): Option[Scalar] = {
     //TODO: filter before making, metadata/name complications
@@ -64,6 +71,11 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     }
   }
   
+  /*
+   * TODO: clarify what happens before/after dataset is constructed vs accessed
+   * need to make source dataset then "wrap"? it to apply projection to the model (and provenance) 
+   * 
+   */
   
   private lazy val resultSet: ResultSet = executeQuery
 
@@ -109,12 +121,12 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   lazy val predicate: String = {
     //start with selection clauses from requested operations
     val buffer = selections
-//TODO: just build on selections
+    //TODO: just build on selections
     
       
     //add processing instructions
     //TODO: diff PI name? unfortunate that "filter" is more intuitive for a relational algebra "selection"
-//TODO: should PIs mutate the dataset?
+    //TODO: should PIs mutate the dataset? probably not, just like any other op, but the adapter's "dataset" should have them applied
     buffer ++= tsml.getProcessingInstructions("filter")
     
     //get "predicate" if defined in the adapter attributes
@@ -138,13 +150,13 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
       val vars = dataset.toSeq //Seq of Variables as ordered in the dataset
 /*
  * TODO: has the dataset been projected yet??? e.g. model or metadata munged
- * this should be the orig dataset
- * but we are taking responsibility for handling Selections and Projections
- * note, we are only access the dataset here so we can match name with db type
+ * yes, this overrides makeScalar which only keeps projected vars
+ * this should be the orig dataset? no, it should be the result of operating on the orig.
+ * Note, we are only accessing the dataset here so we can match name with db type.
+ * The projection has already been applied to the query.
  */
       
       val types = vars.map(v => md.getColumnType(resultSet.findColumn(v.name)))
-//TODO: how does this handle Projection? vars from orig dataset shouldn't be in result set
       val varsWithTypes = vars zip types
       
       //Define a Calendar so we get our times in the GMT time zone.
