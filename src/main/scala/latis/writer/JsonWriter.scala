@@ -8,13 +8,18 @@ class JsonWriter(out: OutputStream) extends Writer {
 
   /*
    * TODO: Include metadata in this long form with objects...
+   * preserve tuples (e.g. function range)
+   * but what about names for unnamed structures?
+   *   use "unknown"?
+   *   "tuple_#"? uuid? ick
+   * 
    */
   
   private val _writer = new PrintWriter(out)
   
   //TODO: can we generalize to writeHeader, ...?
   def write(dataset: Dataset) = {
-    _writer.print("{")
+    _writer.print("{\"" + dataset.name + "\":{")
     var startThenDelim = "{"
     for (v <- dataset.variables) {
       v match {
@@ -23,12 +28,12 @@ class JsonWriter(out: OutputStream) extends Writer {
       }
       startThenDelim = ","
     }
-    _writer.println("}")
+    _writer.println("}}")
     _writer.flush()
   }
   
   private def writeTopLevelFunction(f: Function) {
-    var startThenDelim = "\"" + f.name + "\": ["
+    var startThenDelim = "\"" + f.name + "\":\n["
     for (Sample(domain, range) <- f.iterator) {
       val d = varToString(domain)
       val r = varToString(range)
@@ -43,16 +48,15 @@ class JsonWriter(out: OutputStream) extends Writer {
     //TODO: impl for Function
     //TODO: what if Tuple has name? need to wrap it as an object in "{}"
     
-    val label = variable.name match {
-      case name: String => "\"" + name + "\":"
-      case _ => ""
-    } 
+    //assume everything has a name, may be "unknown"
+    val label = "\"" + variable.name + "\":"
     
     val value = variable match { 
-      case Number(d) => d.toString //TODO: format?
-      //TODO: Integer vs Real?
+      //TODO: Time as unix time
+      case Real(d) => d.toString //TODO: format?
+      case Integer(l) => l.toString 
       case Text(s) => "\"" + s + "\"" //put quotes around text data
-      case Tuple(vars) => vars.map(varToString(_)).mkString(",")
+      case Tuple(vars) => vars.map(varToString(_)).mkString("{", ",", "}")
       case f: Function => ???
     }
     
