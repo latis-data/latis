@@ -21,6 +21,12 @@ class CsvWriter(out: OutputStream) extends Writer {
   
   
   def write(dataset: Dataset) = {
+    //Write header
+    //TODO: add units
+    //val header = dataset.toSeq.map(v => v.name + " (" + v.metadata("units") + ")").mkString(delimiter)
+    val header = dataset.toSeq.map(v => v.name).mkString(delimiter)
+    _writer.println(header)
+    
     for (v <- dataset.variables) {
       v match {
         
