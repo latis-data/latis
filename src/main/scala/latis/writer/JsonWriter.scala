@@ -8,7 +8,8 @@ class JsonWriter(out: OutputStream) extends Writer {
 
   /*
    * TODO: Include metadata in this long form with objects...
-   * preserve tuples (e.g. function range)
+   * 
+   * preserve tuples (e.g. function range), maybe overkill?
    * but what about names for unnamed structures?
    *   use "unknown"?
    *   "tuple_#"? uuid? ick
@@ -37,6 +38,8 @@ class JsonWriter(out: OutputStream) extends Writer {
     for (Sample(domain, range) <- f.iterator) {
       val d = varToString(domain)
       val r = varToString(range)
+      //TODO: consider dropping range tuple layer, unless it is named (other than "unknown")
+      
       _writer.println(startThenDelim + "{" + d + "," + r + "}")
       startThenDelim = ","
     }
