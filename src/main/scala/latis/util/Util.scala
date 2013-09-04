@@ -59,8 +59,15 @@ object Util {
     case v: Time => Time(template.metadata, bb.getDouble)
     case v: Real => Real(template.metadata, bb.getDouble)
     case v: Integer => Integer(template.metadata, bb.getLong)
-
-    //TODO: Text
+    case v: Text => {
+      val cs = new Array[Char](v.length)
+      bb.asCharBuffer.get(cs)
+      bb.position(bb.position + v.length * 2) //advance position in underlying buffer
+      //val s = (0 until v.length).map(bb.getChar).mkString
+      //TODO: why can't we just get chars from the bb?
+      val s = new String(cs)
+      Text(template.metadata, s)
+    }
 
     case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _))) //TODO:, template.metadata)
 

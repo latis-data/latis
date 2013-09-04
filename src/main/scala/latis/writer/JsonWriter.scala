@@ -13,7 +13,10 @@ class JsonWriter(out: OutputStream) extends Writer {
    * but what about names for unnamed structures?
    *   use "unknown"?
    *   "tuple_#"? uuid? ick
-   * 
+   * This should be a non-ambiguous representation of the LaTiS data model
+   *   A Function is a sequence (json array) of domain, range pairs
+   *   so range needs to be a tuple (if multiple vars)
+   *   otherwise need convention saying that first var is domain and the rest the range
    */
   
   private val _writer = new PrintWriter(out)
@@ -38,7 +41,6 @@ class JsonWriter(out: OutputStream) extends Writer {
     for (Sample(domain, range) <- f.iterator) {
       val d = varToString(domain)
       val r = varToString(range)
-      //TODO: consider dropping range tuple layer, unless it is named (other than "unknown")
       
       _writer.println(startThenDelim + "{" + d + "," + r + "}")
       startThenDelim = ","

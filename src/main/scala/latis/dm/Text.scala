@@ -9,6 +9,16 @@ import latis.data.TextData
 class Text extends Scalar {
   //TODO: accept only Text Data
   
+  //Get the nominal/max length of this Text Variable.
+  //If not defined in the metadata, the default is 4 chars (8 bytes).
+  //This is NOT the actual length of the encapsulated String
+  def length: Int = {
+    metadata.get("length") match {
+      case Some(l) => l.toInt
+      case None => 4
+    }
+  }
+  
   def stringValue: String = data.asInstanceOf[TextData].stringValue
   
   //support lexical ordering
@@ -34,6 +44,13 @@ object Text {
   def apply(md: Metadata): Text = {
     val t = new Text
     t._metadata = md
+    t
+  }
+  
+  def apply(md: Metadata, v: String): Text = {
+    val t = new Text
+    t._metadata = md
+    t._data = StringValue(v)
     t
   }
   

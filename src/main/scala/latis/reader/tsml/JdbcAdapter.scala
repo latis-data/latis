@@ -175,8 +175,13 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
               //println(resultSet.getLong(i.name))
               bb.putLong(resultSet.getLong(i.name))
             }
-            //TODO: Text, series of chars? or convert to CharBuffer? require fixed length, default to 8 bytes (4 chars)
-            //case (t: Text, _) => resultSet.getString(t.name).foldLeft(bb)(_.putChar(_))
+            case (t: Text, _) => {
+              //pad the string to its full length using %ns formatting
+              //TODO: regular words pad right, time strings from db pad left!?
+              val s = "%"+t.length+"s" format resultSet.getString(t.name)
+              //fold each char into the ByteBuffer
+              s.foldLeft(bb)(_.putChar(_))
+            }
             
             //TODO: error if column not found
           }

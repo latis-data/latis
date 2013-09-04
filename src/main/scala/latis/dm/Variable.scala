@@ -24,7 +24,7 @@ abstract class Variable {
   protected def getSize = this match {
     case r: Real => 8 //TODO: override for Scalars to support custom?
     case i: Integer => 8 //long
-    //TODO: Text, default to 8 (4 chars), use metadata "length"
+    case t: Text => t.length * 2 //2 bytes per char
     
     case Tuple(vars) => vars.foldLeft(0)(_ + _.size)
     case f @ Function(d,r) => f.length * (d.size + r.size)
