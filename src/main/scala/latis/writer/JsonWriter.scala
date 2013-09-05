@@ -60,7 +60,7 @@ class JsonWriter(out: OutputStream) extends Writer {
       //TODO: Time as unix time
       case Real(d) => d.toString //TODO: format?
       case Integer(l) => l.toString 
-      case Text(s) => "\"" + s + "\"" //put quotes around text data
+      case Text(s) => "\"" + s.trim + "\"" //put quotes around text data
       case Tuple(vars) => vars.map(varToString(_)).mkString("{", ",", "}")
       case f: Function => ???
     }

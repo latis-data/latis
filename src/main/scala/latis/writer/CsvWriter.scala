@@ -78,7 +78,7 @@ class CsvWriter(out: OutputStream) extends Writer {
     
     case Integer(l) => l.toString + delimiter
     
-    case Text(s) => s + delimiter
+    case Text(s) => s.trim + delimiter
     
     case Tuple(vars) => {
       val sb = new StringBuilder

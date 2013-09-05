@@ -45,7 +45,7 @@ class CompactJsonWriter(out: OutputStream) extends Writer {
   private def varToString(variable: Variable): String = variable match {
     case Number(d) => d.toString //TODO: format?
     //TODO: Integer vs Real?
-    case Text(s) => "\"" + s + "\"" //put quotes around text data
+    case Text(s) => "\"" + s.trim + "\"" //put quotes around text data
     case Tuple(vars) => vars.map(varToString(_)).mkString(",")
     case f: Function => ??? //TODO: deal with inner Function
   }
