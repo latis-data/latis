@@ -14,7 +14,7 @@ class LatisServer extends HttpServlet {
   }
   
   override def doGet(request : HttpServletRequest, response : HttpServletResponse) {
-    //TODO: error handling
+    try {
     
     //Get the request not including the constraints
     val path = request.getPathInfo()
@@ -49,6 +49,11 @@ class LatisServer extends HttpServlet {
     
     //Let Reader know that it can release resource (e.g. open files, database connections).
     reader.close()
+    
+    } catch {
+      case e: Exception => println("Exception in LatisServer: " + e.getMessage())
+    }
+    //TODO: finally, close resources: reader, dataset?
   }
 
 }
