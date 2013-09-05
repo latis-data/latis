@@ -13,8 +13,11 @@ import java.util.Calendar
 import java.util.TimeZone
 import latis.ops._
 import scala.collection.mutable.ArrayBuffer
+import java.sql.Statement
 
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
+  
+  //TODO: catch exceptions and close connections
     
   //Handle the Projection and Selection Operation-s
   private var projection = "*"
@@ -78,10 +81,11 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
    */
   
   private lazy val resultSet: ResultSet = executeQuery
+  private lazy val statement: Statement = connection.createStatement()
 
   private def executeQuery: ResultSet =  {
     val sql = makeQuery
-    val statement = connection.createStatement() //(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
+    //val statement = connection.createStatement() //(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
     
     //Apply optional limit to the number of rows
     //TODO: Figure out how to warn the user if the limit is exceeded
@@ -231,6 +235,14 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   
   def close() = {
     //Don't create the lazy connection just to close it.
-    if (hasConnection) connection.close
+    //TODO: do we need to close resultset, statement...?
+    //  should we close it or just return it to the pool?
+    //closing statement also closes resultset 
+    //http://stackoverflow.com/questions/4507440/must-jdbc-resultsets-and-statements-be-closed-separately-although-the-connection
+    if (hasConnection) {
+      try { resultSet.close } catch {case e: Exception =>}
+      try { statement.close } catch {case e: Exception =>}
+      try { connection.close } catch {case e: Exception =>}
+    }
   }
 }
