@@ -6,8 +6,9 @@ import latis.reader.tsml.TsmlReader
 import latis.metadata.Registry
 import latis.util.LatisServerProperties
 import latis.writer.HttpServletWriter
+import com.typesafe.scalalogging.slf4j.Logging
 
-class LatisServer extends HttpServlet {
+class LatisServer extends HttpServlet with Logging {
 
   override def init() {
     LatisProperties.init(getServletConfig)
