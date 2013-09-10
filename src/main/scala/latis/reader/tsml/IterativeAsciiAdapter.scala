@@ -7,6 +7,7 @@ import latis.data.Data
 import latis.util.Util
 import java.nio.ByteBuffer
 import latis.data.IterableData
+import latis.time.Time
 
 class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   
@@ -132,11 +133,17 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     for (v <- vars) {
       val s = svals(v.name) //string value for the given scalar
       v match {
-        case n: Number => bb.putDouble(s.toDouble)
-        //TODO: Text
+        //case time: Time => 
+        case _: Real => bb.putDouble(s.toDouble)
+        case _: Integer => bb.putLong(s.toLong)
+        case t: Text => {
+          val padded = "%"+t.length+"s" format s //pad to the Text variable's defined length
+          s.foldLeft(bb)(_.putChar(_)) //fold each character into buffer
+        }
       }
     }
     
+    //rewind for use
     Data(bb.flip.asInstanceOf[ByteBuffer])
   }
   
