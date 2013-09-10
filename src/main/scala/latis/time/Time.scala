@@ -11,6 +11,81 @@ import latis.util.RegEx
 
 class Time extends Real {
   
+  /*
+   * TODO: support double, long, or string representation
+   * help with format vs units problem?
+   * Does time have type Real or real have type Time?
+   * consider multiple time variables
+   *   only THE indep time should use the tsml time element?
+   *   others should be declared as text, real,... 
+   *   type="Time" is like type="my.custom.Variable"
+   *   but presumably the custom var would extend Real...
+   *   
+   * Can we use traits for all vars?
+   *   new Time with Real or new Real with Time?
+   *   could we keep the data model out of Time for the purpose of sharing?
+   *   Real as trait with self type of Variable
+   *   there's no real impl in scalars
+   * Could we use traits for Tuple and Function?
+   *   probably not, have state: vars, domain/range
+   *   could do via methods...
+   * 
+   * factory constructors
+   *   new Variable(md, data) with Real
+   *   no need for setting _metadata, _data?
+   *   maybe just for Scalars? new Scalar with...?
+   *   but seems like a mismatch
+   *   maybe not if its traits for scalars
+   *   traits for Functions?
+   *     TimeSeries? or subclass?
+   *     
+   * Vector extends Tuple? or new Tuple with Vector trait?
+   *   liskov substitution principle?
+   *   Vector is the specialized case
+   *   Vector is always a Tuple but not any Tuple is a Vector
+   *   what do they say about traits/mixins?
+   *   Foo with Bar
+   *     makes a Foo usable as a Bar
+   *     Foo is-a Bar
+   *     certainly not the other way around
+   *   Variable with Real
+   *     definitely seems backwards
+   *     Real is a special kind of Variable
+   *     this is more like "as-a": threat this Variable as a Real
+   *   
+   * Time extends Variable? or Scalar?
+   *   new Time with Real?
+   *   
+   * Any other use cases where we want to represent data in various forms?
+   * or is Time the oddball?
+   *   stellar temperature and spectral type?
+   *   what else do we have symbolic vs numeric representations?
+   * But still something more profound about time as a concept
+   *   why is it diff than temperature?
+   *   is the desire for integer support only a precision concern that could apply to any var? seems so
+   *     but they could be declared as an integer
+   *     but not a specialized subclass as Time is
+   *   and the desire for text support is because of symbolic string representation
+   *   
+   * Back to thinking of time as a real
+   *   what about other time variables (not the time domain)?
+   *   can we treat them as text?
+   *   but what if we want to query on them?
+   *   do we need Text/Symbolic/FormattedTime and RealTime?
+   *   like custom vars, we should be able to use type="Time" for class to construct
+   *   goal should be to represent original form, avoid transforming (e.g. string to java time)
+   * 
+   * Consider the Logging trait
+   *   I suppose that means the class behaves as a logger
+   *   
+   * Variable with Real mean it behaves as a Real but the model says that Real is-a Variable
+   *   Or is Scalar all the model knows and the trait makes it behave like a certain type
+   *     
+   *   
+   * http://stackoverflow.com/questions/3422606/mixins-vs-composition-in-scala
+   *   
+   */
+  
   protected var timeScale: TimeScale = TimeScale.DEFAULT
   
   def getUnits() = timeScale
