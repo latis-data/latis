@@ -184,6 +184,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
               //TODO: regular words pad right, time strings from db pad left!?
               val s = "%"+t.length+"s" format resultSet.getString(t.name)
               //fold each char into the ByteBuffer
+              //println(t +": "+s)
+              //TODO: make sure we don't exceed buffer
               s.foldLeft(bb)(_.putChar(_))
             }
             
