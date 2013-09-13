@@ -38,12 +38,12 @@ object RegEx {
      *   >=  Greater than or equal to
      *   <   Less than
      *   <=  Less than or equal to
-     *   =   Equals
+     *   ==   Equals
      *   !=  Not equals
      *   =~  Matches pattern
      *   ~   Almost equals, match nearest value
      */
-    val SELECTION_OPERATOR = ">=|<=|>|<|=~|=|!=|~"
+    val SELECTION_OPERATOR = ">=|<=|>|<|=~|==|!=|~"
       
       
     /**
