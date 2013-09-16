@@ -10,7 +10,7 @@ import latis.util.RegEx._
  * Data value class?
  * 
  */
-protected class Selection(val vname: String, val op: String, val value: String) extends Operation {
+protected class Selection(val vname: String, val operation: String, val value: String) extends Operation {
   //TODO: consider abstracting out common "filter" stuff
   //TODO: if domain, delegate to DomainSet
   
@@ -51,18 +51,24 @@ protected class Selection(val vname: String, val op: String, val value: String) 
   
   
   private def isValid(comparison: Int): Boolean = {
-    (comparison < 0 && op.contains("<")) || 
-    (comparison > 0 && op.contains(">")) || 
-    (comparison == 0 && op.contains("="))
+    (comparison < 0 && operation.contains("<")) || 
+    (comparison > 0 && operation.contains(">")) || 
+    (comparison == 0 && operation.contains("="))
   }
   
-  override def toString = vname + op + value
+  override def toString = vname + operation + value
 }
 
 
 object Selection {
   
-  def apply(vname: String, op: String, value: String) = {
+  def apply(vname: String, operation: String, value: String) = {
+    //Deprecate use of "=" for selections. Replace with "==".
+    val op = operation match {
+      case "=" => "=="
+      case _ => operation
+    }
+    
     new Selection(vname, op, value)
   }
   
