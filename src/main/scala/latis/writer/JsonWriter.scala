@@ -22,7 +22,7 @@ class JsonWriter(out: OutputStream) extends Writer {
   private val _writer = new PrintWriter(out)
   
   //TODO: can we generalize to writeHeader, ...?
-  def write(dataset: Dataset) = {
+  def write(dataset: Dataset, args: Seq[String]) = {
     _writer.print("{\"" + dataset.name + "\":{")
     var startThenDelim = "{"
     for (v <- dataset.variables) {

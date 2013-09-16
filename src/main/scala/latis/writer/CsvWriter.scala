@@ -20,7 +20,7 @@ class CsvWriter(out: OutputStream) extends Writer {
   private[this] val _writer = new PrintWriter(out)
   
   
-  def write(dataset: Dataset) = {
+  def write(dataset: Dataset, args: Seq[String]) = {
     //Write header
     //TODO: add units
     //val header = dataset.toSeq.map(v => v.name + " (" + v.metadata("units") + ")").mkString(delimiter)

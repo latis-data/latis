@@ -12,13 +12,15 @@ abstract class Writer {
   /**
    * Output the given Dataset in the desired form.
    */
-  def write(dataset: Dataset)
+  def write(dataset: Dataset): Unit = write(dataset, Seq.empty)
   //TODO: return the Writer so we could append a "close"?
+  
+  def write(dataset: Dataset, args: Seq[String]): Unit
   
   /**
    * Release resources acquired by this Writer.
    */
-  def close()
+  def close(): Unit
   
   /**
    * Return the mime type of the output format.
@@ -27,6 +29,7 @@ abstract class Writer {
    */
   def getMimeType(): String = "text/plain" 
   //TODO: have Writers extend traits (e.g. Text, Binary) and inherit mime type
+    //TODO: mimeType?
   
 }
 

@@ -7,6 +7,7 @@ import latis.metadata.Registry
 import latis.util.LatisServerProperties
 import latis.writer.HttpServletWriter
 import com.typesafe.scalalogging.slf4j.Logging
+import java.net.URLDecoder
 
 class LatisServer extends HttpServlet with Logging {
 
@@ -21,29 +22,48 @@ class LatisServer extends HttpServlet with Logging {
     try {
       logger.debug("Processing request: " + request.getRequestURL())
 
-      //Get the request not including the constraints
+      //Get the request not including the constraints.
       val path = request.getPathInfo()
 
-      //Get the type of the output request from the dataset suffix.
+      //Get the dataset name and type of the output request from the dataset suffix.
       val index = path.lastIndexOf(".");
-      val suffix = path.substring(index + 1); //suffix
+      val suffix = path.substring(index + 1); //suffix for Writer
       val dsname = path.substring(1, index); //dataset name, drop leading "/"
 
+      //Get the URL to the Dataset's TSML descriptor.
       logger.debug("Locating dataset: " + dsname)
-      
-      //Get Dataset
       val url = Registry.getTsmlUrl(dsname)
       
       logger.debug("Reading dataset from TSML: " + url)
+      //Construct the reader for this Dataset.
       reader = TsmlReader(url)
 
-      val constraints = DapConstraintParser.parseQuery(request.getQueryString)
+      //Get the query string from the request.
+      val query = request.getQueryString match {
+        case s: String => URLDecoder.decode(s, "UTF-8")
+        case _ => ""
+      }
+      
+      //Manage the query string "arguments"
+      //Separate out writer instructions of the form name=value.
+      //TODO: just use those left over after reader?
+      val args = query.split("&")
+      val (writerArgs, datasetArgs) = args.partition(_.matches("""\w+=\w+"""))
+      
+      //Get the Dataset from the Reader. 
+      //Note, pass all args to reader so we can continue to support "=" for selections.
+      //TODO: deprecate "=" for selections, use "==", but violates DAP2 spec?
+      val constraints = DapConstraintParser.parseArgs(args)
       val dataset = reader.getDataset(constraints)
 
+      //Make the Writer, wrapped for Servlet output.
       logger.debug("Writing " + suffix + " dataset.")
       val writer = HttpServletWriter(response, suffix)
 
-      writer.write(dataset)
+      //Write the dataest. 
+      //Note, data might not be read until the Writer asks for it.
+      //  So don't blame the Writer if this seems slow.
+      writer.write(dataset, writerArgs)
       logger.debug("Request complete.")
 
     } catch {

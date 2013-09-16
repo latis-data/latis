@@ -12,7 +12,7 @@ class AsciiWriter(out: OutputStream) extends Writer {
 
   private[this] val _writer = new PrintWriter(out)
   
-  def write(dataset: Dataset) = {
+  def write(dataset: Dataset, args: Seq[String]) = {
     _writer.println(dataset) //header
     writeVariable(dataset)
     _writer.println()

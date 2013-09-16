@@ -10,7 +10,9 @@ class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends W
   //TODO: consider writers that can't stream, write tmp file
   //  or simply serve an existing file!?
 
-  def write(dataset: Dataset) {
+  
+  def write(dataset: Dataset, args: Seq[String]): Unit = {
+  //def write(dataset: Dataset) {
     //write http header stuff
             
     //Set the Content-Type HTTP header
@@ -34,7 +36,7 @@ class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends W
 //        String server = TSSProperties.getProperty("server.tss");
 //        response.setHeader("Server", server); 
         
-    writer.write(dataset)
+    writer.write(dataset, args)
     
     response.setStatus(HttpServletResponse.SC_OK);
     response.flushBuffer()

@@ -15,7 +15,7 @@ class CompactJsonWriter(out: OutputStream) extends Writer {
   private val _writer = new PrintWriter(out)
   
   //TODO: can we generalize to writeHeader, ...?
-  def write(dataset: Dataset) = {
+  def write(dataset: Dataset, args: Seq[String]) = {
     _writer.print("[")
     
     //assume a single top level Function
