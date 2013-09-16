@@ -2,6 +2,7 @@ package latis.writer
 
 import latis.dm.Dataset
 import javax.servlet.http.HttpServletResponse
+import latis.util.LatisProperties
 
 /**
  * Decorate a Writer to write via a ServletResponse.
@@ -17,6 +18,15 @@ class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends W
             
     //Set the Content-Type HTTP header
     response.setContentType(writer.getMimeType());
+    
+    //Define the allowed origin for cross-origin resource sharing (CORS)
+    //TODO: get from properties, compare with Origin in request header
+    //Just allow everything for now.
+//    LatisProperties.get("allow.origin") match {
+//      case Some(s) => response.addHeader("Access-Control-Allow-Origin", s)
+//      case None => 
+//    }
+    response.addHeader("Access-Control-Allow-Origin", "*")
         
 //TODO: add other headers
 //        //Set the Content-Description HTTP header
