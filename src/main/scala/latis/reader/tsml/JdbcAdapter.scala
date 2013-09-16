@@ -14,6 +14,7 @@ import java.util.TimeZone
 import latis.ops._
 import scala.collection.mutable.ArrayBuffer
 import java.sql.Statement
+import latis.util.RegEx._
 
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   
@@ -23,9 +24,24 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   private var projection = "*"
   private val selections = ArrayBuffer[String]()
   
-  override def handleOperation(op: Operation): Boolean = op match {
+  override def handleOperation(operation: Operation): Boolean = operation match {
     case Projection(p) => {this.projection = p; true}
-    case Selection(s) => {this.selections += s; true}
+    case Selection(expression) => expression match {
+      //Break expression up into components
+      case SELECTION(name, op, value) => {
+        //TODO: use source name
+        //TODO: use source time format
+        if (tsml.getVariableNames.contains(name)) {
+          //replace "==" with "=" for SQL
+          if (op == "==") this.selections += name + "=" + value
+          else this.selections += expression
+          true
+        }
+        else false
+      }
+      //TODO: case _ => error?
+      
+    }
     //TODO: handle exception, return false (not handled)?
     
     /*

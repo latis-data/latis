@@ -63,9 +63,18 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   }  
   
 
-  
-  //def getDataset(operations: Map[String, Seq[String]]): Dataset = {
   def getDataset(operations: Seq[Operation]): Dataset = {
+    /*
+     * TODO: 2013-09-16
+     * Make sure original Dataset is not changed?
+     * need to be able to access original name (e.g. for sql)
+     * but should adapter be responsible for both if it is handling operations?
+     * we wouldn't want to realize data of the orig dataset
+     * are we safely inside the monadic context that we can violate immutability?
+     * should we look to the TSML instead of the orig Dataset to get source info?
+     * 
+     */
+    
     /*
      * TODO: handle like processing instructions
      * use Map: type => text, or Seq[String] since there can be multiple "filter"s...

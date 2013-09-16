@@ -118,6 +118,7 @@ abstract class Variable {
   
   
   def containsVariable(name: String): Boolean = this match {
+    //TODO: support alias
     case s: Scalar => if (s.name == name) true else false
     case Tuple(vars) => vars.exists(_.containsVariable(name))
     case Function(domain, range) => domain.containsVariable(name) || range.containsVariable(name)

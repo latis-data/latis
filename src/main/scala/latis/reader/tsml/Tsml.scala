@@ -14,13 +14,13 @@ class Tsml(tsml: Elem) { //extends VariableMl(tsml) { //TODO: should this extend
   lazy val dataset = new DatasetMl((tsml \ "dataset")(0)) //assumes only one "dataset" element
   
   /**
-   * Gather the names of all named Variables.
+   * Gather the Names of all named Variables.
    */
   def getVariableNames: Seq[String] = {
     val buffer = ArrayBuffer[String]()
     
     //use id attribute, for now
-    //TODO: use metadata
+    //TODO: use metadata "name"
     //note, this is happening before Variables are constructed
     (tsml \\ "@id").map(_.text)
     
