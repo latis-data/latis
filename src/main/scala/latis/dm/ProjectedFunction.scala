@@ -15,6 +15,7 @@ class ProjectedFunction(function: Function, val projection: Projection) extends 
    * simply override?
    * seems dangerous
    * pass obvious dummies to super?
+   * domain and range should probably be methods
    */
   
   /*
@@ -26,6 +27,8 @@ class ProjectedFunction(function: Function, val projection: Projection) extends 
    * not any time soon, only used for iteration over outer function
    * 
    * Writer just recurses tree, treats dataset as any tuple
+   * when it gets to function it calls iterate
+   * no chance to wrap it
    */
   
   override def domain: Variable = _domain
