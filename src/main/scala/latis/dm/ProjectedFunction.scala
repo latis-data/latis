@@ -17,6 +17,17 @@ class ProjectedFunction(function: Function, val projection: Projection) extends 
    * pass obvious dummies to super?
    */
   
+  /*
+   * TODO: 2013-09-17
+   * seems that we should be able to do this as a Dataset wrapper
+   * instead of making this a subclass of Function, with the domain/range issues...
+   * But we'll be iterating into tree of variables and losing context?
+   * Will we ever do this for internal Functions?
+   * not any time soon, only used for iteration over outer function
+   * 
+   * Writer just recurses tree, treats dataset as any tuple
+   */
+  
   override def domain: Variable = _domain
   override def range: Variable = _range
   
