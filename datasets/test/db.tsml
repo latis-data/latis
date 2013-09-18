@@ -14,9 +14,9 @@
     <?filter file_size > 3000000?>
     <?filter file_size < 6000000?>
              
-    <time id="id" />
+    <time name="id" />
     
-    <real id="file_size"/>
+    <real name="file_size"/>
 
   </dataset>
 
