@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="basic_agg_test">
+  <adapter class="latis.reader.tsml.Aggregator"/>
+  
+    <dataset name="ds1">
+      <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+               url="${dataset.dir}/scalar.txt" />
+      <time name="time" />
+      <real name="foo"/>
+    </dataset>
+
+    <dataset name="ds2">
+      <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+               url="${dataset.dir}/scalar.txt" />
+      <time name="time" />
+      <real name="bar"/>
+    </dataset>
+
+  </dataset>
+  
+</tsml>

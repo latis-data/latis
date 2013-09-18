@@ -44,7 +44,7 @@ class TestModel  {
     val range = List(1.0,2.0,3.0,4.0,5.0)
     val f = Function(domain, range)
     val f2 = f + Real(1)
-    println(f2)
+    //println(f2)
     //for ((d,r) <- f.iterator) println(d.toString + " -> " + r)
     //for ((d,r) <- f2(0)(0).asInstanceOf[Function].iterator) println(d.toString + " -> " + r) 
     new AsciiWriter(System.out).write(f2)
@@ -76,4 +76,5 @@ class TestModel  {
     new AsciiWriter(System.out).write(f)
   }
   
+
 }

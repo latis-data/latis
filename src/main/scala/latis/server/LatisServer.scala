@@ -52,7 +52,7 @@ class LatisServer extends HttpServlet with Logging {
       
       //Get the Dataset from the Reader. 
       //Note, pass all args to reader so we can continue to support "=" for selections.
-      //TODO: deprecate "=" for selections, use "==", but violates DAP2 spec?
+      //TODO: deprecate "=" for selections, use "==", but violates DAP2 spec? and users expect it (e.g. sql)
       val constraints = DapConstraintParser.parseArgs(args)
       val dataset = reader.getDataset(constraints)
 
@@ -60,7 +60,7 @@ class LatisServer extends HttpServlet with Logging {
       logger.debug("Writing " + suffix + " dataset.")
       val writer = HttpServletWriter(response, suffix)
 
-      //Write the dataest. 
+      //Write the dataset. 
       //Note, data might not be read until the Writer asks for it.
       //  So don't blame the Writer if this seems slow.
       writer.write(dataset, writerArgs)

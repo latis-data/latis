@@ -47,4 +47,21 @@ class TestTsml  {
     
     AsciiWriter().write(ds)
   }
+  
+  //@Test
+  def test_dataset_aggregation {
+    val ds1 = TsmlReader("datasets/test/scalar.tsml").getDataset
+    val ds2 = TsmlReader("datasets/test/scalar3.tsml").getDataset
+    
+    val ds = Dataset(ds1, ds2)
+    AsciiWriter().write(ds)
+  }
+  
+  @Test
+  def test_dataset_aggregation2 {
+    //println(Tsml("datasets/test/agg.tsml#ds1"))
+    //val ds = TsmlReader("datasets/test/agg.tsml#ds1").getDataset
+    val ds = TsmlReader("datasets/test/agg.tsml").getDataset
+    AsciiWriter().write(ds)
+  }
 }

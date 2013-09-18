@@ -9,16 +9,16 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * Convenient wrapper for dealing with the TSML XML.
  */
-class Tsml(tsml: Elem) { //extends VariableMl(tsml) { //TODO: should this extend VariableMl? not a Variable
+class Tsml(val xml: Elem) { //extends VariableMl(xml) { //TODO: should this extend VariableMl? not a Variable
   
-  lazy val dataset = new DatasetMl((tsml \ "dataset")(0)) //assumes only one "dataset" element
+  lazy val dataset = new DatasetMl((xml \ "dataset")(0)) //assumes only one "dataset" element
   
   /**
    * Gather the Names of all named Variables.
    */
   def getVariableNames: Seq[String] = {
     //TODO: assumes only scalars are named, for now
-    Tsml.getVariableNodes((tsml \ "dataset").head).flatMap(Tsml.getVariableName(_))
+    Tsml.getVariableNodes((xml \ "dataset").head).flatMap(Tsml.getVariableName(_))
   }
 
   /**
@@ -35,15 +35,25 @@ class Tsml(tsml: Elem) { //extends VariableMl(tsml) { //TODO: should this extend
    */
   //def getProcessingInstructions(): Map[String, Seq[String]] = {
   lazy val processingInstructions: Map[String, Seq[String]] = {
-    val pis: Seq[ProcInstr] = (tsml \ "dataset")(0).child.filter(_.isInstanceOf[ProcInstr]).map(_.asInstanceOf[ProcInstr])
+    val pis: Seq[ProcInstr] = (xml \ "dataset")(0).child.filter(_.isInstanceOf[ProcInstr]).map(_.asInstanceOf[ProcInstr])
     val pimap: Map[String, Seq[ProcInstr]] = pis.groupBy(_.target) //put into Map by target name
     pimap.map((pair) => (pair._1, pair._2.map(_.proctext))) //change Seq of PIs to Seq of their text values
     //TODO: do we need to override this Map's "default" to return an empty Seq[String]?
   }
 
+  override def toString = xml.toString
 }
 
 object Tsml {
+  
+  def apply(xml: Node): Tsml = xml match {
+    case e: Elem => e.label match {
+      case "tsml" => new Tsml(e)
+      case "dataset" => new Tsml(<tsml>{e}</tsml>) //wrap dataset in tsml
+      case _ => throw new RuntimeException("Must construct Tsml from a 'tsml' or 'dataset' XML Element.")
+    }
+    case _ => throw new RuntimeException("Must construct Tsml from a 'tsml' or 'dataset' XML Element.")
+  }
   
   def apply(url: URL): Tsml = {
     val xml = XML.load(url)
@@ -52,7 +62,7 @@ object Tsml {
       case null => new Tsml(xml) //no ref, use top level dataset element
       case ref: String => {
         (xml \\ "dataset").find(node => (node \ "@name").text == ref) match {
-          case Some(node) => new Tsml(<tsml>node.head</tsml>) //TODO: will this form work?
+          case Some(node) => new Tsml(<tsml>{node.head}</tsml>) //TODO: will this form work?
           case None => throw new RuntimeException("Can't find dataset with reference: " + ref)
         }
       }

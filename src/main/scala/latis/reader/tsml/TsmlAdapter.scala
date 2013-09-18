@@ -9,6 +9,7 @@ import latis.ops.Operation
 import latis.time.Time
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ArrayBuffer
+import java.io.File
 //import latis.time.Time
 
 
@@ -167,12 +168,14 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   /**
    * Get the URL of the data source from this adapter's definition.
-   * TODO: we may want to do some clever resolution of relative paths...
-   *   relative to the tsml URL
    */
   def getUrl(): String = {
     properties.get("url") match {
-      case Some(url) => url
+      case Some(url) => {
+        //TODO: deal with relative URL, based on tsml url?
+        if (url.startsWith(File.separator)) "file:" + url
+        else url
+      }
       case None => throw new RuntimeException("No url attribute in TSML adapter definition.")
     }
   }
@@ -473,12 +476,16 @@ object TsmlAdapter {
   /**
    * Construct an instance of a TsmlAdapter as defined in the TSML.
    */
-  def apply(tsml: Tsml) = {
+  def apply(tsml: Tsml): TsmlAdapter = {
     val atts = tsml.dataset.getAdapterAttributes()
     val class_name = atts("class")
     val cls = Class.forName(class_name)
     val ctor = cls.getConstructor(tsml.getClass())
+    try {
     ctor.newInstance(tsml).asInstanceOf[TsmlAdapter]
+    } catch {
+      case e: Exception => e.printStackTrace(); ???
+    }
   }
   
 }
