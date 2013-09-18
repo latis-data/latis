@@ -105,18 +105,6 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //Apply remaining operations to the Dataset.
     ops.foldRight(ds)(_(_)) //op(ds)
     
-    //TODO: too obtuse?
-    //operations.filterNot(handleOperation(_)).foldRight(dataset)(_(_))
-    
-//    for (op <- ops) { //TODO: fold?
-//      ds = op(ds)
-//      println(ds)
-//    }
-//    ds
-    
-//    val ds1 = dataset
-//    val ds2 = operations.foldRight(ds1)(_(_)) //operation.apply(ds)
-//    ds2
   }
   
   /**
@@ -125,13 +113,13 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   protected def makeMetadata(vml: VariableMl): Metadata = {
     //not recursive, each Variable's metadata is independent
     //just the XML attributes from "metadata" elements, for now
-    //if name is not defined in metadata, use the tsml "id" attribute
+    //if name is not defined in metadata, use the tsml "name" attribute
     
     var atts = vml.getMetadataAttributes
     
-    if (! atts.contains("name")) vml.getAttribute("id") match {
+    if (! atts.contains("name")) vml.getAttribute("name") match {
       case Some(name) => atts = atts + ("name" -> name)
-      case None =>
+      case None => //no name, error or make one up? but only scalars have them, for now
     }
 
     Metadata(atts)
@@ -180,6 +168,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   /**
    * Get the URL of the data source from this adapter's definition.
    * TODO: we may want to do some clever resolution of relative paths...
+   *   relative to the tsml URL
    */
   def getUrl(): String = {
     properties.get("url") match {

@@ -17,19 +17,8 @@ class Tsml(tsml: Elem) { //extends VariableMl(tsml) { //TODO: should this extend
    * Gather the Names of all named Variables.
    */
   def getVariableNames: Seq[String] = {
-    val buffer = ArrayBuffer[String]()
-    
-    //use id attribute, for now
-    //TODO: use metadata "name"
-    //note, this is happening before Variables are constructed
-    (tsml \\ "@id").map(_.text)
-    
-    /*
-     * TODO: deal with renaming...
-     * time: keep orig name during construction
-     *   use it as an alias for finding it?
-     * TODO: deal with named tuples, nested long name, like hdf groups
-     */
+    //TODO: assumes only scalars are named, for now
+    Tsml.getVariableNodes((tsml \ "dataset").head).flatMap(Tsml.getVariableName(_))
   }
 
   /**
@@ -82,5 +71,26 @@ object Tsml {
     else if (path.startsWith(File.separator)) "file:" + path //absolute file path
     else "file:" + scala.util.Properties.userDir + File.separator + path //relative file path
     Tsml(new URL(url))
+  }
+  
+    
+  def getVariableNodes(vnode: Node): Seq[Node] = vnode.child.filter(isVariableNode(_))
+  
+  def isVariableNode(node: Node): Boolean = {
+    val exclusions = List("metadata", "adapter", "values") //valid xml Elements that are not Variables
+    node.isInstanceOf[Elem] && (! exclusions.contains(node.label)) 
+  }
+  
+  def getVariableName(node: Node): Option[String] = {
+    (node \ "metadata@name").text match {
+      case "" => {
+        //not defined in metadata element, try attribute
+        (node \ "@name").text match {
+          case "" => None
+          case name: String => Some(name)
+        }
+      }
+      case name: String => Some(name)
+    }
   }
 }

@@ -26,7 +26,7 @@ class TestTsml  {
   def read_scalar_data {
     val reader = TsmlReader("datasets/test/scalar.tsml")
     val ds = reader.getDataset
-    //println(ds)
+    println(ds)
     
     AsciiWriter().write(ds)
     //new JsonWriter(System.out).write(ds)

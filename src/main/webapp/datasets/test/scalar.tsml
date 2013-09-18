@@ -6,12 +6,38 @@
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
              url="file:/data/Dropbox/LaTiS/LaTiS_server/WebContent/datasets/test/scalar.txt" />
              
-    <time id="foo" >
-      <metadata units="days since 1970-01-01"/>
-    </time>
+    <real>
+      <metadata name="foo" units="days since 1970-01-01"/>
+    </real>
     
-    <real id="ssn"/>
+    <real name="ssn"/>
 
   </dataset>
 
 </tsml>
+
+<!--2013-09-18
+TODO: id vs name, attribute vs metadata
+is name an intrinsic thing? not just metadata?
+value of id when parsing tsml?
+  only used to get list of var names
+  already a bit dicey, typically assumes only and all scalars have id
+  need to consider named tuples, functions. later
+refs to other elements
+  don't want the ref defn to be in the model?
+  id could be used for those
+  name for all scalars
+  should ref be a diff dataset with aggregation?
+    no, undue complication
+put name in scalar element as attribute? as opposed to metadata
+  easier to parse tsml? no, just look for @name in metadata elements
+  less of a burden on tsml author? wouldn't have to have metadata
+
+
+
+need to keep source names, e.g. for constructing sql
+  tsml should describe source
+  alias att or metadata?
+    user needs to see it so metadata
+  rename PI
+-->

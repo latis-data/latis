@@ -12,7 +12,7 @@ class DatasetMl(xml: Node) extends TupleMl(xml) {
   override def getVariableMl: Seq[VariableMl] = {
     //get all direct child elements that represent variables, exclude adapter
     //val es = xml.child.filter(e => e.isInstanceOf[Elem] && e.label != "adapter") 
-    val es = getVariableNodes(xml)
+    val es = Tsml.getVariableNodes(xml)
     
     //deal with implicit time series: "time" label
     es.partition(_.label == "time") match {

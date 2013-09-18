@@ -55,15 +55,7 @@ abstract class VariableMl(xml: Node) {
     val seq = for (e <- xml \ "metadata"; att <- e.attributes) yield (att.key, att.value.text)
     Map[String, String](seq: _*)
   }
-  
-  
-  def getVariableNodes(vnode: Node): Seq[Node] = vnode.child.filter(isVariableNode(_))
-  //TODO: cast to Elem?
-  
-  def isVariableNode(node: Node): Boolean = {
-    val exclusions = List("metadata", "adapter", "values") //valid xml Elements that are not Variables
-    node.isInstanceOf[Elem] && (! exclusions.contains(node.label)) 
-  }
+
   
   override def toString = xml.toString
 }
