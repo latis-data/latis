@@ -12,6 +12,7 @@ class Projection(val names: Seq[String]) extends Operation {
   //TODO: preserve order of requested variables
   //TODO: what if only part of nD domain is selected? only if it is a product set
   //TODO: return domain as IndexFunction if only it is projected?
+  //TODO: sanitize: make sure no special chars...
   
   def apply(dataset: Dataset): Dataset = {
     Dataset(dataset.variables.flatMap(project(_)))
