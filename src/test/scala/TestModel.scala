@@ -19,8 +19,8 @@ class TestModel  {
   @Test
   def real_addition {
     val v = Real("pi", 3.14)
-    new CsvWriter(System.out).write(v)
-    new CsvWriter(System.out).write(v + v)
+    Writer("csv").write(v)
+    Writer("csv").write(v + v)
     //println(v)
     //println(v + v)
   }
@@ -32,7 +32,7 @@ class TestModel  {
     
     val tup = Tuple(pi,e)
     
-    new CsvWriter(System.out).write(tup)
+    Writer("csv").write(tup)
     //println(tup)
   }
   
@@ -47,7 +47,7 @@ class TestModel  {
     //println(f2)
     //for ((d,r) <- f.iterator) println(d.toString + " -> " + r)
     //for ((d,r) <- f2(0)(0).asInstanceOf[Function].iterator) println(d.toString + " -> " + r) 
-    new AsciiWriter(System.out).write(f2)
+    AsciiWriter(System.out).write(f2)
     //new CsvWriter(System.out).write(f2)
     //new JsonWriter(System.out).write(f2)
   }
@@ -57,7 +57,7 @@ class TestModel  {
     val data = List(List(0.0,1.0,2.0,3.0,4.0), List(1.0,2.0,3.0,4.0,5.0), List(11.0,12.0,13.0,14.0,15.0))
     val f = Function(data)
     val f2 = f + Real(1)
-    new AsciiWriter(System.out).write(f2)
+    AsciiWriter(System.out).write(f2)
   }
   
   //def test_function_with_data_from_tuple_domain
@@ -73,7 +73,7 @@ class TestModel  {
     val range = Tuple(Real("a"), Real("b"))
     val f = Function(domain, range, data)
     
-    new AsciiWriter(System.out).write(f)
+    AsciiWriter(System.out).write(f)
   }
   
 

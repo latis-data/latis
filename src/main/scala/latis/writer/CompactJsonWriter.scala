@@ -9,9 +9,9 @@ import scala.collection.mutable.MapBuilder
  * One inner array for each sample.
  * Handy for clients that just want the data (e.g. HighCharts).
  */
-class CompactJsonWriter(out: OutputStream) extends Writer {
+class CompactJsonWriter extends Writer {
   
-  private val _writer = new PrintWriter(out)
+  private lazy val _writer = new PrintWriter(outputStream)
   
   //TODO: can we generalize to writeHeader, ...?
   def write(dataset: Dataset, args: Seq[String]) = {

@@ -4,13 +4,13 @@ import latis.dm._
 import java.io.OutputStream
 import java.io.PrintWriter
 
-class AsciiWriter(out: OutputStream) extends Writer {
+class AsciiWriter extends Writer {
   //TODO: extend TextWriter trait, inherit some stuff
   //TODO: abstract out extensible behavior, e.g. writeHeader
   //TODO: enable writing to a String?
   //TODO: nervous about side effect issues since we are given an OutputStream
 
-  private[this] val _writer = new PrintWriter(out)
+  private[this] lazy val _writer = new PrintWriter(outputStream)
   
   def write(dataset: Dataset, args: Seq[String]) = {
     _writer.println(dataset) //header
@@ -65,7 +65,15 @@ class AsciiWriter(out: OutputStream) extends Writer {
 
 object AsciiWriter {
   
-  def apply(out: OutputStream) = new AsciiWriter(out)
+  def apply(out: OutputStream) = {
+    val writer = new AsciiWriter()
+    writer._out = out
+    writer
+  }
   
-  def apply() = new AsciiWriter(System.out)
+  def apply() = {
+    val writer = new AsciiWriter()
+    writer._out = System.out
+    writer
+  }
 }

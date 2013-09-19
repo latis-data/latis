@@ -10,14 +10,14 @@ import java.util.Date
 /**
  * Assume 1D, non-nested Function for now.
  */
-class CsvWriter(out: OutputStream) extends Writer {
+class CsvWriter extends Writer {
   //TODO: Non-flat SSI,...
   
   val delimiter = ","
   //TODO: get from LatisProperties
     //copy all properties for this Writer since we won't know which suffix got us here
   
-  private[this] val _writer = new PrintWriter(out)
+  private[this] lazy val _writer = new PrintWriter(outputStream)
   
   
   def write(dataset: Dataset, args: Seq[String]) = {

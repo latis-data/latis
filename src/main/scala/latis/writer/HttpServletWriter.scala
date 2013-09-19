@@ -16,8 +16,6 @@ class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends W
   //def write(dataset: Dataset) {
     //write http header stuff
             
-    //Set the Content-Type HTTP header
-    response.setContentType(writer.mimeType);
     
     //Define the allowed origin for cross-origin resource sharing (CORS)
     //TODO: get from properties, compare with Origin in request header? or will browser do that?
@@ -59,7 +57,14 @@ class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends W
 object HttpServletWriter {
   
   def apply(response: HttpServletResponse, suffix: String) = {
-    val writer = Writer(response.getOutputStream(), suffix)
+    //Set the Content-Type HTTP header before we get the writer from the response.
+    //TODO: but it seems to have been working, minus the character encoding
+    //  could we go back to the cleaner design of passing output stream to writer constructor?
+    val writer = Writer.fromSuffix(suffix)
+    response.setContentType(writer.mimeType)
+    //TODO: why do we still need to set character encoding? javadoc says 
+    response.setCharacterEncoding("UTF-8") //is this required? maybe ISO-8859-1 (as seen from TSDS)
+    writer._out = response.getOutputStream()
     new HttpServletWriter(writer, response)
   }
 }

@@ -4,16 +4,20 @@ import latis.dm.Dataset
 import javax.servlet.http.HttpServletResponse
 import java.io.OutputStream
 import java.io.PrintWriter
+import latis.util.LatisProperties
 
-class JsonpWriter(out: OutputStream) extends Writer {
+class JsonpWriter extends Writer {
   //TODO: consider writers that can't stream, write tmp file
   //  or simply serve an existing file!?
   
   //Get the writer to decorate
-  //TODO: use property
-  val writer = new CompactJsonWriter(out)
+  lazy val writer = LatisProperties.get("writer.jsonp.writer") match {
+    case Some(cname) => Writer.fromClass(cname, outputStream)
+    case None => Writer.fromSuffix("json", outputStream) //default to the json writer
+  }
   
-  private val _writer = new PrintWriter(out)
+  //beware, repurposing the outputStream used by the wrapped Writer
+  private lazy val _writer = new PrintWriter(outputStream)
   
   def write(dataset: Dataset, args: Seq[String]) {
     val callback = args.find(_.startsWith("callback")) match {

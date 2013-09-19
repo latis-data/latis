@@ -9,6 +9,9 @@ import latis.util.LatisProperties
  */
 abstract class Writer {
 
+  var _out: OutputStream = null //TODO: restrict to subclasses, e.g. HttpServletWriter
+  def outputStream = _out
+
   /**
    * Output the given Dataset in the desired form.
    */
@@ -36,17 +39,37 @@ abstract class Writer {
 object Writer {
   
   def apply(out: OutputStream, suffix: String): Writer = {
-    LatisProperties.get("writer." + suffix + ".class") match {
-      case Some(cname) => {
-        val cls = Class.forName(cname)
-        val ctor = cls.getConstructor(classOf[OutputStream])
-        ctor.newInstance(out).asInstanceOf[Writer]
-      }
-      case None => throw new RuntimeException("Unsupported Writer suffix: " + suffix)
-    }
+    val writer = fromSuffix(suffix)
+    writer._out = out
+    writer
   }
   
   //use System.out as default
   def apply(suffix: String) : Writer = Writer(System.out, suffix)
   
+  
+  def fromSuffix(suffix: String): Writer = {
+    LatisProperties.get("writer." + suffix + ".class") match {
+      case Some(cname) => fromClass(cname)
+      case None => throw new RuntimeException("Unsupported Writer suffix: " + suffix)
+    }
+  }
+  
+  def fromSuffix(suffix: String, out: OutputStream): Writer = {
+    val writer = fromSuffix(suffix)
+    writer._out = out
+    writer
+  }
+  
+  def fromClass(cname: String): Writer = {
+    val cls = Class.forName(cname)
+    val ctor = cls.getConstructor()
+    ctor.newInstance().asInstanceOf[Writer]
+  }
+  
+  def fromClass(cname: String, out: OutputStream): Writer = {
+    val writer = fromClass(cname)
+    writer._out = out
+    writer
+  }
 }

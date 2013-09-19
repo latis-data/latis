@@ -4,7 +4,7 @@ import latis.dm._
 import java.io._
 import scala.collection.mutable.MapBuilder
 
-class JsonWriter(out: OutputStream) extends Writer {
+class JsonWriter extends Writer {
 
   /*
    * TODO: Include metadata in this long form with objects...
@@ -19,7 +19,7 @@ class JsonWriter(out: OutputStream) extends Writer {
    *   otherwise need convention saying that first var is domain and the rest the range
    */
   
-  private val _writer = new PrintWriter(out)
+  private lazy val _writer = new PrintWriter(outputStream)
   
   //TODO: can we generalize to writeHeader, ...?
   def write(dataset: Dataset, args: Seq[String]) = {
