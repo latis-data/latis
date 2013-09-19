@@ -29,6 +29,8 @@ abstract class IterativeAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   override def makeFunction(fml: FunctionMl): Option[Function] = {
     val md = makeMetadata(fml)
     
+ //TODO: if domain or range is None (e.g. projection), make index function
+    
     val domain = makeVariable(fml.domain).get //TODO: better use of Option
     val range = makeVariable(fml.range).get
     //val data = for (domain <- makeVariable(fml.domain); range <- makeVariable(fml.range)) 
