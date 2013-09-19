@@ -17,10 +17,10 @@ class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends W
     //write http header stuff
             
     //Set the Content-Type HTTP header
-    response.setContentType(writer.getMimeType());
+    response.setContentType(writer.mimeType);
     
     //Define the allowed origin for cross-origin resource sharing (CORS)
-    //TODO: get from properties, compare with Origin in request header
+    //TODO: get from properties, compare with Origin in request header? or will browser do that?
     //Just allow everything for now.
 //    LatisProperties.get("allow.origin") match {
 //      case Some(s) => response.addHeader("Access-Control-Allow-Origin", s)

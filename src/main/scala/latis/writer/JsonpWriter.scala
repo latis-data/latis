@@ -28,8 +28,9 @@ class JsonpWriter(out: OutputStream) extends Writer {
     _writer.print(");")
     _writer.flush()
   }
+
   
-  override def getMimeType = "application/javascript" 
+  override def mimeType: String = "application/json" 
   
   def close = writer.close
 

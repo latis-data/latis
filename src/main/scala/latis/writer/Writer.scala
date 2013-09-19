@@ -27,7 +27,7 @@ abstract class Writer {
    * Needed for the Servlet Writer.
    * Default to plain text.
    */
-  def getMimeType(): String = "text/plain" 
+  def mimeType: String = "text/plain" 
   //TODO: have Writers extend traits (e.g. Text, Binary) and inherit mime type
     //TODO: mimeType?
   

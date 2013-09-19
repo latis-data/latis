@@ -69,5 +69,7 @@ class JsonWriter(out: OutputStream) extends Writer {
   }
   
   
+  override def mimeType: String = "application/json" 
+  
   def close() {}
 }

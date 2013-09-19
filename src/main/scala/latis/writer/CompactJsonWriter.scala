@@ -10,7 +10,6 @@ import scala.collection.mutable.MapBuilder
  * Handy for clients that just want the data (e.g. HighCharts).
  */
 class CompactJsonWriter(out: OutputStream) extends Writer {
-  //TODO: mime type
   
   private val _writer = new PrintWriter(out)
   
@@ -50,6 +49,7 @@ class CompactJsonWriter(out: OutputStream) extends Writer {
     case f: Function => ??? //TODO: deal with inner Function
   }
   
+  override def mimeType: String = "application/json" 
   
   def close() {}
 }
