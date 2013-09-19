@@ -5,6 +5,8 @@ import scala.collection.mutable.ArrayBuffer
 import latis.dm.Variable
 
 class Aggregator(tsml: Tsml) extends TsmlAdapter(tsml) {
+  //TODO: use an aggregation operator so we don't need tsml
+  //  have one class here, parameterize operator
   
   override protected def makeDataset(): Dataset = {
     //Get child dataset nodes
