@@ -3,6 +3,8 @@ package latis.writer
 import latis.dm._
 import java.io._
 import scala.collection.mutable.MapBuilder
+import latis.time.Time
+import latis.time.TimeScale
 
 /**
  * Return data as nested arrays, without metadata.
@@ -42,6 +44,7 @@ class CompactJsonWriter extends Writer {
 
   
   private def varToString(variable: Variable): String = variable match {
+    case t: Time => t.convert(TimeScale.JAVA).doubleValue.toString //TODO: make reusable time converter?
     case Number(d) => d.toString //TODO: format?
     //TODO: Integer vs Real?
     case Text(s) => "\"" + s.trim + "\"" //put quotes around text data

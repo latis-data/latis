@@ -1,13 +1,15 @@
 package latis.writer
 
 import latis.dm._
+import latis.time._
 import java.io._
 import scala.collection.mutable.MapBuilder
 
 class JsonWriter extends Writer {
 
   /*
-   * TODO: Include metadata in this long form with objects...
+   * TODO:import latis.time.Time
+ Include metadata in this long form with objects...
    * 
    * preserve tuples (e.g. function range), maybe overkill?
    * but what about names for unnamed structures?
@@ -57,7 +59,7 @@ class JsonWriter extends Writer {
     val label = "\"" + variable.name + "\":"
     
     val value = variable match { 
-      //TODO: Time as unix time
+      case t: Time => t.convert(TimeScale.JAVA).doubleValue.toString //TODO: make reusable time converter?
       case Real(d) => d.toString //TODO: format?
       case Integer(l) => l.toString 
       case Text(s) => "\"" + s.trim + "\"" //put quotes around text data
