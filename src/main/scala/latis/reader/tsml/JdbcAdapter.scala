@@ -15,6 +15,8 @@ import latis.ops._
 import scala.collection.mutable.ArrayBuffer
 import java.sql.Statement
 import latis.util.RegEx._
+import latis.util.RegEx
+import latis.time.TimeScale
 
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   
@@ -29,9 +31,30 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     case Selection(expression) => expression match {
       //Break expression up into components
       case SELECTION(name, op, value) => {
-        //TODO: use source name
+        //TODO: allow alias, use source name
         //TODO: use source time format
-        if (tsml.getVariableNames.contains(name)) {
+        
+        //support ISO time string as value
+        //TODO: assumes db value are numerical, for now
+        if (name == "time") {
+          (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
+            case "" => ??? //no time units found
+            case units: String => {
+              //convert ISO time to units
+              RegEx.TIME findFirstIn value match {
+                case Some(s) => {
+                  val t = Time(javax.xml.bind.DatatypeConverter.parseDateTime(s).getTimeInMillis().toDouble)
+                  val t2 = t.convert(TimeScale(units)).doubleValue
+                  val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
+                  this.selections += tvname + op + t2
+                  true
+                }
+                case None => ??? //value didn't match time format
+              }
+            }
+          }
+        }
+        else if (tsml.getVariableNames.contains(name)) {
           //replace "==" with "=" for SQL
           if (op == "==") this.selections += name + "=" + value
           else this.selections += expression
