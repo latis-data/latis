@@ -8,6 +8,7 @@ import latis.ops.xform._
 //class MathOperation(op: Variable => Variable) extends Morphism {
 class BinaryMathOperation(op: (Double, Double) => Double, other: Dataset) extends Transformation {
   //TODO: take advantage of Transformation's transform(v) ?
+  //TODO: should this be built with the 1st dataset then eval'd with other?
   
   override def apply(dataset: Dataset): Dataset = {
     //Expose the Variable "wrapped" in the Dataset monad. 
