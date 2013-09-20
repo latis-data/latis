@@ -24,7 +24,7 @@ object RegEx {
      * Regular expression that should match an ISO 8601 time.
      * No fractional seconds. Not variants without "-".
      */
-    val TIME = "[0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-2][0-9](:[0-5][0-9](:[0-5][0-9])?)?)?".r
+    val TIME = "[0-9]{4}-[0-9]{2}-[0-9]{2}('?T'?[0-2][0-9](:[0-5][0-9](:[0-5][0-9])?)?)?".r
     
     /**
      * Regular expression matching common delimiters: white space and commas.
