@@ -27,6 +27,18 @@ class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
    * A record may be one or more lines.
    */
   type Record = Seq[Line]
+  /*
+   * TODO: do we need this? just use string
+   * linesPerRecord
+   * just a matter of appending/splitting on newline (\n)?
+   * we even assume one line per record below
+   * IterativeAscii recordIterator uses it
+   * just mkString("\n") as needed?
+   *   use delimiter? so split works?
+   *   that assumes a value doesn't cross line boundaries
+   *   can't be used for iterative, realizes all samples
+   *   "take(linesPerRecord)"?
+   */
   
   lazy val variableNames = tsml.getVariableNames
   //TODO: generalize to get "projected" variables? from dataset? but need orig for parsing?

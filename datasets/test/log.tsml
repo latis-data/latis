@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="log">
+    
+    <adapter class="latis.reader.tsml.RegexAdapter"
+             regex="\[(.+)\] (.+)"
+             url="/data/latis/log.txt" />
+            <!-- url="${log.file}" /-->
+             
+    <time name="time">
+      <metadata units="yyyy-MM-dd" />
+      <metadata length="80" />
+    </time>
+    
+    <text name="message"/>
+  
+  </dataset>
+
+</tsml>

@@ -10,6 +10,7 @@ import latis.data.Data
  */
 abstract class IterativeAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   //TODO: Stream, lazy list
+  //TODO: consider Iterative and Granule as traits?
   
   //TODO: be lazy, don't access data source until Iterator is used
   //  can't wail till "next"

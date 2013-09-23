@@ -133,7 +133,7 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     for (v <- vars) {
       val s = svals(v.name) //string value for the given scalar
       v match {
-        //case time: Time => 
+        //TODO: case time: Time => 
         case _: Real => bb.putDouble(s.toDouble)
         case _: Integer => bb.putLong(s.toLong)
         case t: Text => {

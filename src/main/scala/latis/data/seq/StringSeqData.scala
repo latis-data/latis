@@ -18,6 +18,7 @@ case class StringSeqData(ss: immutable.Seq[String]) extends SeqData {
    * Record size must be fixed, so for a sequence of Strings, use the max String.
    */
   def recordSize = ss.map(_.length).max * 2 //2 bytes per char
+ //TODO: need to use size defined in the Text variable?
   
   def iterator = ss.iterator.map(StringValue(_))
   

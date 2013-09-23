@@ -5,6 +5,7 @@ import latis.metadata.VariableMetadata
 import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
 import latis.data.TextData
+import latis.data.Data
 
 class Text extends Scalar {
   //TODO: accept only Text Data
@@ -51,6 +52,13 @@ object Text {
     val t = new Text
     t._metadata = md
     t._data = StringValue(v)
+    t
+  }
+    
+  def apply(md: Metadata, vs: Seq[String]): Text = {
+    val t = new Text
+    t._metadata = md
+    t._data = Data(vs)
     t
   }
   

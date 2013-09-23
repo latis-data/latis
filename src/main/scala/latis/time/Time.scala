@@ -8,6 +8,7 @@ import latis.data.EmptyData
 import latis.data.Data
 import latis.metadata.EmptyMetadata
 import latis.util.RegEx
+import latis.metadata.VariableMetadata
 
 class Time extends Real {
   
@@ -147,10 +148,22 @@ object Time {
   }
     
   def apply(md: Metadata, values: Seq[Double]): Time = {
+    val scale = md.get("units") match {
+      case Some(u) => TimeScale(u)
+      case None => TimeScale.JAVA
+    }
     val t = new Time
     t._metadata = md
     t._data = Data(values)
-    t.timeScale = TimeScale.JAVA
+    t.timeScale = scale
+    t
+  }
+    
+  def apply(md: Metadata, values: Seq[Double], scale: TimeScale): Time = {
+    val t = new Time
+    t._metadata = md
+    t._data = Data(values)
+    t.timeScale = scale
     t
   }
     
@@ -240,6 +253,7 @@ object Time {
         else {
           val format = new TimeFormat(u)
           Time(md, format.parse(value).getTime(), TimeScale.JAVA)
+          //TODO: change units 
           //TODO: consider units and format attributes
         }
       }
@@ -247,7 +261,26 @@ object Time {
         //throw new RuntimeException("Time Metadata is missing units.")
     }
   }
-  
+    
+  //def apply(md: Metadata, values: Seq[String]): Time = {
+  //TODO: clean up hack for GranuleAdapter
+  def fromStrings(md: Metadata, values: Seq[String]): Time = {
+    md.get("units") match {
+      case Some(u) => {
+        if (u.contains(" since ")) Time(md, values.map(_.toDouble))
+        else {
+          //change metadata units, immutable
+          //TODO: clean up
+          val props = md.asInstanceOf[VariableMetadata].properties
+          val md2 = Metadata(props + (("units", "milliseconds since 1970-01-01")))
+          val format = new TimeFormat(u)
+          Time(md2, values.map(format.parse(_).getTime().toDouble), TimeScale.JAVA)
+        }
+      }
+      case None => Time(md, values.map(_.toDouble))
+    }
+  }
+    
   /**
    * Milliseconds since 1970, native Java time.
    */

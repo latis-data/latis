@@ -32,9 +32,18 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
         
     sml.label match {
       case "real" => Some(Real(md, data.map(_.toDouble)))
-      case "time" => Some(Time(md, data.map(_.toDouble)))
-      
-      //TODO: *** other types ***
+      case "integer" => Some(Integer(md, data.map(_.toLong)))
+      case "text" => Some(Text(md, data))
+      case "time" => {
+        //if numeric units
+        md.get("units") match {
+          case Some(u) => {
+            if (u.contains(" since ")) Some(Time(md, data.map(_.toDouble)))
+            else Some(Time.fromStrings(md, data))
+          }
+          case None => Some(Time(md, data.map(_.toDouble))) //assume numeric
+        }
+      }
       
       case _ => None
     }
