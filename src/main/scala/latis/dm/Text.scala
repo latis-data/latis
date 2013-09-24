@@ -6,6 +6,7 @@ import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
 import latis.data.TextData
 import latis.data.Data
+import latis.data.seq.StringSeqData
 
 class Text extends Scalar {
   //TODO: accept only Text Data
@@ -58,7 +59,7 @@ object Text {
   def apply(md: Metadata, vs: Seq[String]): Text = {
     val t = new Text
     t._metadata = md
-    t._data = Data(vs)
+    t._data = new StringSeqData(vs.toIndexedSeq, md("length").toInt) 
     t
   }
   

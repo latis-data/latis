@@ -10,10 +10,11 @@
              
     <time name="time">
       <metadata units="yyyy-MM-dd" />
-      <metadata length="80" />
     </time>
     
-    <text name="message"/>
+    <text name="message">
+      <metadata length="80" />
+    </text>
   
   </dataset>
 

@@ -102,7 +102,7 @@ object Data {
   def apply(seq: Seq[Any]): Data = seq(0) match {
     case _: Double => new DoubleSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Double]])
     case _: Long =>   new LongSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Long]])
-    case _: String => new StringSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[String]])
+    //case _: String => new StringSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[String]])
     case _ => throw new RuntimeException("Unsupported data sequence type.")
   }
   

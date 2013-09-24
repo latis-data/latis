@@ -1,6 +1,7 @@
 package latis.util
 
 import latis.data._
+import latis.data.value.StringValue
 import latis.dm._
 import java.nio.ByteBuffer
 import latis.time.Time
@@ -47,10 +48,16 @@ object Util {
   }
 
   def dataToVariable(data: Data, template: Variable): Variable = {
-    val bb = data.getByteBuffer
-    val v = buildVarFromBuffer(bb, template)
-    bb.rewind //reset to the beginning in case we want to reuse it
-    v
+    //hack/experiment for text, don't use byte buffer, TODO: generalize?
+    data match {
+      case StringValue(s) => Text(template.metadata, s)
+      case _ => {
+        val bb = data.getByteBuffer
+        val v = buildVarFromBuffer(bb, template)
+        bb.rewind //reset to the beginning in case we want to reuse it
+        v
+      }
+    }
   }
 
   def buildVarFromBuffer(bb: ByteBuffer, template: Variable): Variable = template match {

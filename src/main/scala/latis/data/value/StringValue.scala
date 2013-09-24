@@ -7,6 +7,8 @@ import latis.data.TextData
 //TODO: beware, scala has a StringValue?
 
 case class StringValue(val value: String) extends AnyVal with TextData {
+  //TODO: need to be able to specify max length for buffer size, problem for column oriented data
+  
   //TODO: treat as Array of type Char? Word = Char(4)
   def length = 1
   def recordSize = 2 * value.length //2 bytes per char
