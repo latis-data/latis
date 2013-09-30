@@ -9,6 +9,7 @@ import latis.data.Data
 import latis.metadata.EmptyMetadata
 import latis.util.RegEx
 import latis.metadata.VariableMetadata
+import java.util.TimeZone
 
 class Time extends Real {
   
@@ -119,7 +120,11 @@ class Time extends Real {
 //    }
     RegEx.TIME findFirstIn that match {
       case Some(s) => {
-        val t = Time(javax.xml.bind.DatatypeConverter.parseDateTime(s).getTimeInMillis().toDouble)
+        //Assume UTC. //TODO: support other time zones?
+        val cal = javax.xml.bind.DatatypeConverter.parseDateTime(s)
+        cal.setTimeZone(TimeZone.getTimeZone("GMT"))
+        val t = Time(cal.getTimeInMillis().toDouble)
+        //val t = Time(javax.xml.bind.DatatypeConverter.parseDateTime(s).getTimeInMillis().toDouble)
         val other = t.convert(timeScale).doubleValue
         compare(other)
       }
