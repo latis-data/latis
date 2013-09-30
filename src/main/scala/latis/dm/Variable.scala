@@ -176,7 +176,7 @@ abstract class Variable {
    */
   private def concatData(vars: Seq[Variable]): Iterator[Data] = new Iterator[Data] {
     val its: Seq[Iterator[Data]] = vars.map(_.dataIterator)
-    def hasNext = its.head.hasNext //assume all have the same length
+    def hasNext = its.head.hasNext //assume all Variables have the same number of samples
     def next = {
       val ds: Seq[Data] = its.map(_.next)
       Data(ds)(Data.empty) //hack to disambiguate after type erasure
