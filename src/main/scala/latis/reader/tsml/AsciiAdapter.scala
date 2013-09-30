@@ -120,7 +120,8 @@ class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     while (recordIterator.hasNext) {
       val record = recordIterator.next
       val vs = parseRecord(record)
-      for (vname <- variableNames) map(vname) append vs(vname)
+      //skip bad records (empty Map)
+      if (vs.nonEmpty) for (vname <- variableNames) map(vname) append vs(vname)
     }
     
     //return as immutable dataMap
