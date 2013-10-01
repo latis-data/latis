@@ -57,11 +57,17 @@ class TestTsml  {
     AsciiWriter().write(ds)
   }
   
-  @Test
+  //@Test
   def test_dataset_aggregation2 {
     //println(Tsml("datasets/test/agg.tsml#ds1"))
     //val ds = TsmlReader("datasets/test/agg.tsml#ds1").getDataset
     val ds = TsmlReader("datasets/test/agg.tsml").getDataset
+    AsciiWriter().write(ds)
+  }
+  
+  @Test
+  def test_log_file {
+    val ds = TsmlReader("datasets/test/log.tsml").getDataset
     AsciiWriter().write(ds)
   }
 }
