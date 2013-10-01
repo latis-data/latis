@@ -8,6 +8,8 @@ import latis.data.TextData
 
 case class StringValue(val value: String) extends AnyVal with TextData {
   //TODO: need to be able to specify max length for buffer size, problem for column oriented data
+  //  can't have 2nd value in value class
+  //Should we ignore padding in comparisons? use =~?
   
   //TODO: treat as Array of type Char? Word = Char(4)
   def length = 1
