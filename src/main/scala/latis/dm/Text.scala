@@ -21,7 +21,8 @@ class Text extends Scalar {
     }
   }
   
-  def stringValue: String = data.asInstanceOf[TextData].stringValue
+  //Note: stripping off any white space padding
+  def stringValue: String = data.asInstanceOf[TextData].stringValue.trim
   
   //support lexical ordering
   def compare(that: String): Int = stringValue.compareTo(that)
