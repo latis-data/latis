@@ -6,7 +6,6 @@
     <adapter class="latis.reader.tsml.RegexAdapter"
              regex="\[(\S+)\s+(\w+)\s+(\S+)\s+\((\S+)\)\] (.*)"
              url="${log.file}" />
-             <!--Note, we are using a GranuleAdapter to avoid infinite recursion.-->
              
     <time name="time">
       <metadata units="yyyy-MM-dd'T'HH:mm:ss.SSS" />
@@ -17,15 +16,15 @@
     </text>
     
     <text name="class">
-      <metadata length="36" />
+      <metadata length="32" />
     </text>
     
     <text name="thread">
-      <metadata length="12" />
+      <metadata length="32" />
     </text>
     
     <text name="message">
-      <metadata length="80" />
+      <metadata length="256" />
     </text>
   
   </dataset>
