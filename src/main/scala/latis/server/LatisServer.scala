@@ -19,11 +19,17 @@ class LatisServer extends HttpServlet with Logging {
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
     var reader: TsmlReader = null //hack so it's visible to finally
 
-    try {
-      logger.info("Processing request: " + request.getRequestURL())
-
+    try {      
       //Get the request not including the constraints.
-      val path = request.getPathInfo()
+      val path = request.getPathInfo
+      
+      //Get the query string from the request.
+      val query = request.getQueryString match {
+        case s: String => URLDecoder.decode(s, "UTF-8")
+        case _ => ""
+      }
+      
+      logger.info("Processing request: " + path + "?" + query)
 
       //Get the dataset name and type of the output request from the dataset suffix.
       val index = path.lastIndexOf(".");
@@ -38,11 +44,6 @@ class LatisServer extends HttpServlet with Logging {
       //Construct the reader for this Dataset.
       reader = TsmlReader(url)
 
-      //Get the query string from the request.
-      val query = request.getQueryString match {
-        case s: String => URLDecoder.decode(s, "UTF-8")
-        case _ => ""
-      }
       
       //Manage the query string "arguments"
       //Separate out writer instructions of the form name=value.
