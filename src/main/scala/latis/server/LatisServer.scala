@@ -20,7 +20,7 @@ class LatisServer extends HttpServlet with Logging {
     var reader: TsmlReader = null //hack so it's visible to finally
 
     try {
-      logger.debug("Processing request: " + request.getRequestURL())
+      logger.info("Processing request: " + request.getRequestURL())
 
       //Get the request not including the constraints.
       val path = request.getPathInfo()
@@ -64,11 +64,16 @@ class LatisServer extends HttpServlet with Logging {
       //Note, data might not be read until the Writer asks for it.
       //  So don't blame the Writer if this seems slow.
       writer.write(dataset, writerArgs)
-      logger.debug("Request complete.")
+      
+      logger.info("Request complete.") //TODO: "with status...", do in finally?
 
     } catch {
       
       case e: Exception => {
+        //TODO: throw internal and external exceptions with messages to print here, 
+        //  as opposed to logging within?
+        //  but what about debug logging...?
+        
         logger.error("Exception in LatisServer", e)
         //Return error status 500, if all else fails
         response.reset
