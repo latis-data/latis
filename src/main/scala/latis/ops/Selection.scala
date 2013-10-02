@@ -20,11 +20,19 @@ protected class Selection(val vname: String, val operation: String, val value: S
   }
   
   def filter(variable: Variable): Option[Variable] = variable match {
+    case text: Text => filterText(text)
     case s: Scalar => filterScalar(s)
     case t: Tuple => filterTuple(t)
     case f: Function => filterFunction(f)
   }
     
+  def filterText(text: Text): Option[Text] = {
+    if (vname == text.name) operation match {
+      case "=~" => if (text.stringValue.matches(value)) Some(text) else None //regex
+      case _    => if (isValid(text.compare(value))) Some(text) else None //like any other scalar
+    } else Some(text) //operation doesn't apply to this Scalar Variable, no-op
+  }
+  
   def filterScalar(scalar: Scalar): Option[Scalar] = {
     if (vname == scalar.name) {
       if (isValid(scalar.compare(value))) Some(scalar) else None
@@ -49,6 +57,7 @@ protected class Selection(val vname: String, val operation: String, val value: S
 //    for (d <- filter(sample.domain); r <- filter(sample.range)) yield Sample(d,r)
 //  }
   
+  //TODO: support NOT (!)
   
   private def isValid(comparison: Int): Boolean = {
     (comparison < 0 && operation.contains("<")) || 
@@ -63,7 +72,7 @@ protected class Selection(val vname: String, val operation: String, val value: S
 object Selection {
   
   def apply(vname: String, operation: String, value: String) = {
-    //Deprecate use of "=" for selections. Replace with "==".
+    //Deprecate use of "=" for selections. Replace with "==".? TODO: maybe not
     val op = operation match {
       case "=" => "=="
       case _ => operation
