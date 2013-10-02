@@ -75,7 +75,7 @@ class LatisServer extends HttpServlet with Logging {
         //  as opposed to logging within?
         //  but what about debug logging...?
         
-        logger.error("Exception in LatisServer", e)
+        logger.error("Exception in LatisServer: " + e.getMessage, e)
         //Return error status 500, if all else fails
         response.reset
         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "LaTiS was not able to fulfill this request.")
