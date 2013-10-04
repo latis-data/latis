@@ -12,6 +12,6 @@ object Aggregation {
   def apply(aggType: String): Aggregation = aggType match {
     case "basic" => ???
     case "union" => ???
-    case "join" => ???
+    case "join" => ???  //intersect?
   }
 }
