@@ -23,8 +23,11 @@ class Function(_domain: Variable, _range: Variable) extends Variable {
   def domain: Variable = _domain
   def range: Variable = _range
   
+  private var _iterator: Iterator[Sample] = null
+  
   def iterator: Iterator[Sample] = {
-    if (data.isEmpty) iterateFromKids
+    if (_iterator != null) _iterator
+    else if (data.isEmpty) iterateFromKids
     else dataIterator.map(Util.dataToSample(_, Sample(domain, range)))
   }
   
@@ -47,6 +50,7 @@ class Function(_domain: Variable, _range: Variable) extends Variable {
 object Function {
   //TODO: used named args for data, md?
   
+  
   def apply(domain: Variable, range: Variable): Function = {
     new Function(domain, range)
   }  
@@ -54,6 +58,14 @@ object Function {
   def apply(domain: Variable, range: Variable, data: Data): Function = {
     val f = new Function(domain, range)
     f._data = data
+    f
+  }
+  
+  //build from Iterator[Sample]? TODO: do we need to set _data to something?
+  def apply(domain: Variable, range: Variable, sampleIterator: Iterator[Sample]): Function = {
+    //Note, wouldn't need domain and range, but would have to trigger iterator, or use peek?
+    val f = new Function(domain, range)
+    f._iterator = sampleIterator
     f
   }
   

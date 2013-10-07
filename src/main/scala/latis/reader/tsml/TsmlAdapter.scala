@@ -172,9 +172,10 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   def getUrl(): String = {
     properties.get("url") match {
       case Some(url) => {
-        //TODO: deal with relative URL, based on tsml url?
-        if (url.startsWith(File.separator)) "file:" + url
-        else url
+        //TODO: use URI API?
+        if (url.contains(":")) url //Assume URL is absolute (has scheme) if ":" exists.
+        else if (url.startsWith(File.separator)) "file:" + url //full path
+        else "file:" + System.getProperty("user.dir") + File.separator + url //relative to current working directory
       }
       case None => throw new RuntimeException("No url attribute in TSML adapter definition.")
     }
