@@ -21,6 +21,13 @@ import latis.dm.Dataset
  *   
  * conglomeration: keep dataset structures as tuples
  *   new dataset is a tuple with a element for each 
+ * 
+ * other verbs:
+ *   concatenate
+ *   merge
+ *   join: all combinations (pairs)?
+ *     natural join: join on matching common column values
+ *   combine
  */
 
 trait Aggregation extends Operation {

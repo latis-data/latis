@@ -96,6 +96,7 @@ object Tsml {
     (node \ "metadata@name").text match {
       case "" => {
         //not defined in metadata element, try attribute
+        //TODO: consider "time" with implicit name
         (node \ "@name").text match {
           case "" => None
           case name: String => Some(name)

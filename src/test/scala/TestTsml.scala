@@ -9,21 +9,21 @@ import latis.reader.tsml.ml._
 
 class TestTsml  {
 
-  @Test
+  //@Test
   def test_variable_names {
     val tsml = Tsml("datasets/test/scalar.tsml")
     val names = tsml.getVariableNames
     assertEquals("foo", names(0))
   }
   
-  @Test
+  //@Test
   def test_adapter_attributes {
     val xml = <dataset><adapter a="foo" b="bar"></adapter></dataset>
     val map = new DatasetMl(xml).getAdapterAttributes
     assertEquals("bar", map("b"))
   }
   
-  @Test
+  //@Test
   def read_scalar_data {
     val reader = TsmlReader("datasets/test/scalar.tsml")
     val ds = reader.getDataset
@@ -33,7 +33,7 @@ class TestTsml  {
     //new JsonWriter(System.out).write(ds)
   }
   
-  @Test
+  //@Test
   def read_scalar_data_tuple_range {
     val ds = TsmlReader("datasets/test/scalar3.tsml").getDataset //+ 1
     //println(ds)
@@ -66,9 +66,15 @@ class TestTsml  {
     AsciiWriter().write(ds)
   }
   
-  @Test
+  //@Test
   def test_log_file {
     val ds = TsmlReader("datasets/test/log.tsml").getDataset
+    AsciiWriter().write(ds)
+  }
+  
+  @Test
+  def test_columnar_file {
+    val ds = TsmlReader("datasets/test/col.tsml").getDataset
     AsciiWriter().write(ds)
   }
 }

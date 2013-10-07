@@ -147,23 +147,7 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     //rewind for use
     Data(bb.flip.asInstanceOf[ByteBuffer])
   }
-  
-//  //suck in entire granule, for now
-//  def readData: immutable.Map[String, immutable.Seq[String]] = {
-//    val map = mutable.HashMap[Name, mutable.ArrayBuffer[Value]]()
-//    for (vname <- variableNames) map += ((vname, mutable.ArrayBuffer[Value]()))
-//        
-//    while (recordIterator.hasNext) {
-//      val record = recordIterator.next
-//      val vs = parseRecord(record)
-//      for (vname <- variableNames) map(vname) append vs(vname)
-//    }
-//    
-//    //return as immutable dataMap
-//    val z = for ((name, seq) <- map) yield name -> seq.toIndexedSeq //turn ArrayBuffer into an immutable Seq
-//    z.toMap //turn HashMap into an immutable Map
-//  }
-  
+
   
   def close = source.close
 }

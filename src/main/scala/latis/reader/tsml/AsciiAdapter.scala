@@ -9,6 +9,12 @@ class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
   //handy aliases for a String when we are using it in the context of variable names and values.
   //TODO: could we use the same approach for binary data? define these as ByteBuffer instead of String?
   
+  /*
+   * TODO: 2013-10-07
+   * Could this be designed so the granule adapter simply iterates over IterativeAdapter?
+   * is there ever a need for granlue? just a matter of caching?
+   */
+  
   /**
    * Used for the name of a Variable as defined by the "name" attribute in the TSML, presumably a Scalar.
    */

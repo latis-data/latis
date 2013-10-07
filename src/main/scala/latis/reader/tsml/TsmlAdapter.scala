@@ -30,6 +30,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   val properties: Map[String,String] = tsml.dataset.getAdapterAttributes()
 
+  def getProperty(name: String): Option[String] = properties.get(name)
+  
   /*
    * TODO: 2013-06-25
    * traits for granule vs iterable?

@@ -6,6 +6,7 @@ import latis.reader.tsml.ml.Tsml
  * Use a regular expression to extract data values from a data record.
  */
 class RegexAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
+  //TODO: any reason this couldn't be used with iterative adapter?
   
   val regex = properties.get("regex") match {
     case Some(s: String) => s.r

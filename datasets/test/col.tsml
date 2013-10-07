@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset>
+    <metadata name="Columnar Test"/>
+    <adapter class="latis.reader.tsml.ColumnarAdapter"
+             columns="0;2,1"
+             url="file:/data/latis/scalar_3col.txt" />
+    
+    <time name="time" />
+    
+    <!--real name="a"/>
+    <real name="b"/-->
+    
+    <text name="c">
+      <metadata length="8"/>
+    </text>
+    
+  </dataset>
+
+</tsml>
