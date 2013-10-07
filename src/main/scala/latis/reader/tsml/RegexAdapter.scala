@@ -1,5 +1,7 @@
 package latis.reader.tsml
 
+import latis.reader.tsml.ml.Tsml
+
 /**
  * Use a regular expression to extract data values from a data record.
  */

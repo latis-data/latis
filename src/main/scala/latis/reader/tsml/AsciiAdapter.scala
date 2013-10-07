@@ -2,6 +2,7 @@ package latis.reader.tsml
 
 import scala.io.Source
 import scala.collection._
+import latis.reader.tsml.ml.Tsml
 
 class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
   

@@ -3,6 +3,8 @@ package latis.reader.tsml
 import latis.dm._
 import scala.collection._
 import latis.time.Time
+import latis.reader.tsml.ml.ScalarMl
+import latis.reader.tsml.ml.Tsml
 
 /**
  * An Adapter for Datasets small enough to fit into memory.

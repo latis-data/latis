@@ -3,7 +3,7 @@ package latis.reader.tsml.agg
 import latis.dm.Dataset
 import scala.collection.mutable.ArrayBuffer
 import latis.dm.Variable
-import latis.reader.tsml.Tsml
+import latis.reader.tsml.ml.Tsml
 import latis.reader.tsml.TsmlAdapter
 
 abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {

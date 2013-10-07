@@ -17,6 +17,8 @@ import java.sql.Statement
 import latis.util.RegEx._
 import latis.util.RegEx
 import latis.time.TimeScale
+import latis.reader.tsml.ml.ScalarMl
+import latis.reader.tsml.ml.Tsml
 
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   

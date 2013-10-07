@@ -5,6 +5,7 @@ import org.junit._
 import Assert._
 import latis.writer._
 import latis.reader.tsml._
+import latis.reader.tsml.ml._
 
 class TestTsml  {
 

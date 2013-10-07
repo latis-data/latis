@@ -1,4 +1,4 @@
-package latis.reader.tsml
+package latis.reader.tsml.ml
 
 import scala.xml._
 

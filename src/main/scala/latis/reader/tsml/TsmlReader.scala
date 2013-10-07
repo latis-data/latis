@@ -8,6 +8,7 @@ import scala.collection.mutable.{Map,HashMap}
 import java.net.URL
 import java.io.File
 import latis.ops.Operation
+import latis.reader.tsml.ml.Tsml
 
 /**
  * A Reader for a Dataset defined as a "dataset" element within TSML.

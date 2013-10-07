@@ -1,12 +1,13 @@
-package latis.reader.tsml
+package latis.reader.tsml.ml
 
 import java.net.URL
 import scala.xml._
 import java.io.File
-import scala.collection.mutable.ArrayBuffer
+import scala.Option.option2Iterable
 
 
-/**
+/**import latis.reader.tsml.ml.DatasetMl
+
  * Convenient wrapper for dealing with the TSML XML.
  */
 class Tsml(val xml: Elem) { //extends VariableMl(xml) { //TODO: should this extend VariableMl? not a Variable

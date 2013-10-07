@@ -8,6 +8,7 @@ import latis.util.Util
 import java.nio.ByteBuffer
 import latis.data.IterableData
 import latis.time.Time
+import latis.reader.tsml.ml.Tsml
 
 class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   

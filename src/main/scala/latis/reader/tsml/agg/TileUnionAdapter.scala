@@ -1,7 +1,7 @@
 package latis.reader.tsml.agg
 
 import latis.dm.Dataset
-import latis.reader.tsml.Tsml
+import latis.reader.tsml.ml.Tsml
 import latis.ops.TileAggregation
 
 class TileUnionAdapter(tsml: Tsml) extends AggregationAdapter(tsml) {

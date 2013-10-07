@@ -2,6 +2,8 @@ package latis.reader.tsml
 
 import latis.dm._
 import latis.data.Data
+import latis.reader.tsml.ml.FunctionMl
+import latis.reader.tsml.ml.Tsml
 
 /**
  * This Adapter is designed for arbitrarily large Datasets that can be

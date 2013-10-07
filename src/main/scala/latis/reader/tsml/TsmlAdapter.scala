@@ -10,6 +10,11 @@ import latis.time.Time
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ArrayBuffer
 import java.io.File
+import latis.reader.tsml.ml.VariableMl
+import latis.reader.tsml.ml.ScalarMl
+import latis.reader.tsml.ml.FunctionMl
+import latis.reader.tsml.ml.TupleMl
+import latis.reader.tsml.ml.Tsml
 //import latis.time.Time
 
 

@@ -1,9 +1,6 @@
-package latis.reader.tsml
+package latis.reader.tsml.ml
 
 import scala.xml._
-import scala.collection.immutable.HashMap
-import scala.util.matching.Regex.Match
-import latis.util.LatisProperties
 import latis.util.Util
 
 class DatasetMl(xml: Node) extends TupleMl(xml) {
