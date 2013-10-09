@@ -10,8 +10,10 @@ import latis.util.FileUtils
  * Return a list of files as a Dataset.
  */
 class FileListAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
-  //TODO: see java 7 DirectoryStream,...
+  //TODO: see java 7 java.nio.file, DirectoryStream,...
+  //  FileSystems.getDefault().getPathMatcher("regex:.*").matches(path)
   //Note, we can't count on the order of the files, so we can't use an iterative adapter.
+  //  TODO: maybe chunk nested directories 
   
   /*
    * TODO: if file name has other parameters (e.g. instrument)
@@ -33,16 +35,12 @@ class FileListAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     case None => throw new RuntimeException("FileListAdapter requires a 'url' attribute.")
   }
   
-  //just encode time in file name, for now
-  //TODO: encode other vars in file name, see regex adapter
   val regex = properties.get("pattern") match {
     case Some(s: String) => s.r
     case None => throw new RuntimeException("FileListAdapter requires a file name 'pattern' attribute.")
   }
   
   def readData: immutable.Map[String, immutable.Seq[String]] = {
-    //val files = (new File(dir)).listFiles.map(_.getAbsolutePath()).toIndexedSeq  //TODO: getCanonicalPath?
-    //TODO: deal with nested dirs, special attribute to recurse? or trigger off of 
     //TODO: use file or filename filter?
     //recursive
     val files = FileUtils.listAllFiles(dir)
@@ -68,12 +66,13 @@ class FileListAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     }
     
     //TODO: sort by domain values
+    //  assume lexical ordering reflects time order, for now
     //  hard to know here what the domain var(s)
     //  should Function constructor enforce?
     
     //return as immutable dataMap
     val z = for ((name, seq) <- map) yield name -> seq.toIndexedSeq //turn ArrayBuffer into an immutable Seq
-    z.toMap //turn HashMap into an immutable Map
+    z.toMap //immutable Map
   }
   
   override def close = {}
