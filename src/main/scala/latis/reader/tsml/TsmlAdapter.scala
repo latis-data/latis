@@ -177,6 +177,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * Get the URL of the data source from this adapter's definition.
    */
   def getUrl(): String = {
+    //TODO: consider 'location' since url tends to imply scheme://...
     properties.get("url") match {
       case Some(url) => {
         //TODO: use URI API?

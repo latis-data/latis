@@ -8,6 +8,7 @@ import latis.reader.tsml.ml.Tsml
 class RegexAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
   //TODO: any reason this couldn't be used with iterative adapter?
   
+  //TODO: change att to 'pattern'?
   val regex = properties.get("regex") match {
     case Some(s: String) => s.r
     case None => throw new RuntimeException("RegexAdapter requires a regular expression definition 'regex'.")

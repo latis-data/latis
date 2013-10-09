@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="dirs">
+    
+    <adapter class="latis.reader.tsml.FileListAdapter"
+             pattern="(\d{4}/\d{2}/\d{2}).dat"
+             url="/data/latis/dir_test" />
+             
+    <time name="time">
+      <metadata units="yyyy/MM/dd" />
+    </time>
+    
+    <text name="file">
+      <metadata length="256" />
+    </text>
+  
+  </dataset>
+
+</tsml>

@@ -72,9 +72,21 @@ class TestTsml  {
     AsciiWriter().write(ds)
   }
   
-  @Test
+  //@Test
   def test_columnar_file {
     val ds = TsmlReader("datasets/test/col.tsml").getDataset
+    AsciiWriter().write(ds)
+  }
+  
+  //@Test
+  def test_file_list {
+    val ds = TsmlReader("datasets/test/files.tsml").getDataset
+    AsciiWriter().write(ds)
+  }
+  
+  @Test
+  def test_nested_file_list {
+    val ds = TsmlReader("datasets/test/dirs.tsml").getDataset
     AsciiWriter().write(ds)
   }
 }

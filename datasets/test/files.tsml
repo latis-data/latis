@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="files">
+    
+    <adapter class="latis.reader.tsml.FileListAdapter"
+             pattern="a(\d{4}).dat"
+             url="/data/latis/file_test" />
+             
+    <time name="time">
+      <!--metadata units="years since 0000-00-00" /-->
+      <metadata units="yyyy" />
+    </time>
+    
+    <text name="file">
+      <metadata length="256" />
+    </text>
+  
+  </dataset>
+
+</tsml>
