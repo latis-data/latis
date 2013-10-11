@@ -132,7 +132,15 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     
     if (! atts.contains("name")) vml.getAttribute("name") match {
       case Some(name) => atts = atts + ("name" -> name)
-      case None => //no name, error or make one up? but only scalars have them, for now
+      case None => {
+        //no name, error or make one up? but only scalars have them, for now
+        //special handling for "time" and "index"
+        vml.label match {
+          case "time" => atts = atts + ("name" -> "time")
+          case "index" => atts = atts + ("name" -> "index")
+          case _ =>
+        }
+      }
     }
 
     Metadata(atts)

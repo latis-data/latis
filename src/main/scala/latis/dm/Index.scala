@@ -2,6 +2,7 @@ package latis.dm
 
 import latis.data._
 import latis.data.value.IndexValue
+import latis.metadata.Metadata
 
 /**
  * Scalar Variable that represents an index.
@@ -24,7 +25,11 @@ class Index extends Scalar with Number {
 
 object Index {
   
-  def apply(): Index = new Index //(EmptyMetadata, EmptyData)
+  def apply(): Index = {
+    val index = new Index //(EmptyMetadata, EmptyData)
+    index._metadata = Metadata("index") //set name metadata to "index"
+    index
+  }
   
   def apply(length: Int): Index = {
     val index = Index()

@@ -84,9 +84,15 @@ class TestTsml  {
     AsciiWriter().write(ds)
   }
   
-  @Test
+  //@Test
   def test_nested_file_list {
     val ds = TsmlReader("datasets/test/dirs.tsml").getDataset
+    AsciiWriter().write(ds)
+  }
+  
+  @Test
+  def test_mms_file_list {
+    val ds = TsmlReader("/home/lindholm/git/latis-mms/src/main/webapp/datasets/science_files.tsml").getDataset
     AsciiWriter().write(ds)
   }
 }

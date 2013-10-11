@@ -19,7 +19,10 @@ class Tsml(val xml: Elem) { //extends VariableMl(xml) { //TODO: should this exte
    */
   def getVariableNames: Seq[String] = {
     //TODO: assumes only scalars are named, for now
-    Tsml.getVariableNodes((xml \ "dataset").head).flatMap(Tsml.getVariableName(_))
+    //Tsml.getVariableNodes((xml \ "dataset").head).flatMap(Tsml.getVariableName(_))
+    val ns = Tsml.getVariableNodes((xml \ "dataset").head)
+//TODO: needs to be recursive
+    ns.flatMap(Tsml.getVariableName(_))
   }
 
   /**
@@ -85,7 +88,12 @@ object Tsml {
   }
   
     
-  def getVariableNodes(vnode: Node): Seq[Node] = vnode.child.filter(isVariableNode(_))
+  def getVariableNodes(vnode: Node): Seq[Node] = {
+    val kids = vnode.child
+    //println(kids)
+    kids.filter(isVariableNode(_))
+    //vnode.child.filter(isVariableNode(_))
+  }
   
   def isVariableNode(node: Node): Boolean = {
     val exclusions = List("metadata", "adapter", "values") //valid xml Elements that are not Variables
@@ -93,16 +101,18 @@ object Tsml {
   }
   
   def getVariableName(node: Node): Option[String] = {
-    (node \ "metadata@name").text match {
+    val n = (node \ "metadata@name").text match {
       case "" => {
         //not defined in metadata element, try attribute
-        //TODO: consider "time" with implicit name
+        //TODO: consider "time" and "index" with implicit name
         (node \ "@name").text match {
           case "" => None
-          case name: String => Some(name)
+          case name: String => println(name); Some(name)
         }
       }
       case name: String => Some(name)
     }
+    
+    n
   }
 }

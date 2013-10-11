@@ -47,6 +47,12 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
         }
       }
       
+      case "index" => {
+        //get the number of samples for one of the variables
+        val length = dataMap.last._2.length
+        Some(Index(length))
+      }
+      
       case _ => None
     }
   }
