@@ -76,4 +76,6 @@ object AsciiWriter {
     writer._out = System.out
     writer
   }
+  
+  def write(dataset: Dataset) = AsciiWriter().write(dataset)
 }
