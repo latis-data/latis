@@ -45,6 +45,27 @@ class Function(_domain: Variable, _range: Variable) extends Variable {
       //TODO: consider wrapped Function
     }
   }
+  
+  
+  //TODO: consider more optimal approaches
+  def getFirstSample: Sample = iterator.next
+  def getLastSample: Sample = {
+    //iterator.drop(length-1).next  //dataIterator is giving Util.dataToSample null Data!?
+    
+    //TODO: only gets 190 of 570!?
+    //trying to get new iterator with each ref? skipping by 3s
+//    while(iterator.hasNext) {
+//      sample = iterator.next
+//      c = c+1
+//      println(c +": "+ sample.domain.data)
+//    }
+    
+    var sample: Sample = null
+    for (s <- iterator) sample = s
+    sample 
+  }
+  //TODO: return Function with single sample to preserve namespace...?
+
 }
 
 object Function {

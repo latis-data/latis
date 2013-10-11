@@ -4,7 +4,7 @@ import latis.reader.DatasetAccessor
 import latis.dm._
 import scala.xml._
 import latis.metadata._
-import scala.collection.mutable.{Map,HashMap}
+import scala.collection._
 import java.net.URL
 import java.io.File
 import latis.ops.Operation
@@ -36,8 +36,7 @@ class TsmlReader(tsml: Tsml) extends DatasetAccessor {
    */
   def getDataset(): Dataset = dataset
   
-  //def getDataset(operations: Map[String,Seq[String]]): Dataset = {
-  def getDataset(operations: Seq[Operation]): Dataset = {
+  def getDataset(operations: mutable.Seq[Operation]): Dataset = {
     adapter.getDataset(operations)
   }
   

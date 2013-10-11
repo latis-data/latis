@@ -1,6 +1,7 @@
 package latis.server
 
 import latis.ops._
+import scala.collection._
 import scala.collection.mutable.ArrayBuffer
 import latis.util.RegEx._
 import java.net.URLDecoder
@@ -10,7 +11,7 @@ object DapConstraintParser {
   /**
    * Parse the query args into a sequence of Operations.
    */
-  def parseArgs(args: Seq[String]): Seq[Operation] = {
+  def parseArgs(args: Seq[String]): mutable.Seq[Operation] = {
     //buffer for accumulating the Seq of operations
     val buffer = new ArrayBuffer[Operation]() 
     

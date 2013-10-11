@@ -44,19 +44,15 @@ class LatisServer extends HttpServlet with Logging {
       //Construct the reader for this Dataset.
       reader = TsmlReader(url)
 
-      
-      //Manage the query string "arguments"
-      //Separate out writer instructions of the form name=value.
-      //TODO: just use those left over after reader?
+      //Convert the query arguments into a mutable collection of Operations.
+      //Adapters should remove Operations from this if they handle them
+      //  passing the rest for others to handle.
       val args = query.split("&")
-      val (writerArgs, datasetArgs) = args.partition(_.matches("""\w+=\w+"""))
+      val operations = DapConstraintParser.parseArgs(args)
       
       //Get the Dataset from the Reader. 
-      //Note, pass all args to reader so we can continue to support "=" for selections.
-      //TODO: deprecate "=" for selections, use "==", but violates DAP2 spec? and users expect it (e.g. sql)
-      val constraints = DapConstraintParser.parseArgs(args)
-      val dataset = reader.getDataset(constraints)
-
+      val dataset = reader.getDataset(operations)
+      
       //Make the Writer, wrapped for Servlet output.
       logger.debug("Writing " + suffix + " dataset.")
       val writer = HttpServletWriter(response, suffix)
@@ -64,7 +60,8 @@ class LatisServer extends HttpServlet with Logging {
       //Write the dataset. 
       //Note, data might not be read until the Writer asks for it.
       //  So don't blame the Writer if this seems slow.
-      writer.write(dataset, writerArgs)
+      //TODO: pass remaining operations to the Writer
+      writer.write(dataset)
       
       logger.info("Request complete.") //TODO: "with status...", do in finally?
 

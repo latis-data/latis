@@ -15,7 +15,6 @@ import latis.reader.tsml.ml.ScalarMl
 import latis.reader.tsml.ml.FunctionMl
 import latis.reader.tsml.ml.TupleMl
 import latis.reader.tsml.ml.Tsml
-//import latis.time.Time
 
 
 /**
@@ -70,8 +69,12 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     Dataset(vars, md) 
   }  
   
-
-  def getDataset(operations: Seq[Operation]): Dataset = {
+  def getDataset(operations: mutable.Seq[Operation]): Dataset = {
+    //2013-10-11: remove handled operations from collection
+    //allow other to handle the rest
+    //TODO: consider keeping the full list and risk redundant operations?
+    //  gives too much power to the adapter?
+    
     /*
      * TODO: 2013-09-16
      * Make sure original Dataset is not changed?
@@ -111,6 +114,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //Note, the original dataset will not be mutated
     
     //Apply remaining operations to the Dataset.
+    //TODO: is that our responsibility? We did pass the ops to the reader.
+    //TODO: leave unhandled ops for Writer
     ops.foldRight(ds)(_(_)) //op(ds)
     
   }

@@ -169,9 +169,18 @@ object Operation {
   def apply(name: String, args: Seq[String]): Operation = {
     LatisProperties.get("operation." + name + ".class") match {
       case Some(cname) => {
+       try {
         val cls = Class.forName(cname)
-        val ctor = cls.getConstructor(classOf[Seq[String]])
-        ctor.newInstance(args).asInstanceOf[Operation]
+        if (args.head.length == 0) {  //no args
+          val ctor = cls.getConstructor()
+          ctor.newInstance().asInstanceOf[Operation]
+        } else {
+          val ctor = cls.getConstructor(classOf[Seq[String]])
+          ctor.newInstance(args).asInstanceOf[Operation]
+        }
+       } catch {
+         case e: Exception => throw new RuntimeException("Unsupported Operation: " + name, e)
+       }
       }
       case None => throw new RuntimeException("Unsupported Operation: " + name)
     }

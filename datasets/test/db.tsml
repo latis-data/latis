@@ -4,20 +4,20 @@
   <dataset>
     <metadata name="Database Test"/>
     <adapter class="latis.reader.tsml.JdbcAdapter"
-             url="jdbc:postgresql://winp179:45432/maven_development" 
+             url="jdbc:postgresql://lasp-db-dev:5432/maven_development" 
              driver="org.postgresql.Driver"
-             table="kp_files_metadata"
-             user="maven_development"
-             password="password"
-             predicate="id &lt; 150"/>
+             table="spacecraft_geometry_in_situ_key_parameters"
+             user="mavendevdb"
+             password="mav3nd3vbus3r"/>
              
-    <?filter file_size > 3000000?>
-    <?filter file_size < 6000000?>
-             
-    <time name="id" />
+    <time name="timetag">
+      <metadata long_name="Time(UTC/SCET)" format="yyyy-MM-ddTHH:mm:ss"/>
+    </time>
     
-    <real name="file_size"/>
-
+    <integer name="orbit_number">
+      <metadata long_name="Orbit number" description="use same definition as LM"/>
+    </integer>
+    
   </dataset>
 
 </tsml>
