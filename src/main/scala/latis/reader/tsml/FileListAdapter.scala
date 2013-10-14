@@ -59,7 +59,7 @@ class FileListAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
         case Some(m) => {
           //all but the last variable (file) should have a match, put those in the map
           (vnames.take(nvars-1) zip m.subgroups).map(p => map += ((p._1, map(p._1) += p._2)))
-          map(vnames.last) += dir + File.pathSeparator + file  //the last variable is the filename
+          map(vnames.last) += dir + File.separator + file  //the last variable is the filename
         }
         case None => //no match, don't include this file
       }

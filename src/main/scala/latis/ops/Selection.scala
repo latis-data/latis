@@ -28,7 +28,10 @@ protected class Selection(val vname: String, val operation: String, val value: S
     
   def filterText(text: Text): Option[Text] = {
     if (vname == text.name) operation match {
-      case "=~" => if (text.stringValue.matches(value)) Some(text) else None //regex
+      case "=~" => {
+        if (text.stringValue.matches(value)) Some(text) 
+        else None //regex
+      }
       case _    => if (isValid(text.compare(value))) Some(text) else None //like any other scalar
     } else Some(text) //operation doesn't apply to this Scalar Variable, no-op
   }

@@ -6,6 +6,10 @@ import Assert._
 import latis.writer._
 import latis.reader.tsml._
 import latis.reader.tsml.ml._
+import latis.ops.Projection
+import scala.collection.mutable.ArrayBuffer
+import latis.ops.Operation
+import latis.ops.Selection
 
 class TestTsml  {
 
@@ -92,7 +96,10 @@ class TestTsml  {
   
   @Test
   def test_mms_file_list {
-    val ds = TsmlReader("/home/lindholm/git/latis-mms/src/main/webapp/datasets/science_files.tsml").getDataset
+    val ops = ArrayBuffer[Operation]()
+    //ops += Projection("time,sc_id,file")
+    ops += Selection("data_level=ql")
+    val ds = TsmlReader("/home/lindholm/git/latis-mms/src/main/webapp/datasets/science_files.tsml").getDataset(ops)
     AsciiWriter().write(ds)
   }
 }

@@ -20,6 +20,7 @@ class Projection(val names: Seq[String]) extends Operation {
   }
   
   def project(variable: Variable): Option[Variable] = variable match {
+    case i: Index => Some(i) //always project Index, often used as a place holder for a domain
     case s: Scalar   => projectScalar(s)
     case t: Tuple    => projectTuple(t)
     case f: Function => projectFunction(f)
@@ -50,7 +51,6 @@ class Projection(val names: Seq[String]) extends Operation {
  * NullVariable?
  *   or some other indicator that the iterator can interpret and replace
  * 
- * 
  */
       for (d <- project(function.domain); r <- project(function.range)) yield Function(d,r) //TODO: metadata
     } else { //wrap function
@@ -76,6 +76,7 @@ class Projection(val names: Seq[String]) extends Operation {
 object Projection {
   
   def apply(names: Seq[String]) = new Projection(names)
+  def apply(expression: String) = new Projection(expression.split(","))
   
   def unapply(proj: Projection) = Some(proj.toString)
 }
