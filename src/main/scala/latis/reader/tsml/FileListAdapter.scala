@@ -45,7 +45,7 @@ class FileListAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     //recursive
     val files = FileUtils.listAllFiles(dir)
     
-    val vnames = tsml.getVariableNames
+    val vnames = tsml.getScalarNames
     val nvars = vnames.length
     //TODO: deal with time not being first pattern in filename
     
@@ -57,9 +57,9 @@ class FileListAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     for (file <- files.sorted) {
       regex.findFirstMatchIn(file) match {
         case Some(m) => {
-          //all but the last variable should have a match, put those in the map
+          //all but the last variable (file) should have a match, put those in the map
           (vnames.take(nvars-1) zip m.subgroups).map(p => map += ((p._1, map(p._1) += p._2)))
-          map(vnames.last) += file  //the last variable if the filename
+          map(vnames.last) += dir + File.pathSeparator + file  //the last variable is the filename
         }
         case None => //no match, don't include this file
       }

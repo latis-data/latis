@@ -12,7 +12,7 @@ class TestTsml  {
   //@Test
   def test_variable_names {
     val tsml = Tsml("datasets/test/scalar.tsml")
-    val names = tsml.getVariableNames
+    val names = tsml.getScalarNames
     assertEquals("foo", names(0))
   }
   

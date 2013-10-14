@@ -7,20 +7,31 @@ class DatasetMl(xml: Node) extends TupleMl(xml) {
   
   //deal with adapter and implicit time series
   override def getVariableMl: Seq[VariableMl] = {
-    //get all direct child elements that represent variables, exclude adapter
-    //val es = xml.child.filter(e => e.isInstanceOf[Elem] && e.label != "adapter") 
+    //get all direct child elements that represent variables
     val es = Tsml.getVariableNodes(xml)
     
-    //deal with implicit time series: "time" label
-    es.partition(_.label == "time") match {
-      case (time, r) if (time.length == 1) => { //found one "time" variable
-        val domain = <domain/>.copy(child = time(0))  //<domain>time(0)</domain>
-        val range = <range/>.copy(child = r)  //<range>r</range>
-        val vml = VariableMl(<function/>.copy(child = Seq(domain, range)))
-        Seq(vml)
-      }
-      case _ => es.map(VariableMl(_))
+    //Handle implicit Functions (index or time assumed to be a 1D domain)
+    //Note: order doesn't matter, they don't have to be first.
+    if (Tsml.hasChildWithLabel(xml, "index")) es.partition(_.label == "index") match {
+      //TODO: error if more than one Index?
+      //Make implicit Function with Index domain.
+      case (index, r) => Seq(wrapWithImplicitFunction(index, r))
+      //TODO: error case _ =>
+    } else if (Tsml.hasChildWithLabel(xml, "time")) es.partition(_.label == "time") match {
+      //deal with implicit time series: "time" label.
+      case (time, r) => Seq(wrapWithImplicitFunction(time, r))
+      //TODO: error case _ =>
+    } else {
+      es.map(VariableMl(_))
     }
+  }
+  
+  //TODO: TsmlUtils?
+  private def wrapWithImplicitFunction(d: Seq[Node], r: Seq[Node]): VariableMl = {
+    val domain = <domain/>.copy(child = d.head) //assume one domain variable, <domain>d.head</domain>
+    //TODO: make sure r.length > 0
+    val range = <range/>.copy(child = r) //the rest, <range>r</range>
+    VariableMl(<function/>.copy(child = Seq(domain, range))) //will recurse and make all descendants
   }
   
   /**

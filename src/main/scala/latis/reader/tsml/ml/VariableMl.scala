@@ -56,51 +56,38 @@ abstract class VariableMl(xml: Node) {
     Map[String, String](seq: _*)
   }
 
+  //flatten VariableMl tree into Seq, depth first
+  def toSeq: Seq[VariableMl] = this match {
+    case s: ScalarMl => Seq(s)
+    case TupleMl(vars) => vars.foldLeft(Seq[VariableMl]())(_ ++ _.toSeq)
+    case FunctionMl(d,r) => d.toSeq ++ r.toSeq
+  }
+  
+  def getName = Tsml.getVariableName(xml) match {
+    case Some(name) => name
+    case None => "" //TODO: something better than empty string?
+  }
+  
   
   override def toString = xml.toString
 }
 
 object VariableMl {
-  //TODO: reject invalid nodes, Option? 
+   
   def apply(xml: Node) = {
-    //val xml = node.asInstanceOf[Elem] 
-    //println("Making VariableMl for " + xml.label)
     xml.label match {
-      //case "dataset" => new DatasetMl(xml) //explicitly constructed in Tsml
       case "tuple" => new TupleMl(xml)
       case "function" => new FunctionMl(xml)
-      //case "scalar" => new ScalarMl(xml)
       case _ => new ScalarMl(xml)
-      
-//      case "time" => {
-//        //add name and type
-//        //TODO: needed? Time factory will add them
-//  /*
-//   * TODO: put name and type in <metadata> instead of tsml attributes?
-//   * use "id" and "ref" in attributes?
-//   */
-//        var atts = xml.attributes
-//        atts = Attribute("", "name", "time", atts)
-//        atts = Attribute("", "type", "Time", atts)
-//        val xml2 = xml.copy(attributes = atts)
-//        new ScalarMl(xml2)
-//      }
-      //TODO: "text"?
-      //TODO: default to ScalarMl?
     }
   }
   
-  def apply(es: Seq[Node]): VariableMl = {
-    //println("VariableMl from Seq " + es)
-    es.length match {
-    case 1 => new ScalarMl(es(0).asInstanceOf[Elem])
-    case n if (n > 1) => {
-      val xml = <tuple/>.copy(child = es) //TODO: better way to construct this?
-      new TupleMl(xml) 
-    }
-    }
-    //case _ => error
+  /**
+   * If more than one, wrap in TupleMl.
+   */
+  def apply(es: Seq[Node]): VariableMl = es.length match {
+    case 1 => VariableMl(es.head) //only one
+    case _ => new TupleMl(<tuple/>.copy(child = es)) //implicit Tuple
   }
   
-
 }

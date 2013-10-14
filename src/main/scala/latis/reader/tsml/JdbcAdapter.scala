@@ -28,6 +28,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   private var projection = "*"
   private val selections = ArrayBuffer[String]()
   
+  
+  //TODO: handle first, last ops
+  
   override def handleOperation(operation: Operation): Boolean = operation match {
     case Projection(p) => {this.projection = p; true}
     case Selection(expression) => expression match {
@@ -56,15 +59,16 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
             }
           }
         }
-        else if (tsml.getVariableNames.contains(name)) {
+        else if (tsml.getScalarNames.contains(name)) { //other variable (not time)
+          //add a selection to the sql
           //replace "==" with "=" for SQL
           if (op == "==") this.selections += name + "=" + value
           else this.selections += expression
           true
         }
-        else false
+        else false //doesn't apply to our variables, so leave it for the next handler
       }
-      //TODO: case _ => error?
+      //TODO: case _ => doesn't match selection regex, error
       
     }
     //TODO: handle exception, return false (not handled)?
@@ -97,7 +101,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   *   until then, use "format"
   */
  
-    case _ => false
+    case _ => false //not an operation that we can handle
   }
   
   //Override to apply projection to the model, scalars only, for now.

@@ -8,3 +8,8 @@ class TupleMl(xml: Node) extends VariableMl(xml) {
   
   def getVariableMl() = variables
 }
+
+object TupleMl {
+  
+  def unapply(tml: TupleMl): Option[Seq[VariableMl]] = Some(tml.variables)
+}

@@ -13,9 +13,11 @@ class FunctionMl(xml: Node) extends VariableMl(xml) {
     case (d,r) if (d.length == 1) => {
       _domain = VariableMl(Tsml.getVariableNodes(d(0)))
       _range = VariableMl(Tsml.getVariableNodes(r(0))) //TODO: assert that there is one <range>
+      //TODO: allow range with no domain? implicit index
     }
     case _ => {
       //No "domain" defined, so assume the domain is the first variable
+      //TODO: make sure we have at least 2 kids to work with
       _domain = VariableMl(kids.head)
       _range = VariableMl(kids.tail)
     }
@@ -25,4 +27,9 @@ class FunctionMl(xml: Node) extends VariableMl(xml) {
   
   def range = _range
 
+}
+
+object FunctionMl {
+  
+  def unapply(fml: FunctionMl): Option[(VariableMl, VariableMl)] = Some((fml._domain, fml._range))
 }

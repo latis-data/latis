@@ -5,6 +5,7 @@ import scala.collection._
 import latis.time.Time
 import latis.reader.tsml.ml.ScalarMl
 import latis.reader.tsml.ml.Tsml
+import latis.data.EmptyData
 
 /**
  * An Adapter for Datasets small enough to fit into memory.
@@ -30,7 +31,9 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   override protected def makeScalar(sml: ScalarMl): Option[Scalar] = {
     val md = makeMetadata(sml)
     
-    val data = dataMap(md("name"))
+    val data = dataMap.getOrElse(md("name"), immutable.Seq[String]())
+    //note, will be empty if not a named variable (e.g. index)
+    //TODO: consider broader applicability
         
     sml.label match {
       case "real" => Some(Real(md, data.map(_.toDouble)))
@@ -50,7 +53,7 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
       case "index" => {
         //get the number of samples for one of the variables
         val length = dataMap.last._2.length
-        Some(Index(length))
+        Some(Index.withLength(length))
       }
       
       case _ => None

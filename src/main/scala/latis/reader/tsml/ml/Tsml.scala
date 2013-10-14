@@ -11,20 +11,33 @@ import scala.Option.option2Iterable
  * Convenient wrapper for dealing with the TSML XML.
  */
 class Tsml(val xml: Elem) { //extends VariableMl(xml) { //TODO: should this extend VariableMl? not a Variable
+  //Note: XML utilities methods in the companion object are designed for use during VariableMl construction.
+  //  TODO: move to TsmlUtils?
+  //  Instance methods are designed for use by Adapters after the VariableMl has been constructed.
+  //  The goal is for adapters to get what they need from TSML instance methods, 
+  //    though they may want to use util methods if they have special xml parsing needs.
   
-  lazy val dataset = new DatasetMl((xml \ "dataset")(0)) //assumes only one "dataset" element
+  lazy val dataset = new DatasetMl((xml \ "dataset").head) //assumes only one "dataset" element
   
   /**
-   * Gather the Names of all named Variables.
+   * Gather the Names of all Scalar Variables.
    */
-  def getVariableNames: Seq[String] = {
-    //TODO: assumes only scalars are named, for now
-    //Tsml.getVariableNodes((xml \ "dataset").head).flatMap(Tsml.getVariableName(_))
-    val ns = Tsml.getVariableNodes((xml \ "dataset").head)
-//TODO: needs to be recursive
-    ns.flatMap(Tsml.getVariableName(_))
+  def getScalarNames: Seq[String] = {
+    val scalars = dataset.toSeq.filter(ml => ml.isInstanceOf[ScalarMl])
+    val names = scalars.map(_.getName) //TODO: error if empty?, .filter(_.nonEmpty)
+    //don't include "index"
+    names.filter(_ != "index")
+    /*
+     * TODO: 2013-10-14
+     * consider source names vs exposed names
+     * These are usually (always?) used to map to source data.
+     * Index is a special case.
+     * Are there other special cases that should be applied here 
+     *   as opposed to operations after the dataset has been constructed?
+     * References?
+     */
   }
-
+  
   /**
    * Get a sequence of processing instructions' text values (proctext) 
    * for the given type (target).
@@ -66,7 +79,7 @@ object Tsml {
       case null => new Tsml(xml) //no ref, use top level dataset element
       case ref: String => {
         (xml \\ "dataset").find(node => (node \ "@name").text == ref) match {
-          case Some(node) => new Tsml(<tsml>{node.head}</tsml>) //TODO: will this form work?
+          case Some(node) => new Tsml(<tsml>{node.head}</tsml>) 
           case None => throw new RuntimeException("Can't find dataset with reference: " + ref)
         }
       }
@@ -84,35 +97,40 @@ object Tsml {
     val url = if (path.contains(":")) path //already absolute with a scheme
     else if (path.startsWith(File.separator)) "file:" + path //absolute file path
     else "file:" + scala.util.Properties.userDir + File.separator + path //relative file path
+    //TODO: resolve relative url from LatisProperties, e.g. dataset.dir
     Tsml(new URL(url))
   }
   
+  //just the direct kids
+  def getVariableNodes(vnode: Node): Seq[Node] = vnode.child.filter(isVariableNode(_))
     
-  def getVariableNodes(vnode: Node): Seq[Node] = {
-    val kids = vnode.child
-    //println(kids)
-    kids.filter(isVariableNode(_))
-    //vnode.child.filter(isVariableNode(_))
-  }
-  
   def isVariableNode(node: Node): Boolean = {
     val exclusions = List("metadata", "adapter", "values") //valid xml Elements that are not Variables
     node.isInstanceOf[Elem] && (! exclusions.contains(node.label)) 
   }
   
-  def getVariableName(node: Node): Option[String] = {
-    val n = (node \ "metadata@name").text match {
-      case "" => {
-        //not defined in metadata element, try attribute
-        //TODO: consider "time" and "index" with implicit name
-        (node \ "@name").text match {
-          case "" => None
-          case name: String => println(name); Some(name)
+  //note, metadata name takes precedence, TODO: dangerous if diff from attribute name
+  def getVariableName(node: Node): Option[String] = (node \ "metadata@name").text match {
+    case "" => {
+      //not defined in metadata element, try attribute
+      (node \ "@name").text match {
+        case "" => node.label match {
+          //try "time" and "index" (with implicit name)
+          case "time" => Some("time")
+          case "index" => Some("index")
+          case _ => None  //no name
         }
+        case name: String => Some(name) //from attribute
       }
-      case name: String => Some(name)
     }
-    
-    n
+    case name: String => Some(name) //from metadata
   }
+  
+//  def hasLabel(xml: Node, label: String): Boolean = xml.find(_.label == label) match {
+//    case Some(_) => true
+//    case None => false
+//  }
+  
+  def hasChildWithLabel(xml: Node, label: String): Boolean = xml.child.exists(_.label == label)
+  
 }

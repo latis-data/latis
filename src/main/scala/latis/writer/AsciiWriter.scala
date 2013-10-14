@@ -23,6 +23,7 @@ class AsciiWriter extends Writer {
     //TODO: build string instead of writing directly?
     
     //case Scalar(v) => _writer.print(v)
+    case Index(i) => _writer.print(i.toString)
     case Real(d) => _writer.print(d.toString)
     case Integer(l) => _writer.print(l.toString)
     case Text(s) => _writer.print(s)

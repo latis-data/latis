@@ -47,7 +47,7 @@ class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
    *   "take(linesPerRecord)"?
    */
   
-  lazy val variableNames = tsml.getVariableNames
+  lazy val variableNames = tsml.getScalarNames
   //TODO: generalize to get "projected" variables? from dataset? but need orig for parsing?
   
   /**

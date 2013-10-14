@@ -74,6 +74,9 @@ class CsvWriter extends Writer {
 //        v + delimiter
 //    }
     
+    //Don't print Index
+    case _: Index => ""
+    
     case Real(d) => d.toString + delimiter
     
     case Integer(l) => l.toString + delimiter

@@ -63,6 +63,8 @@ object Util {
   def buildVarFromBuffer(bb: ByteBuffer, template: Variable): Variable = template match {
 
     //TODO: use builder?
+    
+    case v: Index => Index(bb.getInt)
     case v: Time => Time(template.metadata, bb.getDouble)
     case v: Real => Real(template.metadata, bb.getDouble)
     case v: Integer => Integer(template.metadata, bb.getLong)

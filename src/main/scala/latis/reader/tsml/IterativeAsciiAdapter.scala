@@ -36,8 +36,7 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   type Record = Seq[Line]
   
   
-  lazy val variableNames = tsml.getVariableNames
-  //TODO: generalize to get "projected" variables?
+  lazy val variableNames = tsml.getScalarNames
   
   /**
    * Keep track of the data Source so we can close it.

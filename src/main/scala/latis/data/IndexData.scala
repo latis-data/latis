@@ -7,6 +7,7 @@ class IndexData(val start: Int, val stop: Int, val stride: Int) extends Data {
   
   def length: Int = (stop - start) / stride + 1
   
+  
   //TODO: Index values are not to be serialized, so return empty?
   def recordSize: Int = 0
   def getByteBuffer: ByteBuffer = ByteBuffer.allocate(0)
@@ -14,7 +15,7 @@ class IndexData(val start: Int, val stop: Int, val stride: Int) extends Data {
   def iterator = new Iterator[Data]() {
     var index = start
   
-    def hasNext(): Boolean = index + stride < length
+    def hasNext(): Boolean = index + stride < IndexData.this.length
   
     def next() = {
       index += stride

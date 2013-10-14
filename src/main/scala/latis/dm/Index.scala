@@ -31,18 +31,18 @@ object Index {
     index
   }
   
-  def apply(length: Int): Index = {
+  def withLength(length: Int): Index = {
     val index = Index()
     index._data = IndexData(length)
     index
   }  
+
+  def apply(value: Int): Index = {
+    val index = Index()
+    index._data = IndexValue(value)
+    index
+  }
   
-  //TODO: disambiguate from length (long?)
-//  def apply(value: Int): Index = {
-//    val index = Index()
-//    index._data = ???
-//    index
-//  }
-  
-  //def unapply
+  def unapply(index: Index): Option[Int] = Some(index.data.asInstanceOf[IndexValue].intValue)
+  //TODO: make sure we have a data value as opposed to IndexData...
 }
