@@ -7,7 +7,7 @@ apply plugin: 'war'
 apply plugin: 'ivy-publish'
 
 group = 'lasp'
-version = '2.0.1-SNAPSHOT'
+version = '2.0.1'
 
 publishing {
     publications {
@@ -30,9 +30,12 @@ repositories {
 dependencies {    
     providedCompile "javax.servlet:servlet-api:2.5" //not deployed
     compile 'org.scala-lang:scala-library:2.10.3'
-    testCompile 'junit:junit:4.+'
+    
     compile 'com.typesafe:scalalogging-slf4j_2.10:1.0.1'
     compile 'ch.qos.logback:logback-classic:1.0.13'
+    
+    testCompile 'junit:junit:4.+'
+    testCompile 'org.apache.derby:derby:10.10.1.1'
 }
 
 //For testing

@@ -29,64 +29,45 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   private val selections = ArrayBuffer[String]()
   
   
-  //TODO: handle first, last ops
+  //Handle first, last ops
+  private var first = false
+  private var last = false
+  
+  //Define sorting order.
+  private var order = " ASC"
+      
   
   override def handleOperation(operation: Operation): Boolean = operation match {
     case Projection(p) => {this.projection = p; true}
+    //TODO: need to keep orig dataset, filter on non-projected vars...
+    
     case Selection(expression) => expression match {
       //Break expression up into components
       case SELECTION(name, op, value) => {
         //TODO: allow alias, use source name
-        //TODO: use source time format
         
-        //support ISO time string as value
-        //TODO: assumes db value are numerical, for now
-        if (name == "time") {
-          (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
-            case "" => ??? //no time units found
-            case units: String => {
-              //convert ISO time to units
-              RegEx.TIME findFirstIn value match {
-                case Some(s) => {
-                  val t = Time(javax.xml.bind.DatatypeConverter.parseDateTime(s).getTimeInMillis().toDouble)
-                  val t2 = t.convert(TimeScale(units)).doubleValue
-                  val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
-                  this.selections += tvname + op + t2
-                  true
-                }
-                case None => ??? //value didn't match time format
-              }
-            }
-          }
-        }
+        if (name == "time") handleTimeSelection(op, value) //special handling for time
         else if (tsml.getScalarNames.contains(name)) { //other variable (not time)
           //add a selection to the sql
           //replace "==" with "=" for SQL
           if (op == "==") this.selections += name + "=" + value
+          //TODO: sanitize, quotes around timetag,...
           else this.selections += expression
           true
         }
         else false //doesn't apply to our variables, so leave it for the next handler
       }
       //TODO: case _ => doesn't match selection regex, error
-      
     }
+    
+    case _: FirstFilter => first = true; true
+    case _: LastFilter  => last = true; order = " DESC"; true
+    
     //TODO: handle exception, return false (not handled)?
     
-    /*
-     * TODO: support aliases (e.g. "time")
-     * 
-     * resolveName? 
-     *   implies getting full name
-     * getSourceName? 
-     * getShortName?
-     *   but variable could have been renamed
-     *   but the (immutable) Dataset this guy knows about won't be renamed?
-     *   or will processing instructions be applied mutably?
-     * but we don't keep sourceDataset, even if it is immutable
-     * 
-     */
-    
+    case _ => false //not an operation that we can handle
+  }
+
  /*
   * TODO: time format for sql
   * dataset.findTimeVariable? 
@@ -100,8 +81,26 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   *   for the db datetime case, use string
   *   until then, use "format"
   */
- 
-    case _ => false //not an operation that we can handle
+  def handleTimeSelection(op: String, value: String): Boolean = {
+    //support ISO time string as value
+    //TODO: assumes db value are numerical, for now
+    //TODO: use model instead of xml
+    (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
+      case "" => ??? //no time units found
+      case units: String => {
+        //convert ISO time to units
+        RegEx.TIME findFirstIn value match {
+          case Some(s) => {
+            val t = Time(javax.xml.bind.DatatypeConverter.parseDateTime(s).getTimeInMillis().toDouble)
+            val t2 = t.convert(TimeScale(units)).doubleValue
+            val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
+            this.selections += tvname + op + t2
+            true
+          }
+          case None => ??? //value didn't match time format
+        }
+      }
+    }
   }
   
   //Override to apply projection to the model, scalars only, for now.
@@ -139,6 +138,11 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
       case _ => 
     }
     
+    //Apply FirstFilter or LastFilter. 
+    //Set max rows to 1. "last" will set order to descending.
+    //TODO: error if both set, unless there was only one
+    if (first || last) statement.setMaxRows(1)
+    
     statement.executeQuery(sql)
   }
   
@@ -159,7 +163,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     //TODO: generalize for n-D domains, get Function domain...
     //TODO: assuming that the first variable is the one to sort on
     //  make sure that tsml lists that variable first
-    sb append " ORDER BY " + dataset.toSeq.head.name + " ASC"
+    sb append " ORDER BY " + dataset.toSeq.head.name + order
     
     sb.toString
   }

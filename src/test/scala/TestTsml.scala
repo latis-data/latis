@@ -10,6 +10,9 @@ import latis.ops.Projection
 import scala.collection.mutable.ArrayBuffer
 import latis.ops.Operation
 import latis.ops.Selection
+import latis.ops.LastFilter
+import latis.ops.FirstFilter
+import latis.ops.LimitFilter
 
 class TestTsml  {
 
@@ -94,12 +97,23 @@ class TestTsml  {
     AsciiWriter().write(ds)
   }
   
-  @Test
+  //@Test
   def test_mms_file_list {
     val ops = ArrayBuffer[Operation]()
     //ops += Projection("time,sc_id,file")
     ops += Selection("data_level=ql")
+    ops += LimitFilter(30) //TODO: needs to be applied last
+    //ops += new FirstFilter //TODO: no results, make sure it is applied last?
     val ds = TsmlReader("/home/lindholm/git/latis-mms/src/main/webapp/datasets/science_files.tsml").getDataset(ops)
+    AsciiWriter().write(ds)
+  }
+  
+  @Test
+  def test_db {
+    val ops = ArrayBuffer[Operation]()
+    //ops += Selection("orbit_number>1")
+    //ops += FirstFilter()
+    val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
     AsciiWriter().write(ds)
   }
 }

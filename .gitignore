@@ -6,3 +6,4 @@
 .settings/
 .cache
 .gradle/
+*.log

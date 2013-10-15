@@ -13,6 +13,7 @@ class DatasetMl(xml: Node) extends TupleMl(xml) {
     //Handle implicit Functions (index or time assumed to be a 1D domain)
     //Note: order doesn't matter, they don't have to be first.
     if (Tsml.hasChildWithLabel(xml, "index")) es.partition(_.label == "index") match {
+      //TODO: make IndexFunction, iterator counter for index value
       //TODO: error if more than one Index?
       //Make implicit Function with Index domain.
       case (index, r) => Seq(wrapWithImplicitFunction(index, r))
