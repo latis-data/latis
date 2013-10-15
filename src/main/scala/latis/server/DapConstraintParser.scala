@@ -16,11 +16,12 @@ object DapConstraintParser {
     val buffer = new ArrayBuffer[Operation]() 
     
     if (args.nonEmpty) {
-      //projection expression should be first, may be empty
-      if (args.head.length > 0) buffer += Projection(args(0).split(","))
-
       //handle expressions for selections and other operations
       buffer ++= args.tail.map(parseExpression(_))
+      
+      //projection expression should be first among the args
+      //but last to be applied, may be empty string
+      if (args.head.length > 0) buffer += Projection(args(0).split(","))
  
     } //else return an empty list
 
