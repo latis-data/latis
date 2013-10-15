@@ -107,6 +107,7 @@ object Function {
     new Function(domain, range)
   }
   
+  //def apply(samples: Seq[Sample]): Function = 
   
   def unapply(f: Function): Option[(Variable, Variable)] = Some((f.domain, f.range))
   
