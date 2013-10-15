@@ -27,10 +27,19 @@ class Projection(val names: Seq[String]) extends Operation {
   }
    
   def projectScalar(scalar: Scalar): Option[Scalar] = {
+    //TODO: support alias
     if (names contains scalar.name) Some(scalar) else None
   }
   
   def projectTuple(tuple: Tuple): Option[Tuple] = {
+    /*
+     * TODO: maintain projection order
+     * making a new dataset, tuple reuses same kids
+     * need to deal with Data!
+     * otherwise will only work for column-oriented data (all in scalars, GranuleAdapter)
+     * Is this safe to do here or support in adapters?
+     * Apply as a FilteredFunction so we can reorder vars in sample?
+     */
     val vars = tuple.variables.flatMap(project(_))
     if (vars.length == 0) None
     else Some(Tuple(vars)) //TODO: metadata
