@@ -116,8 +116,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //Apply remaining operations to the Dataset.
     //TODO: is that our responsibility? We did pass the ops to the reader.
     //TODO: leave unhandled ops for Writer
-    ops.foldRight(ds)(_(_)) //op(ds)
-    
+    //TODO: what can we do about preservnig operation order if we let adapters handle what they want?
+    ops.reverse.foldRight(ds)(_(_)) //op(ds)
+    //NOTE: foldRight applies them in reverse order
   }
   
   /**
