@@ -7,6 +7,7 @@ import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
 import scala.collection.mutable.ArrayBuffer
 import latis.ops._
+import latis.dm._
 
 class JdbdAdapterTest {
 
@@ -14,11 +15,14 @@ class JdbdAdapterTest {
   
   @Before
   def makeDatabase {
+    System.setProperty("derby.stream.error.file", "/dev/null") //don't make log file
+    
     Class.forName("org.apache.derby.jdbc.EmbeddedDriver")  //Load the JDBC driver     
     connection = DriverManager.getConnection("jdbc:derby:memory:testDB;create=true")
     
     var statement = connection.createStatement()
     statement.execute("create table test(i int, d double, s varchar(1))")
+    //TODO: add other types: datetime,...
     statement.execute("insert into test values(1, 1.1, 'A')")
     statement.execute("insert into test values(2, 2.2, 'B')")
     statement.execute("insert into test values(3, 3.3, 'C')")
@@ -45,6 +49,10 @@ class JdbdAdapterTest {
   
   @Test
   def tsml_adapter {
+    //val ds = TsmlReader("datasets/test/db.tsml").getDataset
+    //ds.variables.head.asInstanceOf[Function].range
+    //ds.getTimeSeries
+    
     val ops = ArrayBuffer[Operation]()
     //ops += LastFilter()
     ops += FirstFilter() //NOTE: jdbc adapter doesn't preserve order of ops

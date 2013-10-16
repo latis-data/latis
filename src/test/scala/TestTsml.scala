@@ -108,9 +108,9 @@ class TestTsml  {
 //    AsciiWriter().write(ds)
 //  }
   
-  @Test
+  //@Test
   def test_dataset {
-    val ds = TsmlReader("datasets/scalar.tsml").getDataset
+    val ds = TsmlReader("datasets/test/scalar.tsml").getDataset
     AsciiWriter().write(ds)
   }
 }
