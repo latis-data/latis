@@ -96,7 +96,10 @@ object Tsml {
   def apply(path: String): Tsml = {
     val url = if (path.contains(":")) path //already absolute with a scheme
     else if (path.startsWith(File.separator)) "file:" + path //absolute file path
-    else "file:" + scala.util.Properties.userDir + File.separator + path //relative file path
+    else getClass.getResource("/"+path) match { //try in the classpath (e.g. "resources")
+      case url: URL => url.toString
+      case null => "file:" + scala.util.Properties.userDir + File.separator + path //relative file path
+    }
     //TODO: resolve relative url from LatisProperties, e.g. dataset.dir
     Tsml(new URL(url))
   }

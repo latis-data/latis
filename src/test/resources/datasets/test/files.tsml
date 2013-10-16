@@ -5,7 +5,7 @@
     
     <adapter class="latis.reader.tsml.FileListAdapter"
              pattern="a(\d{4}).dat"
-             url="/data/latis/file_test" />
+             location="/data/latis/file_test" />
              
     <time name="time">
       <!--metadata units="years since 0000-00-00" /-->

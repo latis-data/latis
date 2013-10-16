@@ -4,7 +4,7 @@
   <dataset>
     <metadata name="Database Test"/>
     <adapter class="latis.reader.tsml.JdbcAdapter"
-             url="jdbc:derby:memory:testDB" 
+             location="jdbc:derby:memory:testDB" 
              driver="org.apache.derby.jdbc.EmbeddedDriver"
              user="" password=""
              table="test"/>

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tsml>
 
-  <dataset name="scalar_ts_3col_0_9">
+  <dataset name="scalar_ts_2col_10_19">
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
-             url="datasets/test/agg/scalar_ts_3col_0-9.txt" />
+             location="datasets/test/agg/scalar_ts_2col_10-19.txt" />
              
     <time name="T"/>
-    <integer name="B"/>
-    <integer name="C"/>
+    <integer name="A"/>
 
   </dataset>
 

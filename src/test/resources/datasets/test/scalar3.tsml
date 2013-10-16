@@ -4,7 +4,7 @@
   <dataset>
     <metadata name="Scalar Test"/>
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
-             url="file:/data/latis/scalar_3col.txt" />
+             location="file:/data/latis/scalar_3col.txt" />
     
     <time name="time" />
     

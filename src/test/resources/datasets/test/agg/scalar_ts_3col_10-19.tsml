@@ -3,7 +3,7 @@
 
   <dataset name="scalar_ts_3col_10_19">
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
-             url="datasets/test/agg/scalar_ts_3col_10-19.txt" />
+             location="datasets/test/agg/scalar_ts_3col_10-19.txt" />
              
     <time name="T"/>
     <integer name="B"/>

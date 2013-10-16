@@ -15,6 +15,7 @@ import latis.reader.tsml.ml.ScalarMl
 import latis.reader.tsml.ml.FunctionMl
 import latis.reader.tsml.ml.TupleMl
 import latis.reader.tsml.ml.Tsml
+import java.net.URL
 
 
 /**
@@ -191,15 +192,18 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * Get the URL of the data source from this adapter's definition.
    */
   def getUrl(): String = {
-    //TODO: consider 'location' since url tends to imply scheme://...
-    properties.get("url") match {
-      case Some(url) => {
+    //TODO: can we be relative to tsml? No, only have xml here
+    properties.get("location") match {
+      case Some(loc) => {
         //TODO: use URI API?
-        if (url.contains(":")) url //Assume URL is absolute (has scheme) if ":" exists.
-        else if (url.startsWith(File.separator)) "file:" + url //full path
-        else "file:" + System.getProperty("user.dir") + File.separator + url //relative to current working directory
+        if (loc.contains(":")) loc //Assume URL is absolute (has scheme) if ":" exists.
+        else if (loc.startsWith(File.separator)) "file:" + loc //full path
+        else getClass.getResource("/"+loc) match { //try in the classpath
+          case url: URL => url.toString
+          case null => "file:" + scala.util.Properties.userDir + File.separator + loc //relative to current working directory
+        }
       }
-      case None => throw new RuntimeException("No url attribute in TSML adapter definition.")
+      case None => throw new RuntimeException("No 'location' attribute in TSML adapter definition.")
     }
   }
   
