@@ -4,6 +4,7 @@ import java.nio.ByteBuffer
 import latis.data._
 
 //TODO: test if we are getting the benefit of value classes
+//  http://docs.scala-lang.org/overviews/core/value-classes.html
 //TODO: ValueData trait?
 
 case class DoubleValue(val value: Double) extends AnyVal with NumberData {
