@@ -3,11 +3,11 @@ package latis.server
 import javax.servlet.http.{ HttpServlet, HttpServletRequest, HttpServletResponse }
 import latis.util.LatisProperties
 import latis.reader.tsml.TsmlReader
-import latis.metadata.Registry
 import latis.util.LatisServerProperties
 import latis.writer.HttpServletWriter
 import com.typesafe.scalalogging.slf4j.Logging
 import java.net.URLDecoder
+import latis.metadata.Catalog
 
 class LatisServer extends HttpServlet with Logging {
 
@@ -38,7 +38,7 @@ class LatisServer extends HttpServlet with Logging {
 
       //Get the URL to the Dataset's TSML descriptor.
       logger.debug("Locating dataset: " + dsname)
-      val url = Registry.getTsmlUrl(dsname)
+      val url = Catalog.getTsmlUrl(dsname)
       
       logger.debug("Reading dataset from TSML: " + url)
       //Construct the reader for this Dataset.

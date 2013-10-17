@@ -34,9 +34,10 @@ import java.io.File
  * Generalize "catalog" to "registry"?
  * DatasetRegistry?
  * this would be useful in the core, too
+ * But "registry" implies a "register" operation.
  */
 
-object Registry {
+object Catalog {
 
   def getTsmlUrl(dataset: String): URL = {
     var base = LatisProperties.getOrElse("dataset.dir", "datasets")
