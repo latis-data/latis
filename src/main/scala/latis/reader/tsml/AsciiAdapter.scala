@@ -12,7 +12,14 @@ class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
   /*
    * TODO: 2013-10-07
    * Could this be designed so the granule adapter simply iterates over IterativeAdapter?
-   * is there ever a need for granlue? just a matter of caching?
+   * is there ever a need for granule? just a matter of caching?
+   * granule adapter uses column oriented store, sep seq for each var
+   * iterative adapter stitches them together in samples
+   * 
+   * How far can we go with parseRecord abstraction?
+   * this would be a good hook for unit tests
+   * use traits for ascii vs bin or granlue vs interative?
+   * http://mods-jira.lasp.colorado.edu:8080/browse/LATIS-29
    */
   
   /**
