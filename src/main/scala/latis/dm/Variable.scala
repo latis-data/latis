@@ -4,16 +4,38 @@ import latis.data._
 import latis.metadata._
 import latis.ops.math.BasicMath
 
-//abstract class Variable(val metadata: Metadata, val data: Data) {
-abstract class Variable {
+/*
+ * TODO: 2013-10-21
+ * traits: Scalar, Real, Integer,..., Tuple, Function
+ * each could have "this: Variable =>"  but not IS-A Variable
+ * when to we need to pattern match on Variable vs type?
+ * do we need a Variable trait? yes, write to interfaces
+ * and a VariableImpl
+ */
+
+trait Variable {
+  def getMetadata: Metadata
+  def getData: Data
+  
+  def isNumeric: Boolean = getData.isInstanceOf[NumberData]
+  
+  def getLength: Int
+  def getSize: Int
+  
+  def toSeq: Seq[Scalar[_]]
+  def getDataIterator: Iterator[Data]
+}
+
+class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyData) extends Variable {
   //TODO: with Subsetting,... so we don't end up with so much code here
 
-  protected var _metadata: Metadata = EmptyMetadata
-  protected var _data: Data = EmptyData
+//  protected var _metadata: Metadata = EmptyMetadata
+//  protected var _data: Data = EmptyData
   
   //allow subclasses to override, e.g. ProjectedFunction
-  def metadata: Metadata = _metadata
-  def data: Data = _data
+  //def metadata: Metadata = _metadata
+  //def data: Data = _data
+  //TODO: require getMetadata, getData?
   
   lazy val name = metadata.name
   
@@ -26,8 +48,8 @@ abstract class Variable {
     case i: Integer => 8 //long
     case t: Text => t.length * 2 //2 bytes per char
     
-    case Tuple(vars) => vars.foldLeft(0)(_ + _.size)
-    case f @ Function(d,r) => f.length * (d.size + r.size)
+    case Tuple(vars) => vars.foldLeft(0)(_ + _.getSize)
+    case f @ Function(d,r) => f.getLength * (d.getSize + r.getSize)
   }
   
   /**
@@ -42,7 +64,7 @@ abstract class Variable {
    */
   lazy val sampleSize: Int = getSampleSize
   protected def getSampleSize: Int = this match {
-    case Function(d,r) => d.size + r.size 
+    case Function(d,r) => d.getSize + r.getSize 
     case _ => size //default to size for Scalars and Tuples
   }
   
@@ -51,9 +73,9 @@ abstract class Variable {
    * In other words, considering the Variable as a tree,
    * return all the leaves in depth first order.
    */
-  def toSeq: Seq[Scalar] = this match {
-    case s: Scalar => Seq(s)
-    case Tuple(vars) => vars.foldLeft(Seq[Scalar]())(_ ++ _.toSeq)
+  def toSeq: Seq[Scalar[_]] = this match {
+    case s: Scalar[_] => Seq(s)
+    case Tuple(vars) => vars.foldLeft(Seq[Scalar[_]]())(_ ++ _.toSeq)
     case Function(d,r) => d.toSeq ++ r.toSeq
   }
   
@@ -117,19 +139,19 @@ abstract class Variable {
 //  }
   
   
-  def containsVariable(name: String): Boolean = this match {
-    //TODO: support alias
-    case s: Scalar => if (s.name == name) true else false
-    case Tuple(vars) => vars.exists(_.containsVariable(name))
-    case Function(domain, range) => domain.containsVariable(name) || range.containsVariable(name)
-  }
-  
-  def hasAlias(alias: String): Boolean = {
-    metadata.get("alias") match {
-      case Some(s) => s.split(",").contains(alias)
-      case None => false
-    }
-  }
+//  def containsVariable(name: String): Boolean = this match {
+//    //TODO: support alias
+//    case s: Scalar[_] => if (s.name == name) true else false
+//    case Tuple(vars) => vars.exists(_.containsVariable(name))
+//    case Function(domain, range) => domain.containsVariable(name) || range.containsVariable(name)
+//  }
+//  
+//  def hasAlias(alias: String): Boolean = {
+//    metadata.get("alias") match {
+//      case Some(s) => s.split(",").contains(alias)
+//      case None => false
+//    }
+//  }
   
   //replaced by toSeq
 //  /**
@@ -161,12 +183,12 @@ abstract class Variable {
    * Get a Data Iterator for this Variable.
    * If it doesn't contain data, gather it from the kids.
    */
-  def dataIterator: Iterator[Data] = {
+  def getDataIterator: Iterator[Data] = {
     if (data.notEmpty) data.iterator
     else this match {
       case Tuple(vars) => concatData(vars) 
       case Function(d, r) => concatData(Seq(d,r))
-      case s: Scalar => s.data.iterator
+      case s: Scalar[_] => s.data.iterator
     }
   }
 
@@ -175,7 +197,7 @@ abstract class Variable {
    * into a single Data Iterator.
    */
   private def concatData(vars: Seq[Variable]): Iterator[Data] = new Iterator[Data] {
-    val its: Seq[Iterator[Data]] = vars.map(_.dataIterator)
+    val its: Seq[Iterator[Data]] = vars.map(_.getDataIterator)
     def hasNext = its.head.hasNext //assume all Variables have the same number of samples
     def next = {
       val ds: Seq[Data] = its.map(_.next)
@@ -184,29 +206,29 @@ abstract class Variable {
   }
   
   
-  override def equals(that: Any): Boolean = (this, that) match {
-    case (v1: Scalar, v2: Scalar) => v1._metadata == v2._metadata && v1._data == v2._data
-    
-    case (v1: Tuple, v2: Tuple) => v1._metadata == v2._metadata && v1._data == v2._data && 
-      v1.variables == v2.variables 
-    
-    //iterate through all samples
-    case (v1: Function, v2: Function) => v1._metadata == v2._metadata && 
-      (v1.iterator zip v2.iterator).forall(p => p._1 == p._2)
-      //TODO: confirm same length? iterate once issues
-    
-    case _ => false
-  }
+//  override def equals(that: Any): Boolean = (this, that) match {
+//    case (v1: Scalar[_], v2: Scalar[_]) => v1._metadata == v2._metadata && v1._data == v2._data
+//    
+//    case (v1: Tuple, v2: Tuple) => v1._metadata == v2._metadata && v1._data == v2._data && 
+//      v1.variables == v2.variables 
+//    
+//    //iterate through all samples
+//    case (v1: Function, v2: Function) => v1._metadata == v2._metadata && 
+//      (v1.iterator zip v2.iterator).forall(p => p._1 == p._2)
+//      //TODO: confirm same length? iterate once issues
+//    
+//    case _ => false
+//  }
   
   //TODO: override def hashCode
   
   
   override def toString() = this match { //name +": "+ data.toString
   //use "unknown" only for scalars
-    case s: Scalar => s.name
-    case t: Tuple => if (t.name == "unknown") t.variables.mkString("(", ", ", ")")
-      else t.name + ": " + t.variables.mkString("(", ", ", ")")
-    case f: Function => f.domain.toString + " -> " + f.range.toString
+    case s: Scalar[_] => s.name
+    case t: Tuple => if (t.name == "unknown") t.getVariables.mkString("(", ", ", ")")
+      else t.name + ": " + t.getVariables.mkString("(", ", ", ")")
+    case f: Function => f.getDomain.toString + " -> " + f.getRange.toString
   }
    
 //--- Units ---
@@ -248,5 +270,5 @@ object Variable {
   
   //Use Variable(md, data) in pattern match to expose metadata and data.
   //Subclasses may want to expose data values
-  def unapply(v: Variable) = Some((v.metadata, v.data))
+  def unapply(v: Variable) = Some((v.getMetadata, v.getData))
 }

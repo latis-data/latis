@@ -8,7 +8,7 @@ import latis.metadata.Metadata
  * Scalar Variable that represents an index.
  * Implemented such that its Data represents the index values.
  */
-class Index extends Scalar with Number {
+trait Index extends Scalar[Int] with Number {
   /*
    * try to impl Data with index math - IndexData
    * 
@@ -19,30 +19,19 @@ class Index extends Scalar with Number {
    */
   
   //needed for Number
-  def doubleValue = data.asInstanceOf[NumberData].doubleValue
+  //def doubleValue = getData.asInstanceOf[NumberData].doubleValue
 }
 
 
 object Index {
   
-  def apply(): Index = {
-    val index = new Index //(EmptyMetadata, EmptyData)
-    index._metadata = Metadata("index") //set name metadata to "index"
-    index
-  }
+  def apply(): Index = new Variable2(metadata = Metadata("index")) with Index
   
-  def withLength(length: Int): Index = {
-    val index = Index()
-    index._data = IndexData(length)
-    index
-  }  
+  def withLength(length: Int): Index = new Variable2(data = IndexData(length)) with Index
 
-  def apply(value: Int): Index = {
-    val index = Index()
-    index._data = IndexValue(value)
-    index
-  }
+  def apply(value: Int): Index = new Variable2(data = IndexValue(value)) with Index
+
   
-  def unapply(index: Index): Option[Int] = Some(index.data.asInstanceOf[IndexValue].intValue)
+  def unapply(index: Index): Option[Int] = Some(index.getData.asInstanceOf[IndexValue].intValue)
   //TODO: make sure we have a data value as opposed to IndexData...
 }

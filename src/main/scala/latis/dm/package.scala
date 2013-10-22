@@ -16,6 +16,9 @@ package object implicits {
   //implicit def longToInteger(l: Long): Integer = Integer(l)
   //... 
   
+  //implicit def doubleToData(d: Double): Data = DoubleValue(d)
+  //...
+  
   
   implicit def doubleToDataset(d: Double): Dataset = Dataset(Real(d))
   //implicit def intToDataset(i: Int): Dataset = Dataset(Integer(i))

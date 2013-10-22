@@ -9,7 +9,7 @@ import latis.util.NextIterator
  * This Function will represent a subset of the samples of the original.
  * The type of the variables will not change.
  */
-class FilteredFunction(function: Function, val selection: Selection) extends Function(function.domain, function.range) {
+class FilteredFunction(function: Function, val selection: Selection) extends Variable with Function {
   //NOTE: can't change type: same domain and range, can't be used for projection
   //TODO: operations: Seq[Operation]? CompositeOperation?
   //TODO: deal with metadata? only if there is a "length", provenance belongs to parent Dataset

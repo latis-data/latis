@@ -6,11 +6,22 @@ import latis.metadata._
 import java.nio.ByteBuffer
 import latis.util.Util
 
-class Function(_domain: Variable, _range: Variable) extends Variable {
+trait Function extends Variable { //this: Variable =>
+  def getDomain: Variable
+  def getRange: Variable
+  
+  
+  //TODO: put in Variable?
+  //def length: Int
+  def iterator: Iterator[Sample]
+}
+
+class SampledFunction(domain: Variable, range: Variable) extends Function {
+  //TODO: metadata, data
   
   /*
    * 2013-08-07
-   * TODO: Continuous vs Sampled Function
+   * TODO: ContinuousFunction
    * now that Data is separable, how can we support continuous function (e.g. exp model)
    * ContinuousFunction:
    *   apply(domainVal: Variable) => range val
@@ -19,25 +30,26 @@ class Function(_domain: Variable, _range: Variable) extends Variable {
    *   iterator => error
    */
 
-  //expose domain and range vis defs only so we can override (e.g. ProjectedFunction)
-  def domain: Variable = _domain
-  def range: Variable = _range
+  //expose domain and range via defs only so we can override (e.g. ProjectedFunction)
+  def getDomain: Variable = domain
+  def getRange: Variable = range
   
   private var _iterator: Iterator[Sample] = null
   
   def iterator: Iterator[Sample] = {
     if (_iterator != null) _iterator
-    else if (data.isEmpty) iterateFromKids
-    else dataIterator.map(Util.dataToSample(_, Sample(domain, range)))
+    else if (getData.isEmpty) iterateFromKids
+    else getDataIterator.map(Util.dataToSample(_, Sample(domain, range)))
   }
   
   private def iterateFromKids: Iterator[Sample] = {
-    val dit = domain.dataIterator.map(data => Util.dataToVariable(data, domain))
-    val rit = range.dataIterator.map(data => Util.dataToVariable(data, range))
+    val dit = domain.getDataIterator.map(data => Util.dataToVariable(data, domain))
+    val rit = range.getDataIterator.map(data => Util.dataToVariable(data, range))
     (dit zip rit).map(pair => Sample(pair._1, pair._2))
   }
 
-  lazy val length: Int = metadata.get("length") match {
+  def length = _length
+  lazy val _length: Int = getMetadata.get("length") match {
     case Some(l) => l.toInt
     case None =>  { //-1 //unknown
       iterator.length
@@ -46,7 +58,7 @@ class Function(_domain: Variable, _range: Variable) extends Variable {
     }
   }
   
-  
+  //Support first and last filters
   //TODO: consider more optimal approaches
   def getFirstSample: Sample = iterator.next
   def getLastSample: Sample = {
@@ -73,43 +85,43 @@ object Function {
   
   
   def apply(domain: Variable, range: Variable): Function = {
-    new Function(domain, range)
+    new SampledFunction(domain, range)
   }  
   
-  def apply(domain: Variable, range: Variable, data: Data): Function = {
-    val f = new Function(domain, range)
-    f._data = data
-    f
-  }
-  
-  //build from Iterator[Sample]? TODO: do we need to set _data to something?
-  def apply(domain: Variable, range: Variable, sampleIterator: Iterator[Sample]): Function = {
-    //Note, wouldn't need domain and range, but would have to trigger iterator, or use peek?
-    val f = new Function(domain, range)
-    f._iterator = sampleIterator
-    f
-  }
-  
-  def apply(domain: Variable, range: Variable, md: Metadata, data: Data): Function = {
-    val f = new Function(domain, range)
-    f._metadata = md
-    f._data = data
-    f
-  }
-  
-  def apply(vals: Seq[Seq[Double]]): Function = Function(vals.head, vals.tail: _*)
-  
-  def apply(dvals: Seq[Double], vals: Seq[Double]*): Function = {
-    val domain = Real(dvals)
-    //make Real if vals.length == 1
-    val range = if (vals.length == 1) Real(vals(0)) else Tuple(vals)(0d) //hack to get around type erasure ambiguity
-
-    new Function(domain, range)
-  }
+//  def apply(domain: Variable, range: Variable, data: Data): Function = {
+//    val f = new Function(domain, range)
+//    f._data = data
+//    f
+//  }
+//  
+//  //build from Iterator[Sample]? TODO: do we need to set _data to something?
+//  def apply(domain: Variable, range: Variable, sampleIterator: Iterator[Sample]): Function = {
+//    //Note, wouldn't need domain and range, but would have to trigger iterator, or use peek?
+//    val f = new Function(domain, range)
+//    f._iterator = sampleIterator
+//    f
+//  }
+//  
+//  def apply(domain: Variable, range: Variable, md: Metadata, data: Data): Function = {
+//    val f = new Function(domain, range)
+//    f._metadata = md
+//    f._data = data
+//    f
+//  }
+//  
+//  def apply(vals: Seq[Seq[Double]]): Function = Function(vals.head, vals.tail: _*)
+//  
+//  def apply(dvals: Seq[Double], vals: Seq[Double]*): Function = {
+//    val domain = Real(dvals)
+//    //make Real if vals.length == 1
+//    val range = if (vals.length == 1) Real(vals(0)) else Tuple(vals)(0d) //hack to get around type erasure ambiguity
+//
+//    new Function(domain, range)
+//  }
   
   //def apply(samples: Seq[Sample]): Function = 
   
-  def unapply(f: Function): Option[(Variable, Variable)] = Some((f.domain, f.range))
+  def unapply(f: Function): Option[(Variable, Variable)] = Some((f.getDomain, f.getRange))
   
 }
 

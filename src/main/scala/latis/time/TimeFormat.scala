@@ -9,14 +9,15 @@ import java.util.TimeZone
  */
 class TimeFormat(format: String) extends SimpleDateFormat(format) {
 
-  this.setTimeZone(TimeZone.getTimeZone("GMT")); //default to GMT
+  this.setTimeZone(TimeZone.getTimeZone("GMT")) //default to GMT
 
   override def toString = format
 }
 
 object TimeFormat {
-  val DATE     = new TimeFormat("yyyy-MM-dd");
-  val DATETIME = new TimeFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+  val DATE     = TimeFormat("yyyy-MM-dd")
+  val DATETIME = TimeFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
+  val ISO      = DATETIME
   
   def apply(format: String): TimeFormat = new TimeFormat(format)
 }

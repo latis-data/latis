@@ -10,7 +10,7 @@ trait TextData extends Any with Data {
   def stringValue: String
 }
 
-//object TextData {
-//just encourages instantiation of value class
-//  def unapply(text: TextData) = Some(text.stringValue)
-//}
+object TextData {
+  //just encourages instantiation of value class
+  def unapply(text: TextData) = Some(text.stringValue)
+}

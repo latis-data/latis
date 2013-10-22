@@ -1,5 +1,7 @@
 package latis.time
 
+import latis.data.NumberData
+
 class BasicTimeConverter(scale1: TimeScale, scale2: TimeScale) extends TimeConverter(scale1, scale2) {
 
   // Get time zero for each time scale in seconds since 1970
@@ -22,7 +24,9 @@ class BasicTimeConverter(scale1: TimeScale, scale2: TimeScale) extends TimeConve
   
   def convert(time: Time): Time = {
     //TODO: assert time.scale == scale1
-    val t = convert(time.doubleValue)
-    Time(t, scale2)
+    //TODO: if LongValue preserve long
+    //TODO: if StringValue...
+    val t = convert(time.getData.asInstanceOf[NumberData].doubleValue)
+    Time(scale2, t)
   }
 }

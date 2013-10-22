@@ -8,7 +8,7 @@ import latis.util.NextIterator
  * Wrapper for a Function that applies a "projection" to each sample.
  * The resulting Function will include only the Variables named in the Projection.
  */
-class ProjectedFunction(function: Function, val projection: Projection) extends Function(function.domain, function.range) {
+class ProjectedFunction(function: Function, val projection: Projection) extends Variable with Function {
   /*
    * TODO: domain and range may change
    * but we pass them to super
@@ -25,7 +25,7 @@ class ProjectedFunction(function: Function, val projection: Projection) extends 
   
   //delegate to projection to get new domain and range for the model
   //TODO: make sure this doesn't tickle the data
-  val (_domain, _range) = projection.projectSample(Sample(function.domain, function.range)) match {
+  val (_domain, _range) = projection.projectSample(Sample(function.getDomain, function.getRange)) match {
     case Some(sample: Sample) => (sample.domain, sample.range)
     case None => ??? //TODO: nothing projected
     case _ => ??? //TODO: something other than Sample returned

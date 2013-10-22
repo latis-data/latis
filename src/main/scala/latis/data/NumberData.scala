@@ -12,6 +12,8 @@ trait NumberData extends Any with Data {
    * always just one number?
    * 
    * assume a single number, for now, use for numeric value classes
+   * 
+   * with ScalaNumericAnyConversions
    */
   
   def intValue: Int
@@ -27,7 +29,6 @@ trait NumberData extends Any with Data {
 /**
  * Object for pattern matching and exposing the data value as a Double.
  */
-//just encourages instantiation of value class
-//object NumberData {
-//  def unapply(num: NumberData) = Some(num.doubleValue) //always expose double? use subclass if we want other type
-//}
+object NumberData {
+  def unapply(num: NumberData) = Some(num.doubleValue)
+}

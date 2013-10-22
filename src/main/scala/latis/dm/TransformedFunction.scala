@@ -6,7 +6,7 @@ import latis.util.NextIterator
 import latis.ops.xform.Transformation
 
 
-class TransformedFunction(function: Function, val xform: Transformation) extends Function(function.domain, function.range) {
+class TransformedFunction(function: Function, val xform: Transformation) extends Variable with Function {
   //TODO: override domain, range, metadata, data ?
   
   /*

@@ -3,11 +3,10 @@ package latis.dm
 import latis.data.Data
 import latis.metadata.Metadata
 
-//abstract class Scalar(metadata: Metadata, data: Data) extends Variable(metadata, data) {
-abstract class Scalar extends Variable { //TODO: with Ordered or Ordering? {
-  //TODO: trait?
+trait Scalar[A] extends Variable with Ordered[A] { 
+  def value: A
   
-  def compare(that: String): Int
+  def compare(that: A): Int
   
     //deal with ISO formatted time
     //TODO: do conversion later, as needed?

@@ -168,7 +168,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     for (domain <- makeVariable(fml.domain); range <- makeVariable(fml.range)) yield Function(domain, range)
   }
   
-  protected def makeScalar(sml: ScalarMl): Option[Scalar] = {
+  protected def makeScalar(sml: ScalarMl): Option[Scalar[_]] = {
     val md = makeMetadata(sml)
 //TODO: apply projection, get name from metadata, it will have applied "id"
 //  does this need to happen after renaming?
@@ -181,6 +181,17 @@ abstract class TsmlAdapter(val tsml: Tsml) {
       case "time" => Some(Time(md))
       
       //TODO: allow Time to have any one of the types
+      
+      /*
+       * TODO: 2013-10-21
+       * How do we reconcile making scalars with no data?
+       * More risk of confusing Variable as data container.
+       * This is just the immutable dataset model.
+       * May be used as templates for constructing mutated dataset to serve.
+       * 
+       * Does the orig dataset model ever have data?
+       * when "values" defined in tsml?
+       */
       
       case _ => None
     }

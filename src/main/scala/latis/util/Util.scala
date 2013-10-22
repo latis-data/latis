@@ -50,7 +50,7 @@ object Util {
   def dataToVariable(data: Data, template: Variable): Variable = {
     //hack/experiment for text, don't use byte buffer, TODO: generalize?
     data match {
-      case StringValue(s) => Text(template.metadata, s)
+      case StringValue(s) => Text(template.getMetadata, s)
       case _ => {
         val bb = data.getByteBuffer
         val v = buildVarFromBuffer(bb, template)
@@ -65,9 +65,9 @@ object Util {
     //TODO: use builder?
     
     case v: Index => Index(bb.getInt)
-    case v: Time => Time(template.metadata, bb.getDouble)
-    case v: Real => Real(template.metadata, bb.getDouble)
-    case v: Integer => Integer(template.metadata, bb.getLong)
+    case v: Time => Time(template.getMetadata, bb.getDouble)
+    case v: Real => Real(template.getMetadata, bb.getDouble)
+    case v: Integer => Integer(template.getMetadata, bb.getLong)
     case v: Text => {
       val cs = new Array[Char](v.length)
       bb.asCharBuffer.get(cs)
@@ -75,7 +75,7 @@ object Util {
       //val s = (0 until v.length).map(bb.getChar).mkString
       //TODO: why can't we just get chars from the bb?
       val s = new String(cs)
-      Text(template.metadata, s)
+      Text(template.getMetadata, s)
     }
 
     case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _))) //TODO:, template.metadata)

@@ -1,6 +1,6 @@
 package latis.dm
 
-import scala.collection.immutable._
+import scala.collection._
 import latis.data.EmptyData
 import latis.data.Data
 import latis.metadata.Metadata
@@ -8,13 +8,15 @@ import latis.metadata.EmptyMetadata
 import latis.ops.math.BasicMath
 import latis.ops._
 
-class Dataset(vars: Seq[Variable]) extends Tuple(vars) with BasicMath {
-//class Dataset(vars: Seq[Variable], operations: Seq[Operation]) extends Tuple(vars) with BasicMath {
+class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
+  extends TupleVariable(variables, metadata, data) with BasicMath {
+  
   
   //convenient method, get number of samples in top level Function
-  def length: Int = vars.find(_.isInstanceOf[Function]) match {
-    case Some(f: Function) => f.length
-    case _ => if (vars.isEmpty) 0 else 1
+  //TODO: what if we have multiple Functions...?
+  def length: Int = variables.find(_.isInstanceOf[Function]) match {
+    case Some(f: Function) => f.getLength
+    case _ => if (variables.isEmpty) 0 else 1
   }
   
   /*
@@ -86,23 +88,18 @@ class Dataset(vars: Seq[Variable]) extends Tuple(vars) with BasicMath {
    * If multiple Variables, return them packaged in a Tuple.
    */
   def unwrap: Variable = {
-    vars.length match {
-      case 1 => vars(0)
-      case _ => Tuple(vars, metadata, data)  //TODO: could we just return this since Dataset ISA Tuple? pattern matching problems?
+    variables.length match {
+      case 1 => variables.head //only one, drop the Tuple wrapper
+      case _ => Tuple(variables, metadata, data) //plain Tuple, TODO: metadata
     }
   }
 }
 
 object Dataset {
-  import scala.collection._
   
   def apply(vars: Seq[Variable]): Dataset = new Dataset(vars.toIndexedSeq)
   
-  def apply(vars: Seq[Variable], md: Metadata): Dataset = {
-    val ds = new Dataset(vars.toIndexedSeq)
-    ds._metadata = md
-    ds
-  }
+  def apply(vars: Seq[Variable], md: Metadata): Dataset = new Dataset(vars.toIndexedSeq, metadata = md)
   
 //  def apply(vars: Seq[Variable], ops: Seq[Operation], md: Metadata): Dataset = {
 //    val ds = new Dataset(vars.toIndexedSeq, ops.toIndexedSeq)
@@ -110,6 +107,6 @@ object Dataset {
 //    ds
 //  }
   
-  def apply(v: Variable, vars: Variable*): Dataset = apply(v +: vars)
+  def apply(v: Variable, vars: Variable*): Dataset = Dataset(v +: vars)
   
 }
