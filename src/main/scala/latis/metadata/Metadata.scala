@@ -5,7 +5,7 @@ package latis.metadata
  * Just name/value pairs, for now.
  */
 trait Metadata {
-  //type Properties = Map[String,String] //TODO: define in package? 
+  def getProperties: Map[String,String]
   
   def get(key: String): Option[String]
   
@@ -14,9 +14,11 @@ trait Metadata {
     case None => null //TODO: error? "unknown"?
   }
   
+  def has(key: String): Boolean
+  
   lazy val name = get("name") match {
     case Some(s) => s
-    case None => "unknown"
+    case None => "unknown" //TODO: do we want default name to be "unknown"? generate a unique id?
   }
   
   override def toString() = name

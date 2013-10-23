@@ -30,20 +30,18 @@ trait Text extends Scalar[String] {
 
 object Text {
   
-  def apply(v: String): Text = new Variable2(data = StringValue(v)) with Text
+  def apply(v: String): Text = new Variable2(data = Data(v)) with Text
   
-  def apply(name: String, v: String): Text = new Variable2(metadata = Metadata(name), data = StringValue(v)) with Text
+  def apply(name: String, v: String): Text = new Variable2(Metadata(name), Data(v)) with Text
 
-  def apply(md: Metadata): Text = new Variable2(metadata = md) with Text
+  def apply(md: Metadata): Text = new Variable2(md) with Text
   
-  def apply(md: Metadata, v: String): Text = new Variable2(metadata = md, data = StringValue(v)) with Text
-    
-//  def apply(md: Metadata, vs: Seq[String]): Text = {
-//    val t = new Text
-//    t._metadata = md
-//    t._data = new StringSeqData(vs.toIndexedSeq, md("length").toInt) 
-//    t
-//  }
+  def apply(md: Metadata, v: String): Text = new Variable2(md, Data(v)) with Text
   
+  def apply(md: Metadata, vs: Seq[String]): Text = {
+    val data = new StringSeqData(vs.toIndexedSeq, md("length").toInt) 
+    new Variable2(md, data) with Text
+  }
+
   def unapply(v: Text): Option[String] = Some(v.stringValue)
 }

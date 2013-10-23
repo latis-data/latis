@@ -15,19 +15,11 @@ trait Integer extends Scalar[Long] with Number {
 object Integer {
   
 //  def apply(): Integer = new Variable() with Integer 
-//  
   
   def apply(md: Metadata): Integer = new Variable2(md) with Integer
 
-
-//  def apply(md: Metadata, vs: Seq[Long]): Integer = {
-//    val r = new Integer
-//    r._metadata = md
-//    r._data = Data(vs)
-//    r
-//  }
-  
-  def apply(md: Metadata, v: Long): Integer = new Variable2(md, LongValue(v)) with Integer
+  def apply(md: Metadata, v: Long): Integer = new Variable2(md, Data(v)) with Integer
+  def apply(md: Metadata, vs: Seq[Long]): Integer = new Variable2(md, Data(vs)) with Integer
 
   
 //  def apply(name: String): Integer = {

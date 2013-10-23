@@ -18,6 +18,8 @@ trait Variable {
   def getData: Data
   
   def isNumeric: Boolean = getData.isInstanceOf[NumberData]
+  def getNumberData: NumberData = getData.asInstanceOf[NumberData]
+  //TODO: deal with TextData
   
   def getLength: Int
   def getSize: Int

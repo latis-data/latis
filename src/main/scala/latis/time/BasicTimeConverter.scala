@@ -26,7 +26,7 @@ class BasicTimeConverter(scale1: TimeScale, scale2: TimeScale) extends TimeConve
     //TODO: assert time.scale == scale1
     //TODO: if LongValue preserve long
     //TODO: if StringValue...
-    val t = convert(time.getData.asInstanceOf[NumberData].doubleValue)
+    val t = convert(time.getNumberData.doubleValue)
     Time(scale2, t)
   }
 }

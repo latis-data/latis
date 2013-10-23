@@ -3,7 +3,12 @@ package latis.metadata
 import scala.collection.immutable.Map
 
 class VariableMetadata(val properties: Map[String,String]) extends Metadata {
+  
+  def getProperties = properties
+  
   def get(key: String) = properties.get(key)
+  
+  def has(key: String): Boolean = properties.contains(key)
   
   override def equals(that: Any): Boolean = that match {
     case md: VariableMetadata => md.properties == properties
