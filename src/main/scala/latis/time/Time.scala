@@ -8,6 +8,7 @@ import latis.data._
 import latis.util.RegEx
 import java.util.TimeZone
 import latis.metadata.VariableMetadata
+import latis.data.value.LongValue
 
 class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) extends 
   Variable2(metadata, data) with Scalar[Any] {
@@ -286,13 +287,17 @@ object Time {
       case Some(u) => {
         if (u.contains(" since ")) Time(md, stringsToNumbers(values))  //numeric units
         else { //formatted time
-          //TODO: store as 
-          //change metadata units, immutable
-          //TODO: clean up
-          val props = md.getProperties
-          val md2 = Metadata(props + (("units", "milliseconds since 1970-01-01")))
-          val format = new TimeFormat(u)
-          Time(md2, values.map(format.parse(_).getTime().toDouble), TimeScale.DEFAULT)
+          //TODO: store as strings, Time with Text
+          //convert to default (numeric) time scale for now
+          val scale = TimeScale.DEFAULT
+          //make sure units metedata is correct
+          val md2 = Metadata(md.getProperties + ("units" -> scale.toString))
+          //parse times into longs
+          val format = TimeFormat(u)
+          val times: Seq[Long] = values.map(format.parse(_).getTime())
+          //note, tempted to delegate to Time(Metadata, Seq[Any]) to get default time scale,
+          //  but we are assuming JAVA time here
+          new Time(scale, md2, Data(times)) with Integer
         }
       }
       case None => Time(md, values.map(_.toDouble))

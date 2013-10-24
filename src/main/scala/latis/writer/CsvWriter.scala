@@ -24,10 +24,10 @@ class CsvWriter extends Writer {
     //Write header
     //TODO: add units
     //val header = dataset.toSeq.map(v => v.name + " (" + v.metadata("units") + ")").mkString(delimiter)
-    val header = dataset.toSeq.map(v => v.name).filter(_ != "index").mkString(delimiter)
+    val header = dataset.toSeq.map(v => v.getName).filter(_ != "index").mkString(delimiter)
     _writer.println(header)
     
-    for (v <- dataset.variables) {
+    for (v <- dataset.getVariables) {
       v match {
         
         case f: Function => {

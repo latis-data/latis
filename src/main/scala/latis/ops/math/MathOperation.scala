@@ -16,7 +16,7 @@ class BinaryMathOperation(op: (Double, Double) => Double, other: Dataset) extend
     //TODO: just add another case to operate: case (_, ds: Dataset) => operate(v1, ds.unwrap, op)?
     //TODO: maybe Dataset should not BE-A Variable?
     val otherVar: Variable = other.unwrap
-    Dataset(dataset.variables.map(operate(_, otherVar, op)))
+    Dataset(dataset.getVariables.map(operate(_, otherVar, op)))
     //TODO: provenance metadata
   }
   

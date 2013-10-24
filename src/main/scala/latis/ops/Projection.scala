@@ -15,20 +15,20 @@ class Projection(val names: Seq[String]) extends Operation {
   //TODO: sanitize: make sure no special chars...
   
   def apply(dataset: Dataset): Dataset = {
-    Dataset(dataset.variables.flatMap(project(_)))
+    Dataset(dataset.getVariables.flatMap(project(_)))
     //TODO: provenance metadata
   }
   
   def project(variable: Variable): Option[Variable] = variable match {
     case i: Index => Some(i) //always project Index, often used as a place holder for a domain
-    case s: Scalar   => projectScalar(s)
+    case s: Scalar[_]   => projectScalar(s)
     case t: Tuple    => projectTuple(t)
     case f: Function => projectFunction(f)
   }
    
-  def projectScalar(scalar: Scalar): Option[Scalar] = {
+  def projectScalar(scalar: Scalar[_]): Option[Scalar[_]] = {
     //TODO: support alias
-    if (names contains scalar.name) Some(scalar) else None
+    if (names contains scalar.getName) Some(scalar) else None
   }
   
   def projectTuple(tuple: Tuple): Option[Tuple] = {
@@ -40,14 +40,14 @@ class Projection(val names: Seq[String]) extends Operation {
      * Is this safe to do here or support in adapters?
      * Apply as a FilteredFunction so we can reorder vars in sample?
      */
-    val vars = tuple.variables.flatMap(project(_))
+    val vars = tuple.getVariables.flatMap(project(_))
     if (vars.length == 0) None
     else Some(Tuple(vars)) //TODO: metadata
   }
     
   def projectFunction(function: Function): Option[Function] = {
     //if function does not have the data, delegate to the kids, saves having to parse data 
-    if (function.data.isEmpty) { //delegate to kids
+    if (function.getData.isEmpty) { //delegate to kids
       //only an optimization for column oriented data?
 /*
  * TODO: 
@@ -61,7 +61,7 @@ class Projection(val names: Seq[String]) extends Operation {
  *   or some other indicator that the iterator can interpret and replace
  * 
  */
-      for (d <- project(function.domain); r <- project(function.range)) yield Function(d,r) //TODO: metadata
+      for (d <- project(function.getDomain); r <- project(function.getRange)) yield Function(d,r) //TODO: metadata
     } else { //wrap function
       Some(ProjectedFunction(function, this))
     }

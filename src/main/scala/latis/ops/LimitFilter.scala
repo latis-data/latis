@@ -7,15 +7,15 @@ class LimitFilter(args: Seq[String]) extends Operation {
   val limit = args.head.toInt
   
   def apply(dataset: Dataset): Dataset = {
-    Dataset(dataset.variables.flatMap(filter(_)))
+    Dataset(dataset.getVariables.flatMap(filter(_)))
     //TODO: provenance metadata
   }
   
   def filter(variable: Variable): Option[Variable] = variable match {
     //this should only do top level variables since filter does not recurse
-    case s: Scalar => Some(s)
+    case s: Scalar[_] => Some(s)
     case t: Tuple => Some(t) //TODO: limit number of elements?
-    case f: Function => Some(Function(f.domain, f.range, f.iterator.take(limit))) //TODO: metadata
+    case f: Function => Some(Function(f.getDomain, f.getRange, f.iterator.take(limit))) //TODO: metadata
   }
 
 }

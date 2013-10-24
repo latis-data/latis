@@ -10,14 +10,18 @@ trait Function extends Variable { //this: Variable =>
   def getDomain: Variable
   def getRange: Variable
   
+  //TODO: reconsider when we add ContinuousFunction
+  def getFirstSample: Sample
+  def getLastSample: Sample
   
   //TODO: put in Variable?
-  //def length: Int
+  //def length: Int  getLength?
   def iterator: Iterator[Sample]
 }
 
-class SampledFunction(domain: Variable, range: Variable) extends Function {
-  //TODO: metadata, data
+class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sample] = null,
+    metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
+    extends Variable2(metadata, data) with Function {
   
   /*
    * 2013-08-07
@@ -34,7 +38,7 @@ class SampledFunction(domain: Variable, range: Variable) extends Function {
   def getDomain: Variable = domain
   def getRange: Variable = range
   
-  private var _iterator: Iterator[Sample] = null
+  //private var _iterator: Iterator[Sample] = null
   
   def iterator: Iterator[Sample] = {
     if (_iterator != null) _iterator
@@ -84,31 +88,25 @@ object Function {
   //TODO: used named args for data, md?
   
   
-  def apply(domain: Variable, range: Variable): Function = {
-    new SampledFunction(domain, range)
-  }  
+  def apply(domain: Variable, range: Variable): Function = new SampledFunction(domain, range)
   
 //  def apply(domain: Variable, range: Variable, data: Data): Function = {
 //    val f = new Function(domain, range)
 //    f._data = data
 //    f
 //  }
-//  
-//  //build from Iterator[Sample]? TODO: do we need to set _data to something?
-//  def apply(domain: Variable, range: Variable, sampleIterator: Iterator[Sample]): Function = {
-//    //Note, wouldn't need domain and range, but would have to trigger iterator, or use peek?
-//    val f = new Function(domain, range)
-//    f._iterator = sampleIterator
-//    f
-//  }
-//  
-//  def apply(domain: Variable, range: Variable, md: Metadata, data: Data): Function = {
-//    val f = new Function(domain, range)
-//    f._metadata = md
-//    f._data = data
-//    f
-//  }
-//  
+  
+  //build from Iterator[Sample]
+  //TODO: could we set data to something?
+  def apply(domain: Variable, range: Variable, sampleIterator: Iterator[Sample]): Function = {
+    //Note, wouldn't need domain and range, but would have to trigger iterator, or use peek?
+    new SampledFunction(domain, range, sampleIterator)
+  }
+  
+  def apply(domain: Variable, range: Variable, md: Metadata, data: Data): Function = {
+    new SampledFunction(domain, range, metadata = md, data = data)
+  }
+  
 //  def apply(vals: Seq[Seq[Double]]): Function = Function(vals.head, vals.tail: _*)
 //  
 //  def apply(dvals: Seq[Double], vals: Seq[Double]*): Function = {

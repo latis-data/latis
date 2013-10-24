@@ -27,7 +27,7 @@ class JsonWriter extends Writer {
   def write(dataset: Dataset, args: Seq[String]) = {
     _writer.print("{\"" + dataset.name + "\":{")
     var startThenDelim = "{"
-    for (v <- dataset.variables) {
+    for (v <- dataset.getVariables) {
       v match {
         case f: Function => writeTopLevelFunction(f)
         case _ => _writer.println(startThenDelim + varToString(v))
@@ -39,7 +39,7 @@ class JsonWriter extends Writer {
   }
   
   private def writeTopLevelFunction(f: Function) {
-    var startThenDelim = "\"" + f.name + "\":\n["
+    var startThenDelim = "\"" + f.getName + "\":\n["
     for (Sample(domain, range) <- f.iterator) {
       val d = varToString(domain)
       val r = varToString(range)
@@ -56,10 +56,10 @@ class JsonWriter extends Writer {
     //TODO: what if Tuple has name? need to wrap it as an object in "{}"
     
     //assume everything has a name, may be "unknown"
-    val label = "\"" + variable.name + "\":"
+    val label = "\"" + variable.getName + "\":"
     
     val value = variable match { 
-      case t: Time => t.convert(TimeScale.JAVA).doubleValue.toString //TODO: make reusable time converter?
+      case t: Time => t.getJavaTime.toString  //use java time for json
       case Real(d) => d.toString //TODO: format?
       case Integer(l) => l.toString 
       case Text(s) => "\"" + s.trim + "\"" //put quotes around text data

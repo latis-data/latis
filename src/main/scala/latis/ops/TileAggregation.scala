@@ -16,13 +16,13 @@ class TileAggregation extends Aggregation {
     //assume one-dimension (e.g. time), for now
     //assume each dataset contains only one top level variable, the Function
     
-    val datasets = dataset.variables
-    val functions = datasets.map(_.asInstanceOf[Dataset].variables.head.asInstanceOf[Function])
+    val datasets = dataset.getVariables
+    val functions = datasets.map(_.asInstanceOf[Dataset].getVariables.head.asInstanceOf[Function])
     val iterator = functions.foldLeft(Iterator[Sample]())(_ ++ _.iterator)
     
     //assume same type for each Function
-    val domain = functions.head.domain
-    val range = functions.head.range
+    val domain = functions.head.getDomain
+    val range = functions.head.getRange
     val f = Function(domain, range, iterator)
     
     //TODO: munge metadata

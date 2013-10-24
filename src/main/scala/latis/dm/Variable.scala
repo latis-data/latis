@@ -17,6 +17,8 @@ trait Variable {
   def getMetadata: Metadata
   def getData: Data
   
+  def getName: String
+  
   def isNumeric: Boolean = getData.isInstanceOf[NumberData]
   def getNumberData: NumberData = getData.asInstanceOf[NumberData]
   //TODO: deal with TextData
@@ -40,6 +42,7 @@ class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyDa
   //TODO: require getMetadata, getData?
   
   lazy val name = metadata.name
+  def getName = name
   
   /**
    * Size of this Variable in bytes.

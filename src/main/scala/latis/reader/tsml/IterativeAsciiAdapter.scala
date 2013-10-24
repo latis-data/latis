@@ -131,7 +131,7 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     val vars = sampleTemplate.toSeq 
     
     for (v <- vars) {
-      val s = svals(v.name) //string value for the given scalar
+      val s = svals(v.getName) //string value for the given scalar
       v match {
         //TODO: case time: Time => 
         case _: Real => bb.putDouble(s.toDouble)

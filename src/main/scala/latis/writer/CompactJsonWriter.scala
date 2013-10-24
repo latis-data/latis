@@ -20,7 +20,7 @@ class CompactJsonWriter extends Writer {
     _writer.print("[")
     
     //assume a single top level Function
-    val f = dataset.variables.find(_.isInstanceOf[Function]) match {
+    val f = dataset.getVariables.find(_.isInstanceOf[Function]) match {
       case Some(f: Function) => f
       case _ => throw new RuntimeException("No Function found in dataset: " + dataset)
     }
@@ -44,7 +44,7 @@ class CompactJsonWriter extends Writer {
 
   
   private def varToString(variable: Variable): String = variable match {
-    case t: Time => t.convert(TimeScale.JAVA).doubleValue.toString //TODO: make reusable time converter?
+    case t: Time => t.getJavaTime.toString  //use java time for json
     case Number(d) => d.toString //TODO: format?
     //TODO: Integer vs Real?
     case Text(s) => "\"" + s.trim + "\"" //put quotes around text data

@@ -62,5 +62,5 @@ object Integer {
 //  }
   
   
-  //def unapply(int: Integer): Option[Long] = Some(int.longValue)
+  def unapply(int: Integer): Option[Long] = Some(int.getNumberData.longValue)
 }

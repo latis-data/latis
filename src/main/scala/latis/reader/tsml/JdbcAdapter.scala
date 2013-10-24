@@ -92,7 +92,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
         RegEx.TIME findFirstIn value match {
           case Some(s) => {
             val t = Time(javax.xml.bind.DatatypeConverter.parseDateTime(s).getTimeInMillis().toDouble)
-            val t2 = t.convert(TimeScale(units)).doubleValue
+            val t2 = t.convert(TimeScale(units)).getNumberData.doubleValue
             val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
             this.selections += tvname + op + t2
             true
@@ -107,11 +107,11 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
 //TODO: keep original Dataset (e.g. so we can select on non-projected variables)
   //TODO: maintain projection order, this means modifying the model higher up
   //TODO: deal with composite names for nested vars
-  override def makeScalar(sml: ScalarMl): Option[Scalar] = {
+  override def makeScalar(sml: ScalarMl): Option[Scalar[_]] = {
     //TODO: filter before making, metadata/name complications
     super.makeScalar(sml) match {
       case os @ Some(s) => {
-        if (projection != "*" && !projection.split(",").contains(s.name)) None  
+        if (projection != "*" && !projection.split(",").contains(s.getName)) None  
         else os
       }
       case _ => None
@@ -163,7 +163,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     //TODO: generalize for n-D domains, get Function domain...
     //TODO: assuming that the first variable is the one to sort on
     //  make sure that tsml lists that variable first
-    sb append " ORDER BY " + dataset.toSeq.head.name + order
+    sb append " ORDER BY " + dataset.toSeq.head.getName + order
     
     sb.toString
   }
@@ -209,7 +209,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
  * The projection has already been applied to the query.
  */
       
-      val types = vars.map(v => md.getColumnType(resultSet.findColumn(v.name)))
+      val types = vars.map(v => md.getColumnType(resultSet.findColumn(v.getName)))
       val varsWithTypes = vars zip types
       
       //Define a Calendar so we get our times in the GMT time zone.
@@ -223,15 +223,15 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
             case (v: Time, t: Int) if (t == java.sql.Types.TIMESTAMP) => 
                   bb.putDouble(resultSet.getTimestamp(v.name, cal).getTime)
             //case (n: Number, _) => bb.putDouble(resultSet.getDouble(n.name))
-            case (r: Real, _) => bb.putDouble(resultSet.getDouble(r.name))
+            case (r: Real, _) => bb.putDouble(resultSet.getDouble(r.getName))
             case (i: Integer, _) => {
               //println(resultSet.getLong(i.name))
-              bb.putLong(resultSet.getLong(i.name))
+              bb.putLong(resultSet.getLong(i.getName))
             }
             case (t: Text, _) => {
               //pad the string to its full length using %ns formatting
               //TODO: regular words pad right, time strings from db pad left!?
-              val s = "%"+t.length+"s" format resultSet.getString(t.name)
+              val s = "%"+t.length+"s" format resultSet.getString(t.getName)
               //fold each char into the ByteBuffer
               //println(t +": "+s)
               //TODO: make sure we don't exceed buffer

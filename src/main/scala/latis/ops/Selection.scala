@@ -15,19 +15,19 @@ protected class Selection(val vname: String, val operation: String, val value: S
   //TODO: if domain, delegate to DomainSet
   
   def apply(dataset: Dataset): Dataset = {
-    Dataset(dataset.variables.flatMap(filter(_)))
+    Dataset(dataset.getVariables.flatMap(filter(_)))
     //TODO: provenance metadata
   }
   
   def filter(variable: Variable): Option[Variable] = variable match {
     case text: Text => filterText(text)
-    case s: Scalar => filterScalar(s)
+    case s: Scalar[_] => filterScalar(s)
     case t: Tuple => filterTuple(t)
     case f: Function => filterFunction(f)
   }
     
   def filterText(text: Text): Option[Text] = {
-    if (vname == text.name) operation match {
+    if (vname == text.getName) operation match {
       case "=~" => {
         if (text.stringValue.matches(value)) Some(text) 
         else None //regex
@@ -36,8 +36,8 @@ protected class Selection(val vname: String, val operation: String, val value: S
     } else Some(text) //operation doesn't apply to this Scalar Variable, no-op
   }
   
-  def filterScalar(scalar: Scalar): Option[Scalar] = {
-    if (vname == scalar.name) {
+  def filterScalar(scalar: Scalar[_]): Option[Scalar[_]] = {
+    if (vname == scalar.getName) {
       if (isValid(scalar.compare(value))) Some(scalar) else None
     } else Some(scalar) //operation doesn't apply to this Scalar Variable, no-op
   }
@@ -48,7 +48,7 @@ protected class Selection(val vname: String, val operation: String, val value: S
   def filterTuple(tuple: Tuple): Option[Tuple] = {
     //TODO: does this short circuit?
     //are any member variables invalid (None) after filtering
-    tuple.variables.map(filter(_)).find(_.isEmpty) match {
+    tuple.getVariables.map(filter(_)).find(_.isEmpty) match {
       case Some(_) => None //found an invalid variable, exclude the entire tuple
       case None => Some(tuple)
     }
