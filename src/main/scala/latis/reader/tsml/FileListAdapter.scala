@@ -30,9 +30,9 @@ class FileListAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
    */
   
   //use url to specify root directory
-  val dir: String = getProperty("url") match {
+  val dir: String = getProperty("location") match {
     case Some(s) => s
-    case None => throw new RuntimeException("FileListAdapter requires a 'url' attribute.")
+    case None => throw new RuntimeException("FileListAdapter requires a 'location' attribute.")
   }
   
   val regex = properties.get("pattern") match {

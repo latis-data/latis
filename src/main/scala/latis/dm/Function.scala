@@ -81,11 +81,8 @@ object Function {
   
   def apply(domain: Variable, range: Variable): Function = new SampledFunction(domain, range)
   
-//  def apply(domain: Variable, range: Variable, data: Data): Function = {
-//    val f = new Function(domain, range)
-//    f._data = data
-//    f
-//  }
+  def apply(domain: Variable, range: Variable, data: Data): Function = new SampledFunction(domain, range, data = data)
+
   
   //build from Iterator[Sample]
   //TODO: could we set data to something?
@@ -98,15 +95,14 @@ object Function {
     new SampledFunction(domain, range, metadata = md, data = data)
   }
   
-//  def apply(vals: Seq[Seq[Double]]): Function = Function(vals.head, vals.tail: _*)
-//  
-//  def apply(dvals: Seq[Double], vals: Seq[Double]*): Function = {
-//    val domain = Real(dvals)
-//    //make Real if vals.length == 1
-//    val range = if (vals.length == 1) Real(vals(0)) else Tuple(vals)(0d) //hack to get around type erasure ambiguity
-//
-//    new Function(domain, range)
-//  }
+  def apply(vals: Seq[Seq[Double]]): Function = Function(vals.head, vals.tail: _*)
+  
+  def apply(dvals: Seq[Double], vals: Seq[Double]*): Function = {
+    val domain = Real(dvals)
+    //make Real if vals.length == 1
+    val range = if (vals.length == 1) Real(vals(0)) else Tuple(vals)(0d) //hack to get around type erasure ambiguity
+    Function(domain, range)
+  }
   
   //def apply(samples: Seq[Sample]): Function = 
   

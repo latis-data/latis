@@ -9,7 +9,7 @@ import latis.ops.math.BasicMath
 import latis.ops._
 
 class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
-  extends TupleVariable(variables, metadata, data) with BasicMath {
+  extends AbstractTuple(variables, metadata, data) with BasicMath {
   
   
   //convenient method, get number of samples in top level Function

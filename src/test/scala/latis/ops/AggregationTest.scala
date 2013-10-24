@@ -9,8 +9,8 @@ class AggregationTest {
 
   //@Test
   def test_collection_tiles {
-    val ds1 = TsmlReader("datasets/test/scalar_ts_2col_0-9.tsml").getDataset
-    val ds2 = TsmlReader("datasets/test/scalar_ts_2col_10-19.tsml").getDataset
+    val ds1 = TsmlReader("datasets/test/agg/scalar_ts_2col_0-9.tsml").getDataset
+    val ds2 = TsmlReader("datasets/test/agg/scalar_ts_2col_10-19.tsml").getDataset
     
     val agg = CollectionAggregation()
     val ds = agg(ds1,ds2)
@@ -20,8 +20,8 @@ class AggregationTest {
   
   //@Test
   def test_collection_diff_types {
-    val ds1 = TsmlReader("datasets/test/scalar_ts_2col_0-9.tsml").getDataset
-    val ds2 = TsmlReader("datasets/test/scalar_ts_3col_0-9.tsml").getDataset
+    val ds1 = TsmlReader("datasets/test/agg/scalar_ts_2col_0-9.tsml").getDataset
+    val ds2 = TsmlReader("datasets/test/agg/scalar_ts_3col_0-9.tsml").getDataset
     
     val agg = CollectionAggregation()
     val ds = agg(ds1,ds2)
@@ -31,8 +31,8 @@ class AggregationTest {
   
   //@Test
   def test_append_samples{
-    val ds1 = TsmlReader("datasets/test/scalar_ts_2col_0-9.tsml").getDataset
-    val ds2 = TsmlReader("datasets/test/scalar_ts_2col_10-19.tsml").getDataset
+    val ds1 = TsmlReader("datasets/test/agg/scalar_ts_2col_0-9.tsml").getDataset
+    val ds2 = TsmlReader("datasets/test/agg/scalar_ts_2col_10-19.tsml").getDataset
     
     val agg = TileAggregation()
     val ds = agg(ds1,ds2)
@@ -42,7 +42,7 @@ class AggregationTest {
     
   @Test
   def test_tsml_append {
-    val ds = TsmlReader("datasets/test/agg_append.tsml").getDataset
+    val ds = TsmlReader("datasets/test/agg/agg_append.tsml").getDataset
     AsciiWriter().write(ds)
   }
   

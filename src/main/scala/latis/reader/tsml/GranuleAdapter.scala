@@ -43,10 +43,17 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
         //if numeric units
         md.get("units") match {
           case Some(u) => {
-            if (u.contains(" since ")) Some(Time(md, data.map(_.toDouble)))
+            //support real or int
+            if (u.contains(" since ")) {
+              val values = md("type") match {
+                case "integer" => data.map(_.toLong)
+                case _ => data.map(_.toDouble) //default to double times
+              }
+              Some(Time(md, values))
+            }
             else Some(Time.fromStrings(md, data))
           }
-          case None => Some(Time(md, data.map(_.toDouble))) //assume numeric
+          case None => Some(Time(md, data.map(_.toDouble))) //default to double times
         }
       }
       

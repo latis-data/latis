@@ -11,7 +11,7 @@ import latis.metadata.Metadata
 trait Index extends Scalar with Number {
   //def value: Int = intValue
   //def stringToValue(s: String): Int = s.toInt
-  def compare(that: String): Int = intValue compare that.toInt
+  //def compare(that: String): Int = intValue compare that.toInt
   /*
    * try to impl Data with index math - IndexData
    * 

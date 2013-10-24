@@ -3,6 +3,7 @@ package latis.dm
 import latis.data._
 import latis.metadata._
 import latis.ops.math.BasicMath
+import latis.time.Time
 
 /*
  * TODO: 2013-10-21
@@ -58,9 +59,9 @@ abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data 
    */
   def getSize: Int = size
   lazy val size: Int  = this match {
-    case r: Real => 8 //TODO: override for Scalars to support custom?
-    case i: Integer => 8 //long
-    case t: Text => t.length * 2 //2 bytes per char
+    case _: Real => 8 //TODO: override for Scalars to support custom?
+    case _: Integer => 8 //long
+    case t: Text => t.length * 2 //2 bytes per char  //TODO: consider Seq, get max
     
     case Tuple(vars) => vars.foldLeft(0)(_ + _.getSize)
     case f @ Function(d,r) => f.getLength * (d.getSize + r.getSize)
@@ -220,19 +221,19 @@ abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data 
   }
   
   
-//  override def equals(that: Any): Boolean = (this, that) match {
-//    case (v1: Scalar, v2: Scalar) => v1._metadata == v2._metadata && v1._data == v2._data
-//    
-//    case (v1: Tuple, v2: Tuple) => v1._metadata == v2._metadata && v1._data == v2._data && 
-//      v1.variables == v2.variables 
-//    
-//    //iterate through all samples
-//    case (v1: Function, v2: Function) => v1._metadata == v2._metadata && 
-//      (v1.iterator zip v2.iterator).forall(p => p._1 == p._2)
-//      //TODO: confirm same length? iterate once issues
-//    
-//    case _ => false
-//  }
+  override def equals(that: Any): Boolean = (this, that) match {
+    case (v1: Scalar, v2: Scalar) => v1.getMetadata == v2.getMetadata && v1.getData == v2.getData
+    
+    case (v1: Tuple, v2: Tuple) => v1.getMetadata == v2.getMetadata && v1.getData == v2.getData && 
+      v1.getVariables == v2.getVariables 
+    
+    //iterate through all samples
+    case (v1: Function, v2: Function) => v1.getMetadata == v2.getMetadata && 
+      (v1.iterator zip v2.iterator).forall(p => p._1 == p._2)
+      //TODO: confirm same length? iterate once issues
+    
+    case _ => false
+  }
   
   //TODO: override def hashCode
   

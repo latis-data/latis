@@ -7,7 +7,7 @@
              pattern="(\d{4}/\d{2}/\d{2}).dat"
              location="/data/latis/dir_test" />
              
-    <time name="time">
+    <time name="time" type="text">
       <metadata units="yyyy/MM/dd" />
     </time>
     

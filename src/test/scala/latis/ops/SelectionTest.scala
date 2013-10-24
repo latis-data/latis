@@ -22,7 +22,7 @@ class SelectionTest {
     val ds = filter(f)
     AsciiWriter().write(expected)
     AsciiWriter().write(ds)
-    assert(expected equals ds.variables(0))
+    assert(expected equals ds(0))
   }
   
   

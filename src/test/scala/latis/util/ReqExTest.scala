@@ -22,7 +22,7 @@ class RegExTest {
     assertEquals("2011-09-14", r.get)
   }
   
-  //@Test
+  @Test
   def extract_group_matches {
     //val r = """(\d+)foo(\d+)bar"""
     //val s = "abc123foo456bar789"
@@ -33,7 +33,7 @@ class RegExTest {
     println(vs.mkString(","))
   }
   
-  @Test
+  //@Test
   def parse_log_file {
     val ds = TsmlReader("datasets/test/log.tsml").getDataset
     Writer("csv").write(ds)

@@ -123,7 +123,7 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   
   def makeDataFromRecord(sampleTemplate: Sample, svals: Map[Name, Value]): Data = {
     //build a ByteBuffer
-    val size = sampleTemplate.size
+    val size = sampleTemplate.getSize
     val bb = ByteBuffer.allocate(size)
     
     //assume every Scalar in the template has a value in the Map, e.g. not stored by Tuple name
@@ -133,7 +133,7 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     for (v <- vars) {
       val s = svals(v.getName) //string value for the given scalar
       v match {
-        //TODO: case time: Time => 
+        //case time: Time =>  //only needed for text type?
         case _: Real => bb.putDouble(s.toDouble)
         case _: Integer => bb.putLong(s.toLong)
         case t: Text => {

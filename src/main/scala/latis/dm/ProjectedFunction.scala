@@ -8,20 +8,14 @@ import latis.util.NextIterator
  * Wrapper for a Function that applies a "projection" to each sample.
  * The resulting Function will include only the Variables named in the Projection.
  */
-class ProjectedFunction(function: Function, val projection: Projection) extends Variable with Function {
-  /*
-   * TODO: domain and range may change
-   * but we pass them to super
-   * simply override?
-   * seems dangerous
-   * pass obvious dummies to super?
-   * domain and range should probably be methods
-   */
+class ProjectedFunction(function: Function, val projection: Projection) 
+  extends SampledFunction(null, null) {
+//pass null domain and range since we override them here
   
   //TODO: return data in projected order
   
-  override def domain: Variable = _domain
-  override def range: Variable = _range
+  override def getDomain: Variable = _domain
+  override def getRange: Variable = _range
   
   //delegate to projection to get new domain and range for the model
   //TODO: make sure this doesn't tickle the data

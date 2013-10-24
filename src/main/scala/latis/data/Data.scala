@@ -92,8 +92,7 @@ object Data {
     case d: Double => DoubleValue(d)
     case l: Long   => LongValue(l)
   }
-  //def apply(d: Double): Data = DoubleValue(d)
-  //def apply(l: Long):   Data = LongValue(l)
+  
   def apply(s: String): Data = StringValue(s)
   
   /**
@@ -103,10 +102,14 @@ object Data {
   //pattern match to deal with type erasure
   //TODO: assert all of the same type
   //TODO: use primitive Arrays?
-  def apply(seq: Seq[AnyVal]): Data = seq.head match {
+  def apply(seq: Seq[Any]): Data = seq.head match {
     case _: Double => new DoubleSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Double]])
     case _: Long   => new LongSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Long]])
-    //case _: String => new StringSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[String]])
+    case _: String => {
+      val strings = seq.toIndexedSeq.asInstanceOf[immutable.Seq[String]]
+      val maxLength = strings.foldLeft(0)((l,s) => Math.max(l, s.length))
+      new StringSeqData(strings, maxLength)
+    }
     case _ => throw new RuntimeException("Unsupported data sequence type.")
   }
   

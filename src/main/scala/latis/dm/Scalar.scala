@@ -1,7 +1,9 @@
 package latis.dm
 
 import latis.data.Data
+import latis.data.value._
 import latis.metadata.Metadata
+import latis.util.RegEx
 
 trait Scalar extends Variable {
 //trait Scalar[A] extends Variable { //TODO: with Ordered[Scalar[A]] { 
@@ -9,8 +11,17 @@ trait Scalar extends Variable {
   
   //def compare(that: Scalar[B]): Int =
   
-  def compare(that: String): Int //= compare(stringToValue(that))
-  //TODO: will this be a problem for Text extends Scalar[String], A = String
+  //note, we tried overriding this in subclasses but ran into inheritance trouble with "new Time with Real"
+  def compare(that: String): Int = getData match {
+    //note, pattern matching instantiates value classes
+    case DoubleValue(d) => d compare that.toDouble
+    case LongValue(l) => l compare that.toLong
+    case IndexValue(i) => i compare that.toInt
+    case StringValue(s) => s compare that
+    //TODO: what about Buffer, SeqData?
+    //TODO: handle format errors
+  }
+  
   
   //convert the string to a value of our type (e.g. for comparison)
   //def stringToValue(s: String): A
@@ -26,11 +37,4 @@ trait Scalar extends Variable {
     //  it's one thing to convert its own value, but as a converter for others?
     
 }
-
-//object Scalar {
-//  //handy for ASCII Writers
-//  def unapply(s: Scalar) = s match {
-//    case Number(n) => Some(n.toString)
-//    case Text(t) => Some(t)
-//  }
 //}

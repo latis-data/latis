@@ -10,8 +10,11 @@ import java.util.TimeZone
 import latis.metadata.VariableMetadata
 import latis.data.value.LongValue
 
-class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) extends 
-  AbstractScalar(metadata, data) { 
+//class RealTime(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyMetadata, data: Data = EmptyData)
+//  extends Time(timeScale, metadata, data) with Real 
+
+class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
+  extends AbstractScalar(metadata, data) { 
   //TODO: generalize scale to units for all numeric data
   
   /*
@@ -19,6 +22,13 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
    * Time needs to be seen as a Scalar.
    * Do we need to have a Scalar impl extend Variable2? with Scalar?
    * Need to revisit all traits as Interfaces with impls.
+   * 
+   * new Time with Real...
+   * doesn't allow us to override compare
+   * maybe we should just make: RealTime, IntegerTime,...
+   * there must be a better way
+   * 
+   * TODO: add utc and tai tsml types?
    */
   
   /*
@@ -166,6 +176,7 @@ object Time {
   
   //def apply(scale: TimeScale, md: Metadata, data: Data) = new Time(scale, md, data)
   
+  //no data, used as a template in adapters
   def apply(md: Metadata): Time = {
     var metadata = md
     val scale = md.get("units") match {
@@ -176,7 +187,17 @@ object Time {
         TimeScale.DEFAULT
       }
     }
-    new Time(scale, md)
+    //Mixin the appropriate type
+    md.get("type") match {
+      case Some(s) => s.toLowerCase match {
+        case "real" => new Time(scale, md) with Real
+        case "integer" => new Time(scale, md) with Integer
+        case "text" => new Time(scale, md) with Text
+        case _ => throw new RuntimeException("Unsupported Time type: " + s)
+      }
+      //default to Real
+      case None => new Time(scale, md) with Real
+    }
   }
   
   def apply(md: Metadata, value: AnyVal): Time = {
@@ -269,7 +290,13 @@ object Time {
       case Some(u) => {
         //If it is a numeric time, units should have "since".
         //TODO: special case for JulianDate? CarringtonRotation...?
-        if (u.contains(" since ")) Time(TimeScale(u), md, stringToNumber(value)) //TODO: allow specification of type
+        if (u.contains(" since ")) {
+          //look for md("type"), default to Real
+          md("type") match {
+            case "integer" => new Time(TimeScale(u), md, Data(value.toLong)) with Integer
+            case _ => new Time(TimeScale(u), md, Data(value.toDouble)) with Real
+          }
+        }
         //Otherwise, store data as StringValue
         else ??? //wait for use case
           //Time(TimeScale.JAVA, md, StringValue(value))
@@ -295,9 +322,9 @@ object Time {
         if (u.contains(" since ")) Time(md, stringsToNumbers(values))  //numeric units
         else { //formatted time
           //TODO: store as strings, Time with Text
-          //convert to default (numeric) time scale for now
-          val scale = TimeScale.DEFAULT
-          //make sure units metedata is correct
+          //convert to java time scale for now, //TODO: use default time scale
+          val scale = TimeScale.JAVA
+          //make sure units metedata is correct //TODO: add type="integer" to metadata?
           val md2 = Metadata(md.getProperties + ("units" -> scale.toString))
           //parse times into longs
           val format = TimeFormat(u)

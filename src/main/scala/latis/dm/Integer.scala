@@ -9,7 +9,7 @@ import latis.data.value.LongValue
 trait Integer extends Scalar with Number {
   //def value: Long = longValue
   //def stringToValue(s: String): Long = s.toLong
-  def compare(that: String): Int = longValue compare that.toLong
+  //def compare(that: String): Int = longValue compare that.toLong
 }
 
 

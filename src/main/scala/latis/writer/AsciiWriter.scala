@@ -10,45 +10,44 @@ class AsciiWriter extends Writer {
   //TODO: enable writing to a String?
   //TODO: nervous about side effect issues since we are given an OutputStream
 
-  private[this] lazy val _writer = new PrintWriter(outputStream)
+  private[this] lazy val writer = new PrintWriter(outputStream)
   
   def write(dataset: Dataset, args: Seq[String]) = {
-    _writer.println(dataset) //header
+    writer.println(dataset) //header
     writeVariable(dataset)
-    _writer.println()
-    _writer.flush()
+    writer.println()
+    writer.flush()
   }
   
   def writeVariable(variable: Variable): Unit = variable match {
     //TODO: build string instead of writing directly?
     
-    //case Scalar(v) => _writer.print(v)
-    case Index(i) => _writer.print(i.toString)
-    case Real(d) => _writer.print(d.toString)
-    case Integer(l) => _writer.print(l.toString)
-    case Text(s) => _writer.print(s)
+    case Index(i)   => writer.print(i.toString)
+    case Real(d)    => writer.print(d.toString)
+    case Integer(l) => writer.print(l.toString)
+    case Text(s)    => writer.print(s)
     
     case Tuple(vars) => {
       //surround Tuple's Variables with parens
-      _writer.print("(")
+      writer.print("(")
       //write each Variable contained in this Tuple separated by commas
       var first = true
       for (v <- vars) {
-        if (!first) _writer.print(",")
+        if (!first) writer.print(",")
         else first = false
         writeVariable(v) //recursive
       }
       //close parens
-      _writer.print(")")
+      writer.print(")")
     }
     
     case f: Function => {
-      _writer.println()
+      writer.println()
       for (Sample(domain, range) <- f.iterator) {
         writeVariable(domain)
-        _writer.print(" -> ")
+        writer.print(" -> ")
         writeVariable(range)
-        _writer.println()
+        writer.println()
       }
     }
   }

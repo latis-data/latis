@@ -220,14 +220,19 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
         //TODO: reuse bb? but the previous sample is in the wild, memory resource issue, will gc help?
         if (resultSet.next) {
           for (vt <- varsWithTypes) vt match {
-            case (v: Time, t: Int) if (t == java.sql.Types.TIMESTAMP) => 
-                  bb.putDouble(resultSet.getTimestamp(v.name, cal).getTime)
+            case (v: Time, t: Int) if (t == java.sql.Types.TIMESTAMP) => {
+              val time = resultSet.getTimestamp(v.name, cal).getTime
+              //deal with diff time types
+              v match {
+                case _: Real => bb.putDouble(time.toDouble)
+                case _: Integer => bb.putLong(time)
+              }
+              //TODO: deal with text time type
+     //TODO: should db with TIMESTAMP use "text" type?
+            }
             //case (n: Number, _) => bb.putDouble(resultSet.getDouble(n.name))
             case (r: Real, _) => bb.putDouble(resultSet.getDouble(r.getName))
-            case (i: Integer, _) => {
-              //println(resultSet.getLong(i.name))
-              bb.putLong(resultSet.getLong(i.getName))
-            }
+            case (i: Integer, _) => bb.putLong(resultSet.getLong(i.getName))
             case (t: Text, _) => {
               //pad the string to its full length using %ns formatting
               //TODO: regular words pad right, time strings from db pad left!?
@@ -272,7 +277,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   private def _getConnection: Connection = {
     //TODO: support jndi
     val driver = properties("driver")
-    val url = properties("url")
+    val url = properties("location")
     val user = properties("user")
     val passwd = properties("password")
     
