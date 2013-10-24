@@ -26,29 +26,38 @@ trait Variable {
   def getLength: Int
   def getSize: Int
   
-  def toSeq: Seq[Scalar[_]]
+  def toSeq: Seq[Scalar]
   def getDataIterator: Iterator[Data]
 }
 
-class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyData) extends Variable {
-  //TODO: with Subsetting,... so we don't end up with so much code here
-
-//  protected var _metadata: Metadata = EmptyMetadata
-//  protected var _data: Data = EmptyData
+abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyData) extends Variable {
   
-  //allow subclasses to override, e.g. ProjectedFunction
-  //def metadata: Metadata = _metadata
-  //def data: Data = _data
-  //TODO: require getMetadata, getData?
+  def getMetadata: Metadata = metadata
+  def getData: Data = data
   
-  lazy val name = metadata.name
   def getName = name
+  lazy val name = metadata.name
+  
+  /**
+   * Length of the Variable depending on type.
+   *   Scalar: 1
+   *   Tuple: number of variable members
+   *   Function: number of samples
+   */
+  def getLength: Int = this match {
+    case _: Scalar => 1  //TODO: consider Scalars with SeqData, implicit IndexFunction
+    case Tuple(vars) => vars.length
+    case f: Function => getMetadata.get("length") match {
+      case Some(l) => l.toInt
+      case None => f.iterator.length //may be costly, try looking at data?
+    }
+  }
   
   /**
    * Size of this Variable in bytes.
    */
-  lazy val size: Int = getSize
-  protected def getSize = this match {
+  def getSize: Int = size
+  lazy val size: Int  = this match {
     case r: Real => 8 //TODO: override for Scalars to support custom?
     case i: Integer => 8 //long
     case t: Text => t.length * 2 //2 bytes per char
@@ -78,9 +87,9 @@ class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyDa
    * In other words, considering the Variable as a tree,
    * return all the leaves in depth first order.
    */
-  def toSeq: Seq[Scalar[_]] = this match {
-    case s: Scalar[_] => Seq(s)
-    case Tuple(vars) => vars.foldLeft(Seq[Scalar[_]]())(_ ++ _.toSeq)
+  def toSeq: Seq[Scalar] = this match {
+    case s: Scalar => Seq(s)
+    case Tuple(vars) => vars.foldLeft(Seq[Scalar]())(_ ++ _.toSeq)
     case Function(d,r) => d.toSeq ++ r.toSeq
   }
   
@@ -146,7 +155,7 @@ class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyDa
   
 //  def containsVariable(name: String): Boolean = this match {
 //    //TODO: support alias
-//    case s: Scalar[_] => if (s.name == name) true else false
+//    case s: Scalar => if (s.name == name) true else false
 //    case Tuple(vars) => vars.exists(_.containsVariable(name))
 //    case Function(domain, range) => domain.containsVariable(name) || range.containsVariable(name)
 //  }
@@ -193,7 +202,7 @@ class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyDa
     else this match {
       case Tuple(vars) => concatData(vars) 
       case Function(d, r) => concatData(Seq(d,r))
-      case s: Scalar[_] => s.data.iterator
+      case s: Scalar => s.data.iterator
     }
   }
 
@@ -212,7 +221,7 @@ class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyDa
   
   
 //  override def equals(that: Any): Boolean = (this, that) match {
-//    case (v1: Scalar[_], v2: Scalar[_]) => v1._metadata == v2._metadata && v1._data == v2._data
+//    case (v1: Scalar, v2: Scalar) => v1._metadata == v2._metadata && v1._data == v2._data
 //    
 //    case (v1: Tuple, v2: Tuple) => v1._metadata == v2._metadata && v1._data == v2._data && 
 //      v1.variables == v2.variables 
@@ -230,7 +239,7 @@ class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyDa
   
   override def toString() = this match { //name +": "+ data.toString
   //use "unknown" only for scalars
-    case s: Scalar[_] => s.name
+    case s: Scalar => s.name
     case t: Tuple => if (t.name == "unknown") t.getVariables.mkString("(", ", ", ")")
       else t.name + ": " + t.getVariables.mkString("(", ", ", ")")
     case f: Function => f.getDomain.toString + " -> " + f.getRange.toString

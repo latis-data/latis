@@ -10,13 +10,13 @@ abstract class Transformation extends Operation {
   //TODO: provenance metadata...
   
   def transform(variable: Variable): Variable = variable match {
-    case s: Scalar[_] => transformScalar(s)
+    case s: Scalar => transformScalar(s)
     case t: Tuple => transformTuple(t)
     case f: Function => transformFunction(f)
   }
   
   //type not necessarily preserved
-  def transformScalar(scalar: Scalar[_]): Variable = scalar //no-op
+  def transformScalar(scalar: Scalar): Variable = scalar //no-op
   def transformTuple(tuple: Tuple): Variable = Tuple(tuple.getVariables.map(transform(_)))
   def transformFunction(function: Function): Variable = TransformedFunction(function, this)
     //TODO: or Function(transform(function.domain), transform(function.range)) ?

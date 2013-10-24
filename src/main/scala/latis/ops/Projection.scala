@@ -21,12 +21,12 @@ class Projection(val names: Seq[String]) extends Operation {
   
   def project(variable: Variable): Option[Variable] = variable match {
     case i: Index => Some(i) //always project Index, often used as a place holder for a domain
-    case s: Scalar[_]   => projectScalar(s)
+    case s: Scalar   => projectScalar(s)
     case t: Tuple    => projectTuple(t)
     case f: Function => projectFunction(f)
   }
    
-  def projectScalar(scalar: Scalar[_]): Option[Scalar[_]] = {
+  def projectScalar(scalar: Scalar): Option[Scalar] = {
     //TODO: support alias
     if (names contains scalar.getName) Some(scalar) else None
   }

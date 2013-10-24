@@ -168,7 +168,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     for (domain <- makeVariable(fml.domain); range <- makeVariable(fml.range)) yield Function(domain, range)
   }
   
-  protected def makeScalar(sml: ScalarMl): Option[Scalar[_]] = {
+  protected def makeScalar(sml: ScalarMl): Option[Scalar] = {
     val md = makeMetadata(sml)
 //TODO: apply projection, get name from metadata, it will have applied "id"
 //  does this need to happen after renaming?

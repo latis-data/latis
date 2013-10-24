@@ -13,7 +13,7 @@ class LimitFilter(args: Seq[String]) extends Operation {
   
   def filter(variable: Variable): Option[Variable] = variable match {
     //this should only do top level variables since filter does not recurse
-    case s: Scalar[_] => Some(s)
+    case s: Scalar => Some(s)
     case t: Tuple => Some(t) //TODO: limit number of elements?
     case f: Function => Some(Function(f.getDomain, f.getRange, f.iterator.take(limit))) //TODO: metadata
   }

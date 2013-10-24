@@ -6,9 +6,10 @@ import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
 import latis.data.value.LongValue
 
-trait Integer extends Scalar[Long] with Number {
-  //def doubleValue = data.asInstanceOf[LongValue].doubleValue 
-  //def longValue = data.asInstanceOf[LongValue].longValue 
+trait Integer extends Scalar with Number {
+  //def value: Long = longValue
+  //def stringToValue(s: String): Long = s.toLong
+  def compare(that: String): Int = longValue compare that.toLong
 }
 
 

@@ -6,7 +6,11 @@ import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
 import latis.data.value.DoubleValue
 
-trait Real extends Scalar[Double] with Number
+trait Real extends Scalar with Number {
+  //def value: Double = doubleValue
+  //def stringToValue(s: String): Double = s.toDouble
+  def compare(that: String): Int = doubleValue compare that.toDouble
+}
 
 
 object Real {

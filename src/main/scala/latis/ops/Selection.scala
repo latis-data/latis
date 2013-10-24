@@ -21,7 +21,7 @@ protected class Selection(val vname: String, val operation: String, val value: S
   
   def filter(variable: Variable): Option[Variable] = variable match {
     case text: Text => filterText(text)
-    case s: Scalar[_] => filterScalar(s)
+    case s: Scalar => filterScalar(s)
     case t: Tuple => filterTuple(t)
     case f: Function => filterFunction(f)
   }
@@ -29,14 +29,14 @@ protected class Selection(val vname: String, val operation: String, val value: S
   def filterText(text: Text): Option[Text] = {
     if (vname == text.getName) operation match {
       case "=~" => {
-        if (text.stringValue.matches(value)) Some(text) 
+        if (text.value.matches(value)) Some(text) 
         else None //regex
       }
       case _    => if (isValid(text.compare(value))) Some(text) else None //like any other scalar
     } else Some(text) //operation doesn't apply to this Scalar Variable, no-op
   }
   
-  def filterScalar(scalar: Scalar[_]): Option[Scalar[_]] = {
+  def filterScalar(scalar: Scalar): Option[Scalar] = {
     if (vname == scalar.getName) {
       if (isValid(scalar.compare(value))) Some(scalar) else None
     } else Some(scalar) //operation doesn't apply to this Scalar Variable, no-op

@@ -8,7 +8,10 @@ import latis.metadata.Metadata
  * Scalar Variable that represents an index.
  * Implemented such that its Data represents the index values.
  */
-trait Index extends Scalar[Int] with Number {
+trait Index extends Scalar with Number {
+  //def value: Int = intValue
+  //def stringToValue(s: String): Int = s.toInt
+  def compare(that: String): Int = intValue compare that.toInt
   /*
    * try to impl Data with index math - IndexData
    * 

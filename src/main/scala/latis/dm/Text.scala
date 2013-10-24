@@ -8,11 +8,12 @@ import latis.data.TextData
 import latis.data.Data
 import latis.data.seq.StringSeqData
 
-trait Text extends Scalar[String] { 
+trait Text extends Scalar { //[String] { 
   
   //Get the nominal/max length of this Text Variable.
   //If not defined in the metadata, the default is 4 chars (8 bytes).
   //This is NOT necessarily the actual length of the encapsulated String.
+  //TODO: rename to avoid confusion with Variable.getLength?
   def length: Int = {
     getMetadata.get("length") match {
       case Some(l) => l.toInt
@@ -21,10 +22,10 @@ trait Text extends Scalar[String] {
   }
   
   //Note: stripping off any white space padding
-  def stringValue: String = getData.asInstanceOf[TextData].stringValue.trim
+  def value: String = getData.asInstanceOf[TextData].stringValue.trim
   
   //Ordered method.
-  def compare(that: String): Int = stringValue.compareTo(that)
+  override def compare(that: String): Int = value compare that
   
 }
 
@@ -43,5 +44,5 @@ object Text {
     new Variable2(md, data) with Text
   }
 
-  def unapply(v: Text): Option[String] = Some(v.stringValue)
+  def unapply(v: Text): Option[String] = Some(v.value)
 }

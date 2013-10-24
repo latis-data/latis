@@ -52,15 +52,6 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
     (dit zip rit).map(pair => Sample(pair._1, pair._2))
   }
 
-  def length = _length
-  lazy val _length: Int = getMetadata.get("length") match {
-    case Some(l) => l.toInt
-    case None =>  { //-1 //unknown
-      iterator.length
-      //TODO: look at Data, or domain set,..., iterable once problem?
-      //TODO: consider wrapped Function
-    }
-  }
   
   //Support first and last filters
   //TODO: consider more optimal approaches

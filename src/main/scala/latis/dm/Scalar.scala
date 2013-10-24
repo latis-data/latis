@@ -3,16 +3,17 @@ package latis.dm
 import latis.data.Data
 import latis.metadata.Metadata
 
-trait Scalar[A] extends Variable with Ordered[A] { 
-  def value: A  
+trait Scalar extends Variable {
+//trait Scalar[A] extends Variable { //TODO: with Ordered[Scalar[A]] { 
+  //def value: A  
   
-  def compare(that: A): Int
+  //def compare(that: Scalar[B]): Int =
   
-  def compare(that: String): Int = compare(stringToValue(that))
+  def compare(that: String): Int //= compare(stringToValue(that))
   //TODO: will this be a problem for Text extends Scalar[String], A = String
   
   //convert the string to a value of our type (e.g. for comparison)
-  def stringToValue(s: String): A
+  //def stringToValue(s: String): A
   
     //deal with ISO formatted time
     //TODO: do conversion later, as needed?

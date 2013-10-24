@@ -11,8 +11,15 @@ import latis.metadata.VariableMetadata
 import latis.data.value.LongValue
 
 class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) extends 
-  Variable2(metadata, data) with Scalar[Any] {
-  //TODO: ick
+  AbstractScalar(metadata, data) { 
+  //TODO: generalize scale to units for all numeric data
+  
+  /*
+   * 2013-10-24
+   * Time needs to be seen as a Scalar.
+   * Do we need to have a Scalar impl extend Variable2? with Scalar?
+   * Need to revisit all traits as Interfaces with impls.
+   */
   
   /*
    * TODO: support double, long, or string representation

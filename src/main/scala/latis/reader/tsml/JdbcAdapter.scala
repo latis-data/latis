@@ -107,7 +107,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
 //TODO: keep original Dataset (e.g. so we can select on non-projected variables)
   //TODO: maintain projection order, this means modifying the model higher up
   //TODO: deal with composite names for nested vars
-  override def makeScalar(sml: ScalarMl): Option[Scalar[_]] = {
+  override def makeScalar(sml: ScalarMl): Option[Scalar] = {
     //TODO: filter before making, metadata/name complications
     super.makeScalar(sml) match {
       case os @ Some(s) => {

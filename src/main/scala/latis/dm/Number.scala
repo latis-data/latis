@@ -2,11 +2,10 @@ package latis.dm
 
 import latis.data.NumberData
 
-trait Number { this: Scalar[_] =>
+trait Number { this: Scalar =>
   def doubleValue: Double = getNumberData.doubleValue
-  def compare(that: Double): Int = doubleValue.compareTo(that)
-  def compare(that: String): Int = compare(that.toDouble)
-  //TODO: add epsilon for equality?
+  def longValue: Long = getNumberData.longValue
+  def intValue: Int = getNumberData.intValue
 }
 
 object Number {

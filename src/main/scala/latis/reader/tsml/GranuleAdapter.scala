@@ -28,7 +28,7 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    * Override to construct Scalars using the data read by this Adapter.
    * Note that only Scalars can have Data with this column-oriented Adapter.
    */
-  override protected def makeScalar(sml: ScalarMl): Option[Scalar[_]] = {
+  override protected def makeScalar(sml: ScalarMl): Option[Scalar] = {
     val md = makeMetadata(sml)
     
     val data = dataMap.getOrElse(md("name"), immutable.Seq[String]())
