@@ -7,7 +7,7 @@ apply plugin: 'war'
 apply plugin: 'ivy-publish'
 
 group = 'lasp'
-version = '2.0.2'
+version = '2.1.0'
 
 publishing {
     publications {
