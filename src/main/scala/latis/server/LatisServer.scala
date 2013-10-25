@@ -13,7 +13,9 @@ class LatisServer extends HttpServlet with Logging {
 
   override def init() {
     logger.info("Initializing LatisServer.")
-    LatisProperties.init(getServletConfig)
+    //LatisProperties.init(getServletConfig)
+    LatisProperties.init(new LatisServerProperties(getServletConfig))
+    //TODO: should we reload properties with every request?
   }
 
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {

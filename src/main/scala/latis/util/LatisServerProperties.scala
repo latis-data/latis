@@ -1,6 +1,8 @@
 package latis.util
 
 import javax.servlet.ServletConfig
+import java.io.File
+import java.net.URL
 
 class LatisServerProperties(config: ServletConfig) extends LatisProperties {
 
@@ -20,6 +22,11 @@ class LatisServerProperties(config: ServletConfig) extends LatisProperties {
    * Return the full file system path for the given relative (to servlet context) path.
    */
   override def resolvePath(path: String): String = {
-    config.getServletContext().getRealPath(path)
+    //try classpath
+    getClass.getResource(File.separator + path) match {
+      case url: URL => url.getPath
+      //else try the servlet context
+      case null => config.getServletContext().getRealPath(path)
+    }
   }
 }

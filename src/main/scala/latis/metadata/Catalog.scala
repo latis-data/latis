@@ -38,11 +38,16 @@ import java.io.File
  */
 
 object Catalog {
-
+  
   def getTsmlUrl(dataset: String): URL = {
-    var base = LatisProperties.getOrElse("dataset.dir", "datasets")
-    if (! base.startsWith(File.separator)) base = LatisProperties.resolvePath(base)
-    val url = "file:" + base + File.separator + dataset + ".tsml"
-    new URL(url)
+    val dsdir = LatisProperties.getOrElse("dataset.dir", "datasets")
+    val tsml = dsdir + File.separator + dataset + ".tsml"
+    
+    //If tsml path has URL scheme, assume we have a valid url  //TODO: use URI api?
+    if (tsml.contains(":")) new URL(tsml)
+    //or absolute file path, prepend 'file' scheme
+    else if (tsml.startsWith(File.separator)) new URL("file:" + tsml)
+    //otherwise try to resolve relative path
+    else new URL("file:" + LatisProperties.resolvePath(tsml))
   }
 }

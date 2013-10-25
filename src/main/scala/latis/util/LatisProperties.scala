@@ -4,7 +4,27 @@ import java.util.Properties
 import java.io.File
 import java.io.FileInputStream
 import java.net.URL
-import javax.servlet.ServletConfig
+//import javax.servlet.ServletConfig
+
+/**
+ * TODO: 2013-10-25
+ * refactor LatisProperties to better separate server specific stuff
+ * complicated by need to init with ServletConfig
+ * init with function? inject dependency
+ * also used to 'resolvePath'
+ *   so need server subclass
+ *   could init with path resolver function, too?
+ * any other need to be a subclass, override?
+ *   property file name from web.xml
+ * how does spray config these things?
+ * seems that these functions don't belong in "Properties"
+ *   need a diff class?
+ *   FileUtils?
+ *   but same problem with needing a subclass
+ *   
+ * can server just say LatisProperties.init(new ServerProperties)?
+ *   it would simply set instance
+ */
 
 class LatisProperties extends Properties {
   //TODO: enforce immutabily? disable setters? extend immutable Map?
@@ -36,8 +56,8 @@ class LatisProperties extends Properties {
     System.getProperty("latis.config") match { //try system property
       case s: String => s
       case null => System.getenv("LATIS_HOME") match { //try under LATIS_HOME
-        case s: String => s + "/latis.properties"
-        case null => getClass.getResource("/latis.properties") match { //try in the classpath
+        case s: String => s + File.separator + "latis.properties"
+        case null => getClass.getResource(File.separator + "latis.properties") match { //try in the classpath
           case url: URL => url.getPath
           case null => throw new RuntimeException("Unable to locate property file.")
         }
@@ -49,7 +69,12 @@ class LatisProperties extends Properties {
    * Return the full file system path for the given relative path.
    */
   def resolvePath(path: String): String = {
-    scala.util.Properties.userDir + File.separator + path //prepend current working directory
+    //try classpath
+    getClass.getResource(File.separator + path) match {
+      case url: URL => url.getPath
+      //else try the current working directory
+      case null => scala.util.Properties.userDir + File.separator + path
+    }
   }
 }
   
@@ -71,7 +96,8 @@ object LatisProperties {
     _instance
   }
   
-  def init(config: ServletConfig) {_instance = new LatisServerProperties(config)}
+  //def init(config: ServletConfig) {_instance = new LatisServerProperties(config)}
+  def init(latisProps: LatisProperties) {_instance = latisProps}
   
   
   //---- Property value access methods --------------------------------------//
