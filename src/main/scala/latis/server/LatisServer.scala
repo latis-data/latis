@@ -8,6 +8,7 @@ import latis.writer.HttpServletWriter
 import com.typesafe.scalalogging.slf4j.Logging
 import java.net.URLDecoder
 import latis.metadata.Catalog
+import latis.dm.Dataset
 
 class LatisServer extends HttpServlet with Logging {
 
@@ -19,7 +20,9 @@ class LatisServer extends HttpServlet with Logging {
   }
 
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
-    var reader: TsmlReader = null //hack so it's visible to finally
+    //Need to expose outside of try scope:
+    var reader: TsmlReader = null
+    var dataset: Dataset = null
 
     try {      
       //Get the request not including the constraints.
@@ -53,7 +56,7 @@ class LatisServer extends HttpServlet with Logging {
       val operations = DapConstraintParser.parseArgs(args)
       
       //Get the Dataset from the Reader. 
-      val dataset = reader.getDataset(operations)
+      dataset = reader.getDataset(operations)
       
       //Make the Writer, wrapped for Servlet output.
       logger.debug("Writing " + suffix + " dataset.")
@@ -69,15 +72,21 @@ class LatisServer extends HttpServlet with Logging {
 
     } catch {
       
-      case e: Exception => {
-        //TODO: throw internal and external exceptions with messages to print here, 
-        //  as opposed to logging within?
-        //  but what about debug logging...?
+      case e: Throwable => {
+        //TODO: throw internal and external exceptions with messages to print here
+        //TODO: safe to catch Thowable? e.g. get out of memory errors, we are on our way out anyway
+        //  if OOM, try to free some resources so we can at least serve an error message?
         
         logger.error("Exception in LatisServer: " + e.getMessage, e)
+        
+        //Return an error page.
+        //Use the Writer mapped with the "error" suffix in the latis properties.        
+        //TODO: deal with exceptions thrown after writing starts
+        val writer = ErrorWriter(response)
+        writer.write(e)
+        
         //Return error status 500, if all else fails
-        response.reset
-        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "LaTiS was not able to fulfill this request.")
+        //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "LaTiS was not able to fulfill this request.")
       }
       
     } finally {
