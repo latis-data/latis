@@ -4,6 +4,7 @@ import java.util.Properties
 import java.io.File
 import java.io.FileInputStream
 import java.net.URL
+import com.typesafe.scalalogging.slf4j.Logging
 //import javax.servlet.ServletConfig
 
 /**
@@ -26,25 +27,29 @@ import java.net.URL
  *   it would simply set instance
  */
 
-class LatisProperties extends Properties {
+class LatisProperties extends Properties with Logging {
   //TODO: enforce immutabily? disable setters? extend immutable Map?
   //but might be useful to change properties on the fly?
   //Tempted to use any URL, but could open up complications.
 
   //Load properties
   val file = getPropertyFileName()
+  
   //Resolve path
-  if (file.startsWith(File.separator)) file //already fully resolved
-  else resolvePath(file)
+//TODO: not assigned to anything!?
+//  if (file.startsWith(File.separator)) file //already fully resolved
+//  else resolvePath(file)
   
   try {
+    logger.debug("Loading properties file: " + file)
     val in = new FileInputStream(file)
     load(in)
     in.close //TODO: do we need to close the stream?
   } catch {
     case e: Exception => {
-      println("[WARN] Unable to load properties file: " + file)
-      e.printStackTrace()
+      //logger.warn("Unable to load properties file: " + file)
+      //e.printStackTrace()
+      throw new RuntimeException("Unable to load properties file: " + file, e)
     }
   }
             
