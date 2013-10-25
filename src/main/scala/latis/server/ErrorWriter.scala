@@ -26,9 +26,11 @@ class ErrorWriter(response: HttpServletResponse) {
     writer.println("LaTiS Error: {")
     writer.println("  " + e.getMessage)
     writer.println("}")
-    
+    writer.flush()
+
     //TODO: consider more specific errors
-    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    //response.setStatus(HttpServletResponse.SC_OK)
+    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     response.flushBuffer()
   }
 }
