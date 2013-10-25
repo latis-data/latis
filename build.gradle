@@ -3,12 +3,16 @@
 
 apply plugin: 'scala'
 apply plugin: 'war'
-//TODO: apply plugin: 'jetty', must us gradle to run it? or glom together an executable war
 apply plugin: 'ivy-publish'
 
-group = 'lasp'
-version = '2.1.1'
+//Define the release version. Used for published jar.
+version = '2.1.2'
 
+//Define Java version for generated class files.
+targetCompatibility = 1.6
+
+//Define the Ivy repository for publishing build artifacts.
+group = 'lasp'
 publishing {
     publications {
         ivyJava(IvyPublication) {
