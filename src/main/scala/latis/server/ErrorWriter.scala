@@ -17,20 +17,19 @@ class ErrorWriter(response: HttpServletResponse) {
      * might want request, too
      */
 
-  response.reset //TODO: what are the side effects?
-  response.setContentType("text/plain")
+  def write(e: Throwable) {  
+    response.reset //TODO: what are the side effects?
   
-  val writer = new PrintWriter(response.getOutputStream)
+    //Note, must set status before getting output stream?
+    //TODO: consider more specific errors
+    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+    response.setContentType("text/plain")
   
-  def write(e: Throwable) {
+    val writer = new PrintWriter(response.getOutputStream)
     writer.println("LaTiS Error: {")
     writer.println("  " + e.getMessage)
     writer.println("}")
     writer.flush()
-
-    //TODO: consider more specific errors
-    //response.setStatus(HttpServletResponse.SC_OK)
-    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     response.flushBuffer()
   }
 }
