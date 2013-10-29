@@ -37,7 +37,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * traits for granule vs iterable?
    * but traits can't have state, e.g. data map
    *   DataGranule: column-oriented, Map, Data for each Scalar
-   *   DataInterator: ByteBufferData with sample size, Data in Function
+   *   DataIterator: ByteBufferData with sample size, Data in Function
    * use same cache as used by values?
    * consider record oriented (ascii, db) vs col-oriented (netcdf, bin)
    *   
@@ -47,8 +47,6 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * use dataMap idea from Granule?
    * generalize to concept of "cache"?
    * values cache is not volatile
-   * 
-   * 
    */
   
   
@@ -72,7 +70,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   def getDataset(operations: mutable.Seq[Operation]): Dataset = {
     //2013-10-11: remove handled operations from collection
-    //allow other to handle the rest
+    //allow others to handle the rest
     //TODO: consider keeping the full list and risk redundant operations?
     //  gives too much power to the adapter?
     
@@ -84,25 +82,48 @@ abstract class TsmlAdapter(val tsml: Tsml) {
      * we wouldn't want to realize data of the orig dataset
      * are we safely inside the monadic context that we can violate immutability?
      * should we look to the TSML instead of the orig Dataset to get source info?
+     *   might be more convenient to use Dataset
+     *   but we are a *tsml* adapter and we do have the Tsml facade
+     *   e.g. metadata from variable element atts, do in Tsml?
+     *   matching on time type...
+     * orig dataset could be used for cache
      * 
+     * handle operations like processing instructions?
+     * new Dataset for each one?
+     * or just let adapter apply them most efficiently (e.g. build sql query) before making the dataset?
+     * handle PIs like these ops?
+     * 
+     * Seems like making an orig dataset would be best.
+     * make dataset then apply ops
+     * leaving ops for writer feels wrong, 
+     *   maybe at the server api level, 
+     *   separate special syntax
+     *   not name=value, confused with selection
+     *   write(format="",...)?
+     * have one method that applies all ops
+     *   if subclass wants to apply some, must apply all
+     *   applyOperations(ops)
+     *   no need for handle returning boolean 
      */
     
+    //val ds = dataset //Should be the call that wakes up the lazy dataset
+    //ops.reverse.foldRight(dataset)(_(_))
     /*
-     * TODO: handle like processing instructions
-     * use Map: type => text, or Seq[String] since there can be multiple "filter"s...
-     * but what about order? do we always want projections before selections...?
-     *   unit conversion before filter?
-     * Need to enable subclass to apply the PIs it can, removing them from the list
+     * 2013-10-29
+     * need to change dataset = op'd dataset?. no
+     * or should 'dataset' always be the orig?
+     *   maybe change name to origDataset
+     * reader should call getDataset only once
+     * adapter may want to refer to origds several times, getvars...
      * 
-     * Dataset has a Seq of operations
-     * some can be applied by the adapter when constructing the Dataset (before data)
-     * others need to be applied when accessing Data
-     *   
+     * consider caching
+     * next request could be diff ops
+     * use GranuleAdapter for caching?
+     *   Iterative may be iterate once
+     *   Stream?
+     *   ehcache?
      */
     
-    //allow subclasses to handle the ones they can
-    //TODO: needs better control
-    //this.operations = operations.toBuffer
     
     //Give subclass the opportunity to handle each operation.
     //They should return false if not handled thus it will be kept to be handled elsewhere.
@@ -110,14 +131,16 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //TODO: before or after making dataset?
     //  probably before so we can apply them while making the Dataset
     //  so they'll need to be lazy
+    //might be useful to have orig dataset before applying ops
+    //someone is liable to ask for dataset in the adapter
     
     val ds = dataset //TODO: make sure this is the waking up of the lazy dataset
-    //Note, the original dataset will not be mutated
     
     //Apply remaining operations to the Dataset.
     //TODO: is that our responsibility? We did pass the ops to the reader.
-    //TODO: leave unhandled ops for Writer
-    //TODO: what can we do about preservnig operation order if we let adapters handle what they want?
+    //TODO: what can we do about preserving operation order if we let adapters handle what they want?
+    //  require adapter to override then be responsible for applying all ops?
+    //  what about leaving some for the writer? wrap in "write(format="",...)" function?
     ops.reverse.foldRight(ds)(_(_)) //op(ds)
     //NOTE: foldRight applies them in reverse order
   }
@@ -129,6 +152,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //not recursive, each Variable's metadata is independent
     //just the XML attributes from "metadata" elements, for now
     //if name is not defined in metadata, use the tsml "name" attribute
+    //TODO: should these tsml shortcuts be applied in Tsml?
     
     var atts = vml.getMetadataAttributes
     

@@ -39,14 +39,29 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   
   override def handleOperation(operation: Operation): Boolean = operation match {
     case Projection(p) => {this.projection = p; true}
-    //TODO: need to keep orig dataset, filter on non-projected vars...
+    //TODO: support alias
+    //getVariableByName(alias).getName
+    //do we really want to impl that for Tsml? in addition to Dataset?
+    
+    /*
+     * TODO: need to keep orig dataset, filter on non-projected vars...
+     * note, we do not yet have a dataset.
+     * We currently ask adapters whether they can and will handle the ops when the dataset is requested.
+     * 
+     * Is there any reason not to create an orig dataset first?
+     * Simply reflects the tsml, no data access needed.
+     * Seems like a better idea.
+     * operation handlers could still be lazy
+     * consider how we use "template" variables
+     * 
+     */
     
     case Selection(expression) => expression match {
       //Break expression up into components
       case SELECTION(name, op, value) => {
         //TODO: allow alias, use source name
         
-        if (name == "time") handleTimeSelection(op, value) //special handling for time
+        if (name == "time") handleTimeSelection(op, value) //special handling for "time"
         else if (tsml.getScalarNames.contains(name)) { //other variable (not time)
           //add a selection to the sql
           //replace "==" with "=" for SQL
