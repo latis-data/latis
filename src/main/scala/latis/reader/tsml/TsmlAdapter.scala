@@ -66,84 +66,95 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     val md = makeMetadata(tsml.dataset)
     val vars = tsml.dataset.getVariableMl.flatMap(makeVariable(_))
     Dataset(vars, md) 
+    //TODO: PIs should be applied here since they are part of the tsml and thus the original Dataset.
   }  
   
-  def getDataset(operations: mutable.Seq[Operation]): Dataset = {
-    //2013-10-11: remove handled operations from collection
-    //allow others to handle the rest
-    //TODO: consider keeping the full list and risk redundant operations?
-    //  gives too much power to the adapter?
-    
-    /*
-     * TODO: 2013-09-16
-     * Make sure original Dataset is not changed?
-     * need to be able to access original name (e.g. for sql)
-     * but should adapter be responsible for both if it is handling operations?
-     * we wouldn't want to realize data of the orig dataset
-     * are we safely inside the monadic context that we can violate immutability?
-     * should we look to the TSML instead of the orig Dataset to get source info?
-     *   might be more convenient to use Dataset
-     *   but we are a *tsml* adapter and we do have the Tsml facade
-     *   e.g. metadata from variable element atts, do in Tsml?
-     *   matching on time type...
-     * orig dataset could be used for cache
-     * 
-     * handle operations like processing instructions?
-     * new Dataset for each one?
-     * or just let adapter apply them most efficiently (e.g. build sql query) before making the dataset?
-     * handle PIs like these ops?
-     * 
-     * Seems like making an orig dataset would be best.
-     * make dataset then apply ops
-     * leaving ops for writer feels wrong, 
-     *   maybe at the server api level, 
-     *   separate special syntax
-     *   not name=value, confused with selection
-     *   write(format="",...)?
-     * have one method that applies all ops
-     *   if subclass wants to apply some, must apply all
-     *   applyOperations(ops)
-     *   no need for handle returning boolean 
-     */
-    
-    //val ds = dataset //Should be the call that wakes up the lazy dataset
-    //ops.reverse.foldRight(dataset)(_(_))
-    /*
-     * 2013-10-29
-     * need to change dataset = op'd dataset?. no
-     * or should 'dataset' always be the orig?
-     *   maybe change name to origDataset
-     * reader should call getDataset only once
-     * adapter may want to refer to origds several times, getvars...
-     * 
-     * consider caching
-     * next request could be diff ops
-     * use GranuleAdapter for caching?
-     *   Iterative may be iterate once
-     *   Stream?
-     *   ehcache?
-     */
-    
-    
-    //Give subclass the opportunity to handle each operation.
-    //They should return false if not handled thus it will be kept to be handled elsewhere.
-    val ops = operations.filterNot(handleOperation(_))
-    //TODO: before or after making dataset?
-    //  probably before so we can apply them while making the Dataset
-    //  so they'll need to be lazy
-    //might be useful to have orig dataset before applying ops
-    //someone is liable to ask for dataset in the adapter
-    
-    val ds = dataset //TODO: make sure this is the waking up of the lazy dataset
-    
-    //Apply remaining operations to the Dataset.
-    //TODO: is that our responsibility? We did pass the ops to the reader.
-    //TODO: what can we do about preserving operation order if we let adapters handle what they want?
-    //  require adapter to override then be responsible for applying all ops?
-    //  what about leaving some for the writer? wrap in "write(format="",...)" function?
-    ops.reverse.foldRight(ds)(_(_)) //op(ds)
-    //NOTE: foldRight applies them in reverse order
-  }
+  /**
+   * Apply the given sequence of operations and return the resulting Dataset.
+   * This will trigger the construction of an original Dataset (dataset) based
+   * only on the tsml, without these constraints applied.
+   * Adapters can override this to apply operations more effectively during
+   * the Dataset construction process (e.g. use in SQL query).
+   */
+  def getDataset(ops: Seq[Operation]) = ops.reverse.foldRight(dataset)(_(_))
+  //NOTE: foldRight applies them in reverse order
+  
+//  def getDataset(operations: mutable.Seq[Operation]): Dataset = {
+//    //2013-10-11: remove handled operations from collection
+//    //allow others to handle the rest
+//    //TODO: consider keeping the full list and risk redundant operations?
+//    //  gives too much power to the adapter?
+//    
+//    /*
+//     * TODO: 2013-09-16
+//     * Make sure original Dataset is not changed?
+//     * need to be able to access original name (e.g. for sql)
+//     * but should adapter be responsible for both if it is handling operations?
+//     * we wouldn't want to realize data of the orig dataset
+//     * are we safely inside the monadic context that we can violate immutability?
+//     * should we look to the TSML instead of the orig Dataset to get source info?
+//     *   might be more convenient to use Dataset
+//     *   but we are a *tsml* adapter and we do have the Tsml facade
+//     *   e.g. metadata from variable element atts, do in Tsml?
+//     *   matching on time type...
+//     * orig dataset could be used for cache
+//     * 
+//     * handle operations like processing instructions?
+//     * new Dataset for each one?
+//     * or just let adapter apply them most efficiently (e.g. build sql query) before making the dataset?
+//     * handle PIs like these ops?
+//     * 
+//     * Seems like making an orig dataset would be best.
+//     * make dataset then apply ops
+//     * leaving ops for writer feels wrong, 
+//     *   maybe at the server api level, 
+//     *   separate special syntax
+//     *   not name=value, confused with selection
+//     *   write(format="",...)?
+//     * have one method that applies all ops
+//     *   if subclass wants to apply some, must apply all
+//     *   applyOperations(ops)
+//     *   no need for handle returning boolean 
+//     */
+//    
+//    //val ds = dataset //Should be the call that wakes up the lazy dataset
+//    //ops.reverse.foldRight(dataset)(_(_))
+//    /*
+//     * 2013-10-29
+//     * need to change dataset = op'd dataset?. no, immutable
+//     * or should 'dataset' always be the orig?
+//     *   maybe change name to origDataset
+//     * reader should call getDataset only once
+//     * adapter may want to refer to origds several times, getvars...
+//     * 
+//     * consider caching
+//     * next request could be diff ops
+//     * use GranuleAdapter for caching?
+//     *   Iterative may be iterate once
+//     *   Stream?
+//     *   ehcache?
+//     */
+//    
+//    
+//    //Give subclass the opportunity to handle each operation.
+//    //They should return false if not handled thus it will be kept to be handled elsewhere.
+//    val ops = operations.filterNot(handleOperation(_))
+//    //TODO: before or after making dataset?
+//    //  probably before so we can apply them while making the Dataset
+//    //  so they'll need to be lazy
+//    //might be useful to have orig dataset before applying ops
+//    //someone is liable to ask for dataset in the adapter
+//    
+//    val ds = dataset //TODO: make sure this is the waking up of the lazy dataset
+//    
+//    //Apply remaining operations to the Dataset.
+//    //TODO: is that our responsibility? We did pass the ops to the reader.
+//    //TODO: what can we do about preserving operation order if we let adapters handle what they want?
+//    //  require adapter to override then be responsible for applying all ops?
+//    //  what about leaving some for the writer? wrap in "write(format="",...)" function?
+//    ops.reverse.foldRight(ds)(_(_)) //op(ds)
+//    //NOTE: foldRight applies them in reverse order
+//  }
   
   /**
    * Create Metadata from "metadata" elements in the given Variable XML.
@@ -189,12 +200,13 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   }
   
   protected def makeFunction(fml: FunctionMl): Option[Function] = {
+    //TODO: if domain or range None, use IndexFunction
     for (domain <- makeVariable(fml.domain); range <- makeVariable(fml.range)) yield Function(domain, range)
   }
   
   protected def makeScalar(sml: ScalarMl): Option[Scalar] = {
     val md = makeMetadata(sml)
-//TODO: apply projection, get name from metadata, it will have applied "id"
+//TODO: apply projection
 //  does this need to happen after renaming?
     //  depends if it is from tsml PI or later?
     
@@ -204,7 +216,6 @@ abstract class TsmlAdapter(val tsml: Tsml) {
       case "text" => Some(Text(md))
       case "time" => Some(Time(md))
       
-      //TODO: allow Time to have any one of the types
       
       /*
        * TODO: 2013-10-21

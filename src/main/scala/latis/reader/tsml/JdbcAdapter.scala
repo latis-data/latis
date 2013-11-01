@@ -35,7 +35,43 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   
   //Define sorting order.
   private var order = " ASC"
-      
+    
+  override def getDataset(ops: Seq[Operation]): Dataset = {
+    //val ds = dataset
+    /*
+     * TODO 2013-10-31
+     * but construction of the dataset applies the handled ops
+     * but all lazily until writer starts asking for data
+     * 
+     * projection broken:
+     * probably because dataset is mode before proj op is applied
+     * we need to deliver the final dataset, not the orig
+     * but we don't want to use default Projection Op
+     * ++handling ops needs to munge dataset model (no data until iterator is invoked)
+     * but tsml can have values = data
+     * 
+     * should just delegate to proper ops even if they are redundant
+     * just use what we can to make source data access efficient
+     * 
+     * does makeFunction,makeDataIterator need to run after projection applied?
+     * default projection op should just wrap it
+     * but proj op will expect data to be consistent with the model when it removes a var...
+     * handleOp could apply op and return new dataset?
+     * they key is to end up with a new dataset after each op
+     * safe to assume here (no values in tsml) that there's no data in dataset at this stage?
+     * 
+     */
+    
+    val others = ops.filterNot(handleOperation(_))
+    //ops.map(handleOperation(_))
+    
+    val ds = dataset
+    
+    //TODO: call super to handle the rest?
+    //TODO: or applyOps(ds, ops)?
+   
+    others.reverse.foldRight(ds)(_(_))
+  }
   
   override def handleOperation(operation: Operation): Boolean = operation match {
     case Projection(p) => {this.projection = p; true}
@@ -63,6 +99,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
         
         if (name == "time") handleTimeSelection(op, value) //special handling for "time"
         else if (tsml.getScalarNames.contains(name)) { //other variable (not time)
+ //TODO: could we use the orig dataset to get names? include alias, 
           //add a selection to the sql
           //replace "==" with "=" for SQL
           if (op == "==") this.selections += name + "=" + value
@@ -70,7 +107,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
           else this.selections += expression
           true
         }
-        else false //doesn't apply to our variables, so leave it for the next handler
+        else false //doesn't apply to our variables, so leave it for the next handler, TODO: or error?
       }
       //TODO: case _ => doesn't match selection regex, error
     }
@@ -123,13 +160,18 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   //TODO: maintain projection order, this means modifying the model higher up
   //TODO: deal with composite names for nested vars
   override def makeScalar(sml: ScalarMl): Option[Scalar] = {
-    //TODO: filter before making, metadata/name complications
+    //metadata/name complications make it easier to make the var first
+    //TODO: filter before making
     super.makeScalar(sml) match {
-      case os @ Some(s) => {
-        if (projection != "*" && !projection.split(",").contains(s.getName)) None  
-        else os
+      case os @ Some(s) => { //super class made a valid Scalar
+        if (projection == "*") os
+        //check if the Scalar has a matching name or alias
+        else projection.split(",").find(s.hasName(_)) match {  
+          case Some(_) => Some(s)  //found a match
+          case None => None  //no match
+        }
       }
-      case _ => None
+      case _ => None  //superclass gave us None
     }
   }
   
@@ -211,18 +253,18 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   
   //No query should be made until the iterator is called
   def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
-    def recordSize = sampleTemplate.size
+    def recordSize = sampleTemplate.getSize
     
     override def iterator = new NextIterator[Data] {
       val md = resultSet.getMetaData
-      val vars = dataset.toSeq //Seq of Variables as ordered in the dataset
-/*
- * TODO: has the dataset been projected yet??? e.g. model or metadata munged
- * yes, this overrides makeScalar which only keeps projected vars
- * this should be the orig dataset? no, it should be the result of operating on the orig.
- * Note, we are only accessing the dataset here so we can match name with db type.
- * The projection has already been applied to the query.
- */
+      //val vars = dataset.toSeq //Seq of Variables as ordered in the dataset
+//TODO: new paradigm: dataset is the orig, unfiltered dataset
+      //  need to apply projection
+      //TODO: maintain projection order, what if domain var is not first?
+      
+      //TODO: if projected:
+      val vars = projection.split(",").flatMap(dataset.getVariableByName(_))
+
       
       val types = vars.map(v => md.getColumnType(resultSet.findColumn(v.getName)))
       val varsWithTypes = vars zip types
@@ -236,7 +278,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
         if (resultSet.next) {
           for (vt <- varsWithTypes) vt match {
             case (v: Time, t: Int) if (t == java.sql.Types.TIMESTAMP) => {
-              val time = resultSet.getTimestamp(v.name, cal).getTime
+              val time = resultSet.getTimestamp(v.getName, cal).getTime
               //deal with diff time types
               v match {
                 case _: Real => bb.putDouble(time.toDouble)
