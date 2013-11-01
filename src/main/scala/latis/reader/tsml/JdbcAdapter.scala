@@ -262,9 +262,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
       //  need to apply projection
       //TODO: maintain projection order, what if domain var is not first?
       
-      //TODO: if projected:
-      val vars = projection.split(",").flatMap(dataset.getVariableByName(_))
-
+      val vars: Seq[Variable] = if (projection == "*") dataset.toSeq
+      else projection.split(",").flatMap(dataset.getVariableByName(_))
       
       val types = vars.map(v => md.getColumnType(resultSet.findColumn(v.getName)))
       val varsWithTypes = vars zip types

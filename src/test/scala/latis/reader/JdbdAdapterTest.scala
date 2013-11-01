@@ -55,7 +55,7 @@ class JdbdAdapterTest {
     
     val ops = ArrayBuffer[Operation]()
     //ops += LastFilter()
-    //ops += FirstFilter() //NOTE: jdbc adapter doesn't preserve order of ops
+    ops += FirstFilter() //NOTE: jdbc adapter doesn't preserve order of ops
     //ops += LimitFilter(2)
     ops += Selection("d>2")
     ops += Projection("i,d")
