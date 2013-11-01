@@ -6,6 +6,8 @@ import java.io._
 import scala.collection.mutable.MapBuilder
 
 class JsonWriter extends Writer {
+  //TODO: extend TextWriter?
+  //TODO: cleanse text, escape new lines "\\n"...
 
   /*
    * TODO:import latis.time.Time
