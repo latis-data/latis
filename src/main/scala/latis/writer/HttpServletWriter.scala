@@ -63,7 +63,8 @@ object HttpServletWriter {
     val writer = Writer.fromSuffix(suffix)
     response.setContentType(writer.mimeType)
     //TODO: why do we still need to set character encoding? 
-    response.setCharacterEncoding("UTF-8") //is this required? maybe ISO-8859-1 (as seen from TSDS)
+    //response.setCharacterEncoding("UTF-8") //is this required? maybe ISO-8859-1 (as seen from TSDS)
+    response.setCharacterEncoding("ISO-8859-1")
     writer._out = response.getOutputStream()
     new HttpServletWriter(writer, response)
   }
