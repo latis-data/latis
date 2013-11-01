@@ -27,6 +27,9 @@ trait Variable {
   def getLength: Int
   def getSize: Int
   
+  def getVariableByName(name: String): Option[Variable]
+  def hasName(name: String): Boolean
+  
   def toSeq: Seq[Scalar]
   def getDataIterator: Iterator[Data]
 }
@@ -109,19 +112,37 @@ abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data 
 //  }
   
   
-//TODO: just delegate to Projection operator?
   /*
    * TODO: do we need to stay within the Dataset monad here? 
-   *   yes, since this will be exposed in the DSL
+   *   this will be exposed in the DSL
    *   but we are already acting on a Variable
    *   only expose via Dataset API?
+   *   Dataset API can override to return a Dataset, 
+   *   the DSL should not expose anything but Dataset
+   *   use this for internal use
    */
   //TODO: support fully qualified names
-//  def getVariableByName(name: String): Option[Variable] = {
-//    val ds = Dataset(this).project(name) 
-//    if (ds.variables.isEmpty) None
-//    else Some(ds.variables(0))
-//  }
+  //TODO: "findVariableByName"? all descendants like netcdf, "get" for direct kids?
+  //TODO: stop as soon as first is found, like Seq.find
+  //Get the actual Variable object with the given name or alias.
+  //Don't try to maintain the entire model structure.
+  def getVariableByName(name: String): Option[Variable] = {
+    if (hasName(name)) Some(this)
+    else this match {
+      case _: Scalar => None  //didn't match above
+      case Tuple(vars) => {
+        val matchingVars = vars.flatMap(_.getVariableByName(name))
+        matchingVars.length match {
+          case 0 => None
+          case 1 => Some(matchingVars.head)
+          case n: Int => throw new RuntimeException("Found " + n + " variables that match the name: " + name)
+            //TODO: warn and return first?
+        }
+      }
+      case Function(domain, range) => Sample(domain, range).getVariableByName(name) //delegate to Tuple
+    }
+  }
+
 //  def getVariableByName(name: String): Option[Variable] = {
 //    if (this.name == name || this.hasAlias(name)) Some(this)
 //    else this match {
@@ -160,31 +181,20 @@ abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data 
 //    case Tuple(vars) => vars.exists(_.containsVariable(name))
 //    case Function(domain, range) => domain.containsVariable(name) || range.containsVariable(name)
 //  }
-//  
-//  def hasAlias(alias: String): Boolean = {
-//    metadata.get("alias") match {
-//      case Some(s) => s.split(",").contains(alias)
-//      case None => false
-//    }
-//  }
   
-  //replaced by toSeq
-//  /**
-//   * Return a Seq of all the Scalar Variables (i.e. leafs) in this Variable.
-//   */
-//  def getScalars: Seq[Scalar] = getScalars(this)
-//  
-//  private def getScalars(variable: Variable): Seq[Scalar] = {
-//    //recursive accumulator
-//    def acc(v: Variable, list: Seq[Scalar]): Seq[Scalar] = v match {
-//      case null => list
-//      case s: Scalar => acc(null, list :+ s)
-//      case Tuple(vars) => vars.flatMap(getScalars(_))
-//      case Function(d, r) => getScalars(d) ++ getScalars(r)
-//    }
-//    
-//    acc(this, List())
-//  }
+  //include alias
+  //TODO: consider long, qualified name
+  def hasName(name: String): Boolean = {
+    //TODO: support wildcard, regex?
+    getName == name || hasAlias(name)
+  }
+  
+  def hasAlias(alias: String): Boolean = {
+    metadata.get("alias") match {
+      case Some(s) => s.split(",").contains(alias)
+      case None => false
+    }
+  }
   
   
   //TODO: filter?
