@@ -43,6 +43,7 @@ class AsciiWriter extends Writer {
     
     case f: Function => {
       writer.println()
+      //TODO: "[]" brackets?
       for (Sample(domain, range) <- f.iterator) {
         writeVariable(domain)
         writer.print(" -> ")
