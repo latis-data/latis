@@ -9,7 +9,7 @@ import scala.collection.mutable.ArrayBuffer
 import latis.ops._
 import latis.dm._
 
-class JdbdAdapterTest {
+class JdbcAdapterTest {
 
   private var connection: Connection = null
   
