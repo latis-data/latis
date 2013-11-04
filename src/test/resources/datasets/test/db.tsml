@@ -9,7 +9,7 @@
              user="" password=""
              table="test"/>
              
-    <time name="i">
+    <time name="i" type="integer">
       <metadata units="years since 2000-01-01"/>
     </time>
     

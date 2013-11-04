@@ -36,7 +36,7 @@ class TsmlReader(tsml: Tsml) extends DatasetAccessor {
    */
   def getDataset(): Dataset = dataset
   
-  def getDataset(operations: mutable.Seq[Operation]): Dataset = {
+  def getDataset(operations: Seq[Operation]): Dataset = {
     adapter.getDataset(operations)
   }
   

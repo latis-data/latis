@@ -19,7 +19,11 @@ abstract class VariableMl(xml: Node) {
       case _ => None
     }
   }
-  //def getAttributes
+  
+  def getAttributes: Map[String, String] = {
+    val atts = xml.attributes  //(xml \ ("@*"))
+    atts.map(att => (att.asInstanceOf[Attribute].key -> att.asInstanceOf[Attribute].value.text)).toMap
+  }
   
   /**
    * Shortcut to directly get an attribute value

@@ -165,20 +165,21 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //if name is not defined in metadata, use the tsml "name" attribute
     //TODO: should these tsml shortcuts be applied in Tsml?
     
-    var atts = vml.getMetadataAttributes
+    //Add all tsml attributes to metadata.
+    var atts = vml.getAttributes ++ vml.getMetadataAttributes
     
-    if (! atts.contains("name")) vml.getAttribute("name") match {
-      case Some(name) => atts = atts + ("name" -> name)
-      case None => {
-        //no name, error or make one up? but only scalars have them, for now
-        //special handling for "time" and "index"
-        vml.label match {
-          case "time" => atts = atts + ("name" -> "time")
-          case "index" => atts = atts + ("name" -> "index")
-          case _ =>
-        }
-      }
+    //internal helper method to add default name for special variable types
+    def addImplicitName(name: String) = {
+      if (atts.contains("name")) atts.get("alias") match {
+        case Some(a) => atts = atts + ("alias" -> (a+","+name)) //append to list of existing aliases
+        case None => atts = atts + ("alias" -> name) //add alias
+      } 
+      else atts = atts + ("name" -> name) //no 'name' attribute, so use it
     }
+ 
+    //Add implicit metadata for "time" and "index" variables.
+    if (vml.label == "time") addImplicitName("time")
+    if (vml.label == "index") addImplicitName("index")
 
     Metadata(atts)
   }
@@ -209,25 +210,13 @@ abstract class TsmlAdapter(val tsml: Tsml) {
 //TODO: apply projection
 //  does this need to happen after renaming?
     //  depends if it is from tsml PI or later?
+    //TODO: deal with values in tsml
     
     sml.label match {
       case "real" => Some(Real(md))
       case "integer" => Some(Integer(md))
       case "text" => Some(Text(md))
       case "time" => Some(Time(md))
-      
-      
-      /*
-       * TODO: 2013-10-21
-       * How do we reconcile making scalars with no data?
-       * More risk of confusing Variable as data container.
-       * This is just the immutable dataset model.
-       * May be used as templates for constructing mutated dataset to serve.
-       * 
-       * Does the orig dataset model ever have data?
-       * when "values" defined in tsml?
-       */
-      
       case _ => None
     }
   }

@@ -258,8 +258,6 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     override def iterator = new NextIterator[Data] {
       val md = resultSet.getMetaData
       //val vars = dataset.toSeq //Seq of Variables as ordered in the dataset
-//TODO: new paradigm: dataset is the orig, unfiltered dataset
-      //  need to apply projection
       //TODO: maintain projection order, what if domain var is not first?
       
       val vars: Seq[Variable] = if (projection == "*") dataset.toSeq

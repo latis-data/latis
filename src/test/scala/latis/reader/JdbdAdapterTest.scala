@@ -47,7 +47,29 @@ class JdbdAdapterTest {
     }
   }
   
+  
   @Test
+  def selection_in_adapter {
+    val ops = List(Selection("d>2"))
+    val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
+    AsciiWriter.write(ds)
+  }
+  
+  //@Test
+  def projection_in_adapter = ???
+  //@Test
+  def projection_order = ???
+  
+  //@Test
+  def first_filter_in_adapter = ???
+  //@Test
+  def last_filter_in_adapter = ???
+  //@Test
+  def limit_filter_in_adapter = ???
+  
+  //TODO: combine, play with order
+  
+  //@Test
   def tsml_adapter {
     //val ds = TsmlReader("datasets/test/db.tsml").getDataset
     //ds.variables.head.asInstanceOf[Function].range
