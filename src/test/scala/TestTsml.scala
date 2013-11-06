@@ -111,4 +111,12 @@ class TestTsml  {
     val ds = TsmlReader("datasets/test/scalar.tsml").getDataset
     AsciiWriter().write(ds)
   }
+  
+  @Test
+  def test_ldap {
+    //TODO: index name "unknown"
+    //TODO: use "sequence"
+    val ds = TsmlReader("datasets/test/ldap.tsml").getDataset
+    AsciiWriter().write(ds)
+  }
 }

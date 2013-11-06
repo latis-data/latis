@@ -54,9 +54,6 @@ class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
    *   "take(linesPerRecord)"?
    */
   
-  lazy val variableNames = tsml.getScalarNames
-  //TODO: generalize to get "projected" variables? from dataset? but need orig for parsing?
-  
   /**
    * Keep track of the data Source so we can close it.
    */
@@ -96,9 +93,8 @@ class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
    * as defined by the "linesPerRecord" attribute in the TSML.
    * Instead of merging all the lines into a single String, each sample
    * will be Seq of lines so the subclass can interpret it as it will.
-   * This is "lazy" so we won't access the data source until called upon.
    */
-  lazy val recordIterator: Iterator[Record] = lineIterator.grouped(linesPerRecord)
+  def recordIterator: Iterator[Record] = lineIterator.grouped(linesPerRecord)
   
   /**
    * The "linesPerRecord" attribute from this Adapter's definition in the TSML.
@@ -123,24 +119,22 @@ class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
   //def parseRecord(metadata: FunctionMd, record: Record): LinkedHashMap[Name,ArrayBuffer[Value]]
   def parseRecord(record: Record): Map[Name, Value] = {
     //assume one line per record, space delimited
-    (variableNames zip record(0).split(" ")).toMap
+    (variableNames zip record.head.split(" ")).toMap
   }
   
   //suck in entire granule, for now
-  def readData: immutable.Map[String, immutable.Seq[String]] = {
-    val map = mutable.HashMap[Name, mutable.ArrayBuffer[Value]]()
-    for (vname <- variableNames) map += ((vname, mutable.ArrayBuffer[Value]()))
+  def readData: immutable.Map[Name, immutable.Seq[Value]] = {
+    val map = initDataMap
         
-    while (recordIterator.hasNext) {
-      val record = recordIterator.next
+    val it = recordIterator
+    while (it.hasNext) {
+      val record = it.next
       val vs = parseRecord(record)
       //skip bad records (empty Map)
       if (vs.nonEmpty) for (vname <- variableNames) map(vname) append vs(vname)
     }
     
-    //return as immutable dataMap
-    val z = for ((name, seq) <- map) yield name -> seq.toIndexedSeq //turn ArrayBuffer into an immutable Seq
-    z.toMap //turn HashMap into an immutable Map
+    immutableDataMap(map)
   }
   
   

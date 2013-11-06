@@ -14,7 +14,7 @@ import latis.data.EmptyData
  * data are stored in a separate Data object).
  */
 abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
-  //TODO: dataMap should contain Data, impl Data with Seq[String]?
+  //TODO: don't make String specific, use Data?
   lazy val dataMap: immutable.Map[String, immutable.Seq[String]] = readData
 
   /**
@@ -23,6 +23,25 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    * This will be invoked lazily, when the dataMap is first accessed.
    */
   def readData: immutable.Map[String, immutable.Seq[String]]
+  
+  
+  /**
+   * Make a mutable data structure (variable name to Seq of values) to use while reading data.
+   */
+  def initDataMap: mutable.HashMap[String, mutable.ArrayBuffer[String]] = {
+    val map = mutable.HashMap[String, mutable.ArrayBuffer[String]]()
+    for (vname <- variableNames) map += ((vname, mutable.ArrayBuffer[String]()))
+    map
+  }
+  
+  /**
+   * Return an immutable dataMap from the mutable data structure we use when reading data.
+   */
+  def immutableDataMap(map: mutable.HashMap[String, mutable.ArrayBuffer[String]]): immutable.Map[String, immutable.Seq[String]] = {
+    val z = for ((name, seq) <- map) yield name -> seq.toIndexedSeq //turn ArrayBuffer into an immutable Seq
+    z.toMap //turn HashMap into an immutable Map
+  }
+  
   
   /**
    * Override to construct Scalars using the data read by this Adapter.

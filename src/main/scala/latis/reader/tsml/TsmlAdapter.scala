@@ -32,6 +32,14 @@ abstract class TsmlAdapter(val tsml: Tsml) {
 
   def getProperty(name: String): Option[String] = properties.get(name)
   
+  def getProperty(name: String, default: String): String = getProperty(name) match {
+    case Some(v) => v
+    case None => default
+  }
+  
+  //TODO: consider using Dataset, apply projections...
+  lazy val variableNames = tsml.getScalarNames
+  
   /*
    * TODO: 2013-06-25
    * traits for granule vs iterable?

@@ -329,7 +329,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   }
   
   private def _getConnection: Connection = {
-    //TODO: support jndi
+    //TODO: error if not present
     val driver = properties("driver")
     val url = properties("location")
     val user = properties("user")
