@@ -27,7 +27,7 @@ class JsonWriter extends Writer {
   
   //TODO: can we generalize to writeHeader, ...?
   def write(dataset: Dataset, args: Seq[String]) = {
-    _writer.print("{\"" + dataset.name + "\":{")
+    _writer.print("{\"" + dataset.getName + "\":{")
     var startThenDelim = "{"
     for (v <- dataset.getVariables) {
       v match {
@@ -61,6 +61,7 @@ class JsonWriter extends Writer {
     val label = "\"" + variable.getName + "\":"
     
     val value = variable match { 
+      case Index(i) => i.toString //TODO: exclude implicit Index
       case t: Time => t.getJavaTime.toString  //use java time for json
       case Real(d) => d.toString //TODO: format?
       case Integer(l) => l.toString 

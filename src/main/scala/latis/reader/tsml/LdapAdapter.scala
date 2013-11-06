@@ -61,7 +61,11 @@ class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     for (result <- results) {
       //Get the attributes for the person. Should be same as attIDs = Dataset Variables.
       val atts = result.getAttributes
-      for (vname <- variableNames) map(vname) append atts.get(vname).toString
+      for (vname <- variableNames) {
+        //Note, the value of an attribute is more attributes. Join with ",".
+        val value = JavaConversions.enumerationAsScalaIterator(atts.get(vname).getAll).mkString(",")
+        map(vname) append value
+      }
     }
     
     //return as immutable dataMap

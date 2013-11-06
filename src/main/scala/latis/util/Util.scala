@@ -78,7 +78,7 @@ object Util {
       Text(template.getMetadata, s)
     }
 
-    case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _))) //TODO:, template.metadata)
+    case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _)), template.getMetadata)
 
     case Function(d, r) => { //entire function, designed for inner functions
       //Function(buildVarFromData(bb, d), buildVarFromData(bb, r))

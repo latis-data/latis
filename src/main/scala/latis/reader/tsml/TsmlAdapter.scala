@@ -205,12 +205,14 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   }
   
   protected def makeTuple(tml: TupleMl): Option[Tuple] = {
-    Some(Tuple(tml.variables.flatMap(makeVariable(_))))
+    val md = makeMetadata(tml)
+    Some(Tuple(tml.variables.flatMap(makeVariable(_)), md))
   }
   
   protected def makeFunction(fml: FunctionMl): Option[Function] = {
+    val md = makeMetadata(fml)
     //TODO: if domain or range None, use IndexFunction
-    for (domain <- makeVariable(fml.domain); range <- makeVariable(fml.range)) yield Function(domain, range)
+    for (domain <- makeVariable(fml.domain); range <- makeVariable(fml.range)) yield Function(domain, range, md)
   }
   
   protected def makeScalar(sml: ScalarMl): Option[Scalar] = {

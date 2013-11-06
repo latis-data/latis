@@ -81,6 +81,8 @@ object Function {
   
   def apply(domain: Variable, range: Variable): Function = new SampledFunction(domain, range)
   
+  def apply(domain: Variable, range: Variable, md: Metadata): Function = new SampledFunction(domain, range, metadata = md)
+  
   def apply(domain: Variable, range: Variable, data: Data): Function = new SampledFunction(domain, range, data = data)
 
   

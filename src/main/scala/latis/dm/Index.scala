@@ -30,9 +30,9 @@ object Index {
   
   def apply(): Index = new Variable2(metadata = Metadata("index")) with Index
   
-  def withLength(length: Int): Index = new Variable2(data = IndexData(length)) with Index
+  def withLength(length: Int): Index = new Variable2(metadata = Metadata("index"), data = IndexData(length)) with Index
 
-  def apply(value: Int): Index = new Variable2(data = IndexValue(value)) with Index
+  def apply(value: Int): Index = new Variable2(metadata = Metadata("index"), data = IndexValue(value)) with Index
 
   
   def unapply(index: Index): Option[Int] = Some(index.getData.asInstanceOf[IndexValue].intValue)

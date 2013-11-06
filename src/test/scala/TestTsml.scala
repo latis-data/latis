@@ -13,6 +13,7 @@ import latis.ops.Selection
 import latis.ops.LastFilter
 import latis.ops.FirstFilter
 import latis.ops.LimitFilter
+import latis.writer.CsvWriter
 
 class TestTsml  {
 
@@ -116,7 +117,10 @@ class TestTsml  {
   def test_ldap {
     //TODO: index name "unknown"
     //TODO: use "sequence"
-    val ds = TsmlReader("datasets/test/ldap.tsml").getDataset
-    AsciiWriter().write(ds)
+    val ops = ArrayBuffer[Operation]()
+    //ops += Projection("cn")
+    val ds = TsmlReader("datasets/test/ldap.tsml").getDataset(ops)
+    
+    Writer("csv").write(ds)
   }
 }

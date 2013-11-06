@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tsml>
 
-  <dataset name="mms_ldap">
+  <dataset name="maven_ldap">
     <adapter class="latis.reader.tsml.LdapAdapter"
              location="ldap://webiam-core1/dc=lasp,dc=colorado,dc=edu" 
              group="cn=maven-sdc-web-users,ou=groups,dc=lasp,dc=colorado,dc=edu"/>
              
-      <index/>
-      <text name="uid" length="16"/>
-      <text name="cn" length="32"/>
-      <text name="mail" length="64"/>
+      <function name="people">
+        <text name="uid" length="16"/>
+        <tuple name="person">
+          <text name="cn" length="32"/>
+          <text name="mail" length="64"/>
+        </tuple>
+      </function>
     
   </dataset>
 
