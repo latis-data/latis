@@ -11,6 +11,7 @@
         <tuple name="person">
           <text name="cn" length="32"/>
           <text name="mail" length="64"/>
+          <text name="memberOf" length="2048"/>
         </tuple>
       </function>
     

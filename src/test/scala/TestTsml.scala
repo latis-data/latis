@@ -119,6 +119,7 @@ class TestTsml  {
     //TODO: use "sequence"
     val ops = ArrayBuffer[Operation]()
     //ops += Projection("cn")
+    ops += Selection("memberOf=~.*jira-administrators.*")
     val ds = TsmlReader("datasets/test/ldap.tsml").getDataset(ops)
     
     Writer("csv").write(ds)
