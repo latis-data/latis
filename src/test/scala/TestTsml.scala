@@ -118,9 +118,9 @@ class TestTsml  {
     //TODO: index name "unknown"
     //TODO: use "sequence"
     val ops = ArrayBuffer[Operation]()
-    //ops += Projection("cn")
-    ops += Selection("memberOf=~.*jira-administrators.*")
-    val ds = TsmlReader("datasets/test/ldap.tsml").getDataset(ops)
+    ops += Projection("uid,cn,mail")
+    ops += Selection("memberOf=~.*maven-sdc-web-users.*")
+    val ds = TsmlReader("datasets/test/ldap_users.tsml").getDataset(ops)
     
     Writer("csv").write(ds)
   }

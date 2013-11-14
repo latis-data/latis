@@ -28,11 +28,20 @@ class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
   
   def executeQuery: Iterator[SearchResult] = {
     // Specify the ids of the attributes to return (Dataset Variables)
+    //TODO: use projection
     val attIDs = variableNames.toArray
     
-    // Specify the group to match
+    // Add search attributes.
+    //TODO: generalize to use selections
     val matchAttrs = new BasicAttributes(true) // ignore case
-    matchAttrs.put(new BasicAttribute("memberof", group))
+    matchAttrs.put(new BasicAttribute("memberof")) //include every entry that has a memberof?
+    
+    // Specify the group to match, if it is defined
+    getProperty("group") match {
+      case Some(group) => matchAttrs.put(new BasicAttribute("memberof", group))
+      case None => 
+    }
+    
     
     // Make the query.
     val answer = context.search("ou=People", matchAttrs, attIDs)  //java Enumeration
