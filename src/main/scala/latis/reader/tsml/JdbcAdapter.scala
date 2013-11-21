@@ -235,7 +235,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     
       
     //add processing instructions
-    //TODO: diff PI name? unfortunate that "filter" is more intuitive for a relational algebra "selection"
+    //TODO: diff PI name? unfortunate that "filter" is more intuitive for a relational algebra "selection", "select"?
     //TODO: should PIs mutate the dataset? probably not, just like any other op, but the adapter's "dataset" should have them applied
     buffer ++= tsml.getProcessingInstructions("filter")
     
@@ -316,6 +316,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   
   protected def getConnection: Connection = {
     hasConnection = true //TODO: what if getting connection fails
+//TODO: use 'location' uri with 'jdbc' or 'java' (for jndi, e.g. java:comp/env/jdbc/sorce_l1a) scheme
     properties.get("jndi") match {
       case Some(jndi) => getConnectionViaJndi(jndi)
       case None => _getConnection
