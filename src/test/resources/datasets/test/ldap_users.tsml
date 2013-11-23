@@ -10,7 +10,10 @@
         <tuple name="person">
           <text name="cn" length="32"/>
           <text name="mail" length="64"/>
-          <text name="memberOf" length="2048"/>
+          <!--text name="memberOf" length="2048"/-->
+          <sequence name="memberOf">
+            <text name="group" regex="cn=(\w+)," length="32"/>
+          </sequence>
         </tuple>
       </function>
     

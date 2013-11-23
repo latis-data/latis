@@ -113,15 +113,21 @@ class TestTsml  {
     AsciiWriter().write(ds)
   }
   
-  @Test
+  //@Test
   def test_ldap {
     //TODO: index name "unknown"
     //TODO: use "sequence"
     val ops = ArrayBuffer[Operation]()
-    ops += Projection("uid,cn,mail")
     ops += Selection("memberOf=~.*maven-sdc-web-users.*")
+    ops += Projection("uid,cn,mail")
     val ds = TsmlReader("datasets/test/ldap_users.tsml").getDataset(ops)
     
     Writer("csv").write(ds)
+  }
+  
+  @Test
+  def test_dbstats {
+    val ds = TsmlReader("/home/lindholm/git/dbstats/src/main/resources/datasets/kepler_usage.tsml").getDataset
+    AsciiWriter().write(ds)
   }
 }
