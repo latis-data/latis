@@ -46,17 +46,17 @@ class MetadataTest {
     assertEquals(None, v)
   }
   
-  @Test
-  def name {
-    val v = metadata.name
-    assertEquals("value", v)
-  }
-  
-  @Test
-  def unknown_name {
-    val v = EmptyMetadata.name
-    assertEquals("unknown", v)
-  }
+//  @Test
+//  def name {
+//    val v = metadata.name
+//    assertEquals("value", v)
+//  }
+//  
+//  @Test
+//  def unknown_name {
+//    val v = EmptyMetadata.name
+//    assertEquals("unknown", v)
+//  }
 
   //---- Equality Tests -----------------------------------------------------//
   

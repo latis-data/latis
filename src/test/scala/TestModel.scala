@@ -42,7 +42,7 @@ class TestModel  {
   def test_function_with_data_from_real_kids {
     val domain = List(0.0,1.0,2.0,3.0,4.0)
     val range = List(1.0,2.0,3.0,4.0,5.0)
-    val f = Function(domain, range)
+    val f = Function.fromValues(domain, range)
     val f2 = f + Real(1)
     //println(f2)
     //for ((d,r) <- f.iterator) println(d.toString + " -> " + r)
@@ -55,7 +55,7 @@ class TestModel  {
   @Test
   def test_function_with_data_from_tuple_range {
     val data = List(List(0.0,1.0,2.0,3.0,4.0), List(1.0,2.0,3.0,4.0,5.0), List(11.0,12.0,13.0,14.0,15.0))
-    val f = Function(data)
+    val f = Function.fromValues(data)
     val f2 = f + Real(1)
     AsciiWriter(System.out).write(f2)
   }

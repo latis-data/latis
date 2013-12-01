@@ -10,7 +10,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class FilterTest {
 
-  val dataset = Dataset(Function(List(1.1,2.2,3.3), List(4.4,5.5,6.6)))
+  val dataset = Dataset(Function.fromValues(List(1.1,2.2,3.3), List(4.4,5.5,6.6)))
   
   //@Test
   def test_last_filter {
