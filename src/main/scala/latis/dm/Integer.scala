@@ -22,18 +22,13 @@ object Integer {
   def apply(md: Metadata, v: Long): Integer = new Variable2(md, Data(v)) with Integer
   def apply(md: Metadata, vs: Seq[Long]): Integer = new Variable2(md, Data(vs)) with Integer
 
-  
+  def apply(v: Long): Integer = new Variable2(data = Data(v)) with Integer
+  def apply(vs: Seq[Long]): Integer = new Variable2(data = Data(vs)) with Integer
+    
 //  def apply(name: String): Integer = {
 //    //new Integer(Metadata(name), EmptyData)
 //    val r = new Integer
 //    r._metadata = Metadata(name)
-//    r
-//  }
-//  
-//  def apply(v: Long): Integer = {
-//    //new Integer(EmptyMetadata, DoubleValue(v))
-//    val r = new Integer
-//    r._data = LongValue(v)
 //    r
 //  }
 //  
@@ -42,14 +37,6 @@ object Integer {
 //    val r = new Integer
 //    r._metadata = Metadata(name)
 //    r._data = LongValue(v)
-//    r
-//  }
-//  
-//  //TODO: IndexFunction?, special constructor so this only works in the context of Functions (e.g. domain, range)?
-//  def apply(vs: Seq[Long]): Integer = {
-//    //new Integer(EmptyMetadata, Data(vs))
-//    val r = new Integer
-//    r._data = Data(vs)
 //    r
 //  }
 //  
