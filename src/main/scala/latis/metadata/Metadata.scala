@@ -16,12 +16,12 @@ trait Metadata {
   
   def has(key: String): Boolean
   
-  lazy val name = get("name") match {
-    case Some(s) => s
-    case None => "unknown" //TODO: do we want default name to be "unknown"? generate a unique id?
-  }
-  
-  override def toString() = name
+//  lazy val name = get("name") match {
+//    case Some(s) => s
+//    case None => "unknown" //TODO: do we want default name to be "unknown"? generate a unique id?
+//  }
+//  
+//  override def toString() = name
 }
 
 
