@@ -7,16 +7,12 @@ import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
 
 trait Tuple extends Variable { //this: Variable =>
-  def getVariables: immutable.Seq[Variable]
-  
-  //TODO: move to Variable
-  def apply(index: Int): Variable = getVariables(index)
   
 }
 
 class AbstractTuple(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
   extends Variable2(metadata, data) with Tuple {
-  def getVariables = variables
+  override def getVariables = variables
 }
 
 object Tuple {

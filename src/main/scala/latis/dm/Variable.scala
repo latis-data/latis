@@ -4,6 +4,7 @@ import latis.data._
 import latis.metadata._
 import latis.ops.math.BasicMath
 import latis.time.Time
+import scala.collection._
 
 /*
  * TODO: 2013-10-21
@@ -32,6 +33,9 @@ trait Variable {
   
   def toSeq: Seq[Scalar]
   def getDataIterator: Iterator[Data]
+  
+  def getVariables: Seq[Variable] //TODO: immutable.Seq?
+  def apply(index: Int): Variable = getVariables(index)
 }
 
 abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyData) extends Variable {
@@ -40,7 +44,10 @@ abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data 
   def getData: Data = data
   
   def getName = name
-  lazy val name = metadata.name
+  lazy val name = metadata.get("name") match {
+    case Some(s) => s
+    case None => "unknown" //TODO: generate unique name?
+  }
   
   /**
    * Length of the Variable depending on type.
@@ -95,6 +102,16 @@ abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data 
     case s: Scalar => Seq(s)
     case Tuple(vars) => vars.foldLeft(Seq[Scalar]())(_ ++ _.toSeq)
     case Function(d,r) => d.toSeq ++ r.toSeq
+  }
+  
+  /**
+   * Return this Variable as a Seq of Variables.
+   */
+  def getVariables: Seq[Variable] = this match {
+    case s: Scalar => Seq(s)
+    //case Sample(d,r) => d.getVariables ++ r.getVariables  more like flatten
+    //case tup: Tuple => tup.
+    //TODO: Function?
   }
   
   
