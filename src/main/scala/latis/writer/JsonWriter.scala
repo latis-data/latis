@@ -40,13 +40,14 @@ class JsonWriter extends Writer {
     _writer.flush()
   }
   
+  /**
+   * Manage top level Function so that we can write one sample at a time.
+   */
   private def writeTopLevelFunction(f: Function) {
     var startThenDelim = "\"" + f.getName + "\":\n["
     for (Sample(domain, range) <- f.iterator) {
-      val d = varToString(domain)
-      val r = varToString(range)
-      
-      _writer.println(startThenDelim + "{" + d + "," + r + "}")
+      val vars = domain.getVariables ++ range.getVariables
+      _writer.println(startThenDelim + vars.map(varToString(_)).mkString("{", ",", "}"))
       startThenDelim = ","
     }
     _writer.print("]")
@@ -54,11 +55,11 @@ class JsonWriter extends Writer {
 
   
   private def varToString(variable: Variable): String = {
-    //TODO: impl for Function
-    //TODO: what if Tuple has name? need to wrap it as an object in "{}"
-    
-    //assume everything has a name, may be "unknown"
-    val label = "\"" + variable.getName + "\":"
+    //Use name for label, no label if "unknown"
+    val label = variable.getName match {
+      case "unknown" => ""
+      case name: String => "\"" + name + "\":"
+    }
     
     val value = variable match { 
       case Index(i) => i.toString //TODO: exclude implicit Index
@@ -67,7 +68,7 @@ class JsonWriter extends Writer {
       case Integer(l) => l.toString 
       case Text(s) => "\"" + s.trim + "\"" //put quotes around text data
       case Tuple(vars) => vars.map(varToString(_)).mkString("{", ",", "}")
-      case f: Function => ???
+      case f: Function => f.iterator.map(s => (s.domain.getVariables ++ s.range.getVariables).map(varToString(_)).mkString("{",",","}")).mkString("[",",\n","]")
     }
     
     label + value
