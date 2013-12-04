@@ -21,6 +21,8 @@ object Integer {
 
   def apply(md: Metadata, v: Long): Integer = new Variable2(md, Data(v)) with Integer
   def apply(md: Metadata, vs: Seq[Long]): Integer = new Variable2(md, Data(vs)) with Integer
+  
+  def apply(name: String, v: Long): Integer = new Variable2(Metadata(name), Data(v)) with Integer
 
   def apply(v: Long): Integer = new Variable2(data = Data(v)) with Integer
   def apply(vs: Seq[Long]): Integer = new Variable2(data = Data(vs)) with Integer
