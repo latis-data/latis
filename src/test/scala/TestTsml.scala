@@ -107,10 +107,11 @@ class TestTsml  {
 //    AsciiWriter().write(ds)
 //  }
   
-  //@Test
+  @Test
   def test_dataset {
-    val ds = TsmlReader("datasets/test/scalar.tsml").getDataset
-    AsciiWriter().write(ds)
+    val ds = TsmlReader("datasets/test/mixed.tsml").getDataset
+    //AsciiWriter().write(ds)
+    Writer("json").write(ds)
   }
   
   //@Test
@@ -125,7 +126,7 @@ class TestTsml  {
     Writer("csv").write(ds)
   }
   
-  @Test
+  //@Test
   def test_dbstats {
     val ds = TsmlReader("/home/lindholm/git/dbstats/src/main/resources/datasets/kepler_usage.tsml").getDataset
     AsciiWriter().write(ds)

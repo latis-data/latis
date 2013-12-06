@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset>
+    <metadata name="Mixed Test"/>
+    <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+             location="file:/data/latis/mixed.txt" />
+    
+    <time name="time" />
+    
+    <real name="a"/>
+    <integer name="b"/>
+    <text name="c"/>
+    
+  </dataset>
+
+</tsml>

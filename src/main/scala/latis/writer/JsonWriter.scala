@@ -44,6 +44,9 @@ class JsonWriter extends Writer {
    * Manage top level Function so that we can write one sample at a time.
    */
   private def writeTopLevelFunction(f: Function) {
+    //TODO: only use label if name is defined
+    //  but need label if within {}
+    //  drop {}? 
     var startThenDelim = "\"" + f.getName + "\":\n["
     for (Sample(domain, range) <- f.iterator) {
       val vars = domain.getVariables ++ range.getVariables
@@ -66,7 +69,7 @@ class JsonWriter extends Writer {
       case t: Time => t.getJavaTime.toString  //use java time for json
       case Real(d) => d.toString //TODO: format?
       case Integer(l) => l.toString 
-      case Text(s) => "\"" + s.trim + "\"" //put quotes around text data
+      case Text(s) => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters
       case Tuple(vars) => vars.map(varToString(_)).mkString("{", ",", "}")
       case f: Function => f.iterator.map(s => (s.domain.getVariables ++ s.range.getVariables).map(varToString(_)).mkString("{",",","}")).mkString("[",",\n","]")
     }
@@ -74,6 +77,13 @@ class JsonWriter extends Writer {
     label + value
   }
   
+  /**
+   * Escape quotes and back-slashes
+   */
+  def escape(s: String): String = {
+    //TODO: find cleaner solution
+    s.replaceAllLiterally("""\""", """\\""").replaceAllLiterally(""""""", """\"""")
+  }
   
   override def mimeType: String = "application/json" 
   
