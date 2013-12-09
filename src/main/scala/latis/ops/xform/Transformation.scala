@@ -11,6 +11,7 @@ abstract class Transformation extends Operation {
   
   def transform(variable: Variable): Variable = variable match {
     case s: Scalar => transformScalar(s)
+    case sample: Sample => transformSample(sample)
     case t: Tuple => transformTuple(t)
     case f: Function => transformFunction(f)
   }
@@ -22,8 +23,8 @@ abstract class Transformation extends Operation {
     //TODO: or Function(transform(function.domain), transform(function.range)) ?
     
   //typically invoked by TransformedFunction
-  def transformSample(sample: Sample): Sample = 
-    Sample(transform(sample.domain), transform(sample.range))
+  //sample should be case where we just act on range, else use tuple
+  def transformSample(sample: Sample): Sample = Sample(sample.domain, transform(sample.range))
   
     /*
      * TODO: if we are operating on function samples is it ever reasonable to NOT return another Sample?
