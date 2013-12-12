@@ -11,6 +11,20 @@ import latis.ops._
 class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
   extends AbstractTuple(variables, metadata, data) with BasicMath {
   
+/*
+ * TODO: 
+ * consider map(f: Variable => Variable)
+ * encapsulate the usual pattern match
+ * 
+ * flatMap(f: Variable => Dataset) ?
+ */
+//  def map(f: Variable => Variable): Dataset = {
+//    Dataset(variables.map(v => v match {
+//      case _: Scalar => f(v)
+//      case Tuple(vars) => vars.map(f(_))
+//      case fun: Function => Function(fun.iterator.map(f(_)))
+//    }))
+//  }
   
   //convenient method, get number of samples in top level Function
   //TODO: what if we have multiple Functions...?
@@ -76,7 +90,7 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   def project(varNames: Seq[String]): Dataset = Projection(varNames)(this)
   def project(vname: String): Dataset = Projection(Seq(vname))(this)
   
-  //TODO: map? operate?
+  //TODO: operate?
   
   
   //def foreach(f: (Variable,Variable) => (Variable,Variable)): Unit
