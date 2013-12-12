@@ -26,7 +26,7 @@ class JsonWriter extends Writer {
   private lazy val _writer = new PrintWriter(outputStream)
   
   //TODO: can we generalize to writeHeader, ...?
-  def write(dataset: Dataset, args: Seq[String]) = {
+  def write(dataset: Dataset) = {
     _writer.print("{\"" + dataset.getName + "\":{")
     var startThenDelim = "{"
     for (v <- dataset.getVariables) {
@@ -87,5 +87,4 @@ class JsonWriter extends Writer {
   
   override def mimeType: String = "application/json" 
   
-  def close() {}
 }

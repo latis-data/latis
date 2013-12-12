@@ -16,7 +16,7 @@ class CompactJsonWriter extends Writer {
   private lazy val _writer = new PrintWriter(outputStream)
   
   //TODO: can we generalize to writeHeader, ...?
-  def write(dataset: Dataset, args: Seq[String]) = {
+  def write(dataset: Dataset) = {
     _writer.print("[")
     
     //assume a single top level Function
@@ -54,5 +54,4 @@ class CompactJsonWriter extends Writer {
   
   override def mimeType: String = "application/json" 
   
-  def close() {}
 }

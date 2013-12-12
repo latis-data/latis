@@ -12,7 +12,7 @@ class AsciiWriter extends Writer {
 
   private[this] lazy val writer = new PrintWriter(outputStream)
   
-  def write(dataset: Dataset, args: Seq[String]) = {
+  def write(dataset: Dataset) = {
     writer.println(dataset) //header
     writeVariable(dataset)
     writer.println()
@@ -20,12 +20,13 @@ class AsciiWriter extends Writer {
   }
   
   def writeVariable(variable: Variable): Unit = variable match {
-    //TODO: build string instead of writing directly?
+    //TODO: build string instead of writing directly? push into super class
     
     case Index(i)   => writer.print(i.toString)
     case Real(d)    => writer.print(d.toString)
     case Integer(l) => writer.print(l.toString)
     case Text(s)    => writer.print(s)
+    case Binary(b)  => writer.print(b) //TODO: uuencode?
     
     case Tuple(vars) => {
       //surround Tuple's Variables with parens
@@ -60,23 +61,19 @@ class AsciiWriter extends Writer {
    *   dangerous side effect? 
    *   use case: out from servet response, what happens if we close it here?
    */
-  def close() {}
+  //def close() {}
 
 }
 
 object AsciiWriter {
   
-  def apply(out: OutputStream) = {
+  def apply(out: OutputStream): AsciiWriter = {
     val writer = new AsciiWriter()
     writer._out = out
     writer
   }
   
-  def apply() = {
-    val writer = new AsciiWriter()
-    writer._out = System.out
-    writer
-  }
+  def apply(): AsciiWriter = AsciiWriter(System.out)
   
   def write(dataset: Dataset) = AsciiWriter().write(dataset)
 }

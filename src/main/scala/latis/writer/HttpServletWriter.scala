@@ -12,7 +12,7 @@ class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends W
   //  or simply serve an existing file!?
 
   
-  def write(dataset: Dataset, args: Seq[String]): Unit = {
+  def write(dataset: Dataset): Unit = {
   //def write(dataset: Dataset) {
     //write http header stuff
             
@@ -44,13 +44,13 @@ class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends W
 //        String server = TSSProperties.getProperty("server.tss");
 //        response.setHeader("Server", server); 
         
-    writer.write(dataset, args)
+    writer.write(dataset)
     
     response.setStatus(HttpServletResponse.SC_OK);
     response.flushBuffer()
   }
   
-  def close() = writer.close()
+  //def close() = writer.close()
 
 }
 

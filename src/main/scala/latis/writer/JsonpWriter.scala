@@ -19,24 +19,26 @@ class JsonpWriter extends Writer {
   //beware, repurposing the outputStream used by the wrapped Writer
   private lazy val _writer = new PrintWriter(outputStream)
   
-  def write(dataset: Dataset, args: Seq[String]) {
-    val callback = args.find(_.startsWith("callback")) match {
-      case Some(s) => s.split("=")(1)
-      case None => throw new RuntimeException("JsonpWriter must have a 'callback' argument.")
-    }
-    _writer.println(callback + "(")
-    _writer.flush()
-    
-    writer.write(dataset)
-    
-    _writer.print(");")
-    _writer.flush()
+  def write(dataset: Dataset) {
+    //TODO: deprecate?
+    ???
+//    val callback = args.find(_.startsWith("callback")) match {
+//      case Some(s) => s.split("=")(1)
+//      case None => throw new RuntimeException("JsonpWriter must have a 'callback' argument.")
+//    }
+//    _writer.println(callback + "(")
+//    _writer.flush()
+//    
+//    writer.write(dataset)
+//    
+//    _writer.print(");")
+//    _writer.flush()
   }
 
   
   override def mimeType: String = "application/json" 
   
-  def close = writer.close
+  //def close = writer.close
 
 }
 

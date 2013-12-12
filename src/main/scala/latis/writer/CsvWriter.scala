@@ -11,7 +11,11 @@ import java.util.Date
  * Assume 1D, non-nested Function for now.
  */
 class CsvWriter extends Writer {
+  //TODO: TextWriter? with Text, Binary trait?
+  //TODO: build with Dataset? but write(ds) feels better that write()
+  //TODO: Dataset.write ?
   //TODO: Non-flat SSI,...
+  //TODO: with Header
   
   val delimiter = ","
   //TODO: get from LatisProperties
@@ -19,12 +23,15 @@ class CsvWriter extends Writer {
   
   private[this] lazy val _writer = new PrintWriter(outputStream)
   
-  
-  def write(dataset: Dataset, args: Seq[String]) = {
-    //Write header
+  def makeHeader(dataset: Dataset): String = {
     //TODO: add units
     //val header = dataset.toSeq.map(v => v.name + " (" + v.metadata("units") + ")").mkString(delimiter)
-    val header = dataset.toSeq.map(v => v.getName).filter(_ != "index").mkString(delimiter)
+    dataset.toSeq.map(v => v.getName).filter(_ != "index").mkString(delimiter)
+  }
+  
+  def write(dataset: Dataset) = {
+    
+    val header = makeHeader(dataset)
     _writer.println(header)
     
     for (v <- dataset.getVariables) {
@@ -98,11 +105,5 @@ class CsvWriter extends Writer {
     
     case null => ""
   }
-  
-
-  /**
-   * Note, don't close 'out' because it was given to us.
-   */
-  def close() {}
 
 }
