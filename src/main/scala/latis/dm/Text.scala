@@ -23,6 +23,7 @@ trait Text extends Scalar { //[String] {
   
   //Note: stripping off any white space padding
   //TODO: need to be able to preserve text with white space padding?
+  //  use other symbol for padding?
   def value: String = getData.asInstanceOf[TextData].stringValue.trim
   
   //Ordered method.

@@ -36,6 +36,8 @@ trait Variable {
   
   def getVariables: Seq[Variable] //TODO: immutable.Seq?
   def apply(index: Int): Variable = getVariables(index)
+  
+  //TODO: toStringValue?
 }
 
 abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyData) extends Variable {
