@@ -10,8 +10,14 @@ import latis.time.TimeScale
  * Return data as nested arrays, without metadata.
  * One inner array for each sample.
  * Handy for clients that just want the data (e.g. HighCharts).
+ * Like CSV, table as 2D array.
  */
 class CompactJsonWriter extends Writer {
+  //TODO: extend JsonWriter? or at least TextWriter
+  //override def makeHeader = "["
+    
+  
+  
   
   private lazy val _writer = new PrintWriter(outputStream)
   
@@ -49,7 +55,7 @@ class CompactJsonWriter extends Writer {
     //TODO: Integer vs Real?
     case Text(s) => "\"" + s.trim + "\"" //put quotes around text data
     case Tuple(vars) => vars.map(varToString(_)).mkString(",")
-    case f: Function => ??? //TODO: deal with inner Function
+    case f: Function => ??? //TODO: deal with inner Function, borrow from non-flattened csv
   }
   
   override def mimeType: String = "application/json" 
