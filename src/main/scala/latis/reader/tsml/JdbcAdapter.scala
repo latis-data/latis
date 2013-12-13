@@ -269,6 +269,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
       //Define a Calendar so we get our times in the GMT time zone.
       val cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
       
+      //TODO: consider rs.getBinaryStream or getBytes
+      
       def getNext: Data = {
         val bb = ByteBuffer.allocate(recordSize) 
         //TODO: reuse bb? but the previous sample is in the wild, memory resource issue, will gc help?
@@ -296,6 +298,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
               //TODO: make sure we don't exceed buffer
               s.foldLeft(bb)(_.putChar(_))
             }
+            case (b: Binary, _) => bb.put(resultSet.getBytes(b.getName))  //TODO: use getBlob? 
             
             //TODO: error if column not found
           }
