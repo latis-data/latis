@@ -31,21 +31,20 @@ class TestTsml  {
     assertEquals("bar", map("b"))
   }
   
-  //@Test
+  @Test
   def read_scalar_data {
     val reader = TsmlReader("datasets/test/scalar.tsml")
     val ds = reader.getDataset
-    AsciiWriter().write(ds)
-    //new JsonWriter(System.out).write(ds)
+    //AsciiWriter().write(ds)
+    Writer("hc").write(ds)
   }
   
   //@Test
   def read_scalar_data_tuple_range {
     val ds = TsmlReader("datasets/test/scalar3.tsml").getDataset //+ 1
     //println(ds)
-    
+    //AsciiWriter().write(ds)
     Writer("hc").write(ds)
-    //new JsonWriter(System.out).write(ds)
   }
   
   //@Test
@@ -107,11 +106,11 @@ class TestTsml  {
 //    AsciiWriter().write(ds)
 //  }
   
-  @Test
+  //@Test
   def test_dataset {
     val ds = TsmlReader("datasets/test/mixed.tsml").getDataset
-    //AsciiWriter().write(ds)
-    Writer("json").write(ds)
+    AsciiWriter().write(ds)
+    //Writer("json").write(ds)
   }
   
   //@Test

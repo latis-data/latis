@@ -6,19 +6,10 @@ import java.io.PrintWriter
 
 class AsciiWriter extends TextWriter {
   //TODO: rename ModelWriter?
-
-//  private[this] lazy val writer = new PrintWriter(outputStream)
-//  
-//  def write(dataset: Dataset) = {
-//    writer.println(dataset) //header
-//    writeVariable(dataset)
-//    writer.println()
-//    writer.flush()
-//  }
   
-  override def makeHeader(dataset: Dataset) = dataset.toString
+  override def makeHeader(dataset: Dataset) = dataset.toString + newLine
   
-  def varToString(variable: Variable): String = variable match {
+  def makeScalar(scalar: Scalar): String = scalar match {
     //case _: Index => "" //don't include Index variable, deal with in Sample match
     case Real(d) => d.toString
     case Integer(l) => l.toString
@@ -26,15 +17,14 @@ class AsciiWriter extends TextWriter {
     case Binary(b) => "blob" //TODO: uuencode?
     //TODO: use Scalar.toStringValue?
   //TODO: deal with Time format
-    
-    case Sample(d, r) => varToString(d) + " -> " + varToString(r)
-    case Tuple(vars) => vars.map(varToString(_)).mkString("(", delimiter, ")")
-    
-    case f: Function => f.iterator.map(varToString(_)).mkString(newLine)
-//      (for (Sample(domain, range) <- f.iterator) 
-//      yield varToString(domain) + " -> " + varToString(range)).mkString(newLine)
-    // TODO: support non-flat, one row for each inner sample, repeat previous values
   }
+    
+  def makeTuple(tuple: Tuple): String = tuple match {
+    case Sample(d, r) => varToString(d) + " -> " + varToString(r)
+    case Tuple(vars) => vars.map(varToString(_)).mkString("(", ",", ")")
+  }
+  
+  def makeFunction(function: Function): String = function.iterator.map(varToString(_)).mkString(newLine)
 
     
 //  def writeVariable(variable: Variable): Unit = variable match {

@@ -4,6 +4,7 @@ import latis.dm._
 import latis.time._
 import java.io._
 import scala.collection.mutable.MapBuilder
+import latis.util.FirstThenOther
 
 class JsonWriter extends TextWriter {
   //TODO: cleanse text, escape new lines "\\n"...
@@ -20,9 +21,22 @@ class JsonWriter extends TextWriter {
    *   so range needs to be a tuple (if multiple vars)
    *   otherwise need convention saying that first var is domain and the rest the range
    */
-  
+  //def delimiter: String = 
   override def makeHeader(dataset: Dataset) = "{\"" + dataset.getName + "\":{"
   override def makeFooter(dataset: Dataset) = "}}"
+  
+//  def writeSamples(samples: Iterator[Sample], prefix: String, delim: String, suffix: String) {
+//    val startThenDelim = FirstThenOther(prefix, delim)
+//    for (sample <- samples) printWriter.print(startThenDelim.value + varToString(sample))
+//    printWriter.print(suffix)
+//  }
+    
+  
+  override def writeFunctionBySample(function: Function) {
+    val startThenDelim = FirstThenOther("[", "," + newLine)
+    for (sample <- function.iterator) printWriter.print(startThenDelim.value + varToString(sample))
+    printWriter.print("]" + newLine)
+  }
   
 //  private lazy val _writer = new PrintWriter(outputStream)
 //  
@@ -57,29 +71,48 @@ class JsonWriter extends TextWriter {
 //    _writer.print("]")
 //  }
 
-  
-  def varToString(variable: Variable): String = {
+  def makeLabel(variable: Variable): String = variable.getName match {
     //Use name for label, no label if "unknown"
     //TODO: don't count on "unknown", use Option?
-    val label = variable.getName match {
-      case "unknown" => ""
-      case name: String => "\"" + name + "\":"
-    }
-    
-    val value = variable match { 
-      //case Index(i) => i.toString //TODO: exclude implicit Index
-      case t: Time => t.getJavaTime.toString  //use java time for json
-      case Real(d) => d.toString //TODO: format?
-      case Integer(l) => l.toString 
-      case Text(s) => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters
-      
-      case Sample(d: Index, r) => varToString(r)
-      case Tuple(vars) => vars.map(varToString(_)).mkString("{", ",", "}")
-      case f: Function => f.iterator.map(varToString(_)).mkString("[", ","+newLine, "]")
-      //f.iterator.map(s => (s.domain.getVariables ++ s.range.getVariables).map(varToString(_)).mkString("{",",","}")).mkString("[",",\n","]")
-    }
-    
-    label + value
+    //TODO: json requires labels in some contexts
+    case "unknown" => ""
+    case name: String => "\"" + name + "\":"
+  }
+  
+  override def varToString(variable: Variable): String = {
+    makeLabel(variable) + super.varToString(variable) //will in turn call our make* methods below
+//    
+//    val value = variable match { 
+//      case t: Time => t.getJavaTime.toString  //use java time for json
+//      case Real(d) => d.toString //TODO: format? NaN to null
+//      case Integer(l) => l.toString 
+//      case Text(s) => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters
+//      
+//      case Sample(d: Index, r) => varToString(r) //don't print Index
+//      case Tuple(vars) => vars.map(varToString(_)).mkString("{", ",", "}")
+//      case f: Function => f.iterator.map(varToString(_)).mkString("[", ","+newLine, "]")
+//      //f.iterator.map(s => (s.domain.getVariables ++ s.range.getVariables).map(varToString(_)).mkString("{",",","}")).mkString("[",",\n","]")
+//    
+//    }
+//    
+//    label + value
+  }
+  
+  
+  def makeScalar(scalar: Scalar): String = scalar match {
+    case t: Time => t.getJavaTime.toString  //use java time for json
+    case Real(d) => d.toString //TODO: format? NaN to null
+    case Integer(l) => l.toString 
+    case Text(s) => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters      
+  }
+  
+  def makeTuple(tuple: Tuple): String = tuple match {
+    case Sample(d: Index, r) => varToString(r) //drop Index domain
+    case Tuple(vars) => vars.map(varToString(_)).mkString("{", ",", "}")
+  }
+  
+  def makeFunction(function: Function): String = {
+    function.iterator.map(varToString(_)).mkString("[", ","+newLine, "]")
   }
   
   /**
