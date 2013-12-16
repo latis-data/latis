@@ -14,14 +14,8 @@ class CsvWriter extends TextWriter {
   //TODO: DelimitedAsciiWriter?
   //TODO: Non-flat SSI,...
   
-  def delimiter: String = {
+  def delimiter: String = ","
     //TODO: get from properties
-    //TODO: record vs field delim
-    newLine
-  }
-  //TODO: get from LatisProperties
-    //copy all properties for this Writer since we won't know which suffix got us here
-  
     
   override def makeHeader(dataset: Dataset): String = {
     //TODO: add units
