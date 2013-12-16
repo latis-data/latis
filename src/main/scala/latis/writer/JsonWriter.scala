@@ -33,7 +33,7 @@ class JsonWriter extends TextWriter {
     
   
   override def writeFunctionBySample(function: Function) {
-    val startThenDelim = FirstThenOther("[", "," + newLine)
+    val startThenDelim = FirstThenOther(makeLabel(function) + "[", "," + newLine)
     for (sample <- function.iterator) printWriter.print(startThenDelim.value + varToString(sample))
     printWriter.print("]" + newLine)
   }
