@@ -6,7 +6,7 @@ apply plugin: 'war'
 apply plugin: 'ivy-publish'
 
 //Define the release version. Used for published jar.
-version = '2.1.19'
+version = '2.1.20'
 
 //Define Java version for generated class files.
 targetCompatibility = 1.6
