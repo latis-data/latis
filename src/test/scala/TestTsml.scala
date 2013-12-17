@@ -17,14 +17,14 @@ import latis.writer.CsvWriter
 
 class TestTsml  {
 
-  @Test
+  //@Test
   def test_variable_names {
     val tsml = Tsml("datasets/test/scalar.tsml")
     val names = tsml.getScalarNames
     assertEquals("foo", names(0))
   }
   
-  @Test
+  //@Test
   def test_adapter_attributes {
     val xml = <dataset><adapter a="foo" b="bar"></adapter></dataset>
     val map = new DatasetMl(xml).getAdapterAttributes
@@ -33,10 +33,11 @@ class TestTsml  {
   
   @Test
   def read_scalar_data {
-    val reader = TsmlReader("datasets/test/scalar.tsml")
+    //val reader = TsmlReader("datasets/scalar.tsml")
+    val reader = TsmlReader("datasets/test/mixed.tsml")
     val ds = reader.getDataset
     //AsciiWriter().write(ds)
-    Writer("hc").write(ds)
+    Writer("csv").write(ds)
   }
   
   //@Test

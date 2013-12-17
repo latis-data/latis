@@ -62,11 +62,11 @@ abstract class Writer {
   /**
    * Return the mime type of the output format.
    * Needed for the Servlet Writer.
-   * Default to plain text.
+   * Default to application/octet-stream per the http spec:
+   * http://www.w3.org/Protocols/rfc2616/rfc2616-sec7.html#sec7.2.1
    */
-  def mimeType: String = "text/plain" 
+  def mimeType: String = "application/octet-stream" 
   //TODO: have Writers extend traits (e.g. Text, Binary) and inherit mime type
-    //TODO: mimeType?
   
 }
 

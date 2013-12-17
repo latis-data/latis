@@ -25,7 +25,6 @@ class BinaryWriter extends Writer {
     }
   }
   
-  override def mimeType: String = "application/octet-stream"
 }
 
 object BinaryWriter {

@@ -100,4 +100,6 @@ abstract class TextWriter extends Writer {
   
   def makeHeader(dataset: Dataset): String = ""
   def makeFooter(dataset: Dataset): String = ""
+
+  override def mimeType: String = "text/plain"
 }
