@@ -19,8 +19,9 @@ import latis.util.RegEx
 import latis.time.TimeScale
 import latis.reader.tsml.ml.ScalarMl
 import latis.reader.tsml.ml.Tsml
+import com.typesafe.scalalogging.slf4j.Logging
 
-class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
+class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
   //TODO: catch exceptions and close connections
     
@@ -186,7 +187,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
 
   private def executeQuery: ResultSet =  {
     val sql = makeQuery
-    //val statement = connection.createStatement() //(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
+    logger.debug("Executing sql query: " + sql)
     
     //Apply optional limit to the number of rows
     //TODO: Figure out how to warn the user if the limit is exceeded
