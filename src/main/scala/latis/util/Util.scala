@@ -67,8 +67,13 @@ object Util {
 
     //TODO: use builder?
     
+    case v: Time => v match {
+      case _: Real => Time(template.getMetadata, bb.getDouble)
+      case _: Integer => Time(template.getMetadata, bb.getLong)
+      case _: Text => ???
+    }
+    
     case v: Index => Index(bb.getInt)
-    //case v: Time => Time(template.getMetadata, bb.getDouble)
     case v: Real => Real(template.getMetadata, bb.getDouble)
     case v: Integer => Integer(template.getMetadata, bb.getLong)
     case v: Text => {
