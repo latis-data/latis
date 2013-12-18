@@ -21,6 +21,8 @@ object Tuple {
   
   def apply(vars: Seq[Variable], md: Metadata): AbstractTuple = new AbstractTuple(vars.toIndexedSeq, md)
   
+  def apply(v: Variable, md: Metadata): AbstractTuple = new AbstractTuple(List(v), md)
+  
   def apply(vars: Seq[Variable]): AbstractTuple = new AbstractTuple(vars.toIndexedSeq)
   
   def apply(v: Variable, vars: Variable*): Tuple = Tuple(v +: vars) 

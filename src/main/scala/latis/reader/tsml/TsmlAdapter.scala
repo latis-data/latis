@@ -87,11 +87,17 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * the Dataset construction process (e.g. use in SQL query).
    */
   def getDataset(ops: Seq[Operation]) = {
-    //Apply tsml Processing Instructions. //TODO: do these need to be last?
-    val projections = tsml.getProcessingInstructions("project").map(Projection(_))
+    //add processing instructions
+    (piOps ++ ops).reverse.foldRight(dataset)(_(_)) //NOTE: foldRight applies them in reverse order
+  }
+  
+  /**
+   * Get the TSML Processing Instructions as a Seq of Operations.
+   */
+  def piOps: Seq[Operation] = {
+    val projections = tsml.getProcessingInstructions("project").map(Projection(_)) //TODO: do these need to be last?
     val selections  = tsml.getProcessingInstructions("select").map(Selection(_))
-    
-    (projections ++ selections ++ ops).reverse.foldRight(dataset)(_(_)) //NOTE: foldRight applies them in reverse order
+    projections ++ selections
   }
   
 //  def getDataset(operations: mutable.Seq[Operation]): Dataset = {

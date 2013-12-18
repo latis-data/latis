@@ -63,7 +63,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
      * 
      */
     
-    val others = ops.filterNot(handleOperation(_))
+    val others = (piOps ++ ops).filterNot(handleOperation(_))
     //ops.map(handleOperation(_))
     
     val ds = dataset
@@ -224,7 +224,13 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     //TODO: generalize for n-D domains, get Function domain...
     //TODO: assuming that the first variable is the one to sort on
     //  make sure that tsml lists that variable first
-    sb append " ORDER BY " + dataset.toSeq.head.getName + order
+    //Don't sort if domain is Index (orig domain not selected)
+//TODO: what about when we want time order but not the time values? e.g. tlm packets
+//  need to apply projection later? but only for domain?
+    dataset.toSeq.head match {
+      case _: Index => 
+      case v: Variable => sb append " ORDER BY " + v.getName + order
+    }
     
     sb.toString
   }
@@ -258,7 +264,10 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
   //No query should be made until the iterator is called
   def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
+    //don't count Index vars
+    //TODO: can we get away with flattening? consider nested Functions
     def recordSize = sampleTemplate.getSize
+    //toSeq.filterNot(_.isInstanceOf[Index]).map(_.getSize).sum
     
     override def iterator = new NextIterator[Data] {
       val md = resultSet.getMetaData

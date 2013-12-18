@@ -48,9 +48,23 @@ class JdbcAdapterTest {
   }
   
   
-  @Test
-  def selection_in_adapter {
+  //@Test
+  def select_data_range {
     val ops = List(Selection("d>2"))
+    val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
+    AsciiWriter.write(ds)
+  }
+  
+  //@Test
+  def project {
+    val ops = List(Projection("i,s"))
+    val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
+    AsciiWriter.write(ds)
+  }
+  
+  @Test
+  def dont_project_domain {
+    val ops = List(Projection("d,s"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
     AsciiWriter.write(ds)
   }

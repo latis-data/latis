@@ -36,11 +36,14 @@ object Util {
    * advancing position. We need to ensure that these are done atomically
    * to avoid side effects.
    * The data should contain all and only the data for the requested Variable(s).
+   * 
+   * How to deal with Index Function? Do we need to store index value?
    */
 
   def dataToSample(data: Data, template: Sample): Sample = {
     //TODO: could we just rely on Sample's Tuple behavior here?
     val bb = data.getByteBuffer
+    //val sample = buildVarFromBuffer(bb, template)
     val domain = buildVarFromBuffer(bb, template.domain)
     val range = buildVarFromBuffer(bb, template.range)
     bb.rewind //reset to the beginning in case we want to reuse it
@@ -78,6 +81,9 @@ object Util {
       Text(template.getMetadata, s)
     }
 
+    //TODO: Don't include Index?
+    //case Sample(_: Index, r: Variable) => Tuple(buildVarFromBuffer(bb, r), template.getMetadata)
+      
     case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _)), template.getMetadata)
 
     case Function(d, r) => { //entire function, designed for inner functions
