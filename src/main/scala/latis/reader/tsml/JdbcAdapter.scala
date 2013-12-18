@@ -96,11 +96,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     case Selection(expression) => expression match {
       //Break expression up into components
       case SELECTION(name, op, value) => {
-        //TODO: allow alias, use source name
-        
         if (name == "time") handleTimeSelection(op, value) //special handling for "time"
-        else if (tsml.getScalarNames.contains(name)) { //other variable (not time)
- //TODO: could we use the orig dataset to get names? include alias, 
+        else if (tsml.getScalarNames.contains(name)) { //other variable (not time), even if not projected
           //add a selection to the sql
           //replace "==" with "=" for SQL
           if (op == "==") this.selections += name + "=" + value
@@ -109,6 +106,12 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
           true
         }
         else false //doesn't apply to our variables, so leave it for the next handler, TODO: or error?
+        
+        /*
+         * TODO: need to be able to select on columns that we don't want to return
+         * should require them to be exposed in tsml, use projection if we don't want them
+         */
+        
       }
       //TODO: case _ => doesn't match selection regex, error
     }
@@ -238,7 +241,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     //add processing instructions
     //TODO: diff PI name? unfortunate that "filter" is more intuitive for a relational algebra "selection", "select"?
     //TODO: should PIs mutate the dataset? probably not, just like any other op, but the adapter's "dataset" should have them applied
-    buffer ++= tsml.getProcessingInstructions("filter")
+    //buffer ++= tsml.getProcessingInstructions("filter")
+    //PIs should be handled with other operations: select, project
     
     //get "predicate" if defined in the adapter attributes
     //TODO: need to be careful what we allow there, assumes selection clauses

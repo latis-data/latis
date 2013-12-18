@@ -16,6 +16,8 @@ import latis.reader.tsml.ml.FunctionMl
 import latis.reader.tsml.ml.TupleMl
 import latis.reader.tsml.ml.Tsml
 import java.net.URL
+import latis.ops.Projection
+import latis.ops.Selection
 
 
 /**
@@ -84,8 +86,13 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * Adapters can override this to apply operations more effectively during
    * the Dataset construction process (e.g. use in SQL query).
    */
-  def getDataset(ops: Seq[Operation]) = ops.reverse.foldRight(dataset)(_(_))
-  //NOTE: foldRight applies them in reverse order
+  def getDataset(ops: Seq[Operation]) = {
+    //Apply tsml Processing Instructions. //TODO: do these need to be last?
+    val projections = tsml.getProcessingInstructions("project").map(Projection(_))
+    val selections  = tsml.getProcessingInstructions("select").map(Selection(_))
+    
+    (projections ++ selections ++ ops).reverse.foldRight(dataset)(_(_)) //NOTE: foldRight applies them in reverse order
+  }
   
 //  def getDataset(operations: mutable.Seq[Operation]): Dataset = {
 //    //2013-10-11: remove handled operations from collection
