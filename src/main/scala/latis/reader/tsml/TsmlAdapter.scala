@@ -100,6 +100,13 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     projections ++ selections
   }
   
+  /**
+   * Find a Selection among the given Operations for the given variable name.
+   */
+  def findSelection(ops: Seq[Operation], name: String): Option[Selection] = {
+    ops.filter(_.isInstanceOf[Selection]).map(_.asInstanceOf[Selection]).find(_.vname == name)
+  }
+  
 //  def getDataset(operations: mutable.Seq[Operation]): Dataset = {
 //    //2013-10-11: remove handled operations from collection
 //    //allow others to handle the rest
