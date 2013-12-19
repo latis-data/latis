@@ -31,7 +31,7 @@ class MetadataWriter extends JsonWriter {
   def makeMetadata(variable: Variable): String = {
     val props = variable.getMetadata.getProperties
     if (props.nonEmpty) {
-      val ss = for ((name, value) <- props) 
+      val ss = for ((name, value) <- props.filterNot(_._1 == "name")) //don't include name (redundant)
         yield "\"" + name + "\": \"" + escape(value) + "\""
       ss.mkString("{\n", ",\n", "\n}")
     }
