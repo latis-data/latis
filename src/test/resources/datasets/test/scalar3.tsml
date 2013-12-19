@@ -6,10 +6,10 @@
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
              location="file:/data/latis/scalar_3col.txt" />
     
-    <time name="time" />
+    <time name="time" units="years since 2000-01-01"/>
     
-    <real name="a"/>
-    <real name="b"/>
+    <real name="a" long_name="My A Variable" units="km"/>
+    <real name="b" long_name="My B Variable" units="C"/>
     
   </dataset>
 

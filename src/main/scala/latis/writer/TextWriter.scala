@@ -41,24 +41,15 @@ abstract class TextWriter extends Writer {
     printWriter.flush()
   }
   
-  def writeFunctionBySample(function: Function) {
+  //call write for each sample, designed for top level Functions
+  def writeFunction(function: Function) {
     val startThenDelim = FirstThenOther("", newLine)
     for (sample <- function.iterator) printWriter.print(startThenDelim.value + varToString(sample))
     printWriter.println
   }
   
-  
   def writeVariable(variable: Variable): Unit = variable match {
-    case f: Function => writeFunctionBySample(f)
-//      {
-//        //TODO: need to be able to have pre and post strings like mkString, see source code
-//        //  e.g. "[]" around json array
-//        //  but still need to close, "]"
-//      for (sample <- f.iterator)  {
-//        printWriter.print(startThenDelim.value + varToString(sample))
-//        //startThenDelim = recordDelim
-//      }
-//    }
+    case f: Function => writeFunction(f)
     case _ => printWriter.println(varToString(variable)) //new line for each top level variable
   }
   

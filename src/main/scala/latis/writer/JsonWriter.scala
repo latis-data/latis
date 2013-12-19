@@ -22,7 +22,7 @@ class JsonWriter extends TextWriter {
    *   otherwise need convention saying that first var is domain and the rest the range
    */
   //def delimiter: String = 
-  override def makeHeader(dataset: Dataset) = "{\"" + dataset.getName + "\":{"
+  override def makeHeader(dataset: Dataset) = "{\"" + dataset.getName + "\": {\n"
   override def makeFooter(dataset: Dataset) = "}}"
   
 //  def writeSamples(samples: Iterator[Sample], prefix: String, delim: String, suffix: String) {
@@ -32,7 +32,7 @@ class JsonWriter extends TextWriter {
 //  }
     
   
-  override def writeFunctionBySample(function: Function) {
+  override def writeFunction(function: Function) {
     val startThenDelim = FirstThenOther(makeLabel(function) + "[", "," + newLine)
     for (sample <- function.iterator) printWriter.print(startThenDelim.value + varToString(sample))
     printWriter.print("]" + newLine)
@@ -76,7 +76,7 @@ class JsonWriter extends TextWriter {
     //TODO: don't count on "unknown", use Option?
     //TODO: json requires labels in some contexts
     case "unknown" => ""
-    case name: String => "\"" + name + "\":"
+    case name: String => "\"" + name + "\": "
   }
   
   override def varToString(variable: Variable): String = {

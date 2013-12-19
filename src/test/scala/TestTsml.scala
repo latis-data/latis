@@ -31,7 +31,7 @@ class TestTsml  {
     assertEquals("bar", map("b"))
   }
   
-  @Test
+  //@Test
   def read_scalar_data {
     val reader = TsmlReader("datasets/scalar.tsml")
     //val reader = TsmlReader("datasets/test/mixed.tsml")
@@ -40,12 +40,12 @@ class TestTsml  {
     Writer("json").write(ds)
   }
   
-  //@Test
+  @Test
   def read_scalar_data_tuple_range {
     val ds = TsmlReader("datasets/test/scalar3.tsml").getDataset //+ 1
     //println(ds)
     //AsciiWriter().write(ds)
-    Writer("hc").write(ds)
+    Writer("meta").write(ds)
   }
   
   //@Test
