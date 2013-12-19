@@ -99,12 +99,13 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
       case SELECTION(name, op, value) => {
         if (name == "time") handleTimeSelection(op, value) //special handling for "time"
         else if (tsml.getScalarNames.contains(name)) { //other variable (not time), even if not projected
-          //add a selection to the sql
-          //replace "==" with "=" for SQL
-          if (op == "==") this.selections append name + "=" + value
-          else if (op == "=~") this.selections append name + " like '%" + value + "%'"
-          else this.selections append expression
-          true
+          //add a selection to the sql, may need to change operation
+          op match {
+            case "==" => selections append name + "=" + value; true
+            case "=~" => selections append name + " like '%" + value + "%'"; true
+            case "~"  => false  //almost equal (e.g. nearest sample) not supported by sql
+            case _ => selections append expression; true
+          }
         }
         else false //doesn't apply to our variables, so leave it for the next handler, TODO: or error?
       }
