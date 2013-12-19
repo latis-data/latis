@@ -62,9 +62,16 @@ class JdbcAdapterTest {
     AsciiWriter.write(ds)
   }
   
-  @Test
+  //@Test
   def dont_project_domain {
     val ops = List(Projection("d,s"))
+    val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
+    AsciiWriter.write(ds)
+  }
+  
+  @Test
+  def string_match {
+    val ops = List(Selection("s=~A"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
     AsciiWriter.write(ds)
   }
