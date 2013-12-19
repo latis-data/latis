@@ -37,7 +37,7 @@ class TestTsml  {
     //val reader = TsmlReader("datasets/test/mixed.tsml")
     val ds = reader.getDataset
     //AsciiWriter().write(ds)
-    Writer("jsond").write(ds)
+    Writer("json").write(ds)
   }
   
   //@Test
