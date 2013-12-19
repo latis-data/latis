@@ -85,7 +85,7 @@ class LatisProperties extends Properties with Logging {
   
 /*
  * Just using LatisProperties.getProperty will cause the singleton to be generated.
- * If first invoked with init(config), then the instance will be a LatisServerProperties
+ * See LatisServer for getting a LatisServerProperties
  * which will delegate to the ServletConfig for paths and such.
  * TODO: seems like there should be a cleaner way. 
  *   Put if(config!=null) logic here instead of using inheritance polymorphism?
@@ -103,6 +103,7 @@ object LatisProperties {
   
   //def init(config: ServletConfig) {_instance = new LatisServerProperties(config)}
   def init(latisProps: LatisProperties) {_instance = latisProps}
+  //TODO: support any Properties
   
   
   //---- Property value access methods --------------------------------------//
