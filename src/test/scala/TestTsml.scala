@@ -33,8 +33,8 @@ class TestTsml  {
   
   @Test
   def read_scalar_data {
-    //val reader = TsmlReader("datasets/scalar.tsml")
-    val reader = TsmlReader("datasets/test/mixed.tsml")
+    val reader = TsmlReader("datasets/scalar.tsml")
+    //val reader = TsmlReader("datasets/test/mixed.tsml")
     val ds = reader.getDataset
     //AsciiWriter().write(ds)
     Writer("jsond").write(ds)
