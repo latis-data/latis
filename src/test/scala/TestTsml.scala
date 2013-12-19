@@ -42,7 +42,7 @@ class TestTsml  {
   
   @Test
   def read_scalar_data_tuple_range {
-    val ds = TsmlReader("datasets/test/scalar3.tsml").getDataset //+ 1
+    val ds = TsmlReader("datasets/test/scalar.tsml").getDataset //+ 1
     //println(ds)
     //AsciiWriter().write(ds)
     Writer("meta").write(ds)

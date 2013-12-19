@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tsml>
 
-  <dataset>
-    <metadata name="Scalar Test"/>
+  <dataset name="Scalar Test">
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
              location="file:/data/latis/scalar.txt" />
              
-    <time name="foo" />
+    <time name="time" units="years since 2000-01-01"/>
     
-    <real name="ssn"/>
+    <real name="a" long_name="My A Variable" units="km"/>
 
   </dataset>
 

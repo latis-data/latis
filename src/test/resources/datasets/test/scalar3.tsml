@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tsml>
 
-  <dataset>
-    <metadata name="Scalar Test"/>
+  <dataset name="Scalar Test">
+    <!--metadata name="Scalar Test"/-->
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
              location="file:/data/latis/scalar_3col.txt" />
     

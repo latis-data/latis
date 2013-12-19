@@ -3,10 +3,11 @@ package latis.ops.xform
 import latis.dm._
 import latis.util.LatisProperties
 import latis.ops.Operation
+import latis.metadata.Metadata
 
 abstract class Transformation extends Operation {
 
-  def apply(dataset: Dataset): Dataset = Dataset(dataset.getVariables.map(transform(_)))
+  def apply(dataset: Dataset): Dataset = Dataset(dataset.getVariables.map(transform(_)), dataset.getMetadata)
   //TODO: provenance metadata...
   
   def transform(variable: Variable): Variable = variable match {
