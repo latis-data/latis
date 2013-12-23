@@ -22,8 +22,17 @@ class JsonWriter extends TextWriter {
    *   otherwise need convention saying that first var is domain and the rest the range
    */
   //def delimiter: String = 
-  override def makeHeader(dataset: Dataset) = "{\"" + dataset.getName + "\": {\n"
-  override def makeFooter(dataset: Dataset) = "}}"
+  
+  //If Dataset has only one Variable, don't include the extra brackets.
+  override def makeHeader(dataset: Dataset) = dataset.getVariables.length match {
+    case 1 => "{\"" + dataset.getName + "\": \n"
+    case _ => "{\"" + dataset.getName + "\": {\n"
+    //TODO: 0?
+  }
+  override def makeFooter(dataset: Dataset) = dataset.getVariables.length match {
+    case 1 => "}"
+    case _ => "}}"
+  }
   
 //  def writeSamples(samples: Iterator[Sample], prefix: String, delim: String, suffix: String) {
 //    val startThenDelim = FirstThenOther(prefix, delim)
@@ -38,38 +47,6 @@ class JsonWriter extends TextWriter {
     printWriter.print("]" + newLine)
   }
   
-//  private lazy val _writer = new PrintWriter(outputStream)
-//  
-//  //TODO: can we generalize to writeHeader, ...?
-//  def write(dataset: Dataset) = {
-//    _writer.print("{\"" + dataset.getName + "\":{")
-//    var startThenDelim = "{"
-//    for (v <- dataset.getVariables) {
-//      v match {
-//        case f: Function => writeTopLevelFunction(f)
-//        case _ => _writer.println(startThenDelim + varToString(v))
-//      }
-//      startThenDelim = ","
-//    }
-//    _writer.println("}}")
-//    _writer.flush()
-//  }
-//  
-//  /**
-//   * Manage top level Function so that we can write one sample at a time.
-//   */
-//  private def writeTopLevelFunction(f: Function) {
-//    //TODO: only use label if name is defined
-//    //  but need label if within {}
-//    //  drop {}? 
-//    var startThenDelim = "\"" + f.getName + "\":\n["
-//    for (Sample(domain, range) <- f.iterator) {
-//      val vars = domain.getVariables ++ range.getVariables
-//      _writer.println(startThenDelim + vars.map(varToString(_)).mkString("{", ",", "}"))
-//      startThenDelim = ","
-//    }
-//    _writer.print("]")
-//  }
 
   def makeLabel(variable: Variable): String = variable.getName match {
     //Use name for label, no label if "unknown"
@@ -81,21 +58,6 @@ class JsonWriter extends TextWriter {
   
   override def varToString(variable: Variable): String = {
     makeLabel(variable) + super.varToString(variable) //will in turn call our make* methods below
-//    
-//    val value = variable match { 
-//      case t: Time => t.getJavaTime.toString  //use java time for json
-//      case Real(d) => d.toString //TODO: format? NaN to null
-//      case Integer(l) => l.toString 
-//      case Text(s) => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters
-//      
-//      case Sample(d: Index, r) => varToString(r) //don't print Index
-//      case Tuple(vars) => vars.map(varToString(_)).mkString("{", ",", "}")
-//      case f: Function => f.iterator.map(varToString(_)).mkString("[", ","+newLine, "]")
-//      //f.iterator.map(s => (s.domain.getVariables ++ s.range.getVariables).map(varToString(_)).mkString("{",",","}")).mkString("[",",\n","]")
-//    
-//    }
-//    
-//    label + value
   }
   
   
@@ -107,8 +69,20 @@ class JsonWriter extends TextWriter {
   }
   
   def makeTuple(tuple: Tuple): String = tuple match {
-    case Sample(d: Index, r) => varToString(r) //drop Index domain
-    case Tuple(vars) => vars.map(varToString(_)).mkString("{", ",", "}")
+    case Sample(d, r) => d match {
+      case _: Index => varToString(r) //drop Index domain
+      case _ => {
+        //Sample needs {} since we are dropping them for unnamed tuples.
+        (d.getVariables ++ r.getVariables).map(varToString(_)).mkString("{", ",", "}")
+      }
+    }
+    //Don't include brackets for unnamed tuple.
+    //Note, even tuple of one will keep {} if it is named to maintain namespace.
+    //TODO: Be consistent with how we make Label (e.g. drop 'unknown')
+    case Tuple(vars) => tuple.getMetadata.get("name") match {
+      case Some(_) => vars.map(varToString(_)).mkString("{", ",", "}")
+      case None => vars.map(varToString(_)).mkString(",")
+    }
   }
   
   def makeFunction(function: Function): String = {
