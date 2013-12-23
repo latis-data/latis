@@ -18,10 +18,8 @@ class CompactJsonWriter extends JsonWriter {
   override def makeTuple(tuple: Tuple): String = tuple match {
     case Sample(d, r) => d match {
       case _: Index => varToString(r) //drop Index domain
-      case _ => varToString(Tuple(d.getVariables ++ r.getVariables)) //combine doman and range vars into one Tuple //TODO: flatten?
+      case _ => varToString(Tuple(d.getVariables ++ r.getVariables)) //combine domain and range vars into one Tuple //TODO: flatten?
     }    
-    case Tuple(vars) => vars.map(varToString(_)).mkString("[", ",", "]")
+    case Tuple(vars) => vars.map(varToString(_)).mkString("[", ",", "]") //represent a tuple as an array
   }
-  
-  override def mimeType: String = "application/json" 
 }
