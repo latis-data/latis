@@ -206,6 +206,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     }
  
     //Add implicit metadata for "time" and "index" variables.
+    //TODO: need to make them unique? consider finding "time" variable, finds first
+    //  do only when time domain is implied?
     if (vml.label == "time") addImplicitName("time")
     if (vml.label == "index") addImplicitName("index")
 
