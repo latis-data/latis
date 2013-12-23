@@ -288,13 +288,15 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
           for (vt <- varsWithTypes) vt match {
             case (v: Time, t: Int) if (t == java.sql.Types.TIMESTAMP) => {
               val time = resultSet.getTimestamp(v.getName, cal).getTime
+              //TODO: support nanos?
               //deal with diff time types
               v match {
                 case _: Real => bb.putDouble(time.toDouble)
                 case _: Integer => bb.putLong(time)
               }
               //TODO: deal with text time type
-     //TODO: should db with TIMESTAMP use "text" type?
+              //TODO: should db with TIMESTAMP use "text" type?
+              //Timestamp.toString => yyyy-mm-dd hh:mm:ss.fffffffff
             }
             //case (n: Number, _) => bb.putDouble(resultSet.getDouble(n.name))
             case (r: Real, _) => bb.putDouble(resultSet.getDouble(r.getName))
