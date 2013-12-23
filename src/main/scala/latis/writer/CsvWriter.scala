@@ -18,10 +18,20 @@ class CsvWriter extends TextWriter {
     //TODO: get from properties
     
   override def makeHeader(dataset: Dataset): String = {
-    //TODO: add units
-    //val header = dataset.toSeq.map(v => v.name + " (" + v.metadata("units") + ")").mkString(delimiter)
-    //dataset.toSeq.map(v => v.getName).filter(_ != "index").mkString(delimiter) //don't include Index variable
-    dataset.toSeq.filterNot(_.isInstanceOf[Index]).map(v => v.getName).mkString("", delimiter, newLine) //don't include Index variable
+    //don't include Index variable
+    dataset.toSeq.filterNot(_.isInstanceOf[Index]).map(makeHeading(_)).mkString("", delimiter, newLine) 
+  }
+  
+  /**
+   * Make a Variable heading for the header.
+   */
+  def makeHeading(variable: Variable): String = {
+    val units = variable.getMetadata.get("units") match {
+      case Some(u) => " (" + u + ")"
+      case None => ""
+    }
+    
+    variable.getName + units
   }
   
   def makeScalar(scalar: Scalar): String = scalar match {
