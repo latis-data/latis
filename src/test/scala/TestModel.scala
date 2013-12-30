@@ -6,8 +6,11 @@ import Assert._
 import latis.writer._
 import java.nio.ByteBuffer
 import latis.data.buffer.ByteBufferData
+import latis.metadata.Metadata
 
 class TestModel  {
+  
+  implicit def stringToMetadata(name: String): Metadata = Metadata(name)
   
   @Test
   def test_array_data {

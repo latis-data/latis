@@ -6,8 +6,11 @@ import latis.writer._
 import org.junit._
 import Assert._
 import latis.reader.tsml.TsmlReader
+import latis.metadata.Metadata
 
 class ProjectionTest {
+  
+  implicit def stringToMetadata(name: String): Metadata = Metadata(name)
   
   @Test
   def project_scalar_include {
