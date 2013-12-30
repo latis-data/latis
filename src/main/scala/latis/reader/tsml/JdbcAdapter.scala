@@ -195,6 +195,12 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
       case _ => 
     }
     
+    //Allow specification of number of rows to fetch at a time.
+    properties.get("fetchSize") match {
+      case Some(fetchSize) => statement.setFetchSize(fetchSize.toInt)
+      case _ => 
+    }
+    
     //Apply FirstFilter or LastFilter. 
     //Set max rows to 1. "last" will set order to descending.
     //TODO: error if both set, unless there was only one
