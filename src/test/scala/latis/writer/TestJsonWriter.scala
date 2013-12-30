@@ -16,5 +16,5 @@ class TestJsonWriter {
   def text = Writer("json").write(TestDataset.text)
   
   @Test
-  def test = Writer("json").write(TestDataset.scalars)
+  def test = Writer("json").write(TestDataset.index_function)
 }

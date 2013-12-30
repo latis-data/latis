@@ -32,6 +32,8 @@ object TestDataset {
 //  def time_series_of_scalar
 //  def time_series_of_tuple
   
+  def index_function = Dataset(Function(List(Text("msg", "Hi"), Text("msg", "Bye")), "myIndexFunction"), "indexFunctionDS")
+  
   //TODO: time_series with res: micro, milli, sec, hour, day, year
   
 }
