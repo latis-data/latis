@@ -47,7 +47,8 @@ class JsonWriter extends TextWriter {
 
   override def writeFunction(function: Function) {
     val startThenDelim = FirstThenOther(makeLabel(function) + "[", "," + newLine)
-    for (sample <- function.iterator) printWriter.print(startThenDelim.value + varToString(sample))
+    //note, calling makeSample directly to avoid the label
+    for (sample <- function.iterator) printWriter.print(startThenDelim.value + makeSample(sample))
     //TODO: deal with error during write, at least close "]"?
     printWriter.print("]" + newLine)
   }
@@ -62,18 +63,19 @@ class JsonWriter extends TextWriter {
     case name: String => "\"" + name + "\": "
   }
   
-//  override def varToString(variable: Variable): String = {
-//    makeLabel(variable) + super.varToString(variable) //will in turn call our make* methods below
-//  }
+  /**
+   * Override to add label before each variable.
+   */
+  override def varToString(variable: Variable): String = {
+    makeLabel(variable) + super.varToString(variable) //will in turn call our make* methods below
+  }
   
   
-  def makeScalar(scalar: Scalar): String = {
-    makeLabel(scalar) + (scalar match {
-      case t: Time => t.getJavaTime.toString  //use java time for json
-      case Real(d) => d.toString //TODO: format? NaN to null
-      case Integer(l) => l.toString 
-      case Text(s) => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters      
-    })
+  def makeScalar(scalar: Scalar): String = scalar match {
+    case t: Time => t.getJavaTime.toString  //use java time for json
+    case Real(d) => d.toString //TODO: format? NaN to null
+    case Integer(l) => l.toString 
+    case Text(s) => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters      
   }
   
   override def makeSample(sample: Sample): String = {
@@ -87,7 +89,7 @@ class JsonWriter extends TextWriter {
   }
     
   def makeTuple(tuple: Tuple): String = {
-    makeLabel(tuple) + tuple.getVariables.map(varToString(_)).mkString("{", ", ", "}")
+    tuple.getVariables.map(varToString(_)).mkString("{", ", ", "}")
 //    //TODO: Be consistent with how we make Label (e.g. 'unknown')
 //    case Tuple(vars) => tuple.getMetadata.get("name") match {
 //      case Some(_) => vars.map(varToString(_)).mkString("{", ",", "}")
@@ -96,8 +98,8 @@ class JsonWriter extends TextWriter {
   }
   
   def makeFunction(function: Function): String = {
-    //function elements need to be in {} even if unnamed
-    function.iterator.map(varToString(_)).mkString("[{", "},"+newLine+"{", "}]")
+    //note, calling makeSample directly to avoid the label
+    function.iterator.map(makeSample(_)).mkString("[", ","+newLine, "]")
   }
   
   /**

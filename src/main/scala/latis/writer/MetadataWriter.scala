@@ -11,8 +11,8 @@ class MetadataWriter extends JsonWriter {
   
   //The Dataset may have one variable (the function) but we only care about the 
   //  set of scalars here, for now. //TODO: review for more general case.
-  override def makeHeader(dataset: Dataset) = "{\"" + dataset.getName + "\": {\n"
-  override def makeFooter(dataset: Dataset) = "}}"
+//  override def makeHeader(dataset: Dataset) = "{\"" + dataset.getName + "\": {\n"
+//  override def makeFooter(dataset: Dataset) = "}}"
   
   //override to write only domain and range info, not all samples
   override def writeFunction(function: Function) {
