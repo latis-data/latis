@@ -7,7 +7,13 @@ import scala.collection.mutable.MapBuilder
 import latis.util.FirstThenOther
 
 class MetadataWriter extends JsonWriter {
-    
+  //TODO: expose the metadata as a Dataset so we can count on parent's logic  
+  
+  //The Dataset may have one variable (the function) but we only care about the 
+  //  set of scalars here, for now. //TODO: review for more general case.
+  override def makeHeader(dataset: Dataset) = "{\"" + dataset.getName + "\": {\n"
+  override def makeFooter(dataset: Dataset) = "}}"
+  
   //override to write only domain and range info, not all samples
   override def writeFunction(function: Function) {
     printWriter.print(varToString(Sample(function.getDomain, function.getRange)))

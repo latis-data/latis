@@ -23,14 +23,36 @@ class JsonWriter extends TextWriter {
    */
   //def delimiter: String = 
   
+  /*
+   * catalog broken
+   * has one sample: tuple, but needs {}
+   * ++drop {} only it single var is function?
+   * 
+   * arrays of datasets and catalogs need {} around elements
+   * modeled as Index functions?
+   * make sure function of tuples gets {} even if unnamed
+   * can elements of function be named?
+   * tuple has no way of knowing that it is part of a function
+   * use delim: },{ ?
+   * ++need delim for dataset top vars, same as recordDelim?
+   * 
+   */
+  
   //If Dataset has only one Variable, don't include the extra brackets.
   override def makeHeader(dataset: Dataset) = dataset.getVariables.length match {
-    case 1 => "{\"" + dataset.getName + "\": \n"
+    //case 1 => "{\"" + dataset.getName + "\": \n"  //
+    /*
+     * TODO: only if the var is unnamed tuple or function?
+     * dataset IS-A tuple so it should have {}
+     * problem seems to be lack of name
+     * would this generalize better if we have a label for everything?
+     * "unknown" vs gen uniq id?
+     */
     case _ => "{\"" + dataset.getName + "\": {\n"
     //TODO: 0?
   }
   override def makeFooter(dataset: Dataset) = dataset.getVariables.length match {
-    case 1 => "}"
+    //case 1 => "}"
     case _ => "}}"
   }
   
