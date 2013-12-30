@@ -35,7 +35,7 @@ object Text {
   
   def apply(v: String): Text = new Variable2(data = Data(v)) with Text
   
-  def apply(name: String, v: String): Text = new Variable2(Metadata(name), Data(v)) with Text
+  //def apply(name: String, v: String): Text = new Variable2(Metadata(name), Data(v)) with Text
 
   def apply(md: Metadata): Text = new Variable2(md) with Text
   

@@ -200,6 +200,8 @@ object Time {
     }
   }
   
+  //def apply(md: Metadata, typ: String): Time 
+  
   def apply(md: Metadata, value: AnyVal): Time = {
     var metadata = md
     val scale = md.get("units") match {

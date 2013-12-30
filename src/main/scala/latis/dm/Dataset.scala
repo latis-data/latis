@@ -113,7 +113,9 @@ object Dataset {
   
   def apply(vars: Seq[Variable]): Dataset = new Dataset(vars.toIndexedSeq)
   
+  //TODO: should metadata be first? e.g. variable name
   def apply(vars: Seq[Variable], md: Metadata): Dataset = new Dataset(vars.toIndexedSeq, metadata = md)
+  def apply(v: Variable, md: Metadata): Dataset = new Dataset(List(v), metadata = md)
   
 //  def apply(vars: Seq[Variable], ops: Seq[Operation], md: Metadata): Dataset = {
 //    val ds = new Dataset(vars.toIndexedSeq, ops.toIndexedSeq)

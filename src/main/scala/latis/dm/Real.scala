@@ -28,7 +28,7 @@ object Real {
   def unapply(real: Real): Option[Double] = Some(real.getNumberData.doubleValue)
   
   
-  def apply(name: String): Real = new AbstractScalar(Metadata(name)) with Real
-  def apply(name: String, v: Double): Real = new AbstractScalar(Metadata(name), Data(v)) with Real
-  def apply(name: String, vs: Seq[Double]): Real = new AbstractScalar(Metadata(name), Data(vs)) with Real
+  //def apply(name: String): Real = new AbstractScalar(Metadata(name)) with Real
+  //def apply(name: String, v: Double): Real = new AbstractScalar(Metadata(name), Data(v)) with Real
+  //def apply(name: String, vs: Seq[Double]): Real = new AbstractScalar(Metadata(name), Data(vs)) with Real
 }
