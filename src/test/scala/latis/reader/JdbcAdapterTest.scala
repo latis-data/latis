@@ -8,6 +8,7 @@ import latis.writer.AsciiWriter
 import scala.collection.mutable.ArrayBuffer
 import latis.ops._
 import latis.dm._
+import latis.writer.Writer
 
 class JdbcAdapterTest {
 
@@ -69,11 +70,18 @@ class JdbcAdapterTest {
     AsciiWriter.write(ds)
   }
   
-  @Test
+  //@Test
   def string_match {
     val ops = List(Selection("s=~A"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
     AsciiWriter.write(ds)
+  }
+  
+  @Test
+  def iso_time_selection {
+    val ops = List(Selection("time>=2000-01-03"))
+    val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
+    Writer("jsond").write(ds)
   }
   
   //@Test

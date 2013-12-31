@@ -10,7 +10,7 @@
              table="test"/>
              
     <time name="i" type="integer">
-      <metadata units="years since 2000-01-01"/>
+      <metadata units="days since 2000-01-01"/>
     </time>
     
     <real name="d"/>
