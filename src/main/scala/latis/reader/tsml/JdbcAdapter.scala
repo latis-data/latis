@@ -143,7 +143,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
         //convert ISO time to units
         RegEx.TIME findFirstIn value match {
           case Some(s) => {
-            val t = Time(javax.xml.bind.DatatypeConverter.parseDateTime(s).getTimeInMillis().toDouble)
+            val t = Time(javax.xml.bind.DatatypeConverter.parseDateTime(s).getTimeInMillis())
             val t2 = t.convert(TimeScale(units)).getNumberData.doubleValue
             val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
             this.selections += tvname + op + t2
