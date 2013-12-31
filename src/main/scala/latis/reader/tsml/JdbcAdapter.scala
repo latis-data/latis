@@ -136,20 +136,21 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   def handleTimeSelection(op: String, value: String): Boolean = {
     //support ISO time string as value
     //TODO: assumes db value are numerical, for now
-    //TODO: use model instead of xml
+    //TODO: use model instead of xml, can we construct dataset before we get here?
+    val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
     (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
-      case "" => ??? //no time units found
+      case "" => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
+      //TODO: what if native time var is "time", without units?
       case units: String => {
         //convert ISO time to units
         RegEx.TIME findFirstIn value match {
           case Some(s) => {
-            val t = Time(javax.xml.bind.DatatypeConverter.parseDateTime(s).getTimeInMillis())
+            val t = Time.fromIso(s)
             val t2 = t.convert(TimeScale(units)).getNumberData.doubleValue
-            val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
             this.selections += tvname + op + t2
             true
           }
-          case None => ??? //value didn't match time format
+          case None => throw new Error("The time value is not in a supported ISO format: " + value)
         }
       }
     }
