@@ -140,6 +140,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
     (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
       case "" => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
+      //TODO: allow units property in time element
       //TODO: what if native time var is "time", without units?
       case units: String => {
         //convert ISO time to units
