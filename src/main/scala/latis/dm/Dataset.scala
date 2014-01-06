@@ -11,6 +11,15 @@ import latis.ops._
 class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
   extends AbstractTuple(variables, metadata, data) with BasicMath {
   
+  //TODO: evaluate for given domain value
+  //TODO: Variable already has apply(int)
+//  def apply(v: Any): Dataset = v match {
+//    case index: Int => ??? //get index-th sample of function, or element of tuple? what about F of Tuple? probably better to use diff method
+//    case p: Product => ??? //multi-dim domain
+//    case _ => ??? //TODO: make Scalar and eval Function?
+//    //error if ds does not have single Function? or recurse till we find a function with a consistent domain?
+//  }
+  
 /*
  * TODO: 
  * consider map(f: Variable => Variable)

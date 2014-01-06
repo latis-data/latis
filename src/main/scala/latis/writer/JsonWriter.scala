@@ -54,14 +54,14 @@ class JsonWriter extends TextWriter {
   }
   
 
-  def makeLabel(variable: Variable): String = variable.getName match {
-    //Use name for label, no label if "unknown"
-    //TODO: don't count on "unknown", use Option?
-    //TODO: json requires labels in some contexts
-    //assume all components have names, for now, use unknown
-   // case "unknown" => ""
-    case name: String => "\"" + name + "\": "
-  }
+  def makeLabel(variable: Variable): String = "\"" + variable.getName + "\": "
+//    variable.getName match {
+//    //TODO: don't count on "unknown", use Option?
+//    //json requires labels in some contexts
+//    //assume all components have names, for now, use whatever we get
+//    //TODO: if unknown, at least use type? e.g. "function"? or just delegate to Var.getName?
+//    case name: String => "\"" + name + "\": "
+//  }
   
   /**
    * Override to add label before each variable.
@@ -83,18 +83,19 @@ class JsonWriter extends TextWriter {
     val vars = d match {
       case _: Index => r.getVariables //drop Index domain
       case _ => d.getVariables ++ r.getVariables
-      //TODO: what if d or r are named tuples?
+      //TODO:  Need to keep domain and range of Sample within {}
+      //  label with name or "domain"/"range"
+      //  [{"domain":{...}, "range":{...}},...]
+      //  what about index domain, need "range"?
+      //  want to avoid special logic based on whether is has a name
+      //  but often range is tuple only because range has to be a single Variable
+      //  not bad to drop extra {} if no name, still need sample {}, the only ones that can't have a label
     }
     vars.map(varToString(_)).mkString("{", ", ", "}") //note, sample shouldn't have name
   }
     
   def makeTuple(tuple: Tuple): String = {
     tuple.getVariables.map(varToString(_)).mkString("{", ", ", "}")
-//    //TODO: Be consistent with how we make Label (e.g. 'unknown')
-//    case Tuple(vars) => tuple.getMetadata.get("name") match {
-//      case Some(_) => vars.map(varToString(_)).mkString("{", ",", "}")
-//      case None => vars.map(varToString(_)).mkString(",")
-//    }
   }
   
   def makeFunction(function: Function): String = {
