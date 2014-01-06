@@ -332,7 +332,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
   //---------------------------------------------------------------------------
     
-  private lazy val connection: Connection = getConnection
+  protected lazy val connection: Connection = getConnection
     
   //hack so we don't end up getting a Connection when we are testing if we have one to close
   private var hasConnection = false 
