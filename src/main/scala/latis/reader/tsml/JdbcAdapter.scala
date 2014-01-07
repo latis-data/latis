@@ -211,6 +211,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     statement.executeQuery(sql)
   }
   
+  def getTable: String = properties("table")
+  
   protected def makeQuery: String = {
     //TODO: sanitize stuff from properties, only in the data providers domain, but still...
     
@@ -219,7 +221,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
 
     sb append projection
     
-    sb append " from " + properties("table")
+    sb append " from " + getTable
     
     val p = predicate 
     if (p.nonEmpty) sb append " where " + p
