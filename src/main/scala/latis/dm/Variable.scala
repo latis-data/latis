@@ -5,6 +5,8 @@ import latis.metadata._
 import latis.ops.math.BasicMath
 import latis.time.Time
 import scala.collection._
+import scala.collection.mutable.ArrayBuilder
+import scala.collection.mutable.ArrayBuffer
 
 /*
  * TODO: 2013-10-21
@@ -36,6 +38,8 @@ trait Variable {
   
   def getVariables: Seq[Variable] //TODO: immutable.Seq?
   def apply(index: Int): Variable = getVariables(index)
+  
+  //def reduce: Variable
   
   //TODO: toStringValue?
 }
@@ -119,6 +123,37 @@ abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data 
     //TODO: Function?
   }
   
+  /*
+   * TODO: "reduce"? function with one sample to its range
+   * equiv to eval at (0) if length=1
+   */
+//  def reduce: Variable = this match {
+//    //TODO: data complications
+//    case s: Scalar => s
+//    
+//    case Tuple(vars)  => {
+//      val vs = ArrayBuffer[Variable]()
+//      for (v <- vars) v match {
+//        case s: Scalar => vs += s
+//        case t: Tuple => {
+//          /*
+//           * can only reduce a tuple if it's parent can take kids
+//           * is this just tuple.flatten?
+//           * (a,(b,c)) => (a,b,c)
+//           * reduce from bottom up
+//           */
+//          vs ++= t.reduce.getVariables
+//          //TODO: if (t.getMetadata.get("name").isEmpty) 
+//        }
+//        case f: Function => ???
+//      }
+//      Tuple(vs) //TODO metadata
+//    }
+//    
+//    case f: Function => {
+//      ???
+//    }
+//  }
   
 //  def getVariableByIndex(index: Int): Variable = this match {
 //    case s: Scalar => {
@@ -269,6 +304,8 @@ abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data 
   
   //TODO: override def hashCode
   
+  //assume a single top level function: a.k.a. "Function Dataset?"
+  //def toStringArray: 
   
   override def toString() = this match { //name +": "+ data.toString
   //use "unknown" only for scalars

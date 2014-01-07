@@ -10,6 +10,9 @@ trait Function extends Variable { //this: Variable =>
   def getDomain: Variable
   def getRange: Variable
   
+  //evaluate for given domain sample
+  //def apply(v: Variable): Variable
+  
   //TODO: reconsider when we add ContinuousFunction
   def getFirstSample: Sample
   def getLastSample: Sample

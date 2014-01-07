@@ -62,7 +62,7 @@ class LatisProperties extends Properties with Logging {
       case s: String => s
       case null => System.getenv("LATIS_HOME") match { //try under LATIS_HOME
         case s: String => s + File.separator + "latis.properties"
-        case null => getClass.getResource(File.separator + "latis.properties") match { //try in the classpath
+        case null => getClass.getResource("/latis.properties") match { //try in the classpath
           case url: URL => url.getPath
           case null => throw new RuntimeException("Unable to locate property file.")
         }
