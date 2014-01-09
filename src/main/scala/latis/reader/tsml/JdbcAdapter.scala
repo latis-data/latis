@@ -140,6 +140,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
     (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
       case "" => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
+      //TODO: allow units property in time element
       //TODO: what if native time var is "time", without units?
       case units: String => {
         //convert ISO time to units
@@ -210,6 +211,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     statement.executeQuery(sql)
   }
   
+  def getTable: String = properties("table")
+  
   protected def makeQuery: String = {
     //TODO: sanitize stuff from properties, only in the data providers domain, but still...
     
@@ -218,7 +221,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
 
     sb append projection
     
-    sb append " from " + properties("table")
+    sb append " from " + getTable
     
     val p = predicate 
     if (p.nonEmpty) sb append " where " + p
@@ -331,7 +334,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
   //---------------------------------------------------------------------------
     
-  private lazy val connection: Connection = getConnection
+  protected lazy val connection: Connection = getConnection
     
   //hack so we don't end up getting a Connection when we are testing if we have one to close
   private var hasConnection = false 

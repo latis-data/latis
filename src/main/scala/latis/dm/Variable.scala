@@ -61,6 +61,7 @@ abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data 
    *   Tuple: number of variable members
    *   Function: number of samples
    */
+  //TODO: dangerous to overload "length", use getVariableCount?
   def getLength: Int = this match {
     case _: Scalar => 1  //TODO: consider Scalars with SeqData, implicit IndexFunction
     case Tuple(vars) => vars.length
