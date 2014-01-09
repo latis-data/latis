@@ -46,7 +46,8 @@ class JsonWriter extends TextWriter {
   override def makeFooter(dataset: Dataset) = "}}"
 
   override def writeFunction(function: Function) {
-    val startThenDelim = FirstThenOther(makeLabel(function) + "[", "," + newLine)
+    printWriter.print(makeLabel(function) + "[")
+    val startThenDelim = FirstThenOther("", "," + newLine)
     //note, calling makeSample directly to avoid the label
     for (sample <- function.iterator) printWriter.print(startThenDelim.value + makeSample(sample))
     //TODO: deal with error during write, at least close "]"?

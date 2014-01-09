@@ -15,6 +15,12 @@ class TestJsonWriter {
   def integer = Writer("json").write(TestDataset.integer)
   def text = Writer("json").write(TestDataset.text)
   
-  @Test
+  //@Test
   def test = Writer("json").write(TestDataset.index_function)
+  
+  //@Test 
+  def empty_dataset = Writer("json").write(TestDataset.empty)
+  
+  @Test
+  def empty_function = Writer("json").write(TestDataset.empty_function)
 }
