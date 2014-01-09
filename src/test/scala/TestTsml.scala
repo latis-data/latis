@@ -45,7 +45,9 @@ class TestTsml  {
     val ds = TsmlReader("datasets/test/scalar3.tsml").getDataset //+ 1
     //println(ds)
     //AsciiWriter().write(ds)
-    Writer("meta").write(ds)
+    val w = new MetadataWriter
+    val s = w.varToString(ds)
+    println(s)
   }
   
   //@Test
