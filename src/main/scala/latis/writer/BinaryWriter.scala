@@ -3,8 +3,14 @@ package latis.writer
 import java.io.OutputStream
 import java.io.DataOutputStream
 import latis.dm._
+import java.nio.ByteOrder
 
 class BinaryWriter extends Writer {
+  
+  //NOTE: We can't simply change the byte order here. 
+  //It either needs to be set for the ByteArray before putDouble...
+  //or set then use getDouble... to get the data out
+  //But it's fair to expect that this use network (big endian) order.
 
   private[this] lazy val writer = new DataOutputStream(outputStream)
   
