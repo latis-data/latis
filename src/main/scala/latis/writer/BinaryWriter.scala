@@ -27,6 +27,9 @@ class BinaryWriter extends Writer {
       case _ => throw new Error("No Data found.")
     } else {
       val bs = data.getByteBuffer.array
+      /*
+       * TODO: not yet implemented for IterableData
+       */
       writer.write(bs)
     }
   }
