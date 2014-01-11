@@ -10,7 +10,7 @@ import latis.ops._
 import latis.dm._
 import latis.writer.Writer
 
-class JdbcAdapterTest {
+class TestJdbcAdapter {
 
   private var connection: Connection = null
   
@@ -63,7 +63,7 @@ class JdbcAdapterTest {
     AsciiWriter.write(ds)
   }
   
-  //@Test
+  @Test
   def dont_project_domain {
     val ops = List(Projection("d,s"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
@@ -77,7 +77,7 @@ class JdbcAdapterTest {
     AsciiWriter.write(ds)
   }
   
-  @Test
+  //@Test
   def iso_time_selection {
     val ops = List(Selection("time>=2000-01-03"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
