@@ -274,8 +274,20 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     //TODO: can we get away with flattening? consider nested Functions
     def recordSize = sampleTemplate.getSize
     //toSeq.filterNot(_.isInstanceOf[Index]).map(_.getSize).sum
+/*
+ * TODO: deal with non-projected domain
+ * template should have it replaced by Index
+ * need to add a value for it in the byte buffer
+ * 
+ */
     
     override def iterator = new NextIterator[Data] {
+      //Use index to replace a non-projected domain. 
+      var index = sampleTemplate.domain match {
+        case _: Index => 0
+        case _ => -1
+      }
+        
       val md = resultSet.getMetaData
       //val vars = dataset.toSeq //Seq of Variables as ordered in the dataset
       //TODO: maintain projection order, what if domain var is not first?
@@ -295,6 +307,12 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
         val bb = ByteBuffer.allocate(recordSize) 
         //TODO: reuse bb? but the previous sample is in the wild, memory resource issue, will gc help?
         if (resultSet.next) {
+          //Add index value if domain not projected. Set to 0 above if we have an Index domain, -1 otherwise.
+          if (index >= 0) {
+            bb.putInt(index)
+            index += 1
+          }
+          
           for (vt <- varsWithTypes) vt match {
             case (v: Time, t: Int) if (t == java.sql.Types.TIMESTAMP) => {
               val time = resultSet.getTimestamp(v.getName, cal).getTime
