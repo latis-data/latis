@@ -21,9 +21,13 @@ trait Binary extends Scalar {
 
 object Binary {
   
-  def apply(buffer: Buffer) = new Variable2(data = Data(buffer)) with Binary
+//TODO: set length if not already set (see Text)
+  
+  def apply(buffer: Buffer) = new AbstractScalar(data = Data(buffer)) with Binary
   
   def apply(md: Metadata): Binary = new AbstractScalar(md) with Binary
+  
+  def apply(md: Metadata, buffer: Buffer): Binary = new AbstractScalar(md, Data(buffer)) with Binary
   
 //  def apply(v: Any) = v match {
 //    case d: Double => new Variable2(data = Data(Data(d).getByteBuffer)) with Binary
