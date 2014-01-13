@@ -27,10 +27,13 @@ class BinaryWriter extends Writer {
   
   //Iteratively build up a ByteBuffer
   def varToBytes(variable: Variable): Array[Byte] = {
-    val bb = ByteBuffer.allocate(variable.getSize)
+    val bb = ByteBuffer.allocate(variable.getSize) //potentially bigger than what we write (e.g. Index)
     //set the byte order
     bb.order(order)
-    buildVariable(variable, bb).array
+    buildVariable(variable, bb)
+    val bytes = new Array[Byte](bb.position())
+    bb.rewind.asInstanceOf[ByteBuffer].get(bytes)
+    bytes
   }
  
   def buildVariable(variable: Variable, bb: ByteBuffer): ByteBuffer = variable match {
