@@ -2,8 +2,8 @@ package latis.dm
 
 import latis.data.Data
 import latis.data.value.DoubleValue
-
 import java.nio.Buffer
+import latis.metadata.Metadata
 
 /**
  * Binary blob.
@@ -22,6 +22,8 @@ trait Binary extends Scalar {
 object Binary {
   
   def apply(buffer: Buffer) = new Variable2(data = Data(buffer)) with Binary
+  
+  def apply(md: Metadata): Binary = new AbstractScalar(md) with Binary
   
 //  def apply(v: Any) = v match {
 //    case d: Double => new Variable2(data = Data(Data(d).getByteBuffer)) with Binary

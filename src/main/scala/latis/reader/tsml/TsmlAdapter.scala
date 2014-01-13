@@ -245,10 +245,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //TODO: deal with values in tsml
     
     sml.label match {
-      case "real" => Some(Real(md))
+      case "real"    => Some(Real(md))
       case "integer" => Some(Integer(md))
-      case "text" => Some(Text(md))
-      case "time" => Some(Time(md))
+      case "text"    => Some(Text(md))
+      case "time"    => Some(Time(md))
+      case "binary"  => Some(Binary(md))
       case _ => None
     }
   }
