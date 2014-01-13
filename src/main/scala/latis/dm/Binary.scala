@@ -33,5 +33,5 @@ object Binary {
 //    case d: Double => new Variable2(data = Data(Data(d).getByteBuffer)) with Binary
 //  }
   
-  def unapply(b: Binary): Option[Buffer] = Some(b.getData.getByteBuffer)
+  def unapply(b: Binary): Option[Array[Byte]] = Some(b.getData.getByteBuffer.array)
 }
