@@ -14,6 +14,7 @@ import latis.ops.LastFilter
 import latis.ops.FirstFilter
 import latis.ops.LimitFilter
 import latis.writer.CsvWriter
+import scala.io.Source
 
 class TestTsml  {
 
@@ -32,12 +33,29 @@ class TestTsml  {
   }
   
   @Test
-  def read_scalar_data {
+  def read_scalar_dds {
     val reader = TsmlReader("datasets/scalar.tsml")
     //val reader = TsmlReader("datasets/test/mixed.tsml")
     val ds = reader.getDataset
     //AsciiWriter().write(ds)
     Writer("dds").write(ds)
+    val w = new DdsWriter()
+    val s = (w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds)).split("\n")
+    val t = Source.fromFile("datasets/scalar.dds").getLines.toArray[String]
+    for(a <- 0 to t.length) assert(s(a)==t(a))
+  }
+  
+  @Test
+  def read_scalar_das {
+    val reader = TsmlReader("datasets/scalar.tsml")
+    //val reader = TsmlReader("datasets/test/mixed.tsml")
+    val ds = reader.getDataset
+    //AsciiWriter().write(ds)
+    Writer("das").write(ds)
+    val w = new DasWriter()
+    //val s = w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds)
+    val s = w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds)
+    println(s)
   }
   
   //@Test
