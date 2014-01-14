@@ -1,0 +1,6 @@
+dataset {
+	sequence {
+		float64 foo;
+		float64 ssn;
+	} unknown;
+} Scalar Test;
