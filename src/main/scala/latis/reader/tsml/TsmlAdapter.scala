@@ -247,7 +247,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
       case "real"    => Some(Real(md))
       case "integer" => Some(Integer(md))
       case "text"    => Some(Text(md))
-      case "time"    => Some(Time(md))
+      case "time"    => Some(Time(md)) //TODO: if type text, set default length=23? or get from 'format'
       case "binary"  => Some(Binary(md))
       case _ => None
     }

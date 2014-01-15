@@ -121,7 +121,13 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
   
   def getJavaTime: Long = getData match {
     case num: NumberData => convert(TimeScale.JAVA).getNumberData.longValue
-    case text: TextData => TimeFormat(getMetadata("units")).parse(text.stringValue).getTime
+    case text: TextData => {
+      val format = getMetadata.get("units") match {  //note: using units for format //TODO: consider use of "format"
+        case Some(f) => f
+        case None => TimeFormat.ISO.toString //default to ISO format
+      }
+      TimeFormat(format).parse(text.stringValue).getTime
+    }
   }
   
   
@@ -317,6 +323,15 @@ object Time {
         case "integer" => new Time(TimeScale.DEFAULT, md, Data(value.toLong)) with Integer
         case "real"    => new Time(TimeScale.DEFAULT, md, Data(value.toDouble)) with Real
         case "text"    => new Time(TimeScale.DEFAULT, md, Data(value)) with Text
+//        {
+//          //add default length of 23 (ISO format)
+//          //TODO: need to set in adapter so we can establish record size
+//          val md2 = md.get("length") match {
+//            case Some(_) => md
+//            case None => Metadata(md.getProperties ++ Map("length" -> "23"))
+//          }
+//          new Time(TimeScale.DEFAULT, md2, Data(value)) with Text
+//        }
       }
     }
   }

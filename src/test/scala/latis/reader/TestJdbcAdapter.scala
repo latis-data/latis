@@ -81,7 +81,8 @@ class TestJdbcAdapter {
   def iso_time_selection {
     val ops = List(Selection("time>=2014-01-02T00:00:00"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
-    AsciiWriter.write(ds)
+    //AsciiWriter.write(ds)
+    Writer("jsond").write(ds)
   }
   
   //@Test
