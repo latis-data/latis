@@ -576,7 +576,8 @@ object TsmlAdapter {
     val cls = Class.forName(class_name)
     val ctor = cls.getConstructor(tsml.getClass())
     try {
-    ctor.newInstance(tsml).asInstanceOf[TsmlAdapter]
+      ctor.newInstance(tsml).asInstanceOf[TsmlAdapter]
+      //TODO: call init? otherwise nothing happens till getDataset, but often need ops that come with getDataset(ops)
     } catch {
       case e: Exception => e.printStackTrace(); ???
     }
