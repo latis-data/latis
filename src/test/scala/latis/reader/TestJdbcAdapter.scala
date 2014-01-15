@@ -22,11 +22,11 @@ class TestJdbcAdapter {
     connection = DriverManager.getConnection("jdbc:derby:memory:testDB;create=true")
     
     var statement = connection.createStatement()
-    statement.execute("create table test(i int, d double, s varchar(1))")
+    statement.execute("create table test(i int, d double, s varchar(1), t timestamp)")
     //TODO: add other types: datetime,...
-    statement.execute("insert into test values(1, 1.1, 'A')")
-    statement.execute("insert into test values(2, 2.2, 'B')")
-    statement.execute("insert into test values(3, 3.3, 'C')")
+    statement.execute("insert into test values(1, 1.1, 'A', '2014-01-01 00:00:00')")
+    statement.execute("insert into test values(2, 2.2, 'B', '2014-01-02 00:00:00')")
+    statement.execute("insert into test values(3, 3.3, 'C', '2014-01-03 00:00:00')")
   }
   
   @After
@@ -44,7 +44,7 @@ class TestJdbcAdapter {
     val rs = statement.executeQuery("select * from test")
     
     while (rs.next()) {
-      println(rs.getInt(1) + " " + rs.getDouble(2) + " " + rs.getString(3))
+      println(rs.getInt(1) + " " + rs.getDouble(2) + " " + rs.getString(3) + " " + rs.getString(4))
     }
   }
   
@@ -63,7 +63,7 @@ class TestJdbcAdapter {
     AsciiWriter.write(ds)
   }
   
-  @Test
+  //@Test
   def dont_project_domain {
     val ops = List(Projection("d,s"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
@@ -77,11 +77,11 @@ class TestJdbcAdapter {
     AsciiWriter.write(ds)
   }
   
-  //@Test
+  @Test
   def iso_time_selection {
-    val ops = List(Selection("time>=2000-01-03"))
+    val ops = List(Selection("time>=2014-01-02T00:00:00"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
-    Writer("jsond").write(ds)
+    AsciiWriter.write(ds)
   }
   
   //@Test

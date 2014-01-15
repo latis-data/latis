@@ -20,6 +20,8 @@ import latis.time.TimeScale
 import latis.reader.tsml.ml.ScalarMl
 import latis.reader.tsml.ml.Tsml
 import com.typesafe.scalalogging.slf4j.Logging
+import latis.time.TimeFormat
+import java.util.Date
 
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
@@ -135,14 +137,36 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   */
   def handleTimeSelection(op: String, value: String): Boolean = {
     //support ISO time string as value
-    //TODO: assumes db value are numerical, for now
+    //TODO: assumes value is ISO, what if dataset does have a var named "time" with other units?
+    /*
+     * TODO: assumes db value are numerical, need to support times stored as datatime...
+     * should be able to use iso form in quotes?
+     * need clue in tsml that db has datetime
+     *   units? format?
+     * even though we can convert it to numeric, the general solution seems to be keep it as text?
+     *   we can define native form as text since latis does not have a datetime type
+     *   what should be the default ascii output? numbers might confuse them
+     *   though defaulting to java time is reasonable
+     * Try using text, default format = iso
+     * 
+     */
+    
+    
     //TODO: use model instead of xml, can we construct dataset before we get here?
     val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
-    (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
-      case "" => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
+    
+    (tsml.xml \\ "time" \ "@type").text match {
+      case "text" => {
+        //TODO: derby doesn't support iso format with "T", replace it with space?
+        //  is this a jdbc thing? consider Timestamp.toString: yyyy-mm-dd hh:mm:ss.fffffffff
+        val time = value.replace('T', ' ')
+        selections += tvname + op + "'" + time + "'"; true
+      }
+      case _ => (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
+       case "" => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
       //TODO: allow units property in time element
       //TODO: what if native time var is "time", without units?
-      case units: String => {
+       case units: String => {
         //convert ISO time to units
         RegEx.TIME findFirstIn value match {
           case Some(s) => {
@@ -154,7 +178,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
           case None => throw new Error("The time value is not in a supported ISO format: " + value)
         }
       }
-    }
+    }}
   }
   
   //Override to apply projection to the model, scalars only, for now.
@@ -321,10 +345,14 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
               v match {
                 case _: Real => bb.putDouble(time.toDouble)
                 case _: Integer => bb.putLong(time)
+                case _: Text => {
+                  //default to iso format: yyyy-MM-ddTHH:mm:ss.SSS, length = 23
+                  //Timestamp.toString => yyyy-mm-dd hh:mm:ss.fffffffff
+                  //TODO: currently requires setting length="25" in tsml
+                  val s = TimeFormat.ISO.format(new Date(time))
+                  s.foldLeft(bb)(_.putChar(_))
+                }
               }
-              //TODO: deal with text time type
-              //TODO: should db with TIMESTAMP use "text" type?
-              //Timestamp.toString => yyyy-mm-dd hh:mm:ss.fffffffff
             }
             //case (n: Number, _) => bb.putDouble(resultSet.getDouble(n.name))
             case (r: Real, _) => bb.putDouble(resultSet.getDouble(r.getName))

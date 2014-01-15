@@ -312,9 +312,12 @@ object Time {
          *   consider TimeScale(unit: String)
          */
       }
-      //No units specified, assume default numeric units
-      //TODO: or if no units, assume formatted? but need format, ISO?
-      case None => Time(md, stringToNumber(value)) //TODO: allow specification of type
+      //No units specified, assume default numeric units or ISO format
+      case None => md("type") match {
+        case "integer" => new Time(TimeScale.DEFAULT, md, Data(value.toLong)) with Integer
+        case "real"    => new Time(TimeScale.DEFAULT, md, Data(value.toDouble)) with Real
+        case "text"    => new Time(TimeScale.DEFAULT, md, Data(value)) with Text
+      }
     }
   }
   

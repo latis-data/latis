@@ -70,7 +70,11 @@ object Util {
     case v: Time => v match {
       case _: Real => Time(template.getMetadata, bb.getDouble)
       case _: Integer => Time(template.getMetadata, bb.getLong)
-      case _: Text => ???
+      case t: Text => {
+        val sb = new StringBuilder
+        for (i <- 0 until t.length) sb append bb.getChar
+        Time(template.getMetadata, sb.toString)
+      }
     }
     
     case v: Index => Index(bb.getInt)
