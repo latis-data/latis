@@ -58,7 +58,7 @@ abstract class Writer {
    * 
    * any way, see no need for close
    */
-  
+    
   /**
    * Return the mime type of the output format.
    * Needed for the Servlet Writer.

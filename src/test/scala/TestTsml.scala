@@ -33,29 +33,41 @@ class TestTsml  {
   }
   
   @Test
-  def read_scalar_dds {
+  def read_scalar_datadds {
     val reader = TsmlReader("datasets/scalar.tsml")
-    //val reader = TsmlReader("datasets/test/mixed.tsml")
     val ds = reader.getDataset
-    //AsciiWriter().write(ds)
-    Writer("dds").write(ds)
-    val w = new DdsWriter()
+    Writer("datadds").write(ds)
+    /*val w = new DdsWriter()
     val s = (w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds)).split("\n")
-    val t = Source.fromFile("datasets/scalar.dds").getLines.toArray[String]
-    for(a <- 0 to t.length) assert(s(a)==t(a))
+    val t = Source.fromFile("src/test/resources/datasets/data/scalar/scalar.dds").getLines.toArray[String]
+    for(a <- 0 until t.length) assertEquals(s(a), t(a))*/
   }
   
-  @Test
+  //@Test
+  def read_scalar_dds {
+    val reader = TsmlReader("datasets/scalar.tsml")
+    val ds = reader.getDataset
+    val w = new DdsWriter()
+    val s = (w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds)).split("\n")
+    val t = Source.fromFile("src/test/resources/datasets/data/scalar/scalar.dds").getLines.toArray[String]
+    for(a <- 0 until t.length) assertEquals(s(a), t(a))
+  }
+  
+  //@Test
+  def write_scalar_dds {
+    val reader = TsmlReader("datasets/scalar.tsml")
+    val ds = reader.getDataset
+    Writer("dds").write(ds)
+  }
+  
+  //@Test
   def read_scalar_das {
     val reader = TsmlReader("datasets/scalar.tsml")
-    //val reader = TsmlReader("datasets/test/mixed.tsml")
     val ds = reader.getDataset
-    //AsciiWriter().write(ds)
-    Writer("das").write(ds)
     val w = new DasWriter()
-    //val s = w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds)
-    val s = w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds)
-    println(s)
+    val s = (w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds)).split("\n")
+    val t = Source.fromFile("src/test/resources/datasets/data/scalar/scalar.das").getLines.toArray[String]
+    for(a <- 0 until t.length) assertEquals(s(a), t(a))
   }
   
   //@Test
@@ -82,7 +94,7 @@ class TestTsml  {
     AsciiWriter().write(ds)
   }
   
-  //@Test
+ // @Test
   def test_dataset_aggregation2 {
     //println(Tsml("datasets/test/agg.tsml#ds1"))
     //val ds = TsmlReader("datasets/test/agg.tsml#ds1").getDataset
