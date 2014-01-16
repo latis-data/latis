@@ -76,8 +76,8 @@ abstract class Variable2(val metadata: Metadata = EmptyMetadata, val data: Data 
    */
   def getSize: Int = size
   lazy val size: Int  = this match {
-    case _: Index => 4
-    case _: Real => 8 //TODO: override for Scalars to support custom?
+    case _: Index => 4 //TODO: Use 0 since we don't actually use these values?
+    case _: Real => 8 //double
     case _: Integer => 8 //long
     case t: Text => t.length * 2 //2 bytes per char  //TODO: consider Seq, get max
     case b: Binary => b.length

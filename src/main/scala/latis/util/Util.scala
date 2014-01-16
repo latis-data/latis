@@ -70,12 +70,17 @@ object Util {
     case v: Time => v match {
       case _: Real => Time(template.getMetadata, bb.getDouble)
       case _: Integer => Time(template.getMetadata, bb.getLong)
-      case _: Text => ???
+      case t: Text => {
+        val sb = new StringBuilder
+        for (i <- 0 until t.length) sb append bb.getChar
+        Time(template.getMetadata, sb.toString)
+      }
     }
     
     case v: Index => Index(bb.getInt)
     case v: Real => Real(template.getMetadata, bb.getDouble)
     case v: Integer => Integer(template.getMetadata, bb.getLong)
+    
     case v: Text => {
       val cs = new Array[Char](v.length)
       bb.asCharBuffer.get(cs)
@@ -84,6 +89,13 @@ object Util {
       //TODO: why can't we just get chars from the bb?
       val s = new String(cs)
       Text(template.getMetadata, s)
+    }
+    
+    case v: Binary => {
+      val bytes = new Array[Byte](v.length)
+      bb.get(bytes)
+      val buffer = ByteBuffer.wrap(bytes)
+      Binary(template.getMetadata, buffer)
     }
 
     //TODO: Don't include Index?

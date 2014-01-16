@@ -12,7 +12,8 @@ object TestDataset {
   
   implicit def stringToMetadata(name: String): Metadata = Metadata(name)
   
-  //TODO: move to TestDataset object
+  def empty = Dataset(List(), "emptyDS")
+  
   def real = Dataset(Real("myReal", 3.14), "realDS")
   def integer = Dataset(Integer("myInteger", 42), "intDS")
   def text = Dataset(Text("myText", "Hi"), "textDS")
@@ -32,7 +33,10 @@ object TestDataset {
 //  def time_series_of_scalar
 //  def time_series_of_tuple
   
-  def index_function = Dataset(Function(List(Text("msg", "Hi"), Text("msg", "Bye")), "myIndexFunction"), "indexFunctionDS")
+  def empty_function = Dataset(Function(Real("domain"), Real("range"), Iterator.empty))
+  
+  //def index_function = Dataset(Function(List(Text("msg", "Hi"), Text("msg", "Bye")), "myIndexFunction"), "indexFunctionDS")
+  def index_function = Dataset(Function(List(Integer(1), Integer(2)), "myIndexFunction"), "indexFunctionDS")
   
   //TODO: time_series with res: micro, milli, sec, hour, day, year
   

@@ -76,7 +76,6 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     val md = makeMetadata(tsml.dataset)
     val vars = tsml.dataset.getVariableMl.flatMap(makeVariable(_))
     Dataset(vars, md) 
-    //TODO: PIs should be applied here since they are part of the tsml and thus the original Dataset.
   }  
   
   /**
@@ -221,6 +220,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   //this will be used only by top level Variables (or kids of top level Tuples)
   protected def makeVariable(vml: VariableMl): Option[Variable] = vml match {
+    //TODO: can we make Metadata here then call make* with md instead of xml?
+    //  makeScalar matches on xml label
+    //  would need to capture that in metadata, 'type'?  but Time with type integer...
     case sml: ScalarMl => makeScalar(sml)
     case tml: TupleMl  => makeTuple(tml)
     case fml: FunctionMl => makeFunction(fml)
@@ -239,16 +241,14 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   protected def makeScalar(sml: ScalarMl): Option[Scalar] = {
     val md = makeMetadata(sml)
-//TODO: apply projection
-//  does this need to happen after renaming?
-    //  depends if it is from tsml PI or later?
     //TODO: deal with values in tsml
     
     sml.label match {
-      case "real" => Some(Real(md))
+      case "real"    => Some(Real(md))
       case "integer" => Some(Integer(md))
-      case "text" => Some(Text(md))
-      case "time" => Some(Time(md))
+      case "text"    => Some(Text(md))
+      case "time"    => Some(Time(md)) //TODO: if type text, set default length=23? or get from 'format'
+      case "binary"  => Some(Binary(md))
       case _ => None
     }
   }
@@ -576,7 +576,8 @@ object TsmlAdapter {
     val cls = Class.forName(class_name)
     val ctor = cls.getConstructor(tsml.getClass())
     try {
-    ctor.newInstance(tsml).asInstanceOf[TsmlAdapter]
+      ctor.newInstance(tsml).asInstanceOf[TsmlAdapter]
+      //TODO: call init? otherwise nothing happens till getDataset, but often need ops that come with getDataset(ops)
     } catch {
       case e: Exception => e.printStackTrace(); ???
     }

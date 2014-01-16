@@ -10,7 +10,7 @@ class AsciiWriter extends TextWriter {
   override def makeHeader(dataset: Dataset) = dataset.toString + newLine
   
   def makeScalar(scalar: Scalar): String = scalar match {
-    //case _: Index => "" //don't include Index variable, deal with in Sample match
+    case Index(i) => i.toString
     case Real(d) => d.toString
     case Integer(l) => l.toString
     case Text(s) => s.trim
