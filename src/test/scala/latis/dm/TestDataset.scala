@@ -12,7 +12,6 @@ import latis.writer.AsciiWriter
 class TestDataset {
   
   @Test
-  def test = println(Real("3.14e3"))
   //def function_of_scalar_with_data_from_kids = AsciiWriter.write(TestDataset.function_of_scalar_with_data_from_kids)
   //def function_of_scalar_with_iterable_data = AsciiWriter.write(TestDataset.function_of_scalar_with_iterable_data)
   //def function_of_tuple_with_data_from_kids = AsciiWriter.write(TestDataset.function_of_tuple_with_data_from_kids)
@@ -27,6 +26,8 @@ object TestDataset {
   def empty = Dataset(List(), Metadata("emptyDS"))
   
   def real = Dataset(Real(Metadata("myReal"), 3.14), Metadata("realDS"))
+  
+  
   def integer = Dataset(Integer(Metadata("myInteger"), 42), Metadata("intDS"))
   def text = Dataset(Text(Metadata("myText"), "Hi"), Metadata("textDS"))
   def time = Dataset(Time(Metadata("myRealTime"), 1000.0), Metadata("timeDS"))
