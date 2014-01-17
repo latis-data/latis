@@ -8,7 +8,7 @@ import latis.util.Util
 
 class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sample] = null,
     metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
-    extends Variable2(metadata, data) with Function {
+    extends AbstractVariable(metadata, data) with Function {
   
   /*
    * 2013-08-07

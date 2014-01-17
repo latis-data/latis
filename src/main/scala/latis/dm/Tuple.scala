@@ -11,7 +11,7 @@ trait Tuple extends Variable { //this: Variable =>
 }
 
 class AbstractTuple(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
-  extends Variable2(metadata, data) with Tuple {
+  extends AbstractVariable(metadata, data) with Tuple {
   override def getVariables = variables
 }
 
