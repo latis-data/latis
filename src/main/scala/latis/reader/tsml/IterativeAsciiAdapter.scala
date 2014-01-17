@@ -102,7 +102,7 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   //def parseRecord(metadata: FunctionMd, record: Record): LinkedHashMap[Name,ArrayBuffer[Value]]
   def parseRecord(record: Record): Map[Name, Value] = {
     //assume one line per record, space delimited
-    (variableNames zip record(0).split(" ")).toMap
+    (variableNames zip record(0).split("""\s+""")).toMap
   }
   
   def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
