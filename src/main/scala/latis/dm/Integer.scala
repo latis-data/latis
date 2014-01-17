@@ -30,6 +30,7 @@ object Integer {
     case d: Double => Integer(d.toLong)
     case f: Float  => Integer(f.toLong)
     case s: Short  => Integer(s.toLong)
+    case st: scala.collection.immutable.StringOps => Integer(st.toLong)
   }
   
   def apply(vs: Seq[Long]): Integer = new Variable2(data = Data(vs)) with Integer

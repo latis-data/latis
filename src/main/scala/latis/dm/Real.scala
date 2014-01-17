@@ -20,6 +20,7 @@ object Real {
     case l: Long  => Real(l.toDouble)
     case f: Float => Real(f.toDouble)
     case s: Short => Real(s.toDouble)
+    case st: scala.collection.immutable.StringOps => Real(st.toDouble)
   }
   
   def apply(vs: Seq[Double]): Real = new AbstractScalar(data = Data(vs)) with Real
