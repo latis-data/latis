@@ -3,7 +3,7 @@
 
   <dataset name="Scalar Test">
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
-             location="file:/data/latis/scalar.txt" />
+             location="datasets/test/scalar.txt" />
              
     <time name="time" units="years since 2000-01-01"/>
     
