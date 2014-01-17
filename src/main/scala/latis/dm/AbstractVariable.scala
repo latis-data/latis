@@ -14,7 +14,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
   def getData: Data = data
   
   def getName = name
-  lazy val name = metadata.get("name") match {
+  private lazy val name = metadata.get("name") match {
     case Some(s) => s
     case None => "unknown" //TODO: generate unique name?
   }
