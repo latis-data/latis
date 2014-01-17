@@ -6,9 +6,13 @@
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
              location="datasets/tsi.txt" />
              
-    <time name="year" />
+    <time name="year" 
+          units="years since 0000-01-01" 
+          long_name="Year"/>
     
-    <real name="tsi"/>
+    <real name="tsi"
+          units="W/m^2"
+          long_name="Total Solar Irradiance"/>
 
   </dataset>
 
