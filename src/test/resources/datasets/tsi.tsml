@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset Name="tsi">
+
+    <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+             location="datasets/tsi.txt" />
+             
+    <time name="year" />
+    
+    <real name="tsi"/>
+
+  </dataset>
+
+</tsml>
