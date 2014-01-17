@@ -25,6 +25,13 @@ object Integer {
   //def apply(name: String, v: Long): Integer = new Variable2(Metadata(name), Data(v)) with Integer
 
   def apply(v: Long): Integer = new Variable2(data = Data(v)) with Integer
+  def apply(v: AnyVal): Integer = v match {
+    case i: Int    => Integer(i.toLong)
+    case d: Double => Integer(d.toLong)
+    case f: Float  => Integer(f.toLong)
+    case s: Short  => Integer(s.toLong)
+  }
+  
   def apply(vs: Seq[Long]): Integer = new Variable2(data = Data(vs)) with Integer
     
 //  def apply(name: String): Integer = {

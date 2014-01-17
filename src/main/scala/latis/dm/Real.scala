@@ -15,6 +15,12 @@ object Real {
   def apply(): Real = new AbstractScalar with Real
   
   def apply(v: Double): Real = new AbstractScalar(data = Data(v)) with Real
+  def apply(v: AnyVal): Real = v match {
+    case i: Int   => Real(i.toDouble)
+    case l: Long  => Real(l.toDouble)
+    case f: Float => Real(f.toDouble)
+    case s: Short => Real(s.toDouble)
+  }
   
   def apply(vs: Seq[Double]): Real = new AbstractScalar(data = Data(vs)) with Real
   
