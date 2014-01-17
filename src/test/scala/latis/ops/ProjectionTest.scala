@@ -9,12 +9,13 @@ import latis.reader.tsml.TsmlReader
 import latis.metadata.Metadata
 
 class ProjectionTest {
+  //TODO: use TestDataset-s
   
-  implicit def stringToMetadata(name: String): Metadata = Metadata(name)
+  //implicit def stringToMetadata(name: String): Metadata = Metadata(name)
   
   @Test
   def project_scalar_include {
-    val r = Real("a")
+    val r = Real(Metadata("a"))
     val proj = new Projection(List("a","c"))
     val ds = proj(r)
     assertEquals(1, ds.getLength)
@@ -22,21 +23,21 @@ class ProjectionTest {
   
   @Test
   def project_scalar_alt_form {
-    val ds = Dataset(Real("a"), Real("b"), Real("c"))
+    val ds = Dataset(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val ds2 = ds.project(Projection(List("b")))
     assertEquals("b", ds2(0).getName)
   }
   
   @Test
   def project_scalar_alt_form_with_names {
-    val ds = Dataset(Real("a"), Real("b"), Real("c"))
+    val ds = Dataset(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val ds2 = ds.project(List("b"))
     assertEquals("b", ds2(0).getName)
   }
   
   @Test
   def project_scalar_exclude {
-    val r = Real("a")
+    val r = Real(Metadata("a"))
     val proj = new Projection(List("b","c"))
     val ds = proj(r)
     assertEquals(0, ds.getLength)
@@ -44,7 +45,7 @@ class ProjectionTest {
   
   @Test
   def project_scalar_in_tuple {
-    val tup = Tuple(Real("a"), Real("b"), Real("c"))
+    val tup = Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val proj = new Projection(List("b"))
     val ds = proj(tup)
     val n = ds(0).asInstanceOf[Tuple].getLength
@@ -53,7 +54,7 @@ class ProjectionTest {
   
   @Test
   def project_scalars_in_tuple {
-    val tup = Tuple(Real("a"), Real("b"), Real("c"))
+    val tup = Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val proj = new Projection(List("a","c"))
     val ds = proj(tup)
     val n = ds(0).asInstanceOf[Tuple].getLength
@@ -62,7 +63,7 @@ class ProjectionTest {
   
   @Test
   def project_scalar_in_function_scalar_range {
-    val f = Function(Real("t"), Real("a"))
+    val f = Function(Real(Metadata("t")), Real(Metadata("a")))
     val proj = new Projection(List("t","a"))
     val ds = proj(f)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
@@ -72,7 +73,7 @@ class ProjectionTest {
   
   @Test
   def project_scalar_in_function_tuple_range {
-    val f = Function(Real("t"), Tuple(Real("a"), Real("b"), Real("c")))
+    val f = Function(Real(Metadata("t")), Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c"))))
     val proj = new Projection(List("t","b"))
     val ds = proj(f)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
@@ -82,7 +83,7 @@ class ProjectionTest {
   
   @Test
   def project_scalars_in_function_tuple_range {
-    val f = Function(Real("t"), Tuple(Real("a"), Real("b"), Real("c")))
+    val f = Function(Real(Metadata("t")), Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c"))))
     val proj = new Projection(List("t","b","a")) //note, diff order, but not used, //TODO: enforce order
     val ds = proj(f)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
@@ -92,7 +93,7 @@ class ProjectionTest {
   
   @Test
   def project_scalars_in_function_function_range {
-    val f = Function(Real("t"), Function(Real("w"), Tuple(Real("a"), Real("b"), Real("c"))))
+    val f = Function(Real(Metadata("t")), Function(Real(Metadata("w")), Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))))
     val proj = new Projection(List("t","w","b","c")) 
     val ds = proj(f)
     val n = ds(0).asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getLength

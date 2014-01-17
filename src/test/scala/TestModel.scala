@@ -10,7 +10,7 @@ import latis.metadata.Metadata
 
 class TestModel  {
   
-  implicit def stringToMetadata(name: String): Metadata = Metadata(name)
+  //implicit def stringToMetadata(name: String): Metadata = Metadata(name)
   
   @Test
   def test_array_data {
@@ -21,7 +21,7 @@ class TestModel  {
 
   @Test
   def real_addition {
-    val v = Real("pi", 3.14)
+    val v = Real(Metadata("pi"), 3.14)
     Writer("csv").write(v)
     Writer("csv").write(v + v)
     //println(v)
@@ -73,7 +73,7 @@ class TestModel  {
     val bb = (0 until n).foldLeft(ByteBuffer.allocate(n * 8))(_.putDouble(_)).flip.asInstanceOf[ByteBuffer]
     val data = new ByteBufferData(bb, 8 * nvar)
     val domain = Real("time")
-    val range = Tuple(Real("a"), Real("b"))
+    val range = Tuple(Real(Metadata("a")), Real(Metadata("b")))
     val f = Function(domain, range, data)
     
     AsciiWriter(System.out).write(f)
