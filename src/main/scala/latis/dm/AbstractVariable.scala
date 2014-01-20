@@ -234,10 +234,31 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     else this match {
       case Tuple(vars) => concatData(vars) 
       case Function(d, r) => concatData(Seq(d,r))
-      case s: Scalar => s.data.iterator
+      case s: Scalar => s.data.iterator //TODO: not possible? only if scalar has no data = error
     }
   }
 
+  /**
+   * Iterate over all combinations of the scalar values in a tuple
+   * instead of combining them pariwaise as for tuples in ranges.
+   */
+  def getDomainDataIterator: Iterator[Data] = {
+    if (data.notEmpty) data.iterator
+    else this match {
+      case Tuple(vars) => {
+        //assume all vars are scalars with data
+//TODO: assuming 2d for now, until cleaner recursive solution emerges
+        //TODO: build with iterators, but can't reuse ys?
+        val xs = vars(0).getData.iterator.toList
+        val ys = vars(1).getData.iterator.toList
+        
+        val ds = for (x <- xs; y <- ys) yield Data(List(x,y))(Data.empty) //hack to disambiguate after type erasure
+        ds.iterator
+      }
+      case Function(d, r) => ??? //TODO: Function in domain as coordinate systems transform
+    }
+  }
+  
   /**
    * Concatenate the Data Iterators of the given Seq of Variables
    * into a single Data Iterator.

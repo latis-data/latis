@@ -21,6 +21,15 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
    *   iterator => error
    */
 
+  /*
+   * 2014-01-20
+   * multidimensional domain
+   * assume product set with each scalar element of the domain having data, for now
+   * nested loops with first dim varying slowest
+   * domain.getDataIterator needs to do all permutations instead of pairwise
+   * 
+   */
+  
   //expose domain and range via defs only so we can override (e.g. ProjectedFunction)
   def getDomain: Variable = domain
   def getRange: Variable = range
@@ -34,7 +43,8 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
   }
   
   private def iterateFromKids: Iterator[Sample] = {
-    val dit = domain.getDataIterator.map(data => Util.dataToVariable(data, domain))
+    //val dit = domain.getDataIterator.map(data => Util.dataToVariable(data, domain))
+    val dit = domain.getDomainDataIterator.map(data => Util.dataToVariable(data, domain))
     val rit = range.getDataIterator.map(data => Util.dataToVariable(data, range))
     (dit zip rit).map(pair => Sample(pair._1, pair._2))
   }
@@ -42,7 +52,8 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
   
   //Support first and last filters
   //TODO: consider more optimal approaches
-  def getFirstSample: Sample = iterator.next
+  //TODO: consider immutability, iterator position
+  def getFirstSample: Sample = iterator.next //TODO: peek
   def getLastSample: Sample = {
     //iterator.drop(length-1).next  //dataIterator is giving Util.dataToSample null Data!?
     
