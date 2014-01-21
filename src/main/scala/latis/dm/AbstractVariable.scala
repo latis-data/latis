@@ -248,8 +248,12 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     else this match {
       case Tuple(vars) => {
         //assume all vars are scalars with data
+        //TODO: how do deal with non-projected domain vars? Index should fill in
 //TODO: assuming 2d for now, until cleaner recursive solution emerges
+        if (vars.length != 2) throw new Error("Data Iterator for a Function domain currently supports only 2D.")
+        
         //TODO: build with iterators, but can't reuse ys?
+        val datas = vars.map(_.getData.iterator.toList) //Seq[Seq[Data]]
         val xs = vars(0).getData.iterator.toList
         val ys = vars(1).getData.iterator.toList
         
