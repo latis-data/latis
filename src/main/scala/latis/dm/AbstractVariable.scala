@@ -244,6 +244,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    */
   def getDomainDataIterator: Iterator[Data] = {
     if (data.notEmpty) data.iterator
+    //TODO: deal with domain Tuple with interleaved data
     else this match {
       case Tuple(vars) => {
         //assume all vars are scalars with data

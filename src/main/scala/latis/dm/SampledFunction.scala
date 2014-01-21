@@ -20,15 +20,6 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
    *   length = -1?
    *   iterator => error
    */
-
-  /*
-   * 2014-01-20
-   * multidimensional domain
-   * assume product set with each scalar element of the domain having data, for now
-   * nested loops with first dim varying slowest
-   * domain.getDataIterator needs to do all permutations instead of pairwise
-   * 
-   */
   
   //expose domain and range via defs only so we can override (e.g. ProjectedFunction)
   def getDomain: Variable = domain
