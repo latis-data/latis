@@ -64,9 +64,9 @@ object TestDataset {
   }
   
   def function_of_tuple_with_mixed_types = {
-    val samples = List(Sample(Integer(0), Tuple(Real(0), Text("zero"))), 
-                       Sample(Integer(1), Tuple(Real(1), Text("one"))), 
-                       Sample(Integer(2), Tuple(Real(2), Text("two"))))
+    val samples = List(Sample(Integer(Metadata("myInteger"), 0), Tuple(Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero"))), 
+                       Sample(Integer(Metadata("myInteger"), 1), Tuple(Real(Metadata("myReal"), 1), Text(Metadata("myText"), "one"))), 
+                       Sample(Integer(Metadata("myInteger"), 2), Tuple(Real(Metadata("myReal"), 2), Text(Metadata("myText"), "two"))))
     Dataset(Function(samples))
   }
   
