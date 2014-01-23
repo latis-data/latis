@@ -61,10 +61,10 @@ class TestDataMap {
   @Test
   def strings_from_function_of_tuple_with_mixed_types {
     val ss = DataMap.toStrings(TestDataset.function_of_tuple_with_mixed_types)
-    for (a <- ss; s <- a) println(s)
+    //for (a <- ss; s <- a) println(s)
     assertEquals("2", ss(0)(2))
     assertEquals("0.0", ss(1)(0))
-    assertEquals("one", ss(1)(1))
+    assertEquals("one", ss(2)(1))
   }
   
   //TODO:
