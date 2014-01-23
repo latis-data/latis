@@ -16,6 +16,16 @@ import latis.ops.LimitFilter
 import latis.writer.CsvWriter
 import scala.io.Source
 
+import org.junit._
+import Assert._
+import java.sql._
+import latis.reader.tsml.TsmlReader
+import latis.writer.AsciiWriter
+import scala.collection.mutable.ArrayBuffer
+import latis.ops._
+import latis.dm._
+import latis.writer.Writer
+
 class TestTsml  {
 
   //@Test
@@ -32,15 +42,25 @@ class TestTsml  {
     assertEquals("bar", map("b"))
   }
   
-  @Test
+  //@Test
   def read_scalar_datadds {
     val reader = TsmlReader("datasets/scalar.tsml")
     val ds = reader.getDataset
-    Writer("datadds").write(ds)
+    Writer("dods").write(ds)	
+    //Writer("dds").write(ds)	//Can't run dds after a writer that iterates functions
+
     /*val w = new DdsWriter()
     val s = (w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds)).split("\n")
     val t = Source.fromFile("src/test/resources/datasets/data/scalar/scalar.dds").getLines.toArray[String]
     for(a <- 0 until t.length) assertEquals(s(a), t(a))*/
+  }
+  
+  //@Test
+  def read_scalar_bin {
+    val reader = TsmlReader("datasets/scalar.tsml")
+    val ds = reader.getDataset
+    println
+    Writer("bin").write(ds)	
   }
   
   //@Test
@@ -58,6 +78,20 @@ class TestTsml  {
     val reader = TsmlReader("datasets/scalar.tsml")
     val ds = reader.getDataset
     Writer("dds").write(ds)
+  }
+  
+    
+  @Test
+  def write_scalar_das {
+    /*val reader = TsmlReader("datasets/scalar.tsml")
+    val ds = reader.getDataset
+    val w = new DasWriter()
+    val s = (w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds))//.split("\n")
+    val t = Source.fromFile("src/test/resources/datasets/data/scalar/scalar.das").getLines.toArray[String]
+    println(s)*/
+    val reader = TsmlReader("datasets/scalar.tsml")
+    val ds = reader.getDataset
+    Writer("das").write(ds)
   }
   
   //@Test

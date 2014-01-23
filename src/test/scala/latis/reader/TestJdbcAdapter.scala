@@ -58,9 +58,16 @@ class TestJdbcAdapter {
   
   //@Test
   def project {
-    val ops = List(Projection("i,s"))
+    val ops = List(Projection("i,d"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
     AsciiWriter.write(ds)
+  }
+  
+  @Test
+  def write_db_dds {
+    val reader = TsmlReader("datasets/test/db.tsml")
+    val ds = reader.getDataset
+    Writer("dds").write(ds)
   }
   
   //@Test
@@ -77,7 +84,7 @@ class TestJdbcAdapter {
     AsciiWriter.write(ds)
   }
   
-  @Test
+  //@Test
   def iso_time_selection {
     val ops = List(Selection("time>=2014-01-02T00:00:00"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)

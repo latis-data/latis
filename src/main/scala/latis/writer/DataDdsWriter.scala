@@ -1,6 +1,7 @@
 package latis.writer
 
 import latis.dm._
+import java.nio.ByteBuffer
 import java.io.OutputStream
 import java.io.DataOutputStream
 import java.io.OutputStream
@@ -21,28 +22,29 @@ class DataDdsWriter extends BinaryWriter {
   }
   
   def writeHeader(dataset: Dataset) = {
-    //val w = new DdsWriter()
-    //writer.write((w.makeHeader(dataset)+w.varToString(dataset)+w.makeFooter(dataset)).toByte)
-    Writer("dds").write(dataset)
-    println("Data:")
+    val w = new DdsWriter()
+    val s = w.makeHeader(dataset) + w.varToString(dataset) + w.makeFooter(dataset) + "Data:"
+    writer.write(s.getBytes)    
   }
   
-  override def writeVariable(variable: Variable) {
-    val data = variable.getData
-    if (data.isEmpty) variable match {
-      case Tuple(vars) => vars.map(writeVariable(_))
-      case f: Function => {
-        for(a <- f.iterator) {
-          writer.write(START_OF_INSTANCE)
-          writeVariable(a)
-          }
-        writer.write(END_OF_INSTANCE)
+  override def writeVariable(variable: Variable) = variable match {
+    case f: Function => {
+      for (sample <- f.iterator){
+        writer.write("\n".getBytes)
+        writer.write(START_OF_INSTANCE)
+        writer.write(varToBytes(sample))
       }
-      case _ => throw new Error("No Data found.")
-    } 
-    else {
-      val bs = data.getByteBuffer.array
-      writer.write(bs)
+      writer.write(END_OF_INSTANCE)
+    }
+    case _ => {
+      writer.write("\n".getBytes)
+      writer.write(varToBytes(variable))
     }
   }
+ 
+  override def buildFunction(function: Function, bb: ByteBuffer): ByteBuffer = {
+     writeVariable(function)
+     bb
+  }
+
 }

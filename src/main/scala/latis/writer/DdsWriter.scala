@@ -12,7 +12,7 @@ class DdsWriter extends TextWriter {
     printWriter.print(varToString(function))
   }
   
-  def makeFunction(function: Function): String = {
+  def makeFunction(function: Function): String = { //Something's not working here...
     count += 1
     val s = indent(count-1) + "sequence {\n" + varToString(function.getFirstSample) + indent(count-1) + "} " + function.getName + ";\n"
     count -=1

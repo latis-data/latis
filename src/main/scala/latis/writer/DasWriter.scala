@@ -39,14 +39,17 @@ class DasWriter extends TextWriter {
     else indent(count) + "}\n"
   }
   
-  def makeFunction(function: Function): String = varToString(function.getFirstSample) + indent(count-1) + "}\n"
+  def makeFunction(function: Function): String = varToString(function.getFirstSample)
   
   def makeScalar(scalar:Scalar): String = {
     makeLabel(scalar) + makeAttributes(scalar)
   }
   
   def makeTuple(tuple: Tuple): String = {
-    makeLabel(tuple) + tuple.getVariables.map(varToString(_)).mkString("")
+    val label = makeLabel(tuple)
+    val s = tuple.getVariables.map(varToString(_))
+    count-=1
+    label + s.mkString("","",indent(count)+"}\n")
   }
   
   override def makeFooter(dataset: Dataset) = "}\n"
