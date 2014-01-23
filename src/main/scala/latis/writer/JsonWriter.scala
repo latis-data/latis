@@ -84,6 +84,7 @@ class JsonWriter extends TextWriter {
     val vars = d match {
       case _: Index => r.getVariables //drop Index domain
       case _ => d.getVariables ++ r.getVariables
+      //TODO: breaks for nested Function
       //TODO:  Need to keep domain and range of Sample within {}
       //  label with name or "domain"/"range"
       //  [{"domain":{...}, "range":{...}},...]

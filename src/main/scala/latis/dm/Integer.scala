@@ -17,15 +17,23 @@ object Integer {
   
 //  def apply(): Integer = new Variable() with Integer 
   
-  def apply(md: Metadata): Integer = new Variable2(md) with Integer
+  def apply(md: Metadata): Integer = new AbstractVariable(md) with Integer
 
-  def apply(md: Metadata, v: Long): Integer = new Variable2(md, Data(v)) with Integer
-  def apply(md: Metadata, vs: Seq[Long]): Integer = new Variable2(md, Data(vs)) with Integer
+  def apply(md: Metadata, v: Long): Integer = new AbstractVariable(md, Data(v)) with Integer
+  def apply(md: Metadata, vs: Seq[Long]): Integer = new AbstractVariable(md, Data(vs)) with Integer
   
-  //def apply(name: String, v: Long): Integer = new Variable2(Metadata(name), Data(v)) with Integer
+  //def apply(name: String, v: Long): Integer = new AbstractVariable(Metadata(name), Data(v)) with Integer
 
-  def apply(v: Long): Integer = new Variable2(data = Data(v)) with Integer
-  def apply(vs: Seq[Long]): Integer = new Variable2(data = Data(vs)) with Integer
+  def apply(v: Long): Integer = new AbstractVariable(data = Data(v)) with Integer
+  def apply(v: AnyVal): Integer = v match {
+    case i: Int    => Integer(i.toLong)
+    case d: Double => Integer(d.toLong)
+    case f: Float  => Integer(f.toLong)
+    case s: Short  => Integer(s.toLong)
+    case st: scala.collection.immutable.StringOps => Integer(st.toLong)
+  }
+  
+  def apply(vs: Seq[Long]): Integer = new AbstractVariable(data = Data(vs)) with Integer
     
 //  def apply(name: String): Integer = {
 //    //new Integer(Metadata(name), EmptyData)

@@ -8,7 +8,7 @@ import latis.util.Util
 
 class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sample] = null,
     metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
-    extends Variable2(metadata, data) with Function {
+    extends AbstractVariable(metadata, data) with Function {
   
   /*
    * 2013-08-07
@@ -20,7 +20,7 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
    *   length = -1?
    *   iterator => error
    */
-
+  
   //expose domain and range via defs only so we can override (e.g. ProjectedFunction)
   def getDomain: Variable = domain
   def getRange: Variable = range
@@ -34,7 +34,8 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
   }
   
   private def iterateFromKids: Iterator[Sample] = {
-    val dit = domain.getDataIterator.map(data => Util.dataToVariable(data, domain))
+    //val dit = domain.getDataIterator.map(data => Util.dataToVariable(data, domain))
+    val dit = domain.getDomainDataIterator.map(data => Util.dataToVariable(data, domain))
     val rit = range.getDataIterator.map(data => Util.dataToVariable(data, range))
     (dit zip rit).map(pair => Sample(pair._1, pair._2))
   }
@@ -42,7 +43,8 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
   
   //Support first and last filters
   //TODO: consider more optimal approaches
-  def getFirstSample: Sample = iterator.next
+  //TODO: consider immutability, iterator position
+  def getFirstSample: Sample = iterator.next //TODO: peek
   def getLastSample: Sample = {
     //iterator.drop(length-1).next  //dataIterator is giving Util.dataToSample null Data!?
     

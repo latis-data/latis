@@ -173,9 +173,10 @@ class TestTsml  {
 //    AsciiWriter().write(ds)
 //  }
   
-  //@Test
+  @Test
   def test_dataset {
-    val ds = TsmlReader("datasets/test/mixed.tsml").getDataset
+    //val ds = TsmlReader("datasets/test/mixed.tsml").getDataset
+    val ds = TsmlReader("datasets/tsi.tsml").getDataset
     AsciiWriter().write(ds)
     //Writer("json").write(ds)
   }

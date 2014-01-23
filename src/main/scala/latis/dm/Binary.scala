@@ -41,7 +41,7 @@ object Binary {
   }
   
 //  def apply(v: Any) = v match {
-//    case d: Double => new Variable2(data = Data(Data(d).getByteBuffer)) with Binary
+//    case d: Double => new AbstractVariable(data = Data(Data(d).getByteBuffer)) with Binary
 //  }
   
   def unapply(b: Binary): Option[Array[Byte]] = Some(b.getData.getByteBuffer.array)

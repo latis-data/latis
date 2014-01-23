@@ -19,8 +19,6 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
   
   /*
    * 2013-10-24
-   * Time needs to be seen as a Scalar.
-   * Do we need to have a Scalar impl extend Variable2? with Scalar?
    * Need to revisit all traits as Interfaces with impls.
    * 
    * new Time with Real...
