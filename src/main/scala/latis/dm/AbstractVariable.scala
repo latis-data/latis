@@ -90,6 +90,9 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
   /*
    * TODO: "reduce"? function with one sample to its range
    * equiv to eval at (0) if length=1
+   * 
+   * method on Variable or Operation?
+   * probably should be an operation, more modular, extensible
    */
 //  def reduce: Variable = this match {
 //    //TODO: data complications
