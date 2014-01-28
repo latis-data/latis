@@ -221,6 +221,48 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
   }
   
   
+  /**
+   * Used by Dataset.groupBy.
+   */
+  def groupVariableBy(name: String): Function = this match {
+    //assumes Tuples don't contain data
+    case Tuple(vars) => {
+      val vs = vars.map(_.toSeq).flatten
+      val (domain, range) = vs.partition(_.getName == name)
+      domain.length match {
+        case 1 => domain.head match {
+          case s: Scalar => {
+            val sample = Sample(s, Tuple(range))  //TODO: metadata
+            Function(List(sample))
+          }
+          case _ => throw new Error("Can only group by Scalar variables, for now.")
+        }
+        case 0 => throw new Error("groupBy failed to find variable: " + name)
+        case n: Int => throw new Error("groupBy found more than one Variable named: " + name)
+      }
+    }
+    
+    case f: Function => {
+      //recall that samples are Tuples      
+      val new_samples = for (sample <- f.iterator; new_sample <- sample.groupVariableBy(name).iterator) yield new_sample
+      //TODO: sort by domain, or let Function constructor do it?
+      //TODO: need domain and range type, use NextIterator with peek?  just suck in all samples as List
+      
+      //if duplicate values, need nested function
+      //TODO: should this be done by Function constructor (along with sorting)? can't have duplicate domain samples
+      //  but may just need index domain
+      val map = new_samples.toList.groupBy(_.domain.asInstanceOf[Scalar].getValue)
+      
+      val z = for ((d,r) <- map) yield Sample(Scalar(d), Function(r.map(sample => Tuple(sample.getVariables.tail))))  //drop 1st var in tuple - now domain?
+      
+      //val z = map.map(p => Sample(Scalar(p._1), Function(p._2))).toList
+      Function(z.toList)
+    }
+    
+    //case _: Scalar => error?
+  }
+  
+  
   //TODO: filter?
   //TODO: project?
   //  or should logic be encapsulated in Operation

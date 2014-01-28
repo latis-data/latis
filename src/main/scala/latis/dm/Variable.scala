@@ -40,6 +40,9 @@ trait Variable {
   def getVariables: Seq[Variable] //TODO: immutable.Seq?
   def apply(index: Int): Variable = getVariables(index)
   
+  def groupVariableBy(name: String): Function
+  //TODO: allow multiple vars for nD
+  
   //def reduce: Variable
   
   //TODO: toStringValue?

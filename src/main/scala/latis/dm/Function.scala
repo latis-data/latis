@@ -48,6 +48,8 @@ object Function {
     new SampledFunction(domain, range, metadata = md, data = data)
   }
   
+//TODO: make sure samples are sorted!
+  
   def apply(vs: Seq[Variable], metadata: Metadata = EmptyMetadata): Function = vs.head match {
     case sample: Sample => Function(sample.domain, sample.range, vs.asInstanceOf[Seq[Sample]].iterator, metadata)
     case _ => {
