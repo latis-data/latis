@@ -25,6 +25,7 @@ trait Text extends Scalar { //[String] {
   //TODO: need to be able to preserve text with white space padding?
   //  use other symbol for padding?
   def value: String = getData.asInstanceOf[TextData].stringValue.trim
+  //TODO: consider Scalar.getValue
   
   //Ordered method.
   override def compare(that: String): Int = value compare that
