@@ -226,6 +226,11 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    */
   def groupVariableBy(name: String): Function = this match {
     //assumes Tuples don't contain data
+    
+//    case Sample(domain, range) => {
+//      
+//    }
+    
     case Tuple(vars) => {
       val vs = vars.map(_.toSeq).flatten
       val (domain, range) = vs.partition(_.getName == name)
@@ -243,8 +248,11 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     }
     
     case f: Function => {
-      //recall that samples are Tuples      
+      //For each sample, make a new Function by factoring out the given variable to be the domain.
+      //TODO: need Function? will this impl support a nested Function? 
+      //recall that samples are Tuples 
       val new_samples = for (sample <- f.iterator; new_sample <- sample.groupVariableBy(name).iterator) yield new_sample
+      //                     (I,(R,T))             (T,(I,R))
       //TODO: sort by domain, or let Function constructor do it?
       //TODO: need domain and range type, use NextIterator with peek?  just suck in all samples as List
       
@@ -252,8 +260,44 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
       //TODO: should this be done by Function constructor (along with sorting)? can't have duplicate domain samples
       //  but may just need index domain
       val map = new_samples.toList.groupBy(_.domain.asInstanceOf[Scalar].getValue)
+      //  Tval -> (T,(I,R))
+      //TODO: do we dare use Scalar as key? need equals, hashCode
       
-      val z = for ((d,r) <- map) yield Sample(Scalar(d), Function(r.map(sample => Tuple(sample.getVariables.tail))))  //drop 1st var in tuple - now domain?
+      val z = for ((value, samples) <- map) yield {
+        //range should be the new_samples, need to remove the variable that is now the domain
+        //  (myText, (myInteger, myReal))
+        /*
+         * start with I -> (R,T)
+         * want T -> (I -> R)
+         * groupBy(T)
+         *   by sample.flatten: (I,R,T)
+         *   T -> (I,R)
+         *   
+         * can range be a Sample and not just a Tuple? need a Sample match above?
+         * samples: (T, (I,R))
+         * 
+         * can we know the I was a domain var and reconstruct the nested Function?
+         * 
+         */
+        val domain = Scalar(value)
+        
+        //val z = samples.map(_.range)
+        //TODO: need these samples to be Samples, not just Tuples
+        
+        val ss = samples.map(sample => {
+          // range: (T, (I,R))
+          val vars = sample.range.asInstanceOf[Tuple].getVariables   // (I,R)
+          Sample(vars.head, Tuple(vars.tail))  // I -> (R)  //TODO: reduce?
+          //we know I was the orig domain, so make new function with these as the samples
+        }) 
+        val range = Function(ss)
+        
+        //Sample(Scalar(dvalue), Function(range.map(sample => Tuple(sample.getVariables.tail))))  //drop 1st var in tuple - now domain?
+        Sample(domain, range)
+      }
+      //TODO: reduce function of one sample
+      //simplify:
+      
       
       //val z = map.map(p => Sample(Scalar(p._1), Function(p._2))).toList
       Function(z.toList)

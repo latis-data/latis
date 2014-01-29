@@ -14,7 +14,7 @@ class TestGroupBy {
     AsciiWriter.write(ds)
   }
   
-  @Test
+  //@Test
   def change_domain {
     val ds = TestDataset.function_of_tuple_with_mixed_types.groupBy("myReal")
     //val ds = TestDataset.function_of_tuple_with_mixed_types.groupBy("myText")
