@@ -21,10 +21,10 @@ class DdsWriter extends TextWriter {
   }
   
   def makeScalar(scalar:Scalar): String = scalar match {
-    case Real(d) => indent(count) + "float64 " + scalar.getName + ";\n"
-    case Integer(l) => indent(count) + "int64 " + scalar.getName + ";\n"
-    case Text(s) => indent(count) + "string " + scalar.getName + ";\n"
-    case Binary(b) => "NaN"
+    case _: Real    => indent(count) + "float64 " + scalar.getName + ";\n"
+    case _: Integer => indent(count) + "int64 " + scalar.getName + ";\n"
+    case _: Text    => indent(count) + "string " + scalar.getName + ";\n"
+    case _: Binary  => "NaN"
   }
   
   def makeTuple(tuple: Tuple): String = { 
