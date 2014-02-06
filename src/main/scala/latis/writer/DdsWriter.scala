@@ -6,19 +6,19 @@ import java.io.PrintWriter
 
 class DdsWriter extends TextWriter {
   
-  override def makeHeader(dataset: Dataset) = "dataset {" + newLine
+  override def makeHeader(dataset: Dataset) = "dataset {\n"
   
-  override def writeFunction(function: Function) {
-    printWriter.print(varToString(function))
+  override def writeVariable(variable: Variable): Unit = {
+    printWriter.print(varToString(variable))
   }
   
-  def makeFunction(function: Function): String = { //Something's not working here...
+  def makeFunction(function: Function): String = {
     count += 1
-    val s = indent(count-1) + "sequence {\n" + varToString(function.getFirstSample) + indent(count-1) + "} " + function.getName + ";\n"
+    val s = indent(count-1) + "sequence {\n" + varToString(Sample(function.getDomain, 
+        function.getRange)) + indent(count-1) + "} " + function.getName + ";\n"
     count -=1
     s
   }
-
   
   def makeScalar(scalar:Scalar): String = scalar match {
     case Real(d) => indent(count) + "float64 " + scalar.getName + ";\n"
@@ -27,8 +27,15 @@ class DdsWriter extends TextWriter {
     case Binary(b) => "NaN"
   }
   
-  def makeTuple(tuple: Tuple): String = {
+  def makeTuple(tuple: Tuple): String = { 
     tuple.getVariables.map(varToString(_)).mkString("")
+    /*case Sample(vars) => tuple.getVariables.map(varToString(_)).mkString("")
+    case _ => {
+      count += 1
+      val s = indent(count-1) + "structure {\n" + tuple.getVariables.map(varToString(_)).mkString("") + indent(count-1) + "} " + tuple.getName + ";\n"
+      count -=1
+      s
+    }*/
   }
   
   override def makeFooter(dataset: Dataset) = "} " + dataset.getName + ";\n"
@@ -40,6 +47,5 @@ class DdsWriter extends TextWriter {
     for(a <- 0 to num) sb append "\t"
     sb.toString
   }
-  
-  
+    
 }
