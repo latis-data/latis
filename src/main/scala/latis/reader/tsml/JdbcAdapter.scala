@@ -26,6 +26,10 @@ import java.util.Date
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
   //TODO: catch exceptions and close connections
+  
+  //Keep these global so we can close them.
+  private lazy val resultSet: ResultSet = executeQuery
+  private lazy val statement: Statement = connection.createStatement()
     
   //Handle the Projection and Selection Operation-s
   private var projection = "*"
@@ -207,8 +211,6 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
    * 
    */
   
-  private lazy val resultSet: ResultSet = executeQuery
-  private lazy val statement: Statement = connection.createStatement()
 
   private def executeQuery: ResultSet =  {
     val sql = makeQuery
@@ -380,18 +382,23 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
   //---------------------------------------------------------------------------
     
-  protected lazy val connection: Connection = getConnection
+  /**
+   * Allow subclasses to use the connection. They should not close it.
+   */
+  protected def getConnection: Connection = connection
     
-  //hack so we don't end up getting a Connection when we are testing if we have one to close
+  //Used so we don't end up getting the lazy connection when we are testing if we have one to close
   private var hasConnection = false 
   
-  protected def getConnection: Connection = {
-    hasConnection = true //TODO: what if getting connection fails
-//TODO: use 'location' uri with 'jdbc' or 'java' (for jndi, e.g. java:comp/env/jdbc/sorce_l1a) scheme
-    properties.get("jndi") match {
+  private lazy val connection: Connection = {
+    //TODO: use 'location' uri for jndi with 'java' (e.g. java:comp/env/jdbc/sorce_l1a) scheme, but glassfish doesn't use that form
+    val con = properties.get("jndi") match {
       case Some(jndi) => getConnectionViaJndi(jndi)
-      case None => _getConnection
+      case None => getConnectionViaJdbc
     }
+    
+    hasConnection = true //will still be false if getting connection fails
+    con
   }
   
   private def getConnectionViaJndi(jndiName: String): Connection = {
@@ -400,7 +407,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     ds.getConnection();
   }
   
-  private def _getConnection: Connection = {
+  private def getConnectionViaJdbc: Connection = {
     //TODO: error if not present
     val driver = properties("driver")
     val url = properties("location")
@@ -416,7 +423,6 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
   
   def close() = {
-    //Don't create the lazy connection just to close it.
     //TODO: do we need to close resultset, statement...?
     //  should we close it or just return it to the pool?
     //closing statement also closes resultset 

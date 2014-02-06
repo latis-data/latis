@@ -130,7 +130,6 @@ object DataMap {
     val map = toStringMap(dataset)
     val ab = mutable.ArrayBuffer[Array[String]]()
     map.foldLeft(ab)(_ += _._2).toArray
-    //too much?: toDoubleMap(dataset).foldLeft(mutable.ArrayBuffer[Array[Double]]())(_ += _._2).toArray
   }
   
   private def putStringsInMap(v: Variable, m: mutable.Map[String, mutable.ArrayBuffer[String]]): Unit = v match {
@@ -148,10 +147,10 @@ object DataMap {
       }
       //Add double to buffer for Numbers, otherwise NaN
       v match {
-        case Index(i) => i.toString
-        case Real(d) => d.toString
-        case Integer(l) => l.toString
-        case Text(s) => s.trim
+        case Index(i) => buffer += i.toString
+        case Real(d) => buffer += d.toString
+        case Integer(l) => buffer += l.toString
+        case Text(s) => buffer += s.trim
       }
     }
     

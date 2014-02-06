@@ -99,6 +99,12 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   def project(varNames: Seq[String]): Dataset = Projection(varNames)(this)
   def project(vname: String): Dataset = Projection(Seq(vname))(this)
   
+  
+  def groupBy(name: String): Dataset = {
+    val vs = getVariables.map(_.groupVariableBy(name))
+    Dataset(vs) //TODO: metadata
+  }
+  
   //TODO: operate?
   
   

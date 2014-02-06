@@ -22,6 +22,12 @@ trait Scalar extends Variable {
     //TODO: handle format errors
   }
   
+  def getValue: Any = getData match {
+    case DoubleValue(d) => d
+    case LongValue(l) => l
+    case IndexValue(i) => i
+    case StringValue(s) => s.trim
+  }
   
   //convert the string to a value of our type (e.g. for comparison)
   //def stringToValue(s: String): A
@@ -37,4 +43,20 @@ trait Scalar extends Variable {
     //  it's one thing to convert its own value, but as a converter for others?
     
 }
-//}
+
+object Scalar {
+  
+  def apply(value: Any) = value match {
+    case d: Double => Real(d)
+    case f: Float  => Real(f)
+    case l: Long   => Integer(l)
+    case i: Int    => Integer(i)
+    case s: String => Text(s)
+    case _ => throw new Error("Unable to make Scalar from value: " + value)
+  }
+  
+  def unapply(s: Scalar) = Some(s.getValue)
+}
+
+
+

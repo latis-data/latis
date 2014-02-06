@@ -7,6 +7,8 @@ import java.io.PrintWriter
 class AsciiWriter extends TextWriter {
   //TODO: rename ModelWriter?
   
+  private var indent = 0
+  
   override def makeHeader(dataset: Dataset) = dataset.toString + newLine
   
   def makeScalar(scalar: Scalar): String = scalar match {
@@ -24,7 +26,12 @@ class AsciiWriter extends TextWriter {
     case Tuple(vars) => vars.map(varToString(_)).mkString("(", ",", ")")
   }
   
-  def makeFunction(function: Function): String = function.iterator.map(varToString(_)).mkString(newLine)
+  def makeFunction(function: Function): String = {
+    indent += 5
+    val s = function.iterator.map(varToString(_)).mkString(newLine + " "*indent)
+    indent -= 5
+    s
+  }
 
     
 //  def writeVariable(variable: Variable): Unit = variable match {
