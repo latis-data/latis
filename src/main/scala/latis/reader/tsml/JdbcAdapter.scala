@@ -209,6 +209,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
    * TODO: clarify what happens before/after dataset is constructed vs accessed
    * need to make source dataset then "wrap"? it to apply projection to the model (and provenance) 
    * 
+   * try making 'dataset' be unaltered
+   * getDataset(ops) should return the new one
    */
   
 
@@ -252,16 +254,33 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     val p = predicate 
     if (p.nonEmpty) sb append " where " + p
     
-    //sort by the domain variable (e.g. time) 
-    //TODO: generalize for n-D domains, get Function domain...
-    //TODO: assuming that the first variable is the one to sort on
-    //  make sure that tsml lists that variable first
-    //Don't sort if domain is Index (orig domain not selected)
-//TODO: what about when we want time order but not the time values? e.g. tlm packets
-//  need to apply projection later? but only for domain?
-    dataset.toSeq.head match {
-      case _: Index => 
-      case v: Variable => sb append " ORDER BY " + v.getName + order
+//TODO: reuse
+    def findDomainVariable(variable: Variable): Option[Variable] = variable match {
+      case _: Scalar => None
+      case Tuple(vars) => {
+        val domains = vars.flatMap(findDomainVariable(_))
+        if (domains.nonEmpty) Some(domains.head) else None
+      }
+      case f: Function => Some(f.getDomain)
+    }
+    
+    //Sort by domain variable.
+    //assume domain is scalar, for now
+    //Note 'dataset' should be the original before ops
+    val dvar = findDomainVariable(dataset) 
+//TODO: won't work if domain not projected, dataset will have projections applied in makeScalar above during dataset construction process
+    //  no orig Dataset to be had
+    
+    dvar match {
+      case Some(i: Index) => //use natural order
+      case Some(v) => v match {
+        case _: Scalar => sb append " ORDER BY " + v.getName + order
+        case _ => {
+          println(v)
+          ??? //TODO: generalize for n-D domains, Function in domain?
+        }
+      }
+      case _ => ??? //TODO: error?
     }
     
     sb.toString
