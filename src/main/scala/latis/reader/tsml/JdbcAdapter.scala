@@ -69,6 +69,25 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
      * 
      */
     
+/*
+ * 2014-02-07
+ * Need orig dataset domain for sorting even if not projected
+ * First pass: make full Dataset from tsml
+ *   => origDataset? or just use 'dataset'? or do we need to hang on to the processed dataset too?
+ *   all in TsmlAdapter, no override, encapsulate ML classes
+ *   apply PIs?
+ *     at least rename?
+ *     but sql query needs orig name
+ *     don't apply PIs yet
+ *   suitable for all metadata queries
+ *   use as template when building actual Dataset components
+ * Second pass: 
+ *   apply PIs and user ops
+ *   
+ * Could this help us reorder by projection?
+ * make a branch
+ */
+    
     val others = (piOps ++ ops).filterNot(handleOperation(_))
     //ops.map(handleOperation(_))
     
