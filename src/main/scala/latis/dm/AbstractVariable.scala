@@ -39,7 +39,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    * Size of this Variable in bytes.
    */
   def getSize: Int = size
-  lazy val size: Int  = this match {
+  private lazy val size: Int  = this match {
     case _: Index => 4 //TODO: Use 0 since we don't actually use these values?
     case _: Real => 8 //double
     case _: Integer => 8 //long

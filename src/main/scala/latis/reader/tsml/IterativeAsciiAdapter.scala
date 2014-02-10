@@ -11,8 +11,9 @@ import latis.time.Time
 import latis.reader.tsml.ml.Tsml
 
 class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
+  //TODO: put reusable stuff in AsciiAdapter, consider traits
   
-  //handy aliases for a String when we are using it in the context of variable names and values.
+  //Define handy aliases for a String when we are using it in the context of variable names and values.
   //TODO: could we use the same approach for binary data? define these as ByteBuffer instead of String?
   
   /**
@@ -41,13 +42,12 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
   lazy private val source: Source = Source.fromURL(getUrl())
   
   /**
-   * Get the character that is used at the start of a line to indicate that
-   * it should not be read as data. Defaults to null, meaning that no line
-   * should be ignored (except empty lines).
+   * Determine if the given line is a comment base on whether it starts with
+   * the "commentCharacter" as defined in the adapter definition in the TSML.
    */
-  lazy private val commentCharacter: String = properties.get("commentCharacter") match {
-    case Some(s) => s
-    case None => null
+  def isComment(line: Line): Boolean = getProperty("commentCharacter") match {
+    case Some(s) => true
+    case None => false
   }
   
   /**
@@ -65,49 +65,52 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
    * Note that the "isEmpty" test bypasses an end of file problem iterating over the 
    * iterator from Source.getLines.
    */
-  def shouldSkipLine(line: Line): Boolean = {
-    line.isEmpty() || (commentCharacter != null && line.startsWith(commentCharacter))
-  }
+  def shouldSkipLine(line: Line): Boolean = line.isEmpty() || isComment(line)
   
   /**
-   * This Iterator will return multiple lines of text for each record
+   * This Iterator will return one or more lines of text for each record
    * as defined by the "linesPerRecord" attribute in the TSML.
    * Instead of merging all the lines into a single String, each sample
    * will be Seq of lines so the subclass can interpret it as it will.
    * This is "lazy" so we won't access the data source until called upon.
    */
   lazy val recordIterator: Iterator[Record] = lineIterator.grouped(linesPerRecord)
-  //TODO: support iterating more than once?
   
   /**
    * The "linesPerRecord" attribute from this Adapter's definition in the TSML.
    * This value represents how many lines of text in the ASCII source are needed
    * for one record/sample of the outer Function.
    */
-  val linesPerRecord: Int = properties.get("linesPerRecord") match {
+  val linesPerRecord: Int = getProperty("linesPerRecord") match {
     case Some(s) => s.toInt
     case None => 1
   }
   
+  /**
+   * Get the delimiter string used between data values in this data source.
+   * Default to any white space.
+   */
+  val delimiter: String = getProperty("delimiter", """\s+""")
+  //TODO: default to white space OR ","
   
   /**
    * Subclasses should implement this method to parse a "record" of text
    * into a Map of Variable name to value. This may be one or more lines
    * as defined by the "linesPerRecord" attribute of this adapter definition 
    * in the TSML.
-   * Note, LinkedHashMap will maintain order.
-   * Return empty Map if there was a problem with this record.
-   * The metadata is for the Function Variable that we are iterating over.
+   * Return empty Map if there was a problem with this record, causing it to be rejected.
    */
-  //def parseRecord(metadata: FunctionMd, record: Record): LinkedHashMap[Name,ArrayBuffer[Value]]
   def parseRecord(record: Record): Map[Name, Value] = {
-    //assume one line per record, space delimited
-    (variableNames zip record(0).split("""\s+""")).toMap
+    //combine lines of record with delimiter before splitting
+    (origVariableNames zip record.mkString(delimiter).split(delimiter)).toMap
   }
   
+  
+  
   def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
-    def recordSize = sampleTemplate.size
+    def recordSize = sampleTemplate.getSize
     
+    //TODO: make PeekIterator? but don't access data source prematurely
     def iterator = new Iterator[Data] {
       override def hasNext = recordIterator.hasNext
       override def next = {
@@ -130,7 +133,6 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     for (v <- vars) {
       val s = svals(v.getName) //string value for the given scalar
       v match {
-        //case time: Time =>  //only needed for text type?
         case _: Real => bb.putDouble(s.toDouble)
         case _: Integer => bb.putLong(s.toLong)
         case t: Text => {
@@ -144,6 +146,6 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) {
     Data(bb.flip.asInstanceOf[ByteBuffer])
   }
 
-  
+  //TODO: don't invoke creation of lazy Source if it hasn't been created
   def close = source.close
 }

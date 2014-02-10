@@ -24,7 +24,7 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
       val tsml = Tsml(node)
       //println(tsml)
       val adapter = TsmlAdapter(tsml)
-      adapter.dataset
+      adapter.getDataset
     }
     
     val ds = collect(dss)

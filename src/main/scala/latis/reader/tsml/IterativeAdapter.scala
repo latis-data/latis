@@ -14,28 +14,27 @@ abstract class IterativeAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   //TODO: Stream, lazy list
   //TODO: consider Iterative and Granule as traits?
   
-  //TODO: be lazy, don't access data source until Iterator is used
-  //  can't wail till "next"
-  //  wrap Data with function that makes Iterator, call it when invoking data.iterator
-  
   //TODO: assuming single top level variable = Function
   
-  //TODO: move to Function?
-  lazy val sampleSize = {
-    val f = dataset(0).asInstanceOf[Function] //assume single top-level Function
-    f.getDomain.getSize + f.getRange.getSize
-  }
+//  lazy val sampleSize = {
+//    val f = dataset(0).asInstanceOf[Function] //assume single top-level Function
+//    f.getDomain.getSize + f.getRange.getSize
+//  }
   
+  /**
+   * Implementations of IterativeAdapter need to override this to construct Data
+   * that can iterate over each sample.
+   */
   def makeIterableData(sampleTemplate: Sample): Data
-  //note, Function has dataToSample, the inverse of this, except this sample has no data
   
-  override def makeFunction(fml: FunctionMl): Option[Function] = {
-    val md = makeMetadata(fml)
-    
+  /**
+   * Override to make Function with IterableData.
+   */
+  override def makeFunction(f: Function): Option[Function] = {
     //if domain or range is None (e.g. not projected), make index function
-    val domain = makeVariable(fml.domain)
-    val range = makeVariable(fml.range)
-    val sample = (domain, range) match {
+    val odomain = makeVariable(f.getDomain)
+    val orange = makeVariable(f.getRange)
+    val sample = (odomain, orange) match {
       case (Some(d), Some(r)) => Sample(d,r)
       case (None, Some(r))    => Sample(Index(-1), r) //TODO: do we need a valid value here? Sample is used just as a template
       case (Some(d), None)    => Sample(Index(-1), d) //no range, so make domain the range of an index function
@@ -44,7 +43,7 @@ abstract class IterativeAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     
     val data: Data = makeIterableData(sample)
     
-    Some(Function(sample.domain, sample.range, md, data))
+    Some(Function(sample.domain, sample.range, f.getMetadata, data))
   }
   
 }

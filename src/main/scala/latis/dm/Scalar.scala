@@ -4,6 +4,7 @@ import latis.data.Data
 import latis.data.value._
 import latis.metadata.Metadata
 import latis.util.RegEx
+import latis.time.Time
 
 trait Scalar extends Variable {
 //trait Scalar[A] extends Variable { //TODO: with Ordered[Scalar[A]] { 
@@ -45,6 +46,16 @@ trait Scalar extends Variable {
 }
 
 object Scalar {
+  
+  def apply(metadata: Metadata, vtype: String) = vtype match {
+    case "real"    => Real(metadata)
+    case "integer" => Integer(metadata)
+    case "text"    => Text(metadata)
+    case "time"    => Time(metadata) //TODO: if type text, set default length=23? or get from 'format'
+    case "binary"  => Binary(metadata)
+    //TODO: vtype = class name, dynamicly construct 
+    case _ => None
+  }
   
   def apply(value: Any) = value match {
     case d: Double => Real(d)

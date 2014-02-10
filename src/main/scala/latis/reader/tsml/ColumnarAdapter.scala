@@ -37,12 +37,12 @@ class ColumnarAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
   //TODO: use for Vector?
   
   val indexMap: Map[String, String] = getProperty("columns") match {
-    case Some(s) => (variableNames zip s.split(";")).toMap
+    case Some(s) => (origVariableNames zip s.split(";")).toMap
     case None => throw new RuntimeException("ColumnarAdapter requires 'columns' definition.")
   }
   
   override def parseRecord(record: Record): Map[Name, Value] = {
-    val names = variableNames
+    val names = origVariableNames
     //assume one line per record, space delimited
     val delimiter = " "  //TODO: from attributes
     val ss = record(0).split(delimiter)  //TODO: splitRecord

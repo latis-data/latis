@@ -42,6 +42,15 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
     case _ => if (variables.isEmpty) 0 else 1
   }
   
+  def findFunction(variable: Variable): Option[Function] = variable match {
+    case _: Scalar => None
+    case Tuple(vars) => {
+      val fs = vars.flatMap(findFunction(_))
+      if (fs.nonEmpty) Some(fs.head) else None
+    }
+    case f: Function => Some(f)
+  }
+  
   /*
    * TODO: 2013-07-16 Do we need operations?
    * it seems that this was an attempt to lazily apply them

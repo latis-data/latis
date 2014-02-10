@@ -6,6 +6,8 @@ import latis.reader.tsml.ml.Tsml
 
 class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
   
+  //TODO: factor out commonalities with IterativeAsciiAdapter
+  
   //handy aliases for a String when we are using it in the context of variable names and values.
   //TODO: could we use the same approach for binary data? define these as ByteBuffer instead of String?
   
@@ -64,7 +66,7 @@ class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
    * it should not be read as data. Defaults to null, meaning that no line
    * should be ignored (except empty lines).
    */
-  lazy private val commentCharacter: String = properties.get("commentCharacter") match {
+  lazy private val commentCharacter: String = getProperty("commentCharacter") match {
     case Some(s) => s
     case None => null
   }
@@ -101,7 +103,7 @@ class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
    * This value represents how many lines of text in the ASCII source are needed
    * for one record/sample of the outer Function.
    */
-  val linesPerRecord: Int = properties.get("linesPerRecord") match {
+  val linesPerRecord: Int = getProperty("linesPerRecord") match {
     case Some(s) => s.toInt
     case None => 1
   }
@@ -119,7 +121,7 @@ class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
   //def parseRecord(metadata: FunctionMd, record: Record): LinkedHashMap[Name,ArrayBuffer[Value]]
   def parseRecord(record: Record): Map[Name, Value] = {
     //assume one line per record, space delimited
-    (variableNames zip record.head.split(" ")).toMap
+    (origVariableNames zip record.head.split(" ")).toMap
   }
   
   //suck in entire granule, for now
@@ -131,7 +133,7 @@ class AsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
       val record = it.next
       val vs = parseRecord(record)
       //skip bad records (empty Map)
-      if (vs.nonEmpty) for (vname <- variableNames) map(vname) append vs(vname)
+      if (vs.nonEmpty) for (vname <- origVariableNames) map(vname) append vs(vname)
     }
     
     immutableDataMap(map)

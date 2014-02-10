@@ -273,34 +273,22 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     val p = predicate 
     if (p.nonEmpty) sb append " where " + p
     
-//TODO: reuse
-    def findDomainVariable(variable: Variable): Option[Variable] = variable match {
-      case _: Scalar => None
-      case Tuple(vars) => {
-        val domains = vars.flatMap(findDomainVariable(_))
-        if (domains.nonEmpty) Some(domains.head) else None
-      }
-      case f: Function => Some(f.getDomain)
-    }
-    
     //Sort by domain variable.
     //assume domain is scalar, for now
     //Note 'dataset' should be the original before ops
-    val dvar = findDomainVariable(dataset) 
-//TODO: won't work if domain not projected, dataset will have projections applied in makeScalar above during dataset construction process
-    //  no orig Dataset to be had
-    
-    dvar match {
-      case Some(i: Index) => //use natural order
-      case Some(v) => v match {
-        case _: Scalar => sb append " ORDER BY " + v.getName + order
-        case _ => {
-          println(v)
-          ??? //TODO: generalize for n-D domains, Function in domain?
+    //val dvar = findDomainVariable(dataset) 
+    origDataset.findFunction match {
+      case Some(f) => f.getDomain match {
+        case Some(i: Index) => //use natural order
+        case Some(v) => v match {
+          case _: Scalar => sb append " ORDER BY " + v.getName + order
+          case _ => ??? //TODO: generalize for n-D domains, Function in domain?
         }
+        case _ => ??? //TODO: error? Function has no domain
       }
-      case _ => ??? //TODO: error?
+      case None => //no function so domain variable to sort by
     }
+    
     
     sb.toString
   }

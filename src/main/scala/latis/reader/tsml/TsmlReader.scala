@@ -28,7 +28,7 @@ class TsmlReader(tsml: Tsml) extends DatasetAccessor {
    * Delegate to the Adapter to construct the Dataset
    * from the TSML's single top level "dataset" element.
    */
-  lazy val dataset: Dataset = adapter.dataset
+//  lazy val dataset: Dataset = adapter.dataset
   //TODO: need to be lazy? adapter's is, but could be overridden
   
   /**
@@ -36,7 +36,7 @@ class TsmlReader(tsml: Tsml) extends DatasetAccessor {
    */
   //def getDataset(): Dataset = dataset
   //TODO: careful, need to make sure kids can override without lazy val init problems, just use the ops call for now
-  def getDataset(): Dataset = getDataset(Seq[Operation]())
+  def getDataset: Dataset = getDataset(Seq[Operation]())
   
   def getDataset(operations: Seq[Operation]): Dataset = {
     adapter.getDataset(operations)
@@ -46,7 +46,6 @@ class TsmlReader(tsml: Tsml) extends DatasetAccessor {
    * Clean up any resources that the reader used.
    */
   def close() = adapter.close()
-  
   
 }
 

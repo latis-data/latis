@@ -18,6 +18,8 @@ import latis.reader.tsml.ml.Tsml
 import java.net.URL
 import latis.ops.Projection
 import latis.ops.Selection
+import latis.data._
+import latis.data.EmptyData
 
 
 /**
@@ -27,20 +29,173 @@ import latis.ops.Selection
  */
 abstract class TsmlAdapter(val tsml: Tsml) {
   
+  //---- Adapter properties from TSML -----------------------------------------
+  
   /**
    * Store XML attributes for this Adapter definition as a properties Map.
    */
-  val properties: Map[String,String] = tsml.dataset.getAdapterAttributes()
+  private val properties: Map[String,String] = tsml.dataset.getAdapterAttributes()
 
+  /**
+   * Return Some property value or None if property does not exist.
+   */
   def getProperty(name: String): Option[String] = properties.get(name)
   
+  /**
+   * Return property value or default if property does not exist.
+   */
   def getProperty(name: String, default: String): String = getProperty(name) match {
     case Some(v) => v
     case None => default
   }
   
-  //TODO: consider using Dataset, apply projections...
-  lazy val variableNames = tsml.getScalarNames
+  //---- Original Dataset Construction ----------------------------------------
+  
+  /**
+   * The original Dataset as defined by the TSML.
+   * This will only include Data values that are defined in the TSML.
+   */
+  lazy val origDataset: Dataset = makeOrigDataset()
+  
+  private def makeOrigDataset(): Dataset = {
+    val md = makeMetadata(tsml.dataset)
+    val vars = tsml.dataset.getVariableMl.flatMap(makeOrigVariable(_))
+    Dataset(vars, md) 
+  } 
+  
+  /**
+   * Create Metadata from "metadata" elements or Variable element's attributes
+   * in the given Variable XML.
+   */
+  protected def makeMetadata(vml: VariableMl): Metadata = {
+    //Note, not recursive, each Variable's metadata is independent
+    //TODO: could this be private? AggregationAdapter overrides it
+    
+    //Add tsml attributes for the variable element to attributes from the metadata element.
+    var atts = vml.getAttributes ++ vml.getMetadataAttributes
+    
+    //internal helper method to add default name for special variable types
+    def addImplicitName(name: String) = {
+      //If the Variable already has a name, add the given name as an alias
+      if (atts.contains("name")) atts.get("alias") match {
+        case Some(a) => atts = atts + ("alias" -> (a+","+name)) //append to list of existing aliases
+        case None => atts = atts + ("alias" -> name) //add alias
+      } 
+      else atts = atts + ("name" -> name) //no 'name' attribute, so use it
+    }
+ 
+    //Add implicit metadata for "time" and "index" variables.
+    //TODO: need to make them unique? consider finding "time" variable, finds first
+    //  do only when time domain is implied?
+    if (vml.label == "time") addImplicitName("time")
+    if (vml.label == "index") addImplicitName("index")
+
+    Metadata(atts)
+  }
+    
+  //this will be used only by top level Variables (or kids of top level Tuples)
+  //TODO: do we need Option since we are only building what tsml defines?
+  private def makeOrigVariable(vml: VariableMl): Option[Variable] = {
+    //TODO: support Data values defined in tsml
+    val md = makeMetadata(vml)
+    vml match {
+      case sml: ScalarMl => Some(Scalar(md, sml.label))
+      case tml: TupleMl  => Some(Tuple(tml.variables.flatMap(makeOrigVariable(_)), md))
+      case fml: FunctionMl => for (domain <- makeOrigVariable(fml.domain); range <- makeOrigVariable(fml.range)) 
+        yield Function(domain, range, md)
+    }
+  }
+  
+
+  //---- Dataset Construction -------------------------------------------------
+  
+  /*
+   * Apply the given sequence of operations and return the resulting Dataset.
+   * This will also apply the TSML Processing Instructions.
+   * This will trigger the construction of an original Dataset based
+   * only on the tsml, without these constraints applied.
+   * Adapters can override this to apply operations more effectively during
+   * the Dataset construction process (e.g. use in SQL query).
+   * 
+   */
+  //TODO: save dataset for reuse?
+  //TODO: use this dataset as cache? data with PIs applied but not user ops,
+  
+  def getDataset: Dataset = {
+    //Build the Dataset with Data (second build pass)
+    val ds = makeDataset(origDataset)
+    //Apply the TSML Processing Instructions
+    //reverse order because foldRight applies them in reverse order
+    piOps.reverse.foldRight(ds)(_(_))
+  }
+  
+  def getDataset(ops: Seq[Operation]): Dataset = {
+    val ds = getDataset
+    
+    //TODO: use handleOps to let adapter handle some and leave rest for here
+    //TODO: what can we do about preserving operation order if we let adapters handle what they want?
+    //  require adapter to override then be responsible for applying all ops?
+    //  what about leaving some for the writer? wrap in "write(format="",...)" function?
+    
+    //reverse order because foldRight applies them in reverse order
+    ops.reverse.foldRight(ds)(_(_))
+  }
+  
+  //TODO: "build" vs "make"? consider scala Builder
+  
+  protected def makeDataset(ds: Dataset): Dataset = {
+    val vars = ds.getVariables.flatMap(makeVariable(_))
+    Dataset(vars, ds.getMetadata) 
+  } 
+  
+  //lots of extension points
+  
+  protected def makeVariable(variable: Variable): Option[Variable] = variable match {
+    case s: Scalar => makeScalar(s)
+    case t: Tuple  => makeTuple(t)
+    case f: Function => makeFunction(f)
+  }
+  
+  //default to no-op
+  //deal with data defined in tsml
+  protected def makeScalar(scalar: Scalar): Option[Scalar] = {
+    scalar.getData match {
+      case EmptyData => Some(scalar)
+      case d: Data => Some(Scalar(scalar.getMetadata, d)) //make new Scalar with md and data from orig
+      //TODO: make sure we get the same type, use Builder pattern? CanBuildFrom? 
+    }
+  }
+  
+  protected def makeTuple(tuple: Tuple): Option[Tuple] = {
+    val md = tuple.getMetadata
+    val vars = tuple.getVariables.flatMap(makeVariable(_))
+    Some(Tuple(vars, md))
+  }
+  
+  protected def makeFunction(function: Function): Option[Function] = {
+    val md = function.getMetadata
+    //TODO: if domain or range None, use IndexFunction
+    for (domain <- makeVariable(function.getDomain); 
+         range  <- makeVariable(function.getRange)
+    ) yield Function(domain, range, md)
+  }
+  /*
+   * TODO: consider how Iterative vs Granule adapters should handle extension
+   * traits that override makeFunction?
+   * but no state for data map...
+   * would like to have FooAdapter with either mixed-in, but probably no do-able
+   * do at Data level?
+   *   DataGranule: column-oriented, Map, Data for each Scalar
+   *   DataIterator: ByteBufferData with sample size, Data in Function
+   */
+  
+  
+  //===========================================================================
+  
+  //TODO: use OrigDataset or dataset after ops (e.g. projections)
+//  lazy val variableNames = tsml.getScalarNames
+  lazy val origVariableNames = origDataset.toSeq.map(_.getName)
+  
   
   /*
    * TODO: 2013-06-25
@@ -57,6 +212,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * use dataMap idea from Granule?
    * generalize to concept of "cache"?
    * values cache is not volatile
+   * consider scala Stream, solver iterable once problem, but memory problem
    */
   
   
@@ -69,26 +225,6 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   def handleOperation(op: Operation): Boolean = false 
   
-  
-  lazy val dataset: Dataset = makeDataset()
-  
-  protected def makeDataset(): Dataset = {
-    val md = makeMetadata(tsml.dataset)
-    val vars = tsml.dataset.getVariableMl.flatMap(makeVariable(_))
-    Dataset(vars, md) 
-  }  
-  
-  /**
-   * Apply the given sequence of operations and return the resulting Dataset.
-   * This will trigger the construction of an original Dataset (dataset) based
-   * only on the tsml, without these constraints applied.
-   * Adapters can override this to apply operations more effectively during
-   * the Dataset construction process (e.g. use in SQL query).
-   */
-  def getDataset(ops: Seq[Operation]) = {
-    //add processing instructions
-    (piOps ++ ops).reverse.foldRight(dataset)(_(_)) //NOTE: foldRight applies them in reverse order
-  }
   
   /**
    * Get the TSML Processing Instructions as a Seq of Operations.
@@ -105,154 +241,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   def findSelection(ops: Seq[Operation], name: String): Option[Selection] = {
     ops.filter(_.isInstanceOf[Selection]).map(_.asInstanceOf[Selection]).find(_.vname == name)
   }
-  
-//  def getDataset(operations: mutable.Seq[Operation]): Dataset = {
-//    //2013-10-11: remove handled operations from collection
-//    //allow others to handle the rest
-//    //TODO: consider keeping the full list and risk redundant operations?
-//    //  gives too much power to the adapter?
-//    
-//    /*
-//     * TODO: 2013-09-16
-//     * Make sure original Dataset is not changed?
-//     * need to be able to access original name (e.g. for sql)
-//     * but should adapter be responsible for both if it is handling operations?
-//     * we wouldn't want to realize data of the orig dataset
-//     * are we safely inside the monadic context that we can violate immutability?
-//     * should we look to the TSML instead of the orig Dataset to get source info?
-//     *   might be more convenient to use Dataset
-//     *   but we are a *tsml* adapter and we do have the Tsml facade
-//     *   e.g. metadata from variable element atts, do in Tsml?
-//     *   matching on time type...
-//     * orig dataset could be used for cache
-//     * 
-//     * handle operations like processing instructions?
-//     * new Dataset for each one?
-//     * or just let adapter apply them most efficiently (e.g. build sql query) before making the dataset?
-//     * handle PIs like these ops?
-//     * 
-//     * Seems like making an orig dataset would be best.
-//     * make dataset then apply ops
-//     * leaving ops for writer feels wrong, 
-//     *   maybe at the server api level, 
-//     *   separate special syntax
-//     *   not name=value, confused with selection
-//     *   write(format="",...)?
-//     * have one method that applies all ops
-//     *   if subclass wants to apply some, must apply all
-//     *   applyOperations(ops)
-//     *   no need for handle returning boolean 
-//     */
-//    
-//    //val ds = dataset //Should be the call that wakes up the lazy dataset
-//    //ops.reverse.foldRight(dataset)(_(_))
-//    /*
-//     * 2013-10-29
-//     * need to change dataset = op'd dataset?. no, immutable
-//     * or should 'dataset' always be the orig?
-//     *   maybe change name to origDataset
-//     * reader should call getDataset only once
-//     * adapter may want to refer to origds several times, getvars...
-//     * 
-//     * consider caching
-//     * next request could be diff ops
-//     * use GranuleAdapter for caching?
-//     *   Iterative may be iterate once
-//     *   Stream?
-//     *   ehcache?
-//     */
-//    
-//    
-//    //Give subclass the opportunity to handle each operation.
-//    //They should return false if not handled thus it will be kept to be handled elsewhere.
-//    val ops = operations.filterNot(handleOperation(_))
-//    //TODO: before or after making dataset?
-//    //  probably before so we can apply them while making the Dataset
-//    //  so they'll need to be lazy
-//    //might be useful to have orig dataset before applying ops
-//    //someone is liable to ask for dataset in the adapter
-//    
-//    val ds = dataset //TODO: make sure this is the waking up of the lazy dataset
-//    
-//    //Apply remaining operations to the Dataset.
-//    //TODO: is that our responsibility? We did pass the ops to the reader.
-//    //TODO: what can we do about preserving operation order if we let adapters handle what they want?
-//    //  require adapter to override then be responsible for applying all ops?
-//    //  what about leaving some for the writer? wrap in "write(format="",...)" function?
-//    ops.reverse.foldRight(ds)(_(_)) //op(ds)
-//    //NOTE: foldRight applies them in reverse order
-//  }
-  
-  /**
-   * Create Metadata from "metadata" elements in the given Variable XML.
-   */
-  protected def makeMetadata(vml: VariableMl): Metadata = {
-    //not recursive, each Variable's metadata is independent
-    //just the XML attributes from "metadata" elements, for now
-    //if name is not defined in metadata, use the tsml "name" attribute
-    //TODO: should these tsml shortcuts be applied in Tsml?
-    
-    //Add all tsml attributes to metadata.
-    var atts = vml.getAttributes ++ vml.getMetadataAttributes
-    
-    //internal helper method to add default name for special variable types
-    def addImplicitName(name: String) = {
-      if (atts.contains("name")) atts.get("alias") match {
-        case Some(a) => atts = atts + ("alias" -> (a+","+name)) //append to list of existing aliases
-        case None => atts = atts + ("alias" -> name) //add alias
-      } 
-      else atts = atts + ("name" -> name) //no 'name' attribute, so use it
-    }
- 
-    //Add implicit metadata for "time" and "index" variables.
-    //TODO: need to make them unique? consider finding "time" variable, finds first
-    //  do only when time domain is implied?
-    if (vml.label == "time") addImplicitName("time")
-    if (vml.label == "index") addImplicitName("index")
+  //TODO: ByName and ByType?
 
-    Metadata(atts)
-  }
-  
-  //-------------------------------------------------------------------------//
-  
-  //TODO: deal with metadata
-  
-  
-  //this will be used only by top level Variables (or kids of top level Tuples)
-  protected def makeVariable(vml: VariableMl): Option[Variable] = vml match {
-    //TODO: can we make Metadata here then call make* with md instead of xml?
-    //  makeScalar matches on xml label
-    //  would need to capture that in metadata, 'type'?  but Time with type integer...
-    case sml: ScalarMl => makeScalar(sml)
-    case tml: TupleMl  => makeTuple(tml)
-    case fml: FunctionMl => makeFunction(fml)
-  }
-  
-  protected def makeTuple(tml: TupleMl): Option[Tuple] = {
-    val md = makeMetadata(tml)
-    Some(Tuple(tml.variables.flatMap(makeVariable(_)), md))
-  }
-  
-  protected def makeFunction(fml: FunctionMl): Option[Function] = {
-    val md = makeMetadata(fml)
-    //TODO: if domain or range None, use IndexFunction
-    for (domain <- makeVariable(fml.domain); range <- makeVariable(fml.range)) yield Function(domain, range, md)
-  }
-  
-  protected def makeScalar(sml: ScalarMl): Option[Scalar] = {
-    val md = makeMetadata(sml)
-    //TODO: deal with values in tsml
-    
-    sml.label match {
-      case "real"    => Some(Real(md))
-      case "integer" => Some(Integer(md))
-      case "text"    => Some(Text(md))
-      case "time"    => Some(Time(md)) //TODO: if type text, set default length=23? or get from 'format'
-      case "binary"  => Some(Binary(md))
-      case _ => None
-    }
-  }
-  
   //-------------------------------------------------------------------------//
   
   /**
