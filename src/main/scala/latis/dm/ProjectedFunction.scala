@@ -2,7 +2,7 @@ package latis.dm
 
 import latis.metadata._
 import latis.ops._
-import latis.util.NextIterator
+import latis.util.PeekIterator
 
 /**
  * Wrapper for a Function that applies a "projection" to each sample.
@@ -25,7 +25,7 @@ class ProjectedFunction(function: Function, val projection: Projection)
     case _ => ??? //TODO: something other than Sample returned
   }
   
-  override def iterator = new NextIterator[Sample] {
+  override def iterator = new PeekIterator[Sample] {
     lazy val it = function.iterator  //original Function's iterator
     
     override def getNext: Sample = {

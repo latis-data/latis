@@ -2,7 +2,7 @@ package latis.dm
 
 import latis.metadata._
 import latis.ops._
-import latis.util.NextIterator
+import latis.util.PeekIterator
 
 /**
  * Wrapper for a Function that applies a boolean filter to each sample.
@@ -17,7 +17,7 @@ class FilteredFunction(function: Function, val selection: Selection)
 
   //TODO: override metadata, data? 
   
-  override def iterator = new NextIterator[Sample] {
+  override def iterator = new PeekIterator[Sample] {
     lazy val it = function.iterator  //original Function's iterator
     
 /*
