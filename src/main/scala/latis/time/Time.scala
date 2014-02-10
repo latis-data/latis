@@ -181,7 +181,7 @@ object Time {
   //def apply(scale: TimeScale, md: Metadata, data: Data) = new Time(scale, md, data)
   
   //no data, used as a template in adapters
-  def apply(md: Metadata): Time = {
+  def apply(md: Metadata, data: Data = EmptyData): Time = {
     var metadata = md
     val scale = md.get("units") match {
       case Some(u) => TimeScale(u)
@@ -194,13 +194,13 @@ object Time {
     //Mixin the appropriate type
     md.get("type") match {
       case Some(s) => s.toLowerCase match {
-        case "real" => new Time(scale, md) with Real
-        case "integer" => new Time(scale, md) with Integer
-        case "text" => new Time(scale, md) with Text
+        case "real" => new Time(scale, md, data) with Real
+        case "integer" => new Time(scale, md, data) with Integer
+        case "text" => new Time(scale, md, data) with Text
         case _ => throw new RuntimeException("Unsupported Time type: " + s)
       }
       //default to Real
-      case None => new Time(scale, md) with Real
+      case None => new Time(scale, md, data) with Real
     }
   }
   

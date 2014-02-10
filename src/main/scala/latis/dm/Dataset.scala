@@ -42,7 +42,10 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
     case _ => if (variables.isEmpty) 0 else 1
   }
   
-  def findFunction(variable: Variable): Option[Function] = variable match {
+  def findFunction: Option[Function] = findFunction(this)
+  
+  //TODO: put in Variable?
+  private def findFunction(variable: Variable): Option[Function] = variable match {
     case _: Scalar => None
     case Tuple(vars) => {
       val fs = vars.flatMap(findFunction(_))

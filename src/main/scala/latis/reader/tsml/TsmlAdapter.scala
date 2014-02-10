@@ -55,9 +55,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * The original Dataset as defined by the TSML.
    * This will only include Data values that are defined in the TSML.
    */
-  lazy val origDataset: Dataset = makeOrigDataset()
+  lazy val origDataset: Dataset = makeOrigDataset
   
-  private def makeOrigDataset(): Dataset = {
+  protected def makeOrigDataset: Dataset = {
     val md = makeMetadata(tsml.dataset)
     val vars = tsml.dataset.getVariableMl.flatMap(makeOrigVariable(_))
     Dataset(vars, md) 
@@ -99,7 +99,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //TODO: support Data values defined in tsml
     val md = makeMetadata(vml)
     vml match {
-      case sml: ScalarMl => Some(Scalar(md, sml.label))
+      case sml: ScalarMl => Some(Scalar(sml.label, md))
       case tml: TupleMl  => Some(Tuple(tml.variables.flatMap(makeOrigVariable(_)), md))
       case fml: FunctionMl => for (domain <- makeOrigVariable(fml.domain); range <- makeOrigVariable(fml.range)) 
         yield Function(domain, range, md)
@@ -130,15 +130,18 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   }
   
   def getDataset(ops: Seq[Operation]): Dataset = {
-    val ds = getDataset
     
-    //TODO: use handleOps to let adapter handle some and leave rest for here
+    //Use handleOps to let adapter handle some and leave rest for here
     //TODO: what can we do about preserving operation order if we let adapters handle what they want?
     //  require adapter to override then be responsible for applying all ops?
     //  what about leaving some for the writer? wrap in "write(format="",...)" function?
+    //  Note, PIs already processed, consider rename PI breaking sql...
+    val others = ops.filterNot(handleOperation(_))
+    
+    val ds = getDataset
     
     //reverse order because foldRight applies them in reverse order
-    ops.reverse.foldRight(ds)(_(_))
+    others.reverse.foldRight(ds)(_(_))
   }
   
   //TODO: "build" vs "make"? consider scala Builder
@@ -157,14 +160,16 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   }
   
   //default to no-op
-  //deal with data defined in tsml
-  protected def makeScalar(scalar: Scalar): Option[Scalar] = {
-    scalar.getData match {
-      case EmptyData => Some(scalar)
-      case d: Data => Some(Scalar(scalar.getMetadata, d)) //make new Scalar with md and data from orig
-      //TODO: make sure we get the same type, use Builder pattern? CanBuildFrom? 
-    }
-  }
+  //TODO: deal with data defined in tsml
+  protected def makeScalar(scalar: Scalar): Option[Scalar] = Some(scalar)
+//  {
+//    scalar.getData match {
+//      case EmptyData => Some(scalar) //no need for modified copy
+//      //case d: Data => Some(Scalar(scalar.getMetadata, d)) //make new Scalar with md and data from orig
+//      //TODO: make sure we get the same type, use Builder pattern? CanBuildFrom? 
+//      //copyWithNewData?
+//    }
+//  }
   
   protected def makeTuple(tuple: Tuple): Option[Tuple] = {
     val md = tuple.getMetadata
@@ -189,39 +194,17 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    *   DataIterator: ByteBufferData with sample size, Data in Function
    */
   
-  
-  //===========================================================================
-  
-  //TODO: use OrigDataset or dataset after ops (e.g. projections)
-//  lazy val variableNames = tsml.getScalarNames
-  lazy val origVariableNames = origDataset.toSeq.map(_.getName)
-  
-  
-  /*
-   * TODO: 2013-06-25
-   * traits for granule vs iterable?
-   * but traits can't have state, e.g. data map
-   *   DataGranule: column-oriented, Map, Data for each Scalar
-   *   DataIterator: ByteBufferData with sample size, Data in Function
-   * use same cache as used by values?
-   * consider record oriented (ascii, db) vs col-oriented (netcdf, bin)
-   *   
-   * should parsers be traits?
-   * 
-   * support values in tsml
-   * use dataMap idea from Granule?
-   * generalize to concept of "cache"?
-   * values cache is not volatile
-   * consider scala Stream, solver iterable once problem, but memory problem
+  /**
+   * Keep a list of the names of the original Scalars.
    */
-  
+  lazy val origVariableNames = origDataset.toSeq.map(_.getName)
   
   /**
    * Hook for subclasses to apply operations during data access
    * to reduce data volumes. (e.g. query constraints to database or web service)
    * Return true if it will be handled. Otherwise, it will be applied
-   * to the Dataset later.
-   * The default behavior is for the Adapter to handle no operations.
+   * to the Dataset by the TsmlAdapter superclass.
+   * The default behavior is for the Adapter subclass to handle no operations.
    */
   def handleOperation(op: Operation): Boolean = false 
   
