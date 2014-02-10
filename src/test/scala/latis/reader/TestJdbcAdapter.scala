@@ -70,7 +70,7 @@ class TestJdbcAdapter {
     Writer("dds").write(ds)
   }
   
-  //@Test
+  @Test
   def dont_project_domain {
     val ops = List(Projection("d,s"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
