@@ -1,0 +1,13 @@
+attributes {
+	unknown{
+		year{
+			string long_name "Year";
+			string units "years since 0000-01-01";
+			string alias "time";
+		}
+		tsi{
+			string long_name "Total Solar Irradiance";
+			string units "W/m^2";
+		}
+	}
+}

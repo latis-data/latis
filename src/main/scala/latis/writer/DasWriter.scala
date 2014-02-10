@@ -24,8 +24,8 @@ class DasWriter extends TextWriter {
     }
     else indent(count) + "}\n"
   }
-  
-  def makeFunction(function: Function): String = varToString(function.getFirstSample)
+
+  def makeFunction(function: Function): String = varToString(Sample(function.getDomain, function.getRange))
   
   def makeScalar(scalar:Scalar): String = {
     makeLabel(scalar) + makeAttributes(scalar)

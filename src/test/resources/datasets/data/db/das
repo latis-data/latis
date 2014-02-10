@@ -1,0 +1,15 @@
+attributes {
+	unknown{
+		i{
+			string type "integer";
+			string units "days since 2000-01-01";
+			string alias "time";
+		}
+		unknown{
+			d{
+			}
+			s{
+			}
+		}
+	}
+}

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tsml>
 
-  <dataset Name="tsi">
+  <dataset name="tsi">
 
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
              location="datasets/tsi.txt" />

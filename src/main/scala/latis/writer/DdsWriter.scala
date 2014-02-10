@@ -22,20 +22,19 @@ class DdsWriter extends TextWriter {
   
   def makeScalar(scalar:Scalar): String = scalar match {
     case _: Real    => indent(count) + "float64 " + scalar.getName + ";\n"
-    case _: Integer => indent(count) + "int64 " + scalar.getName + ";\n"
-    case _: Text    => indent(count) + "string " + scalar.getName + ";\n"
+    case _: Integer => indent(count) + "int64 "   + scalar.getName + ";\n"
+    case _: Text    => indent(count) + "string "  + scalar.getName + ";\n"
     case _: Binary  => "NaN"
   }
   
-  def makeTuple(tuple: Tuple): String = { 
-    tuple.getVariables.map(varToString(_)).mkString("")
-    /*case Sample(vars) => tuple.getVariables.map(varToString(_)).mkString("")
+  def makeTuple(tuple: Tuple): String = tuple match{ 
+    case Sample(vars) => tuple.getVariables.map(varToString(_)).mkString("")
     case _ => {
       count += 1
       val s = indent(count-1) + "structure {\n" + tuple.getVariables.map(varToString(_)).mkString("") + indent(count-1) + "} " + tuple.getName + ";\n"
       count -=1
       s
-    }*/
+    }
   }
   
   override def makeFooter(dataset: Dataset) = "} " + dataset.getName + ";\n"

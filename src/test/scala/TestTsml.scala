@@ -43,68 +43,6 @@ class TestTsml  {
   }
   
   //@Test
-  def read_scalar_datadds {
-    val reader = TsmlReader("datasets/scalar.tsml")
-    val ds = reader.getDataset
-    Writer("dods").write(ds)	
-    //Writer("dds").write(ds)	//Can't run dds after a writer that iterates functions
-
-    /*val w = new DdsWriter()
-    val s = (w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds)).split("\n")
-    val t = Source.fromFile("src/test/resources/datasets/data/scalar/scalar.dds").getLines.toArray[String]
-    for(a <- 0 until t.length) assertEquals(s(a), t(a))*/
-  }
-  
-  //@Test
-  def read_scalar_bin {
-    val reader = TsmlReader("datasets/scalar.tsml")
-    val ds = reader.getDataset
-    println
-    Writer("bin").write(ds)	
-  }
-  
-  //@Test
-  def read_scalar_dds {
-    val reader = TsmlReader("datasets/scalar.tsml")
-    val ds = reader.getDataset
-    val w = new DdsWriter()
-    val s = (w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds)).split("\n")
-    val t = Source.fromFile("src/test/resources/datasets/data/scalar/scalar.dds").getLines.toArray[String]
-    for(a <- 0 until t.length) assertEquals(s(a), t(a))
-  }
-  
-  //@Test
-  def write_scalar_dds {
-    val reader = TsmlReader("datasets/scalar.tsml")
-    val ds = reader.getDataset
-    Writer("dds").write(ds)
-  }
-  
-    
-  @Test
-  def write_scalar_das {
-    /*val reader = TsmlReader("datasets/scalar.tsml")
-    val ds = reader.getDataset
-    val w = new DasWriter()
-    val s = (w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds))//.split("\n")
-    val t = Source.fromFile("src/test/resources/datasets/data/scalar/scalar.das").getLines.toArray[String]
-    println(s)*/
-    val reader = TsmlReader("datasets/scalar.tsml")
-    val ds = reader.getDataset
-    Writer("das").write(ds)
-  }
-  
-  //@Test
-  def read_scalar_das {
-    val reader = TsmlReader("datasets/scalar.tsml")
-    val ds = reader.getDataset
-    val w = new DasWriter()
-    val s = (w.makeHeader(ds) + w.varToString(ds) + w.makeFooter(ds)).split("\n")
-    val t = Source.fromFile("src/test/resources/datasets/data/scalar/scalar.das").getLines.toArray[String]
-    for(a <- 0 until t.length) assertEquals(s(a), t(a))
-  }
-  
-  //@Test
   def read_scalar_data_tuple_range {
     val ds = TsmlReader("datasets/test/scalar3.tsml").getDataset //+ 1
     //println(ds)
@@ -173,7 +111,7 @@ class TestTsml  {
 //    AsciiWriter().write(ds)
 //  }
   
-  @Test
+  //@Test
   def test_dataset {
     //val ds = TsmlReader("datasets/test/mixed.tsml").getDataset
     val ds = TsmlReader("datasets/tsi.tsml").getDataset

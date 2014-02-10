@@ -1,0 +1,9 @@
+dataset {
+	sequence {
+		int64 i;
+		structure {
+			float64 d;
+			string s;
+		} unknown;
+	} unknown;
+} Database Test;
