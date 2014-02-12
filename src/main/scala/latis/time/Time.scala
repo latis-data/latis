@@ -78,7 +78,7 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
   
   def compare(that: Time): Int = {
     //Convert 'that' Time to our time scale.
-//Note, converted Times will have numeric (double or long) data values.
+    //Note, converted Times will have numeric (double or long) data values.
     val otherData = that.convert(timeScale).getNumberData
     //Base comparison on our type so we can get the benefit of double precision or long accuracy
     getData match {
@@ -286,17 +286,22 @@ object Time {
       case Some(u) => {
         if (u.contains(" since ")) Time(md, stringsToNumbers(values))  //numeric units
         else { //formatted time
-          //TODO: store as strings, Time with Text
-          //convert to java time scale for now, //TODO: use default time scale
-          val scale = TimeScale.JAVA
-          //make sure units metedata is correct //TODO: add type="integer" to metadata?
-          val md2 = Metadata(md.getProperties + ("units" -> scale.toString))
-          //parse times into longs
-          val format = TimeFormat(u)
-          val times: Seq[Long] = values.map(format.parse(_).getTime())
-          //note, tempted to delegate to Time(Metadata, Seq[Any]) to get default time scale,
-          //  but we are assuming JAVA time here
-          new Time(scale, md2, Data(times)) with Integer
+          //store as strings, Time with Text
+          //assume type is text
+          new Time(TimeScale.DEFAULT, md, Data(values)) with Text
+          
+//          //convert to java time scale for now, //TODO: use arbitrary default time scale
+//          val scale = TimeScale.JAVA
+//          //make sure units metedata is correct //TODO: add type="integer" to metadata?
+//          val md2 = Metadata(md.getProperties + ("units" -> scale.toString))
+// //TODO: since we are changing the units, at least let us write with native format
+// //  use 'format'? also could be used by format_time filter         
+//          //parse times into longs
+//          val format = TimeFormat(u)
+//          val times: Seq[Long] = values.map(format.parse(_).getTime())
+//          //note, tempted to delegate to Time(Metadata, Seq[Any]) to get default time scale,
+//          //  but we are assuming JAVA time here
+//          new Time(scale, md2, Data(times)) with Integer
         }
       }
       case None => Time(md, values.map(_.toDouble))
