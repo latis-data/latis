@@ -72,7 +72,7 @@ class JsonWriter extends TextWriter {
   }
   
   
-  def makeScalar(scalar: Scalar): String = scalar match {
+  override def makeScalar(scalar: Scalar): String = scalar match {
     case t: Time => t.getJavaTime.toString  //use java time for json
     case Real(d) => d.toString //TODO: format? NaN to null
     case Integer(l) => l.toString 
@@ -96,11 +96,11 @@ class JsonWriter extends TextWriter {
     vars.map(varToString(_)).mkString("{", ", ", "}") //note, sample shouldn't have name
   }
     
-  def makeTuple(tuple: Tuple): String = {
+  override def makeTuple(tuple: Tuple): String = {
     tuple.getVariables.map(varToString(_)).mkString("{", ", ", "}")
   }
   
-  def makeFunction(function: Function): String = {
+  override def makeFunction(function: Function): String = {
     //note, calling makeSample directly to avoid the label
     function.iterator.map(makeSample(_)).mkString("[", ","+newLine, "]")
   }

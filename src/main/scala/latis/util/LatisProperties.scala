@@ -5,6 +5,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.net.URL
 import com.typesafe.scalalogging.slf4j.Logging
+import scala.collection.JavaConversions
 //import javax.servlet.ServletConfig
 
 /**
@@ -28,6 +29,7 @@ import com.typesafe.scalalogging.slf4j.Logging
  */
 
 class LatisProperties extends Properties with Logging {
+  //TODO: consider https://github.com/typesafehub/config
   //TODO: enforce immutabily? disable setters? extend immutable Map?
   //but might be useful to change properties on the fly?
   //Tempted to use any URL, but could open up complications.
@@ -144,6 +146,11 @@ object LatisProperties {
     }
   }
   
+  /**
+   * Return the known property names.
+   * This will only include those in the latis.properties file.
+   */
+  def keys: Iterable[String] = JavaConversions.dictionaryAsScalaMap(instance).keys.map(_.asInstanceOf[String])
   
   //----  -------------------------------------------------------------------//
     
