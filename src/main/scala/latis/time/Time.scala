@@ -17,17 +17,7 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
   extends AbstractScalar(metadata, data) { 
   //TODO: generalize scale to units for all numeric data
   
-  /*
-   * 2013-10-24
-   * Need to revisit all traits as Interfaces with impls.
-   * 
-   * new Time with Real...
-   * doesn't allow us to override compare
-   * maybe we should just make: RealTime, IntegerTime,...
-   * there must be a better way
-   * 
-   * TODO: add utc and tai tsml types?
-   */
+  //TODO: add utc and tai tsml types?
   
   /*
    * TODO: support double, long, or string representation
@@ -38,41 +28,7 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
    *   others should be declared as text, real,... 
    *   type="Time" is like type="my.custom.Variable"
    *   but presumably the custom var would extend Real...
-   *   
-   * Can we use traits for all vars?
-   *   new Time with Real or new Real with Time?
-   *   could we keep the data model out of Time for the purpose of sharing?
-   *   Real as trait with self type of Variable
-   *   there's no real impl in scalars
-   * Could we use traits for Tuple and Function?
-   *   probably not, have state: vars, domain/range
-   *   could do via methods...
    * 
-   * factory constructors
-   *   new Variable(md, data) with Real
-   *   no need for setting _metadata, _data?
-   *   maybe just for Scalars? new Scalar with...?
-   *   but seems like a mismatch
-   *   maybe not if its traits for scalars
-   *   traits for Functions?
-   *     TimeSeries? or subclass?
-   *     
-   * Vector extends Tuple? or new Tuple with Vector trait?
-   *   liskov substitution principle?
-   *   Vector is the specialized case
-   *   Vector is always a Tuple but not any Tuple is a Vector
-   *   what do they say about traits/mixins?
-   *   Foo with Bar
-   *     makes a Foo usable as a Bar
-   *     Foo is-a Bar
-   *     certainly not the other way around
-   *   Variable with Real
-   *     definitely seems backwards
-   *     Real is a special kind of Variable
-   *     this is more like "as-a": threat this Variable as a Real
-   *   
-   * Time extends Variable? or Scalar?
-   *   new Time with Real?
    *   
    * Any other use cases where we want to represent data in various forms?
    * or is Time the oddball?
@@ -93,15 +49,6 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
    *   like custom vars, we should be able to use type="Time" for class to construct
    *   goal should be to represent original form, avoid transforming (e.g. string to java time)
    * 
-   * Consider the Logging trait
-   *   I suppose that means the class behaves as a logger
-   *   
-   * Variable with Real mean it behaves as a Real but the model says that Real is-a Variable
-   *   Or is Scalar all the model knows and the trait makes it behave like a certain type
-   *     
-   *   
-   * http://stackoverflow.com/questions/3422606/mixins-vs-composition-in-scala
-   *   
    */
   
   //protected var timeScale: TimeScale = TimeScale.DEFAULT
@@ -143,7 +90,7 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
   
   //override to deal with ISO formatted time strings  
   override def compare(that: String): Int = {
-    RegEx.TIME findFirstIn that match {
+    RegEx.TIME.r findFirstIn that match {
       //If the string matches the ISO format
       case Some(s) => compare(Time.fromIso(s)) //Make Time from ISO formatted time string, convert to our time scale
       //Otherwise assume we have a numeric value in our time scale
