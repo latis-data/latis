@@ -50,15 +50,15 @@ object RegEx {
     /**
      * Selection clause. Match variable name, operator, value.
      */
-    val SELECTION = ("(" + VARIABLE + ")(" + SELECTION_OPERATOR + ")(.+)")
+    val SELECTION = "(" + VARIABLE + ")(" + SELECTION_OPERATOR + ")(.+)"
     
     /**
      * Projection clause. Match comma separates list of variable names.
      */
-    val PROJECTION = ("(" + VARIABLE + "(," + VARIABLE + ")*)")
+    val PROJECTION = "(" + VARIABLE + "(," + VARIABLE + ")*)"
     
     /**
      * Operation expression. Match operation name and argument list.
      */
-    val OPERATION = ("(" + WORD + ")\\((.*)\\)")
+    val OPERATION = "(" + WORD + ")\\((.*)\\)"
 }
