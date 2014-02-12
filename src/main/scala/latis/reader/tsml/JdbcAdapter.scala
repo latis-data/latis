@@ -53,7 +53,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     
     case Selection(expression) => expression match {
       //Break expression up into components
-      case SELECTION(name, op, value) => {
+      case SELECTION.r(name, op, value) => {
         if (name == "time") handleTimeSelection(op, value) //special handling for "time"
         //TODO: handle other Time variables (dependent)
         else if (origVariableNames.contains(name)) { //other variable (not time), even if not projected
@@ -125,7 +125,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
       //TODO: what if native time var is "time", without units?
        case units: String => {
         //convert ISO time to units
-        RegEx.TIME findFirstIn value match {
+        RegEx.TIME.r findFirstIn value match {
           case Some(s) => {
             val t = Time.fromIso(s)
             val t2 = t.convert(TimeScale(units)).getNumberData.doubleValue

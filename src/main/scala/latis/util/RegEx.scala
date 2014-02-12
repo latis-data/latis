@@ -24,7 +24,7 @@ object RegEx {
      * Regular expression that should match an ISO 8601 time.
      * No fractional seconds. Not variants without "-".
      */
-    val TIME = "[0-9]{4}-[0-9]{2}-[0-9]{2}('?T'?[0-2][0-9](:[0-5][0-9](:[0-5][0-9])?)?)?".r
+    val TIME = "[0-9]{4}-[0-9]{2}-[0-9]{2}('?T'?[0-2][0-9](:[0-5][0-9](:[0-5][0-9])?)?)?"
     
     /**
      * Regular expression matching common delimiters: white space and commas.
@@ -50,15 +50,15 @@ object RegEx {
     /**
      * Selection clause. Match variable name, operator, value.
      */
-    val SELECTION = ("(" + VARIABLE + ")(" + SELECTION_OPERATOR + ")(.+)").r
+    val SELECTION = ("(" + VARIABLE + ")(" + SELECTION_OPERATOR + ")(.+)")
     
     /**
      * Projection clause. Match comma separates list of variable names.
      */
-    val PROJECTION = ("(" + VARIABLE + "(," + VARIABLE + ")*)").r
+    val PROJECTION = ("(" + VARIABLE + "(," + VARIABLE + ")*)")
     
     /**
      * Operation expression. Match operation name and argument list.
      */
-    val OPERATION = ("(" + WORD + ")\\((.*)\\)").r
+    val OPERATION = ("(" + WORD + ")\\((.*)\\)")
 }
