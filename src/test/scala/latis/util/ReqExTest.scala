@@ -17,7 +17,7 @@ class RegExTest {
   
   @Test
   def match_date_selection {
-    val r = RegEx.TIME findFirstIn "time>=2011-09-14"
+    val r = RegEx.TIME.r findFirstIn "time>=2011-09-14"
     //println(r.get)
     assertEquals("2011-09-14", r.get)
   }
