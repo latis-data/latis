@@ -10,10 +10,10 @@ class TestRegexAdapter {
   
   @Test
   def log {
-    //val ops = List(Operation("last"))
-    val ops = List(Selection("time>2014-02-12T18"))
+    val ops = List(Operation("last"))
+    //val ops = List(Selection("time>2014-02-12T18"))
     val ds = TsmlReader("datasets/test/log.tsml").getDataset(ops)
-    Writer("csv").write(ds)
+    Writer("txt").write(ds)
   }
 
 }

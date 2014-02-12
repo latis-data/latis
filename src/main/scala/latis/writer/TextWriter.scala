@@ -5,9 +5,8 @@ import java.io.OutputStream
 import java.io.PrintWriter
 import latis.util.FirstThenOther
 
-abstract class TextWriter extends Writer {
+class TextWriter extends Writer {
   //TODO: with Text, Binary trait?
-  //TODO: build with Dataset? but write(ds) feels better that write()
   //TODO: Dataset.write ?
   //TODO: with Header
   
@@ -25,23 +24,17 @@ abstract class TextWriter extends Writer {
   def printWriter: PrintWriter = _writer
   //TODO: what happens to PrintWriter when out is closed?
   
-  //TODO: platform indep new line
-  val newLine = "\n"
+  //platform indep new line
+  val newLine = System.getProperty("line.separator") //"\n"
     
   lazy val delimiter = getProperty("delimiter", ", ")
-  
-
-//  def recordDelim = newLine
-//  def fieldDelim = ","
-  
-  //def startThenDelim = FirstThenOther("", newLine)
     
   
   def writeHeader(dataset: Dataset) = printWriter.print(makeHeader(dataset)) //NOTE: just "print" w/o nl
   def writeFooter(dataset: Dataset) = printWriter.print(makeFooter(dataset)) //NOTE: just "print" w/o nl
   
   //Override these if you need to add a header or footer
-  //TODO: use Header class with writer.sfx.header property
+  //TODO: use Header class from writer.sfx.header property
   def makeHeader(dataset: Dataset): String = ""
   def makeFooter(dataset: Dataset): String = ""
     
@@ -85,12 +78,6 @@ abstract class TextWriter extends Writer {
     case function: Function => makeFunction(function)
   }
   
-//  //Override these to get the desired behavior
-//  def makeScalar(scalar: Scalar): String 
-  def makeSample(sample: Sample): String = makeTuple(sample)
-//  def makeTuple(tuple: Tuple): String 
-//  def makeFunction(function: Function): String
-//  //TODO: can we provide default implementations for these?
   
   def makeScalar(scalar: Scalar): String = scalar match {
     case Index(i)   => i.toString
@@ -101,6 +88,8 @@ abstract class TextWriter extends Writer {
     //TODO: use Scalar.toStringValue?
     //TODO: deal with Time format
   }
+  
+  def makeSample(sample: Sample): String = makeTuple(sample)
   
   def makeTuple(tuple: Tuple): String = tuple match {
     case Sample(d: Index, r) => varToString(r) //drop Index domain

@@ -12,7 +12,7 @@ import java.util.Date
  */
 class CsvWriter extends TextWriter {
   //TODO: Non-flat SSI,...
-    
+  
   override def makeHeader(dataset: Dataset): String = {
     //don't include Index variable
     dataset.toSeq.filterNot(_.isInstanceOf[Index]).map(makeHeading(_)).mkString("", delimiter, newLine) 
@@ -30,4 +30,11 @@ class CsvWriter extends TextWriter {
   }
   
   override def mimeType: String = getProperty("mimeType", "text/csv")
+  
+  /*
+   * TODO: CSV "standard":
+   * http://tools.ietf.org/html/rfc4180
+   * "there is no formal specification in existence"
+   * tend not to have " " in delim
+   */
 }
