@@ -25,6 +25,7 @@ object RegEx {
      * No fractional seconds. Not variants without "-".
      */
     val TIME = "[0-9]{4}-[0-9]{2}-[0-9]{2}('?T'?[0-2][0-9](:[0-5][0-9](:[0-5][0-9])?)?)?"
+    //TODO: DATE, TIME, and DATETIME?
     
     /**
      * Regular expression matching common delimiters: white space and commas.
