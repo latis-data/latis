@@ -165,6 +165,8 @@ trait Operation {
 }
 
 object Operation {
+  
+  def apply(name: String): Operation = Operation(name, List(""))
 
   def apply(name: String, args: Seq[String]): Operation = {
     LatisProperties.get("operation." + name + ".class") match {
