@@ -11,15 +11,9 @@ import latis.reader.tsml.ml.Tsml
  * via the Data's iterator which can be fed by this Adapter.
  */
 abstract class IterativeAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
-  //TODO: Stream, lazy list
+  //TODO: Stream, lazy list?
   //TODO: consider Iterative and Granule as traits?
-  
-  //TODO: assuming single top level variable = Function
-  
-//  lazy val sampleSize = {
-//    val f = dataset(0).asInstanceOf[Function] //assume single top-level Function
-//    f.getDomain.getSize + f.getRange.getSize
-//  }
+  //TODO: consider use cases beyond single top level variable = Function
   
   /**
    * Implementations of IterativeAdapter need to override this to construct Data
