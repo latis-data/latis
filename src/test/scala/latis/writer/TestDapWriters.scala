@@ -27,6 +27,13 @@ import latis.dm._
 
 class TestDapWriters {
 
+  var tmpFile = ???
+  
+  def getTmpDir = System.getProperty("java.io.tmpdir")
+  
+  @After
+  def removeTmpFile = ???
+  
   @Test
   def test_dds {
     test_scalar_dds
@@ -40,14 +47,14 @@ class TestDapWriters {
     test_tsi_das
   }
   
-  //@Test
+  @Test
   def write_dds {
     val reader = TsmlReader("datasets/tsi.tsml")
     val ds = reader.getDataset
     Writer("dds").write(ds)
   }
     
-  //@Test
+  @Test
   def write_das {
     val reader = TsmlReader("datasets/tsi.tsml")
     val ds = reader.getDataset
