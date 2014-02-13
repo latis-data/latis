@@ -8,6 +8,8 @@ import latis.util.FirstThenOther
 
 class DasWriter extends TextWriter {
   
+  val indentSize = 4
+  
   override def makeHeader(dataset: Dataset) = "attributes {" + newLine
   
   override def writeVariable(variable: Variable): Unit = {
@@ -16,10 +18,10 @@ class DasWriter extends TextWriter {
   
   def makeAttributes(variable: Variable): String = {
     val props = variable.getMetadata.getProperties
-    count-=1
+    count-=indentSize
     if (props.filterNot(_._1 == "name").nonEmpty) {
       val ss = for ((name, value) <- props.filterNot(_._1 == "name"))
-        yield indent(count+1) + "string " + name + " \"" + value + "\""   //metadata should only be strings
+        yield indent(count+indentSize) + "string " + name + " \"" + value + "\""   //metadata should only be strings
       ss.mkString("", ";\n", ";\n" + indent(count) + "}\n")
     }
     else indent(count) + "}\n"
@@ -34,7 +36,7 @@ class DasWriter extends TextWriter {
   override def makeTuple(tuple: Tuple): String = {
     val label = makeLabel(tuple)
     val s = tuple.getVariables.map(varToString(_))
-    count-=1
+    count-=indentSize
     label + s.mkString("","",indent(count)+"}\n")
   }
   
@@ -44,12 +46,12 @@ class DasWriter extends TextWriter {
     
   def indent(num: Int): String = {
     val sb = new StringBuilder()
-    for(a <- 0 to num) sb append "\t"
+    for(a <- 0 to num) sb append " "
     sb.toString
   }
   
   def makeLabel(variable: Variable): String ={
-    count +=1
-    indent(count-1) + variable.getName + "{\n"
+    count +=indentSize
+    indent(count-indentSize) + variable.getName + "{\n"
   }
 }

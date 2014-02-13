@@ -6,33 +6,35 @@ import java.io.PrintWriter
 
 class DdsWriter extends TextWriter {
   
-  override def makeHeader(dataset: Dataset) = "dataset {\n"
+  val indentSize = 4
+  
+  override def makeHeader(dataset: Dataset) = "Dataset {\n"
   
   override def writeVariable(variable: Variable): Unit = {
     printWriter.print(varToString(variable))
   }
   
   override def makeFunction(function: Function): String = {
-    count += 1
-    val s = indent(count-1) + "sequence {\n" + varToString(Sample(function.getDomain, 
-        function.getRange)) + indent(count-1) + "} " + function.getName + ";\n"
-    count -=1
+    count += indentSize
+    val s = indent(count-indentSize) + "Sequence {\n" + varToString(Sample(function.getDomain, 
+        function.getRange)) + indent(count-indentSize) + "} " + function.getName + ";\n"
+    count -= indentSize
     s
   }
   
   override def makeScalar(scalar:Scalar): String = scalar match {
-    case _: Real    => indent(count) + "float64 " + scalar.getName + ";\n"
-    case _: Integer => indent(count) + "int64 "   + scalar.getName + ";\n"
-    case _: Text    => indent(count) + "string "  + scalar.getName + ";\n"
+    case _: Real    => indent(count) + "Float64 " + scalar.getName + ";\n"
+    case _: Integer => indent(count) + "Int64 "   + scalar.getName + ";\n"
+    case _: Text    => indent(count) + "String "  + scalar.getName + ";\n"
     case _: Binary  => "NaN"
   }
   
   override def makeTuple(tuple: Tuple): String = tuple match{ 
     case Sample(vars) => tuple.getVariables.map(varToString(_)).mkString("")
     case _ => {
-      count += 1
-      val s = indent(count-1) + "structure {\n" + tuple.getVariables.map(varToString(_)).mkString("") + indent(count-1) + "} " + tuple.getName + ";\n"
-      count -=1
+      count += indentSize
+      val s = indent(count-indentSize) + "Structure {\n" + tuple.getVariables.map(varToString(_)).mkString("") + indent(count-indentSize) + "} " + tuple.getName + ";\n"
+      count -= indentSize
       s
     }
   }
@@ -43,7 +45,7 @@ class DdsWriter extends TextWriter {
     
   def indent(num: Int): String = {
     val sb = new StringBuilder()
-    for(a <- 0 to num) sb append "\t"
+    for(a <- 0 to num) sb append " "
     sb.toString
   }
     
