@@ -5,9 +5,8 @@ import java.io.OutputStream
 import java.io.PrintWriter
 import latis.util.FirstThenOther
 
-abstract class TextWriter extends Writer {
+class TextWriter extends Writer {
   //TODO: with Text, Binary trait?
-  //TODO: build with Dataset? but write(ds) feels better that write()
   //TODO: Dataset.write ?
   //TODO: with Header
   
@@ -25,19 +24,17 @@ abstract class TextWriter extends Writer {
   def printWriter: PrintWriter = _writer
   //TODO: what happens to PrintWriter when out is closed?
   
-  //TODO: platform indep new line
-  val newLine = "\n"
-  
-
-//  def recordDelim = newLine
-//  def fieldDelim = ","
-  
-  //def startThenDelim = FirstThenOther("", newLine)
+  //platform indep new line
+  val newLine = System.getProperty("line.separator") //"\n"
+    
+  lazy val delimiter = getProperty("delimiter", ", ")
     
   
   def writeHeader(dataset: Dataset) = printWriter.print(makeHeader(dataset)) //NOTE: just "print" w/o nl
   def writeFooter(dataset: Dataset) = printWriter.print(makeFooter(dataset)) //NOTE: just "print" w/o nl
   
+  //Override these if you need to add a header or footer
+  //TODO: use Header class from writer.sfx.header property
   def makeHeader(dataset: Dataset): String = ""
   def makeFooter(dataset: Dataset): String = ""
     
@@ -73,8 +70,6 @@ abstract class TextWriter extends Writer {
   }
   
   //make lots of extension points
-  //TODO: default impl?
-  //TODO: or just override with other cases delegating to super?
   
   def varToString(variable: Variable): String = variable match {
     case   scalar: Scalar   => makeScalar(scalar)
@@ -83,30 +78,29 @@ abstract class TextWriter extends Writer {
     case function: Function => makeFunction(function)
   }
   
-  def makeScalar(scalar: Scalar): String 
-  def makeSample(sample: Sample): String = makeTuple(sample)
-  def makeTuple(tuple: Tuple): String 
-  def makeFunction(function: Function): String
   
-//  = scalar match {
-//    case real: Real => makeReal(real)
-//    case int: Integer => makeInteger(int)
-//    case text: Text => makeText(text)
-//    case bin: Binary => makeBinary(bin)
-//  }
-//    case Real(d) => d.toString
-//    case Integer(l) => l.toString
-//    case Text(s) => s.trim
-//    case Binary(b) => "NaN" //TODO: uuencode?
-//    //TODO: use Scalar.toStringValue?
-//  //TODO: deal with Time format
-    
-//  = tuple match {
-//    case Sample(d: Index, r) => varToString(r) //drop Index domain
-//    case Tuple(vars) => vars.map(varToString(_)).mkString(delimiter)
-//  }
+  def makeScalar(scalar: Scalar): String = scalar match {
+    case Index(i)   => i.toString
+    case Real(d)    => d.toString
+    case Integer(l) => l.toString
+    case Text(s)    => s.trim
+    case Binary(b)  => "blob" //TODO: uuencode?
+    //TODO: use Scalar.toStringValue?
+    //TODO: deal with Time format
+  }
+  
+  def makeSample(sample: Sample): String = makeTuple(sample)
+  
+  def makeTuple(tuple: Tuple): String = tuple match {
+    case Sample(d: Index, r) => varToString(r) //drop Index domain
+    case Tuple(vars) => vars.map(varToString(_)).mkString(delimiter)
+  }
+  
+  def makeFunction(function: Function): String = {
+    function.iterator.map(varToString(_)).mkString(delimiter)
+    // TODO: support non-flat, one row for each inner sample, repeat previous values
+  }
   
  
-
-  override def mimeType: String = "text/plain"
+  override def mimeType: String = getProperty("mimeType", "text/plain")
 }

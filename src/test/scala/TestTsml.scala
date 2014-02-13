@@ -32,7 +32,7 @@ class TestTsml  {
   def test_variable_names {
     val tsml = Tsml("datasets/test/scalar.tsml")
     val names = tsml.getScalarNames
-    assertEquals("foo", names(0))
+    assertEquals("a", names(1))
   }
   
   //@Test
@@ -70,9 +70,10 @@ class TestTsml  {
   
  // @Test
   def test_dataset_aggregation2 {
+    //TODO: broken
     //println(Tsml("datasets/test/agg.tsml#ds1"))
-    //val ds = TsmlReader("datasets/test/agg.tsml#ds1").getDataset
-    val ds = TsmlReader("datasets/test/agg.tsml").getDataset
+    //val ds = TsmlReader("datasets/test/agg/agg.tsml#ds1").getDataset
+    val ds = TsmlReader("datasets/test/agg/agg.tsml").getDataset
     AsciiWriter().write(ds)
   }
   

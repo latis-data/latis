@@ -14,7 +14,8 @@ import latis.data.EmptyData
  * data are stored in a separate Data object).
  */
 abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
-  //TODO: don't make String specific, use Data?
+  //TODO: don't make String specific, use Data? type Value = ...?
+  //TODO: compare to DataMap util
   lazy val dataMap: immutable.Map[String, immutable.Seq[String]] = readData
 
   /**
@@ -30,7 +31,7 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    */
   def initDataMap: mutable.HashMap[String, mutable.ArrayBuffer[String]] = {
     val map = mutable.HashMap[String, mutable.ArrayBuffer[String]]()
-    for (vname <- variableNames) map += ((vname, mutable.ArrayBuffer[String]()))
+    for (vname <- origVariableNames) map += ((vname, mutable.ArrayBuffer[String]()))
     map
   }
   
@@ -47,18 +48,16 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    * Override to construct Scalars using the data read by this Adapter.
    * Note that only Scalars can have Data with this column-oriented Adapter.
    */
-  override protected def makeScalar(sml: ScalarMl): Option[Scalar] = {
-    val md = makeMetadata(sml)
+  override protected def makeScalar(scalar: Scalar): Option[Scalar] = {
+    val md = scalar.getMetadata
     
     val data = dataMap.getOrElse(md("name"), immutable.Seq[String]())
     //note, will be empty if not a named variable (e.g. index)
     //TODO: consider broader applicability
         
-    sml.label match {
-      case "real" => Some(Real(md, data.map(_.toDouble)))
-      case "integer" => Some(Integer(md, data.map(_.toLong)))
-      case "text" => Some(Text(md, data))
-      case "time" => {
+    scalar match {
+      //TODO: can we delegate more to Time factory?
+      case _: Time => {
         //if numeric units
         md.get("units") match {
           case Some(u) => {
@@ -75,8 +74,10 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
           case None => Some(Time(md, data.map(_.toDouble))) //default to double times
         }
       }
-      
-      case "index" => {
+      case _: Real => Some(Real(md, data.map(_.toDouble)))
+      case _: Integer => Some(Integer(md, data.map(_.toLong)))
+      case _: Text => Some(Text(md, data))
+      case _: Index => {
         //get the number of samples for one of the variables
         val length = dataMap.last._2.length
         Some(Index.withLength(length))

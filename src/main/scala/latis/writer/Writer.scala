@@ -3,12 +3,35 @@ package latis.writer
 import latis.dm.Dataset
 import java.io.OutputStream
 import latis.util.LatisProperties
+import scala.collection._
 
 /**
  * Base class for Dataset writers.
  */
 abstract class Writer {
+  
+  //---- Writer properties from latis.properties ------------------------------
+  //TODO: Properties trait? also used by TsmlAdapter, but traits can't have state
+  
+  /**
+   * Store XML attributes for this Adapter definition as a properties Map.
+   */
+  private var properties: immutable.Map[String,String] = immutable.Map[String,String]()
 
+  /**
+   * Return Some property value or None if property does not exist.
+   */
+  def getProperty(name: String): Option[String] = properties.get(name)
+  
+  /**
+   * Return property value or default if property does not exist.
+   */
+  def getProperty(name: String, default: String): String = getProperty(name) match {
+    case Some(v) => v
+    case None => default
+  }
+
+  
   var _out: OutputStream = null //TODO: restrict to subclasses, e.g. HttpServletWriter
   def outputStream = _out
 
@@ -67,7 +90,7 @@ abstract class Writer {
    */
   def mimeType: String = "application/octet-stream" 
   //TODO: have Writers extend traits (e.g. Text, Binary) and inherit mime type
-  
+  //TODO: get from latis.properties
 }
 
 object Writer {
@@ -84,7 +107,20 @@ object Writer {
   
   def fromSuffix(suffix: String): Writer = {
     LatisProperties.get("writer." + suffix + ".class") match {
-      case Some(cname) => fromClass(cname)
+      case Some(cname) => {
+        val writer = fromClass(cname)
+        //add properties from the writer definition in latis.properties
+        //writer.properties 
+        val props = mutable.Map[String, String]()
+        val keys = LatisProperties.keys.filter(_.startsWith("writer." + suffix))
+        for (key <- keys) {
+          val k = key.substring(suffix.length + 8) //skip "writer.sfx."
+          props += (k -> LatisProperties(key))
+        }
+        
+        writer.properties = props.toMap //make it immutable
+        writer
+      }
       case None => throw new RuntimeException("Unsupported Writer suffix: " + suffix)
     }
   }

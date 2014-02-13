@@ -7,7 +7,7 @@ package latis.util
  * sample but this will keep looking for the next valid sample.
  * You can also "peek" at the next sample without advancing.
  */
-abstract class NextIterator[T] extends Iterator[T] {
+abstract class PeekIterator[T] extends Iterator[T] {
   
 //  /**
 //   * Override to initialize stuff before we try to get the first sample.

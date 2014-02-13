@@ -58,7 +58,7 @@ class TestJdbcAdapter {
   
   //@Test
   def project {
-    val ops = List(Projection("i,d"))
+    val ops = List(Projection("t,s"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
     AsciiWriter.write(ds)
   }
@@ -70,7 +70,7 @@ class TestJdbcAdapter {
     Writer("dds").write(ds)
   }
   
-  @Test
+  //@Test
   def dont_project_domain {
     val ops = List(Projection("d,s"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
@@ -88,8 +88,22 @@ class TestJdbcAdapter {
   def iso_time_selection {
     val ops = List(Selection("time>=2014-01-02T00:00:00"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
-    //AsciiWriter.write(ds)
-    Writer("jsond").write(ds)
+    AsciiWriter.write(ds)
+    //Writer("jsond").write(ds)
+  }
+  
+  //@Test
+  def select_on_non_projected_project_first {
+    val ops = List(Projection("d,s"), Selection("time>=2014-01-02T00:00:00"))
+    val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
+    AsciiWriter.write(ds)
+  }
+  
+  @Test
+  def select_on_non_projected_select_first {
+    val ops = List(Selection("time>=2014-01-02T00:00:00"), Projection("d,s"))
+    val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
+    AsciiWriter.write(ds)
   }
   
   //@Test

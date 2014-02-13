@@ -5,6 +5,7 @@ import latis.time.TimeScaleType._
 import java.text.SimpleDateFormat
 import scala.util.matching.Regex
 import latis.units.UnitOfMeasure
+import latis.util.RegEx
 
 class TimeScale(val epoch: Date, val unit: TimeUnit, val tsType: TimeScaleType) extends UnitOfMeasure("TODO") {
   
@@ -36,24 +37,22 @@ object TimeScale {
   //TODO: other options with defaults
   
   /**
-   * Make TimeScale from "unit since epoch" String.
+   * Make TimeScale from "unit since epoch" or time format String.
    * Assume Native TimeScaleType (no leap second consideration).
    */
   def apply(scale: String): TimeScale = {
     //TODO: encode type (e.g. UTC) in scale string?
     //TODO: allow named TimeScales, e.g. GPS
     
-    scale.toLowerCase()
-//    val regex = new Regex("""(RegEx.WORD) since (RegEx.TIME)""")
-//    val regex(unit, time) = scale
-    //TODO: may throw scala.MatchError
-    //TODO: would split be more efficient? less likely to detect invalid time unit
-    val ss = scale.split(" ")
-    val time = ss(2)
-    val timeUnit = TimeUnit.withName(ss(0)) 
-    
-    //val date: Date = TimeFormat.DATE.parse(time) //TODO: assumes yyyy-MM-dd, add support for any time
-    
-    TimeScale(time, timeUnit, TimeScaleType.NATIVE)
+    //val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + "("+RegEx.TIME+")").r
+    //TODO: apparently scala regex will extract group for nested ()s
+    val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """([0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
+    scale.trim match {
+      case regex(unit, epoch) => TimeScale(epoch, TimeUnit.withName(unit), TimeScaleType.NATIVE)
+      case _ => {
+        //assume formatted time (http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html)
+        TimeScale.JAVA
+      }
+    }
   }
 }

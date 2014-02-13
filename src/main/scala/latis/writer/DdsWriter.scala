@@ -12,7 +12,7 @@ class DdsWriter extends TextWriter {
     printWriter.print(varToString(variable))
   }
   
-  def makeFunction(function: Function): String = {
+  override def makeFunction(function: Function): String = {
     count += 1
     val s = indent(count-1) + "sequence {\n" + varToString(Sample(function.getDomain, 
         function.getRange)) + indent(count-1) + "} " + function.getName + ";\n"
@@ -20,14 +20,14 @@ class DdsWriter extends TextWriter {
     s
   }
   
-  def makeScalar(scalar:Scalar): String = scalar match {
+  override def makeScalar(scalar:Scalar): String = scalar match {
     case _: Real    => indent(count) + "float64 " + scalar.getName + ";\n"
     case _: Integer => indent(count) + "int64 "   + scalar.getName + ";\n"
     case _: Text    => indent(count) + "string "  + scalar.getName + ";\n"
     case _: Binary  => "NaN"
   }
   
-  def makeTuple(tuple: Tuple): String = tuple match{ 
+  override def makeTuple(tuple: Tuple): String = tuple match{ 
     case Sample(vars) => tuple.getVariables.map(varToString(_)).mkString("")
     case _ => {
       count += 1

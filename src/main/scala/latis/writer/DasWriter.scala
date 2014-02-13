@@ -25,13 +25,13 @@ class DasWriter extends TextWriter {
     else indent(count) + "}\n"
   }
 
-  def makeFunction(function: Function): String = varToString(Sample(function.getDomain, function.getRange))
+  override def makeFunction(function: Function): String = varToString(Sample(function.getDomain, function.getRange))
   
-  def makeScalar(scalar:Scalar): String = {
+  override def makeScalar(scalar:Scalar): String = {
     makeLabel(scalar) + makeAttributes(scalar)
   }
   
-  def makeTuple(tuple: Tuple): String = {
+  override def makeTuple(tuple: Tuple): String = {
     val label = makeLabel(tuple)
     val s = tuple.getVariables.map(varToString(_))
     count-=1

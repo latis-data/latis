@@ -7,7 +7,7 @@ import java.nio.ByteBuffer
 import javax.naming.Context
 import javax.naming.InitialContext
 import javax.sql.DataSource
-import latis.util.NextIterator
+import latis.util.PeekIterator
 import latis.time.Time
 import java.util.Calendar
 import java.util.TimeZone
@@ -43,93 +43,26 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   //Define sorting order.
   private var order = " ASC"
     
-  override def getDataset(ops: Seq[Operation]): Dataset = {
-    //val ds = dataset
-    /*
-     * TODO 2013-10-31
-     * but construction of the dataset applies the handled ops
-     * but all lazily until writer starts asking for data
-     * 
-     * projection broken:
-     * probably because dataset is mode before proj op is applied
-     * we need to deliver the final dataset, not the orig
-     * but we don't want to use default Projection Op
-     * ++handling ops needs to munge dataset model (no data until iterator is invoked)
-     * but tsml can have values = data
-     * 
-     * should just delegate to proper ops even if they are redundant
-     * just use what we can to make source data access efficient
-     * 
-     * does makeFunction,makeDataIterator need to run after projection applied?
-     * default projection op should just wrap it
-     * but proj op will expect data to be consistent with the model when it removes a var...
-     * handleOp could apply op and return new dataset?
-     * they key is to end up with a new dataset after each op
-     * safe to assume here (no values in tsml) that there's no data in dataset at this stage?
-     * 
-     */
-    
-/*
- * 2014-02-07
- * Need orig dataset domain for sorting even if not projected
- * First pass: make full Dataset from tsml
- *   => origDataset? or just use 'dataset'? or do we need to hang on to the processed dataset too?
- *   all in TsmlAdapter, no override, encapsulate ML classes
- *   apply PIs?
- *     at least rename?
- *     but sql query needs orig name
- *     don't apply PIs yet
- *   suitable for all metadata queries
- *   use as template when building actual Dataset components
- * Second pass: 
- *   apply PIs and user ops
- *   
- * Could this help us reorder by projection?
- * make a branch
- */
-    
-    val others = (piOps ++ ops).filterNot(handleOperation(_))
-    //ops.map(handleOperation(_))
-    
-    val ds = dataset
-    
-    //TODO: call super to handle the rest?
-    //TODO: or applyOps(ds, ops)?
-   
-    others.reverse.foldRight(ds)(_(_))
-  }
+
   
   override def handleOperation(operation: Operation): Boolean = operation match {
-    case Projection(p) => {this.projection = p; true}
+    case Projection(p) => this.projection = p; true
+    
     //TODO: support alias
     //getVariableByName(alias).getName
-    //do we really want to impl that for Tsml? in addition to Dataset?
-    
-    /*
-     * TODO: need to keep orig dataset, filter on non-projected vars...
-     * note, we do not yet have a dataset.
-     * We currently ask adapters whether they can and will handle the ops when the dataset is requested.
-     * 
-     * Is there any reason not to create an orig dataset first?
-     * Simply reflects the tsml, no data access needed.
-     * Seems like a better idea.
-     * operation handlers could still be lazy
-     * consider how we use "template" variables
-     * 
-     */
     
     case Selection(expression) => expression match {
       //Break expression up into components
-      //TODO: sanitize value, quotes around timetag,...
-      case SELECTION(name, op, value) => {
+      case SELECTION.r(name, op, value) => {
         if (name == "time") handleTimeSelection(op, value) //special handling for "time"
-        else if (tsml.getScalarNames.contains(name)) { //other variable (not time), even if not projected
+        //TODO: handle other Time variables (dependent)
+        else if (origVariableNames.contains(name)) { //other variable (not time), even if not projected
           //add a selection to the sql, may need to change operation
           op match {
             case "==" => selections append name + "=" + value; true
             case "=~" => selections append name + " like '%" + value + "%'"; true
             case "~"  => false  //almost equal (e.g. nearest sample) not supported by sql
-            case _ => selections append expression; true
+            case _ => selections append expression; true //TODO: sanitize, but already matched Selection regex
           }
         }
         else false //doesn't apply to our variables, so leave it for the next handler, TODO: or error?
@@ -143,6 +76,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     //TODO: handle exception, return false (not handled)?
     
     case _ => false //not an operation that we can handle
+    //TODO: rename: select foo as bar?
   }
 
  /*
@@ -191,7 +125,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
       //TODO: what if native time var is "time", without units?
        case units: String => {
         //convert ISO time to units
-        RegEx.TIME findFirstIn value match {
+        RegEx.TIME.r findFirstIn value match {
           case Some(s) => {
             val t = Time.fromIso(s)
             val t2 = t.convert(TimeScale(units)).getNumberData.doubleValue
@@ -205,32 +139,17 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   }
   
   //Override to apply projection to the model, scalars only, for now.
-//TODO: keep original Dataset (e.g. so we can select on non-projected variables)
-  //TODO: maintain projection order, this means modifying the model higher up
+  //TODO: maintain projection order, this means modifying the model higher up, or when building Sample?
   //TODO: deal with composite names for nested vars
-  override def makeScalar(sml: ScalarMl): Option[Scalar] = {
-    //metadata/name complications make it easier to make the var first
-    //TODO: filter before making
-    super.makeScalar(sml) match {
-      case os @ Some(s) => { //super class made a valid Scalar
-        if (projection == "*") os
-        //check if the Scalar has a matching name or alias
-        else projection.split(",").find(s.hasName(_)) match {  
-          case Some(_) => Some(s)  //found a match
-          case None => None  //no match
-        }
+  override def makeScalar(s: Scalar): Option[Scalar] = {
+    if (projection == "*") super.makeScalar(s)
+    else projection.split(",").find(s.hasName(_)) match {  //account for aliases
+      case Some(_) => {
+        super.makeScalar(s)  //found a match
       }
-      case _ => None  //superclass gave us None
+      case None => None  //no match
     }
   }
-  
-  /*
-   * TODO: clarify what happens before/after dataset is constructed vs accessed
-   * need to make source dataset then "wrap"? it to apply projection to the model (and provenance) 
-   * 
-   * try making 'dataset' be unaltered
-   * getDataset(ops) should return the new one
-   */
   
 
   private def executeQuery: ResultSet =  {
@@ -239,13 +158,13 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     
     //Apply optional limit to the number of rows
     //TODO: Figure out how to warn the user if the limit is exceeded
-    properties.get("limit") match {
+    getProperty("limit") match {
       case Some(limit) => statement.setMaxRows(limit.toInt)
       case _ => 
     }
     
     //Allow specification of number of rows to fetch at a time.
-    properties.get("fetchSize") match {
+    getProperty("fetchSize") match {
       case Some(fetchSize) => statement.setFetchSize(fetchSize.toInt)
       case _ => 
     }
@@ -258,7 +177,10 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     statement.executeQuery(sql)
   }
   
-  def getTable: String = properties("table")
+  def getTable: String = getProperty("table") match {
+    case Some(s) => s
+    case None => throw new Error("JdbcAdapter needs to have a 'table' defined.")
+  }
   
   protected def makeQuery: String = {
     //TODO: sanitize stuff from properties, only in the data providers domain, but still...
@@ -273,33 +195,20 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     val p = predicate 
     if (p.nonEmpty) sb append " where " + p
     
-//TODO: reuse
-    def findDomainVariable(variable: Variable): Option[Variable] = variable match {
-      case _: Scalar => None
-      case Tuple(vars) => {
-        val domains = vars.flatMap(findDomainVariable(_))
-        if (domains.nonEmpty) Some(domains.head) else None
-      }
-      case f: Function => Some(f.getDomain)
-    }
-    
     //Sort by domain variable.
     //assume domain is scalar, for now
     //Note 'dataset' should be the original before ops
-    val dvar = findDomainVariable(dataset) 
-//TODO: won't work if domain not projected, dataset will have projections applied in makeScalar above during dataset construction process
-    //  no orig Dataset to be had
-    
-    dvar match {
-      case Some(i: Index) => //use natural order
-      case Some(v) => v match {
-        case _: Scalar => sb append " ORDER BY " + v.getName + order
-        case _ => {
-          println(v)
-          ??? //TODO: generalize for n-D domains, Function in domain?
+    //val dvar = findDomainVariable(dataset) 
+    origDataset.findFunction match {
+      case Some(f) => f.getDomain match {
+        case i: Index => //use natural order
+        case v: Variable => v match {
+          case _: Scalar => sb append " ORDER BY " + v.getName + order
+          case _ => ??? //TODO: generalize for n-D domains, Function in domain?
         }
+        case _ => ??? //TODO: error? Function has no domain
       }
-      case _ => ??? //TODO: error?
+      case None => //no function so domain variable to sort by
     }
     
     sb.toString
@@ -311,55 +220,35 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   lazy val predicate: String = {
     //start with selection clauses from requested operations
     val buffer = selections
-    //TODO: just build on selections
+    //TODO: sanitize
     
-      
-    //add processing instructions
-    //TODO: diff PI name? unfortunate that "filter" is more intuitive for a relational algebra "selection", "select"?
-    //TODO: should PIs mutate the dataset? probably not, just like any other op, but the adapter's "dataset" should have them applied
-    //buffer ++= tsml.getProcessingInstructions("filter")
-    //PIs should be handled with other operations: select, project
-    
-    //get "predicate" if defined in the adapter attributes
-    //TODO: need to be careful what we allow there, assumes selection clauses
-    //  disallow for now since PIs can handle that
-//    buffer += (properties.get("predicate") match {
-//      case Some(s) => s
-//      case None => ""
-//    })
+    //TODO: support "predicate" defined in the adapter attributes? or just depend on PIs
     
     //insert "AND" between the selection clauses
     buffer.filter(_.nonEmpty).mkString(" AND ")
   }
   
-  //No query should be made until the iterator is called
+  //Note, no query should be made until the iterator is called.
   def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
-    //don't count Index vars
-    //TODO: can we get away with flattening? consider nested Functions
     def recordSize = sampleTemplate.getSize
-    //toSeq.filterNot(_.isInstanceOf[Index]).map(_.getSize).sum
-/*
- * TODO: deal with non-projected domain
- * template should have it replaced by Index
- * need to add a value for it in the byte buffer
- * 
- */
     
-    override def iterator = new NextIterator[Data] {
+    override def iterator = new PeekIterator[Data] {
       //Use index to replace a non-projected domain. 
       var index = sampleTemplate.domain match {
         case _: Index => 0
         case _ => -1
       }
-        
+      
+      //Get list of projected Scalars in projection order
+      val vars: Seq[Variable] = if (projection == "*") origDataset.toSeq
+      else projection.split(",").flatMap(origDataset.getVariableByName(_))
+      
+      //Get the types of these variables in the database
       val md = resultSet.getMetaData
-      //val vars = dataset.toSeq //Seq of Variables as ordered in the dataset
-      //TODO: maintain projection order, what if domain var is not first?
-      
-      val vars: Seq[Variable] = if (projection == "*") dataset.toSeq
-      else projection.split(",").flatMap(dataset.getVariableByName(_))
-      
       val types = vars.map(v => md.getColumnType(resultSet.findColumn(v.getName)))
+      
+      //Combine the variables with their database types in a Seq of pairs.
+      //TODO: cleaner way? only needed for Time stored as TIMESTAMP?
       val varsWithTypes = vars zip types
       
       //Define a Calendar so we get our times in the GMT time zone.
@@ -372,6 +261,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
         //TODO: reuse bb? but the previous sample is in the wild, memory resource issue, will gc help?
         if (resultSet.next) {
           //Add index value if domain not projected. Set to 0 above if we have an Index domain, -1 otherwise.
+          //TODO: getNextIndex?
           if (index >= 0) {
             bb.putInt(index)
             index += 1
@@ -379,6 +269,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
           
           for (vt <- varsWithTypes) vt match {
             case (v: Time, t: Int) if (t == java.sql.Types.TIMESTAMP) => {
+              //TODO: other database time types?
               val time = resultSet.getTimestamp(v.getName, cal).getTime
               //TODO: support nanos?
               //deal with diff time types
@@ -399,7 +290,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
             case (i: Integer, _) => bb.putLong(resultSet.getLong(i.getName))
             case (t: Text, _) => {
               //pad the string to its full length using %ns formatting
-              //TODO: regular words pad right, time strings from db pad left!?
+              //Note: regular words pad right, time strings from db pad left!?
               val s = "%"+t.length+"s" format resultSet.getString(t.getName)
               //fold each char into the ByteBuffer
               //println(t +": "+s)
@@ -430,7 +321,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
   private lazy val connection: Connection = {
     //TODO: use 'location' uri for jndi with 'java' (e.g. java:comp/env/jdbc/sorce_l1a) scheme, but glassfish doesn't use that form
-    val con = properties.get("jndi") match {
+    val con = getProperty("jndi") match {
       case Some(jndi) => getConnectionViaJndi(jndi)
       case None => getConnectionViaJdbc
     }
@@ -446,11 +337,22 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   }
   
   private def getConnectionViaJdbc: Connection = {
-    //TODO: error if not present
-    val driver = properties("driver")
-    val url = properties("location")
-    val user = properties("user")
-    val passwd = properties("password")
+    val driver = getProperty("driver") match {
+      case Some(s) => s
+      case None => throw new Error("JdbcAdapter needs to have a JDBC 'driver' defined.")
+    }
+    val url = getProperty("location") match {
+      case Some(s) => s
+      case None => throw new Error("JdbcAdapter needs to have a JDBC 'url' defined.")
+    }
+    val user = getProperty("user") match {
+      case Some(s) => s
+      case None => throw new Error("JdbcAdapter needs to have a 'user' defined.")
+    }
+    val passwd = getProperty("password") match {
+      case Some(s) => s
+      case None => throw new Error("JdbcAdapter needs to have a 'password' defined.")
+    }
     
     //Load the JDBC driver 
     Class.forName(driver)

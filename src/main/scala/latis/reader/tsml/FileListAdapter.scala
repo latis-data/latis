@@ -35,7 +35,7 @@ class FileListAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     case None => throw new RuntimeException("FileListAdapter requires a 'location' attribute.")
   }
   
-  val regex = properties.get("pattern") match {
+  val regex = getProperty("pattern") match {
     case Some(s: String) => s.r
     case None => throw new RuntimeException("FileListAdapter requires a file name 'pattern' attribute.")
   }

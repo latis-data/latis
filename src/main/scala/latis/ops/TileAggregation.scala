@@ -4,7 +4,7 @@ import latis.dm._
 import latis.data.IterableData
 import latis.data.Data
 import latis.dm.Sample
-import latis.util.NextIterator
+import latis.util.PeekIterator
 
 /**
  * Assumes aggregates have the same type and domain sets

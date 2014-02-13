@@ -29,7 +29,7 @@ class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
   def executeQuery: Iterator[SearchResult] = {
     // Specify the ids of the attributes to return (Dataset Variables)
     //TODO: use projection
-    val attIDs = variableNames.toArray
+    val attIDs = origVariableNames.toArray
     
     // Add search attributes.
     //TODO: generalize to use selections
@@ -70,7 +70,7 @@ class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     for (result <- results) {
       //Get the attributes for the person. Should be same as attIDs = Dataset Variables.
       val atts = result.getAttributes
-      for (vname <- variableNames) {
+      for (vname <- origVariableNames) {
         //Note, the value of an attribute is more attributes. Join with ",".
         val value = JavaConversions.enumerationAsScalaIterator(atts.get(vname).getAll).mkString(",")
         map(vname) append value

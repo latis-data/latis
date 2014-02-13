@@ -9,7 +9,7 @@ class RegexAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
   //TODO: any reason this couldn't be used with iterative adapter?
   
   //TODO: change att to 'pattern'?
-  val regex = properties.get("regex") match {
+  val regex = getProperty("regex") match {
     case Some(s: String) => s.r
     case None => throw new RuntimeException("RegexAdapter requires a regular expression definition 'regex'.")
   }
@@ -29,7 +29,7 @@ class RegexAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
     }
     
     //create Map with variable names and values
-    val vnames = variableNames
+    val vnames = origVariableNames
     //If we didn't find the right number of samples, drop this record
     if (vnames.length != values.length) Map[Name, Value]()
     else (vnames zip values).toMap

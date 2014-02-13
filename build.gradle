@@ -6,7 +6,7 @@ apply plugin: 'war'
 apply plugin: 'ivy-publish'
 
 //Define the release version. Used for published jar.
-version = '2.2.2'
+version = '2.2.5'
 
 //Define Java version for generated class files.
 targetCompatibility = 1.6
@@ -37,6 +37,9 @@ dependencies {
     
     compile 'com.typesafe:scalalogging-slf4j_2.10:1.0.1'
     compile 'ch.qos.logback:logback-classic:1.0.13'
+    
+    //compile 'org.scalanlp:breeze-viz_2.10:0.5.2'
+    //for plotting with jfreechart, lots of dependencies!
     
     testCompile 'junit:junit:4.+'
     testCompile 'org.apache.derby:derby:10.10.1.1'

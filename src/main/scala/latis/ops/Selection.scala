@@ -85,7 +85,7 @@ object Selection {
   }
   
   def apply(expression: String): Selection = expression match {
-    case SELECTION(name, op, value) => Selection(name, op, value)
+    case SELECTION.r(name, op, value) => Selection(name, op, value)
     //TODO: case _ => error
   }
   

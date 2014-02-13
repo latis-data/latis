@@ -65,8 +65,8 @@ object DapConstraintParser {
   def parseExpression(expression: String): Operation = {
     //TODO: Option? error handling
     expression match {
-      case SELECTION(name, op, value) => Selection(name, op, value)
-      case OPERATION(name, args) => Operation(name, args.split(","))
+      case SELECTION.r(name, op, value) => Selection(name, op, value)
+      case OPERATION.r(name, args) => Operation(name, args.split(","))
       case _ => throw new UnsupportedOperationException("Failed to parse expression: " + expression)
       //TODO: log and return None? probably should return error
     }

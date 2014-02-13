@@ -39,8 +39,8 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    * Size of this Variable in bytes.
    */
   def getSize: Int = size
-  lazy val size: Int  = this match {
-    case _: Index => 4 //TODO: Use 0 since we don't actually use these values?
+  private lazy val size: Int  = this match {
+    case _: Index => 4 
     case _: Real => 8 //double
     case _: Integer => 8 //long
     case t: Text => t.length * 2 //2 bytes per char  //TODO: consider Seq, get max
@@ -254,7 +254,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
       val new_samples = for (sample <- f.iterator; new_sample <- sample.groupVariableBy(name).iterator) yield new_sample
       //                     (I,(R,T))             (T,(I,R))
       //TODO: sort by domain, or let Function constructor do it?
-      //TODO: need domain and range type, use NextIterator with peek?  just suck in all samples as List
+      //TODO: need domain and range type, use PeekIterator with peek?  just suck in all samples as List
       
       //if duplicate values, need nested function
       //TODO: should this be done by Function constructor (along with sorting)? can't have duplicate domain samples
@@ -279,7 +279,8 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
          * can we know the I was a domain var and reconstruct the nested Function?
          * 
          */
-        val domain = Scalar(value)
+        val domain = Scalar.fromAny(value)
+        //TODO: preserve metadata
         
         //val z = samples.map(_.range)
         //TODO: need these samples to be Samples, not just Tuples
