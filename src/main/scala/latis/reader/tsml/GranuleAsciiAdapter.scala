@@ -4,10 +4,11 @@ import scala.io.Source
 import scala.collection._
 import latis.reader.tsml.ml.Tsml
 
-class AsciiAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
+class GranuleAsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
   
   //TODO: factor out commonalities with IterativeAsciiAdapter
   
+  //handy aliases for a String when we are using it in the context of variable names and values.
   //TODO: could we use the same approach for binary data? define these as ByteBuffer instead of String?
   
   /*
@@ -18,13 +19,11 @@ class AsciiAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    * iterative adapter stitches them together in samples
    * 
    * How far can we go with parseRecord abstraction?
-   * binary data "records", ByteBuffer instead of String?
+   * this would be a good hook for unit tests
    * use traits for ascii vs bin or granlue vs interative?
    * http://mods-jira.lasp.colorado.edu:8080/browse/LATIS-29
    */
   
-  //---- Handy type aliases for a String when we are using it in the context of variable names and values.
-
   /**
    * Used for the name of a Variable as defined by the "name" attribute in the TSML, presumably a Scalar.
    */
@@ -125,20 +124,20 @@ class AsciiAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     (origVariableNames zip record.head.split(" ")).toMap
   }
   
-//  //suck in entire granule, for now
-//  def readData: immutable.Map[Name, immutable.Seq[Value]] = {
-//    val map = initDataMap
-//        
-//    val it = recordIterator
-//    while (it.hasNext) {
-//      val record = it.next
-//      val vs = parseRecord(record)
-//      //skip bad records (empty Map)
-//      if (vs.nonEmpty) for (vname <- origVariableNames) map(vname) append vs(vname)
-//    }
-//    
-//    immutableDataMap(map)
-//  }
+  //suck in entire granule, for now
+  def readData: immutable.Map[Name, immutable.Seq[Value]] = {
+    val map = initDataMap
+        
+    val it = recordIterator
+    while (it.hasNext) {
+      val record = it.next
+      val vs = parseRecord(record)
+      //skip bad records (empty Map)
+      if (vs.nonEmpty) for (vname <- origVariableNames) map(vname) append vs(vname)
+    }
+    
+    immutableDataMap(map)
+  }
   
   
   def close = source.close

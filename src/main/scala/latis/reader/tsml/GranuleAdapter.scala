@@ -15,6 +15,7 @@ import latis.data.EmptyData
  */
 abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   //TODO: don't make String specific, use Data? type Value = ...?
+  
   //TODO: compare to DataMap util
   lazy val dataMap: immutable.Map[String, immutable.Seq[String]] = readData
 
@@ -51,10 +52,8 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   override protected def makeScalar(scalar: Scalar): Option[Scalar] = {
     val md = scalar.getMetadata
     
-    val data = dataMap.getOrElse(md("name"), immutable.Seq[String]())
-    //note, will be empty if not a named variable (e.g. index)
-    //TODO: consider broader applicability
-        
+    val data = dataMap.getOrElse(md("name"), immutable.Seq[String]()) //TODO: error if name not found?
+
     scalar match {
       //TODO: can we delegate more to Time factory?
       case _: Time => {
