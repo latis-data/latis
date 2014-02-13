@@ -37,7 +37,10 @@ class ImageWriter {
   def test_plot{
     val ds = TsmlReader("datasets/tsi.tsml").getDataset
     val data = latis.util.DataMap.toDoubleMap(ds)
-    val a = data("year")
+    
+    val fun = ds.findFunction.get //TODO: handle Option better
+    
+    val a = data(fun.getDomain.getName)
     val b = data("tsi")
     
     val f = Figure()
