@@ -113,6 +113,8 @@ object Data {
     case _ => throw new RuntimeException("Unsupported data sequence type.")
   }
   
+  def apply(strings: Seq[String], length: Int): Data = new StringSeqData(strings.toIndexedSeq, length)
+  
   //takes Buffer so user's don't have to cast after "rewind"
   def apply(buffer: Buffer, sampleSize: Int): Data = {
     //TODO: if buffer is empty, return EmptyData?
