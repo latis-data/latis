@@ -18,7 +18,8 @@ import scala.collection.mutable.ArrayBuffer
  */
 
 trait Variable {
-  def getMetadata: Metadata
+  def getMetadata(): Metadata //need () to avoid ambiguity
+  def getMetadata(name: String): Option[String] = getMetadata.get(name)
   def getData: Data
   
   def getName: String
