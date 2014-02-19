@@ -5,6 +5,7 @@ import scala.collection._
 import java.io.File
 import scala.collection.mutable.ArrayBuffer
 import latis.util.FileUtils
+import latis.data.Data
 
 /**
  * Return a list of files as a Dataset.
@@ -40,7 +41,7 @@ class FileListAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     case None => throw new RuntimeException("FileListAdapter requires a file name 'pattern' attribute.")
   }
   
-  def readData: immutable.Map[String, immutable.Seq[String]] = {
+  override def readData: Map[String, Data] = {
     //TODO: use file or filename filter?
     //recursive
     val files = FileUtils.listAllFiles(dir)
@@ -70,9 +71,8 @@ class FileListAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     //  hard to know here what the domain var(s)
     //  should Function constructor enforce?
     
-    //return as immutable dataMap
-    val z = for ((name, seq) <- map) yield name -> seq.toIndexedSeq //turn ArrayBuffer into an immutable Seq
-    z.toMap //immutable Map
+    //convert string values to Data
+    for ((name, seq) <- map) yield name -> Data(seq) 
   }
   
   override def close = {}

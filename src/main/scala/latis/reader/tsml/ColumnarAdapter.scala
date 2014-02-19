@@ -6,8 +6,8 @@ import scala.collection._
 /**
  * Use column index properties to parse ascii tabular data.
  */
-class ColumnarAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
-  //TODO: any reason this couldn't be used with iterative adapter?
+class ColumnarAdapter(tsml: Tsml) extends GranuleAsciiAdapter(tsml) {
+  //TODO: mixin Iterative or Granule?
   
   /*
    * TODO: 2013-10-16 with Columns trait?
@@ -23,7 +23,7 @@ class ColumnarAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
    * Keep in mind principle of describing source dataset
    * PIs to reorder, drop,...
    *   "projection" PI?
-   * complicates reordering data if dome after?
+   * complicates reordering data if done after?
    * not as much for granule = each scalar has all data
    * some cases (e.g. time in multiple cols) better applied as parsed
    * 
@@ -37,27 +37,25 @@ class ColumnarAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
   //TODO: use for Vector?
   
   val indexMap: Map[String, String] = getProperty("columns") match {
-    case Some(s) => (origVariableNames zip s.split(";")).toMap
+    case Some(s) => (origScalarNames zip s.split(";")).toMap
     case None => throw new RuntimeException("ColumnarAdapter requires 'columns' definition.")
   }
   
-  override def parseRecord(record: Record): Map[Name, Value] = {
-    val names = origVariableNames
-    //assume one line per record, space delimited
-    val delimiter = " "  //TODO: from attributes
-    val ss = record(0).split(delimiter)  //TODO: splitRecord
-    //TODO: join record lines with line_delimiter?
-    
-    val dmap = mutable.Map[Name, Value]()
-    
-    for (name <- names) {
-      //get values by col index and concat with space
-      val value = getIndicesForVariable(name).map(ss(_)).mkString(" ")
-      dmap(name) = value
-    }
-    
-    dmap
-  }
+//  override def parseRecord(record: String): Map[String, String] = {
+//    val names = origScalarNames
+//    val ss = record.split(getDelimiter)  //TODO: splitRecord
+//    //TODO: join record lines with line_delimiter?
+//    
+//    val dmap = Map[String, String]()
+//    
+//    for (name <- names) {
+//      //get values by col index and concat with space
+//      val value = getIndicesForVariable(name).map(ss(_)).mkString(" ")
+//      dmap(name) = value
+//    }
+//    
+//    dmap
+//  }
   
   def getIndicesForVariable(vname: String): Seq[Int] = indexMap(vname).split(",").map(_.toInt)
 }

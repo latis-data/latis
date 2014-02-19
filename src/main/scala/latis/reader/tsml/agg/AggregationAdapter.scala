@@ -44,5 +44,4 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     Dataset(datasets, md) 
   }
 
-  def close {}
 }

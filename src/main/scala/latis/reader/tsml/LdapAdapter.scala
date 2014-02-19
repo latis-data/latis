@@ -5,6 +5,8 @@ import scala.collection._
 import java.util.Hashtable
 import javax.naming._
 import javax.naming.directory._
+import latis.data.Data
+import scala.collection.mutable.ArrayBuffer
 
 class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
 
@@ -29,7 +31,7 @@ class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
   def executeQuery: Iterator[SearchResult] = {
     // Specify the ids of the attributes to return (Dataset Variables)
     //TODO: use projection
-    val attIDs = origVariableNames.toArray
+    val attIDs = origScalarNames.toArray
     
     // Add search attributes.
     //TODO: generalize to use selections
@@ -41,7 +43,6 @@ class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
       case Some(group) => matchAttrs.put(new BasicAttribute("memberof", group))
       case None => 
     }
-    
     
     // Make the query.
     val answer = context.search("ou=People", matchAttrs, attIDs)  //java Enumeration
@@ -60,8 +61,8 @@ class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
 //  }
   
   
-  def readData: immutable.Map[String, immutable.Seq[String]] = {
-    val map = initDataMap
+  def readData: Map[String, Data] = {
+    val map = mutable.Map[String,ArrayBuffer[String]]()
     
     //Get the query results
     val results = executeQuery
@@ -70,15 +71,30 @@ class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     for (result <- results) {
       //Get the attributes for the person. Should be same as attIDs = Dataset Variables.
       val atts = result.getAttributes
-      for (vname <- origVariableNames) {
+      for (vname <- origScalarNames) {
         //Note, the value of an attribute is more attributes. Join with ",".
         val value = JavaConversions.enumerationAsScalaIterator(atts.get(vname).getAll).mkString(",")
         map(vname) append value
       }
     }
     
-    //return as immutable dataMap
-    immutableDataMap(map)
+    //convert tmp string values to Data
+    //assume all variables are type Text, deal with length
+    val dataMap = mutable.Map[String,Data]()
+    
+    for (scalar <- origScalars) {
+      val name = scalar.getName
+      val buffer = map(name)
+      //TODO: if length = 0?          
+      val length: Int = scalar.getMetadata("length") match {
+        case Some(l) => l.toInt
+        case None => buffer.map(_.length).max
+      }
+      val data = Data(buffer, length)
+      dataMap += (name -> data)
+    }
+    
+    dataMap
   }
   
   override def close {context.close}

@@ -5,8 +5,8 @@ import latis.reader.tsml.ml.Tsml
 /**
  * Use a regular expression to extract data values from a data record.
  */
-class RegexAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
-  //TODO: any reason this couldn't be used with iterative adapter?
+class RegexAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
+  //TODO: mixin Iterative or Granule
   
   //TODO: change att to 'pattern'?
   val regex = getProperty("regex") match {
@@ -15,13 +15,10 @@ class RegexAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
   }
   
   /**
-   * Parse a "record" of text into a Map of Variable name to value. 
-   * This may be one or more lines as defined by the "linesPerRecord" 
-   * attribute of this adapter definition in the TSML.
-   * Note, LinkedHashMap will maintain order.
-   * Return empty Map if there was a problem with this record.
+   * Parse a "record" of text into a Map of Variable name to value
+   * by matching the given regular expression.
    */
-  override def parseRecord(record: Record): Map[Name, Value] = {
+  override def parseRecord(record: String): Map[String, String] = {
     val s = record.mkString("\n") //stitch multi-lined record back into a single string
     val values = regex.findFirstMatchIn(s) match {
       case Some(m) => m.subgroups
@@ -29,9 +26,9 @@ class RegexAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
     }
     
     //create Map with variable names and values
-    val vnames = origVariableNames
+    val vnames = origScalarNames
     //If we didn't find the right number of samples, drop this record
-    if (vnames.length != values.length) Map[Name, Value]()
+    if (vnames.length != values.length) Map[String, String]()
     else (vnames zip values).toMap
   }
 }

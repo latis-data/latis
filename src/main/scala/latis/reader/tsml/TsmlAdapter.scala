@@ -20,6 +20,8 @@ import latis.ops.Projection
 import latis.ops.Selection
 import latis.data._
 import latis.data.EmptyData
+import java.nio.ByteBuffer
+import scala.io.Source
 
 
 /**
@@ -195,9 +197,15 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   
   /**
+   * Keep a list of the original Scalars.
+   */
+  lazy val origScalars = origDataset.toSeq
+  
+  /**
    * Keep a list of the names of the original Scalars.
    */
-  lazy val origVariableNames = origDataset.toSeq.map(_.getName)
+  lazy val origScalarNames = origScalars.map(_.getName)
+    
   
   /**
    * Hook for subclasses to apply operations during data access
@@ -228,6 +236,33 @@ abstract class TsmlAdapter(val tsml: Tsml) {
 
   //-------------------------------------------------------------------------//
   
+  //Column-oriented data cache
+  //TODO: consider memory usage/leaks with immutable data in a var that can be replaced
+  //protected var dataCache: immutable.Map[String, immutable.Seq[String]] = immutable.Map[String, immutable.Seq[String]]()
+  protected var dataCache: immutable.Map[String, Data] = immutable.Map[String, Data]()
+  //TODO: lazy val, trigger data read?
+  //consider Stream
+  /*
+   * TODO: do we need diff place to hold tsml values so we don't have partial cache confusion?
+   * allow mutable and require getCachedData? hard to enforce
+   * use tsmlData?
+   */
+  val tsmlData = Map[String, Data]() //TODO: immutable?
+  
+  //-------------------------------------------------------------------------//
+  
+  private var source: Source = null
+  
+  /**
+   * Source from which we will read data.
+   */
+  def getDataSource: Source = {
+    if (source == null) source = Source.fromURL(getUrl())
+    source
+  }
+    
+  
+  
   /**
    * Get the URL of the data source from this adapter's definition.
    */
@@ -247,7 +282,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     }
   }
   
-  def close()
+  def close() {
+    if (source != null) source.close
+  }
   
   //=================================================================================================
 

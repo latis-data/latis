@@ -56,7 +56,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
       case SELECTION.r(name, op, value) => {
         if (name == "time") handleTimeSelection(op, value) //special handling for "time"
         //TODO: handle other Time variables (dependent)
-        else if (origVariableNames.contains(name)) { //other variable (not time), even if not projected
+        else if (origScalarNames.contains(name)) { //other variable (not time), even if not projected
           //add a selection to the sql, may need to change operation
           op match {
             case "==" => selections append name + "=" + value; true
@@ -362,7 +362,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   }
   
   
-  def close() = {
+  override def close() = {
     //TODO: do we need to close resultset, statement...?
     //  should we close it or just return it to the pool?
     //closing statement also closes resultset 
