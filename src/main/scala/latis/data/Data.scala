@@ -107,7 +107,7 @@ object Data {
     case _: Long   => new LongSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Long]])
     case _: String => {
       val strings = seq.toIndexedSeq.asInstanceOf[immutable.Seq[String]]
-      val maxLength = strings.foldLeft(0)((l,s) => Math.max(l, s.length))
+      val maxLength = strings.map(_.length).max  //foldLeft(0)((l,s) => Math.max(l, s.length))
       new StringSeqData(strings, maxLength)
     }
     case _ => throw new RuntimeException("Unsupported data sequence type.")
