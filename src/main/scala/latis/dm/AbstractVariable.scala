@@ -11,6 +11,7 @@ import scala.collection.mutable.ArrayBuffer
 abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyData) extends Variable {
   
   def getMetadata: Metadata = metadata
+  def getMetadata(name: String): Option[String] = getMetadata.get(name)
   def getData: Data = data
   
   def getName = name
