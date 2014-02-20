@@ -6,25 +6,21 @@ import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
 import latis.data.value.LongValue
 
-trait Integer extends Scalar with Number {
-  //def value: Long = longValue
-  //def stringToValue(s: String): Long = s.toLong
-  //def compare(that: String): Int = longValue compare that.toLong
-}
+trait Integer extends Scalar with Number
 
 
 object Integer {
   
 //  def apply(): Integer = new Variable() with Integer 
   
-  def apply(md: Metadata): Integer = new AbstractVariable(md) with Integer
+  def apply(md: Metadata): Integer = new AbstractScalar(md) with Integer
 
-  def apply(md: Metadata, v: Long): Integer = new AbstractVariable(md, Data(v)) with Integer
-  def apply(md: Metadata, vs: Seq[Long]): Integer = new AbstractVariable(md, Data(vs)) with Integer
+  def apply(md: Metadata, v: Long): Integer = new AbstractScalar(md, Data(v)) with Integer
+  def apply(md: Metadata, vs: Seq[Long]): Integer = new AbstractScalar(md, Data(vs)) with Integer
   
   //def apply(name: String, v: Long): Integer = new AbstractVariable(Metadata(name), Data(v)) with Integer
 
-  def apply(v: Long): Integer = new AbstractVariable(data = Data(v)) with Integer
+  def apply(v: Long): Integer = new AbstractScalar(data = Data(v)) with Integer
   def apply(v: AnyVal): Integer = v match {
     case i: Int    => Integer(i.toLong)
     case d: Double => Integer(d.toLong)
@@ -33,7 +29,7 @@ object Integer {
     case st: scala.collection.immutable.StringOps => Integer(st.toLong)
   }
   
-  def apply(vs: Seq[Long]): Integer = new AbstractVariable(data = Data(vs)) with Integer
+  def apply(vs: Seq[Long]): Integer = new AbstractScalar(data = Data(vs)) with Integer
     
 //  def apply(name: String): Integer = {
 //    //new Integer(Metadata(name), EmptyData)

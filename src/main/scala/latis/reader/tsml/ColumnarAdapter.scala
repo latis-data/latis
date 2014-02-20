@@ -6,6 +6,7 @@ import latis.reader.tsml.ml.Tsml
  * Use column index properties to parse ascii tabular data.
  */
 class ColumnarAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
+  //TODO: Iterative? GranuleAsciiAdapter
   
   /*
    * TODO: 2013-10-16 with Columns trait?
@@ -46,7 +47,9 @@ class ColumnarAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
 
     //Helper function to build the variable value from the appropriate columns.
     //Concatenate multiple column values with the delimiter.
-    def makeValue(name: String) = indexMap(name).map(ss(_)).mkString(delim)
+    //TODO: problem if delim is regex, just use " " for now.
+    //  needed for time format (units) for example: "yy MM" vs "yy  MM"
+    def makeValue(name: String) = indexMap(name).map(ss(_)).mkString(" ")
     
     //Map variable names to their string values
     origScalarNames.map(name => (name, makeValue(name))).toMap

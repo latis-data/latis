@@ -5,11 +5,11 @@
     <metadata name="Columnar Test"/>
     <adapter class="latis.reader.tsml.ColumnarAdapter"
              columns="0,1,2;5;3;4"
-             delimiter=" "
+             delimiter="\s+"
              commentCharacter="#"
              location="datasets/test/col.txt" />
     
-    <time name="time" units="yyyy MM dd"/> <!--Note, same delimiter as defined above-->
+    <time name="time" type="text" length="10" units="yyyy MM dd"/> <!--Note, same delimiter as defined above-->
     
     <text name="text"/>
     <integer name="int"/>

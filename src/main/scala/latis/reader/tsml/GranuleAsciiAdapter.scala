@@ -51,7 +51,7 @@ class GranuleAsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) with AsciiAda
           //get length from tsml or longest string
           val length: Int = scalar.getMetadata("length") match {
             case Some(l) => l.toInt
-            case None => buffer.map(_.length).max
+            case None => Math.max(buffer.map(_.length).max, Text.DEFAULT_LENGTH) //at least as big as default=4
           }
           Data(buffer, length)
         }

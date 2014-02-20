@@ -9,41 +9,12 @@ import latis.metadata.EmptyMetadata
 import latis.data.EmptyData
 
 trait Scalar extends Variable {
-//trait Scalar[A] extends Variable { //TODO: with Ordered[Scalar[A]] { 
-  //def value: A  
   
-  //def compare(that: Scalar[B]): Int =
-  
+  //move to AbstractScalar since mixing in Time with Text means that anything here overrides Time?
   //note, we tried overriding this in subclasses but ran into inheritance trouble with "new Time with Real"
-  def compare(that: String): Int = getData match {
-    //note, pattern matching instantiates value classes
-    case DoubleValue(d) => d compare that.toDouble
-    case LongValue(l) => l compare that.toLong
-    case IndexValue(i) => i compare that.toInt
-    case StringValue(s) => s compare that
-    //TODO: what about Buffer, SeqData?
-    //TODO: handle format errors
-  }
+  def compare(that: String): Int
   
-  def getValue: Any = getData match {
-    case DoubleValue(d) => d
-    case LongValue(l) => l
-    case IndexValue(i) => i
-    case StringValue(s) => s.trim
-  }
-  
-  //convert the string to a value of our type (e.g. for comparison)
-  //def stringToValue(s: String): A
-  
-    //deal with ISO formatted time
-    //TODO: do conversion later, as needed?
-    //if (vname == time) 
-    //TSDS delegates to Variable to parse value into double for comparison
-    //but we don't want to have to do that for each call to filterScalar?
-    //  but we do value.toDouble already
-    //  but need to convert units, need Time variable
-    //  does it still make sense to delegate to Variable?
-    //  it's one thing to convert its own value, but as a converter for others?
+  def getValue: Any 
     
 }
 
@@ -58,17 +29,6 @@ object Scalar {
     //TODO: vtype = class name, dynamicly construct 
     case _ => ???
   }
-  
-//  def apply(vtype: String, metadata: Metadata): Scalar = Scalar(vtype, metadata)
-//  : Scalar = vtype match {
-//    case "real"    => Real(metadata)
-//    case "integer" => Integer(metadata)
-//    case "text"    => Text(metadata)
-//    case "time"    => Time(metadata) //TODO: if type text, set default length=23? or get from 'format'
-//    case "binary"  => Binary(metadata)
-//    //TODO: vtype = class name, dynamicly construct 
-//    case _ => ???
-//  }
   
   def apply(value: AnyVal): Scalar = value match {
     case d: Double => Real(d)

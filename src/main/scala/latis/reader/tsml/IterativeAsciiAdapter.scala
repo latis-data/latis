@@ -43,8 +43,9 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Asci
         case _: Real => bb.putDouble(s.toDouble)
         case _: Integer => bb.putLong(s.toLong)
         case t: Text => {
+          val l = t.length
           val padded = "%"+t.length+"s" format s //pad to the Text variable's defined length
-          s.foldLeft(bb)(_.putChar(_)) //fold each character into buffer
+          padded.foldLeft(bb)(_.putChar(_)) //fold each character into buffer
         }
       }
     }

@@ -92,7 +92,7 @@ object Util {
     }
     
     case v: Binary => {
-      val bytes = new Array[Byte](v.length)
+      val bytes = new Array[Byte](v.getSize)
       bb.get(bytes)
       val buffer = ByteBuffer.wrap(bytes)
       Binary(template.getMetadata, buffer)

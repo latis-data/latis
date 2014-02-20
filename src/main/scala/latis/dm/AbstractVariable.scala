@@ -25,7 +25,10 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    *   Tuple: number of variable members
    *   Function: number of samples
    */
-  //TODO: dangerous to overload "length", use getVariableCount?
+  /*
+   * TODO: is 'length' too overloaded?
+   * should Text return length of string?
+   */
   def getLength: Int = this match {
     case _: Scalar => 1  //TODO: consider Scalars with SeqData, implicit IndexFunction
     case Tuple(vars) => vars.length
@@ -43,8 +46,11 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     case _: Index => 4 
     case _: Real => 8 //double
     case _: Integer => 8 //long
-    case t: Text => t.length * 2 //2 bytes per char  //TODO: consider Seq, get max
-    case b: Binary => b.length
+    case t: Text => t.length * 2 //2 bytes per char  //TODO: avoid confusing t.length with getLength
+    case _: Binary => getMetadata("size") match {
+      case Some(l) => l.toInt
+      case None => throw new Error("Must declare length of Binary Variable.")
+    } 
     
     case Tuple(vars) => vars.foldLeft(0)(_ + _.getSize)
     case f @ Function(d,r) => f.getLength * (d.getSize + r.getSize)
