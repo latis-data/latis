@@ -23,8 +23,9 @@ trait AsciiAdapterHelper extends AsciiParser { this: TsmlAdapter =>
   
   /**
    * Get the String (one or more characters) that is used to separate data values.
+   * Default to comma (",").
    */
-  def getDelimiter: String = getProperty("delimiter", RegEx.DELIMITER)
+  def getDelimiter: String = getProperty("delimiter", ",")
   
   /**
    * Return the number of lines (as returned by Source.getLines) that make up

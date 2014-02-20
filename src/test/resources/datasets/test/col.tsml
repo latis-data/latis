@@ -4,17 +4,16 @@
   <dataset>
     <metadata name="Columnar Test"/>
     <adapter class="latis.reader.tsml.ColumnarAdapter"
-             columns="0;2,1"
-             location="file:/data/latis/scalar_3col.txt" />
+             columns="0,1,2;5;3;4"
+             delimiter=" "
+             commentCharacter="#"
+             location="datasets/test/col.txt" />
     
-    <time name="time" />
+    <time name="time" units="yyyy MM dd"/> <!--Note, same delimiter as defined above-->
     
-    <!--real name="a"/>
-    <real name="b"/-->
-    
-    <text name="c">
-      <metadata length="8"/>
-    </text>
+    <text name="text"/>
+    <integer name="int"/>
+    <real name="real"/>
     
   </dataset>
 
