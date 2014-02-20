@@ -9,46 +9,7 @@ import scala.collection.mutable.ArrayBuffer
 import latis.dm._
 import latis.time.Time
 
-class GranuleAsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) with AsciiParser {
-  
-//TODO: should be able to inherit these, use self ref to TsmlAdapter in Parser?  
-//  /**
-//   * Get the String (one or more characters) that is used at the start of a 
-//   * line to indicate that it should not be read as data. 
-//   * Defaults to null, meaning that no line should be ignored (except empty lines).
-//   * Return null if there are no comments to skip.
-//   */
-//  def getCommentCharacter: String = getProperty("commentCharacter") match {
-//    case Some(s) => s
-//    case None    => null
-//  }
-//  
-//  /**
-//   * Get the String (one or more characters) that is used to separate data values.
-//   */
-//  def getDelimiter: String = getProperty("delimiter", RegEx.DELIMITER)
-//  
-//  /**
-//   * Return the number of lines (as returned by Source.getLines) that make up
-//   * each data record.
-//   */
-//  def getLinesPerRecord: Int = getProperty("linesPerRecord") match {
-//    case Some(s) => s.toInt
-//    case None => 1
-//  }
-//  
-//  /**
-//   * Source from which we will read data.
-//   */
-//  def getDataSource: Source = Source.fromURL(getUrl())
-//  
-//  /**
-//   * Return a list of variable names represented in the data.
-//   */
-//  def getVariableNames: Seq[Name] = origScalarNames
-  //needed by Parser
-  
-  //---------------------------------------------------------------------------
+class GranuleAsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) with AsciiAdapterHelper {
   
   /**
    * Read all the data for the Dataset, convert to proper form of Data based on its type, 

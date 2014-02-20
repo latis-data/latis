@@ -10,7 +10,7 @@ import latis.data.IterableData
 import latis.time.Time
 import latis.reader.tsml.ml.Tsml
 
-class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with AsciiParser {
+class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with AsciiAdapterHelper {
   
   def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
     def recordSize = sampleTemplate.getSize

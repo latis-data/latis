@@ -5,70 +5,39 @@ package latis.reader.tsml
 import scala.io.Source
 import latis.util.RegEx
 
-trait AsciiParser extends Parser[String] { this: TsmlAdapter =>
+trait AsciiParser extends Parser[String] {
   
-  //TODO: assume only used by adapters so use self ref to get this info from adapter
+  //---- Methods for implementation to provide --------------------------------
+  
   /**
    * Get the String (one or more characters) that is used at the start of a 
    * line to indicate that it should not be read as data. 
    * Defaults to null, meaning that no line should be ignored (except empty lines).
    * Return null if there are no comments to skip.
    */
-  def getCommentCharacter: String = getProperty("commentCharacter") match {
-    case Some(s) => s
-    case None    => null
-  }
+  def getCommentCharacter: String
   
   /**
    * Get the String (one or more characters) that is used to separate data values.
    */
-  def getDelimiter: String = getProperty("delimiter", RegEx.DELIMITER)
+  def getDelimiter: String
   
   /**
    * Return the number of lines (as returned by Source.getLines) that make up
    * each data record.
    */
-  def getLinesPerRecord: Int = getProperty("linesPerRecord") match {
-    case Some(s) => s.toInt
-    case None => 1
-  }
+  def getLinesPerRecord: Int
+  
+  /**
+   * Source from which we will read data.
+   */
+  def getDataSource: Source
   
   /**
    * Return a list of variable names represented in the data.
    */
-  def getVariableNames: Seq[String] = origScalarNames
+  def getVariableNames: Seq[String]
   
-//  //---- Methods for implementation to provide --------------------------------
-//  
-//  /**
-//   * Get the String (one or more characters) that is used at the start of a 
-//   * line to indicate that it should not be read as data. 
-//   * Defaults to null, meaning that no line should be ignored (except empty lines).
-//   * Return null if there are no comments to skip.
-//   */
-//  def getCommentCharacter: String
-//  
-//  /**
-//   * Get the String (one or more characters) that is used to separate data values.
-//   */
-//  def getDelimiter: String
-//  //TODO: default? but don't want this to override
-//  
-//  /**
-//   * Return the number of lines (as returned by Source.getLines) that make up
-//   * each data record.
-//   */
-//  def getLinesPerRecord: Int
-//  
-//  /**
-//   * Source from which we will read data.
-//   */
-//  def getDataSource: Source
-//  
-//  /**
-//   * Return a list of variable names represented in the data.
-//   */
-//  def getVariableNames: Seq[Name]
   
   //---- Parse operations -----------------------------------------------------
   
@@ -95,7 +64,7 @@ trait AsciiParser extends Parser[String] { this: TsmlAdapter =>
    * iterator from Source.getLines.
    */
   def shouldSkipLine(line: String): Boolean = {
-    //TODO: what if nothing but whitespace?
+    //TODO: what if nothing but whitespace? trim?
     val c = getCommentCharacter
     line.isEmpty() || (c != null && line.startsWith(c))
   }
