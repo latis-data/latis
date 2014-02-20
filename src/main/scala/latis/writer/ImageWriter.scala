@@ -31,23 +31,35 @@ import latis.reader.tsml.TsmlReader
 import scala.collection.mutable.ArrayBuffer
 import latis.ops._
 
-class ImageWriter {
+class ImageWriter extends Writer{
   
-  @Test
-  def test_plot{
-    val ds = TsmlReader("datasets/tsi.tsml").getDataset
-    val data = latis.util.DataMap.toDoubleMap(ds)
-    val a = data("year")
-    val b = data("tsi")
-    
-    val f = Figure()
-    val p = f.subplot(0)
-    val x = linspace(0.0,1.0)
-    p+=plot(a,b)
-    p.title = "tsi"
-    p.xlabel = "year"
-    p.ylabel = "tsi"
+  val f = Figure()
+  
+  def write(dataset: Dataset) {
+    plotData(dataset)
+    val name=dataset.getName
     f.saveas("src/test/resources/datasets/data/tsi/plot.png")
   }
   
+  def plotData(dataset: Dataset, style: String = "plot") {
+    val function = dataset.findFunction.get
+    val a = function.getDomain
+    val b = function.getRange
+    b match{
+      case _:Tuple => for(c <- b.toSeq) plotFunction(a.getName,c.getName,dataset)
+      case _:Scalar => plotFunction(a.getName,b.getName,dataset)
+    }
+  }
+  
+  def plotFunction(a: String, b: String, dataset: Dataset, style: Char = '-') {
+    val data = latis.util.DataMap.toDoubleMap(dataset)
+    val x = data(a)
+    val y = data(b)
+    val p = f.subplot(0)
+    p += plot(x,y)
+    p.xlabel = a
+    p.ylabel = b
+    p.title = dataset.getName
+  }
+
 }

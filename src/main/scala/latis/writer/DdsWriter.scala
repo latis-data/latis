@@ -41,11 +41,11 @@ class DdsWriter extends TextWriter {
   
   override def makeFooter(dataset: Dataset) = "} " + dataset.getName + ";\n"
   
-  var count = 0
+  var count = indentSize
     
   def indent(num: Int): String = {
     val sb = new StringBuilder()
-    for(a <- 0 to num) sb append " "
+    for(a <- 1 to num) sb append " "
     sb.toString
   }
     

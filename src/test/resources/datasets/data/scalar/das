@@ -1,9 +1,9 @@
 attributes {
-	unknown{
-		foo{
-			string alias "time";
-		}
-		ssn{
-		}
-	}
+    unknown{
+        foo{
+            string alias "time";
+        }
+        ssn{
+        }
+    }
 }

@@ -1,9 +1,9 @@
-dataset {
-	sequence {
-		int64 i;
-		structure {
-			float64 d;
-			string s;
-		} unknown;
-	} unknown;
+Dataset {
+    Sequence {
+        Int64 i;
+        Structure {
+            Float64 d;
+            String s;
+        } unknown;
+    } unknown;
 } Database Test;

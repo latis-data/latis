@@ -1,6 +1,7 @@
 package latis.writer
 
 import latis.dm._
+import java.io.FileOutputStream
 import latis.dm.implicits._
 import latis.data._
 import org.junit._
@@ -27,97 +28,42 @@ import latis.dm._
 
 class TestDapWriters {
 
-  var tmpFile = ???
-  
-  def getTmpDir = System.getProperty("java.io.tmpdir")
-  
-  @After
-  def removeTmpFile = ???
-  
+  var tmpFile = java.io.File.createTempFile("writer", "test")
+  tmpFile.deleteOnExit
+    
+  val names = List("scalar","tsi","db")
+    
   @Test
-  def test_dds {
-    test_scalar_dds
-    test_db_dds
-    test_tsi_dds
-  }
-  @Test
-  def test_das {
-    test_scalar_das
-    test_db_das
-    test_tsi_das
+  def test_all {
+    for(name <- names) {
+      test(name,"dds")
+      test(name,"das")
+    }
   }
   
-  @Test
+  def test(name: String, suffix: String) {
+    val fos = new FileOutputStream(tmpFile)
+    val ds = TsmlReader(s"datasets/test/$name.tsml").getDataset
+    Writer(fos,suffix).write(ds)
+    val s = Source.fromFile(tmpFile).getLines
+    val t = Source.fromFile(s"src/test/resources/datasets/data/$name/$suffix").getLines
+    assertEquals(t.length,s.length)
+    while(t.hasNext) assertEquals(t.next, s.next)
+    fos.close()
+  }
+  
+  //@Test
   def write_dds {
-    val reader = TsmlReader("datasets/tsi.tsml")
+    val reader = TsmlReader("datasets/test/tsi.tsml")
     val ds = reader.getDataset
     Writer("dds").write(ds)
   }
     
-  @Test
+  //@Test
   def write_das {
-    val reader = TsmlReader("datasets/tsi.tsml")
+    val reader = TsmlReader("datasets/test/tsi.tsml")
     val ds = reader.getDataset
     Writer("das").write(ds)
   }
   
-  def test_scalar_dds {
-    val reader = TsmlReader("datasets/scalar.tsml")
-    val ds = reader.getDataset
-    val w = new DdsWriter()
-    val s = (w.makeHeader(ds) + ds.getVariables.map(w.varToString(_)).mkString("") + w.makeFooter(ds)).split("\n")
-    val t = Source.fromFile("src/test/resources/datasets/data/scalar/dds").getLines.toArray[String]
-    assertEquals(t.length,s.length)
-    for(a <- 0 until t.length) assertEquals(t(a), s(a))
-  }
-  
-  def test_db_dds {
-    val reader = TsmlReader("datasets/test/db.tsml")
-    val ds = reader.getDataset
-    val w = new DdsWriter()
-    val s = (w.makeHeader(ds) + ds.getVariables.map(w.varToString(_)).mkString("") + w.makeFooter(ds)).split("\n")
-    val t = Source.fromFile("src/test/resources/datasets/data/db/dds").getLines.toArray[String]
-    assertEquals(t.length,s.length)
-    for(a <- 0 until t.length) assertEquals(t(a), s(a))
-  }
-  
-  def test_tsi_dds {
-    val reader = TsmlReader("datasets/tsi.tsml")
-    val ds = reader.getDataset
-    val w = new DdsWriter()
-    val s = (w.makeHeader(ds) + ds.getVariables.map(w.varToString(_)).mkString("") + w.makeFooter(ds)).split("\n")
-    val t = Source.fromFile("src/test/resources/datasets/data/tsi/dds").getLines.toArray[String]
-    assertEquals(t.length,s.length)
-    for(a <- 0 until t.length) assertEquals(t(a), s(a))
-  }
-  
-  def test_scalar_das {
-    val reader = TsmlReader("datasets/scalar.tsml")
-    val ds = reader.getDataset
-    val w = new DasWriter()
-    val s = (w.makeHeader(ds) + ds.getVariables.map(w.varToString(_)).mkString("") + w.makeFooter(ds)).split("\n")
-    val t = Source.fromFile("src/test/resources/datasets/data/scalar/das").getLines.toArray[String]
-    assertEquals(t.length,s.length)
-    for(a <- 0 until t.length) assertEquals(t(a), s(a))
-  }
-  
-  def test_db_das {
-    val reader = TsmlReader("datasets/test/db.tsml")
-    val ds = reader.getDataset
-    val w = new DasWriter()
-    val s = (w.makeHeader(ds) + ds.getVariables.map(w.varToString(_)).mkString("") + w.makeFooter(ds)).split("\n")
-    val t = Source.fromFile("src/test/resources/datasets/data/db/das").getLines.toArray[String]
-    assertEquals(t.length,s.length)
-    for(a <- 0 until t.length) assertEquals(t(a), s(a))
-  }
-  
-  def test_tsi_das {
-    val reader = TsmlReader("datasets/tsi.tsml")
-    val ds = reader.getDataset
-    val w = new DasWriter()
-    val s = (w.makeHeader(ds) + ds.getVariables.map(w.varToString(_)).mkString("") + w.makeFooter(ds)).split("\n")
-    val t = Source.fromFile("src/test/resources/datasets/data/tsi/das").getLines.toArray[String]
-    assertEquals(t.length,s.length)
-    for(a <- 0 until t.length) assertEquals(t(a), s(a))
-  }
 }
