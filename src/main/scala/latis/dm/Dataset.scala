@@ -7,6 +7,7 @@ import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
 import latis.ops.math.BasicMath
 import latis.ops._
+import latis.util.DataMap
 
 class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
   extends AbstractTuple(variables, metadata, data) with BasicMath {
@@ -37,9 +38,10 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   
   //convenient method, get number of samples in top level Function
   //TODO: what if we have multiple Functions...?
-  def length: Int = variables.find(_.isInstanceOf[Function]) match {
+  //TODO: better name: getSampleCount?
+  def length: Int = findFunction match {
     case Some(f: Function) => f.getLength
-    case _ => if (variables.isEmpty) 0 else 1
+    case _ => if (variables.isEmpty) 0 else 1  //TODO: delegate to super? but want "1" as in only one sample, more indications that "length" is too overloaded
   }
   
   def findFunction: Option[Function] = findFunction(this)
@@ -100,10 +102,8 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
    * 
    */
   
-  //TODO: apply operations, or just do in adapter?
-  //operations.foldRight(this)(_(_)) //operation.apply(ds)
-  
   //convenience methods for transforming Dataset
+  //TODO: operate?
   def filter(selection: Selection): Dataset = selection(this)
   def filter(expression: String): Dataset = Selection(expression)(this)
   
@@ -111,6 +111,11 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   def project(varNames: Seq[String]): Dataset = Projection(varNames)(this)
   def project(vname: String): Dataset = Projection(Seq(vname))(this)
   
+  //Convenient data dumping methods.
+  def toDoubleMap = DataMap.toDoubleMap(this)
+  def toDoubles   = DataMap.toDoubles(this)
+  def toStringMap = DataMap.toStringMap(this)
+  def toStrings   = DataMap.toStrings(this)
   
   def groupBy(name: String): Dataset = {
     val vs = getVariables.map(_.groupVariableBy(name))
