@@ -60,10 +60,11 @@ object Util {
       v
     }
     //TODO: use builder
-    case _: Real => Real(template.getMetadata, data)
+    case _: Time    => Time(template.getMetadata, data)
+    case _: Real    => Real(template.getMetadata, data)
     case _: Integer => Integer(template.getMetadata, data)
-    case _: Text => Text(template.getMetadata, data)
-    case _: Binary => Binary(template.getMetadata, data)
+    case _: Text    => Text(template.getMetadata, data)
+    case _: Binary  => Binary(template.getMetadata, data)
     
     //TODO: deal with nested Function
     case f: Function => ???
