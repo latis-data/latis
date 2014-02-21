@@ -109,7 +109,7 @@ class ProjectionTest {
   //def project_named_function
   //TODO: nested use cases
   
-  
+  //TODO: project same var twice
 }
 
 

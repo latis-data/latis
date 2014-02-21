@@ -14,22 +14,24 @@ class TestJdbcAdapter {
 
   private var connection: Connection = null
   
-  @Before
+  @BeforeClass
   def makeDatabase {
+    //TODO: make sure these data are consistent with data used in other tests, ingest from same ascii file?
+    //TODO: add Text type with length longer than default (4)
+    
     System.setProperty("derby.stream.error.file", "/dev/null") //don't make log file
     
     Class.forName("org.apache.derby.jdbc.EmbeddedDriver")  //Load the JDBC driver     
     connection = DriverManager.getConnection("jdbc:derby:memory:testDB;create=true")
     
     var statement = connection.createStatement()
-    statement.execute("create table test(i int, d double, s varchar(1), t timestamp)")
-    //TODO: add other types: datetime,...
-    statement.execute("insert into test values(1, 1.1, 'A', '2014-01-01 00:00:00')")
-    statement.execute("insert into test values(2, 2.2, 'B', '2014-01-02 00:00:00')")
-    statement.execute("insert into test values(3, 3.3, 'C', '2014-01-03 00:00:00')")
+    statement.execute("create table test(t timestamp, i int, d double, s varchar(1))")
+    statement.execute("insert into test values('1970-01-01 00:00:00', 1, 1.1, 'A')")
+    statement.execute("insert into test values('1970-01-02 00:00:00', 2, 2.2, 'B')")
+    statement.execute("insert into test values('1970-01-03 00:00:00', 3, 3.3, 'C')")
   }
   
-  @After
+  @AfterClass
   def dropDatabase {
     try {
       DriverManager.getConnection("jdbc:derby:memory:testDB;drop=true")
@@ -79,7 +81,7 @@ class TestJdbcAdapter {
   
   //@Test
   def iso_time_selection {
-    val ops = List(Selection("time>=2014-01-02T00:00:00"))
+    val ops = List(Selection("time>=1970-01-02T00:00:00"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
     AsciiWriter.write(ds)
     //Writer("jsond").write(ds)
@@ -87,14 +89,14 @@ class TestJdbcAdapter {
   
   //@Test
   def select_on_non_projected_project_first {
-    val ops = List(Projection("d,s"), Selection("time>=2014-01-02T00:00:00"))
+    val ops = List(Projection("d,s"), Selection("time>=1970-01-02T00:00:00"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
     AsciiWriter.write(ds)
   }
   
   @Test
   def select_on_non_projected_select_first {
-    val ops = List(Selection("time>=2014-01-02T00:00:00"), Projection("d,s"))
+    val ops = List(Selection("time>=1970-01-02T00:00:00"), Projection("d,s"))
     val ds = TsmlReader("datasets/test/db.tsml").getDataset(ops)
     AsciiWriter.write(ds)
   }

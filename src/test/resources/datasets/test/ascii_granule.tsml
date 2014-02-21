@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="ascii_iterative">
+    <adapter class="latis.reader.tsml.GranuleAsciiAdapter"
+             delimiter="\s+"
+             commentCharacter="#"
+             location="datasets/test/mixed.txt" />
+    
+    <time name="time" units="yyyy/MM/dd" type="text" length="10"/>
+    
+    <integer name="int"/>
+    <real    name="real"/>
+    <text    name="text"/>
+    
+  </dataset>
+
+</tsml>
