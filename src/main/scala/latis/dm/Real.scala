@@ -24,6 +24,8 @@ object Real {
   
   def apply(vs: Seq[Double]): Real = new AbstractScalar(data = Data(vs)) with Real
   
+  def apply(md: Metadata, data: Data): Real = new AbstractScalar(md, data) with Real
+  
   def apply(md: Metadata): Real = new AbstractScalar(md) with Real
 
   //TODO: review consistency in order or args

@@ -15,6 +15,7 @@ object Integer {
   
   def apply(md: Metadata): Integer = new AbstractScalar(md) with Integer
 
+  def apply(md: Metadata, data: Data): Integer = new AbstractScalar(md, data) with Integer
   def apply(md: Metadata, v: Long): Integer = new AbstractScalar(md, Data(v)) with Integer
   def apply(md: Metadata, vs: Seq[Long]): Integer = new AbstractScalar(md, Data(vs)) with Integer
   

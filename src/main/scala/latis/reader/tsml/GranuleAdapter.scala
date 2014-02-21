@@ -50,11 +50,7 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
       case Some(d) => d
       case None => throw new Error("No data found in cache for Variable: " + name)
     }
-    
-    /*
-     * TODO: only getting one sample written even though they are all in the cache
-     * make sure Function iterator can stitch these together
-     */
+
     Some(Util.dataToVariable(data, scalar).asInstanceOf[Scalar])
     //TODO: use builder method on Variable
   }

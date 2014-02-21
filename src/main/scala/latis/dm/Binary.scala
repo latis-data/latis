@@ -20,6 +20,8 @@ object Binary {
   
   def apply(md: Metadata): Binary = new AbstractScalar(md) with Binary
   
+  def apply(md: Metadata, data: Data): Binary = new AbstractScalar(md, data) with Binary
+  
   def apply(md: Metadata, buffer: Buffer): Binary = {
     //add size if not already defined
     val md2 = md.get("size") match {

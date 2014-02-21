@@ -336,7 +336,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
 
   /**
    * Iterate over all combinations of the scalar values in a tuple
-   * instead of combining them pariwaise as for tuples in ranges.
+   * instead of combining them pairwise as for tuples in ranges.
    */
   def getDomainDataIterator: Iterator[Data] = {
     if (data.notEmpty) data.iterator

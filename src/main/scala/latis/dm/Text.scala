@@ -34,6 +34,8 @@ object Text {
 
   def apply(md: Metadata): Text = new AbstractScalar(md) with Text
   
+  def apply(md: Metadata, data: Data): Text = new AbstractScalar(md, data) with Text
+  
   def apply(md: Metadata, v: String): Text = new AbstractScalar(md, Data(v)) with Text
   
   def apply(md: Metadata, vs: Seq[String]): Text = {

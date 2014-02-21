@@ -5,6 +5,7 @@ import latis.data.value.StringValue
 import latis.dm._
 import java.nio.ByteBuffer
 import latis.time.Time
+import latis.data.seq.SeqData
 
 object Util {
 
@@ -50,18 +51,43 @@ object Util {
     Sample(domain, range)
   }
 
-  def dataToVariable(data: Data, template: Variable): Variable = {
-    //hack/experiment for text, don't use byte buffer, TODO: generalize?
-    data match {
-      case StringValue(s) => Text(template.getMetadata, s)
-      case _ => {
-        val bb = data.getByteBuffer
-        val v = buildVarFromBuffer(bb, template)
-        bb.rewind //reset to the beginning in case we want to reuse it
-        v
-      }
+  def dataToVariable(data: Data, template: Variable): Variable = template match {
+    case tup: Tuple => {
+      //don't allow tuple to contain its own data, for now
+      val bb = data.getByteBuffer
+      val v = buildVarFromBuffer(bb, template)
+      bb.rewind //reset to the beginning in case we want to reuse it
+      v
     }
+    //TODO: use builder
+    case _: Real => Real(template.getMetadata, data)
+    case _: Integer => Integer(template.getMetadata, data)
+    case _: Text => Text(template.getMetadata, data)
+    case _: Binary => Binary(template.getMetadata, data)
+    
+    //TODO: deal with nested Function
+    case f: Function => ???
   }
+  
+//  def dataToVariable(data: Data, template: Variable): Variable = {
+//    //hack/experiment for text, don't use byte buffer, TODO: generalize?
+//    data match {
+//      case StringValue(s) => Text(template.getMetadata, s) //TODO: just build with Data instead of extracting string? or do we need to be able to reapply length?
+//      case sd: SeqData => template match {
+//        //TODO: make sure types match
+//        //TODO: use builder
+//        case _: Real => Real(template.getMetadata, data)
+//        ???
+//      }
+////      case _ => {
+////        //TODO: just build any var with given data? even Tuple?
+////        val bb = data.getByteBuffer
+////        val v = buildVarFromBuffer(bb, template)
+////        bb.rewind //reset to the beginning in case we want to reuse it
+////        v
+////      }
+//    }
+//  }
 
   def buildVarFromBuffer(bb: ByteBuffer, template: Variable): Variable = template match {
 

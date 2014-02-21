@@ -7,14 +7,9 @@
              pattern="a(\d{4}).dat"
              location="/data/latis/file_test" />
              
-    <time name="time">
-      <!--metadata units="years since 0000-00-00" /-->
-      <metadata units="yyyy" />
-    </time>
+    <time name="time" units="yyyy"/>
     
-    <text name="file">
-      <metadata length="256" />
-    </text>
+    <text name="file" length="256"/>
   
   </dataset>
 
