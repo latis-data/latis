@@ -85,7 +85,7 @@ class Projection(val names: Seq[String]) extends Operation {
 object Projection {
   
   def apply(names: Seq[String]) = new Projection(names)
-  def apply(expression: String) = new Projection(expression.split(","))
+  def apply(expression: String) = new Projection(expression.replaceAll("""\s""","").split(","))
   
   def unapply(proj: Projection) = Some(proj.toString)
 }
