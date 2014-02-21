@@ -5,7 +5,7 @@ import latis.reader.tsml.ml.Tsml
 /**
  * Use column index properties to parse ascii tabular data.
  */
-class ColumnarAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
+class ColumnarAdapter(tsml: Tsml) extends GranuleAsciiAdapter(tsml) {
   //TODO: Iterative? GranuleAsciiAdapter
   
   /*
