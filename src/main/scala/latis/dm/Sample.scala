@@ -6,6 +6,7 @@ package latis.dm
  */
 class Sample(val domain: Variable, val range: Variable) extends AbstractTuple(List(domain,range)) 
 //TODO: add metadata, data?
+//TODO: require getDomain, getRange?
 
 object Sample {
   def apply(domain: Variable, range: Variable) = new Sample(domain, range)
