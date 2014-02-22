@@ -152,7 +152,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    *   use this for internal use
    */
   //TODO: support fully qualified names
-  //TODO: "findVariableByName"? all descendants like netcdf, "get" for direct kids?
+  //TODO: "findVariableByName"? all descendants like netcdf, "get" for direct kids? "find" implies 'Option' and 'first' in scala
   //TODO: stop as soon as first is found, like Seq.find
   //Get the actual Variable object with the given name or alias.
   //Don't try to maintain the entire model structure.
