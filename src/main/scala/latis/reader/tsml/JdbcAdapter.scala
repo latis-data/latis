@@ -22,6 +22,7 @@ import latis.reader.tsml.ml.Tsml
 import com.typesafe.scalalogging.slf4j.Logging
 import latis.time.TimeFormat
 import java.util.Date
+import java.sql.Timestamp
 
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
@@ -95,6 +96,11 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   def handleTimeSelection(op: String, value: String): Boolean = {
     //support ISO time string as value
     //TODO: assumes value is ISO, what if dataset does have a var named "time" with other units?
+    
+    //this should work because any time variable should have the alias "time"
+    val tvar = origDataset.getVariableByName("time").get //TODO: handle option better
+    val tvname = tvar.getName 
+    
     /*
      * TODO: assumes db value are numerical, need to support times stored as datatime...
      * should be able to use iso form in quotes?
@@ -108,22 +114,25 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
      * 
      */
     
+//    //TODO: use model instead of xml, can we construct dataset before we get here?
+//    val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
+//    
+//    (tsml.xml \\ "time" \ "@type").text 
     
-    //TODO: use model instead of xml, can we construct dataset before we get here?
-    val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
-    
-    (tsml.xml \\ "time" \ "@type").text match {
-      case "text" => {
+    tvar.getMetadata("type") match {
+      case Some("text") => {
         //TODO: derby doesn't support iso format with "T", replace it with space?
-        //  is this a jdbc thing? consider Timestamp.toString: yyyy-mm-dd hh:mm:ss.fffffffff
-        val time = value.replace('T', ' ')
-        selections += tvname + op + "'" + time + "'"; true
+        //  is this a jdbc thing? consider java.sql.Timestamp.toString: yyyy-mm-dd hh:mm:ss.fffffffff
+        val ts = new Timestamp(Time.isoToJava(value))
+        //val time = value.replace('T', ' ')
+        selections += tvname + op + "'" + ts.toString + "'"; true
       }
-      case _ => (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
-       case "" => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
+      //case _ => (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
+      case _ => tvar.getMetadata("units") match {
+       case None => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
       //TODO: allow units property in time element
       //TODO: what if native time var is "time", without units?
-       case units: String => {
+       case Some(units) => {
         //convert ISO time to units
         RegEx.TIME.r findFirstIn value match {
           case Some(s) => {
