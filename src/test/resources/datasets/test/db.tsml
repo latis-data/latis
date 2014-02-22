@@ -8,17 +8,11 @@
              driver="org.apache.derby.jdbc.EmbeddedDriver"
              user="" password=""
              table="test"/>
-             
-    <!--time name="i" type="integer">
-      <metadata units="days since 2000-01-01"/>
-    </time-->
     
-    <time name="t" type="text" length="23"/>
-    <integer name="i"/>
-    
-    <real name="d"/>
-    <text name="s"/>
-    <!--TODO: make this work like time  text name="t" type="time" length="23"/-->
+    <time name="time" type="text" length="23"/>
+    <integer name="int"/>
+    <real name="real"/>
+    <text name="text"/>
     
     <!--?select d>2?-->
     <!--?project i,s?-->
