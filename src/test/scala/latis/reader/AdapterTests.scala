@@ -10,6 +10,9 @@ import scala.collection.mutable.ArrayBuffer
 import latis.ops.Operation
 import latis.dm.Dataset
 import latis.util.DataMap
+import latis.ops.LastFilter
+import latis.ops.FirstFilter
+import latis.ops.LimitFilter
 
 abstract class AdapterTests {
   
@@ -82,6 +85,9 @@ abstract class AdapterTests {
     val ops = List(Selection("time > 1970-01-01"))
     val data = getDataset(ops).toStringMap
     assertEquals(2, data("time").length)
+    assertEquals(2, data("int").length)
+    assertEquals(2, data("real").length)
+    assertEquals(2, data("text").length)
     assertEquals(2, data("int").head.toInt)
   }
   
@@ -117,9 +123,45 @@ abstract class AdapterTests {
     assertEquals(2, data("int").head.toInt)
   }
   
+  @Test
+  def string_match {
+    val ops = List(Selection("text =~ B"))
+    val data = getDataset(ops).toStringMap
+    assertEquals(1, data("text").length)
+    assertEquals(2, data("int").head.toInt)
+  }
+  
   //TODO: test various equals, match,... or leave to Operation tests?
   
+  //---- Test Filters -------------------------------------------------------//
+  
+  @Test
+  def first {
+    val ops = List(FirstFilter())
+    val data = getDataset(ops).toStringMap
+    assertEquals(1, data("time").length)
+    assertEquals(1, data("int").head.toInt)
+  }  
+  
+  @Test
+  def last {
+    val ops = List(LastFilter())
+    val data = getDataset(ops).toStringMap
+    assertEquals(1, data("time").length)
+    assertEquals(3, data("int").head.toInt)
+  }
+  
+  @Test
+  def limit {
+    val ops = List(LimitFilter(2))
+    val data = getDataset(ops).toStringMap
+    assertEquals(2, data("time").length)
+    assertEquals(1, data("int").head.toInt)
+  }
+  
+  
   //---- Test Combined Operations -------------------------------------------//
+  //TODO: lots of permutations
     
   @Test
   def projection_before_selection {
