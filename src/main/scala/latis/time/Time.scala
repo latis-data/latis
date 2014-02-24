@@ -61,6 +61,7 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
   
   //def format: String = TimeFormat(getMetadata("format")).format(getJavaDate)
   
+  def format(format: String): String = TimeFormat(format).format(getJavaDate)
   
   def getJavaDate: java.util.Date = new java.util.Date(getJavaTime)
   
