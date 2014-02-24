@@ -46,6 +46,7 @@ class ProjectedFunction(function: Function, val projection: Projection)
    * If the range is not projected, make domain the range of a function of index.
    */
   def projectSample(sample: Sample): Option[Sample] = {
+    //TODO: could we reuse the logic in TsmlAdapter.makeSample here?
     val pd = projection.project(sample.domain)
     val pr = projection.project(sample.range)
     (pd,pr) match {
