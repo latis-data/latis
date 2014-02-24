@@ -8,7 +8,6 @@ import scala.Option.option2Iterable
  */
 class Projection(val names: Seq[String]) extends Operation {
   //TODO: support long names, e.g. tupA.foo  
-  //TODO: support aliases, see Variable.hasAlias
   //TODO: preserve order of requested variables
   //TODO: consider projecting only part of nD domain. only if it is a product set
   //TODO: sanitize: make sure no special chars..., do via pattern match sufficient?
@@ -26,8 +25,7 @@ class Projection(val names: Seq[String]) extends Operation {
   }
    
   def projectScalar(scalar: Scalar): Option[Scalar] = {
-    //TODO: support alias
-    if (names contains scalar.getName) Some(scalar) else None
+    if (names.exists(scalar.hasName(_))) Some(scalar) else None
   }
   
   def projectTuple(tuple: Tuple): Option[Tuple] = {
