@@ -26,6 +26,15 @@ import java.sql.Timestamp
 
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
+  /*
+   * TODO: 2014-02-24
+   * deal with non-projected domain or range, replace with Index
+   * let Projection do this on first pass? instead of doing the logic here?
+   * but even projection delegated to projectedFunction (so it can set index value)
+   * needs to be applied at sample level so you know if domain or range is empty
+   * 
+   */
+  
   //TODO: catch exceptions and close connections
   
   //Keep these global so we can close them.
@@ -99,7 +108,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     
     //this should work because any time variable should have the alias "time"
     val tvar = origDataset.getVariableByName("time").get //TODO: handle option better
-    val tvname = tvar.getName 
+    val tvname = tvar.getName //original name which should match database column
     
     /*
      * TODO: assumes db value are numerical, need to support times stored as datatime...
@@ -114,18 +123,27 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
      * 
      */
     
-//    //TODO: use model instead of xml, can we construct dataset before we get here?
-//    val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
-//    
-//    (tsml.xml \\ "time" \ "@type").text 
-    
     tvar.getMetadata("type") match {
       case Some("text") => {
         //TODO: derby doesn't support iso format with "T", replace it with space?
         //  is this a jdbc thing? consider java.sql.Timestamp.toString: yyyy-mm-dd hh:mm:ss.fffffffff
-        val ts = new Timestamp(Time.isoToJava(value))
+        //TODO: uses default time zone!
+        //Note, Timestamp supports nanosecond precision unlike Date.
+        //internally, Timestamp treats milliseconds as GMT.
+        //Timestamp has internal Gregorian$Date which has the local time zone.
+        //  No apparent hooks to change that!?
+        //TODO: make use of setNanos when more precision is needed
+        //val ts = new Timestamp(Time.isoToJava(value))
         //val time = value.replace('T', ' ')
-        selections += tvname + op + "'" + ts.toString + "'"; true
+        //val s = ts.toGMTString //1 Jan 1970 00:00:00 GMT
+        //selections += tvname + op + "'" + ts.toString + "'"; true
+        
+        //just replace T with space, for now
+        //but just the date doesn't work!
+        //parse value into a Time then format
+        val time = Time.fromIso(value).format("yyyy-MM-dd HH:mm:ss.SSS")
+        
+        selections += tvname + op + "'" + time + "'"; true
       }
       //case _ => (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
       case _ => tvar.getMetadata("units") match {
