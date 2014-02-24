@@ -12,24 +12,24 @@ import latis.writer.Writer
 
 class TestJdbcAdapter extends AdapterTests {
   def datasetName = "db"
-      
-  @Test
-  def test {
-    println("hi")
-  }
-    
-  @Before
+}
+
+object TestJdbcAdapter {
+  
+  //private var connection: Connection = null
+  
+  @BeforeClass
   def makeDatabase {
     //TODO: make sure these data are consistent with data used in other tests, ingest from same ascii file?
     //TODO: add Text type with length longer than default (4)
-    
+
     System.setProperty("derby.stream.error.file", "/dev/null") //don't make log file
     
     Class.forName("org.apache.derby.jdbc.EmbeddedDriver")  //Load the JDBC driver     
     val connection = DriverManager.getConnection("jdbc:derby:memory:testDB;create=true")
     
     var statement = connection.createStatement()
-    statement.execute("""create table test(time timestamp, int int, real double, text varchar(1))""")
+    statement.execute("""create table test(myTime timestamp, myInt int, myReal double, myText varchar(1))""")
     statement.execute("insert into test values('1970-01-01 00:00:00', 1, 1.1, 'A')")
     statement.execute("insert into test values('1970-01-02 00:00:00', 2, 2.2, 'B')")
     statement.execute("insert into test values('1970-01-03 00:00:00', 3, 3.3, 'C')")
@@ -42,7 +42,7 @@ class TestJdbcAdapter extends AdapterTests {
 //    }
   }
   
-  @After
+  @AfterClass
   def dropDatabase {
     try {
       DriverManager.getConnection("jdbc:derby:memory:testDB;drop=true")
@@ -50,35 +50,4 @@ class TestJdbcAdapter extends AdapterTests {
       case e: Exception =>
     }
   }
-}
-
-object TestJdbcAdapter {
-  
-  //private var connection: Connection = null
-  
-//  @BeforeClass
-//  def makeDatabase {
-//    //TODO: make sure these data are consistent with data used in other tests, ingest from same ascii file?
-//    //TODO: add Text type with length longer than default (4)
-//    
-//    System.setProperty("derby.stream.error.file", "/dev/null") //don't make log file
-//    
-//    Class.forName("org.apache.derby.jdbc.EmbeddedDriver")  //Load the JDBC driver     
-//    val connection = DriverManager.getConnection("jdbc:derby:memory:testDB;create=true")
-//    
-//    var statement = connection.createStatement()
-//    statement.execute("""create table test("time" timestamp, "int" int, "real" double, "text" varchar(1))""")
-//    statement.execute("insert into test values('1970-01-01 00:00:00', 1, 1.1, 'A')")
-//    statement.execute("insert into test values('1970-01-02 00:00:00', 2, 2.2, 'B')")
-//    statement.execute("insert into test values('1970-01-03 00:00:00', 3, 3.3, 'C')")
-//  }
-//  
-//  @AfterClass
-//  def dropDatabase {
-//    try {
-//      DriverManager.getConnection("jdbc:derby:memory:testDB;drop=true")
-//    } catch {
-//      case e: Exception =>
-//    }
-//  }
 }

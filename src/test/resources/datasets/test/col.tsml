@@ -9,11 +9,11 @@
              commentCharacter="#"
              location="datasets/test/col.txt" />
     
-    <time name="time" type="text" length="10" units="yyyy MM dd"/> <!--Note, columns will be concat'd with space-->
-    
-    <integer name="int"/>
-    <real name="real"/>
-    <text name="text"/>
+    <time name="myTime" type="text" length="10" units="yyyy MM dd"/> <!--Note, columns will be concat'd with space-->
+   
+    <integer name="myInt"/>
+    <real    name="myReal"/>
+    <text    name="myText"/>
     
   </dataset>
 

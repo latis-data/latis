@@ -9,13 +9,13 @@
              user="" password=""
              table="test"/>
     
-    <time name="time" type="text" length="23"/>
-    <integer name="int"/>
-    <real name="real"/>
-    <text name="text"/>
+    <time name="myTime" type="text" length="23"/>
+    <integer name="myInt"/>
+    <real name="myReal"/>
+    <text name="myText"/>
     
-    <!--?select d>2?-->
-    <!--?project i,s?-->
+    <!--?select myReal>2?-->
+    <!--?project myInt,myText?-->
     
   </dataset>
 
