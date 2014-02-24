@@ -30,7 +30,7 @@ protected class Selection(val vname: String, val operation: String, val value: S
   }
     
   def filterText(text: Text): Option[Text] = {
-    if (vname == text.getName) operation match {
+    if (text.hasName(vname)) operation match {
       case "=~" => {
         if (text.getValue.asInstanceOf[String].matches(value)) Some(text) //TODO: getStringValue on Variable?
         else None //regex
@@ -40,7 +40,7 @@ protected class Selection(val vname: String, val operation: String, val value: S
   }
   
   def filterScalar(scalar: Scalar): Option[Scalar] = {
-    if (vname == scalar.getName) {
+    if (scalar.hasName(vname)) {
       if (isValid(scalar.compare(value))) Some(scalar) else None
     } else Some(scalar) //operation doesn't apply to this Scalar Variable, no-op
   }
