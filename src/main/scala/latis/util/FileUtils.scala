@@ -5,8 +5,11 @@ import scala.collection.mutable.ArrayBuffer
 
 object FileUtils {
 
+  /**
+   * Get a list of all the files in the given directory and nested directories.
+   * Paths with be relative to the given directory.
+   */
   def listAllFiles(dir: String): Seq[String] = {  
-    //don't include "dir" in the names
     
     def accumulateFiles(file: File, buffer: ArrayBuffer[String]) {
       if (file.isDirectory()) file.listFiles().map(accumulateFiles(_, buffer))

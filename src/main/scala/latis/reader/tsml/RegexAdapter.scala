@@ -6,7 +6,6 @@ import latis.reader.tsml.ml.Tsml
  * Use a regular expression to extract data values from a data record.
  */
 class RegexAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
-  //TODO: mixin Iterative or Granule
   
   //TODO: change att to 'pattern'?
   val regex = getProperty("regex") match {
@@ -19,8 +18,7 @@ class RegexAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
    * by matching the given regular expression.
    */
   override def parseRecord(record: String): Map[String, String] = {
-    val s = record.mkString("\n") //stitch multi-lined record back into a single string
-    val values = regex.findFirstMatchIn(s) match {
+    val values = regex.findFirstMatchIn(record) match {
       case Some(m) => m.subgroups
       case None => List[String]()
     }
