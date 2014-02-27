@@ -14,7 +14,7 @@ class ImageWriter extends Writer{
   
   def write(dataset: Dataset) {
     plotData(dataset)
-    ChartUtilities.saveChartAsPNG(new File("src/test/resources/datasets/data/tsi/plot.png"), chart, 500, 300)
+    ChartUtilities.writeBufferedImageAsPNG(outputStream, chart.createBufferedImage(500, 300))
   }
   
   def plotData(dataset: Dataset) {
@@ -22,7 +22,7 @@ class ImageWriter extends Writer{
     val a = function.getDomain
     val b = function.getRange
     plotFunction(a, b, dataset)
-    //fixRange(chart)
+    fixRange(chart)
   }
   
   def fixRange(chart: JFreeChart) {
