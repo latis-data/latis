@@ -22,7 +22,7 @@ class ImageWriter extends Writer{
     val a = function.getDomain
     val b = function.getRange
     plotFunction(a, b, dataset)
-    fixRange(chart)
+    //fixRange(chart)
   }
   
   def fixRange(chart: JFreeChart) {
