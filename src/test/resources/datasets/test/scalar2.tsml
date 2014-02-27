@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset>
+    <metadata name="Scalar Test"/>
+    <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+             location="datasets/scalar2.txt" />
+             
+    <time name="foo" />
+    
+    <real name="ssn"/>
+    <real name="zzz"/>
+
+  </dataset>
+
+</tsml>

@@ -1,65 +1,52 @@
 package latis.writer
 
 import latis.dm._
-import scala.io.Source
-import breeze.plot._
-import breeze.linalg._
-import latis.writer._
-import latis.reader.tsml._
-import latis.reader.tsml.ml._
-import org.junit._
-import Assert._
-import java.sql._
-import latis.dm._
-import latis.dm.implicits._
-import latis.data._
-import org.junit._
-import Assert._
-import latis.writer._
-import latis.reader.tsml._
-import latis.reader.tsml.ml._
-import latis.ops.Projection
-import scala.collection.mutable.ArrayBuffer
-import latis.ops.Operation
-import latis.ops.Selection
-import latis.ops.LastFilter
-import latis.ops.FirstFilter
-import latis.ops.LimitFilter
-import scala.io.Source
-import java.sql._
-import latis.reader.tsml.TsmlReader
-import scala.collection.mutable.ArrayBuffer
-import latis.ops._
+import org.jfree.chart.JFreeChart
+import org.jfree.chart.ChartUtilities
+import org.jfree.chart.ChartFactory
+import org.jfree.data.xy.XYSeriesCollection
+import org.jfree.data.xy.XYSeries
+import java.io.File
 
 class ImageWriter extends Writer{
   
-  val f = Figure()
+  private var chart: JFreeChart = null
   
   def write(dataset: Dataset) {
     plotData(dataset)
-    val name=dataset.getName
-    f.saveas("src/test/resources/datasets/data/tsi/plot.png")
+    ChartUtilities.saveChartAsPNG(new File("src/test/resources/datasets/data/tsi/plot.png"), chart, 500, 300)
   }
   
-  def plotData(dataset: Dataset, style: String = "plot") {
+  def plotData(dataset: Dataset) {
     val function = dataset.findFunction.get
     val a = function.getDomain
     val b = function.getRange
-    b match{
-      case _:Tuple => for(c <- b.toSeq) plotFunction(a.getName,c.getName,dataset)
-      case _:Scalar => plotFunction(a.getName,b.getName,dataset)
-    }
+    plotFunction(a, b, dataset)
+    fixRange(chart)
   }
   
-  def plotFunction(a: String, b: String, dataset: Dataset, style: Char = '-') {
-    val data = latis.util.DataMap.toDoubleMap(dataset)
-    val x = data(a)
-    val y = data(b)
-    val p = f.subplot(0)
-    p += plot(x,y)
-    p.xlabel = a
-    p.ylabel = b
-    p.title = dataset.getName
+  def fixRange(chart: JFreeChart) {
+    val plot = chart.getXYPlot
+    val range = plot.getRangeAxis
+    range.setRangeWithMargins(plot.getDataRange(plot.getRangeAxis()))
   }
-
+  
+  def makeSeries(a: Variable, b: Variable, data: scala.collection.Map[String,Array[Double]]): XYSeries = {
+    val x = data(a.getName)
+    val y = data(b.getName)
+    val series = new XYSeries(b.getName)
+    for(i <- 0 until x.length) series.add(x(i),y(i))
+    series
+  }
+  
+  def plotFunction(x: Variable, y: Variable, dataset: Dataset) {
+    val data = latis.util.DataMap.toDoubleMap(dataset)
+    val xycol = new XYSeriesCollection()
+    y match{
+      case _:Tuple => for (b <- y.getVariables) xycol.addSeries(makeSeries(x, b, data))
+      case _:Scalar => xycol.addSeries(makeSeries(x, y, data))
+    }
+    chart = ChartFactory.createXYLineChart(dataset.getName, x.getName, y.getName, xycol, org.jfree.chart.plot.PlotOrientation.VERTICAL, true, false, false)
+  }
+ 
 }
