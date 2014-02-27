@@ -10,7 +10,6 @@ trait Real extends Scalar with Number
 
 
 object Real {
-  //implicit def stringToMetadata(name: String): Metadata = Metadata(name) //Metadata with "name" property
   
   def apply(): Real = new AbstractScalar with Real
   
@@ -24,6 +23,8 @@ object Real {
   }
   
   def apply(vs: Seq[Double]): Real = new AbstractScalar(data = Data(vs)) with Real
+  
+  def apply(md: Metadata, data: Data): Real = new AbstractScalar(md, data) with Real
   
   def apply(md: Metadata): Real = new AbstractScalar(md) with Real
 

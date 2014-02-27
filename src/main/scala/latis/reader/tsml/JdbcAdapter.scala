@@ -22,8 +22,18 @@ import latis.reader.tsml.ml.Tsml
 import com.typesafe.scalalogging.slf4j.Logging
 import latis.time.TimeFormat
 import java.util.Date
+import java.sql.Timestamp
 
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
+  
+  /*
+   * TODO: 2014-02-24
+   * deal with non-projected domain or range, replace with Index
+   * let Projection do this on first pass? instead of doing the logic here?
+   * but even projection delegated to projectedFunction (so it can set index value)
+   * needs to be applied at sample level so you know if domain or range is empty
+   * 
+   */
   
   //TODO: catch exceptions and close connections
   
@@ -56,7 +66,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
       case SELECTION.r(name, op, value) => {
         if (name == "time") handleTimeSelection(op, value) //special handling for "time"
         //TODO: handle other Time variables (dependent)
-        else if (origVariableNames.contains(name)) { //other variable (not time), even if not projected
+        else if (origScalarNames.contains(name)) { //other variable (not time), even if not projected
           //add a selection to the sql, may need to change operation
           op match {
             case "==" => selections append name + "=" + value; true
@@ -95,6 +105,11 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   def handleTimeSelection(op: String, value: String): Boolean = {
     //support ISO time string as value
     //TODO: assumes value is ISO, what if dataset does have a var named "time" with other units?
+    
+    //this should work because any time variable should have the alias "time"
+    val tvar = origDataset.getVariableByName("time").get //TODO: handle option better
+    val tvname = tvar.getName //original name which should match database column
+    
     /*
      * TODO: assumes db value are numerical, need to support times stored as datatime...
      * should be able to use iso form in quotes?
@@ -108,22 +123,34 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
      * 
      */
     
-    
-    //TODO: use model instead of xml, can we construct dataset before we get here?
-    val tvname = (tsml.xml \\ "time" \ "@name").text //TODO: also look in metadata
-    
-    (tsml.xml \\ "time" \ "@type").text match {
-      case "text" => {
+    tvar.getMetadata("type") match {
+      case Some("text") => {
         //TODO: derby doesn't support iso format with "T", replace it with space?
-        //  is this a jdbc thing? consider Timestamp.toString: yyyy-mm-dd hh:mm:ss.fffffffff
-        val time = value.replace('T', ' ')
+        //  is this a jdbc thing? consider java.sql.Timestamp.toString: yyyy-mm-dd hh:mm:ss.fffffffff
+        //TODO: uses default time zone!
+        //Note, Timestamp supports nanosecond precision unlike Date.
+        //internally, Timestamp treats milliseconds as GMT.
+        //Timestamp has internal Gregorian$Date which has the local time zone.
+        //  No apparent hooks to change that!?
+        //TODO: make use of setNanos when more precision is needed
+        //val ts = new Timestamp(Time.isoToJava(value))
+        //val time = value.replace('T', ' ')
+        //val s = ts.toGMTString //1 Jan 1970 00:00:00 GMT
+        //selections += tvname + op + "'" + ts.toString + "'"; true
+        
+        //just replace T with space, for now
+        //but just the date doesn't work!
+        //parse value into a Time then format
+        val time = Time.fromIso(value).format("yyyy-MM-dd HH:mm:ss.SSS")
+        
         selections += tvname + op + "'" + time + "'"; true
       }
-      case _ => (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
-       case "" => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
+      //case _ => (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
+      case _ => tvar.getMetadata("units") match {
+       case None => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
       //TODO: allow units property in time element
       //TODO: what if native time var is "time", without units?
-       case units: String => {
+       case Some(units) => {
         //convert ISO time to units
         RegEx.TIME.r findFirstIn value match {
           case Some(s) => {
@@ -362,7 +389,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   }
   
   
-  def close() = {
+  override def close() = {
     //TODO: do we need to close resultset, statement...?
     //  should we close it or just return it to the pool?
     //closing statement also closes resultset 

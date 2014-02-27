@@ -61,6 +61,7 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
   
   //def format: String = TimeFormat(getMetadata("format")).format(getJavaDate)
   
+  def format(format: String): String = TimeFormat(format).format(getJavaDate)
   
   def getJavaDate: java.util.Date = new java.util.Date(getJavaTime)
   
@@ -90,6 +91,7 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
   
   //override to deal with ISO formatted time strings  
   override def compare(that: String): Int = {
+    //TODO: look for units and see if 'that' matches...
     RegEx.TIME.r findFirstIn that match {
       //If the string matches the ISO format
       case Some(s) => compare(Time.fromIso(s)) //Make Time from ISO formatted time string, convert to our time scale
@@ -126,6 +128,7 @@ object Time {
   
   
   //def apply(scale: TimeScale, md: Metadata, data: Data) = new Time(scale, md, data)
+  //need to know what scalar type to mixin
   
   //no data, used as a template in adapters
   def apply(md: Metadata, data: Data = EmptyData): Time = {
@@ -250,18 +253,11 @@ object Time {
             case _ => new Time(TimeScale(u), md, Data(value.toDouble)) with Real
           }
         }
-        //Otherwise, store data as StringValue
-        else ??? //wait for use case
-          //Time(TimeScale.JAVA, md, StringValue(value))
-        //TODO: reconcile "units", assumes units = time format string, inconsistent with scale.toString
-        /*
-         * TODO: what should time scale be for text times?
-         *   JAVA: leap second agnostic
-         *   UTC: considers leap seconds
-         *   allow any scale and transform as requested? seems dangerous
-         *   but must be able to get a numeric value at some point, or does that require a "convert"?
-         *   consider TimeScale(unit: String)
-         */
+        //Otherwise, store data as StringValue.
+        //Use java time scale so we can count on using SimpleDateFormat conversions.
+        //TODO: consider implications of ignoring leap seconds for formatted times, 
+        //  could java format conversions still work for UTC scale?
+        else new Time(TimeScale.JAVA, md, StringValue(value)) with Text
       }
       //No units specified, assume default numeric units or ISO format
       case None => md("type") match {

@@ -11,15 +11,9 @@ import latis.reader.tsml.ml.Tsml
  * via the Data's iterator which can be fed by this Adapter.
  */
 abstract class IterativeAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
-  //TODO: Stream, lazy list
+  //TODO: Stream, lazy list?
   //TODO: consider Iterative and Granule as traits?
-  
-  //TODO: assuming single top level variable = Function
-  
-//  lazy val sampleSize = {
-//    val f = dataset(0).asInstanceOf[Function] //assume single top-level Function
-//    f.getDomain.getSize + f.getRange.getSize
-//  }
+  //TODO: consider use cases beyond single top level variable = Function
   
   /**
    * Implementations of IterativeAdapter need to override this to construct Data
@@ -32,18 +26,14 @@ abstract class IterativeAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    */
   override def makeFunction(f: Function): Option[Function] = {
     //if domain or range is None (e.g. not projected), make index function
-    val odomain = makeVariable(f.getDomain)
-    val orange = makeVariable(f.getRange)
-    val sample = (odomain, orange) match {
-      case (Some(d), Some(r)) => Sample(d,r)
-      case (None, Some(r))    => Sample(Index(-1), r) //TODO: do we need a valid value here? Sample is used just as a template
-      case (Some(d), None)    => Sample(Index(-1), d) //no range, so make domain the range of an index function
-      case (None, None) => ??? //TODO: nothing projected
+    val template = Sample(f.getDomain, f.getRange)
+    makeSample(template) match {
+      case Some(sample) => {
+        val data: Data = makeIterableData(sample)
+        Some(Function(sample.domain, sample.range, f.getMetadata, data))
+      }
+      case None => None
     }
-    
-    val data: Data = makeIterableData(sample)
-    
-    Some(Function(sample.domain, sample.range, f.getMetadata, data))
   }
   
 }

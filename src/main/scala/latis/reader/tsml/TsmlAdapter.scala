@@ -20,6 +20,8 @@ import latis.ops.Projection
 import latis.ops.Selection
 import latis.data._
 import latis.data.EmptyData
+import java.nio.ByteBuffer
+import scala.io.Source
 
 
 /**
@@ -120,6 +122,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   //TODO: save dataset for reuse?
   //TODO: use this dataset as cache? data with PIs applied but not user ops,
+//TODO: Note that these are no longer Tsml specific! could we use them elsewhere? 
+  //e.g. ProjectedFunction makeSample, but we do count on special adapters overriding these
   
   def getDataset: Dataset = {
     //Build the Dataset with Data (second build pass)
@@ -154,9 +158,10 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   //lots of extension points
   
   protected def makeVariable(variable: Variable): Option[Variable] = variable match {
-    case s: Scalar => makeScalar(s)
-    case t: Tuple  => makeTuple(t)
-    case f: Function => makeFunction(f)
+    case scalar:   Scalar   => makeScalar(scalar)
+    case sample:   Sample   => makeSample(sample)
+    case tuple:    Tuple    => makeTuple(tuple)
+    case function: Function => makeFunction(function)
   }
   
   //default to no-op
@@ -171,10 +176,28 @@ abstract class TsmlAdapter(val tsml: Tsml) {
 //    }
 //  }
   
+  protected def makeSample(sample: Sample): Option[Sample] = {
+    //Note this uses a -1 place holder for Index.
+    //ProjectedFunction will set the appropriate index value
+    val odomain = makeVariable(sample.domain)
+    val orange  = makeVariable(sample.range)
+    (odomain, orange) match {
+      case (Some(d), Some(r)) => Some(Sample(d,r))
+      case (None, Some(r))    => Some(Sample(Index(-1), r)) //no domain, so replace with Index. 
+      case (Some(d), None)    => Some(Sample(Index(-1), d)) //no range, so make domain the range of an index function
+      case (None, None)       => None //nothing projected
+    }
+  }
+  
+  
   protected def makeTuple(tuple: Tuple): Option[Tuple] = {
     val md = tuple.getMetadata
-    val vars = tuple.getVariables.flatMap(makeVariable(_))
-    Some(Tuple(vars, md))
+    val vars = tuple.getVariables.flatMap(makeVariable(_)) 
+    vars.length match {
+      case 0 => None
+      case n => Some(Tuple(vars, md))
+      //TODO: make scalar if only one variable?
+    }
   }
   
   protected def makeFunction(function: Function): Option[Function] = {
@@ -195,9 +218,15 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   
   /**
+   * Keep a list of the original Scalars.
+   */
+  lazy val origScalars = origDataset.toSeq
+  
+  /**
    * Keep a list of the names of the original Scalars.
    */
-  lazy val origVariableNames = origDataset.toSeq.map(_.getName)
+  lazy val origScalarNames = origScalars.map(_.getName)
+    
   
   /**
    * Hook for subclasses to apply operations during data access
@@ -228,6 +257,33 @@ abstract class TsmlAdapter(val tsml: Tsml) {
 
   //-------------------------------------------------------------------------//
   
+  //Column-oriented data cache
+  //TODO: consider memory usage/leaks with immutable data in a var that can be replaced
+  //protected var dataCache: immutable.Map[String, immutable.Seq[String]] = immutable.Map[String, immutable.Seq[String]]()
+  protected var dataCache: immutable.Map[String, Data] = immutable.Map[String, Data]()
+  //TODO: lazy val, trigger data read?
+  //consider Stream
+  /*
+   * TODO: do we need diff place to hold tsml values so we don't have partial cache confusion?
+   * allow mutable and require getCachedData? hard to enforce
+   * use tsmlData?
+   */
+  val tsmlData = Map[String, Data]() //TODO: immutable?
+  
+  //-------------------------------------------------------------------------//
+  
+  private var source: Source = null
+  
+  /**
+   * Source from which we will read data.
+   */
+  def getDataSource: Source = {
+    if (source == null) source = Source.fromURL(getUrl())
+    source
+  }
+    
+  
+  
   /**
    * Get the URL of the data source from this adapter's definition.
    */
@@ -247,7 +303,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     }
   }
   
-  def close()
+  def close() {
+    if (source != null) source.close
+  }
   
   //=================================================================================================
 

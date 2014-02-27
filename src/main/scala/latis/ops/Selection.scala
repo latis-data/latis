@@ -1,6 +1,7 @@
 package latis.ops
 
 import latis.dm._
+import latis.time._
 import latis.util.RegEx._
 
 /**
@@ -20,24 +21,26 @@ protected class Selection(val vname: String, val operation: String, val value: S
   }
   
   def filter(variable: Variable): Option[Variable] = variable match {
-    case text: Text => filterText(text)
-    case s: Scalar => filterScalar(s)
-    case t: Tuple => filterTuple(t)
+    //Special handling for Text regex matching with "=~"
+    // except Time which can be handled like any other Scalar.
+    case text: Text if (! text.isInstanceOf[Time]) => filterText(text)
+    case s: Scalar   => filterScalar(s)
+    case t: Tuple    => filterTuple(t)
     case f: Function => filterFunction(f)
   }
     
   def filterText(text: Text): Option[Text] = {
-    if (vname == text.getName) operation match {
+    if (text.hasName(vname)) operation match {
       case "=~" => {
-        if (text.value.matches(value)) Some(text) 
+        if (text.getValue.asInstanceOf[String].matches(value)) Some(text) //TODO: getStringValue on Variable?
         else None //regex
       }
-      case _    => if (isValid(text.compare(value))) Some(text) else None //like any other scalar
+      case _ => if (isValid(text.compare(value))) Some(text) else None //like any other scalar
     } else Some(text) //operation doesn't apply to this Scalar Variable, no-op
   }
   
   def filterScalar(scalar: Scalar): Option[Scalar] = {
-    if (vname == scalar.getName) {
+    if (scalar.hasName(vname)) {
       if (isValid(scalar.compare(value))) Some(scalar) else None
     } else Some(scalar) //operation doesn't apply to this Scalar Variable, no-op
   }
@@ -84,9 +87,13 @@ object Selection {
     new Selection(vname, op, value)
   }
   
-  def apply(expression: String): Selection = expression match {
-    case SELECTION.r(name, op, value) => Selection(name, op, value)
-    //TODO: case _ => error
+  def apply(expression: String): Selection = {
+    //remove white space so we can say "t > 1"
+    val exp = expression.replaceAll("""\s""", "")
+    exp match {
+      case SELECTION.r(name, op, value) => Selection(name, op, value)
+      //TODO: case _ => error
+    }
   }
   
   //Extract the selection as a single string expression

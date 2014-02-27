@@ -5,6 +5,7 @@ import java.nio.ByteBuffer
 import latis.data.value.{DoubleValue,StringValue}
 
 case class StringSeqData(ss: immutable.Seq[String], textLength: Int) extends SeqData {
+  //TODO: make sure textLength is at least the default = 4
   
   def getByteBuffer: ByteBuffer = {
     val bb = ByteBuffer.allocate(size)

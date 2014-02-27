@@ -10,7 +10,7 @@ import scala.collection.mutable.ArrayBuffer
 
 abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyData) extends Variable {
   
-  def getMetadata: Metadata = metadata
+  def getMetadata(): Metadata = metadata
   def getData: Data = data
   
   def getName = name
@@ -25,7 +25,10 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    *   Tuple: number of variable members
    *   Function: number of samples
    */
-  //TODO: dangerous to overload "length", use getVariableCount?
+  /*
+   * TODO: is 'length' too overloaded?
+   * should Text return length of string?
+   */
   def getLength: Int = this match {
     case _: Scalar => 1  //TODO: consider Scalars with SeqData, implicit IndexFunction
     case Tuple(vars) => vars.length
@@ -43,8 +46,11 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     case _: Index => 4 
     case _: Real => 8 //double
     case _: Integer => 8 //long
-    case t: Text => t.length * 2 //2 bytes per char  //TODO: consider Seq, get max
-    case b: Binary => b.length
+    case t: Text => t.length * 2 //2 bytes per char  //TODO: avoid confusing t.length with getLength
+    case _: Binary => getMetadata("size") match {
+      case Some(l) => l.toInt
+      case None => throw new Error("Must declare length of Binary Variable.")
+    } 
     
     case Tuple(vars) => vars.foldLeft(0)(_ + _.getSize)
     case f @ Function(d,r) => f.getLength * (d.getSize + r.getSize)
@@ -146,7 +152,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    *   use this for internal use
    */
   //TODO: support fully qualified names
-  //TODO: "findVariableByName"? all descendants like netcdf, "get" for direct kids?
+  //TODO: "findVariableByName"? all descendants like netcdf, "get" for direct kids? "find" implies 'Option' and 'first' in scala
   //TODO: stop as soon as first is found, like Seq.find
   //Get the actual Variable object with the given name or alias.
   //Don't try to maintain the entire model structure.
@@ -330,7 +336,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
 
   /**
    * Iterate over all combinations of the scalar values in a tuple
-   * instead of combining them pariwaise as for tuples in ranges.
+   * instead of combining them pairwise as for tuples in ranges.
    */
   def getDomainDataIterator: Iterator[Data] = {
     if (data.notEmpty) data.iterator
