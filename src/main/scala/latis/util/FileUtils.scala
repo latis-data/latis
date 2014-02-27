@@ -10,6 +10,7 @@ object FileUtils {
    * Paths with be relative to the given directory.
    */
   def listAllFiles(dir: String): Seq[String] = {  
+    //TODO: performance concern, especially since we are sorting
     
     def accumulateFiles(file: File, buffer: ArrayBuffer[String]) {
       if (file.isDirectory()) file.listFiles().map(accumulateFiles(_, buffer))
@@ -18,7 +19,7 @@ object FileUtils {
     
     val buffer = ArrayBuffer[String]()
     accumulateFiles(new File(dir), buffer)
-    buffer
+    buffer.sorted //sort lexically
   }
   
 }

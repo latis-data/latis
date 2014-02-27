@@ -12,47 +12,35 @@ import latis.data.Data
  */
 //class FileListAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
 class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
-  /*
-   * TODO: extend RegexAdapter?
-   * tricky since we need to add the file itself to the dataset
-   * just match with a set of () around the whole thing?
-   * almost! putting () around regex does give us the file but it is first, 
-   * need it last, unless we do index function then groupby time?
-   */
+  //TODO: add the file variable without defining it in the tsml? but opportunity to define max length
+  //Note: Using the RegexAdapter with "()" around the file name pattern almost works.
+  //      The matcher returns it first but we want the file variable to be last.
   
   /**
    * Override to treat every file name as a data record.
    */
   override def getRecordIterator = {
     //TODO: can we do this without reading all file names into memory?
-    val dir = "/tmp/latis_file_test" //getUrl
+    //      But we need to make sure they are sorted?
+    //      Should we use the GranuleAdapter and let Function creation require that samples are sorted?
+    //TODO: see java 7 java.nio.file, DirectoryStream,...
+    //  FileSystems.getDefault().getPathMatcher("regex:.*").matches(path)
+    //TODO: support ftp...?
+    val dir = getUrl.getPath //assumes a file URL 
     FileUtils.listAllFiles(dir).iterator
   }
   
-
   /**
-   * Override to add the file name itself to the data.
+   * Override to add the file name (i.e. the data "record") itself as a data value.
+   * Note, this assumes that the TSML has the file variable defined last.
    */
-//  override def parseRecord(record: String): Map[String, String] = {
-//    val map = super.parseRecord(record)
-//  }
-//    val values = regex.findFirstMatchIn(record) match {
-//      case Some(m) => m.subgroups
-//      case None => List[String]()
-//    }
-//    
-//    //create Map with variable names and values
-//    val vnames = origScalarNames
-//    //If we didn't find the right number of samples, drop this record
-//    if (vnames.length != values.length) Map[String, String]()
-//    else (vnames zip values).toMap
-//  }
-  
-  //TODO: see java 7 java.nio.file, DirectoryStream,...
-  //  FileSystems.getDefault().getPathMatcher("regex:.*").matches(path)
-  //Note, we can't count on the order of the files, so we can't use an iterative adapter.
-  //  TODO: maybe chunk nested directories 
-  
+  override def getMatchingValues(fileName: String) = {
+    regex.findFirstMatchIn(fileName) match {
+      case Some(m) => m.subgroups :+ fileName //add the file name
+      case None => List[String]()
+    }
+  }
+
   /*
    * TODO: if file name has other parameters (e.g. instrument)
    *   then it likely has one for each time sample.

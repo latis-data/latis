@@ -7,25 +7,35 @@ import latis.reader.tsml.ml.Tsml
  */
 class RegexAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
   
-  //TODO: change att to 'pattern'?
-  val regex = getProperty("regex") match {
-    case Some(s: String) => s.r
-    case None => throw new RuntimeException("RegexAdapter requires a regular expression definition 'regex'.")
-  }
-  
   /**
-   * Parse a "record" of text into a Map of Variable name to value
-   * by matching the given regular expression.
+   * Get the required regular expression pattern from the adapter definition.
    */
-  override def parseRecord(record: String): Map[String, String] = {
-    val values = regex.findFirstMatchIn(record) match {
+  val regex = getProperty("pattern") match {
+    case Some(s: String) => s.r
+    case None => throw new RuntimeException("RegexAdapter requires a regular expression definition 'pattern'.")
+  }
+    
+  /**
+   * Return a List of values in the given record that match
+   * this Adapter's regular expression pattern.
+   * Return an empty List if the record does not match (i.e. does not contain valid data).
+   */
+  def getMatchingValues(record: String) = {
+    regex.findFirstMatchIn(record) match {
       case Some(m) => m.subgroups
       case None => List[String]()
     }
-    
+  }
+
+  /**
+   * Parse a "record" of text into a Map of Variable name to value
+   * by matching this Adapter's regular expression pattern.
+   */
+  override def parseRecord(record: String): Map[String, String] = {
     //create Map with variable names and values
     val vnames = origScalarNames
-    //If we didn't find the right number of samples, drop this record
+    val values = getMatchingValues(record)
+    //If we didn't find the right number of samples, drop this record by returning an empty Map
     if (vnames.length != values.length) Map[String, String]()
     else (vnames zip values).toMap
   }
