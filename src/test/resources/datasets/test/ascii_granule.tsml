@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tsml>
 
-  <dataset name="ascii_iterative">
+  <dataset name="ascii_granule">
     <adapter class="latis.reader.tsml.GranuleAsciiAdapter"
              delimiter="\s+"
              commentCharacter="#"
