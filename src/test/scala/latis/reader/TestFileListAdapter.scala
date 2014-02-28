@@ -12,12 +12,8 @@ class TestFileListAdapter extends AdapterTests {
 
   def datasetName = "files"
   
-//  @Test
-//  def test {
-//    //val ops = List(Selection("time>2000-01-01"))
-//    val ds = TsmlReader("datasets/test/files.tsml").getDataset
-//    AsciiWriter().write(ds)
-//  }
+  //@Test
+  def test = writeDataset
 }
 
 object TestFileListAdapter {
