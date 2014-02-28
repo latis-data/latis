@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tsml>
 
-  <dataset>
-    <metadata name="Database Test"/>
+  <dataset name="db" long_name="Database Test">
     <adapter class="latis.reader.tsml.JdbcAdapter"
              location="jdbc:derby:memory:testDB" 
              driver="org.apache.derby.jdbc.EmbeddedDriver"
