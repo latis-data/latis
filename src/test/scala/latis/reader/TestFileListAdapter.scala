@@ -6,6 +6,7 @@ import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
 import latis.ops.Selection
 import java.io.File
+import latis.util.FileUtils
 
 class TestFileListAdapter extends AdapterTests {
 
@@ -21,10 +22,9 @@ class TestFileListAdapter extends AdapterTests {
 
 object TestFileListAdapter {
   
-  val tmpDir = {
+  val tmpDir: File = {
     val dir = new File(System.getProperty("java.io.tmpdir") + File.separator + "latis_file_test")
     dir.mkdir
-    dir.deleteOnExit //make sure we don't leave it around //TODO: not working
     dir
   }
   
@@ -34,10 +34,12 @@ object TestFileListAdapter {
     (new File(tmpDir, "Foo1970001bar1v1.1A.dat")).createNewFile
     (new File(tmpDir, "Foo1970002bar2v2.2B.dat")).createNewFile
     (new File(tmpDir, "Foo1970003bar3v3.3C.dat")).createNewFile
+    //test with non-matching file
+    (new File(tmpDir, "junk")).createNewFile
   }
   
   @AfterClass
   def removeTmpFiles {
-    tmpDir.delete //redundant with deleteOnExit, but oh well //TODO: not working
+    FileUtils.delete(tmpDir)
   }
 }
