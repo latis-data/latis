@@ -24,6 +24,13 @@ object TimeScale {
   val JAVA = new TimeScale(new Date(0), TimeUnit.MILLISECOND, TimeScaleType.NATIVE)
   val DEFAULT = JAVA
   
+  /**
+   * Define a special case for Julian date: days since noon Jan 1, 4713 BC.
+   * Because Java's default calendar jumps from 1 BC to 1 AD, we need to use year -4712.
+   * This seems to work for the times we care about.
+   */
+  val JULIAN_DATE = TimeScale("-4712-01-01T12:00:00", TimeUnit.MILLISECOND, TimeScaleType.NATIVE)
+  
   def apply(epoch: Date, unit: TimeUnit, tstype: TimeScaleType): TimeScale = {
     new TimeScale(epoch, unit, tstype)
   }
@@ -46,7 +53,8 @@ object TimeScale {
     
     //val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + "("+RegEx.TIME+")").r
     //TODO: apparently scala regex will extract group for nested ()s
-    val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """([0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
+    //val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """([0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
+    val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """(-?[0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
     scale.trim match {
       case regex(unit, epoch) => TimeScale(epoch, TimeUnit.withName(unit), TimeScaleType.NATIVE)
       case _ => {
