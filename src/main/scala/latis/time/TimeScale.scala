@@ -52,8 +52,7 @@ object TimeScale {
     //TODO: allow named TimeScales, e.g. GPS
     
     //val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + "("+RegEx.TIME+")").r
-    //TODO: apparently scala regex will extract group for nested ()s
-    //val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """([0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
+    //Note, scala regex will extract group for nested ()s
     val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """(-?[0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
     scale.trim match {
       case regex(unit, epoch) => TimeScale(epoch, TimeUnit.withName(unit), TimeScaleType.NATIVE)
