@@ -28,4 +28,12 @@ class TestFileUtils {
   }
   
   //TODO: test how it handles io exceptions: permissions, file not found
+  
+  //TODO: explore whether java.io.tmpdir ends with "/" on various OS's 
+  @Test
+  def tmpdir {
+    val dirName = System.getProperty("java.io.tmpdir")
+    assertEquals(File.separator, dirName.last.toString)
+    //println(dirName)  // Mac: /var/folders/Jl/JlPXu2FoEs0GXqwaPMPc2++++TY/-Tmp-/
+  }
 }

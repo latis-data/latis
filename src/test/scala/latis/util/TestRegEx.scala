@@ -5,8 +5,7 @@ import Assert._
 import latis.reader.tsml.TsmlReader
 import latis.writer.Writer
 
-class RegExTest {
-  //TODO: load special properties file, controlled environment
+class TestRegEx {
   
   def getMatches(pattern: String, s: String): Seq[String] = {
     pattern.r.findFirstMatchIn(s) match {
@@ -32,15 +31,5 @@ class RegExTest {
     
     println(vs.mkString(","))
   }
-  
-  //@Test
-  def parse_log_file {
-    val ds = TsmlReader("datasets/test/log.tsml").getDataset
-    Writer("csv").write(ds)
-    /*
-     * Text variable has data = StringSeqData
-     * but data iterator consolidates data via a byte buffer
-     * Text length never applied so buffer underflow
-     */
-  }
+
 }
