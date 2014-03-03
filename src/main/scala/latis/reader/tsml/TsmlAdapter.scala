@@ -22,6 +22,7 @@ import latis.data._
 import latis.data.EmptyData
 import java.nio.ByteBuffer
 import scala.io.Source
+import java.net.URI
 
 
 /**
@@ -282,26 +283,45 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     source
   }
     
-  
+    
   
   /**
    * Get the URL of the data source from this adapter's definition.
    */
-  def getUrl(): String = {
-    //TODO: can we be relative to tsml? No, only have xml here
+  def getUrl(): URL = {
+    //Note, can't be relative to the tsml file since we only have xml here. Tsml could be from any source.
     properties.get("location") match {
       case Some(loc) => {
-        //TODO: use URI API?
-        if (loc.contains(":")) loc //Assume URL is absolute (has scheme) if ":" exists.
-        else if (loc.startsWith(File.separator)) "file:" + loc //full path
-        else getClass.getResource("/"+loc) match { //try in the classpath
-          case url: URL => url.toString
-          case null => "file:" + scala.util.Properties.userDir + File.separator + loc //relative to current working directory
+        val uri = new URI(loc)
+        if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
+        else if (loc.startsWith(File.separator)) new URL("file:" + loc) //absolute path
+        else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
+          case url: URL => url
+          case null => new URL("file:" + scala.util.Properties.userDir + File.separator + loc) //relative to current working directory
         }
       }
       case None => throw new RuntimeException("No 'location' attribute in TSML adapter definition.")
     }
   }
+  
+//  /**
+//   * Get the URL of the data source from this adapter's definition.
+//   */
+//  def getUrl(): String = {
+//    //Note, can't be relative to the tsml file since we only have xml here. Tsml could be from any source.
+//    properties.get("location") match {
+//      case Some(loc) => {
+//        //TODO: use URI API?
+//        if (loc.contains(":")) loc //Assume URL is absolute (has scheme) if ":" exists.
+//        else if (loc.startsWith(File.separator)) "file:" + loc //full path
+//        else getClass.getResource("/"+loc) match { //try in the classpath
+//          case url: URL => url.toString
+//          case null => "file:" + scala.util.Properties.userDir + File.separator + loc //relative to current working directory
+//        }
+//      }
+//      case None => throw new RuntimeException("No 'location' attribute in TSML adapter definition.")
+//    }
+//  }
   
   def close() {
     if (source != null) source.close

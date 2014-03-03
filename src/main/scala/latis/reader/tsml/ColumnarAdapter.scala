@@ -50,6 +50,7 @@ class ColumnarAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
     //Concatenate multiple column values with the delimiter.
     //TODO: problem if delim is regex, just use " " for now.
     //  needed for time format (units) for example: "yy MM" vs "yy  MM"
+//TODO: deal with invalid record, ss.length? return empty map like regex adapter
     def makeValue(name: String) = indexMap(name).map(ss(_)).mkString(" ")
     
     //Map variable names to their string values

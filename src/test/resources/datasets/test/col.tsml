@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tsml>
 
-  <dataset>
-    <metadata name="Columnar Test"/>
+  <dataset name="col" long_name="Columnar Test">
     <adapter class="latis.reader.tsml.ColumnarAdapter"
              columns="0,1,2;5;3;4"
              delimiter="\s+"

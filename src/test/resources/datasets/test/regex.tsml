@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tsml>
 
-  <dataset name="ascii_granule">
-    <adapter class="latis.reader.tsml.GranuleAsciiAdapter"
-             delimiter="\s+"
+  <dataset name="regex">
+    <adapter class="latis.reader.tsml.RegexAdapter"
+             pattern="(\S+)\s+(\S+)\s+(\S+)\s+(\S+)"
              commentCharacter="#"
              location="datasets/test/mixed.txt" />
     
@@ -12,7 +12,7 @@
     <integer name="myInt"/>
     <real    name="myReal"/>
     <text    name="myText"/>
-    
+  
   </dataset>
 
 </tsml>

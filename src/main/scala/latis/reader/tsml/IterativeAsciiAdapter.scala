@@ -9,20 +9,24 @@ import java.nio.ByteBuffer
 import latis.data.IterableData
 import latis.time.Time
 import latis.reader.tsml.ml.Tsml
+import latis.util.PeekIterator
 
 class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with AsciiAdapterHelper {
   
   def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
     def recordSize = sampleTemplate.getSize
-    val recordIterator = getRecordIterator
     
-    //TODO: make PeekIterator? but don't access data source prematurely
-    def iterator = new Iterator[Data] {
-      override def hasNext = recordIterator.hasNext
-      override def next = {
-        val record = recordIterator.next
-        val svals = parseRecord(record)
-        makeDataFromRecord(sampleTemplate, svals)
+    def iterator = new PeekIterator[Data] {
+      val it = getRecordIterator
+      
+      //keep going till we find a valid record or run out
+      def getNext: Data = {
+        if (it.hasNext) {
+          val record = it.next
+          val svals = parseRecord(record)
+          if (svals.isEmpty) getNext
+          else makeDataFromRecord(sampleTemplate, svals)
+        } else null
       }
     }
   }

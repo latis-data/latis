@@ -4,6 +4,7 @@
   <dataset name="tsi">
 
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+    		 delimiter="\s+"
              location="datasets/tsi.txt" />
              
     <time name="year" 

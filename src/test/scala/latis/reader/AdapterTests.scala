@@ -22,8 +22,12 @@ abstract class AdapterTests {
    * It is expected that each adapted dataset represent the same values.
    */
   def datasetName: String
+  
   def getDataset(ops: Seq[Operation]) = TsmlReader("datasets/test/" + datasetName + ".tsml").getDataset(ops)
+  def getDataset: Unit = getDataset(Seq[Operation]())
+  
   def writeDataset(ops: Seq[Operation]) = AsciiWriter().write(getDataset(ops))
+  def writeDataset: Unit = writeDataset(Seq[Operation]())
   
   //---- Test Projection ----------------------------------------------------//
   
