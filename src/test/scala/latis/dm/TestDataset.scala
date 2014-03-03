@@ -11,7 +11,7 @@ import latis.writer.AsciiWriter
 
 class TestDataset {
   
-  @Test
+  //@Test
   //def function_of_scalar_with_data_from_kids = AsciiWriter.write(TestDataset.function_of_scalar_with_data_from_kids)
   //def function_of_scalar_with_iterable_data = AsciiWriter.write(TestDataset.function_of_scalar_with_iterable_data)
   //def function_of_tuple_with_data_from_kids = AsciiWriter.write(TestDataset.function_of_tuple_with_data_from_kids)
@@ -19,7 +19,12 @@ class TestDataset {
   def function_of_tuple_with_mixed_types = AsciiWriter.write(TestDataset.function_of_tuple_with_mixed_types)
 }
 
+/**
+ * Static datasets to use for testing.
+ */
 object TestDataset {
+  //TODO: delegate to Variable specific tests, wrap in Dataset as needed
+  //TODO: consider a single collection of Datasets that can be used by anything that needs to be tested with datasets, by extending trait?
   
   //implicit def stringToMetadata(name: String): Metadata = Metadata(name)
   
