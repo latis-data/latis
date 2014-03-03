@@ -40,15 +40,24 @@ object Scalar {
   
   def apply(value: String) = Text(value)
   
-  def fromAny(value: Any): Scalar = value match {
-    //Note, can't match on AnyVal so we need to repeat these
-    case d: Double => Real(d)
-    case f: Float  => Real(f)
-    case l: Long   => Integer(l)
-    case i: Int    => Integer(i)
-    case s: String => Text(s)
+  def apply(metadata: Metadata, value: Any): Scalar = value match {
+    case d: Double => Real(metadata, d)
+    case f: Float  => Real(metadata, f)
+    case l: Long   => Integer(metadata, l)
+    case i: Int    => Integer(metadata, i)
+    case s: String => Text(metadata, s)
     case _ => throw new Error("Unable to make Scalar from value: " + value)
   }
+  
+//  def fromAny(value: Any): Scalar = value match {
+//    //Note, can't match on AnyVal so we need to repeat these
+//    case d: Double => Real(d)
+//    case f: Float  => Real(f)
+//    case l: Long   => Integer(l)
+//    case i: Int    => Integer(i)
+//    case s: String => Text(s)
+//    case _ => throw new Error("Unable to make Scalar from value: " + value)
+//  }
   
   def unapply(s: Scalar) = Some(s.getValue)
 }
