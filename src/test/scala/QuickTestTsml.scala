@@ -1,0 +1,33 @@
+import latis.dm._
+import latis.dm.implicits._
+import latis.data._
+import org.junit._
+import Assert._
+import latis.writer._
+import latis.reader.tsml._
+import latis.reader.tsml.ml._
+import latis.ops.Projection
+import scala.collection.mutable.ArrayBuffer
+import latis.ops.Operation
+import latis.ops.Selection
+import latis.ops.LastFilter
+import latis.ops.FirstFilter
+import latis.ops.LimitFilter
+import latis.writer.CsvWriter
+
+object QuickTestTsml extends App {
+  
+  //TODO: make an app that takes the same request as a server
+  
+    val tsml = "/home/lindholm/git/lisird3/src/test/resources/datasets/test/sorce_tim_tsi_6h_v12.tsml"
+      
+    val ops = ArrayBuffer[Operation]()
+    //ops += Selection("")
+    //ops += Projection("time,data_rate_mode,file")
+    ops += Operation("first")
+    //ops += Operation("last")
+    //ops += LimitFilter(3)
+    
+    val ds = TsmlReader(tsml).getDataset(ops)
+    Writer("asc").write(ds)
+}
