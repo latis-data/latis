@@ -3,8 +3,13 @@ package latis.util
 import org.junit._
 import Assert._
 
-class UtilTest {
-  //TODO: load special properties file, controlled environment
+class TestProperties {
+  
+  @Test
+  def precedence_of_test_properties {
+    val version = LatisProperties.getOrElse("version", "Not Found")
+    assertEquals("test", version)
+  }
   
   @Test
   def resolve_string_with_system_property {
@@ -35,23 +40,18 @@ class UtilTest {
     assertEquals(a, s)
   }
   
-  @Test //TODO: move to properties test?
+  @Test 
   def resolve_string_with_latis_property_with_space {
     val s = Util.resolveParameterizedString("Hi ${test.name.with.space}!")
     val a = "Hi George !"
     assertEquals(a, s)
   }
   
-  @Test //TODO: move to properties test?
+  @Test
   def resolve_string_with_latis_property_without_new_line {
     val s = Util.resolveParameterizedString("Hi ${test.name.without.nl}!")
     val a = "Hi George!"
     assertEquals(a, s)
   }
   
-  
-  
-  //----//
-  
-  //TODO: test data methods
 }

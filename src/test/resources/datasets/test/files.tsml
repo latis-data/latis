@@ -5,7 +5,8 @@
     
     <adapter class="latis.reader.tsml.FileListAdapter"
              pattern="Foo(\d{7})bar(\d)v(\d.\d)(\w).dat"
-             location="${java.io.tmpdir}/latis_file_test" />
+             location="/tmp/latis_file_test"
+             todo_location="${java.io.tmpdir}/latis_file_test" />
              
     <time name="myTime" units="yyyyDDD" type="text" length="7"/>
    

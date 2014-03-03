@@ -110,7 +110,7 @@ class TestTsml  {
 //    AsciiWriter().write(ds)
 //  }
   
-  @Test
+  //@Test
   def test_dataset {
     //val ds = TsmlReader("datasets/test/mixed.tsml").getDataset
     val ds = TsmlReader("datasets/tsi.tsml").getDataset
@@ -131,8 +131,9 @@ class TestTsml  {
   }
   
   //@Test
-  def test_dbstats {
-    val ds = TsmlReader("/home/lindholm/git/dbstats/src/main/resources/datasets/kepler_usage.tsml").getDataset
-    AsciiWriter().write(ds)
+  def test {
+    val ops = List(Operation("last"))
+    val ds = TsmlReader("/home/lindholm/git/lisird3/src/test/resources/datasets/test/sorce_tim_tsi_6h_v12.tsml").getDataset(ops)
+    Writer("asc").write(ds)//2452696.0
   }
 }
