@@ -4,7 +4,7 @@
   <dataset>
     <metadata name="Scalar Test"/>
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
-             url="file:/data/Dropbox/LaTiS/LaTiS_server/WebContent/datasets/test/scalar.txt" />
+             url="datasets/test/scalar.txt" />
              
     <time>
       <metadata name="foo" units="days since 1970-01-01"/>

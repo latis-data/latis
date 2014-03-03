@@ -34,14 +34,14 @@ class TestDapWriters {
   
   //@Test
   def write_dds {
-    val reader = TsmlReader("datasets/test/tsi.tsml")
+    val reader = TsmlReader("datasets/test/db.tsml")
     val ds = reader.getDataset
     Writer("dds").write(ds)
   }
     
   //@Test
   def write_das {
-    val reader = TsmlReader("datasets/test/tsi.tsml")
+    val reader = TsmlReader("datasets/test/db.tsml")
     val ds = reader.getDataset
     Writer("das").write(ds)
   }

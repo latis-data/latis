@@ -1,9 +1,10 @@
 Dataset {
     Sequence {
-        Int64 i;
+        String myTime;
         Structure {
-            Float64 d;
-            String s;
+            Int64 myInt;
+            Float64 myReal;
+            String myText;
         } unknown;
     } unknown;
 } Database Test;

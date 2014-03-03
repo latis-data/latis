@@ -1,14 +1,16 @@
 attributes {
     unknown{
-        i{
-            string type "integer";
-            string units "days since 2000-01-01";
+        myTime{
+            string length "23";
+            string type "text";
             string alias "time";
         }
         unknown{
-            d{
+            myInt{
             }
-            s{
+            myReal{
+            }
+            myText{
             }
         }
     }
