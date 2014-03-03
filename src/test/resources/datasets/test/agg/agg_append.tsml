@@ -6,6 +6,7 @@
   
     <dataset name="ds1">
       <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+               delimiter="\s+"
                location="datasets/test/agg/scalar_ts_2col_0-9.txt" />
       <time name="T" />
       <real name="A"/>
@@ -13,6 +14,7 @@
 
     <dataset name="ds2">
       <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+               delimiter="\s+"
                location="datasets/test/agg/scalar_ts_2col_10-19.txt" />
       <time name="T" />
       <real name="A"/>

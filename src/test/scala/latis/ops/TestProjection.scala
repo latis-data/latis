@@ -8,7 +8,7 @@ import Assert._
 import latis.reader.tsml.TsmlReader
 import latis.metadata.Metadata
 
-class ProjectionTest {
+class TestProjection {
   //TODO: use TestDataset-s
   
   //implicit def stringToMetadata(name: String): Metadata = Metadata(name)

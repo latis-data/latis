@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tsml>
 
-  <dataset name="scalar_ts_2col_0_9">
+  <dataset name="scalar_ts_2col_0to9">
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+             delimiter="\s+"
              location="datasets/test/agg/scalar_ts_2col_0-9.txt" />
              
     <time name="T"/>
