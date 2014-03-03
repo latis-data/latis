@@ -1,6 +1,7 @@
 package latis.writer
 
 import latis.dm._
+import latis.time.Time
 
 /**
  * Return data as nested arrays, without metadata.
@@ -15,6 +16,14 @@ class CompactJsonWriter extends JsonWriter {
   
   override def makeLabel(variable: Variable): String = ""
     
+  /**
+   * Override to present time in native JavaScript units: milliseconds since 1970.
+   */
+  override def makeScalar(scalar: Scalar): String = scalar match {
+    case t: Time => t.getJavaTime.toString  //use java time for json
+    case _ => super.makeScalar(scalar)
+  }
+  
   override def makeSample(sample: Sample): String = {
     val Sample(d, r) = sample
     d match {
