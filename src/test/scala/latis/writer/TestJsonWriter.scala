@@ -21,6 +21,6 @@ class TestJsonWriter {
   //@Test 
   def empty_dataset = Writer("json").write(TestDataset.empty)
   
-  @Test
+  //@Test
   def empty_function = Writer("json").write(TestDataset.empty_function)
 }

@@ -30,7 +30,7 @@ class TestBinaryWriter {
   def integer = Writer(fos, "bin").write(TestDataset.integer)
   def text = Writer(fos, "bin").write(TestDataset.text)
   
-  @Test
+  //@Test
   def test = Writer(fos, "bin").write(TestDataset.index_function)
   
   //@Test 
