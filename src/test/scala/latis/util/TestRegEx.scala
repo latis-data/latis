@@ -29,7 +29,7 @@ class TestRegEx {
     val s = "[2001-01-01] Hello, world!"
     val vs = getMatches(r,s)
     
-    println(vs.mkString(","))
+    assertEquals("2001-01-01", vs.head)
   }
 
 }
