@@ -202,8 +202,20 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   }
   
   protected def makeFunction(function: Function): Option[Function] = {
+    //TODO: use Builder? Variable.build[T](template: Variable): T  CanBuildFrom...  builder += (elem), don't want to do it one elem at a time
+    //  buildWith(template, metadata, data)?
     val md = function.getMetadata
     //TODO: if domain or range None, use IndexFunction
+    //  where else is this handled? makeSample above and ProjectionFunction
+    //  do we need to worry about makeVar returning None here?
+    //  this case assumes kids with data, if one is missing replace with Index.withLength
+    
+    //TODO: function may have _iterator already (e.g. agg)
+    
+    
+    
+    
+    
     for (domain <- makeVariable(function.getDomain); 
          range  <- makeVariable(function.getRange)
     ) yield Function(domain, range, md)
