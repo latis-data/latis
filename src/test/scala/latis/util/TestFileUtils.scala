@@ -8,7 +8,7 @@ class TestFileUtils {
   
   @Test
   def delete_nested_directory_with_files {
-    val dirName = System.getProperty("java.io.tmpdir") + File.separator + "latis_file_util_test"
+    val dirName = FileUtils.getTmpDir.getPath + File.separator + "latis_file_util_test"
     val dir = new File(dirName)
     dir.mkdir
     val d1 = new File(dir, "d1")
@@ -29,11 +29,20 @@ class TestFileUtils {
   
   //TODO: test how it handles io exceptions: permissions, file not found
   
-  //TODO: explore whether java.io.tmpdir ends with "/" on various OS's 
   @Test
-  def tmpdir {
-    val dirName = System.getProperty("java.io.tmpdir")
-    assertEquals(File.separator, dirName.last.toString)
-    //println(dirName)  // Mac: /var/folders/Jl/JlPXu2FoEs0GXqwaPMPc2++++TY/-Tmp-/
+  def tmpdir_exists {
+    val dir = FileUtils.getTmpDir
+    assertTrue(dir.exists)
+  }
+  
+  @Test
+  def tmpdir_path_does_not_end_with_separator {
+    //Note, System.getProperty("java.io.tmpdir") varies in this. 
+    //  Mac includes a "/": /var/folders/Jl/JlPXu2FoEs0GXqwaPMPc2++++TY/-Tmp-/
+    //  while Linux does not: /tmp
+    //Using FileUtils.getTmpDir and requiring the user to get the name via 'getPath'
+    //  ensures that we don't end up with double "//".
+    val dir = FileUtils.getTmpDir
+    assertNotEquals(File.separator, dir.getPath.last.toString)
   }
 }

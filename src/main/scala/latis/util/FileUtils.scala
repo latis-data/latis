@@ -5,6 +5,8 @@ import scala.collection.mutable.ArrayBuffer
 
 object FileUtils {
   
+  def getTmpDir: File = new File(System.getProperty("java.io.tmpdir"))
+  
   /**
    * Get a list of all the files in the given directory and nested directories.
    * Paths with be relative to the given directory.
