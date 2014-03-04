@@ -42,12 +42,11 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Asci
     val size = sampleTemplate.getSize
     val bb = ByteBuffer.allocate(size)
     
-    //assume every Scalar in the template has a value in the Map, e.g. not stored by Tuple name
+    //assume every Scalar in the template has a value in the Map (except index), e.g. not stored by Tuple name
     //get Seq of Scalars from template
     val vars = sampleTemplate.toSeq 
     
     for (v <- vars) {
-      //val s = svals(v.getName) //string value for the given scalar
       v match {
         case _: Index   => index += 1; bb.putInt(index) //deal with index domain (defined in tsml)
         case _: Real    => bb.putDouble(svals(v.getName).toDouble)
