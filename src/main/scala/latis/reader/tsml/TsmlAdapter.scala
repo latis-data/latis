@@ -636,13 +636,16 @@ object TsmlAdapter {
   def apply(tsml: Tsml): TsmlAdapter = {
     val atts = tsml.dataset.getAdapterAttributes()
     val class_name = atts("class")
-    val cls = Class.forName(class_name)
-    val ctor = cls.getConstructor(tsml.getClass())
     try {
+      val cls = Class.forName(class_name)
+      val ctor = cls.getConstructor(tsml.getClass())
       ctor.newInstance(tsml).asInstanceOf[TsmlAdapter]
       //TODO: call init? otherwise nothing happens till getDataset, but often need ops that come with getDataset(ops)
     } catch {
-      case e: Exception => e.printStackTrace(); ???
+      case e: Exception => {
+        //e.printStackTrace()
+        throw new Error("Failed to construct Adapter: " + class_name, e)
+      }
     }
   }
   
