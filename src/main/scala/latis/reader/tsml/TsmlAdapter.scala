@@ -237,8 +237,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   /**
    * Keep a list of the names of the original Scalars.
+   * Don't include "index" which is only a place holder when there is no other domain variable.
    */
-  lazy val origScalarNames = origScalars.map(_.getName)
+  lazy val origScalarNames = origScalars.map(_.getName).filter(_ != "index")
     
   
   /**
