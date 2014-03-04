@@ -21,6 +21,7 @@ trait Scalar extends Variable {
 object Scalar {
   
   def apply(vtype: String, metadata: Metadata = EmptyMetadata, data: Data = EmptyData): Scalar = vtype match {
+    //TODO: for when there is no indep var (e.g. list of files) case "index"   => new AbstractScalar(metadata, data) with Index
     case "real"    => new AbstractScalar(metadata, data) with Real
     case "integer" => new AbstractScalar(metadata, data) with Integer
     case "text"    => new AbstractScalar(metadata, data) with Text
