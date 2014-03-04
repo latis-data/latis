@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="log">
+    
+    <adapter class="latis.reader.tsml.RegexAdapter"
+             pattern="\[(\S+)\s+(\w+)\s+(\S+)\s+\((\S+)\)\] (.*)"
+             location="${log.file}" />
+             
+    <time type="text" units="yyyy-MM-dd'T'HH:mm:ss.SSS"/>
+    <text name="level"   length="5" />
+    <text name="class"   length="32" />
+    <text name="thread"  length="32" />
+    <text name="message" length="256" />
+  
+  </dataset>
+  
+</tsml>
