@@ -75,7 +75,7 @@ class JsonWriter extends TextWriter {
    * Override to escape any special characters in Text values.
    */
   override def makeScalar(scalar: Scalar): String = scalar match {
-    case Real(d) => d.toString //TODO: format? NaN to null
+    case Real(d) => if (d.isNaN) "null" else d.toString //replace NaNs with null //TODO: format?
     case Integer(l) => l.toString 
     case Text(s) => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters      
   }
