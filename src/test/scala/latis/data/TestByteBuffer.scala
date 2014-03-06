@@ -11,8 +11,8 @@ import java.nio.ByteBuffer
 import scala.collection.mutable.ArrayBuffer
 import java.nio.CharBuffer
 
-class ByteBufferTest {
-  //TODO: DataTest trait that defines tests that each Data impl must pass?
+class TestByteBuffer {
+  //TODO: DataTest trait that defines tests that each Data impl must pass? see AdapterTests
   
   def testData(data: Data, test: Data => Any, expected: Any) = assertEquals(expected, test(data))
   

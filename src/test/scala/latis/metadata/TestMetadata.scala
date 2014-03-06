@@ -6,7 +6,7 @@ import latis.writer._
 import org.junit._
 import Assert._
 
-class MetadataTest {
+class TestMetadata {
   
   lazy val metadata = Metadata(Map("name" -> "value", "foo" -> "bar"))
   

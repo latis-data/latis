@@ -7,7 +7,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 
 class WriterTest extends Logging {
   
-  @Test
+  //@Test
   def test {
     val w = Writer(System.out, "csv")
     logger.info("Hodwy")

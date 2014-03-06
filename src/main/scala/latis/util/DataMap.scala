@@ -75,7 +75,7 @@ object DataMap {
   }
   
   def toDoubles(dataset: Dataset): Array[Array[Double]] = {
-    //TODO: optimize by skipping the mapping step
+    //TODO: optimize by skipping the mapping step, especially since it requires named variables
     val map = toDoubleMap(dataset)
     val ab = mutable.ArrayBuffer[Array[Double]]()
     map.foldLeft(ab)(_ += _._2).toArray

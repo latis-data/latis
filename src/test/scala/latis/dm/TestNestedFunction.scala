@@ -9,7 +9,7 @@ import latis.metadata.Metadata
 
 class TestNestedFunction {
 
-  @Test
+  //@Test
   def function_of_functions {
     val ds = Dataset(TestNestedFunction.function_of_functions)
     AsciiWriter.write(ds)
@@ -19,7 +19,7 @@ class TestNestedFunction {
   //@Test
   def tuple_of_functions {
     val ds = Dataset(TestNestedFunction.tuple_of_functions)
-    AsciiWriter.write(ds)
+    AsciiWriter.write(ds) //TODO: improve formatting, 
   }
 }
 

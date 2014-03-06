@@ -8,7 +8,7 @@ import Assert._
 import latis.reader.tsml.TsmlReader
 import latis.metadata.Metadata
 
-class SelectionTest {
+class TestSelection {
   
   implicit def stringToMetadata(name: String): Metadata = Metadata(name)
   
@@ -23,8 +23,8 @@ class SelectionTest {
   def testSelection(f: Function, s: String, expected: Function) {
     val filter = Selection(s)
     val ds = filter(f)
-    AsciiWriter().write(expected)
-    AsciiWriter().write(ds)
+    //AsciiWriter().write(expected)
+    //AsciiWriter().write(ds)
     assert(expected equals ds(0))
   }
   

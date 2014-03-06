@@ -9,7 +9,7 @@ import Assert._
 import latis.data.value.DoubleValue
 import latis.data.seq.SeqData
 
-class SeqDataTest {
+class TestSeqData {
 
   val doubleSeq = Data(Seq(1.0, 2.0, 3.0))
   

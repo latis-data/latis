@@ -12,14 +12,24 @@ import latis.writer.Writer
 
 class Test2D {
   
+  //TODO: consider superclass for things like this
+  def write(v: Variable) {
+    AsciiWriter.write(Dataset(v))
+  }
+  
+  //@Test
+  def write_scalar_function_3x3 = write(Test2D.scalar_function_3x3)
+  
   @Test
-  def scalar_function_3x3 {
-    val ds = Dataset(Test2D.scalar_function_3x3)
-    AsciiWriter.write(ds)
-    //Writer("csv").write(ds)
+  def scalar_function_3x3_length {
+    val l = Test2D.scalar_function_3x3.getLength
+    assertEquals(9, l)
   }
 }
 
+/**
+ * Static two-dimensional variables to use for testing.
+ */
 object Test2D {
   
   def scalar_function_3x3 = {

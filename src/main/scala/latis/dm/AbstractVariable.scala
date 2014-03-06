@@ -260,7 +260,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
       //For each sample, make a new Function by factoring out the given variable to be the domain.
       //TODO: need Function? will this impl support a nested Function? 
       //recall that samples are Tuples 
-      val new_samples = for (sample <- f.iterator; new_sample <- sample.groupVariableBy(name).iterator) yield new_sample
+      val new_samples = (for (sample <- f.iterator; new_sample <- sample.groupVariableBy(name).iterator) yield new_sample).toList
       //                     (I,(R,T))             (T,(I,R))
       //TODO: sort by domain, or let Function constructor do it?
       //TODO: need domain and range type, use PeekIterator with peek?  just suck in all samples as List
@@ -268,9 +268,12 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
       //if duplicate values, need nested function
       //TODO: should this be done by Function constructor (along with sorting)? can't have duplicate domain samples
       //  but may just need index domain
-      val map = new_samples.toList.groupBy(_.domain.asInstanceOf[Scalar].getValue)
+      val map = new_samples.groupBy(_.domain.asInstanceOf[Scalar].getValue)
       //  Tval -> (T,(I,R))
       //TODO: do we dare use Scalar as key? need equals, hashCode
+      
+      //extract metadata from new domain
+      val domainMetadata = new_samples.head.domain.getMetadata
       
       val z = for ((value, samples) <- map) yield {
         //range should be the new_samples, need to remove the variable that is now the domain
@@ -288,7 +291,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
          * can we know the I was a domain var and reconstruct the nested Function?
          * 
          */
-        val domain = Scalar.fromAny(value)
+        val domain = Scalar(domainMetadata, value)
         //TODO: preserve metadata
         
         //val z = samples.map(_.range)

@@ -202,8 +202,20 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   }
   
   protected def makeFunction(function: Function): Option[Function] = {
+    //TODO: use Builder? Variable.build[T](template: Variable): T  CanBuildFrom...  builder += (elem), don't want to do it one elem at a time
+    //  buildWith(template, metadata, data)?
     val md = function.getMetadata
     //TODO: if domain or range None, use IndexFunction
+    //  where else is this handled? makeSample above and ProjectionFunction
+    //  do we need to worry about makeVar returning None here?
+    //  this case assumes kids with data, if one is missing replace with Index.withLength
+    
+    //TODO: function may have _iterator already (e.g. agg)
+    
+    
+    
+    
+    
     for (domain <- makeVariable(function.getDomain); 
          range  <- makeVariable(function.getRange)
     ) yield Function(domain, range, md)
@@ -225,8 +237,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   /**
    * Keep a list of the names of the original Scalars.
+   * Don't include "index" which is only a place holder when there is no other domain variable.
    */
-  lazy val origScalarNames = origScalars.map(_.getName)
+  lazy val origScalarNames = origScalars.map(_.getName).filter(_ != "index")
     
   
   /**
@@ -624,13 +637,16 @@ object TsmlAdapter {
   def apply(tsml: Tsml): TsmlAdapter = {
     val atts = tsml.dataset.getAdapterAttributes()
     val class_name = atts("class")
-    val cls = Class.forName(class_name)
-    val ctor = cls.getConstructor(tsml.getClass())
     try {
+      val cls = Class.forName(class_name)
+      val ctor = cls.getConstructor(tsml.getClass())
       ctor.newInstance(tsml).asInstanceOf[TsmlAdapter]
       //TODO: call init? otherwise nothing happens till getDataset, but often need ops that come with getDataset(ops)
     } catch {
-      case e: Exception => e.printStackTrace(); ???
+      case e: Exception => {
+        //e.printStackTrace()
+        throw new Error("Failed to construct Adapter: " + class_name, e)
+      }
     }
   }
   

@@ -6,7 +6,7 @@ import latis.writer._
 import org.junit._
 import Assert._
 
-class EmptyDataTest {
+class TestEmptyData {
 
   @Test
   def equals {
