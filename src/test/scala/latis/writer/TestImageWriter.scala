@@ -10,7 +10,7 @@ class TestImageWriter {
 
   @Test
   def testPlot{
-    val file = new File("src/test/resources/datasets/data/plot.png")
+    val file = new File("/tmp/latis_image_writer_test.png")
     val fos = new FileOutputStream(file)
     val ds = TsmlReader("datasets/test/tsi.tsml").getDataset
     Writer(fos, "image").write(ds)

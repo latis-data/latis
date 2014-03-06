@@ -8,6 +8,10 @@ import org.jfree.data.xy.XYSeriesCollection
 import org.jfree.data.xy.XYSeries
 import java.io.File
 
+  /**
+   * Writes a line graph of the data to the output stream. 
+   * The dataset must have a scalar independent variable and a scalar or tuple dependent variable.
+   */
 class ImageWriter extends Writer{
   
   private var chart: JFreeChart = null
@@ -16,7 +20,7 @@ class ImageWriter extends Writer{
     plotData(dataset)
     ChartUtilities.writeBufferedImageAsPNG(outputStream, chart.createBufferedImage(500, 300))
   }
-  
+
   def plotData(dataset: Dataset) {
     val function = dataset.findFunction.get
     val a = function.getDomain
@@ -24,13 +28,13 @@ class ImageWriter extends Writer{
     plotFunction(a, b, dataset)
     fixRange(chart)
   }
-  
+
   def fixRange(chart: JFreeChart) {
     val plot = chart.getXYPlot
     val range = plot.getRangeAxis
     range.setRangeWithMargins(plot.getDataRange(plot.getRangeAxis()))
   }
-  
+
   def makeSeries(a: Variable, b: Variable, data: scala.collection.Map[String,Array[Double]]): XYSeries = {
     val x = data(a.getName)
     val y = data(b.getName)
@@ -38,7 +42,7 @@ class ImageWriter extends Writer{
     for(i <- 0 until x.length) series.add(x(i),y(i))
     series
   }
-  
+
   def plotFunction(x: Variable, y: Variable, dataset: Dataset) {
     val data = latis.util.DataMap.toDoubleMap(dataset)
     val xycol = new XYSeriesCollection()
