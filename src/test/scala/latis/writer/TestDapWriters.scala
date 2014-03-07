@@ -32,6 +32,17 @@ class TestDapWriters {
     while(t.hasNext) assertEquals(t.next, s.next)
   }
   
+  /*
+   * For lack of a better solution at this time, dods must be tested manually.
+   * The saved file can be compared to the output of pydap using the following commands in python:
+   * 	>>> from pydap.client import open_dods
+   *    >>> dods = open_dods('http://localhost:8080/LaTiS/dap/test/ **name** .dods')
+   *    >>> len(dods.samples.data)
+   *    	This should be equal to the number of lines in the saved file
+   *    >>> print dods.samples.data
+   *    	This will print the data values which can be compared to the saved file
+   */
+  
   //@Test
   def write_dds {
     val reader = TsmlReader("datasets/test/db.tsml")
