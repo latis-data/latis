@@ -23,6 +23,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 import latis.time.TimeFormat
 import java.util.Date
 import java.sql.Timestamp
+import latis.util.StringUtils
 
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
@@ -304,10 +305,12 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
                 case _: Real => bb.putDouble(time.toDouble)
                 case _: Integer => bb.putLong(time)
                 case _: Text => {
-                  //default to iso format: yyyy-MM-ddTHH:mm:ss.SSS, length = 23
-                  //Timestamp.toString => yyyy-mm-dd hh:mm:ss.fffffffff
-                  //TODO: currently requires setting length="25" in tsml
-                  val s = TimeFormat.ISO.format(new Date(time))
+                  //use units from Time variable
+                  val s = v.getMetadata("units") match {
+                    case Some(units) => TimeFormat(units).format(new Date(time))
+                    case None        => TimeFormat.ISO.format(new Date(time)) //default to ISO yyyy-MM-ddTHH:mm:ss.SSS
+                    //TODO: currently requires setting length="23" in tsml
+                  }
                   s.foldLeft(bb)(_.putChar(_))
                 }
               }
@@ -316,13 +319,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
             case (r: Real, _) => bb.putDouble(resultSet.getDouble(r.getName))
             case (i: Integer, _) => bb.putLong(resultSet.getLong(i.getName))
             case (t: Text, _) => {
-              //pad the string to its full length using %ns formatting
-              //Note: regular words pad right, time strings from db pad left!?
-              val s = "%"+t.length+"s" format resultSet.getString(t.getName)
-              //fold each char into the ByteBuffer
-              //println(t +": "+s)
-              //TODO: make sure we don't exceed buffer
-              s.foldLeft(bb)(_.putChar(_))
+              val s = StringUtils.padOrTruncate(resultSet.getString(t.getName), t.length)
+              s.foldLeft(bb)(_.putChar(_)) //fold each char into the ByteBuffer
             }
             case (b: Binary, _) => bb.put(resultSet.getBytes(b.getName))  //TODO: use getBlob? 
             
