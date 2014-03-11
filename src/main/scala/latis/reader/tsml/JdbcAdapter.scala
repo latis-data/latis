@@ -58,6 +58,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   
   override def handleOperation(operation: Operation): Boolean = operation match {
     case Projection(p) => this.projection = p; true
+    //TODO: make sure these match variable names and don't contain some sort of sql injection, enforce in Projection?
     
     //TODO: support alias
     //getVariableByName(alias).getName
