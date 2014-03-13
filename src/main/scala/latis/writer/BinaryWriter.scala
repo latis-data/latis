@@ -46,7 +46,7 @@ class BinaryWriter extends Writer {
     case _: Index   => bb //don't write index
     case Integer(l) => bb.putLong(l)
     case Real(d)    => bb.putDouble(d)
-    case Text(s)    => ??? //TODO: see JdbcAdapter
+    case Text(s)    => bb.put(s.getBytes()) //??? //TODO: see JdbcAdapter
     case Binary(b)  => bb.put(b)
   }
   

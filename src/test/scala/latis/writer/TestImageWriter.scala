@@ -8,7 +8,7 @@ import java.io.FileOutputStream
 
 class TestImageWriter {
 
-  @Test
+  //@Test
   def testPlot{
     val file = new File("/tmp/latis_image_writer_test.png")
     val fos = new FileOutputStream(file)

@@ -1,11 +1,11 @@
 attributes {
-    unknown{
+    samples{
         myTime{
             string length "23";
             string type "text";
             string alias "time";
         }
-        unknown{
+        samples{
             myInt{
             }
             myReal{

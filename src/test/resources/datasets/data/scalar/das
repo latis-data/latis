@@ -1,5 +1,5 @@
 attributes {
-    unknown{
+    samples{
         foo{
             string alias "time";
         }
