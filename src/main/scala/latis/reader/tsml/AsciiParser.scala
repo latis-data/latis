@@ -45,6 +45,7 @@ trait AsciiParser extends Parser[String] {
    * Return an Iterator of data records. Group multiple lines of text for each record.
    */
   def getRecordIterator: Iterator[String] = {
+    //TODO: use getLinesToSkip, or Records?
     val lpr = getLinesPerRecord
     val dlm = getDelimiter
     getLineIterator.grouped(lpr).map(_.mkString(dlm))
