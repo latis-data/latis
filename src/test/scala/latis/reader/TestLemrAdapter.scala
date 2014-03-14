@@ -26,9 +26,10 @@ class TestLmerAdapter {
   @Test
   def test_sparql_in_tsml {
     val ops = ArrayBuffer[Operation]()
-    ops += Selection("predicate=~.*version")
-    ops += Selection("object=~11")
     val ds = TsmlReader("datasets/test/lemr_datasets.tsml").getDataset(ops)
-    Writer("asc").write(ds)
+    
+    val ds2 = ds.groupBy("subject")
+    
+    Writer("asc").write(ds2)
   }
 }
