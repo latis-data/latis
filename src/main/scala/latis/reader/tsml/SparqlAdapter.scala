@@ -5,6 +5,7 @@ import java.net.URL
 import latis.dm.Dataset
 import latis.ops.Operation
 import latis.ops.Selection
+import java.net.URLEncoder
 
 /**
  * Use a regular expression to extract data values from a data record.
@@ -15,10 +16,11 @@ class SparqlAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
   
   /**
    * Override to make sure the required 'query' selection has been made.
+   * Encode any special characters so they are suitable for a URL.
    */
   override def getDataset(ops: Seq[Operation]): Dataset = {
     query = findSelection(ops, "query") match {
-      case Some(Selection(_,_,s)) => s
+      case Some(Selection(_,_,s)) => URLEncoder.encode(s, "UTF-8")
       case None => throw new RuntimeException("SparqlAdapter must have a 'query' selection.")
     }
     super.getDataset(ops)
