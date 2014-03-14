@@ -19,6 +19,7 @@ class TestLmerAdapter {
     ops += Selection("object=~11")
     val ds = TsmlReader("datasets/test/sparql.tsml").getDataset(ops)
     
+    //TODO: FilteredFunction needs to redo index
     Writer("asc").write(ds)
   }
 }
