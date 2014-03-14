@@ -19,7 +19,9 @@ class SparqlAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
    * Encode any special characters so they are suitable for a URL.
    */
   override def getDataset(ops: Seq[Operation]): Dataset = {
-    query = findSelection(ops, "query") match {
+    //TODO: reconsider how/when PIs are applied
+    //Note, this allows user to override what the tsml PI has
+    query = findSelection(ops ++ piOps, "query") match {
       case Some(Selection(_,_,s)) => {
         //Note, still need to encode "#"s in prefix defs
         URLEncoder.encode(s, "UTF-8").replaceAll("#", "%23")
