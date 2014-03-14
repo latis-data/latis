@@ -88,10 +88,7 @@ object Selection {
   }
   
   def apply(expression: String): Selection = {
-    //remove white space so we can say "t > 1"
-    //TODO: breaks being able to use spaces in other selects: myTime>'1970-01-02 00:00:00', needed?
-    val exp = expression.replaceAll("""\s""", "")
-    exp match {
+    expression match {
       case SELECTION.r(name, op, value) => Selection(name, op, value)
       //TODO: case _ => error
     }

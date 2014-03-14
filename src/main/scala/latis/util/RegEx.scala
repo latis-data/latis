@@ -50,8 +50,9 @@ object RegEx {
       
     /**
      * Selection clause. Match variable name, operator, value.
+     * Allow white space around the operator.
      */
-    val SELECTION = "(" + VARIABLE + ")(" + SELECTION_OPERATOR + ")(.+)"
+    val SELECTION = "(" + VARIABLE + """)\s*(""" + SELECTION_OPERATOR + """)\s*(.+)"""
     
     /**
      * Projection clause. Match comma separates list of variable names.
