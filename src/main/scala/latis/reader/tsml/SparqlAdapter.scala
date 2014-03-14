@@ -20,7 +20,10 @@ class SparqlAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
    */
   override def getDataset(ops: Seq[Operation]): Dataset = {
     query = findSelection(ops, "query") match {
-      case Some(Selection(_,_,s)) => URLEncoder.encode(s, "UTF-8")
+      case Some(Selection(_,_,s)) => {
+        //Note, still need to encode "#"s in prefix defs
+        URLEncoder.encode(s, "UTF-8").replaceAll("#", "%23")
+      }
       case None => throw new RuntimeException("SparqlAdapter must have a 'query' selection.")
     }
     super.getDataset(ops)
