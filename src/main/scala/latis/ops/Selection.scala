@@ -98,5 +98,6 @@ object Selection {
   }
   
   //Extract the selection as a single string expression
-  def unapply(sel: Selection): Option[String] = Some(sel.toString)
+  //def unapply(sel: Selection): Option[String] = Some(sel.toString)
+  def unapply(sel: Selection): Option[(String, String, String)] = Some((sel.vname, sel.operation, sel.value))
 }

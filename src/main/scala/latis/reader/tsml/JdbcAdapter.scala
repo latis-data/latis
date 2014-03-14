@@ -63,7 +63,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     //TODO: support alias
     //getVariableByName(alias).getName
     
-    case Selection(expression) => expression match {
+    case sel: Selection => val expression = sel.toString; expression match { //TODO: can we use an alias with '@'...?
       //Break expression up into components
       case SELECTION.r(name, op, value) => {
         if (name == "time") handleTimeSelection(op, value) //special handling for "time"
