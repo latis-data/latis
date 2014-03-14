@@ -10,6 +10,7 @@ import latis.data.IterableData
 import latis.time.Time
 import latis.reader.tsml.ml.Tsml
 import latis.util.PeekIterator
+import latis.util.StringUtils
 
 class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with AsciiAdapterHelper {
   
@@ -52,10 +53,8 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Asci
         case _: Real    => bb.putDouble(svals(v.getName).toDouble)
         case _: Integer => bb.putLong(svals(v.getName).toLong)
         case t: Text    => {
-          val l = t.length
-          val s = svals(v.getName)
-          val padded = "%"+t.length+"s" format s //pad to the Text variable's defined length
-          padded.foldLeft(bb)(_.putChar(_)) //fold each character into buffer
+          val s = StringUtils.padOrTruncate(svals(v.getName), t.length)
+          s.foldLeft(bb)(_.putChar(_)) //fold each character into buffer
         }
       }
     }

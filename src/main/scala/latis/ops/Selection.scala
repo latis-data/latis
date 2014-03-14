@@ -88,14 +88,13 @@ object Selection {
   }
   
   def apply(expression: String): Selection = {
-    //remove white space so we can say "t > 1"
-    val exp = expression.replaceAll("""\s""", "")
-    exp match {
+    expression match {
       case SELECTION.r(name, op, value) => Selection(name, op, value)
       //TODO: case _ => error
     }
   }
   
   //Extract the selection as a single string expression
-  def unapply(sel: Selection): Option[String] = Some(sel.toString)
+  //def unapply(sel: Selection): Option[String] = Some(sel.toString)
+  def unapply(sel: Selection): Option[(String, String, String)] = Some((sel.vname, sel.operation, sel.value))
 }

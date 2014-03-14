@@ -19,20 +19,8 @@ class FilteredFunction(function: Function, val selection: Selection)
   
   override def iterator = new PeekIterator[Sample] {
     lazy val it = function.iterator  //original Function's iterator
-    
-/*
- * TODO: should iterator always return Sample?
- * does it matter? just let pattern matching handle filtering?
- * does it make sense to iterate on other var types?
- *   tuple might iter over members, or implicit IndexFunction if it has data?
- * what about for general transform, could be diff type
- *   but will xformed data ever have no domain?
- *   maybe if a function is reduced to a single value
- *   e.g. integrated
- *   but would still have a relevant "nominal" domain value
- *   domain could always be an index
- * are there any other cases of iterating over Variables that are not Function samples?
- */
+
+//TODO: manage index if this is an IndexFunction, consider a bigger refactoring, see ProjectedFunction...
     
     override def getNext: Sample = {
       if (it.hasNext) {

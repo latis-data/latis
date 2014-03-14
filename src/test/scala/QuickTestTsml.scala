@@ -19,11 +19,10 @@ object QuickTestTsml extends App {
   
   //TODO: make an app that takes the same request as a server
   
-    val tsml = "/home/lindholm/git/latis-mms/src/main/resources/datasets/science_files.tsml"
-    //val tsml = "/home/lindholm/git/LaTiS/src/test/resources/datasets/test/files.tsml"
+    val tsml = "datasets/log.tsml"
       
     val ops = ArrayBuffer[Operation]()
-    //ops += Selection("")
+    //ops += Selection("time<=2015-04-01T01:00:00")
     //ops += Projection("time,data_rate_mode,file")
     //ops += Operation("first")
     //ops += Operation("last")

@@ -45,6 +45,7 @@ trait AsciiParser extends Parser[String] {
    * Return an Iterator of data records. Group multiple lines of text for each record.
    */
   def getRecordIterator: Iterator[String] = {
+    //TODO: use getLinesToSkip, or Records?
     val lpr = getLinesPerRecord
     val dlm = getDelimiter
     getLineIterator.grouped(lpr).map(_.mkString(dlm))
@@ -71,8 +72,15 @@ trait AsciiParser extends Parser[String] {
   
   /**
    * Return Map with Variable name to value.
+   * If we don't find the right number of values, return an empty Map
+   * so this record can be skipped.
    */
   def parseRecord(record: String): Map[String,String] = {
-    (getVariableNames zip record.split(getDelimiter)).toMap
+    //TODO: consider factoring out extractValues(record) to get more reuse,
+    //e.g. testing that we got the expected number of values
+    val vnames = getVariableNames
+    val values = record.split(getDelimiter)
+    if (vnames.length != values.length) Map[String, String]()
+    else (vnames zip values).toMap
   }
 }

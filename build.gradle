@@ -7,7 +7,7 @@ apply plugin: 'ivy-publish'
 
 //Define the release version. Used for published jar.
 //TODO: get from latis.properties?
-version = '2.3.3'
+version = '2.3.9'
 
 //Define Java version for generated class files.
 targetCompatibility = 1.6
@@ -29,6 +29,9 @@ publishing {
 
 //Repositories for dependencies.
 repositories {
+    ivy {
+      url "http://dsweb:8080/ivy"
+    }
     mavenCentral()
 }
 
@@ -39,11 +42,9 @@ dependencies {
     compile 'com.typesafe:scalalogging-slf4j_2.10:1.0.1'
     compile 'ch.qos.logback:logback-classic:1.0.13'
     
-    //compile 'org.scalanlp:breeze-viz_2.10:0.5.2'
-    //for plotting with jfreechart, lots of dependencies!
-    
     testCompile 'junit:junit:4.+'
     testCompile 'org.apache.derby:derby:10.10.1.1'
+    //testRuntime 'postgres:postgresql:9.2-1002'
 	
 	compile 'jfree:jfreechart:1.0.12'
 }

@@ -52,5 +52,6 @@ class ImageWriter extends Writer{
     }
     chart = ChartFactory.createXYLineChart(dataset.getName, x.getName, y.getName, xycol, org.jfree.chart.plot.PlotOrientation.VERTICAL, true, false, false)
   }
- 
+  
+  override def mimeType: String = "image/png" 
 }

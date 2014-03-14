@@ -187,8 +187,17 @@ abstract class AdapterTests {
   
   //@Test
   //TODO: ignores selection, works for JdbcAdapter
-  def select_on_non_projected_domain {
+  def select_on_non_projected_domain_with_projection_first {
     val ops = List(Projection("myReal"), Selection("time < 1970-01-02"))
+    val data = getDataset(ops).toDoubleMap
+    assertEquals(2, data.keySet.size)  //index and myReal
+    assertEquals(1, data("myReal").length)
+    assertEquals(1.1, data("myReal").head, 0.0)
+  }
+  
+  @Test
+  def select_on_non_projected_domain_with_selection_first {
+    val ops = List(Selection("time < 1970-01-02"), Projection("myReal"))
     val data = getDataset(ops).toDoubleMap
     assertEquals(2, data.keySet.size)  //index and myReal
     assertEquals(1, data("myReal").length)
