@@ -24,13 +24,7 @@ class SparqlAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
     super.getDataset(ops)
   }
   
-//  /**
-//   * Get the required query string from the adapter definition.
-//   */
-//  lazy val query = getProperty("query") match {
-//    case Some(s: String) => s
-//    case None => throw new Error("The LemrAdapter requires a 'query' definition.")
-//  }
+  //TODO: use ProcessingInstruction if we want to define the query in the tsml
 
   /**
    * Override to add query string to URL and request csv output.
