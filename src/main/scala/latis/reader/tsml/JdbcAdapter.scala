@@ -308,8 +308,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
                 case _: Text => {
                   //use units from Time variable
                   val s = v.getMetadata("units") match {
-                    case Some(units) => TimeFormat(units).format(new Date(time))
-                    case None        => TimeFormat.ISO.format(new Date(time)) //default to ISO yyyy-MM-ddTHH:mm:ss.SSS
+                    case Some(units) => TimeFormat(units).format(time)
+                    case None        => TimeFormat.ISO.format(time) //default to ISO yyyy-MM-ddTHH:mm:ss.SSS
                     //TODO: currently requires setting length="23" in tsml
                   }
                   s.foldLeft(bb)(_.putChar(_))
