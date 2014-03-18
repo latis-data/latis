@@ -49,15 +49,13 @@ class TestConcurrency {
   
   //@Test
   def test_concurrent_via_server {
+    //trigger loading of properties and log config so that doesn't collide, only avoids log config errors
+    LatisProperties.getOrElse("foo", "bar")
     val url575 = "http://localhost:8080/web-tcad/dap/quikscat/AnalogTelemetryItem.jsond?&TMID=575&time>=2014-02-19T17:00:00&time<2014-02-19T19:00:00"
     val url592 = "http://localhost:8080/web-tcad/dap/quikscat/AnalogTelemetryItem.jsond?&TMID=592&time>=2014-02-19T17:00:00&time<2014-02-19T19:00:00"
 
-    new Thread(make_runnable_server_request(url575, "/data/tmp/575-1")).start()
-    new Thread(make_runnable_server_request(url592, "/data/tmp/592-1")).start()
-    new Thread(make_runnable_server_request(url575, "/data/tmp/575-2")).start()
-    new Thread(make_runnable_server_request(url592, "/data/tmp/592-2")).start()
-    new Thread(make_runnable_server_request(url575, "/data/tmp/575-3")).start()
-    new Thread(make_runnable_server_request(url592, "/data/tmp/592-3")).start()
+    new Thread(make_runnable_server_request(url575, "/data/tmp/575-81")).start()
+    new Thread(make_runnable_server_request(url575, "/data/tmp/575-82")).start()
       
     //TODO: need to have unit test wait till all threads are complete?
     Thread.sleep(5000)
