@@ -18,7 +18,7 @@ class TestFileReaderConcurrency  {
     }
   }
   
-  @Test
+  //@Test
   def test {
     val ops = List[Operation]()
     new Thread(make_runnable_request(ops, "/data/tmp/test1")).start()

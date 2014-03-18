@@ -72,7 +72,7 @@ class TestConcurrency {
     }
   }
   
-  @Test //Both results corrupted
+  //@Test //Both results corrupted - FIXED!
   def test_concurrent_direct_sybase {
     //trigger loading of properties and log config so that doesn't collide, only avoids log config errors
     LatisProperties.getOrElse("foo", "bar")
