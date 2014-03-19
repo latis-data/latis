@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="iterative_skip">
+    <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+             delimiter="\s+"
+             skip="1"
+             location="datasets/test/mixed.txt" />
+    
+    <time name="myTime" units="yyyy/MM/dd" type="text" length="10"/>
+   
+    <integer name="myInt"/>
+    <real    name="myReal"/>
+    <text    name="myText"/>
+    
+  </dataset>
+
+</tsml>

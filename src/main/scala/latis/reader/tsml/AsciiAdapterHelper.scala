@@ -36,14 +36,14 @@ trait AsciiAdapterHelper extends AsciiParser { this: TsmlAdapter =>
     case None => 1
   }
     
-//  /**
-//   * Return the number of lines (as returned by Source.getLines) that should
-//   * be skipped before reading data.
-//   */
-//  def getLinesToSkip: Int = getProperty("linesToSkip") match {
-//    case Some(s) => s.toInt
-//    case None => 0
-//  }
+  /**
+   * Return the number of lines (as returned by Source.getLines) that should
+   * be skipped before reading data.
+   */
+  def getLinesToSkip: Int = getProperty("skip") match {
+    case Some(s) => s.toInt
+    case None => 0
+  }
   
   /**
    * Return a list of variable names represented in the original data.
