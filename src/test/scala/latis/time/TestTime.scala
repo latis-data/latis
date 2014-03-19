@@ -27,9 +27,9 @@ class TestTime {
   //TODO: test other flavors, with time zone,...
 
   
-  //@Test
+  @Test
   def julian_date {
     val t = Time(TimeScale.JULIAN_DATE, 2456734.5)
-    println(t.format(TimeFormat.ISO))  //-4713-11-24T12:40:56.735  but http://aa.usno.navy.mil/data/docs/JulianDate.php says 2014-03-18
+    assertEquals("2014-03-18T00:00:00.000", t.format(TimeFormat.ISO))
   }
 }

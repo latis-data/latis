@@ -6,7 +6,8 @@ import java.text.SimpleDateFormat
 import scala.util.matching.Regex
 import latis.units.UnitOfMeasure
 import latis.util.RegEx
-import org.joda.time.DateTimeUtils
+import java.util.GregorianCalendar
+import java.util.TimeZone
 
 class TimeScale(val epoch: Date, val unit: TimeUnit, val tsType: TimeScaleType) extends UnitOfMeasure("TODO") {
   //TODO: consider using millis for epoch instead of Date
@@ -26,14 +27,16 @@ object TimeScale {
   lazy val JAVA = new TimeScale(new Date(0), TimeUnit.MILLISECOND, TimeScaleType.NATIVE)
   lazy val DEFAULT = JAVA
   
-//  /**
-//   * Define a special case for Julian date: days since noon Jan 1, 4713 BC.
-//   * Because Java's default calendar jumps from 1 BC to 1 AD, we need to use year -4712.
-//   * This seems to work for the times we care about.
-//   */
-  //val JULIAN_DATE = TimeScale("-4712-01-01T12:00:00", TimeUnit.MILLISECOND, TimeScaleType.NATIVE)
-  //TODO: not working with joda-time, try DateTimeUtils.fromJulianDate...
-  lazy val JULIAN_DATE = TimeScale(new Date(DateTimeUtils.fromJulianDay(0)), TimeUnit.MILLISECOND, TimeScaleType.NATIVE)
+  /**
+   * Define a special case for Julian date: days since noon Jan 1, 4713 BC.
+   * Because Java's default calendar jumps from 1 BC to 1 AD, we need to use year -4712.
+   * This seems to work for the times we care about.
+   */
+  lazy val JULIAN_DATE = {
+    val cal = new GregorianCalendar(-4712, 0, 1, 12, 0);
+    cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+    TimeScale(cal.getTime, TimeUnit.DAY, TimeScaleType.NATIVE)
+  }
   
   def apply(epoch: Date, unit: TimeUnit, tstype: TimeScaleType): TimeScale = {
     new TimeScale(epoch, unit, tstype)
