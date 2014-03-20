@@ -7,6 +7,7 @@ import scala.io.Source
 import latis.reader.tsml.TsmlReader
 import java.io.DataOutputStream
 import java.io.File
+import latis.ops.Selection
 
 class TestDapWriters {
 
@@ -37,9 +38,9 @@ class TestDapWriters {
   
   //@Test
   def write_dds {
-    val reader = TsmlReader("datasets/test/scalar.tsml")
-    val ds = reader.getDataset
-    Writer("dods").write(ds)
+    val reader = TsmlReader("datasets/test/tsi.tsml")
+    val ds = reader.getDataset()
+    Writer("dds").write(ds)
   }
     
   //@Test

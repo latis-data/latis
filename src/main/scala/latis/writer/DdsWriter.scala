@@ -27,6 +27,7 @@ class DdsWriter extends TextWriter {
     case _: Integer => indent(count) + "Int64 "   + scalar.getName + ";\n"
     case _: Text    => indent(count) + "String "  + scalar.getName + ";\n"
     case _: Binary  => "NaN"
+    case _: Index => indent(count) + "Int64 " + scalar.getName + ";\n"
   }
   
   override def makeTuple(tuple: Tuple): String = tuple match{ 
