@@ -14,12 +14,13 @@ import latis.ops.LastFilter
 import latis.ops.FirstFilter
 import latis.ops.LimitFilter
 import latis.writer.CsvWriter
+import java.io.FileOutputStream
 
 object QuickTestTsml extends App {
   
   //TODO: make an app that takes the same request as a server
   
-    val tsml = "datasets/log.tsml"
+    val tsml = "/home/lindholm/git/nrlssi/src/main/resources/datasets/usaf_mwl.tsml"
       
     val ops = ArrayBuffer[Operation]()
     //ops += Selection("time<=2015-04-01T01:00:00")
@@ -28,6 +29,11 @@ object QuickTestTsml extends App {
     //ops += Operation("last")
     //ops += LimitFilter(3)
     
+    
     val ds = TsmlReader(tsml).getDataset(ops)
-    Writer("asc").write(ds)
+    
+    //Writer("asc").write(ds)
+    
+    val out = new FileOutputStream("/data/tmp/usaf_mwl.csv")
+    Writer(out, "csv").write(ds)
 }

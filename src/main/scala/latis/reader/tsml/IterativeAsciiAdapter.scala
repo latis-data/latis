@@ -25,7 +25,7 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Asci
         if (it.hasNext) {
           val record = it.next
           val svals = parseRecord(record)
-          if (svals.isEmpty) getNext
+          if (svals.isEmpty) getNext  //TODO: log warning? or in parseRecord
           else makeDataFromRecord(sampleTemplate, svals)
         } else null
       }
@@ -50,12 +50,13 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Asci
     for (v <- vars) {
       v match {
         case _: Index   => index += 1; bb.putInt(index) //deal with index domain (defined in tsml)
-        case _: Real    => bb.putDouble(svals(v.getName).toDouble)
-        case _: Integer => bb.putLong(svals(v.getName).toLong)
         case t: Text    => {
           val s = StringUtils.padOrTruncate(svals(v.getName), t.length)
           s.foldLeft(bb)(_.putChar(_)) //fold each character into buffer
         }
+        //Note, the numerical data will attempt to use a fill or missing value if it fails to parse the string
+        case _: Real    => bb.putDouble(v.stringToValue(svals(v.getName)).asInstanceOf[Double])
+        case _: Integer => bb.putLong(v.stringToValue(svals(v.getName)).asInstanceOf[Long])
       }
     }
     

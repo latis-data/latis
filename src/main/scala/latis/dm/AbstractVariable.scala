@@ -22,6 +22,8 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     }
   }
   
+  def stringToValue(string: String): Any = ??? //just works for Scalars for now
+  
   /**
    * Length of the Variable depending on type.
    *   Scalar: 1

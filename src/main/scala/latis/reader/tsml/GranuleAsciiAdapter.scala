@@ -44,6 +44,7 @@ class GranuleAsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) with AsciiAda
       val data = scalar match {
         //case _: Time => ???
         //TODO: no special treatment for Time needed?
+        //TODO: catch parse error and fill (see IterativeAsciiAdapter)
         case _: Real    => Data(buffer.map(_.toDouble))
         case _: Integer => Data(buffer.map(_.toLong))
         case _: Binary  => ???
