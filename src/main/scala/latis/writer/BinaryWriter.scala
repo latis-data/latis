@@ -12,7 +12,7 @@ class BinaryWriter extends Writer {
   private val order = ByteOrder.BIG_ENDIAN
   //private val order = ByteOrder.LITTLE_ENDIAN
 
-  private[this] lazy val writer = new DataOutputStream(outputStream)
+  private[this] lazy val writer = new DataOutputStream(getOutputStream)
   
   def write(dataset: Dataset) {
     dataset.getVariables.map(writeVariable(_))
@@ -62,7 +62,7 @@ object BinaryWriter {
   
   def apply(out: OutputStream): BinaryWriter = {
     val writer = new BinaryWriter()
-    writer._out = out
+    writer.setOutputStream(out)
     writer
   }
   

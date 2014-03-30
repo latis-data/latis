@@ -7,7 +7,7 @@ import java.io.PrintWriter
 
 class DataDdsWriter extends BinaryWriter {
   
-  private[this] lazy val writer = new DataOutputStream(outputStream)
+  private[this] lazy val writer = new DataOutputStream(getOutputStream)
 
   final val START_OF_INSTANCE: Array[Byte] = Array(0x5A.toByte, 0, 0, 0)
 

@@ -11,16 +11,16 @@ import latis.dm.TestDataset
 
 class TestJsonWriter {
   
-  def real = Writer("json").write(TestDataset.real)
-  def integer = Writer("json").write(TestDataset.integer)
-  def text = Writer("json").write(TestDataset.text)
+  def real = Writer.fromSuffix("json").write(TestDataset.real)
+  def integer = Writer.fromSuffix("json").write(TestDataset.integer)
+  def text = Writer.fromSuffix("json").write(TestDataset.text)
   
   //@Test
-  def test = Writer("json").write(TestDataset.index_function)
+  def test = Writer.fromSuffix("json").write(TestDataset.index_function)
   
   //@Test 
-  def empty_dataset = Writer("json").write(TestDataset.empty)
+  def empty_dataset = Writer.fromSuffix("json").write(TestDataset.empty)
   
   //@Test
-  def empty_function = Writer("json").write(TestDataset.empty_function)
+  def empty_function = Writer.fromSuffix("json").write(TestDataset.empty_function)
 }

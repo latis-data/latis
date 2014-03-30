@@ -129,13 +129,13 @@ class TestTsml  {
     ops += Projection("uid,cn,mail")
     val ds = TsmlReader("datasets/test/ldap_users.tsml").getDataset(ops)
     
-    Writer("csv").write(ds)
+    Writer.fromSuffix("csv").write(ds)
   }
   
   //@Test
   def test {
     val ops = List(Operation("last"))
     val ds = TsmlReader("/home/lindholm/git/lisird3/src/test/resources/datasets/test/sorce_tim_tsi_6h_v12.tsml").getDataset(ops)
-    Writer("asc").write(ds)//2452696.0
+    Writer.fromSuffix("asc").write(ds)//2452696.0
   }
 }

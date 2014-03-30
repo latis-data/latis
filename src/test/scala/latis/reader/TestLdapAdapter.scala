@@ -18,6 +18,6 @@ class TestLdapAdapter {
     ops += Projection("uid,cn,mail")
     val ds = TsmlReader("datasets/test/ldap_users.tsml").getDataset(ops)
     
-    Writer("csv").write(ds)
+    Writer.fromSuffix("csv").write(ds)
   }
 }

@@ -18,7 +18,7 @@ class ImageWriter extends Writer{
   
   def write(dataset: Dataset) {
     plotData(dataset)
-    ChartUtilities.writeBufferedImageAsPNG(outputStream, chart.createBufferedImage(500, 300))
+    ChartUtilities.writeBufferedImageAsPNG(getOutputStream, chart.createBufferedImage(500, 300))
   }
 
   def plotData(dataset: Dataset) {
