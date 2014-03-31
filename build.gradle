@@ -7,7 +7,7 @@ apply plugin: 'ivy-publish'
 
 //Define the release version. Used for published jar.
 //TODO: get from latis.properties?
-version = '2.3.12'
+version = '2.3.13'
 
 //Define Java version for generated class files.
 targetCompatibility = 1.6
@@ -50,6 +50,8 @@ dependencies {
     testRuntime 'sybase:jconn3:6.0'
 	
 	compile 'jfree:jfreechart:1.0.12'
+	
+	compile 'edu.ucar.ral:nujan:1.4.2'
 }
 
 //For testing
