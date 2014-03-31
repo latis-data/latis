@@ -4,13 +4,13 @@ import org.junit._
 import latis.reader.tsml.TsmlReader
 import latis.ops.Selection
 
-class TestInfoWriter {
+class TestHtmlWriter {
   
-  //@Test
-  def write_info {
-    val reader = TsmlReader("datasets/test/lemr.tsml")
+  @Test
+  def write_html {
+    val reader = TsmlReader("datasets/test/tsi.tsml")
     val ds = reader.getDataset()
-    Writer("info").write(ds)
+    Writer("html").write(ds)
   }
 
 }
