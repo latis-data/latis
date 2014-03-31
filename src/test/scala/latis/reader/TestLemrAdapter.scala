@@ -20,15 +20,16 @@ class TestLmerAdapter {
     val ds = TsmlReader("datasets/test/lemr.tsml").getDataset(ops)
     
     //TODO: FilteredFunction needs to redo index
-    Writer("asc").write(ds)
+    Writer.fromSuffix("asc").write(ds)
   }
   
-  @Test
+  //@Test
   def test_sparql_in_tsml {
     val ops = ArrayBuffer[Operation]()
-    ops += Selection("predicate=~.*version")
-    ops += Selection("object=~11")
     val ds = TsmlReader("datasets/test/lemr_datasets.tsml").getDataset(ops)
-    Writer("asc").write(ds)
+    
+    val ds2 = ds.groupBy("subject")
+    
+    Writer.fromSuffix("asc").write(ds2)
   }
 }

@@ -20,7 +20,7 @@ class TextWriter extends Writer {
    * buildRecord, varToString...?
    */
   
-  private[this] lazy val _writer = new PrintWriter(outputStream)
+  private[this] lazy val _writer = new PrintWriter(getOutputStream)
   def printWriter: PrintWriter = _writer
   //TODO: what happens to PrintWriter when out is closed?
   

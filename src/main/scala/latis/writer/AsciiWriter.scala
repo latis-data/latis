@@ -36,7 +36,7 @@ object AsciiWriter {
   
   def apply(out: OutputStream): AsciiWriter = {
     val writer = new AsciiWriter()
-    writer._out = out
+    writer.setOutputStream(out)
     writer
   }
   

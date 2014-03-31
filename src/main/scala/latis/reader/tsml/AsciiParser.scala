@@ -38,6 +38,11 @@ trait AsciiParser extends Parser[String] {
    */
   def getVariableNames: Seq[String]
   
+  /**
+   * Return the number of lines to skip at the start of the ASCII Source.
+   */
+  def getLinesToSkip: Int
+  
   
   //---- Parse operations -----------------------------------------------------
   
@@ -45,7 +50,6 @@ trait AsciiParser extends Parser[String] {
    * Return an Iterator of data records. Group multiple lines of text for each record.
    */
   def getRecordIterator: Iterator[String] = {
-    //TODO: use getLinesToSkip, or Records?
     val lpr = getLinesPerRecord
     val dlm = getDelimiter
     getLineIterator.grouped(lpr).map(_.mkString(dlm))
@@ -55,7 +59,9 @@ trait AsciiParser extends Parser[String] {
    * Return Iterator of lines, filter out lines deemed unworthy by "shouldSkipLine".
    */
   def getLineIterator: Iterator[String] = {
-    getDataSource.getLines().filterNot(shouldSkipLine(_))
+    //TODO: does using 'drop' cause premature reading of data?
+    val skip = getLinesToSkip
+    getDataSource.getLines.drop(skip).filterNot(shouldSkipLine(_))
   }
   
   /**

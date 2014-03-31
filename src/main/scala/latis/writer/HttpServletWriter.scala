@@ -9,22 +9,15 @@ import latis.util.LatisProperties
  */
 class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends Writer {
   //TODO: consider writers that can't stream, write tmp file
-  //  or simply serve an existing file!?
-
   
   def write(dataset: Dataset): Unit = {
-  //def write(dataset: Dataset) {
     //write http header stuff
             
-    
     //Define the allowed origin for cross-origin resource sharing (CORS)
-    //TODO: get from properties, compare with Origin in request header? or will browser do that?
-    //Just allow everything for now.
-//    LatisProperties.get("allow.origin") match {
-//      case Some(s) => response.addHeader("Access-Control-Allow-Origin", s)
-//      case None => 
-//    }
-    response.addHeader("Access-Control-Allow-Origin", "*")
+    LatisProperties.get("cors.allow.origin") match {
+      case Some(s) => response.addHeader("Access-Control-Allow-Origin", s)
+      case None => 
+    }
         
 //TODO: add other headers
 //        //Set the Content-Description HTTP header
@@ -49,9 +42,6 @@ class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends W
     response.setStatus(HttpServletResponse.SC_OK);
     response.flushBuffer()
   }
-  
-  //def close() = writer.close()
-
 }
 
 object HttpServletWriter {
@@ -65,7 +55,7 @@ object HttpServletWriter {
     //TODO: why do we still need to set character encoding? 
     //response.setCharacterEncoding("UTF-8") //is this required? maybe ISO-8859-1 (as seen from TSDS)
     response.setCharacterEncoding("ISO-8859-1")
-    writer._out = response.getOutputStream()
+    writer.setOutputStream(response.getOutputStream)
     new HttpServletWriter(writer, response)
   }
 }

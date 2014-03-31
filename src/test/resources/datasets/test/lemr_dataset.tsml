@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="lemr_datasets">
+    <adapter class="latis.reader.tsml.LemrAdapter"
+             delimiter="\s+"
+             commentCharacter="#"
+             location="datasets/test/mixed.txt" />
+             
+    <sequence name="dataset">
+        <text name="identifier"/>
+        <text name="label"/>
+        <text name="description"/>
+        <sequence name="params">
+          <!--could wrap in tuple but would only serve to give is a name-->
+          <text name="name"/>
+          <text name="long_name"/>
+          <text name="units"/>
+        </sequence>
+    </sequence>
+   
+  </dataset>
+
+</tsml>

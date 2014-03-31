@@ -57,13 +57,15 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
   
   def convert(scale: TimeScale): Time = TimeConverter(this.timeScale, scale).convert(this)
   
-  def toIso: String = TimeFormat.ISO.format(getJavaDate)
+  def toIso: String = TimeFormat.ISO.format(getJavaTime)
   
   //def format: String = TimeFormat(getMetadata("format")).format(getJavaDate)
   
-  def format(format: String): String = TimeFormat(format).format(getJavaDate)
+  def format(format: String): String = TimeFormat(format).format(getJavaTime)
   
-  def getJavaDate: java.util.Date = new java.util.Date(getJavaTime)
+  def format(format: TimeFormat): String = format.format(getJavaTime)
+  
+  //def getJavaDate: java.util.Date = new java.util.Date(getJavaTime)
   
   def getJavaTime: Long = getData match {
     case num: NumberData => convert(TimeScale.JAVA).getNumberData.longValue
@@ -72,7 +74,7 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
         case Some(f) => f
         case None => TimeFormat.ISO.toString //default to ISO format
       }
-      TimeFormat(format).parse(text.stringValue).getTime
+      TimeFormat(format).parse(text.stringValue)
     }
   }
   

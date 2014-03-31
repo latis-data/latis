@@ -46,6 +46,8 @@ trait Variable {
   
   //def reduce: Variable
   
+  def stringToValue(string: String): Any
+  
   //TODO: toStringValue?
 }
 

@@ -26,4 +26,10 @@ class TestTime {
   
   //TODO: test other flavors, with time zone,...
 
+  
+  @Test
+  def julian_date {
+    val t = Time(TimeScale.JULIAN_DATE, 2456734.5)
+    assertEquals("2014-03-18T00:00:00.000", t.format(TimeFormat.ISO))
+  }
 }

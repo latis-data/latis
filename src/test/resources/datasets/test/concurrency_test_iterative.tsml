@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="concurrency_test_iterative">
+    <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+             delimiter=","
+             commentCharacter="#"
+             location="/data/latis/con_test.csv" />
+    
+    <time units="yyyy-MM-dd'T'HH:mm:ss.SSS" type="text" length="23"/>
+    <real name="value"/>
+    
+  </dataset>
+
+</tsml>

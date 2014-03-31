@@ -104,7 +104,7 @@ abstract class AdapterTests {
   }
   
   @Test
-  def select_on_two_range_values {
+  def select_on_two_range_values { //TODO: misnamed or wrong test
     val ops = List(Selection("time > 1970-01-01"), Selection("myInt <= 3"))
     val data = getDataset(ops).toStringMap
     assertEquals(2, data("myTime").length)
