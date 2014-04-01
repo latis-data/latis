@@ -1,6 +1,9 @@
 package latis.util
 
 object RegEx {
+  
+  //TODO: use string interpolation (http://docs.scala-lang.org/overviews/core/string-interpolation.html)
+  // VARIABLE = s"$WORD|\."
       
     /**
      * Regular expression matching one or more word characters ([a-zA-Z_0-9]).
@@ -12,13 +15,13 @@ object RegEx {
      * Limited to alpha-numeric characters and underscore.
      * Nested components may have "." in the name.
      */
-    val VARIABLE = WORD //TODO: problem matching in SELECTION.  +"(\\."+WORD+")*"
+    val VARIABLE = s"$WORD(?:\\.$WORD)*"
     
     /**
      * Regular expression matching any reasonable number
      * including sign and scientific notation.
      */
-    val NUMBER = "[+|-]?[0-9]*\\.?[0-9]*([e|E][+|-]?[0-9]*)?"
+    val NUMBER = "[+|-]?[0-9]*\\.?[0-9]*(?:[e|E][+|-]?[0-9]*)?"
     
     /**
      * Regular expression that should match an ISO 8601 time.
@@ -39,7 +42,7 @@ object RegEx {
      *   >=  Greater than or equal to
      *   <   Less than
      *   <=  Less than or equal to
-     *   =    Equals  //TODO: deprecate in favor of "=="
+     *   =    Equals  //TODO: deprecate in favor of "=="?
      *   ==   Equals
      *   !=  Not equals
      *   =~  Matches pattern
