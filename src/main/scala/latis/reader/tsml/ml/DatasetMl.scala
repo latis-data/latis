@@ -18,7 +18,7 @@ class DatasetMl(xml: Node) extends TupleMl(xml) {
     val es = Tsml.getVariableNodes(xml)
     
     //Handle implicit Functions. If the first variable definition is "index" or "time"
-    //wrap in a function with those as a 1D domain.
+    // wrap in a function with those as a 1D domain.
     val label = es.head.label
     if (label == "index" || label == "time") Seq(wrapWithImplicitFunction(es.head, es.tail))
     else es.map(VariableMl(_))
