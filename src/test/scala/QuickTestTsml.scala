@@ -23,7 +23,8 @@ object QuickTestTsml extends App {
     val tsml = "/home/lindholm/git/nrlssi/src/main/resources/datasets/usaf_mwl.tsml"
       
     val ops = ArrayBuffer[Operation]()
-    ops += Selection("time<1982-01-01")
+    ops += Selection("time < 1982-01-01")
+    ops += Selection("area!=-999")
     //ops += Projection("time,data_rate_mode,file")
     //ops += Operation("first")
     //ops += Operation("last")

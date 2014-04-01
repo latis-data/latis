@@ -70,16 +70,15 @@ protected class Selection(val vname: String, val operation: String, val value: S
   
   def filterFunction(f: Function): Option[Function] = Some(FilteredFunction(f, this))
 
-//  def filterSample(sample: Sample): Option[Sample] = {
-//    for (d <- filter(sample.domain); r <- filter(sample.range)) yield Sample(d,r)
-//  }
-  
-  //TODO: support NOT (!)
   
   private def isValid(comparison: Int): Boolean = {
-    (comparison < 0 && operation.contains("<")) || 
-    (comparison > 0 && operation.contains(">")) || 
-    (comparison == 0 && operation.contains("="))
+    if (operation == "!=") {
+      comparison != 0
+    } else {
+      (comparison < 0  && operation.contains("<")) || 
+      (comparison > 0  && operation.contains(">")) || 
+      (comparison == 0 && operation.contains("="))
+    }
   }
   
   override def toString = vname + operation + value
