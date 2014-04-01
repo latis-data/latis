@@ -7,7 +7,7 @@ apply plugin: 'ivy-publish'
 
 //Define the release version. Used for published jar.
 //TODO: get from latis.properties?
-version = '2.3.13'
+version = '2.3.14'
 
 //Define Java version for generated class files.
 targetCompatibility = 1.6
@@ -39,8 +39,7 @@ dependencies {
     providedCompile "javax.servlet:servlet-api:2.5" //not deployed
     compile 'org.scala-lang:scala-library:2.10.3'
     
-    //compile 'joda-time:joda-time:2.3'
-    
+    //Support for logging
     compile 'com.typesafe:scalalogging-slf4j_2.10:1.0.1'
     compile 'ch.qos.logback:logback-classic:1.0.13'
     
@@ -49,8 +48,10 @@ dependencies {
     //testRuntime 'postgres:postgresql:9.2-1002'
     testRuntime 'sybase:jconn3:6.0'
 	
+	//Support for writing png images
 	compile 'jfree:jfreechart:1.0.12'
 	
+	//Support for writing NetCDF4 and HDF5
 	compile 'edu.ucar.ral:nujan:1.4.2'
 }
 
