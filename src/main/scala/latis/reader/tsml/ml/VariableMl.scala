@@ -61,16 +61,16 @@ abstract class VariableMl(xml: Node) {
   }
 
   //flatten VariableMl tree into Seq, depth first
-  def toSeq: Seq[VariableMl] = this match {
-    case s: ScalarMl => Seq(s)
-    case TupleMl(vars) => vars.foldLeft(Seq[VariableMl]())(_ ++ _.toSeq)
-    case FunctionMl(d,r) => d.toSeq ++ r.toSeq
-  }
+//  def toSeq: Seq[VariableMl] = this match {
+//    case s: ScalarMl => Seq(s)
+//    case TupleMl(vars) => vars.foldLeft(Seq[VariableMl]())(_ ++ _.toSeq)
+//    case FunctionMl(d,r) => d.toSeq ++ r.toSeq
+//  }
   
-  def getName = Tsml.getVariableName(xml) match {
-    case Some(name) => name
-    case None => "" //TODO: something better than empty string?
-  }
+//  def getName = Tsml.getVariableName(xml) match {
+//    case Some(name) => name
+//    case None => "" //TODO: something better than empty string?
+//  }
   
   
   override def toString = xml.toString

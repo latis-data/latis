@@ -19,24 +19,25 @@ class Tsml(val xml: Elem) { //extends VariableMl(xml) { //TODO: should this exte
   
   lazy val dataset = new DatasetMl((xml \ "dataset").head) //assumes only one "dataset" element
   
-  /**
-   * Gather the Names of all Scalar Variables.
-   */
-  def getScalarNames: Seq[String] = {
-    val scalars = dataset.toSeq.filter(ml => ml.isInstanceOf[ScalarMl])
-    val names = scalars.map(_.getName) //TODO: error if empty?, .filter(_.nonEmpty)
-    //don't include "index"
-    names.filter(_ != "index")
-    /*
-     * TODO: 2013-10-14
-     * consider source names vs exposed names
-     * These are usually (always?) used to map to source data.
-     * Index is a special case.
-     * Are there other special cases that should be applied here 
-     *   as opposed to operations after the dataset has been constructed?
-     * References?
-     */
-  }
+//deprecated: adapters should have access to initial Dataset from which they can get variable names
+//  /**
+//   * Gather the Names of all Scalar Variables.
+//   */
+//  def getScalarNames: Seq[String] = {
+//    val scalars = dataset.toSeq.filter(ml => ml.isInstanceOf[ScalarMl])
+//    val names = scalars.map(_.getName) //TODO: error if empty?, .filter(_.nonEmpty)
+//    //don't include "index"
+//    names.filter(_ != "index")
+//    /*
+//     * TODO: 2013-10-14
+//     * consider source names vs exposed names
+//     * These are usually (always?) used to map to source data.
+//     * Index is a special case.
+//     * Are there other special cases that should be applied here 
+//     *   as opposed to operations after the dataset has been constructed?
+//     * References?
+//     */
+//  }
   
   /**
    * Get a sequence of processing instructions' text values (proctext) 
@@ -108,32 +109,34 @@ object Tsml {
   def getVariableNodes(vnode: Node): Seq[Node] = vnode.child.filter(isVariableNode(_))
     
   def isVariableNode(node: Node): Boolean = {
+    //TODO: use xml schema, subtypes?
+    //TODO: inclusion list instead of exclusions?
     val exclusions = List("metadata", "adapter", "values") //valid xml Elements that are not Variables
     node.isInstanceOf[Elem] && (! exclusions.contains(node.label)) 
   }
   
   //note, metadata name takes precedence, TODO: dangerous if diff from attribute name
-  def getVariableName(node: Node): Option[String] = (node \ "metadata@name").text match {
-    case "" => {
-      //not defined in metadata element, try attribute
-      (node \ "@name").text match {
-        case "" => node.label match {
-          //try "time" and "index" (with implicit name)
-          case "time" => Some("time")
-          case "index" => Some("index")
-          case _ => None  //no name
-        }
-        case name: String => Some(name) //from attribute
-      }
-    }
-    case name: String => Some(name) //from metadata
-  }
+//  def getVariableName(node: Node): Option[String] = (node \ "metadata@name").text match {
+//    case "" => {
+//      //not defined in metadata element, try attribute
+//      (node \ "@name").text match {
+//        case "" => node.label match {
+//          //try "time" and "index" (with implicit name)
+//          case "time" => Some("time")
+//          case "index" => Some("index")
+//          case _ => None  //no name
+//        }
+//        case name: String => Some(name) //from attribute
+//      }
+//    }
+//    case name: String => Some(name) //from metadata
+//  }
   
 //  def hasLabel(xml: Node, label: String): Boolean = xml.find(_.label == label) match {
 //    case Some(_) => true
 //    case None => false
 //  }
   
-  def hasChildWithLabel(xml: Node, label: String): Boolean = xml.child.exists(_.label == label)
+  //def hasChildWithLabel(xml: Node, label: String): Boolean = xml.child.exists(_.label == label)
   
 }
