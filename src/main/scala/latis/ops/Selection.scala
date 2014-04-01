@@ -3,6 +3,7 @@ package latis.ops
 import latis.dm._
 import latis.time._
 import latis.util.RegEx._
+import com.typesafe.scalalogging.slf4j.Logging
 
 /**
  * Filter based on (in)equality.
@@ -11,7 +12,7 @@ import latis.util.RegEx._
  * Data value class?
  * 
  */
-protected class Selection(val vname: String, val operation: String, val value: String) extends Operation {
+protected class Selection(val vname: String, val operation: String, val value: String) extends Operation with Logging {
   //TODO: consider abstracting out common "filter" stuff
   //TODO: if domain, delegate to DomainSet
   
@@ -20,13 +21,23 @@ protected class Selection(val vname: String, val operation: String, val value: S
     //TODO: provenance metadata
   }
   
-  def filter(variable: Variable): Option[Variable] = variable match {
-    //Special handling for Text regex matching with "=~"
-    // except Time which can be handled like any other Scalar.
-    case text: Text if (! text.isInstanceOf[Time]) => filterText(text)
-    case s: Scalar   => filterScalar(s)
-    case t: Tuple    => filterTuple(t)
-    case f: Function => filterFunction(f)
+  def filter(variable: Variable): Option[Variable] = {
+    //If the filtering causes an exception, log a warning and return None.
+    try {
+      variable match {
+      //Special handling for Text regex matching with "=~"
+      // except Time which can be handled like any other Scalar.
+      case text: Text if (! text.isInstanceOf[Time]) => filterText(text)
+      case s: Scalar   => filterScalar(s)
+      case t: Tuple    => filterTuple(t)
+      case f: Function => filterFunction(f)
+      }
+    } catch {
+      case e: Exception => {
+        logger.warn("Selection filter threw an exception: " + e.getMessage, e)
+        None
+      }
+    }
   }
     
   def filterText(text: Text): Option[Text] = {
