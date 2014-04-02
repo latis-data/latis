@@ -2,7 +2,7 @@ package latis.reader.tsml
 
 import latis.data._
 import latis.dm._
-import java.sql.{Connection, DriverManager, ResultSet}
+import java.sql.{ Connection, DriverManager, ResultSet }
 import java.nio.ByteBuffer
 import javax.naming.Context
 import javax.naming.InitialContext
@@ -26,7 +26,7 @@ import java.sql.Timestamp
 import latis.util.StringUtils
 
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
-  
+
   /*
    * TODO: 2014-02-24
    * deal with non-projected domain or range, replace with Index
@@ -35,63 +35,67 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
    * needs to be applied at sample level so you know if domain or range is empty
    * 
    */
-  
+
   //TODO: catch exceptions and close connections
-  
+
   //Keep these global so we can close them.
   private lazy val resultSet: ResultSet = executeQuery
   private lazy val statement: Statement = connection.createStatement()
-    
+
   //Handle the Projection and Selection Operation-s
   private var projection = "*"
   private val selections = ArrayBuffer[String]()
-  
-  
+
   //Handle first, last ops
   private var first = false
   private var last = false
-  
+
   //Define sorting order.
   private var order = " ASC"
-    
 
-  
   override def handleOperation(operation: Operation): Boolean = operation match {
-    case Projection(p) => this.projection = p; true
-    //TODO: make sure these match variable names and don't contain some sort of sql injection, enforce in Projection?
-    
-    //TODO: support alias
-    //getVariableByName(alias).getName
-    
-    case sel: Selection => val expression = sel.toString; expression match { //TODO: can we use an alias with '@'...?
-      //Break expression up into components
-      case SELECTION.r(name, op, value) => {
-        if (name == "time") handleTimeSelection(op, value) //special handling for "time"
-        //TODO: handle other Time variables (dependent)
-        else if (origScalarNames.contains(name)) { //other variable (not time), even if not projected
-          //add a selection to the sql, may need to change operation
-          op match {
-            case "==" => selections append name + "=" + value; true
-            case "=~" => selections append name + " like '%" + value + "%'"; true
-            case "~"  => false  //almost equal (e.g. nearest sample) not supported by sql
-            case _ => selections append expression; true //TODO: sanitize, but already matched Selection regex
-          }
-        }
-        else false //doesn't apply to our variables, so leave it for the next handler, TODO: or error?
-      }
-      //TODO: case _ => doesn't match selection regex, error
+    case p: Projection => {
+      //make sure these match variable names or aliases
+      if (!p.names.forall(origDataset.getVariableByName(_).nonEmpty))
+        throw new Error("Not all variables are available for the projection: " + p)
+
+      this.projection = p.toString
+      true
     }
-    
-    case _: FirstFilter => first = true; true
-    case _: LastFilter  => last = true; order = " DESC"; true
-    
+
+    case sel: Selection =>
+      val expression = sel.toString; expression match { //TODO: can we use an alias with '@'...?
+        //Break expression up into components
+        case SELECTION.r(name, op, value) => {
+          if (name == "time") handleTimeSelection(op, value) //special handling for "time"
+          //TODO: handle other Time variables (dependent)
+          else if (origScalarNames.contains(name)) { //other variable (not time), even if not projected
+            //add a selection to the sql, may need to change operation
+            op match {
+              case "==" =>
+                selections append name + "=" + value; true
+              case "=~" =>
+                selections append name + " like '%" + value + "%'"; true
+              case "~" => false //almost equal (e.g. nearest sample) not supported by sql
+              case _ => selections append expression; true //TODO: sanitize, but already matched Selection regex
+            }
+          } else false //doesn't apply to our variables, so leave it for the next handler, TODO: or error?
+        }
+        //TODO: case _ => doesn't match selection regex, error
+      }
+
+    case _: FirstFilter =>
+      first = true; true
+    case _: LastFilter =>
+      last = true; order = " DESC"; true
+
     //TODO: handle exception, return false (not handled)?
-    
+
     case _ => false //not an operation that we can handle
     //TODO: rename: select foo as bar?
   }
 
- /*
+  /*
   * TODO: time format for sql
   * dataset.findTimeVariable? 
   * numeric units: if query string matched TIME regex, convert iso to var's timeScale
@@ -107,123 +111,99 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   def handleTimeSelection(op: String, value: String): Boolean = {
     //support ISO time string as value
     //TODO: assumes value is ISO, what if dataset does have a var named "time" with other units?
-    
+
     //this should work because any time variable should have the alias "time"
-    val tvar = origDataset.getVariableByName("time").get //TODO: handle option better
+    val tvar = origDataset.getVariableByName("time") match {
+      case Some(t) => t
+      case None => throw new Error("No time variable found in dataset.")
+    }
     val tvname = tvar.getName //original name which should match database column
-    
-    /*
-     * TODO: assumes db value are numerical, need to support times stored as datatime...
-     * should be able to use iso form in quotes?
-     * need clue in tsml that db has datetime
-     *   units? format?
-     * even though we can convert it to numeric, the general solution seems to be keep it as text?
-     *   we can define native form as text since latis does not have a datetime type
-     *   what should be the default ascii output? numbers might confuse them
-     *   though defaulting to java time is reasonable
-     * Try using text, default format = iso
-     * 
-     */
-    
+
     tvar.getMetadata("type") match {
       case Some("text") => {
-        //TODO: derby doesn't support iso format with "T", replace it with space?
-        //  is this a jdbc thing? consider java.sql.Timestamp.toString: yyyy-mm-dd hh:mm:ss.fffffffff
-        //TODO: uses default time zone!
-        //Note, Timestamp supports nanosecond precision unlike Date.
-        //internally, Timestamp treats milliseconds as GMT.
-        //Timestamp has internal Gregorian$Date which has the local time zone.
-        //  No apparent hooks to change that!?
-        //TODO: make use of setNanos when more precision is needed
-        //val ts = new Timestamp(Time.isoToJava(value))
-        //val time = value.replace('T', ' ')
-        //val s = ts.toGMTString //1 Jan 1970 00:00:00 GMT
-        //selections += tvname + op + "'" + ts.toString + "'"; true
-        
-        //just replace T with space, for now
-        //but just the date doesn't work!
-        //parse value into a Time then format
+        //JDBC doesn't generally like the 'T' in the iso time.
+        //Parse value into a Time then format consistent with java.sql.Timestamp.toString: yyyy-mm-dd hh:mm:ss.fffffffff
+        //This should also treat the time as GMT. (Timestamp has internal Gregorian$Date which has the local time zone.)
         val time = Time.fromIso(value).format("yyyy-MM-dd HH:mm:ss.SSS")
-        
-        selections += tvname + op + "'" + time + "'"; true
+        selections += tvname + op + "'" + time + "'"
+        true
       }
-      //case _ => (tsml.xml \\ "time" \ "metadata" \ "@units").text match {
       case _ => tvar.getMetadata("units") match {
-       case None => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
-      //TODO: allow units property in time element
-      //TODO: what if native time var is "time", without units?
-       case Some(units) => {
-        //convert ISO time to units
-        RegEx.TIME.r findFirstIn value match {
-          case Some(s) => {
-            val t = Time.fromIso(s)
-            val t2 = t.convert(TimeScale(units)).getNumberData.doubleValue
-            this.selections += tvname + op + t2
-            true
+        case None => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
+        //Note, The Time constructor will provide default units (ISO) if none are defined in the tsml.
+        case Some(units) => {
+          //convert ISO time selection value to dataset units
+          //regex ensures that the value is a valid ISO time
+          RegEx.TIME.r findFirstIn value match {
+            case Some(s) => {
+              val t = Time.fromIso(s)
+              val t2 = t.convert(TimeScale(units)).getNumberData.doubleValue
+              this.selections += tvname + op + t2
+              true
+            }
+            case None => throw new Error("The time value is not in a supported ISO format: " + value)
           }
-          case None => throw new Error("The time value is not in a supported ISO format: " + value)
         }
       }
-    }}
+    }
   }
-  
+
   //Override to apply projection to the model, scalars only, for now.
   //TODO: maintain projection order, this means modifying the model higher up, or when building Sample?
   //TODO: deal with composite names for nested vars
   override def makeScalar(s: Scalar): Option[Scalar] = {
     if (projection == "*") super.makeScalar(s)
-    else projection.split(",").find(s.hasName(_)) match {  //account for aliases
+    else projection.split(",").find(s.hasName(_)) match { //account for aliases
       case Some(_) => {
-        super.makeScalar(s)  //found a match
+        super.makeScalar(s) //found a match
       }
-      case None => None  //no match
+      case None => None //no match
     }
   }
-  
 
-  private def executeQuery: ResultSet =  {
+  private def executeQuery: ResultSet = {
     val sql = makeQuery
     logger.debug("Executing sql query: " + sql)
-    
+
     //Apply optional limit to the number of rows
     //TODO: Figure out how to warn the user if the limit is exceeded
     getProperty("limit") match {
       case Some(limit) => statement.setMaxRows(limit.toInt)
-      case _ => 
+      case _ =>
     }
-    
+
     //Allow specification of number of rows to fetch at a time.
     getProperty("fetchSize") match {
       case Some(fetchSize) => statement.setFetchSize(fetchSize.toInt)
-      case _ => 
+      case _ =>
     }
-    
+
     //Apply FirstFilter or LastFilter. 
     //Set max rows to 1. "last" will set order to descending.
     //TODO: error if both set, unless there was only one
     if (first || last) statement.setMaxRows(1)
-    
+
     statement.executeQuery(sql)
   }
-  
+
   def getTable: String = getProperty("table") match {
     case Some(s) => s
     case None => throw new Error("JdbcAdapter needs to have a 'table' defined.")
   }
-  
+
   protected def makeQuery: String = {
     //TODO: sanitize stuff from properties, only in the data providers domain, but still...
-    
+
     val sb = new StringBuffer()
     sb append "select "
 
     sb append projection
-    
+
     sb append " from " + getTable
-    
-    val p = predicate 
+
+    val p = predicate
     if (p.nonEmpty) sb append " where " + p
-    
+
     //Sort by domain variable.
     //assume domain is scalar, for now
     //Note 'dataset' should be the original before ops
@@ -239,10 +219,10 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
       }
       case None => //no function so domain variable to sort by
     }
-    
+
     sb.toString
   }
-  
+
   /**
    * Build a list of constraints for the "where" clause.
    */
@@ -250,43 +230,43 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     //start with selection clauses from requested operations
     val buffer = selections
     //TODO: sanitize
-    
+
     //TODO: support "predicate" defined in the adapter attributes? or just depend on PIs
-    
+
     //insert "AND" between the selection clauses
     buffer.filter(_.nonEmpty).mkString(" AND ")
   }
-  
+
   //Note, no query should be made until the iterator is called.
   def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
     def recordSize = sampleTemplate.getSize
-    
+
     override def iterator = new PeekIterator[Data] {
       //Use index to replace a non-projected domain. 
       var index = sampleTemplate.domain match {
         case _: Index => 0
         case _ => -1
       }
-      
+
       //Get list of projected Scalars in projection order
       val vars: Seq[Variable] = if (projection == "*") origDataset.toSeq
       else projection.split(",").flatMap(origDataset.getVariableByName(_))
-      
+
       //Get the types of these variables in the database
       val md = resultSet.getMetaData
       val types = vars.map(v => md.getColumnType(resultSet.findColumn(v.getName)))
-      
+
       //Combine the variables with their database types in a Seq of pairs.
       //TODO: cleaner way? only needed for Time stored as TIMESTAMP?
       val varsWithTypes = vars zip types
-      
+
       //Define a Calendar so we get our times in the GMT time zone.
       val cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-      
+
       //TODO: consider rs.getBinaryStream or getBytes
-      
+
       def getNext: Data = {
-        val bb = ByteBuffer.allocate(recordSize) 
+        val bb = ByteBuffer.allocate(recordSize)
         //TODO: reuse bb? but the previous sample is in the wild, memory resource issue, will gc help?
         if (resultSet.next) {
           //Add index value if domain not projected. Set to 0 above if we have an Index domain, -1 otherwise.
@@ -295,7 +275,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
             bb.putInt(index)
             index += 1
           }
-          
+
           for (vt <- varsWithTypes) vt match {
             case (v: Time, t: Int) if (t == java.sql.Types.TIMESTAMP) => {
               //TODO: other database time types?
@@ -309,7 +289,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
                   //use units from Time variable
                   val s = v.getMetadata("units") match {
                     case Some(units) => TimeFormat(units).format(time)
-                    case None        => TimeFormat.ISO.format(time) //default to ISO yyyy-MM-ddTHH:mm:ss.SSS
+                    case None => TimeFormat.ISO.format(time) //default to ISO yyyy-MM-ddTHH:mm:ss.SSS
                     //TODO: currently requires setting length="23" in tsml
                   }
                   s.foldLeft(bb)(_.putChar(_))
@@ -323,45 +303,45 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
               val s = StringUtils.padOrTruncate(resultSet.getString(t.getName), t.length)
               s.foldLeft(bb)(_.putChar(_)) //fold each char into the ByteBuffer
             }
-            case (b: Binary, _) => bb.put(resultSet.getBytes(b.getName))  //TODO: use getBlob? 
-            
+            case (b: Binary, _) => bb.put(resultSet.getBytes(b.getName)) //TODO: use getBlob? 
+
             //TODO: error if column not found
           }
-        
+
           Data(bb.flip.asInstanceOf[ByteBuffer]) //set limit and rewind so it is ready to be read
-          
+
         } else null //no more samples
       }
     }
   }
-  
+
   //---------------------------------------------------------------------------
-    
+
   /**
    * Allow subclasses to use the connection. They should not close it.
    */
   protected def getConnection: Connection = connection
-    
+
   //Used so we don't end up getting the lazy connection when we are testing if we have one to close
-  private var hasConnection = false 
-  
+  private var hasConnection = false
+
   private lazy val connection: Connection = {
     //TODO: use 'location' uri for jndi with 'java' (e.g. java:comp/env/jdbc/sorce_l1a) scheme, but glassfish doesn't use that form
     val con = getProperty("jndi") match {
       case Some(jndi) => getConnectionViaJndi(jndi)
       case None => getConnectionViaJdbc
     }
-    
+
     hasConnection = true //will still be false if getting connection fails
     con
   }
-  
+
   private def getConnectionViaJndi(jndiName: String): Connection = {
     val initCtx = new InitialContext();
     val ds = initCtx.lookup(jndiName).asInstanceOf[DataSource];
     ds.getConnection();
   }
-  
+
   private def getConnectionViaJdbc: Connection = {
     val driver = getProperty("driver") match {
       case Some(s) => s
@@ -379,24 +359,23 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
       case Some(s) => s
       case None => throw new Error("JdbcAdapter needs to have a 'password' defined.")
     }
-    
+
     //Load the JDBC driver 
     Class.forName(driver)
 
     //Make database connection
     DriverManager.getConnection(url, user, passwd)
   }
-  
-  
+
   override def close() = {
     //TODO: do we need to close resultset, statement...?
     //  should we close it or just return it to the pool?
     //closing statement also closes resultset 
     //http://stackoverflow.com/questions/4507440/must-jdbc-resultsets-and-statements-be-closed-separately-although-the-connection
     if (hasConnection) {
-      try { resultSet.close } catch {case e: Exception =>}
-      try { statement.close } catch {case e: Exception =>}
-      try { connection.close } catch {case e: Exception =>}
+      try { resultSet.close } catch { case e: Exception => }
+      try { statement.close } catch { case e: Exception => }
+      try { connection.close } catch { case e: Exception => }
     }
   }
 }

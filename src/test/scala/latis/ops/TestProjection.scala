@@ -110,6 +110,13 @@ class TestProjection {
   //TODO: nested use cases
   
   //TODO: project same var twice
+  
+  
+  @Test def construct_from_expression_of_one = assertEquals(1, Projection("a").names.length)
+  @Test def construct_from_expression_of_two = assertEquals(2, Projection("a,b").names.length)
+  @Test def construct_from_expression_of_three = assertEquals(3, Projection("a,b,c").names.length)
+  @Test def construct_from_expression_with_spaces = assertEquals(2, Projection("a,  b").names.length)
+  @Test def construct_from_expression_with_space_padding = assertEquals(2, Projection(" a,b ").names.length)
 }
 
 

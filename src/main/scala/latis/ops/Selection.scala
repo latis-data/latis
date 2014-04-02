@@ -87,24 +87,13 @@ protected class Selection(val vname: String, val operation: String, val value: S
 
 object Selection {
   
-  def apply(vname: String, operation: String, value: String) = {
-    //Deprecate use of "=" for selections. Replace with "==".? TODO: maybe not
-    val op = operation match {
-      case "=" => "=="
-      case _ => operation
-    }
-    
-    new Selection(vname, op, value)
+  def apply(vname: String, operation: String, value: String) = new Selection(vname, operation, value)
+  
+  def apply(expression: String): Selection = expression.trim match {
+    case SELECTION.r(name, op, value) => Selection(name, op, value)
+    case _ => throw new Error("Failed to make a Selection from the expression: " + expression)
   }
   
-  def apply(expression: String): Selection = {
-    expression match {
-      case SELECTION.r(name, op, value) => Selection(name, op, value)
-      //TODO: case _ => error
-    }
-  }
-  
-  //Extract the selection as a single string expression
-  //def unapply(sel: Selection): Option[String] = Some(sel.toString)
+  //Extract the selection as a triple
   def unapply(sel: Selection): Option[(String, String, String)] = Some((sel.vname, sel.operation, sel.value))
 }
