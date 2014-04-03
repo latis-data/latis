@@ -10,6 +10,7 @@ class InfoWriter extends TextWriter{
     val info = getInfo(dataset).toStringMap
     writeLabel(info)
     writeDesc(info)
+    printWriter.flush
   }
 
   def getInfo(dataset: Dataset): Dataset = {

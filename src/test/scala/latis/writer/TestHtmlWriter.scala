@@ -10,7 +10,7 @@ class TestHtmlWriter {
   def write_html {
     val reader = TsmlReader("datasets/test/tsi.tsml")
     val ds = reader.getDataset()
-    Writer("html").write(ds)
+    Writer.fromSuffix("html").write(ds)
   }
 
 }

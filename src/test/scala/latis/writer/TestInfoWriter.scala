@@ -10,7 +10,7 @@ class TestInfoWriter {
   def write_info {
     val reader = TsmlReader("datasets/test/lemr.tsml")
     val ds = reader.getDataset()
-    Writer("info").write(ds)
+    Writer.fromSuffix("info").write(ds)
   }
 
 }
