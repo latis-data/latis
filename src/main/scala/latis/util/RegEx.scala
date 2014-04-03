@@ -1,9 +1,6 @@
 package latis.util
 
 object RegEx {
-  
-  //TODO: use string interpolation (http://docs.scala-lang.org/overviews/core/string-interpolation.html)
-  // VARIABLE = s"$WORD|\."
       
     /**
      * Regular expression matching one or more word characters ([a-zA-Z_0-9]).
@@ -21,14 +18,14 @@ object RegEx {
      * Regular expression matching any reasonable number
      * including sign and scientific notation.
      */
-    lazy val NUMBER = "[+|-]?[0-9]*\\.?[0-9]*(?:[e|E][+|-]?[0-9]*)?"
-//TODO: fails for "1e" and "e1"
+    lazy val NUMBER = """[+|-]?(?:\d*\.\d+|\d+\.\d*|\d+)(?:[e|E][+|-]?\d+)?"""
       
     /**
      * Regular expression matching any reasonable value (e.g. on the right hand side on an expression.
      * This is designed to keep out escape characters and other nasties.
      */
     lazy val VALUE = """[\w\.\+\-eE:]+"""
+    //TODO: work out the kinks in: lazy val VALUE = s"(?:$TIME)|(?:$NUMBER)|(?:$VARIABLE)" //TODO: OPERATION? but recursive
     
     /**
      * Regular expression that should match an ISO 8601 time or the form: yyyy-MM-ddTHH:mm:ss
@@ -63,15 +60,16 @@ object RegEx {
     lazy val SELECTION = s"($VARIABLE)\\s*($SELECTION_OPERATOR)\\s*($VALUE)"
     
     /**
-     * Projection clause. Match comma separated list of variable names.
+     * Projection clause. Match comma and/or space delimited list of variable names.
+     * Don't try to match groups since we have a variable number of groups and this
+     * would only capture the first and last elements.
      */
-    lazy val PROJECTION = s"($VARIABLE)(?:,\\s*($VARIABLE))*"
+    lazy val PROJECTION = s"$VARIABLE(?:(?:$DELIMITER)$VARIABLE)*"  //TODO: use DELIMITER?
     
     /**
      * List of arguments, such as for a function call.
      * Don't try to match groups.
      */
-    //lazy val ARGUMENT_LIST = s"($VALUE)(?:,\\s*($VALUE))*"
     lazy val ARGUMENT_LIST = s"$VALUE(?:,\\s*$VALUE)*"
     
     /**

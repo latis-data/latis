@@ -67,12 +67,14 @@ class TestRegEx {
   @Test def match_scientific_notation2 = assertTrue("1.23E+12" matches RegEx.NUMBER)
   @Test def match_scientific_notation3 = assertTrue("1e12" matches RegEx.NUMBER)
   @Test def match_scientific_notation4 = assertTrue("1.e12" matches RegEx.NUMBER)
+  @Test def match_scientific_notation5 = assertTrue(".1e12" matches RegEx.NUMBER)
   @Test def dont_match_not_a_number = assertFalse("1.23-e12" matches RegEx.NUMBER)
-  //@Test def dont_match_not_a_number2 = assertFalse("e12" matches RegEx.NUMBER)
-  //@Test def dont_match_not_a_number3 = assertFalse("1e" matches RegEx.NUMBER)
+  @Test def dont_match_not_a_number2 = assertFalse("e12" matches RegEx.NUMBER)
+  @Test def dont_match_not_a_number3 = assertFalse("1e" matches RegEx.NUMBER)
   @Test def dont_match_not_a_number4 = assertFalse("1-12" matches RegEx.NUMBER)
   @Test def dont_match_not_a_number5 = assertFalse("1e12." matches RegEx.NUMBER)
   @Test def dont_match_not_a_number6 = assertFalse("-+1" matches RegEx.NUMBER)
+  @Test def dont_match_not_a_number7 = assertFalse(".e12" matches RegEx.NUMBER)
   @Test def dont_match_number_with_two_decimals = assertFalse("1.2.3" matches RegEx.NUMBER)
   
   //Value tests
@@ -157,37 +159,13 @@ class TestRegEx {
   @Test def match_projection_of_two = assertTrue("foo,bar" matches RegEx.PROJECTION)
   @Test def match_projection_of_three = assertTrue("foo,bar,car" matches RegEx.PROJECTION)
   @Test def match_projection_of_two_with_space = assertTrue("foo, bar" matches RegEx.PROJECTION)
+  @Test def match_projection_of_two_with_spaces = assertTrue("foo  ,  bar" matches RegEx.PROJECTION)
+  @Test def match_projection_of_two_without_comma = assertTrue("foo    bar" matches RegEx.PROJECTION)
   @Test def dont_match_projection_with_empty = assertFalse("foo,,bar" matches RegEx.PROJECTION)
   @Test def dont_match_projection_with_trailing_comma = assertFalse("foo," matches RegEx.PROJECTION)
   @Test def dont_match_projection_with_leading_comma = assertFalse(",foo" matches RegEx.PROJECTION)
   @Test def dont_match_projection_with_bad_var = assertFalse("foo,#oo" matches RegEx.PROJECTION)
   @Test def dont_match_empty_projection = assertFalse("" matches RegEx.PROJECTION)
-   
-  //Extract projection
-  //TODO: figure out how to match unlimited groups ()*
-  //  match will only keep the last match (or null if none)
-//  @Test def extract_projection_of_one = {
-//    "foo,bar,car" match {
-//      case RegEx.PROJECTION.r(z,y) => {
-//        println(z) //foo
-//        println(y) //car
-//      }
-//    }
-////    val ms = (RegEx.PROJECTION.r findAllMatchIn "foo").toList.head.subgroups
-////    assertEquals(1, ms.length)
-////    assertEquals("foo", ms(0).toString)
-//  }
-//  @Test def extract_projection_of_two = {
-//    val ms = (RegEx.PROJECTION.r findAllMatchIn "foo, bar").toList.head.subgroups
-//    assertEquals(2, ms.length)
-//    assertEquals("foo", ms(0).toString)
-//    assertEquals("bar", ms(1).toString)
-//  }
-//  @Test def extract_projection_of_three = {
-//    val ms = (RegEx.PROJECTION.r findAllMatchIn "foo,bar,car").toList //.head.subgroups
-//    assertEquals(3, ms.length)
-//    assertEquals("car", ms(2).toString)
-//  }
   
   //Operation (function call) expression
   @Test def match_operation_with_no_args = assertTrue("foo()" matches RegEx.OPERATION)
