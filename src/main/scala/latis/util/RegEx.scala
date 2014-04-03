@@ -1,6 +1,7 @@
 package latis.util
 
 object RegEx {
+  //TODO: consider Parser Combinators
       
     /**
      * Regular expression matching one or more word characters ([a-zA-Z_0-9]).
@@ -57,7 +58,9 @@ object RegEx {
      * Selection clause. Match variable name, operator, value.
      * Allow white space around the operator.
      */
-    lazy val SELECTION = s"($VARIABLE)\\s*($SELECTION_OPERATOR)\\s*($VALUE)"
+    //lazy val SELECTION = s"($VARIABLE)\\s*($SELECTION_OPERATOR)\\s*($VALUE)"
+    //TODO: consider quotes around value
+    lazy val SELECTION = s"($VARIABLE)\\s*($SELECTION_OPERATOR)\\s*($VALUE|'$VALUE')"
     
     /**
      * Projection clause. Match comma and/or space delimited list of variable names.

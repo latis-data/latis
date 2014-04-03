@@ -128,11 +128,13 @@ class TestRegEx {
   
   //Selection expression
   @Test def match_selection = assertTrue("foo>bar" matches RegEx.SELECTION)
+  @Test def match_selection_with_quotes = assertTrue("foo>'bar'" matches RegEx.SELECTION)
   @Test def match_selection_with_number = assertTrue("foo>-1.23e+12" matches RegEx.SELECTION)
   @Test def match_selection_with_time = assertTrue("foo>1970-01-01T00:00:00" matches RegEx.SELECTION)
   @Test def dont_match_selection_with_bad_value = assertFalse("foo>#00" matches RegEx.SELECTION)
   @Test def dont_match_selection_with_bad_variable = assertFalse("#oo>bar" matches RegEx.SELECTION)
   @Test def dont_match_selection_with_bad_operator = assertFalse("foo=>bar" matches RegEx.SELECTION)
+  @Test def dont_match_selection_with_mismatched_quotes = assertFalse("foo=bar'" matches RegEx.SELECTION)
   
   //Extract Selection
   @Test def extract_selection = {
