@@ -95,19 +95,6 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     //TODO: rename: select foo as bar?
   }
 
-  /*
-  * TODO: time format for sql
-  * dataset.findTimeVariable? 
-  * numeric units: if query string matched TIME regex, convert iso to var's timeScale
-  * datetime: what should tsml units be?
-  *   will be converted to java time
-  *   but we need to know if the db uses datetime so we can form sql
-  *   units="ISO"?
-  *   use "format", save units for numeric times, default to java
-  * Support Time as real, integer or string
-  *   for the db datetime case, use string
-  *   until then, use "format"
-  */
   def handleTimeSelection(op: String, value: String): Boolean = {
     //support ISO time string as value
     //TODO: assumes value is ISO, what if dataset does have a var named "time" with other units?
@@ -136,9 +123,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
           //regex ensures that the value is a valid ISO time
           RegEx.TIME.r findFirstIn value match {
             case Some(s) => {
-              val t = Time.fromIso(s)
-              val t2 = t.convert(TimeScale(units)).getNumberData.doubleValue
-              this.selections += tvname + op + t2
+              val t = Time.fromIso(s).convert(TimeScale(units)).getValue
+              this.selections += tvname + op + t
               true
             }
             case None => throw new Error("The time value is not in a supported ISO format: " + value)
@@ -229,9 +215,6 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   lazy val predicate: String = {
     //start with selection clauses from requested operations
     val buffer = selections
-    //TODO: sanitize
-
-    //TODO: support "predicate" defined in the adapter attributes? or just depend on PIs
 
     //insert "AND" between the selection clauses
     buffer.filter(_.nonEmpty).mkString(" AND ")
