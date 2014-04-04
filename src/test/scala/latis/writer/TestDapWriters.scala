@@ -15,7 +15,7 @@ class TestDapWriters {
     
   val names = List("scalar", "tsi","dap2")
     
-  //@Test
+  @Test
   def test_all {
     for(name <- names) {
       test(name,"dds")
@@ -35,9 +35,9 @@ class TestDapWriters {
     assert(s.isEmpty)
   }
   
-  @Test
+  //@Test
   def write_dds {
-    val reader = TsmlReader("datasets/test/composite_mg_index.tsml")
+    val reader = TsmlReader("datasets/test/historical_tsi.tsml")
     val ds = reader.getDataset()
     Writer.fromSuffix("csv").write(ds)
   }

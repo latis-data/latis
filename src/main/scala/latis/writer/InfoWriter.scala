@@ -17,16 +17,24 @@ class InfoWriter extends TextWriter{
     val reader = TsmlReader("datasets/test/lemr.tsml")
     reader.getDataset(Seq(Selection("query=PREFIX dcat:<http://www.w3.org/ns/dcat#> " + 
         "PREFIX dcterms:<http://purl.org/dc/terms/> PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> "+
-        "PREFIX vivo:<http://vivoweb.org/ontology/core#> SELECT ?a?description?label " +
+        "PREFIX vivo:<http://vivoweb.org/ontology/core#> SELECT ?desc?id?label " +
         "WHERE{?s a dcat:Dataset. ?s dcterms:identifier?id. ?s rdfs:label?label. "+
-        "OPTIONAL{?s vivo:description?description.} Filter(?id=\"" + dataset.getName + "\")}")))
+        "OPTIONAL{?s vivo:description?desc.} Filter(?id=\""+dataset.getName+"\")}")))
   }
   
   def writeLabel(info: scala.collection.Map[String,Array[String]]) {
-    printWriter.print(info("object")(0))
+    try{
+      printWriter.print(info("object")(0)+"\n")
+    } catch {
+      case e : Exception => printWriter.print("No label found\n")
+    }
   }
   
   def writeDesc(info: scala.collection.Map[String,Array[String]]) {
-    printWriter.print(info("predicate")(0))
+    try{
+      printWriter.print(info("subject")(0))
+    } catch {
+      case e : Exception => printWriter.print("No description found")
+    }
   }
 }

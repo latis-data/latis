@@ -10,7 +10,7 @@
     <time name="time" type="text" length="7" units="yyyyDDD"/>
    
     <real name="LymanAlpha" long_name="Lyman-alpha irradiance" units ="1e11 photons/cm^2/sec"/>
-    <integer  name="type" long_name="Source of the data" missing_value = "0"/>
+    <integer  name="type" long_name="Source of the data" missing_value = "-999999"/>
     
   </dataset>
 

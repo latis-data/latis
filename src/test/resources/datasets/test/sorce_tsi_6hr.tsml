@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="sorce_tsi_6hr" long_name="SORCE Total Solar Irradiance - Six Hour Average">
+    <adapter class="latis.reader.tsml.ColumnarAdapter"
+             columns="1;4;5;6;7;8;9;10;11;12;13;2;3"
+             delimiter="\s+"
+             commentCharacter=";"
+             location="/lisird/public/lasp/sorce/sorce_tsi_6hr/sorce_tsi_6hr.la" />
+    
+    <time name="time" long_name="Nominal Time" type="real" units="Julian Date"/>
+   
+    <real name="tsi_lau" long_name="Total Solar Irradiance (TSI) at 1-AU" units="W/m^2" missing_value="0"/>
+    <real name="instrument_accuracy_1au" long_name="Instrument Accuracy in 1-AU TSI, 1 sigma" units="W/m^2" missing_value="0"/>
+    <real name="instrument_precision_1au" long_name="Instrument Precision in TSI at 1-AU, 1 sigma" units="W/m^2" missing_value="0"/>
+    <real name="solar_standard_deviation_1au" long_name="Solar Standard Deviation in 1-AU TSI, 1 sigma" units="W/m^2" missing_value="0"/>
+    <real name="measurement_uncertainty_1au" long_name="long_name" value="Total Uncertainty in TSI at 1-AU, 1 sigma" units="W/m^2" missing_value="0"/>
+    <real name="tsi_true_earth" long_name="Total Solar Irradiance at Earth distance" units="W/m^2" missing_value="0"/>
+    <real name="instrument_accuracy_true_earth" long_name="Instrument Accuracy at Earth distance, 1 sigma" units="W/m^2" missing_value="0"/>
+    <real name="instrument_precision_true_earth" long_name="Instrument Precision at Earth distance, 1 sigma" units="W/m^2" missing_value="0"/>
+    <real name="solar_standard_deviation_true_earth" long_name="Solar Standard Deviation in TSI at Earth, 1 sigma" units="W/m^2" missing_value="0"/>
+    <real name="measurement_uncertainty_true_earth" long_name="Total Uncertainty in TSI at Earth distance, 1 sigma" units="W/m^2" missing_value="0"/>
+    <real name="avg_measurement_date" long_name="Average Data Time" units="Julian Date" missing_value="0"/>
+    <real name="std_dev_measurement_date" long_name="Stdev of Average Data Time, 1 sigma" units="days" missing_value="0"/>
+
+  </dataset>
+
+</tsml>
