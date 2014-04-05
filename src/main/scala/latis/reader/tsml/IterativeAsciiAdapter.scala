@@ -14,6 +14,34 @@ import latis.util.StringUtils
 
 class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with AsciiAdapterHelper {
   
+  /*
+   * TODO: support nested Function
+   * should a record have all lines for an outer sample? probably yes
+   * consider db result set style (below) vs flattened to one row
+   * would need to get inner function length
+   * or should adapter just read that many lines when it gets to it?
+   * function length should account for length of nested function
+   * (x,y)->a equivalent to x->y->a so number of records should be number of 'a' values?
+   *   or at least 'length' should be
+   * 
+   * could we use algebra?
+   * read n (3) records
+   * i -> (t,w,a,b)
+   * make sure t is same for all
+   * groupBy(w)
+   *   w -> (a,b)
+   * 
+   */
+//1970/01/01  1 1.1 A
+//1970/01/01  2 2.2 B
+//1970/01/01  3 3.3 C
+//1970/01/02  1 11.1 A
+//1970/01/02  2 12.2 B
+//1970/01/02  3 13.3 C
+//1970/01/03  1 21.1 A
+//1970/01/03  2 22.2 B
+//1970/01/03  3 23.3 C
+  
   def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
     def recordSize = sampleTemplate.getSize
     

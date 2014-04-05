@@ -20,11 +20,13 @@ object QuickTestTsml extends App {
   
   //TODO: make an app that takes the same request as a server
   
-    val tsml = "/home/lindholm/git/nrlssi/src/main/resources/datasets/usaf_mwl.tsml"
+    //val tsml = "/home/lindholm/git/latis-maven/src/test/resources/datasets/iuvs_periapse_radiance.tsml"
+    val tsml = "datasets/test/nested_function.tsml"
+        
       
     val ops = ArrayBuffer[Operation]()
-    ops += Selection("time < 1982-01-01")
-    ops += Selection("area!=-999")
+    //ops += Selection("time < 1982-01-01")
+    //ops += Selection("area!=-999")
     //ops += Projection("time,data_rate_mode,file")
     //ops += Operation("first")
     //ops += Operation("last")

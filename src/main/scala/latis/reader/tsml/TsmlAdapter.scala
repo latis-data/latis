@@ -60,6 +60,12 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   lazy val origDataset: Dataset = makeOrigDataset
   
+  /**
+   * The final Dataset that this Adapter produces.
+   */
+  lazy val dataset: Dataset = makeDataset(origDataset)
+  
+  
   protected def makeOrigDataset: Dataset = {
     val md = makeMetadata(tsml.dataset)
     val vars = tsml.dataset.getVariableMl.flatMap(makeOrigVariable(_))
@@ -126,13 +132,16 @@ abstract class TsmlAdapter(val tsml: Tsml) {
 //TODO: Note that these are no longer Tsml specific! could we use them elsewhere? 
   //e.g. ProjectedFunction makeSample, but we do count on special adapters overriding these
   
-  def getDataset: Dataset = {
-    //Build the Dataset with Data (second build pass)
-    val ds = makeDataset(origDataset)
-    //Apply the TSML Processing Instructions
-    //reverse order because foldRight applies them in reverse order
-    piOps.reverse.foldRight(ds)(_(_))
-  }
+  def getDataset: Dataset = dataset
+//  {
+//    //Build the Dataset with Data (second build pass)
+//    makeDataset(origDataset)
+//    
+//    //Apply the TSML Processing Instructions
+//    //reverse order because foldRight applies them in reverse order
+////TODO: give adapter opportunity to handle PIs
+////    piOps.reverse.foldRight(ds)(_(_))
+//  }
   
   def getDataset(ops: Seq[Operation]): Dataset = {
     
@@ -141,12 +150,15 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //  require adapter to override then be responsible for applying all ops?
     //  what about leaving some for the writer? wrap in "write(format="",...)" function?
     //  Note, PIs already processed, consider rename PI breaking sql...
-    val others = ops.filterNot(handleOperation(_))
     
-    val ds = getDataset
+    //Combine data provider processing instructions with user ops.
+    //Give the adapter the opportunity to handle them. 
+    val others = (piOps ++ ops).filterNot(handleOperation(_))
     
-    //reverse order because foldRight applies them in reverse order
-    others.reverse.foldRight(ds)(_(_))
+    //Apply operations that the adapter didn't handle.
+    //Reverse because foldRight applies them in reverse order.
+    //This may be the first use of the lazy 'dataset' so it may trigger its final construction.
+    others.reverse.foldRight(dataset)(_(_))
   }
   
   //TODO: "build" vs "make"? consider scala Builder

@@ -70,6 +70,10 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
           if (name == "time") handleTimeSelection(op, value) //special handling for "time"
           //TODO: handle other Time variables (dependent)
           else if (origScalarNames.contains(name)) { //other variable (not time), even if not projected
+            //TODO: quote text values, or expect selection to be that way?
+            //we may want to do that for the same reason sql does: value could be a variable as opposed to a literal
+            
+            
             //add a selection to the sql, may need to change operation
             op match {
               case "==" =>
@@ -252,6 +256,15 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
         val bb = ByteBuffer.allocate(recordSize)
         //TODO: reuse bb? but the previous sample is in the wild, memory resource issue, will gc help?
         if (resultSet.next) {
+          
+          /*
+           * TODO: deal with nested functions
+           * one outer record will be multiple rows
+           * do something akin to Seq.grouped
+           * 
+           * 
+           */
+          
           //Add index value if domain not projected. Set to 0 above if we have an Index domain, -1 otherwise.
           //TODO: getNextIndex?
           if (index >= 0) {

@@ -9,6 +9,10 @@ import latis.metadata.Metadata
 import latis.time.Time
 import latis.writer.AsciiWriter
 
+/*
+ * TODO: provide a Seq of Datasets that can be fed to various tests such as getLength
+ */
+
 class TestDataset {
   
   //@Test
