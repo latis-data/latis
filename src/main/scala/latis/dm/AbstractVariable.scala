@@ -237,6 +237,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    * Used by Dataset.groupBy.
    */
   def groupVariableBy(name: String): Function = this match {
+//TODO: move to Operation
     //assumes Tuples don't contain data
     
 //    case Sample(domain, range) => {

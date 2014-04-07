@@ -54,9 +54,29 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Asci
    *   'reduce' IndexFunction of length one?
    *     but only if for all time samples ?
    *     could we have t -> (a | i -> a) ?
+   *     for now at least, lets say reduce can reduce range only if all samples can be reduced
    *   or should fOD only work when it is a valid domain, have to use both vars
    *   fOD(t,w), but get 2D domain instead of nested
+   *   groupByAndFactorOut?
+   *     but presumably factoring will do that since you can't have duplicate domain values
+   *   
+   * groupBy with Iterative adapters
+   *   must read all, in generic case
+   *   if it's a domain var, we could takeWhile val is the same
+   *   use factorOutDomain for that special case?
+   *   
+   * +groupByName vs value, current groupBy only uses name
+   *   
+   * +factor implies multiplication
+   *   is some abstract type of multiplication involved here?
+   *   t: 1,2,3  a: A,B,C
+   *   kind of like dot product
+   *   
+   *   
+   * *keep in mind Data issues: column vs row oriented
    * 
+   * *keep in mind principle of modeling the *source* dataset
+   *   better to use ops (algebra) to manipulate it than to try to get clever with the adapter
    */
 //1970/01/01  1 1.1 A
 //1970/01/01  2 2.2 B

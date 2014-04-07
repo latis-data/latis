@@ -118,6 +118,7 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   def toStrings   = DataMap.toStrings(this)
   
   def groupBy(name: String): Dataset = {
+    //TODO: impl as Operation?
     val vs = getVariables.map(_.groupVariableBy(name))
     Dataset(vs) //TODO: metadata
   }
