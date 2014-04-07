@@ -25,11 +25,37 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Asci
    *   or at least 'length' should be
    * 
    * could we use algebra?
-   * read n (3) records
-   * i -> (t,w,a,b)
-   * make sure t is same for all
-   * groupBy(w)
+   *   read n (3) records
+   *   make sure t is same for all
+   *  takeWhile range.head has same value
+   *   i -> (t,w,a,b)
+   *  groupBy(w)
    *   w -> (a,b)
+   * something like groupBy that removes var from range
+   *   extract? factorOut?
+   *   or just make that the behavior of groupBy
+   *   scala groupBy takes function, this one takes var name
+   *   we could offer one like scala that would keep same range since domain could be new var
+   *   +use this to make time domain from year,mon,day columns?
+   *     i -> (y,m,d,a) groupBy (y,m,d)=>t  =>  t -> (y,m,d,a), still would like to drop y,m,d from range?
+   *   if no nested function and var is a suitable domain var, groupBy should have one value for each domain sample
+   *   with nested function, groupBy should give seq, like typical scala groupBy
+   *   +in this case, groupBy semantics don't make sense
+   *   *factorOutDomain?
+   *   semantics of removing from range to domain
+   *   only allow for IndexFunctions?
+   *   more than one arg means multi-dim
+   *   
+   *   i -> (t,w,a,b) factorOutDomain("t") => t -> (w,a,b)
+   *   but not just one sample for each time: t -> (i -> (w.a.b)), more consistent with groupBy
+   *   now the inner function is an index function
+   *   for each time sample call fOD("w") on range: t -> (w -> (a.b))
+   *   +should fOD(x) always have IndexFunction as range even if only one sample?
+   *   'reduce' IndexFunction of length one?
+   *     but only if for all time samples ?
+   *     could we have t -> (a | i -> a) ?
+   *   or should fOD only work when it is a valid domain, have to use both vars
+   *   fOD(t,w), but get 2D domain instead of nested
    * 
    */
 //1970/01/01  1 1.1 A

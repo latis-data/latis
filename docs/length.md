@@ -23,4 +23,7 @@ length = 1 + 3 + nx + ny*nz
 If nz is a function of y, then the length from it would be the integral of nz(y) from y=1,ny.
 ++need word for nested Function with inner domain set that is not a function of the outer
   visad used FlatField for similarly simple data
-
+  *cartesian? think product set
+  http://en.wikipedia.org/wiki/Cartesian_closed_category
+  http://en.wikipedia.org/wiki/Cartesian_diagram: pullback ~ fiber bundle!
+    Equijoin in relational algebra.
