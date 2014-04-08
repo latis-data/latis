@@ -14,25 +14,18 @@ import latis.util.Util
  * This Adapter will read all the data in the Dataset and 
  * store it in a column-oriented store (i.e. each Scalar's
  * data are stored in a separate Data object).
+ * Use an IterativeAdapter if you want to read data lazily.
  */
 abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
-  //TODO: avoid reading data till requested? 
-  //  but used to build dataset that is returned
-  //  use Iterative adapter if you want to be lazy
   
   /**
-   * Read data and combine with data values from tsml into the cache
-   * then delegate to super.
+   * Read and cache the data.
    */
-  override def getDataset: Dataset = {
-    dataCache = (tsmlData ++ readData).toMap //make immutable
-    super.getDataset
-  }
+  override def init = cache(readData)
 
   /**
    * Subclasses need to implement this method to read all of the data
-   * into the dataMap.
-   * This will be invoked lazily, when the dataMap is first accessed.
+   * into the data Map.
    */
   def readData: Map[String, Data]
   
@@ -45,8 +38,8 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   override protected def makeScalar(scalar: Scalar): Option[Scalar] = {
     val md = scalar.getMetadata
     
-    val name =  scalar.getName
-    val data = dataCache.get(name) match {
+    val name = scalar.getName
+    val data = getCachedData(name) match {
       case Some(d) => d
       case None => throw new Error("No data found in cache for Variable: " + name)
     }

@@ -21,7 +21,8 @@ object QuickTestTsml extends App {
   //TODO: make an app that takes the same request as a server
   
     //val tsml = "/home/lindholm/git/latis-maven/src/test/resources/datasets/iuvs_periapse_radiance.tsml"
-    val tsml = "datasets/test/nested_function.tsml"
+    //val tsml = "datasets/test/nested_function.tsml"
+    val tsml =   "/home/lindholm/git/latis-mms/src/test/resources/datasets/mms_burst_data_segment.tsml"
         
       
     val ops = ArrayBuffer[Operation]()

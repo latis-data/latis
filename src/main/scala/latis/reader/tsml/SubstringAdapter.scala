@@ -9,7 +9,7 @@ class SubstringAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
 
   lazy val indexMap: Map[String, Array[Int]] = getProperty("substring") match {
     case Some(s: String) => {
-      val vnames = origScalarNames
+      val vnames = getOrigScalarNames
       val specs = s.split(";")
       if (vnames.length != specs.length) throw new Error("Must have a substring specification for each variable.")
       (vnames zip specs.map(_.split(",").map(_.toInt))).toMap
@@ -28,7 +28,7 @@ class SubstringAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
     
     //Map variable names to their string values.
     //Map will be empty if makeValue failed to parse thie record.
-    (for (name <- origScalarNames; value <- makeValue(name)) yield (name, value)).toMap
+    (for (name <- getOrigScalarNames; value <- makeValue(name)) yield (name, value)).toMap
   }
   
 }

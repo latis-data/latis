@@ -56,7 +56,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   override def handleOperation(operation: Operation): Boolean = operation match {
     case p: Projection => {
       //make sure these match variable names or aliases
-      if (!p.names.forall(origDataset.getVariableByName(_).nonEmpty))
+      if (!p.names.forall(getOrigDataset.getVariableByName(_).nonEmpty))
         throw new Error("Not all variables are available for the projection: " + p)
 
       this.projection = p.toString
@@ -69,7 +69,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
         case SELECTION.r(name, op, value) => {
           if (name == "time") handleTimeSelection(op, value) //special handling for "time"
           //TODO: handle other Time variables (dependent)
-          else if (origScalarNames.contains(name)) { //other variable (not time), even if not projected
+          else if (getOrigScalarNames.contains(name)) { //other variable (not time), even if not projected
             //TODO: quote text values, or expect selection to be that way?
             //we may want to do that for the same reason sql does: value could be a variable as opposed to a literal
             
@@ -104,7 +104,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     //TODO: assumes value is ISO, what if dataset does have a var named "time" with other units?
 
     //this should work because any time variable should have the alias "time"
-    val tvar = origDataset.getVariableByName("time") match {
+    val tvar = getOrigDataset.getVariableByName("time") match {
       case Some(t) => t
       case None => throw new Error("No time variable found in dataset.")
     }
@@ -198,7 +198,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     //assume domain is scalar, for now
     //Note 'dataset' should be the original before ops
     //val dvar = findDomainVariable(dataset) 
-    origDataset.findFunction match {
+    getOrigDataset.findFunction match {
       case Some(f) => f.getDomain match {
         case i: Index => //use natural order
         case v: Variable => v match {
@@ -236,8 +236,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
       }
 
       //Get list of projected Scalars in projection order
-      val vars: Seq[Variable] = if (projection == "*") origDataset.toSeq
-      else projection.split(",").flatMap(origDataset.getVariableByName(_))
+      val vars: Seq[Variable] = if (projection == "*") getOrigDataset.toSeq
+      else projection.split(",").flatMap(getOrigDataset.getVariableByName(_))
 
       //Get the types of these variables in the database
       val md = resultSet.getMetaData
@@ -271,6 +271,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
             bb.putInt(index)
             index += 1
           }
+          
+          //TODO: handle null database cells
+          //but for numeric values? (http://mods-jira.lasp.colorado.edu:8080/browse/LATIS-69)
 
           for (vt <- varsWithTypes) vt match {
             case (v: Time, t: Int) if (t == java.sql.Types.TIMESTAMP) => {
@@ -292,16 +295,20 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
                 }
               }
             }
-            //case (n: Number, _) => bb.putDouble(resultSet.getDouble(n.name))
-            case (r: Real, _) => bb.putDouble(resultSet.getDouble(r.getName))
-            case (i: Integer, _) => bb.putLong(resultSet.getLong(i.getName))
-            case (t: Text, _) => {
-              val s = StringUtils.padOrTruncate(resultSet.getString(t.getName), t.length)
-              s.foldLeft(bb)(_.putChar(_)) //fold each char into the ByteBuffer
-            }
-            case (b: Binary, _) => bb.put(resultSet.getBytes(b.getName)) //TODO: use getBlob? 
 
-            //TODO: error if column not found
+            case (r: Real, _) => bb.putDouble(resultSet.getDouble(r.getName))
+            
+            case (i: Integer, _) => bb.putLong(resultSet.getLong(i.getName))
+            
+            case (t: Text, _) => {
+              val value = resultSet.getString(t.getName) match {
+                case s: String => s
+                case null => "" //TODO: t.getFillValue.toString? may throw exception
+              }
+              StringUtils.padOrTruncate(value, t.length).foldLeft(bb)(_.putChar(_)) //fix length, fold each char into the ByteBuffer
+            }
+            
+            case (b: Binary, _) => bb.put(resultSet.getBytes(b.getName)) //TODO: use getBlob?
           }
 
           Data(bb.flip.asInstanceOf[ByteBuffer]) //set limit and rewind so it is ready to be read

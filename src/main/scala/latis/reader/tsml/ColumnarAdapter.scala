@@ -34,7 +34,7 @@ class ColumnarAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
    */
   val indexMap: Map[String, Array[Int]] = getProperty("columns") match {
     case Some(s) => {
-      val names = origScalarNames
+      val names = getOrigScalarNames
       val specs = s.split(";")
       if (names.length != specs.length) throw new Error("Must have a column specification for each variable.")
       (names zip specs.map(_.split(",").map(_.toInt))).toMap
@@ -54,7 +54,7 @@ class ColumnarAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
     def makeValue(name: String) = indexMap(name).map(ss(_)).mkString(" ")
     
     //Map variable names to their string values
-    origScalarNames.map(name => (name, makeValue(name))).toMap
+    getOrigScalarNames.map(name => (name, makeValue(name))).toMap
   }
   
 }
