@@ -255,6 +255,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
       def getNext: Data = {
         val bb = ByteBuffer.allocate(recordSize)
         //TODO: reuse bb? but the previous sample is in the wild, memory resource issue, will gc help?
+
+
+        
         if (resultSet.next) {
           
           /*
@@ -279,6 +282,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
             case (v: Time, t: Int) if (t == java.sql.Types.TIMESTAMP) => {
               //TODO: other database time types?
               val time = resultSet.getTimestamp(v.getName, cal).getTime
+              //TODO: deal with missing: resultSet.wasNull
               //TODO: support nanos?
               //deal with diff time types
               v match {
@@ -296,19 +300,25 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
               }
             }
 
-            case (r: Real, _) => bb.putDouble(resultSet.getDouble(r.getName))
-            
-            case (i: Integer, _) => bb.putLong(resultSet.getLong(i.getName))
-            
-            case (t: Text, _) => {
-              val value = resultSet.getString(t.getName) match {
-                case s: String => s
-                case null => "" //TODO: t.getFillValue.toString? may throw exception
-              }
-              StringUtils.padOrTruncate(value, t.length).foldLeft(bb)(_.putChar(_)) //fix length, fold each char into the ByteBuffer
+            case (r: Real, _) => {
+              var d = resultSet.getDouble(r.getName)
+              if (resultSet.wasNull) d = r.getFillValue.asInstanceOf[Double]
+              bb.putDouble(d)
             }
             
-            case (b: Binary, _) => bb.put(resultSet.getBytes(b.getName)) //TODO: use getBlob?
+            case (i: Integer, _) =>{
+              var l = resultSet.getLong(i.getName)
+              if (resultSet.wasNull) l = i.getFillValue.asInstanceOf[Long]
+              bb.putLong(l)
+            } 
+            
+            case (t: Text, _) => {
+              var s = resultSet.getString(t.getName)
+              if (resultSet.wasNull) s = t.getFillValue.asInstanceOf[String]
+              StringUtils.padOrTruncate(s, t.length).foldLeft(bb)(_.putChar(_)) //fix length, fold each char into the ByteBuffer
+            }
+            
+            case (b: Binary, _) => bb.put(resultSet.getBytes(b.getName)) //TODO: use getBlob? deal with null?
           }
 
           Data(bb.flip.asInstanceOf[ByteBuffer]) //set limit and rewind so it is ready to be read
@@ -318,6 +328,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
     }
   }
 
+  
   //---------------------------------------------------------------------------
 
   /**
