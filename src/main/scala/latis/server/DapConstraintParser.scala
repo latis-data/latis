@@ -66,7 +66,11 @@ object DapConstraintParser {
     //TODO: Option? error handling
     expression match {
       case SELECTION.r(name, op, value) => Selection(name, op, value)
-      case OPERATION.r(name, args) => Operation(name, args.split(","))
+      case OPERATION.r(name, args) => args match {
+        //args will be null if there are none, e.g. first()
+        case s: String => Operation(name, s.split(","))
+        case null => Operation(name)
+      }
       case _ => throw new UnsupportedOperationException("Failed to parse expression: " + expression)
       //TODO: log and return None? probably should return error
     }
