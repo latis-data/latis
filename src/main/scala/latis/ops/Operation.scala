@@ -21,6 +21,9 @@ trait Operation {
    *   operation "operates on" a dataset
    *   apply an operation to a dataset
    *     consistent with operation.apply(ds) or operation(ds)?
+   *     
+   * Function as morphism (arrow, functor)
+   * Operation transforms F to F: Natural Transformation !?
    */
   
   def apply(dataset: Dataset): Dataset
