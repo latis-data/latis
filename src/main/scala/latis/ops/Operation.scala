@@ -57,23 +57,37 @@ trait Operation {
      *   ("Rename" is also part of relational algebra)
      * 
      * Things that can change in a Dataset operation
-     * - model
-     * - number of samples
-     * - data values
-     * - metadata
-     * sample ops
-     * - exclude Variable(s) (reduce model, domain Vars replaced by Index)
-     * - select/filter (exclude samples, same type)
-     * - subset/resample (diff set of samples, same type)
-     * - reduce dimension lengths (stride, bin, ...)
-     * - reduce dimension to length to 1, eliminate? (slice, first, last, min, max, integrate) "aggregation" in some circles
-     * - convert units (change values, change metadata, same model/type)
-     * - replace values (change values, e.g. missing value, may change metadata, same model)
-     * - compute new variable (e.g. B mag, same domain, add to model)
-     * - new variable with new domain type (e.g. FFT, completely new dataset, incompatible domains)
-     * - rename (metadata only)
-     * - enhance/repair metadata
+     * - model, same values
+     *     projection
+     *     reduction
+     *     factorization
+     * - model, diff values
+     *     derived field, FFT, ...
+     * - number of samples, same values
+     *     filter
+     *     selection
+     *     limit
+     *     subset (without reduction: removing dimensions of length 1)
+     * - number of samples, same values, diff model (reduced dimensions)
+     *     slice (subset + reduce)
+     *     first, last, min, max (filter + reduce)
+     * - number of samples, diff values, diff model (reduced dimensions)
+     *     integrate
+     * - number of samples, diff values
+     *     resample
+     *     bin 
+     * - data values, same number of samples
+     *     basic math
+     *     unit conversion
+     *     replace
+     * - metadata only
+     *     rename
+     *     enhance/repair
+     * aggregation
      * 
+     * pivot
+     * coordinate transform
+     * evaluate
      */
 
 }
