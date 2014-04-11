@@ -50,6 +50,6 @@ trait AsciiAdapterHelper extends AsciiParser { this: TsmlAdapter =>
    * Note, this will not account Projections or other operations that
    * the adapter may apply.
    */
-  def getVariableNames: Seq[String] = origScalarNames
+  def getVariableNames: Seq[String] = getOrigScalarNames
 
 }

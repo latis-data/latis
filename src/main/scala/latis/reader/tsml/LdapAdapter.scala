@@ -31,7 +31,7 @@ class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
   def executeQuery: Iterator[SearchResult] = {
     // Specify the ids of the attributes to return (Dataset Variables)
     //TODO: use projection
-    val attIDs = origScalarNames.toArray
+    val attIDs = getOrigScalarNames.toArray
     
     // Add search attributes.
     //TODO: generalize to use selections
@@ -71,7 +71,7 @@ class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     for (result <- results) {
       //Get the attributes for the person. Should be same as attIDs = Dataset Variables.
       val atts = result.getAttributes
-      for (vname <- origScalarNames) {
+      for (vname <- getOrigScalarNames) {
         //Note, the value of an attribute is more attributes. Join with ",".
         val value = JavaConversions.enumerationAsScalaIterator(atts.get(vname).getAll).mkString(",")
         map(vname) append value
@@ -82,7 +82,7 @@ class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     //assume all variables are type Text, deal with length
     val dataMap = mutable.Map[String,Data]()
     
-    for (scalar <- origScalars) {
+    for (scalar <- getOrigScalars) {
       val name = scalar.getName
       val buffer = map(name)
       //TODO: if length = 0?          

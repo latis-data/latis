@@ -6,12 +6,12 @@ import Assert._
 
 class TestTsml  {
 
-  @Test
-  def test_variable_names {
-    val tsml = Tsml("datasets/test/col.tsml")
-    val names = tsml.getScalarNames
-    assertEquals("myTime", names.head)
-  }
+//  @Test
+//  def test_variable_names {
+//    val tsml = Tsml("datasets/test/col.tsml")
+//    val names = tsml.getScalarNames
+//    assertEquals("myTime", names.head)
+//  }
   
   @Test
   def test_adapter_attributes {

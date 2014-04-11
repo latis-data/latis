@@ -1,7 +1,8 @@
 package latis.ops
 
 import latis.dm._
-import scala.Option.option2Iterable
+//import scala.Option.option2Iterable
+import latis.util.RegEx._
 
 /**
  * Exclude variables not named in the given list.
@@ -50,13 +51,20 @@ class Projection(val names: Seq[String]) extends Operation {
   def projectFunction(function: Function): Option[Function] = Some(ProjectedFunction(function, this))
   //TODO: consider projected function by name (instead of its scalars), similar to long name support
 
-  override def toString = names.mkString(",") //TODO: inside "Projection()"
+  override def toString = names.mkString(",")
 }
 
 object Projection {
   
   def apply(names: Seq[String]) = new Projection(names)
-  def apply(expression: String) = new Projection(expression.replaceAll("""\s""","").split(","))
+    
+  def apply(expression: String): Projection = expression.trim match {
+    //case PROJECTION.r(names) => //will only expose first and last
+    case s: String if (s matches PROJECTION) => Projection(s.split(""",\s*""")) //Note, same delimiter used in PROJECTION def
+    case _ => throw new Error("Failed to make a Projection from the expression: " + expression)
+  }
   
-  def unapply(proj: Projection) = Some(proj.toString)
+  //Extract the list of projected variable names
+  def unapply(proj: Projection) = Some(proj.names)
+
 }

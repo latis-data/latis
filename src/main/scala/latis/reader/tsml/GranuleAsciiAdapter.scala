@@ -24,7 +24,7 @@ class GranuleAsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) with AsciiAda
       val record = it.next
       val vs = parseRecord(record)
       //skip bad records (empty Map)
-      if (vs.nonEmpty) for (vname <- origScalarNames) map.get(vname) match {
+      if (vs.nonEmpty) for (vname <- getOrigScalarNames) map.get(vname) match {
         case Some(buffer) => buffer append vs(vname)
         case None => {
           val buffer = ArrayBuffer[String](vs(vname))
@@ -37,7 +37,7 @@ class GranuleAsciiAdapter(tsml: Tsml) extends GranuleAdapter(tsml) with AsciiAda
     //TODO: factor out into reusable function/
     val dataMap = mutable.Map[String,Data]()
     
-    for (scalar <- origScalars) {
+    for (scalar <- getOrigScalars) {
       val name = scalar.getName
       val buffer = map(name)
       //TODO: if length = 0?

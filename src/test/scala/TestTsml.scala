@@ -29,11 +29,11 @@ import latis.writer.Writer
 class TestTsml  {
 
   //@Test
-  def test_variable_names {
-    val tsml = Tsml("datasets/test/scalar.tsml")
-    val names = tsml.getScalarNames
-    assertEquals("a", names(1))
-  }
+//  def test_variable_names {
+//    val tsml = Tsml("datasets/test/scalar.tsml")
+//    val names = tsml.getScalarNames
+//    assertEquals("a", names(1))
+//  }
   
   //@Test
   def test_adapter_attributes {

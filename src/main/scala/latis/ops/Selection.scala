@@ -3,6 +3,7 @@ package latis.ops
 import latis.dm._
 import latis.time._
 import latis.util.RegEx._
+import com.typesafe.scalalogging.slf4j.Logging
 
 /**
  * Filter based on (in)equality.
@@ -11,7 +12,7 @@ import latis.util.RegEx._
  * Data value class?
  * 
  */
-protected class Selection(val vname: String, val operation: String, val value: String) extends Operation {
+protected class Selection(val vname: String, val operation: String, val value: String) extends Operation with Logging {
   //TODO: consider abstracting out common "filter" stuff
   //TODO: if domain, delegate to DomainSet
   
@@ -20,13 +21,23 @@ protected class Selection(val vname: String, val operation: String, val value: S
     //TODO: provenance metadata
   }
   
-  def filter(variable: Variable): Option[Variable] = variable match {
-    //Special handling for Text regex matching with "=~"
-    // except Time which can be handled like any other Scalar.
-    case text: Text if (! text.isInstanceOf[Time]) => filterText(text)
-    case s: Scalar   => filterScalar(s)
-    case t: Tuple    => filterTuple(t)
-    case f: Function => filterFunction(f)
+  def filter(variable: Variable): Option[Variable] = {
+    //If the filtering causes an exception, log a warning and return None.
+    try {
+      variable match {
+      //Special handling for Text regex matching with "=~"
+      // except Time which can be handled like any other Scalar.
+      case text: Text if (! text.isInstanceOf[Time]) => filterText(text)
+      case s: Scalar   => filterScalar(s)
+      case t: Tuple    => filterTuple(t)
+      case f: Function => filterFunction(f)
+      }
+    } catch {
+      case e: Exception => {
+        logger.warn("Selection filter threw an exception: " + e.getMessage, e)
+        None
+      }
+    }
   }
     
   def filterText(text: Text): Option[Text] = {
@@ -59,16 +70,15 @@ protected class Selection(val vname: String, val operation: String, val value: S
   
   def filterFunction(f: Function): Option[Function] = Some(FilteredFunction(f, this))
 
-//  def filterSample(sample: Sample): Option[Sample] = {
-//    for (d <- filter(sample.domain); r <- filter(sample.range)) yield Sample(d,r)
-//  }
-  
-  //TODO: support NOT (!)
   
   private def isValid(comparison: Int): Boolean = {
-    (comparison < 0 && operation.contains("<")) || 
-    (comparison > 0 && operation.contains(">")) || 
-    (comparison == 0 && operation.contains("="))
+    if (operation == "!=") {
+      comparison != 0
+    } else {
+      (comparison < 0  && operation.contains("<")) || 
+      (comparison > 0  && operation.contains(">")) || 
+      (comparison == 0 && operation.contains("="))
+    }
   }
   
   override def toString = vname + operation + value
@@ -77,24 +87,13 @@ protected class Selection(val vname: String, val operation: String, val value: S
 
 object Selection {
   
-  def apply(vname: String, operation: String, value: String) = {
-    //Deprecate use of "=" for selections. Replace with "==".? TODO: maybe not
-    val op = operation match {
-      case "=" => "=="
-      case _ => operation
-    }
-    
-    new Selection(vname, op, value)
+  def apply(vname: String, operation: String, value: String) = new Selection(vname, operation, value)
+  
+  def apply(expression: String): Selection = expression.trim match {
+    case SELECTION.r(name, op, value) => Selection(name, op, value)
+    case _ => throw new Error("Failed to make a Selection from the expression: " + expression)
   }
   
-  def apply(expression: String): Selection = {
-    expression match {
-      case SELECTION.r(name, op, value) => Selection(name, op, value)
-      //TODO: case _ => error
-    }
-  }
-  
-  //Extract the selection as a single string expression
-  //def unapply(sel: Selection): Option[String] = Some(sel.toString)
+  //Extract the selection as a triple
   def unapply(sel: Selection): Option[(String, String, String)] = Some((sel.vname, sel.operation, sel.value))
 }

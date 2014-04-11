@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="properties">
+    
+    <adapter class="latis.reader.tsml.PropertiesAdapter"/>
+            
+    <tuple>
+      <text name="version" length="8"/>
+    </tuple> 
+  
+  </dataset>
+  
+</tsml>

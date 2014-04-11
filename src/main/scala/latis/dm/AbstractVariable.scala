@@ -39,7 +39,8 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     case Tuple(vars) => vars.length
     case f: Function => getMetadata.get("length") match {
       case Some(l) => l.toInt
-      case None => f.iterator.length //may be costly, try looking at data?
+      case None => f.iterator.length //may be costly, problem with IterableOnce? try looking at data?
+      //TODO: need to account for nested Functions? maybe Dataset should but not Function?
     }
   }
   
@@ -236,6 +237,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    * Used by Dataset.groupBy.
    */
   def groupVariableBy(name: String): Function = this match {
+//TODO: move to Operation
     //assumes Tuples don't contain data
     
 //    case Sample(domain, range) => {

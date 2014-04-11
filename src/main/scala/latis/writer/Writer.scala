@@ -106,7 +106,8 @@ object Writer {
    * Use the file suffix to determine the type of Writer.
    */
   def apply(fileName: String) : Writer = {
-    val suffix = fileName.split(".").last
+    //TODO: will treat name without a "." as a suffix, do we want to allow that?
+    val suffix = fileName.split("""\.""").last
     val writer = Writer.fromSuffix(suffix)
     writer.file = new File(fileName)
     writer

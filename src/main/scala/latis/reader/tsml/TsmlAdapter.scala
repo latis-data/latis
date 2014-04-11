@@ -58,7 +58,22 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * The original Dataset as defined by the TSML.
    * This will only include Data values that are defined in the TSML.
    */
-  lazy val origDataset: Dataset = makeOrigDataset
+  private lazy val origDataset: Dataset = makeOrigDataset
+  def getOrigDataset = origDataset
+  
+  /**
+   * Keep a list of the original Scalars.
+   */
+  private lazy val origScalars = origDataset.toSeq
+  def getOrigScalars = origScalars
+  
+  /**
+   * Keep a list of the names of the original Scalars.
+   * Don't include "index" which is only a place holder when there is no other domain variable.
+   */
+  private lazy val origScalarNames = origScalars.map(_.getName).filter(_ != "index")
+  def getOrigScalarNames = origScalarNames
+  
   
   protected def makeOrigDataset: Dataset = {
     val md = makeMetadata(tsml.dataset)
@@ -126,13 +141,21 @@ abstract class TsmlAdapter(val tsml: Tsml) {
 //TODO: Note that these are no longer Tsml specific! could we use them elsewhere? 
   //e.g. ProjectedFunction makeSample, but we do count on special adapters overriding these
   
-  def getDataset: Dataset = {
-    //Build the Dataset with Data (second build pass)
-    val ds = makeDataset(origDataset)
-    //Apply the TSML Processing Instructions
-    //reverse order because foldRight applies them in reverse order
-    piOps.reverse.foldRight(ds)(_(_))
+  /**
+   * Hook for subclasses to do something before constructing the Dataset.
+   * Note, this happens after the first Dataset construction pass (loading TSML).
+   */
+  def init: Unit = {}
+  
+  /**
+   * The final Dataset that this Adapter produces.
+   */
+  private lazy val dataset: Dataset = {
+    init
+    makeDataset(origDataset)
   }
+  
+  def getDataset: Dataset = dataset
   
   def getDataset(ops: Seq[Operation]): Dataset = {
     
@@ -141,12 +164,15 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //  require adapter to override then be responsible for applying all ops?
     //  what about leaving some for the writer? wrap in "write(format="",...)" function?
     //  Note, PIs already processed, consider rename PI breaking sql...
-    val others = ops.filterNot(handleOperation(_))
     
-    val ds = getDataset
+    //Combine data provider processing instructions with user ops.
+    //Give the adapter the opportunity to handle them. 
+    val others = (piOps ++ ops).filterNot(handleOperation(_))
     
-    //reverse order because foldRight applies them in reverse order
-    others.reverse.foldRight(ds)(_(_))
+    //Apply operations that the adapter didn't handle.
+    //Reverse because foldRight applies them in reverse order.
+    //This may be the first use of the lazy 'dataset' so it may trigger its final construction.
+    others.reverse.foldRight(getDataset)(_(_))
   }
   
   //TODO: "build" vs "make"? consider scala Builder
@@ -230,17 +256,6 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    *   DataIterator: ByteBufferData with sample size, Data in Function
    */
   
-  /**
-   * Keep a list of the original Scalars.
-   */
-  lazy val origScalars = origDataset.toSeq
-  
-  /**
-   * Keep a list of the names of the original Scalars.
-   * Don't include "index" which is only a place holder when there is no other domain variable.
-   */
-  lazy val origScalarNames = origScalars.map(_.getName).filter(_ != "index")
-    
   
   /**
    * Hook for subclasses to apply operations during data access
@@ -270,19 +285,33 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   //TODO: ByName and ByType?
 
   //-------------------------------------------------------------------------//
-  
-  //Column-oriented data cache
-  //TODO: consider memory usage/leaks with immutable data in a var that can be replaced
-  //protected var dataCache: immutable.Map[String, immutable.Seq[String]] = immutable.Map[String, immutable.Seq[String]]()
-  protected var dataCache: immutable.Map[String, Data] = immutable.Map[String, Data]()
-  //TODO: lazy val, trigger data read?
-  //consider Stream
+
   /*
    * TODO: do we need diff place to hold tsml values so we don't have partial cache confusion?
    * allow mutable and require getCachedData? hard to enforce
    * use tsmlData?
    */
-  val tsmlData = Map[String, Data]() //TODO: immutable?
+  //val tsmlData = Map[String, Data]() //TODO: immutable?
+  
+  /**
+   * Column-oriented data cache.
+   */
+  private val dataCache = mutable.Map[String, Data]()
+  
+  //TODO: consider mutability issues
+  //TODO: consider ehcache
+  
+  /**
+   * Add Data to the cache.
+   */
+  protected def cache(data: Map[String, Data]) = dataCache ++= data
+  
+  /**
+   * Get the Data that has been cached for the given variable.
+   */
+  def getCachedData(variableName: String): Option[Data] = dataCache.get(variableName)
+  //TODO: if None throw new Error("No data found in cache for Variable: " + variableName)? or return empty Data?
+
   
   //-------------------------------------------------------------------------//
   

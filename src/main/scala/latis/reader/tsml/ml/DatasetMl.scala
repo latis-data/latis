@@ -1,33 +1,33 @@
 package latis.reader.tsml.ml
 
-import scala.xml._
 import latis.util.Util
 
+import scala.xml.Node
+
+/**
+ * Representation of a TSML "dataset" element.
+ */
 class DatasetMl(xml: Node) extends TupleMl(xml) {
   
-  //deal with adapter and implicit time series
-  override def getVariableMl: Seq[VariableMl] = {
-    //get all direct child elements that represent variables
+  /**
+   * Get a list of top level (i.e. direct children) variable definitions for this dataset node.
+   * Handle implicit Functions. If the first variable definition is "index" or "time"
+   * wrap in a function with those as a 1D domain.
+   */
+  def getVariableMl: Seq[VariableMl] = {
     val es = Tsml.getVariableNodes(xml)
     
-    //Handle implicit Functions (index or time assumed to be a 1D domain)
-    //Note: order doesn't matter, they don't have to be first.
-    if (Tsml.hasChildWithLabel(xml, "index")) es.partition(_.label == "index") match {
-      //TODO: make IndexFunction, iterator counter for index value
-      //TODO: error if more than one Index?
-      //Make implicit Function with Index domain.
-      case (index, r) => Seq(wrapWithImplicitFunction(index, r))
-      //TODO: error case _ =>
-    } else if (Tsml.hasChildWithLabel(xml, "time")) es.partition(_.label == "time") match {
-      //deal with implicit time series: "time" label.
-      case (time, r) => Seq(wrapWithImplicitFunction(time, r))
-      //TODO: error case _ =>
-    } else {
-      es.map(VariableMl(_))
-    }
+    //Handle implicit Functions. If the first variable definition is "index" or "time"
+    // wrap in a function with those as a 1D domain.
+    val label = es.head.label
+    if (label == "index" || label == "time") Seq(wrapWithImplicitFunction(es.head, es.tail))
+    else es.map(VariableMl(_))
   }
   
-  //TODO: TsmlUtils?
+  /**
+   * Given tsml nodes representing the domain and range variables, 
+   * wrap them to look like a "function" variable.
+   */
   private def wrapWithImplicitFunction(d: Seq[Node], r: Seq[Node]): VariableMl = {
     val domain = <domain/>.copy(child = d.head) //assume one domain variable, <domain>d.head</domain>
     //TODO: make sure r.length > 0

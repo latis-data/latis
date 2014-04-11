@@ -2,10 +2,16 @@ package latis.reader.tsml.ml
 
 import scala.xml._
 
+/**
+ * Representation of a TSML "function" element.
+ */
 class FunctionMl(xml: Node) extends VariableMl(xml) {
   
   private var _domain: VariableMl = null
+  def domain = _domain
+  
   private var _range: VariableMl = null
+  def range = _range
   
   val kids = Tsml.getVariableNodes(xml)
   kids.partition(_.label == "domain") match {
@@ -22,14 +28,9 @@ class FunctionMl(xml: Node) extends VariableMl(xml) {
       _range = VariableMl(kids.tail)
     }
   }
-  
-  def domain = _domain
-  
-  def range = _range
-
 }
 
 object FunctionMl {
   
-  def unapply(fml: FunctionMl): Option[(VariableMl, VariableMl)] = Some((fml._domain, fml._range))
+  //def unapply(fml: FunctionMl): Option[(VariableMl, VariableMl)] = Some((fml._domain, fml._range))
 }

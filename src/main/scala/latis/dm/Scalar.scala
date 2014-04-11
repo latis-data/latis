@@ -14,8 +14,9 @@ trait Scalar extends Variable {
   //note, we tried overriding this in subclasses but ran into inheritance trouble with "new Time with Real"
   def compare(that: String): Int
   
-  def getValue: Any 
-    
+  def getValue: Any
+  def getFillValue: Any
+  def getMissingValue: Any
 }
 
 object Scalar {

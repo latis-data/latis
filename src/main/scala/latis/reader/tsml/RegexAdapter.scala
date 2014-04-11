@@ -33,7 +33,7 @@ class RegexAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
    */
   override def parseRecord(record: String): Map[String, String] = {
     //create Map with variable names and values
-    val vnames = origScalarNames
+    val vnames = getOrigScalarNames
     val values = getMatchingValues(record)
     //If we didn't find the right number of samples, drop this record by returning an empty Map
     if (vnames.length != values.length) Map[String, String]()

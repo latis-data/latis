@@ -69,6 +69,14 @@ class TestSelection {
     assertEquals(4, n)
   }
   
+  @Test
+  def select_ne_value {
+    val filter = Selection("value!=3")
+    val ds = filter(scalarFunction)
+    val n = ds.length
+    assertEquals(3, n)
+  }
+  
   
   @Test
   def select_equal_time {

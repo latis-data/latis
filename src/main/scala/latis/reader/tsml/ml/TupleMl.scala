@@ -6,10 +6,10 @@ class TupleMl(xml: Node) extends VariableMl(xml) {
   
   lazy val variables = Tsml.getVariableNodes(xml).map(VariableMl(_))
   
-  def getVariableMl() = variables
+  //def getVariableMl() = variables
 }
 
 object TupleMl {
   
-  def unapply(tml: TupleMl): Option[Seq[VariableMl]] = Some(tml.variables)
+  //def unapply(tml: TupleMl): Option[Seq[VariableMl]] = Some(tml.variables)
 }
