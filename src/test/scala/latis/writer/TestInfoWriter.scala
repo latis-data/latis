@@ -8,7 +8,7 @@ class TestInfoWriter {
   
   //@Test
   def write_info {
-    val reader = TsmlReader("datasets/test/historical_tsi.tsml")
+    val reader = TsmlReader("datasets/test/tsi.tsml")
     val ds = reader.getDataset()
     Writer.fromSuffix("info").write(ds)
   }

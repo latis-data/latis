@@ -23,18 +23,24 @@ class InfoWriter extends TextWriter{
   }
   
   def writeLabel(info: scala.collection.Map[String,Array[String]]) {
+    printWriter.print(makeLabel(info)+"\n")
+  }
+  def makeLabel(info: scala.collection.Map[String,Array[String]]): String = {
     try{
-      printWriter.print(info("object")(0)+"\n")
+      info("object")(0)
     } catch {
-      case e : Exception => printWriter.print("No label found\n")
+      case e : Exception => "No label found"
     }
   }
   
   def writeDesc(info: scala.collection.Map[String,Array[String]]) {
+    printWriter.print(makeDesc(info)+"\n")
+  }
+  def makeDesc(info: scala.collection.Map[String,Array[String]]): String = {
     try{
-      printWriter.print(info("subject")(0))
+      info("subject")(0)
     } catch {
-      case e : Exception => printWriter.print("No description found")
+      case e : Exception => "No description available"
     }
   }
 }

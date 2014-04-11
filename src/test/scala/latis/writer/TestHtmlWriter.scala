@@ -6,9 +6,9 @@ import latis.ops.Selection
 
 class TestHtmlWriter {
   
-  @Test
+  //@Test
   def write_html {
-    val reader = TsmlReader("datasets/test/tsi.tsml")
+    val reader = TsmlReader("datasets/test/composite_lyman_alpha.tsml")
     val ds = reader.getDataset()
     Writer.fromSuffix("html").write(ds)
   }

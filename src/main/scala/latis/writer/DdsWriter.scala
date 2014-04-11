@@ -40,7 +40,7 @@ class DdsWriter extends TextWriter {
     }
   }
   
-  override def makeFooter(dataset: Dataset) = "} " + dataset.getName + ";\n"
+  override def makeFooter(dataset: Dataset) = "} " + dataset.getName + ";"
   
   var count = indentSize
   
