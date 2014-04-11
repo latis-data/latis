@@ -21,7 +21,7 @@ class DataDdsWriter extends BinaryWriter {
   
   def writeHeader(dataset: Dataset) = {
     val w = new DdsWriter()
-    val s = w.makeHeader(dataset) + dataset.getVariables.map(w.varToString(_)).mkString("") + w.makeFooter(dataset) + "Data:\n"
+    val s = w.makeHeader(dataset) + dataset.getVariables.map(w.varToString(_)).mkString("") + w.makeFooter(dataset) + "\nData:\n"
     writer.write(s.getBytes)    
   }
 
