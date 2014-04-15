@@ -1,10 +1,14 @@
 package latis.server
 
-import latis.ops._
-import scala.collection._
+import latis.ops.Operation
+import latis.ops.Projection
+import latis.ops.filter.Selection
+import latis.util.RegEx.OPERATION
+import latis.util.RegEx.SELECTION
+
+import scala.collection.Seq
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import latis.util.RegEx._
-import java.net.URLDecoder
 
 object DapConstraintParser {
 

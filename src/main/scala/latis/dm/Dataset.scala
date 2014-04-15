@@ -8,6 +8,7 @@ import latis.metadata.EmptyMetadata
 import latis.ops.math.BasicMath
 import latis.ops._
 import latis.util.DataMap
+import latis.ops.filter.Selection
 
 class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
   extends AbstractTuple(variables, metadata, data) with BasicMath {

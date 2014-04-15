@@ -7,6 +7,7 @@ import org.junit._
 import Assert._
 import scala.collection.mutable.ArrayBuffer
 import latis.ops._
+import latis.ops.filter._
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.io.BufferedReader

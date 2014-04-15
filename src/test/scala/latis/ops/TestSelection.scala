@@ -7,6 +7,7 @@ import org.junit._
 import Assert._
 import latis.reader.tsml.TsmlReader
 import latis.metadata.Metadata
+import latis.ops.filter.Selection
 
 class TestSelection {
   

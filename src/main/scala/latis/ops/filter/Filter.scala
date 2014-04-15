@@ -1,14 +1,14 @@
-package latis.ops
+package latis.ops.filter
 
 import latis.dm.Dataset
-import latis.dm.FilteredFunction
 import latis.dm.Function
 import latis.dm.Sample
 import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
-
 import scala.Option.option2Iterable
+import latis.ops.Operation
+import latis.dm.FilteredFunction
 
 /**
  * Subtype of Operation that may drop samples.

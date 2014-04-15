@@ -4,7 +4,7 @@ import org.junit._
 import Assert._
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
-import latis.ops.Selection
+import latis.ops.filter.Selection
 import java.io.File
 import latis.util.FileUtils
 

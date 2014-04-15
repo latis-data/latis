@@ -3,6 +3,7 @@ package latis.dm
 import latis.metadata._
 import latis.ops._
 import latis.util.PeekIterator
+import latis.ops.filter.Filter
 
 /**
  * Wrapper for a Function that applies a boolean filter to each sample.

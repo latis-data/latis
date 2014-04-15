@@ -2,10 +2,10 @@ package latis.server
 
 import org.junit._
 import Assert._
-import latis.ops.Selection
+import latis.ops.filter.Selection
 import latis.ops.Projection
-import latis.ops.FirstFilter
-import latis.ops.LastFilter
+import latis.ops.filter.FirstFilter
+import latis.ops.filter.LastFilter
 
 class TestDapConstraintParser {
 

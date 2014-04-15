@@ -24,6 +24,9 @@ import latis.time.TimeFormat
 import java.util.Date
 import java.sql.Timestamp
 import latis.util.StringUtils
+import latis.ops.filter.Selection
+import latis.ops.filter.FirstFilter
+import latis.ops.filter.LastFilter
 
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
 

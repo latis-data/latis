@@ -4,7 +4,7 @@ import latis.reader.tsml.ml.Tsml
 import java.net.URL
 import latis.dm.Dataset
 import latis.ops.Operation
-import latis.ops.Selection
+import latis.ops.filter.Selection
 import java.net.URLEncoder
 
 /**

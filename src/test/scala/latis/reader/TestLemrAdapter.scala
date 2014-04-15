@@ -5,6 +5,7 @@ import Assert._
 import latis.reader.tsml.TsmlReader
 import latis.writer.Writer
 import latis.ops._
+import latis.ops.filter._
 import scala.collection.mutable.ArrayBuffer
 
 class TestLmerAdapter {

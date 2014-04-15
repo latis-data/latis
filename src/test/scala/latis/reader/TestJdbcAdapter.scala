@@ -7,6 +7,7 @@ import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
 import scala.collection.mutable.ArrayBuffer
 import latis.ops._
+import latis.ops.filter._
 import latis.dm._
 import latis.writer.Writer
 

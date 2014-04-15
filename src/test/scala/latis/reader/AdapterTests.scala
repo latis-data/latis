@@ -4,15 +4,13 @@ import org.junit._
 import Assert._
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
-import latis.ops.Selection
+import latis.ops.filter.Selection
 import latis.ops.Projection
 import scala.collection.mutable.ArrayBuffer
 import latis.ops.Operation
 import latis.dm.Dataset
 import latis.util.DataMap
-import latis.ops.LastFilter
-import latis.ops.FirstFilter
-import latis.ops.LimitFilter
+import latis.ops.filter._
 
 abstract class AdapterTests {
   

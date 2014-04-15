@@ -1,4 +1,4 @@
-package latis.ops
+package latis.ops.filter
 
 import latis.dm.Scalar
 import latis.dm.Text

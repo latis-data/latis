@@ -7,6 +7,8 @@ import Assert._
 import latis.reader.tsml.TsmlReader
 import scala.collection._
 import scala.collection.mutable.ArrayBuffer
+import latis.ops.filter.FirstFilter
+import latis.ops.filter.LastFilter
 
 class TestFilter {
 

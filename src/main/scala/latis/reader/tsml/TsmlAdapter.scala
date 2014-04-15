@@ -17,7 +17,7 @@ import latis.reader.tsml.ml.TupleMl
 import latis.reader.tsml.ml.Tsml
 import java.net.URL
 import latis.ops.Projection
-import latis.ops.Selection
+import latis.ops.filter.Selection
 import latis.data._
 import latis.data.EmptyData
 import java.nio.ByteBuffer

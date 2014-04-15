@@ -9,10 +9,7 @@ import latis.reader.tsml.ml._
 import latis.ops.Projection
 import scala.collection.mutable.ArrayBuffer
 import latis.ops.Operation
-import latis.ops.Selection
-import latis.ops.LastFilter
-import latis.ops.FirstFilter
-import latis.ops.LimitFilter
+import latis.ops.filter._
 import latis.writer.CsvWriter
 import scala.io.Source
 
