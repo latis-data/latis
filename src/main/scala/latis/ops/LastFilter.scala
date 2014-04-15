@@ -1,24 +1,14 @@
 package latis.ops
 
-import latis.dm._
+import latis.dm.Function
 
-class LastFilter extends Operation {
-  
-  def apply(dataset: Dataset): Dataset = {
-    Dataset(dataset.getVariables.flatMap(filter(_)))
-    //TODO: provenance metadata
-  }
-  
-  def filter(variable: Variable): Option[Variable] = variable match {
-    //this should only do top level variables since filter does not recurse
-    case s: Scalar => Some(s)
-    case t: Tuple => Some(t) //TODO: last element?
-    case f: Function => Some(f.getLastSample)
-  }
-
+/**
+ * Keep only the last sample of any outer Function in the Dataset.
+ */
+class LastFilter extends Filter {
+  override def filterFunction(function: Function) = Some(Function(Seq(function.getLastSample)))
 }
 
-object LastFilter {
-  def apply() = new LastFilter
-  def apply(dataset: Dataset): Dataset = LastFilter()(dataset)
+object LastFilter extends OperationFactory {
+  override def apply() = new LastFilter
 }

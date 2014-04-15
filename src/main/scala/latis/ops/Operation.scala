@@ -1,48 +1,67 @@
 package latis.ops
 
-import latis.dm._
+import latis.dm.Dataset
 import latis.util.LatisProperties
 
 trait Operation {
-  
-  /*
-   * Like scala, we should support something like 
-   *   ds.filter(p: Variable => Boolean) 
-   *   ds.map(f: Variable => Variable)
-   *   
-   * Do we need Transformation or just use Operation with Filter as special kind?
-   * 
-   * Filter super (trait?)
-   * ultimately support dataset.filter(predicate)?
-   * currently myFilter(dataset)
-   * filter(var): Boolean?
-   * 
-   * bothered by semantics:
-   *   operation "operates on" a dataset
-   *   apply an operation to a dataset
-   *     consistent with operation.apply(ds) or operation(ds)?
-   *     
-   * Function as morphism (arrow, functor)
-   * Operation transforms F to F: Natural Transformation !?
-   */
-  
+
   def apply(dataset: Dataset): Dataset
 
-  //  protected def applyToVariable(variable: Variable): Variable = variable match {
-  //    case s: Scalar => applyToScalar(s)
-  //    case t: Tuple => applyToTuple(t)
-  //    case f: Function => applyToFunction(f)
-  //  }
-  //  
-  //  //type not necessarily preserved
-  //  protected def applyToScalar(scalar: Scalar): Variable = scalar //no-op
-  //  protected def applyToTuple(tuple: Tuple): Variable = Tuple(tuple.variables.map(applyToVariable(_)))
-  //  protected def applyToFunction(function: Function): Variable = WrappedFunction(function, this)
-  //    //TODO: or Function(applyToVariable(function.domain), applyToVariable(function.range)) ?
-  //    
-  //  //typically invoked by WrappedFunction
-  //  protected def applyToSample(sample: Sample): Variable = 
-  //    Sample(applyToVariable(sample.domain), applyToVariable(sample.range))
+}
+
+object Operation {
+    
+  /**
+   * Construct an Operation subclass based on the given name.
+   */
+  def apply(opName: String): Operation = apply(opName, Seq[String]())
+
+  /**
+   * Construct an Operation subclass based on the given name and arguments.
+   */
+  def apply(opName: String, args: Seq[String]): Operation = {
+    try { 
+      val compObj = getCompanionObject(opName)
+      if (args.length == 0 || args.head.length == 0) compObj.apply() //no args or empty first arg
+      else compObj.apply(args)
+    } catch {
+      case e: Exception => throw new UnsupportedOperationException(opName + ": " + e.getMessage)
+    }
+  }
+
+  /**
+   * Get the class of the desired Operation subclass.
+   * The class name must be defined as a property of the form "operation.<opName>.class".
+   */
+  private def getClassFromOpName(opName: String) = {
+    LatisProperties.get("operation." + opName + ".class") match {
+      case Some(cname) => Class.forName(cname) //TODO: handle ClassNotFoundException?
+      case None => throw new UnsupportedOperationException("No Operation class defined for: " + opName)
+    }
+  }
+    
+  /**
+   * Use reflection to get the companion object of the desired Operation subclass.
+   */
+  private def getCompanionObject(opName: String): OperationFactory = {
+    import scala.reflect.runtime.currentMirror
+    
+    val cls = getClassFromOpName(opName)
+    val moduleSymbol = currentMirror.classSymbol(cls).companionSymbol.asModule
+    currentMirror.reflectModule(moduleSymbol).instance.asInstanceOf[OperationFactory] 
+  }
+    
+}
+//    
+//    //type not necessarily preserved
+//    protected def applyToScalar(scalar: Scalar): Variable = scalar //no-op
+//    protected def applyToTuple(tuple: Tuple): Variable = Tuple(tuple.variables.map(applyToVariable(_)))
+//    protected def applyToFunction(function: Function): Variable = WrappedFunction(function, this)
+//      //TODO: or Function(applyToVariable(function.domain), applyToVariable(function.range)) ?
+//      
+//    //typically invoked by WrappedFunction
+//    protected def applyToSample(sample: Sample): Variable = 
+//      Sample(applyToVariable(sample.domain), applyToVariable(sample.range))
 
     /*
      * Operations: subclass of Operation for each? easier to reason about
@@ -88,38 +107,10 @@ trait Operation {
      * pivot
      * coordinate transform
      * evaluate
+     * op on domain vs range
+     * 
+     * --
+     * Filter: return Option
+     * Transform: return Var
+     * 
      */
-
-}
-
-object Operation {
-  
-  def apply(name: String): Operation = Operation(name, List(""))
-
-  def apply(name: String, args: Seq[String]): Operation = {
-    LatisProperties.get("operation." + name + ".class") match {
-      case Some(cname) => {
-       try {
-        val cls = Class.forName(cname)
-        if (args.head.length == 0) {  //no args
-          val ctor = cls.getConstructor()
-          ctor.newInstance().asInstanceOf[Operation]
-        } else {
-          val ctor = cls.getConstructor(classOf[Seq[String]])
-          ctor.newInstance(args).asInstanceOf[Operation]
-        }
-       } catch {
-         case e: Exception => throw new RuntimeException("Unsupported Operation: " + name, e)
-       }
-      }
-      case None => throw new RuntimeException("Unsupported Operation: " + name)
-    }
-  }
-
-}
-
-
-
-
-
-

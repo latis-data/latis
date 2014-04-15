@@ -14,14 +14,14 @@ class TestFilter {
   
   @Test
   def test_last_filter {
-    val ds = LastFilter(dataset).toDoubles
+    val ds = LastFilter().filter(dataset).toDoubles
     assertEquals(3.3, ds(0)(0), 0.0)
     assertEquals(6.6, ds(1)(0), 0.0)
   }
   
   @Test
   def test_first_filter {
-    val ds = FirstFilter(dataset).toDoubles
+    val ds = FirstFilter().filter(dataset).toDoubles
     assertEquals(1.1, ds(0)(0), 0.0)
     assertEquals(4.4, ds(1)(0), 0.0)
   }

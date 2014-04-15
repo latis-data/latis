@@ -9,13 +9,10 @@ import latis.util.PeekIterator
  * This Function will represent a subset of the samples of the original.
  * The type of the variables will not change.
  */
-class FilteredFunction(function: Function, val selection: Selection) 
+class FilteredFunction(function: Function, val filter: Filter) 
   extends SampledFunction(function.getDomain, function.getRange) {
-  //NOTE: can't change type: same domain and range, can't be used for projection
-  //TODO: operations: Seq[Operation]? CompositeOperation?
-  //TODO: deal with metadata? only if there is a "length", provenance belongs to parent Dataset
-
-  //TODO: override metadata, data? 
+  //NOTE: Filter can only from samples, can't change type: same domain and range
+  //TODO: deal with 'length' metadata
   
   override def iterator = new PeekIterator[Sample] {
     lazy val it = function.iterator  //original Function's iterator
@@ -25,13 +22,10 @@ class FilteredFunction(function: Function, val selection: Selection)
     override def getNext: Sample = {
       if (it.hasNext) {
         val nxt = it.next()
-        selection.filter(nxt) match {
-          //TODO: could just use "filter" and treat it as Tuple, but need to return Sample here
-          //  let next be any Variable?
-          //assume that we are getting a 2-tuple, for now
+        val myFilter = FilteredFunction.this.filter //avoid name conflict with Iterator's ,filter, method
+        myFilter.filterSample(nxt) match {
           case None => getNext //keep trying until we get a valid sample
-          case Some(tup: Tuple) => Sample(tup(0), tup(1)) //TODO: assert size = 2
-          case _ => throw new Error("Filtered sample should be a 2-Tuple.")
+          case Some(sample) => sample
         }
       } else null //no more valid samples
     }
@@ -40,5 +34,5 @@ class FilteredFunction(function: Function, val selection: Selection)
 
 object FilteredFunction {
   
-  def apply(function: Function, selection: Selection) = new FilteredFunction(function, selection)
+  def apply(function: Function, filter: Filter) = new FilteredFunction(function, filter)
 }

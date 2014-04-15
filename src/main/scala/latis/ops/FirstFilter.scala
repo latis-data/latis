@@ -1,26 +1,14 @@
 package latis.ops
 
-import latis.dm._
+import latis.dm.Function
 
-class FirstFilter extends Operation {
-  
-  def apply(dataset: Dataset): Dataset = {
-    Dataset(dataset.getVariables.flatMap(filter(_)))
-    //TODO: provenance metadata
-  }
-  
-  def filter(variable: Variable): Option[Variable] = variable match {
-    //this should only do top level variables since filter does not recurse
-    case s: Scalar => Some(s)
-    case t: Tuple => Some(t) //TODO: first element?
-    case f: Function => Some(f.getFirstSample)
-    //TODO: consider nested functions, 
-  }
-
+/**
+ * Keep only the first sample of any outer Function in the Dataset.
+ */
+class FirstFilter extends Filter {
+  override def filterFunction(function: Function) = Some(Function(Seq(function.getFirstSample)))
 }
 
-object FirstFilter {
-  def apply(): FirstFilter = new FirstFilter
-  
-  def apply(dataset: Dataset): Dataset = FirstFilter()(dataset)
+object FirstFilter extends OperationFactory {
+  override def apply(): FirstFilter = new FirstFilter
 }

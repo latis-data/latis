@@ -1,26 +1,32 @@
 package latis.ops
 
-import latis.dm._
+import latis.dm.Function
 
-class LimitFilter(args: Seq[String]) extends Operation {
+/**
+ * Keep only the first 'limit' samples of any outer Function in the Dataset.
+ */
+class LimitFilter(val limit: Int) extends Filter {
   
-  val limit = args.head.toInt
-  
-  def apply(dataset: Dataset): Dataset = {
-    Dataset(dataset.getVariables.flatMap(filter(_)))
-    //TODO: provenance metadata
-  }
-  
-  def filter(variable: Variable): Option[Variable] = variable match {
-    //this should only do top level variables since filter does not recurse
-    case s: Scalar => Some(s)
-    case t: Tuple => Some(t) //TODO: limit number of elements?
-    case f: Function => Some(Function(f.getDomain, f.getRange, f.iterator.take(limit))) //TODO: metadata
+  /**
+   * Make a new Function with the original Function's types and limited iterator.
+   */
+  override def filterFunction(function: Function) = {
+    //TODO: consider iterable once issues
+    Some(Function(function.getDomain, function.getRange, function.iterator.take(limit)))
   }
 
 }
 
-object LimitFilter {
-  def apply(args: Seq[String]): LimitFilter = new LimitFilter(args)
-  def apply(limit: Int): LimitFilter = new LimitFilter(Seq(limit.toString))
+object LimitFilter extends OperationFactory {
+  
+  override def apply(args: Seq[String]): LimitFilter = {
+    if (args.length > 1) throw new UnsupportedOperationException("The LimitFilter accepts only one argument")
+    try {
+      LimitFilter(args.head.toInt)
+    } catch {
+      case e: NumberFormatException => throw new UnsupportedOperationException("The LimitFilter requires an integer argument")
+    }
+  }
+    
+  def apply(limit: Int): LimitFilter = new LimitFilter(limit)
 }
