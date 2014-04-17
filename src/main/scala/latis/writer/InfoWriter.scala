@@ -15,7 +15,7 @@ class InfoWriter extends TextWriter{
 
   def getInfo(dataset: Dataset): Dataset = {
     val reader = TsmlReader("datasets/test/lemr.tsml")
-    reader.getDataset(Seq(Selection("query=PREFIX dcat:<http://www.w3.org/ns/dcat#> " + 
+    reader.getDataset(Seq(Selection("query","=","PREFIX dcat:<http://www.w3.org/ns/dcat#> " + 
         "PREFIX dcterms:<http://purl.org/dc/terms/> PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> "+
         "PREFIX vivo:<http://vivoweb.org/ontology/core#> SELECT ?desc?id?label " +
         "WHERE{?s a dcat:Dataset. ?s dcterms:identifier?id. ?s rdfs:label?label. "+

@@ -6,6 +6,7 @@ import org.jfree.chart.ChartUtilities
 import org.jfree.chart.ChartFactory
 import org.jfree.data.xy.XYSeriesCollection
 import org.jfree.data.xy.XYSeries
+import org.jfree.chart.axis._
 import java.io.File
 
   /**
@@ -32,9 +33,12 @@ class ImageWriter extends Writer{
   def fixRange(chart: JFreeChart) {
     val plot = chart.getXYPlot
     val range = plot.getRangeAxis
-    range.setRangeWithMargins(plot.getDataRange(plot.getRangeAxis()))
+    //range.setRangeWithMargins(plot.getDataRange(plot.getRangeAxis()))
+    range match{
+      case a:NumberAxis=>a.setAutoRangeIncludesZero(false)
+    }
+    //range.setAutoRangeIncludesZero(false)
   }
-
   def makeSeries(a: Variable, b: Variable, data: scala.collection.Map[String,Array[Double]]): XYSeries = {
     val x = data(a.getName)
     val y = data(b.getName)

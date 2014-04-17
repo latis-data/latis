@@ -2,8 +2,8 @@ package latis.util
 
 import latis.dm._
 import scala.collection._
-//import scala.reflect.runtime.universe._
 import scala.reflect.ClassTag
+import latis.time.Time
 
 object DataMap {
   
@@ -98,6 +98,7 @@ object DataMap {
       //Add double to buffer for Numbers, otherwise NaN
       v match {
         case Number(d) => buffer += d
+        case t:Time => buffer += t.getJavaTime.toDouble
         case _ => buffer += Double.NaN
       }
     }

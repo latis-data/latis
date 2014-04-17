@@ -26,7 +26,7 @@ class HtmlWriter extends TextWriter {
     sb.toString
   }
   
-  val scripts = ""
+  val scripts = "<script type=\"text/javascript\" src=\"http://lasp.colorado.edu/lisird/tss/resources/tss.js\"></script>"
   
   val style = "\n<link rel=\"stylesheet\" type=\"text/css\" href=\"http://lasp.colorado.edu/lisird/tss/resources/tss.css\">"  
     
