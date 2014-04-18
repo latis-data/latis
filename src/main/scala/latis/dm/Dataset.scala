@@ -13,7 +13,9 @@ import latis.ops.filter.Selection
 class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
   extends AbstractTuple(variables, metadata, data) with BasicMath {
   
-  //TODO: evaluate for given domain value
+  //TODO: considering Monadic role of Dataset, maybe Dataset should not BE-A Variable?
+  
+  //TODO: evaluate for given domain value, impl as Operation
   //TODO: Variable already has apply(int)
 //  def apply(v: Any): Dataset = v match {
 //    case index: Int => ??? //get index-th sample of function, or element of tuple? what about F of Tuple? probably better to use diff method
@@ -57,16 +59,6 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
     case f: Function => Some(f)
   }
   
-  /*
-   * TODO: 2013-07-16 Do we need operations?
-   * it seems that this was an attempt to lazily apply them
-   * could we apply them earlier (e.g. TsmlAdapter)?
-   * A Wrapped Function could provide laziness
-   * What about non tsml use cases?
-   *   make it part of the Reader?
-   *   getDataset(ops)
-   *   otherwise, directly apply as needed
-   */
   
   /*
    * TODO: 2013-06-11
