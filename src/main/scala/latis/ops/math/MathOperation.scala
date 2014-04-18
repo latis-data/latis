@@ -2,11 +2,10 @@ package latis.ops.math
 
 import latis.dm._
 import latis.ops.xform._
+import latis.ops.Operation
 //import latis.dm.implicits._
 
-trait MathOperation extends Transformation {
-  
-}
+trait MathOperation extends Operation 
 
 object MathOperation {
   

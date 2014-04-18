@@ -7,6 +7,6 @@ import latis.dm.Dataset
  */
 class NoOp extends Operation {
 
-  def apply(dataset: Dataset): Dataset = dataset
+  override def apply(dataset: Dataset): Dataset = dataset
 
 }

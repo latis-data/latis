@@ -33,7 +33,7 @@ import latis.dm.Dataset
 trait Aggregation extends Operation {
   def aggregate(dataset: Dataset): Dataset
   
-  def apply(dataset: Dataset) = aggregate(dataset)
+  override def apply(dataset: Dataset) = aggregate(dataset)
   def apply(datasets: Seq[Dataset]) = aggregate(datasets)
   def apply(dataset1: Dataset, dataset2: Dataset) = aggregate(dataset1, dataset2)
   

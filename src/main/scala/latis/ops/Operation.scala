@@ -1,13 +1,64 @@
 package latis.ops
 
-import latis.dm.Dataset
+import latis.dm._
 import latis.util.LatisProperties
 
 trait Operation {
 
-  def apply(dataset: Dataset): Dataset
+  /**
+   * Apply this Operation to the given Dataset.
+   */
+  def apply(dataset: Dataset): Dataset = {
+    Dataset(dataset.getVariables.flatMap(applyToVariable(_)))
+    //TODO: provenance metadata
+  }
+  
+  /**
+   * Apply Operation to a Variable.
+   */
+  def applyToVariable(variable: Variable): Option[Variable] = variable match {
+    case scalar: Scalar     => applyToScalar(scalar)
+    case sample: Sample     => applyToSample(sample)
+    case tuple: Tuple       => applyToTuple(tuple)
+    case function: Function => applyToFunction(function)
+  }
 
+  /**
+   * Default no-op operation for Scalars.
+   */
+  def applyToScalar(scalar: Scalar): Option[Variable] = Some(scalar)
+  
+  /**
+   * Default operation for Samples. Apply operation to the range, keeping the same domain.
+   * If the resulting range is invalid, the whole sample is invalid.
+   */
+  def applyToSample(sample: Sample): Option[Variable] = {
+ //TODO: return Var since ops like reduce can change type? SampleApplicable trait with method that returns Sample?
+    applyToVariable(sample.range) match {
+      case Some(r) => Some(Sample(sample.domain, r))
+      case None => None
+    }
+  }
+  
+  /**
+   * Default operation for Tuples. Apply operation to each element.
+   * If all elements are invalid, then the Tuple is invalid.
+   */
+  def applyToTuple(tuple: Tuple): Option[Variable] = {
+    val vars = tuple.getVariables.flatMap(applyToVariable(_))
+    if (vars.length == 0) None
+    else Some(Tuple(vars))
+  }
+  
+  /**
+   * Default operation for a Function. Wrap the original Function Apply operation to each sample.
+   */
+  def applyToFunction(function: Function): Option[Variable] = this match {
+    case homo: SampleHomomorphism => Some(WrappedFunction(function, homo))
+    case _ => throw new UnsupportedOperationException("Only homomorphic operations can use the default Function application.")
+  }
 }
+
 
 object Operation {
     
@@ -112,5 +163,21 @@ object Operation {
      * --
      * Filter: return Option
      * Transform: return Var
+     * 
+     * 
+     * MungedFunction (Filter, Transform)
+     * need to count on Sample remaining a Sample for iteration
+     * 3 kinds of munging?
+     *   Filter may drop sample
+     *   sample preserving: modified, morphed, ...?
+     *     transform implies changing form
+     *   all bets off, maybe not even iterable
+     * Projection: may need to fill with Index, not sure if we can do that with generic TransformedFunction
+     * 
+     * Ops extend SampleApplicable trait
+     *   applySample(sample: Sample): Option[Sample]
+     * 
+     * isomorphic: same type, has inverse
+     * homomorphic: same type
      * 
      */

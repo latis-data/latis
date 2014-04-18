@@ -8,48 +8,50 @@ import latis.util.RegEx._
  * Exclude variables not named in the given list.
  */
 class Projection(val names: Seq[String]) extends Operation {
-  //TODO: support long names, e.g. tupA.foo  
+  //TODO: support long names, e.g. tupA.foo  , build into hasName?
   //TODO: preserve order of requested variables
   //TODO: consider projecting only part of nD domain. only if it is a product set
-  //TODO: sanitize: make sure no special chars..., do via pattern match sufficient?
   
-  def apply(dataset: Dataset): Dataset = {
-    Dataset(dataset.getVariables.flatMap(project(_)))
-    //TODO: provenance metadata
-  }
+//TODO: with WrappedFunction, we aren't getting the model munging
+  override def applyToFunction(function: Function): Option[Variable] = Some(ProjectedFunction(function, this))
   
-  def project(variable: Variable): Option[Variable] = variable match {
-    case i: Index => Some(i) //always project Index, often used as a place holder for a domain
-    case s: Scalar   => projectScalar(s)
-    case t: Tuple    => projectTuple(t)
-    case f: Function => projectFunction(f)
+  override def applyToVariable(variable: Variable): Option[Variable] = {
+    //Note, always project Index since it is used as a place holder for a non-projected domain.
+    if (variable.isInstanceOf[Index] || names.exists(variable.hasName(_))) Some(variable) 
+    else super.applyToVariable(variable)
   }
    
-  def projectScalar(scalar: Scalar): Option[Scalar] = {
-    if (names.exists(scalar.hasName(_))) Some(scalar) else None
+  override def applyToScalar(scalar: Scalar): Option[Scalar] = scalar match {
+    case i: Index => Some(i) //always project Index since it is used as a place holder for a non-projected domain.
+    case _ => None //name didn't match above
   }
   
-  def projectTuple(tuple: Tuple): Option[Tuple] = {
-    /*
-     * TODO: maintain projection order
-     * making a new dataset, tuple reuses same kids
-     * need to deal with Data!
-     * otherwise will only work for column-oriented data (all in scalars, GranuleAdapter)
-     * Is this safe to do here or support in adapters?
-     * Apply as a FilteredFunction so we can reorder vars in sample?
-     * 
-     * only becomes a problem if tuples are allowed to contain data
-     * what about nested functions...?
-     * note, Sample is managed in ProjectedFunction
-     */
-    val vars = tuple.getVariables.flatMap(project(_))
-    if (vars.length == 0) None
-    else Some(Tuple(vars)) //TODO: metadata
-  }
-    
-  //Let ProjectedFunction deal with this.
-  def projectFunction(function: Function): Option[Function] = Some(ProjectedFunction(function, this))
-  //TODO: consider projected function by name (instead of its scalars), similar to long name support
+//  def projectScalar(scalar: Scalar): Option[Scalar] = {
+//    if (names.exists(scalar.hasName(_))) Some(scalar) else None
+//    //TODO: do name test for all
+//  }
+//  
+//  def projectTuple(tuple: Tuple): Option[Tuple] = {
+//    /*
+//     * TODO: maintain projection order
+//     * making a new dataset, tuple reuses same kids
+//     * need to deal with Data!
+//     * otherwise will only work for column-oriented data (all in scalars, GranuleAdapter)
+//     * Is this safe to do here or support in adapters?
+//     * Apply as a FilteredFunction so we can reorder vars in sample?
+//     * 
+//     * only becomes a problem if tuples are allowed to contain data
+//     * what about nested functions...?
+//     * note, Sample is managed in ProjectedFunction
+//     */
+//    val vars = tuple.getVariables.flatMap(projectVariable(_))
+//    if (vars.length == 0) None
+//    else Some(Tuple(vars)) //TODO: metadata
+//  }
+//    
+//  //Let ProjectedFunction deal with this.
+//  def projectFunction(function: Function): Option[Function] = Some(ProjectedFunction(function, this))
+//  //TODO: consider projected function by name (instead of its scalars), similar to long name support
 
   override def toString = names.mkString(",")
 }

@@ -2,18 +2,22 @@ package latis.ops.filter
 
 import latis.dm.Function
 import latis.ops.OperationFactory
+import latis.dm.Sample
 
 /**
  * Keep only the first 'limit' samples of any outer Function in the Dataset.
  */
 class LimitFilter(val limit: Int) extends Filter {
   
+  private var count = 0
+  
   /**
-   * Make a new Function with the original Function's types and limited iterator.
+   * Only allow this to be applied 'limit' times.
    */
-  override def filterFunction(function: Function) = {
-    //TODO: consider iterable once issues
-    Some(Function(function.getDomain, function.getRange, function.iterator.take(limit)))
+  override def applyToSample(sample: Sample): Option[Sample] = {
+    count += 1
+    if (count > limit) None
+    else Some(sample)
   }
 
 }

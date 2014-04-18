@@ -14,7 +14,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 protected class Selection(val vname: String, val operation: String, val value: String) extends Filter with Logging {
   //TODO: if domain, delegate to DomainSet
 
-  override def filterScalar(scalar: Scalar): Option[Scalar] = {
+  override def applyToScalar(scalar: Scalar): Option[Scalar] = {
     //If the filtering causes an exception, log a warning and return None.
     try {
       scalar match {

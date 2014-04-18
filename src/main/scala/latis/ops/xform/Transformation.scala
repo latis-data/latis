@@ -5,33 +5,52 @@ import latis.util.LatisProperties
 import latis.ops.Operation
 import latis.metadata.Metadata
 
-abstract class Transformation extends Operation {
-
-  def apply(dataset: Dataset): Dataset = Dataset(dataset.getVariables.map(transform(_)), dataset.getMetadata)
-  //TODO: provenance metadata...
+/**
+ * Subtype of Operation that may modify a Dataset beyond just dropping samples (Filter).
+ * The data types may not be preserved.
+ */
+@Deprecated
+trait Transformation extends Operation {
   
-  def transform(variable: Variable): Variable = variable match {
-    case s: Scalar => transformScalar(s)
-    case sample: Sample => transformSample(sample)
-    case t: Tuple => transformTuple(t)
-    case f: Function => transformFunction(f)
-  }
-  
-  //type not necessarily preserved
-  def transformScalar(scalar: Scalar): Variable = scalar //no-op
-  def transformTuple(tuple: Tuple): Variable = Tuple(tuple.getVariables.map(transform(_)))
-  def transformFunction(function: Function): Variable = TransformedFunction(function, this)
-    //TODO: or Function(transform(function.domain), transform(function.range)) ?
-    
-  //typically invoked by TransformedFunction
-  //sample should be case where we just act on range, else use tuple
-  def transformSample(sample: Sample): Sample = Sample(sample.domain, transform(sample.range))
-  
-
+//  /**
+//   * Apply this Operation to the given Dataset.
+//   */
+//  override def apply(dataset: Dataset): Dataset = transform(dataset)
+//    
+//  /**
+//   * Apply this Transformation to the given Dataset.
+//   * Same as 'apply' but more semantically useful.
+//   */
+//  def transform(dataset: Dataset): Dataset = {
+//    Dataset(dataset.getVariables.map(transformVariable(_)))
+//    //TODO: provenance metadata
+//  }
+//  
+//  protected def transformVariable(variable: Variable): Variable = variable match {
+//    case scalar: Scalar     => transformScalar(scalar)
+//    case sample: Sample     => transformSample(sample)
+//    case tuple: Tuple       => transformTuple(tuple)
+//    case function: Function => transformFunction(function)
+//  }
+//  
+//  /**
+//   * No-op default transform for Scalars.
+//   */
+//  protected def transformScalar(scalar: Scalar): Variable = scalar
+//  
+//  /**
+//   * Default transform for Samples. Transform the range component leaving the domain unchanged.
+//   */
+//  def transformSample(sample: Sample): Variable = Sample(sample.domain, transformVariable(sample.range))
+//  
+//  /**
+//   * Default transform for Tuples. Transform each member then repackage as a Tuple.
+//   */
+//  protected def transformTuple(tuple: Tuple): Variable = Tuple(tuple.getVariables.map(transformVariable(_)))
+//  
+//  /**
+//   * Wrap Function with a FilteredFunction.
+//   */
+//  protected def transformFunction(function: Function): Variable = TransformedFunction(function, this)
  
 }
-
-
-
-
-
