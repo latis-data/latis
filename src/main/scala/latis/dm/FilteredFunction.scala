@@ -4,6 +4,7 @@ import latis.metadata._
 import latis.ops._
 import latis.util.PeekIterator
 import latis.ops.filter.Filter
+import latis.util.PeekIterator2
 
 /**
  * Wrapper for a Function that applies a boolean filter to each sample.
@@ -15,22 +16,24 @@ class FilteredFunction(function: Function, val filter: Filter)
   //NOTE: Filter can only from samples, can't change type: same domain and range
   //TODO: deal with 'length' metadata
   
-  override def iterator = new PeekIterator[Sample] {
-    lazy val it = function.iterator  //original Function's iterator
-
-//TODO: manage index if this is an IndexFunction, consider a bigger refactoring, see ProjectedFunction...
-    
-    override def getNext: Sample = {
-      if (it.hasNext) {
-        val nxt = it.next()
-        val myFilter = FilteredFunction.this.filter //avoid name conflict with Iterator's ,filter, method
-        myFilter.filterSample(nxt) match {
-          case None => getNext //keep trying until we get a valid sample
-          case Some(sample) => sample
-        }
-      } else null //no more valid samples
-    }
-  }
+//  override def iterator = new PeekIterator2(function.iterator, (s: Sample) => FilteredFunction.this.filter.filterSample(s))
+  
+//  override def iterator = new PeekIterator[Sample] {
+//    lazy val it = function.iterator  //original Function's iterator
+//
+////TODO: manage index if this is an IndexFunction, consider a bigger refactoring, see ProjectedFunction...
+//    
+//    override def getNext: Sample = {
+//      if (it.hasNext) {
+//        val nxt = it.next()
+//        val myFilter = FilteredFunction.this.filter //avoid name conflict with Iterator's ,filter, method
+//        myFilter.filterSample(nxt) match {
+//          case None => getNext //keep trying until we get a valid sample
+//          case Some(sample) => sample
+//        }
+//      } else null //no more valid samples
+//    }
+//  }
 }
 
 object FilteredFunction {

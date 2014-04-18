@@ -12,6 +12,14 @@ class ProjectedFunction(function: Function, val projection: Projection)
   extends SampledFunction(null, null) {
 //pass null domain and range since we override them here
   
+  /*
+   * TODO: can this be a WrappedFunction?
+   * needs logic to insert index
+   * don't think we can delegate to Projection to do that since it won't know index value
+   * also need to override domain and range
+   * can we generally apply as below? probably not since most operation op on data
+   */
+  
   //TODO: return data in projected order
   
   //Keep current sample index.
@@ -26,7 +34,8 @@ class ProjectedFunction(function: Function, val projection: Projection)
     case None => ??? //TODO: nothing projected, bug?
   }
   
-  
+  //TODO: consider iterable once issues
+  //TODO: could we use PeekIterator2 with an implicit index arg for the function?
   override def iterator = new PeekIterator[Sample] {
     lazy val it = function.iterator  //original Function's iterator
     
@@ -47,8 +56,8 @@ class ProjectedFunction(function: Function, val projection: Projection)
    */
   def projectSample(sample: Sample): Option[Sample] = {
     //TODO: could we reuse the logic in TsmlAdapter.makeSample here?
-    val pd = projection.project(sample.domain)
-    val pr = projection.project(sample.range)
+    val pd = projection.applyToVariable(sample.domain)
+    val pr = projection.applyToVariable(sample.range)
     (pd,pr) match {
       case (Some(d), Some(r)) => Some(Sample(d,r))
       case (None, Some(r))    => Some(Sample(Index(index), r)) //TODO: do we need a valid value here? 
