@@ -16,6 +16,7 @@ trait Function extends Variable { //this: Variable =>
   //TODO: reconsider when we add ContinuousFunction
   def getFirstSample: Sample
   def getLastSample: Sample
+  def getSample(index: Int): Sample
   
   //TODO: put in Variable?
   //def length: Int  getLength?
