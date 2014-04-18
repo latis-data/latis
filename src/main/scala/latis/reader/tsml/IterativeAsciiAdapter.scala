@@ -11,6 +11,7 @@ import latis.time.Time
 import latis.reader.tsml.ml.Tsml
 import latis.util.PeekIterator
 import latis.util.StringUtils
+import latis.util.PeekIterator2
 
 class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with AsciiAdapterHelper {
   
@@ -88,33 +89,60 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Asci
 //1970/01/03  2 22.2 B
 //1970/01/03  3 23.3 C
   
-  def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
-    def recordSize = sampleTemplate.getSize
+  //will be invoked when client tries to iterate on IterableData via iterating on WrappedFunction
+  
+  //def makeDataIterator = new PeekIterator2(getRecordIterator, (record: String) => parseData(record))
+  
+  def parseData(record: Any): Option[Data] = ???
+//  def parseData(record: String): Option[Data] = {
+//    val svals = parseRecord(record)
+//    if (svals.isEmpty) None
+//    else Some(makeDataFromRecord(getSampleTemplate, svals))
+//    //TODO: have makeDataFromRecord return Option?
+//  }
+  
+  //private var sampleTemplate: Sample = null
+  
+
     
-    def iterator = new PeekIterator[Data] {
-      val it = getRecordIterator
-      
-      //keep going till we find a valid record or run out
-      def getNext: Data = {
-        if (it.hasNext) {
-          val record = it.next
-          val svals = parseRecord(record)
-          if (svals.isEmpty) getNext  //TODO: log warning? or in parseRecord
-          else makeDataFromRecord(sampleTemplate, svals)
-        } else null
-      }
-    }
-  }
+    
+//  def makeIterableDataORIG(sampleTemplate: Sample): Data = new IterableData {
+//    //def recordSize = sampleTemplate.getSize
+//    
+//    /*
+//     * TODO: consider PeekIterator2
+//     * f = (record: String) => Data
+//     * add hook to cache so we can iterate more than once
+//     * consider Stream?
+//     * 
+//     * manage iterator so we can get index from it
+//     * 
+//     */
+//    
+//    def iterator = new PeekIterator[Data] {
+//      val it = getRecordIterator
+//      
+//      //keep going till we find a valid record or run out
+//      def getNext: Data = {
+//        if (it.hasNext) {
+//          val record = it.next
+//          val svals = parseRecord(record)
+//          if (svals.isEmpty) getNext  //TODO: log warning? or in parseRecord
+//          else makeDataFromRecord(sampleTemplate, svals)
+//        } else null
+//      }
+//    }
+//  }
   
   /**
    * Counter in case we have an Index domain.
    */
-  private var index = -1
+  //private var index = -1
   
-  //TODO: compare to Util dataToVariable... move this there?
+  //TODO: compare to Util dataToVariable... move this there? but needs access to dataIterator index
   def makeDataFromRecord(sampleTemplate: Sample, svals: Map[String, String]): Data = {
     //build a ByteBuffer
-    val size = sampleTemplate.getSize
+    val size = sampleTemplate.getSize  //TODO: no need to do every time
     val bb = ByteBuffer.allocate(size)
     
     //assume every Scalar in the template has a value in the Map (except index), e.g. not stored by Tuple name
@@ -123,8 +151,9 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Asci
     
     for (v <- vars) {
       v match {
-        case _: Index   => index += 1; bb.putInt(index) //deal with index domain (defined in tsml)
-        case t: Text    => {
+        //case _: Index   => index += 1; bb.putInt(index) //deal with index domain (defined in tsml)
+        case _: Index => bb.putInt(getCurrentIndex) //deal with index domain (defined in tsml)
+        case t: Text  => {
           val s = StringUtils.padOrTruncate(svals(v.getName), t.length)
           s.foldLeft(bb)(_.putChar(_)) //fold each character into buffer
         }

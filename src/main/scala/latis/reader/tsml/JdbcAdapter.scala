@@ -228,7 +228,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
   }
 
   //Note, no query should be made until the iterator is called.
-  def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
+  override def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
     def recordSize = sampleTemplate.getSize
 
     override def iterator = new PeekIterator[Data] {

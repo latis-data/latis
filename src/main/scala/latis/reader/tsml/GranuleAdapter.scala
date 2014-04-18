@@ -29,6 +29,12 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    */
   def readData: Map[String, Data]
   
+  /*
+   * TODO: do we really need to make scalars with these data?
+   * could we just do the same iterative approach, just get data from cache instead of source?
+   * avoid hack of allowing scalars to contain arrays!
+   * 
+   */
   
   /**
    * Override to construct Scalars using the data read by this Adapter and
