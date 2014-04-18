@@ -11,5 +11,10 @@ class Sample(val domain: Variable, val range: Variable) extends AbstractTuple(Li
 object Sample {
   def apply(domain: Variable, range: Variable) = new Sample(domain, range)
   
+  def apply(vars: Seq[Variable]) = {
+    if (vars.length != 2) throw new Error("Sample must be constructed from two Variables")
+    new Sample(vars(0), vars(1))
+  }
+  
   def unapply(sample: Sample): Option[(Variable, Variable)] = Some((sample.domain, sample.range))
 }
