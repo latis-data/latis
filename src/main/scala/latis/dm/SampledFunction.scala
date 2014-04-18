@@ -21,6 +21,19 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
    *   iterator => error
    */
   
+  /*
+   * TODO: IterableOnce issues
+   * Use Stream? or cache?
+   * effectively becomes like a GranuleAdapter after the first pass
+   * but requires caching even if we don't need it, oh well
+   * responsibility of IterativeAdapter to cache as it iterates
+   * property of adapter for when we really can't cache?
+   * 
+   * iterator.toStream here?
+   * or add 'stream' in place of 'iterate'?
+   * need hook to disable for really large datasets
+   */
+  
   //expose domain and range via defs only so we can override (e.g. ProjectedFunction)
   def getDomain: Variable = domain
   def getRange: Variable = range
@@ -47,19 +60,13 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
   def getFirstSample: Sample = iterator.next //TODO: peek
   def getLastSample: Sample = {
     //iterator.drop(length-1).next  //dataIterator is giving Util.dataToSample null Data!?
-    
-    //TODO: only gets 190 of 570!?
-    //trying to get new iterator with each ref? skipping by 3s
-//    while(iterator.hasNext) {
-//      sample = iterator.next
-//      c = c+1
-//      println(c +": "+ sample.domain.data)
-//    }
-    
     var sample: Sample = null
     for (s <- iterator) sample = s
     sample 
   }
-  //TODO: return Function with single sample to preserve namespace...?
+  
+  def getSample(index: Int): Sample = {
+    iterator.drop(index-1).next
+  }
 
 }
