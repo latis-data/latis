@@ -9,6 +9,7 @@ abstract class IterableData extends Data {
   //TODO: trait?
   //TODO: should all Data extend this since they impl iterator?
   //TODO: or make DataIterator? complication with "length"
+  //TODO: should Data even define iterator method or do it here?
   
   //To get record/sample by index, need to manage iterator ourselves, as Stream.
   lazy val stream: Stream[Data] = iterator.toStream
