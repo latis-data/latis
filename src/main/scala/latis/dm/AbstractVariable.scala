@@ -18,6 +18,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     case Some(s) => s
     case None => this match {
       case _: Function => "samples" //default name for Functions
+      case _: Sample => "sample"    //default name for Samples
       case _ => "unknown" //TODO: generate unique name?
     }
   }
