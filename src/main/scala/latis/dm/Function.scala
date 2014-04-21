@@ -4,7 +4,6 @@ import scala.collection._
 import latis.data._
 import latis.metadata._
 import java.nio.ByteBuffer
-import latis.util.Util
 
 trait Function extends Variable { //this: Variable =>
   def getDomain: Variable

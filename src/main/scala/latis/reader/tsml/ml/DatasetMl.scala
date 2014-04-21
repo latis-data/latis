@@ -1,6 +1,5 @@
 package latis.reader.tsml.ml
 
-import latis.util.Util
 import scala.xml.Node
 import latis.util.StringUtils
 

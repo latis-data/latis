@@ -7,7 +7,7 @@ import latis.reader.tsml.ml.ScalarMl
 import latis.reader.tsml.ml.Tsml
 import latis.data.EmptyData
 import latis.data.Data
-import latis.util.Util
+import latis.util.DataUtils
 
 /**
  * An Adapter for Datasets small enough to fit into memory.
@@ -50,7 +50,7 @@ abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
       case None => throw new Error("No data found in cache for Variable: " + name)
     }
 
-    Some(Util.dataToVariable(data, scalar).asInstanceOf[Scalar])
+    Some(DataUtils.dataToVariable(data, scalar).asInstanceOf[Scalar])
     //TODO: use builder method on Variable
   }
 

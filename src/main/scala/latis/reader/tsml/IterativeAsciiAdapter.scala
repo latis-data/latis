@@ -4,7 +4,6 @@ import latis.dm._
 import scala.io.Source
 import scala.collection._
 import latis.data.Data
-import latis.util.Util
 import java.nio.ByteBuffer
 import latis.data.IterableData
 import latis.time.Time

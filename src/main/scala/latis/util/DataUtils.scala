@@ -7,7 +7,7 @@ import java.nio.ByteBuffer
 import latis.time.Time
 import latis.data.seq.SeqData
 
-object Util {
+object DataUtils {
 
 
 
