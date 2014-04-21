@@ -7,7 +7,21 @@ import latis.reader.tsml.ml.Tsml
 import latis.util.PeekIterator2
 import latis.data.IterableData
 
-trait IterativeAdapter2 { this: TsmlAdapter =>
+trait IterativeAdapter2[R] { this: TsmlAdapter =>
+  //R is the type of record
+  
+  def getRecordIterator: Iterator[R]
+  def parseRecord(record: R): Map[String,Data]
+  
+  def getDataIterator: Iterator[Data] = {
+    //if (cacheIsEmpty)
+    getRecordIterator.map(record => {
+      parseRecord(record) //Map[String,Data]
+      //TODO: stitch Data together based on sample template
+    })
+    //else get from cache
+    ???
+  }
     
   /**
    * Override to make Function with IterableData.
@@ -68,11 +82,54 @@ abstract class IterativeAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    * do we even need granule adapter?
    *   probably for not iterable sources, e.g. netcdf
    *   one readAll sucks data into cache
+   * IterableAdapter: record based
+   *   recordIterator: Iterator[R]
+   *   parameterize with record type: IterableAdapter[String]
+   *   can that be used as trait?
+   *   maybe not needed since many granule adapters could be impld as Iterative with caching enabled
+   * is it worth worrying about column vs row major
+   *   cache as column major
+   *   but iterative is row major
+   *   col major cache means we can do some things better from cache
+   *   Peek2 used to map sample template to sample with data
+   *   can we do this in terms of parseRecord: Map[Name,Data]?
+   *   consider utils: sample2data, data2sample
+   *   dataIterator: 
+   *     based on Sample template (or any Var?)
+   *     if cache is empty: recordIterator.map(parseRecord(_))
+   *       if cache is not none, cache by sample: "sample" -> Data for the entire sample
+   *     else pull data from cache, effectively need new Adapter to serve data from cache
+   *     could this be a mixin?
+   *   consider caching by sample? row major
+   *     key/name = "sample"?
+   *     but parseRecord returns map of scalar name to Data
+   *   does cache know record size?
+   *     cache doesn't need to be iterable, up to adapter to manage how to get data out
+   *   
+   *     
+   *   WrappedFunction uses PeekIt to map sample to sample via operation (SampleHomomorphism)
+   *   IterativeAdapter uses PeekIt to map record to Data, doesn't care about sample structure (though parsing will)
+   *   
+   *   +++
+   *   
+   * Hibernate has "load" vs "iterate"
    * 
    * cache: map name to Data = byte buffer
    * use recordSize to do index math?
-   * use ehcache so not limited by memory?
+   * use ehcache so not limited by memory
+   * 'cache' property in adapter tsml: default or none, lazy vs eager?
+   * ++property for iterative with or without lazy cache vs granule with eager cache
    * 
+   * ehcache
+   *   singleton cm = CacheManager.create
+   *   add multiple Cache-s (one for each Dataset)
+   *   manager.addCache(new Cache(config))
+   *   manager.getCache("my_dataset")
+   *   cache.put(new Element(key, value))   (key = var name)
+   *   elm = cache.get(key)
+   *   elm.getValue (Serializable, byte array)
+   * we would want to append to value as we iterate
+   * consider key/value store for disk cache?
    */
   
   
