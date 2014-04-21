@@ -1,8 +1,8 @@
 package latis.reader.tsml.ml
 
 import latis.util.Util
-
 import scala.xml.Node
+import latis.util.StringUtils
 
 /**
  * Representation of a TSML "dataset" element.
@@ -41,7 +41,7 @@ class DatasetMl(xml: Node) extends TupleMl(xml) {
    */
   def getAdapterAttributes(): Map[String,String] = {
     val atts = (xml \ "adapter").head.attributes
-    val seq = for (att <- atts) yield (att.key, Util.resolveParameterizedString(att.value.text))
+    val seq = for (att <- atts) yield (att.key, StringUtils.resolveParameterizedString(att.value.text))
     seq.toMap
   }
 }
