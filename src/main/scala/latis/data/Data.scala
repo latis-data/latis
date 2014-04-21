@@ -42,6 +42,7 @@ trait Data extends Any {
   //TODO: word = Array of 4 chars, 8 bytes
   //TODO: String as Index array of Char, or Word?
   //TODO: Blob: fixed length byte array
+//TODO: move record semantics to IterableData? deprecate SeqData?
   
   //try Set behavior
   //def indexToRecord(index: Int): Data
@@ -102,6 +103,7 @@ object Data {
   //pattern match to deal with type erasure
   //TODO: assert all of the same type
   //TODO: use primitive Arrays?
+//TODO: deprecate SeqData, use IterableData
   def apply(seq: Seq[Any]): Data = seq.head match {
     case _: Double => new DoubleSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Double]])
     case _: Long   => new LongSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Long]])

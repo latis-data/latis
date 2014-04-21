@@ -7,10 +7,7 @@ import latis.ops.Operation
 import latis.ops.filter.Selection
 import java.net.URLEncoder
 
-/**
- * Use a regular expression to extract data values from a data record.
- */
-class SparqlAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
+class SparqlAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
   
   private var query: String = ""
   
@@ -30,8 +27,6 @@ class SparqlAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
     }
     super.getDataset(ops)
   }
-  
-  //TODO: use ProcessingInstruction if we want to define the query in the tsml
 
   /**
    * Override to add query string to URL and request csv output.

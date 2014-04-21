@@ -5,7 +5,7 @@ import latis.reader.tsml.ml.Tsml
 /**
  * Use a regular expression to extract data values from a data record.
  */
-class RegexAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
+class RegexAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
   
   /**
    * Get the required regular expression pattern from the adapter definition.
@@ -20,23 +20,11 @@ class RegexAdapter(tsml: Tsml) extends IterativeAsciiAdapter(tsml) {
    * this Adapter's regular expression pattern.
    * Return an empty List if the record does not match (i.e. does not contain valid data).
    */
-  def getMatchingValues(record: String) = {
+  override def extractValues(record: String) = {
     regex.findFirstMatchIn(record) match {
       case Some(m) => m.subgroups
       case None => List[String]()
     }
   }
 
-  /**
-   * Parse a "record" of text into a Map of Variable name to value
-   * by matching this Adapter's regular expression pattern.
-   */
-  override def parseRecord(record: String): Map[String, String] = {
-    //create Map with variable names and values
-    val vnames = getOrigScalarNames
-    val values = getMatchingValues(record)
-    //If we didn't find the right number of samples, drop this record by returning an empty Map
-    if (vnames.length != values.length) Map[String, String]()
-    else (vnames zip values).toMap
-  }
 }

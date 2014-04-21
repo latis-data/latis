@@ -306,6 +306,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   protected def cache(data: Map[String, Data]) = dataCache ++= data
   
+  //TODO: appendToCache? backing Data would be iterable, know record size, get record by index?
+  
   /**
    * Get the Data that has been cached for the given variable.
    */

@@ -6,32 +6,44 @@ import latis.reader.tsml.ml.FunctionMl
 import latis.reader.tsml.ml.Tsml
 import latis.util.PeekIterator2
 import latis.data.IterableData
+import latis.util.DataUtils
 
-trait IterativeAdapter2[R] { this: TsmlAdapter =>
+abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
   //R is the type of record
   
-  def getRecordIterator: Iterator[R]
-  def parseRecord(record: R): Map[String,Data]
+  def getRecordIterator: Iterator[R] //TODO: return same one or make new one? hook to iterate more than once?
+  def parseRecord(record: R): Option[Map[String,Data]] 
   
-  def getDataIterator: Iterator[Data] = {
+  private lazy val parsedRecordIterator: PeekIterator2[R, Map[String,Data]] = new PeekIterator2(getRecordIterator, (record: R) => parseRecord(record))
+  def getCurrentIndex = parsedRecordIterator.getIndex
+  
+  def makeDataIterator(sampleTemplate: Sample): Iterator[Data] = {
     //if (cacheIsEmpty)
-    getRecordIterator.map(record => {
-      parseRecord(record) //Map[String,Data]
-      //TODO: stitch Data together based on sample template
-    })
+    new PeekIterator2(parsedRecordIterator, (vals: Map[String,Data]) =>  makeDataFromValueMap(vals, sampleTemplate))
+//TODO: populate cache, put makeDataFromDataMap here? has access to cache
+    
     //else get from cache
-    ???
+    //"sample" maps to Data, which could be constructed with record size, so we could just iterate on it
+    //cache.getData("sample").iterator
   }
     
+  private def makeDataFromValueMap(dataMap: Map[String,Data], sampleTemplate: Sample): Option[Data] = {
+    //TODO: cache base on caching strategy
+    //default: key = "sample", append Data to IterableData
+    
+    
+    Some(DataUtils.makeDataFromDataMap(dataMap, sampleTemplate, parsedRecordIterator.getIndex))
+  }
+  
+  
   /**
    * Override to make Function with IterableData.
    */
   override def makeFunction(f: Function): Option[Function] = {
-    //if domain or range is None (e.g. not projected), make index function
+    //Note, if domain or range is None (e.g. not projected), make index function
     val template = Sample(f.getDomain, f.getRange)
     makeSample(template) match {
       case Some(sample) => {
-        //sampleTemplate = sample
         val data: Data = makeIterableData(sample)
         Some(Function(sample.domain, sample.range, f.getMetadata, data))
       }
@@ -40,18 +52,80 @@ trait IterativeAdapter2[R] { this: TsmlAdapter =>
   }
   
   def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
-    lazy val recordSize = sampleTemplate.getSize
-    
-    lazy val iterator = ???//dataIterator
+    def recordSize = sampleTemplate.getSize
+    def iterator = makeDataIterator(sampleTemplate)
   }
 }
+    /*
+     * ascii adapters' parseRecord returns String instead of Data
+     * ++can we simply use StringValue? size issue when converting to bytes? apply when building from template
+     * do we need AsciiParser trait if we do away with GranuleAsciiAdapter?
+     * get rid of AsciiAdapterHelper, too?
+     * they are both record centric, no need to have granule adapter to share with 
+     *   since the granule adapter can be an iterative adapter with eager caching
+     * row vs column major storage concerns?
+     *   granule cache was col-oriented, not helpful?
+     * +some data require sorting
+     *   if source isn't sorted then we can have only a index Function, use Factorization to define domain and sort  
+     *    
+     * ***want to be able to separate out domain Data as Sets
+     *   other vars' data could use set or function mapping
+     * column-oriented cache
+     *   nested Functions could simply use recordSize
+     * but Iterative adapter can't have domain sets
+     *   could via aggregation
+     *   ++domain defined as values in tsml could be a set
+     *     is this done via aggregation?
+     * just stick with column-oriented for now
+     *   optimize for record oriented later? 
+     *   akin to storing data in Tuples, not yet supported
+     * since the adapter owns the cache, we could make it as adapter specific as we'd like
+     *   but would like to reuse some utils
+     *   seems reasonable for IterativeAdapter to store data by sample
+     *   
+     * ++do we need to consider multiple Functions? more than one "sample" variable
+     * let's assume not, for now
+     * Sample.getName = sample
+     * 
+     * ++consider cache as DatasetAccessor?
+     *   Dataset effectively has cache instead of Adapter
+     *   consider making data in code, no adapter
+     *   already tried this in earlier iterations, before we had Data as part of Variable?
+     *   if every dataset needs to have an Accessor, what does a derived dataset have?
+     *   currently Dataset doesn't know its accessor/adapter
+     *     except provenance metadata
+     * consider need for cache vs Var having data
+     *   latter much easier for DSL use
+     *   maybe it is more of an adapter issue: holding data so we can iterate on it again
+     */
+    
+//    getRecordIterator.map(record => {
+//      parseRecord(record) //Map[String,Data]
+//      //TODO: stitch Data together based on sample template
+//      makeDataFromRecord(sampleTemplate, parsedRecord, currentIndex)
+//      /*
+//       * index of recordIt or dataIt?
+//       * try recordIt, assume adapter can apply PIs before exposing recordIt?
+//       * but currently, parseRecord is responsible for rejecting records, return empty Map
+//       * make another PeekIt that wraps recordIt and applies parse, skipping bad samples
+//       *   parsedRecordIterator
+//       *   use Option instead of emptyMap
+//       * 
+//       * need another dataset building pass?
+//       *   1) orig ds, model + metadata only
+//       *   2) apply PIs then cache
+//       *   3) apply user ops
+//       */
+//    })
+    
+
 
 /**
  * This Adapter is designed for arbitrarily large Datasets that can be
  * processed one sample at a time. The Data will be managed in the Function
  * via the Data's iterator which can be fed by this Adapter.
  */
-abstract class IterativeAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
+abstract class IterativeAdapterORIG(tsml: Tsml) extends TsmlAdapter(tsml) {
   //TODO: Stream, lazy list?
   //TODO: consider Iterative and Granule as traits?
   //TODO: consider use cases beyond single top level variable = Function

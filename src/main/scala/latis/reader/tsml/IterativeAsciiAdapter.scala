@@ -12,7 +12,8 @@ import latis.util.PeekIterator
 import latis.util.StringUtils
 import latis.util.PeekIterator2
 
-class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with AsciiAdapterHelper {
+@Deprecated //use AsciiAdapter
+class IterativeAsciiAdapter(tsml: Tsml) { //extends IterativeAdapter(tsml) with AsciiAdapterHelper {
   
   /*
    * TODO: support nested Function
@@ -92,7 +93,7 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Asci
   
   //def makeDataIterator = new PeekIterator2(getRecordIterator, (record: String) => parseData(record))
   
-  def parseData(record: Any): Option[Data] = ???
+  //def parseData(record: Any): Option[Data] = ???
 //  def parseData(record: String): Option[Data] = {
 //    val svals = parseRecord(record)
 //    if (svals.isEmpty) None
@@ -133,37 +134,38 @@ class IterativeAsciiAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Asci
 //    }
 //  }
   
-  /**
-   * Counter in case we have an Index domain.
-   */
-  //private var index = -1
-  
-  //TODO: compare to Util dataToVariable... move this there? but needs access to dataIterator index
-  def makeDataFromRecord(sampleTemplate: Sample, svals: Map[String, String]): Data = {
-    //build a ByteBuffer
-    val size = sampleTemplate.getSize  //TODO: no need to do every time
-    val bb = ByteBuffer.allocate(size)
-    
-    //assume every Scalar in the template has a value in the Map (except index), e.g. not stored by Tuple name
-    //get Seq of Scalars from template
-    val vars = sampleTemplate.toSeq 
-    
-    for (v <- vars) {
-      v match {
-        //case _: Index   => index += 1; bb.putInt(index) //deal with index domain (defined in tsml)
-        case _: Index => bb.putInt(getCurrentIndex) //deal with index domain (defined in tsml)
-        case t: Text  => {
-          val s = StringUtils.padOrTruncate(svals(v.getName), t.length)
-          s.foldLeft(bb)(_.putChar(_)) //fold each character into buffer
-        }
-        //Note, the numerical data will attempt to use a fill or missing value if it fails to parse the string
-        case _: Real    => bb.putDouble(v.stringToValue(svals(v.getName)).asInstanceOf[Double])
-        case _: Integer => bb.putLong(v.stringToValue(svals(v.getName)).asInstanceOf[Long])
-      }
-    }
-    
-    //rewind for use
-    Data(bb.flip.asInstanceOf[ByteBuffer])
-  }
+//  /**
+//   * Counter in case we have an Index domain.
+//   */
+//  //private var index = -1
+//  
+//  //TODO: compare to Util dataToVariable... move this there? but needs access to dataIterator index
+//  //  optional index arg?
+//  def makeDataFromRecord(sampleTemplate: Sample, svals: Map[String, String]): Data = {
+//    //build a ByteBuffer
+//    val size = sampleTemplate.getSize  //TODO: no need to do every time
+//    val bb = ByteBuffer.allocate(size)
+//    
+//    //assume every Scalar in the template has a value in the Map (except index), e.g. not stored by Tuple name
+//    //get Seq of Scalars from template
+//    val vars = sampleTemplate.toSeq 
+//    
+//    for (v <- vars) {
+//      v match {
+//        //case _: Index   => index += 1; bb.putInt(index) //deal with index domain (defined in tsml)
+//        case _: Index => bb.putInt(getCurrentIndex) //deal with index domain (defined in tsml)
+//        case t: Text  => {
+//          val s = StringUtils.padOrTruncate(svals(v.getName), t.length)
+//          s.foldLeft(bb)(_.putChar(_)) //fold each character into buffer
+//        }
+//        //Note, the numerical data will attempt to use a fill or missing value if it fails to parse the string
+//        case _: Real    => bb.putDouble(v.stringToValue(svals(v.getName)).asInstanceOf[Double])
+//        case _: Integer => bb.putLong(v.stringToValue(svals(v.getName)).asInstanceOf[Long])
+//      }
+//    }
+//    
+//    //rewind for use
+//    Data(bb.flip.asInstanceOf[ByteBuffer])
+//  }
 
 }

@@ -28,18 +28,43 @@ import latis.ops.filter.Selection
 import latis.ops.filter.FirstFilter
 import latis.ops.filter.LastFilter
 
-class JdbcAdapter(tsml: Tsml) extends IterativeAdapter(tsml) with Logging {
+/*
+ * TODO: consider other APIs
+ * slick: typesafe, but oracle api closed
+ * anorm: play, might work
+ *   JNDI: http://www.playframework.com/documentation/2.0/ScalaDatabaseOthers
+ *   
+ */
+
+/**
+ * Define some inner classes to provide us with Record semantics for JDBC ResultSets.
+ */
+object JdbcAdapter {
+  class JdbcRecord {}
+  class JdbcRecordIterator(resultSet: ResultSet) extends Iterator[JdbcRecord] {
+    
+  }
+}
+
+class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](tsml) with Logging {
+  //TODO: catch exceptions and close connections
 
   /*
-   * TODO: 2014-02-24
-   * deal with non-projected domain or range, replace with Index
-   * let Projection do this on first pass? instead of doing the logic here?
-   * but even projection delegated to projectedFunction (so it can set index value)
-   * needs to be applied at sample level so you know if domain or range is empty
-   * 
+   * TODO: refactor with Record semantics
+   * make an internal class for Record
+   * encapsulate ResultSet
    */
 
-  //TODO: catch exceptions and close connections
+  
+  def getRecordIterator = new JdbcAdapter.JdbcRecordIterator(resultSet)
+  def parseRecord(record: JdbcAdapter.JdbcRecord): Option[Map[String,Data]] = {
+    
+    
+    ???
+  }
+  
+  
+  
 
   //Keep these global so we can close them.
   private lazy val resultSet: ResultSet = executeQuery

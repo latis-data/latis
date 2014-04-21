@@ -11,7 +11,20 @@ abstract class IterableData extends Data {
   //TODO: or make DataIterator? complication with "length"
   //TODO: should Data even define iterator method or do it here?
   
+  /*
+   * was use for adapters and such to impl 
+   * as opposed to defining concrete subclasses
+   * could we use this with "recordSize" and "append"?
+   * SeqData uses recordSize
+   * should we use SeqData instead?
+   *   but it was designed for use by scalars with all the data
+   *   should deprecate that
+   *   use implicit Index Function instead
+   */
+  
+  
   //To get record/sample by index, need to manage iterator ourselves, as Stream.
+  //TODO: review use of Stream in light of caching
   lazy val stream: Stream[Data] = iterator.toStream
   def apply(index: Int): Data = stream(index)
   

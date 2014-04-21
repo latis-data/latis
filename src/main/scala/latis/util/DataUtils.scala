@@ -9,8 +9,41 @@ import latis.data.seq.SeqData
 
 object DataUtils {
 
+  /**
+   * Given a dataMap mapping Variable names to Data and a Variable template,
+   * construct a Data object with data from the dataMap.
+   */
+  def makeDataFromDataMap(dataMap: Map[String, Data], variableTemplate: Variable, index: Int = -1): Data = {
+    //build a ByteBuffer to contain the data
+    val size = variableTemplate.getSize
+    val bb = ByteBuffer.allocate(size)
 
+    //Internal method to recursively populate the buffer
+    def accumulateData(v: Variable) {
+      //See if we have cached data for the given variable.
+      //If not, keep iterating recursively.
+      dataMap.get(v.getName) match {
+        case Some(d) => bb.put(d.getByteBuffer.array)
+        case None => variableTemplate match {
+          case _: Index => bb.putInt(index)  //handle Index which should not have a value in the dataMap
+          case Tuple(vars) => vars.map(v => accumulateData(v))
+          case f: Function => f.iterator.map(v => accumulateData(v))
+          case _: Scalar => throw new Error("No data found for " + v.getName)
+        }
+      }
+    }
 
+    //recursively populate the byte buffer
+    accumulateData(variableTemplate)
+
+    //TODO: test that we got the size right
+    //rewind for use
+    Data(bb.flip.asInstanceOf[ByteBuffer])
+  }
+  
+ 
+  
+  
   /*
    * TODO: The Data to Variable conversions make use of a ByteBuffer's
    * advancing position. We need to ensure that these are done atomically

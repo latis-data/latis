@@ -34,7 +34,7 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
    * Override to add the file name (i.e. the data "record") itself as a data value.
    * Note, this assumes that the TSML has the file variable defined last.
    */
-  override def getMatchingValues(fileName: String) = {
+  override def extractValues(fileName: String) = {
     regex.findFirstMatchIn(fileName) match {
       case Some(m) => m.subgroups :+ fileName //add the file name
       case None => List[String]()
