@@ -40,9 +40,14 @@ import latis.ops.filter.LastFilter
  * Define some inner classes to provide us with Record semantics for JDBC ResultSets.
  */
 object JdbcAdapter {
-  class JdbcRecord {}
-  class JdbcRecordIterator(resultSet: ResultSet) extends Iterator[JdbcRecord] {
-    
+  
+  case class JdbcRecord(resultSet: ResultSet) 
+
+  class JdbcRecordIterator(resultSet: ResultSet) extends PeekIterator[JdbcRecord] {
+    def getNext: JdbcRecord = resultSet.next match {
+      case true => JdbcRecord(resultSet)
+      case false => null
+    }
   }
 }
 
@@ -55,8 +60,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * encapsulate ResultSet
    */
 
-  
   def getRecordIterator = new JdbcAdapter.JdbcRecordIterator(resultSet)
+  
   def parseRecord(record: JdbcAdapter.JdbcRecord): Option[Map[String,Data]] = {
     
     
