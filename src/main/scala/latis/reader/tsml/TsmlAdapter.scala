@@ -293,10 +293,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   //val tsmlData = Map[String, Data]() //TODO: immutable?
   
-  /**
-   * Column-oriented data cache.
-   */
-  private val dataCache = mutable.Map[String, Data]()
+  private val dataCache = mutable.Map[String, DataSeq]()
   
   //TODO: consider mutability issues
   //TODO: consider ehcache
@@ -304,14 +301,34 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   /**
    * Add Data to the cache.
    */
-  protected def cache(data: Map[String, Data]) = dataCache ++= data
+  //protected def cache(data: Map[String, Data]) = dataCache ++= data
   
-  //TODO: appendToCache? backing Data would be iterable, know record size, get record by index?
+  /**
+   * Replace data for given variable.
+   */
+  protected def cache(variableName: String, data: Data) = {
+    //make sure data is Iterable
+    val d: DataSeq = data match {
+      case idata: DataSeq => idata
+      case _ => DataSeq(data)
+    }
+    dataCache += (variableName -> d)
+  }
+  
+  /**
+   * Append data to given variable.
+   */
+  protected def appendToCache(variableName: String, data: Data) {
+    getCachedData(variableName) match {
+      case Some(d) => cache(variableName, d append data) //Note: error if wrong size
+      case None => cache(variableName, data) //first sample
+    }
+  }
   
   /**
    * Get the Data that has been cached for the given variable.
    */
-  def getCachedData(variableName: String): Option[Data] = dataCache.get(variableName)
+  def getCachedData(variableName: String): Option[DataSeq] = dataCache.get(variableName)
   //TODO: if None throw new Error("No data found in cache for Variable: " + variableName)? or return empty Data?
 
   

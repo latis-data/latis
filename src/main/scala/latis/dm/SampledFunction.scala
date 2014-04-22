@@ -42,16 +42,16 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
   
   def iterator: Iterator[Sample] = {
     if (_iterator != null) _iterator
-    else if (getData.isEmpty) iterateFromKids
+//    else if (getData.isEmpty) iterateFromKids
     else getDataIterator.map(DataUtils.dataToSample(_, Sample(domain, range)))
   }
   
-  private def iterateFromKids: Iterator[Sample] = {
-    //val dit = domain.getDataIterator.map(data => DataUtils.dataToVariable(data, domain))
-    val dit = domain.getDomainDataIterator.map(data => DataUtils.dataToVariable(data, domain))
-    val rit = range.getDataIterator.map(data => DataUtils.dataToVariable(data, range))
-    (dit zip rit).map(pair => Sample(pair._1, pair._2))
-  }
+//  private def iterateFromKids: Iterator[Sample] = {
+//    //val dit = domain.getDataIterator.map(data => DataUtils.dataToVariable(data, domain))
+//    val dit = domain.getDomainDataIterator.map(data => DataUtils.dataToVariable(data, domain))
+//    val rit = range.getDataIterator.map(data => DataUtils.dataToVariable(data, range))
+//    (dit zip rit).map(pair => Sample(pair._1, pair._2))
+//  }
 
   
   //Support first and last filters

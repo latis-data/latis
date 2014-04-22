@@ -16,12 +16,13 @@ import latis.util.DataUtils
  * data are stored in a separate Data object).
  * Use an IterativeAdapter if you want to read data lazily.
  */
+@Deprecated //use IterativeAdapter with eager caching strategy
 abstract class GranuleAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   
   /**
    * Read and cache the data.
    */
-  override def init = cache(readData)
+//  override def init = cache(readData)
 
   /**
    * Subclasses need to implement this method to read all of the data

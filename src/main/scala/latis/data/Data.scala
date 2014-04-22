@@ -46,23 +46,24 @@ trait Data extends Any {
   
   //try Set behavior
   //def indexToRecord(index: Int): Data
-  def apply(index: Int): Data
+ //only apllicable to IterableData  def apply(index: Int): Data
   //TODO: or Index? could encapsulate n-D
   //TODO: valueToIndex? indexOf?
   
-  def length: Int  //number of records, Experimental: "-n" is unlimited, currently n
-  def recordSize: Int //bytes per record
-  def size = length * recordSize //total number of bytes
+  //def length: Int  //number of records, Experimental: "-n" is unlimited, currently n
+  //def recordSize: Int //bytes per record
+  def size: Int // = length * recordSize //total number of bytes
   
   def getByteBuffer: ByteBuffer 
   //TODO: just byteBuffer?
   
   //TODO: beware of mixing getters that increment with iterator
-  def iterator: Iterator[Data] //= List(DoubleValue(doubleValue)).iterator
+  //def iterator: Iterator[Data] //= List(DoubleValue(doubleValue)).iterator
   //TODO: support foreach, (d <- data)
     
-  def isEmpty: Boolean = length == 0
+  def isEmpty: Boolean //= length == 0
   def notEmpty = ! isEmpty
+
   
   /*
    * TODO: is byte buffer equality sufficient?
@@ -118,22 +119,24 @@ object Data {
   def apply(strings: Seq[String], length: Int): Data = new StringSeqData(strings.toIndexedSeq, length)
   
   //takes Buffer so user's don't have to cast after "rewind"
-  def apply(buffer: Buffer, sampleSize: Int): Data = {
-    //TODO: if buffer is empty, return EmptyData?
-    //flip if not positioned at 0, sets limit to current position and rewinds
-    //If position is 0, assume the provider already flipped it.
-    //TODO: potential for buffer capacity to be larger than desired, e.g. rewind called instead of flip
-    //  but most cases should allocate just the right size: limit = capacity
-    val b = if (buffer.limit > 0 && buffer.position != 0) buffer.flip else buffer
-    b match {
-      case bb: ByteBuffer => new ByteBufferData(bb, sampleSize)
-      case _ => throw new RuntimeException("Data buffer must be a ByteBuffer")
-      //Note, can't take CharBuffer, need to start with a ByteBuffer and use asFooBuffer only as a wrapper
-    }
-  }
+//  def apply(buffer: Buffer, sampleSize: Int): Data = {
+//    //TODO: if buffer is empty, return EmptyData?
+//    //flip if not positioned at 0, sets limit to current position and rewinds
+//    //If position is 0, assume the provider already flipped it.
+//    //TODO: potential for buffer capacity to be larger than desired, e.g. rewind called instead of flip
+//    //  but most cases should allocate just the right size: limit = capacity
+//    val b = if (buffer.limit > 0 && buffer.position != 0) buffer.flip else buffer
+//    b match {
+//      case bb: ByteBuffer => new ByteBufferData(bb, sampleSize)
+//      case _ => throw new RuntimeException("Data buffer must be a ByteBuffer")
+//      //Note, can't take CharBuffer, need to start with a ByteBuffer and use asFooBuffer only as a wrapper
+//    }
+//  }
   
   //to be used for a single sample: sampleSize = limit
-  def apply(buffer: Buffer): Data = Data(buffer, buffer.limit)
+  //def apply(buffer: Buffer): Data = Data(buffer, buffer.limit)
+  //TODO: make sure buffer is rewound? if (buffer.limit > 0 && buffer.position != 0) buffer.flip else buffer
+  def apply(buffer: ByteBuffer): Data = new ByteBufferData(buffer)
   
   //def apply(bytes: Seq[Byte]): Data = Data(ByteBuffer.wrap(bytes.toArray))
   def apply(bytes: Array[Byte]): Data = Data(ByteBuffer.wrap(bytes))

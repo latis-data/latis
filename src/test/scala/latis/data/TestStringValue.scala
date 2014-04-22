@@ -28,11 +28,11 @@ class TestStringValue {
   @Test
   def not_is_empty = assertTrue(!data.isEmpty)
   
-  @Test
-  def length = assertEquals(1, data.length)
-  
-  @Test
-  def recordSize = assertEquals(10, data.recordSize)
+//  @Test
+//  def length = assertEquals(1, data.length)
+//  
+//  @Test
+//  def recordSize = assertEquals(10, data.recordSize)
   
   @Test
   def size = assertEquals(10, data.size)
@@ -40,25 +40,25 @@ class TestStringValue {
   @Test
   def equals = assertEquals(data, Data("hello"))
   
-  @Test
-  def iterate = {
-    assertEquals(List("hello"), data.iterator.map(_.stringValue).toList)
-  }
-  
-  @Test
-  def index = {
-    assertEquals(data, data(0))
-  }
-  
-  @Test
-  def index_out_of_bounds = {
-    try{
-      data(1)
-      fail
-    } catch {
-      case e: Exception => assertTrue(true)
-    }
-  }
+//  @Test
+//  def iterate = {
+//    assertEquals(List("hello"), data.iterator.map(_.stringValue).toList)
+//  }
+//  
+//  @Test
+//  def index = {
+//    assertEquals(data, data(0))
+//  }
+//  
+//  @Test
+//  def index_out_of_bounds = {
+//    try{
+//      data(1)
+//      fail
+//    } catch {
+//      case e: Exception => assertTrue(true)
+//    }
+//  }
   
   //def iterate_twice
 }

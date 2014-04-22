@@ -337,52 +337,53 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    * If it doesn't contain data, gather it from the kids.
    */
   def getDataIterator: Iterator[Data] = {
-    if (data.notEmpty) data.iterator
-    else this match {
-      case Tuple(vars) => concatData(vars) 
-      case Function(d, r) => concatData(Seq(d,r))
-      case s: Scalar => s.data.iterator //TODO: not possible? only if scalar has no data = error
-    }
+    if (data.notEmpty) data.asInstanceOf[IterableData].iterator
+    else ???
+//    else this match {
+//      case Tuple(vars) => concatData(vars) 
+//      case Function(d, r) => concatData(Seq(d,r))
+//      case s: Scalar => s.data.iterator //TODO: not possible? only if scalar has no data = error
+//    }
   }
 
-  /**
-   * Iterate over all combinations of the scalar values in a tuple
-   * instead of combining them pairwise as for tuples in ranges.
-   */
-  def getDomainDataIterator: Iterator[Data] = {
-    if (data.notEmpty) data.iterator
-    //TODO: deal with domain Tuple with interleaved data
-    else this match {
-      case Tuple(vars) => {
-        //assume all vars are scalars with data
-        //TODO: how do deal with non-projected domain vars? Index should fill in
-//TODO: assuming 2d for now, until cleaner recursive solution emerges
-        if (vars.length != 2) throw new Error("Data Iterator for a Function domain currently supports only 2D.")
-        
-        //TODO: build with iterators, but can't reuse ys?
-        val datas = vars.map(_.getData.iterator.toList) //Seq[Seq[Data]]
-        val xs = vars(0).getData.iterator.toList
-        val ys = vars(1).getData.iterator.toList
-        
-        val ds = for (x <- xs; y <- ys) yield Data(List(x,y))(Data.empty) //hack to disambiguate after type erasure
-        ds.iterator
-      }
-      case Function(d, r) => ??? //TODO: Function in domain as coordinate systems transform
-    }
-  }
+//  /**
+//   * Iterate over all combinations of the scalar values in a tuple
+//   * instead of combining them pairwise as for tuples in ranges.
+//   */
+//  def getDomainDataIterator: Iterator[Data] = {
+//    if (data.notEmpty) data.iterator
+//    //TODO: deal with domain Tuple with interleaved data
+//    else this match {
+//      case Tuple(vars) => {
+//        //assume all vars are scalars with data
+//        //TODO: how do deal with non-projected domain vars? Index should fill in
+////TODO: assuming 2d for now, until cleaner recursive solution emerges
+//        if (vars.length != 2) throw new Error("Data Iterator for a Function domain currently supports only 2D.")
+//        
+//        //TODO: build with iterators, but can't reuse ys?
+//        val datas = vars.map(_.getData.iterator.toList) //Seq[Seq[Data]]
+//        val xs = vars(0).getData.iterator.toList
+//        val ys = vars(1).getData.iterator.toList
+//        
+//        val ds = for (x <- xs; y <- ys) yield Data(List(x,y))(Data.empty) //hack to disambiguate after type erasure
+//        ds.iterator
+//      }
+//      case Function(d, r) => ??? //TODO: Function in domain as coordinate systems transform
+//    }
+//  }
   
   /**
    * Concatenate the Data Iterators of the given Seq of Variables
    * into a single Data Iterator.
    */
-  private def concatData(vars: Seq[Variable]): Iterator[Data] = new Iterator[Data] {
-    val its: Seq[Iterator[Data]] = vars.map(_.getDataIterator)
-    def hasNext = its.head.hasNext //assume all Variables have the same number of samples
-    def next = {
-      val ds: Seq[Data] = its.map(_.next)
-      Data(ds)(Data.empty) //hack to disambiguate after type erasure
-    }
-  }
+//  private def concatData(vars: Seq[Variable]): Iterator[Data] = new Iterator[Data] {
+//    val its: Seq[Iterator[Data]] = vars.map(_.getDataIterator)
+//    def hasNext = its.head.hasNext //assume all Variables have the same number of samples
+//    def next = {
+//      val ds: Seq[Data] = its.map(_.next)
+//      Data(ds)(Data.empty) //hack to disambiguate after type erasure
+//    }
+//  }
   
   
   override def equals(that: Any): Boolean = (this, that) match {

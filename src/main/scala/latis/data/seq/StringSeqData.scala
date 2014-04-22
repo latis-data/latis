@@ -8,7 +8,7 @@ import latis.util.StringUtils
 case class StringSeqData(ss: immutable.Seq[String], textLength: Int) extends SeqData {
   //TODO: what if textLength < the default = 4?
   
-  def getByteBuffer: ByteBuffer = {
+  override def getByteBuffer: ByteBuffer = {
     val bb = ByteBuffer.allocate(size)
     //Fix length of strings
     val ss2 = ss.map(StringUtils.padOrTruncate(_, textLength))
@@ -16,7 +16,7 @@ case class StringSeqData(ss: immutable.Seq[String], textLength: Int) extends Seq
     bb
   }
   
-  def length = ss.length //number of samples
+  override def length = ss.length //number of samples
 
   def recordSize = textLength * 2 //2 bytes per char
   

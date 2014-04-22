@@ -7,9 +7,9 @@ import latis.data.value.LongValue
 
 case class LongSeqData(ds: immutable.Seq[Long]) extends SeqData {
   
-  def getByteBuffer: ByteBuffer = ds.foldLeft(ByteBuffer.allocate(size))(_.putLong(_)).rewind.asInstanceOf[ByteBuffer]
+  override def getByteBuffer: ByteBuffer = ds.foldLeft(ByteBuffer.allocate(size))(_.putLong(_)).rewind.asInstanceOf[ByteBuffer]
   
-  def length = ds.length
+  override def length = ds.length
   def recordSize = 8
   
   def iterator = ds.iterator.map(LongValue(_))

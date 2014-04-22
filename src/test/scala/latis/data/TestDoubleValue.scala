@@ -28,11 +28,11 @@ class TestDoubleValue {
   @Test
   def not_is_empty = assertTrue(!data.isEmpty)
   
-  @Test
-  def length = assertEquals(1, data.length)
-  
-  @Test
-  def recordSize = assertEquals(8, data.recordSize)
+//  @Test
+//  def length = assertEquals(1, data.length)
+//  
+//  @Test
+//  def recordSize = assertEquals(8, data.recordSize)
   
   @Test
   def size = assertEquals(8, data.size)
@@ -40,24 +40,24 @@ class TestDoubleValue {
   @Test
   def equals = assertEquals(data, Data(3.14))
   
-  @Test
-  def iterate = {
-    assertEquals(List(3.14), data.iterator.map(_.doubleValue).toList)
-  }
-  
-  @Test
-  def index = {
-    assertEquals(data, data(0))
-  }
-  
-  @Test
-  def index_out_of_bounds = {
-    try{
-      data(1)
-      fail
-    } catch {
-      case e: Exception => assertTrue(true)
-    }
-  }
+//  @Test
+//  def iterate = {
+//    assertEquals(List(3.14), data.iterator.map(_.doubleValue).toList)
+//  }
+//  
+//  @Test
+//  def index = {
+//    assertEquals(data, data(0))
+//  }
+//  
+//  @Test
+//  def index_out_of_bounds = {
+//    try{
+//      data(1)
+//      fail
+//    } catch {
+//      case e: Exception => assertTrue(true)
+//    }
+//  }
   //def iterate_twice
 }

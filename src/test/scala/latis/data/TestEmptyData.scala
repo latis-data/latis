@@ -36,13 +36,13 @@ class TestEmptyData {
   @Test
   def empty_byte_buffer = assertEquals(0, EmptyData.getByteBuffer.limit)
 
-  @Test
-  def access_by_index = {
-    try{
-      EmptyData(0)
-      fail
-    } catch {
-      case e: Exception => assertTrue(true)
-    }
-  }
+//  @Test
+//  def access_by_index = {
+//    try{
+//      EmptyData(0)
+//      fail
+//    } catch {
+//      case e: Exception => assertTrue(true)
+//    }
+//  }
 }

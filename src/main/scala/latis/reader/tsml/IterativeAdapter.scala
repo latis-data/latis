@@ -21,7 +21,6 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
   def makeDataIterator(sampleTemplate: Sample): Iterator[Data] = {
     //if (cacheIsEmpty)
     new PeekIterator2(parsedRecordIterator, (vals: Map[String,Data]) =>  makeDataFromValueMap(vals, sampleTemplate))
-//TODO: populate cache, put makeDataFromDataMap here? has access to cache
     
     //else get from cache
     //"sample" maps to Data, which could be constructed with record size, so we could just iterate on it
@@ -32,8 +31,14 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
     //TODO: cache base on caching strategy
     //default: key = "sample", append Data to IterableData
     
+    val data = DataUtils.makeDataFromDataMap(dataMap, sampleTemplate, parsedRecordIterator.getIndex)
     
-    Some(DataUtils.makeDataFromDataMap(dataMap, sampleTemplate, parsedRecordIterator.getIndex))
+    getProperty("cache") match {
+      case Some("none") =>
+      case None => 
+    }
+    
+    Some(data)
   }
   
   

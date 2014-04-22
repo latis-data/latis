@@ -4,6 +4,7 @@ import latis.data.Data
 import latis.data.value.DoubleValue
 import java.nio.Buffer
 import latis.metadata.Metadata
+import java.nio.ByteBuffer
 
 /**
  * Binary blob.
@@ -12,7 +13,7 @@ trait Binary extends Scalar
 
 object Binary {
   
-  def apply(buffer: Buffer) = {
+  def apply(buffer: ByteBuffer) = {
     val size = buffer.limit
     val md = Metadata(Map("size" -> size.toString))
     new AbstractScalar(md, Data(buffer)) with Binary
@@ -22,7 +23,7 @@ object Binary {
   
   def apply(md: Metadata, data: Data): Binary = new AbstractScalar(md, data) with Binary
   
-  def apply(md: Metadata, buffer: Buffer): Binary = {
+  def apply(md: Metadata, buffer: ByteBuffer): Binary = {
     //add size if not already defined
     val md2 = md.get("size") match {
       case Some(_) => md

@@ -3,14 +3,11 @@ package latis.data
 import java.nio.ByteBuffer
 import latis.data.value.IndexValue
 
-class IndexData(val start: Int, val stop: Int, val stride: Int) extends Data {
+class IndexData(val start: Int, val stop: Int, val stride: Int) extends IterableData {
   
-  def length: Int = (stop - start) / stride + 1
-  
-  
-  //TODO: Index values are not to be serialized, so return empty?
-  def recordSize: Int = 0
-  def getByteBuffer: ByteBuffer = ByteBuffer.allocate(0)
+  override def length: Int = (stop - start) / stride + 1
+  def recordSize: Int = 4
+  //def getByteBuffer: ByteBuffer = ByteBuffer.allocate(size)
   
   def iterator = new Iterator[Data]() {
     var index = start
@@ -37,6 +34,7 @@ class IndexData(val start: Int, val stop: Int, val stride: Int) extends Data {
 
 object IndexData {
   //TODO: n-dimensions
+  //TODO: error if start > stop...
   
   def apply(start: Int, stop: Int, stride: Int): IndexData = new IndexData(start, stop, stride)
   

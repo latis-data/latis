@@ -36,7 +36,7 @@ trait Variable {
   
   def toSeq: Seq[Scalar]
   def getDataIterator: Iterator[Data]
-  def getDomainDataIterator: Iterator[Data]
+//  def getDomainDataIterator: Iterator[Data]
   
   def getVariables: Seq[Variable] //TODO: immutable.Seq?
   def apply(index: Int): Variable = getVariables(index)
