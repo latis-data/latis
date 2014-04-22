@@ -124,7 +124,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) {
     case _: Index   => IndexValue(value.toInt)
     case _: Integer => Data(value.toLong)
     case _: Real    => Data(value.toDouble)
-    case _: Text    => Data(value) //Note, this will not enforce length
+    case t: Text    => Data(StringUtils.padOrTruncate(value, t.length)) //enforce length
   }
 }
 

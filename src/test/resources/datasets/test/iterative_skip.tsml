@@ -2,7 +2,7 @@
 <tsml>
 
   <dataset name="iterative_skip">
-    <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+    <adapter class="latis.reader.tsml.AsciiAdapter"
              delimiter="\s+"
              skip="1"
              location="datasets/test/mixed.txt" />

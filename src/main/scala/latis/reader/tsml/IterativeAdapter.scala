@@ -1,12 +1,13 @@
 package latis.reader.tsml
 
-import latis.dm._
 import latis.data.Data
-import latis.reader.tsml.ml.FunctionMl
-import latis.reader.tsml.ml.Tsml
-import latis.util.PeekIterator2
 import latis.data.IterableData
+import latis.dm.Function
+import latis.dm.Sample
+import latis.reader.tsml.ml.Tsml
 import latis.util.DataUtils
+import latis.util.PeekIterator2
+import scala.collection.Map
 
 abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
   //R is the type of record
