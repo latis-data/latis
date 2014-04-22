@@ -6,6 +6,8 @@ import latis.dm._
 import java.nio.ByteBuffer
 import latis.time.Time
 import latis.data.seq.SeqData
+import latis.time.TimeFormat
+import scala.collection.Map
 
 object DataUtils {
 
@@ -23,11 +25,16 @@ object DataUtils {
       //See if we have cached data for the given variable.
       //If not, keep iterating recursively.
       dataMap.get(v.getName) match {
-        case Some(d) => bb.put(d.getByteBuffer.array)
-        case None => variableTemplate match {
+        case Some(d) => {
+          //TODO: consider trace debugging here
+          val dbb = d.getByteBuffer
+          val bytes = dbb.array
+          bb.put(bytes)
+        }
+        case None => v match {
           case _: Index => bb.putInt(index)  //handle Index which should not have a value in the dataMap
-          case Tuple(vars) => vars.map(v => accumulateData(v))
-          case f: Function => f.iterator.map(v => accumulateData(v))
+          case Tuple(vars) => vars.map(accumulateData(_))
+          case f: Function => f.iterator.map(accumulateData(_))
           case _: Scalar => throw new Error("No data found for " + v.getName)
         }
       }
@@ -41,17 +48,6 @@ object DataUtils {
     Data(bb.flip.asInstanceOf[ByteBuffer])
   }
   
- 
-  
-  
-  /*
-   * TODO: The Data to Variable conversions make use of a ByteBuffer's
-   * advancing position. We need to ensure that these are done atomically
-   * to avoid side effects.
-   * The data should contain all and only the data for the requested Variable(s).
-   * 
-   * How to deal with Index Function? Do we need to store index value?
-   */
 
   def dataToSample(data: Data, template: Sample): Sample = {
     //TODO: could we just rely on Sample's Tuple behavior here?
@@ -81,26 +77,7 @@ object DataUtils {
     //TODO: deal with nested Function
     case f: Function => ???
   }
-  
-//  def dataToVariable(data: Data, template: Variable): Variable = {
-//    //hack/experiment for text, don't use byte buffer, TODO: generalize?
-//    data match {
-//      case StringValue(s) => Text(template.getMetadata, s) //TODO: just build with Data instead of extracting string? or do we need to be able to reapply length?
-//      case sd: SeqData => template match {
-//        //TODO: make sure types match
-//        //TODO: use builder
-//        case _: Real => Real(template.getMetadata, data)
-//        ???
-//      }
-////      case _ => {
-////        //TODO: just build any var with given data? even Tuple?
-////        val bb = data.getByteBuffer
-////        val v = buildVarFromBuffer(bb, template)
-////        bb.rewind //reset to the beginning in case we want to reuse it
-////        v
-////      }
-//    }
-//  }
+
 
   def buildVarFromBuffer(bb: ByteBuffer, template: Variable): Variable = template match {
 
