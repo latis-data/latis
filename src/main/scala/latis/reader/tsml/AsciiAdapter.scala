@@ -121,7 +121,6 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) {
   //TODO: reuse, dataUtils?
   //TODO: handle number parse exceptions
   def parseStringValue(value: String, variableTemplate: Variable): Data = variableTemplate match {
-    case _: Index   => IndexValue(value.toInt)
     case _: Integer => Data(value.toLong)
     case _: Real    => Data(value.toDouble)
     case t: Text    => Data(StringUtils.padOrTruncate(value, t.length)) //enforce length
