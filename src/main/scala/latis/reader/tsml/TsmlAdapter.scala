@@ -1,28 +1,33 @@
 package latis.reader.tsml
 
-import latis.dm._
-import scala.xml.{Elem,Node}
-import scala.collection._
-import latis.metadata._
-import javax.naming.directory.Attributes
+import latis.data.Data
+import latis.data.DataSeq
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Index
+import latis.dm.Sample
+import latis.dm.Scalar
+import latis.dm.Tuple
+import latis.dm.Variable
+import latis.metadata.Metadata
 import latis.ops.Operation
-import latis.time.Time
-import scala.collection.mutable.Buffer
-import scala.collection.mutable.ArrayBuffer
-import java.io.File
-import latis.reader.tsml.ml.VariableMl
-import latis.reader.tsml.ml.ScalarMl
-import latis.reader.tsml.ml.FunctionMl
-import latis.reader.tsml.ml.TupleMl
-import latis.reader.tsml.ml.Tsml
-import java.net.URL
 import latis.ops.Projection
 import latis.ops.filter.Selection
-import latis.data._
-import latis.data.EmptyData
-import java.nio.ByteBuffer
-import scala.io.Source
+import latis.reader.tsml.ml.FunctionMl
+import latis.reader.tsml.ml.ScalarMl
+import latis.reader.tsml.ml.Tsml
+import latis.reader.tsml.ml.TupleMl
+import latis.reader.tsml.ml.VariableMl
+
+import java.io.File
 import java.net.URI
+import java.net.URL
+
+import scala.Option.option2Iterable
+import scala.collection.Map
+import scala.collection.Seq
+import scala.collection.mutable
+import scala.io.Source
 
 
 /**
@@ -63,15 +68,16 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   /**
    * Keep a list of the original Scalars.
+   * Don't include "index" which is just a placeholder for an otherwise undefined domain.
+   * The index value does not appear in the original data source. Otherwise, model it as an Integer.
    */
-  private lazy val origScalars = origDataset.toSeq
+  private lazy val origScalars = origDataset.toSeq.filterNot(_.isInstanceOf[Index])
   def getOrigScalars = origScalars
   
   /**
    * Keep a list of the names of the original Scalars.
-   * Don't include "index" which is only a place holder when there is no other domain variable.
    */
-  private lazy val origScalarNames = origScalars.map(_.getName).filter(_ != "index")
+  private lazy val origScalarNames = origScalars.map(_.getName)
   def getOrigScalarNames = origScalarNames
   
   
@@ -143,7 +149,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   /**
    * Hook for subclasses to do something before constructing the Dataset.
-   * Note, this happens after the first Dataset construction pass (loading TSML).
+   * Note, this happens after the first Dataset construction pass (loading TSML)
+   * but before the second (reading data).
    */
   def init: Unit = {}
   
@@ -151,11 +158,13 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * The final Dataset that this Adapter produces.
    */
   private lazy val dataset: Dataset = {
-    init
-    makeDataset(origDataset)
+    val ods = origDataset //invoke lazy first Dataset construction pass
+    init //let subclasses do something before we start thinking about data access.
+    makeDataset(ods)
   }
   
   def getDataset: Dataset = dataset
+    //TODO: PIs not applied!?
   
   def getDataset(ops: Seq[Operation]): Dataset = {
     
@@ -191,17 +200,14 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     case function: Function => makeFunction(function)
   }
   
-  //default to no-op
   //TODO: deal with data defined in tsml
-  protected def makeScalar(scalar: Scalar): Option[Scalar] = Some(scalar)
-//  {
-//    scalar.getData match {
-//      case EmptyData => Some(scalar) //no need for modified copy
-//      //case d: Data => Some(Scalar(scalar.getMetadata, d)) //make new Scalar with md and data from orig
-//      //TODO: make sure we get the same type, use Builder pattern? CanBuildFrom? 
-//      //copyWithNewData?
-//    }
-//  }
+  //protected def makeScalar(scalar: Scalar): Option[Scalar] = Some(scalar)
+  //if we made it this far, this should be a top level scalar with a single value in the cache
+  //or is it possible that the Scalar has Data? would have had to be done in first dataset construction pass - from data in tsml?
+  protected def makeScalar(scalar: Scalar): Option[Scalar] = getCachedData(scalar.getName) match {
+    case Some(ds) => Some(Scalar(scalar.getMetadata, ds(0)))
+    case None => Some(scalar) //no-op, but might as well throw an error since this means no data is defined?
+  }
   
   protected def makeSample(sample: Sample): Option[Sample] = {
     //Note this uses a -1 place holder for Index.
@@ -300,8 +306,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   /**
    * Add Data to the cache.
+   * Note, this will replace any data cached for a given variable name.
    */
-  //protected def cache(data: Map[String, Data]) = dataCache ++= data
+  protected def cache(dataMap: Map[String, DataSeq]) = dataCache ++= dataMap
   
   /**
    * Replace data for given variable.

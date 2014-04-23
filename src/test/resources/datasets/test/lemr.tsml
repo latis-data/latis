@@ -5,12 +5,10 @@
     <adapter class="latis.reader.tsml.SparqlAdapter"
              location="http://lemr-dev:3030/VIVO/sparql" />
              
-    <function>
       <index/>
       <text name="subject" length="256"/>
       <text name="predicate" length="256"/>
       <text name="object" length="256"/>
-    </function>
    
   </dataset>
 

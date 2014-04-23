@@ -42,7 +42,7 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
   
   def iterator: Iterator[Sample] = {
     if (_iterator != null) _iterator
-//    else if (getData.isEmpty) iterateFromKids
+    else if (getData.isEmpty) ??? //iterateFromKids
     else getDataIterator.map(DataUtils.dataToSample(_, Sample(domain, range)))
   }
   

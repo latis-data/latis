@@ -22,7 +22,7 @@ abstract class IterableData extends Data { //TODO: with Iterable[Data] {
 //TODO: deprecate SeqData?
 
 class DataSeq extends IterableData {
-  private val datas = mutable.Seq[Data]()
+  private val datas = mutable.ArrayBuffer[Data]()
   
   override def length: Int = datas.length  
   
@@ -41,7 +41,7 @@ class DataSeq extends IterableData {
     if (recordSize < 0) _recordSize = size
     else if (recordSize != size) throw new Error("IterableData requires that each Data record has the same size.")
     
-    datas :+ data //append to collection
+    datas += data //append to collection
     this
   }
 }

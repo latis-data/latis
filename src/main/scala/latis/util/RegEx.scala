@@ -25,7 +25,9 @@ object RegEx {
      * Regular expression matching any reasonable value (e.g. on the right hand side on an expression.
      * This is designed to keep out escape characters and other nasties.
      */
-    lazy val VALUE = """[\w\.\+\-eE:]+"""
+    lazy val VALUE = """[\w\.\+\-eE\:\*\?\{\}\<\>#\s/]+"""
+    //Note, needed to match regex for "=~" op: "*?"
+    //  SPARQL: "{}<>#?/" and space
     //TODO: work out the kinks in: lazy val VALUE = s"(?:$TIME)|(?:$NUMBER)|(?:$VARIABLE)" //TODO: OPERATION? but recursive
     
     /**

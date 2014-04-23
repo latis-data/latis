@@ -7,9 +7,77 @@ import javax.naming._
 import javax.naming.directory._
 import latis.data.Data
 import scala.collection.mutable.ArrayBuffer
+import latis.data.DataSeq
+import latis.util.StringUtils
+import latis.dm.Text
 
-class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
+class LdapAdapter(tsml: Tsml) extends IterativeAdapter[SearchResult](tsml) {
+  
+  def getRecordIterator: Iterator[SearchResult] = executeQuery
 
+  def parseRecord(record: SearchResult): Option[Map[String,Data]] = {
+    //val valueMap = mutable.Map[String,ArrayBuffer[String]]()
+    val dataMap = mutable.Map[String,Data]()
+    
+    val atts = record.getAttributes
+    for (v <- getOrigScalars) {
+      val vname = v.getName
+      //Note, the value of an attribute is more attributes. Join with ",".
+      val value = JavaConversions.enumerationAsScalaIterator(atts.get(vname).getAll).mkString(",")
+      //valueMap(vname) append value
+      val data = Data(StringUtils.padOrTruncate(value, v.asInstanceOf[Text].length)) //enforce length
+      dataMap += (vname -> data)
+    }
+    
+    Some(dataMap)
+  }
+  
+//  /**
+//   * Read 
+//   */
+//  def init {
+//    val dataMap = readData
+//    
+//  }
+  
+//  def readData: Map[String, DataSeq] = {
+//    val map = mutable.Map[String,ArrayBuffer[String]]()
+//    
+//    //Get the query results
+//    val results = executeQuery
+//    
+//    // Parse results, one for each person found. Build up array of values for each variable.
+//    for (result <- results) {
+//      //Get the attributes for the person. Should be same as attIDs = Dataset Variables.
+//      val atts = result.getAttributes
+//      for (vname <- getOrigScalarNames) {
+//        //Note, the value of an attribute is more attributes. Join with ",".
+//        val value = JavaConversions.enumerationAsScalaIterator(atts.get(vname).getAll).mkString(",")
+//        map(vname) append value
+//      }
+//    }
+//    
+//    //convert tmp string values to Data
+//    //assume all variables are type Text, deal with length
+//    val dataMap = mutable.Map[String,Data]()
+//    
+//    for (scalar <- getOrigScalars) {
+//      val name = scalar.getName
+//      val buffer = map(name)
+//      //TODO: if length = 0?          
+//      val length: Int = scalar.getMetadata("length") match {
+//        case Some(l) => l.toInt
+//        case None => buffer.map(_.length).max
+//      }
+//      val data = Data(buffer, length)
+//      dataMap += (name -> data)
+//    }
+//    
+//    dataMap
+//  }
+  
+  
+  
   def location: String = getProperty("location") match {
     case Some(v) => v
     case None => throw new RuntimeException("LdapAdapter must have 'location' defined.")
@@ -48,53 +116,6 @@ class LdapAdapter(tsml: Tsml) extends GranuleAdapter(tsml) {
     val answer = context.search("ou=People", matchAttrs, attIDs)  //java Enumeration
     JavaConversions.enumerationAsScalaIterator(answer)            //scala Iterator
     //TODO: test for null, return empty iterator, or will conversion handle it?
-  }
-  
-  //TODO: consider using Record semantics, but dangerous to depend on toString format
-//  override def recordIterator: Iterator[Record] = executeQuery.map(result => List(result.toString))
-//    //return each result as space delimited values and super will do the rest
-//    //Just use toString for now: uid=sroughto: null:null:{mail=mail: steve.roughton@lasp.colorado.edu, uid=uid: sroughto, cn=cn: Steve Roughton}
-//
-//  override def parseRecord(record: Record): Map[Name, Value] = {
-//    val map = mutable.HashMap[Name, Value]()
-//    ???
-//  }
-  
-  
-  def readData: Map[String, Data] = {
-    val map = mutable.Map[String,ArrayBuffer[String]]()
-    
-    //Get the query results
-    val results = executeQuery
-    
-    // Parse results, one for each person found. Build up array of values for each variable.
-    for (result <- results) {
-      //Get the attributes for the person. Should be same as attIDs = Dataset Variables.
-      val atts = result.getAttributes
-      for (vname <- getOrigScalarNames) {
-        //Note, the value of an attribute is more attributes. Join with ",".
-        val value = JavaConversions.enumerationAsScalaIterator(atts.get(vname).getAll).mkString(",")
-        map(vname) append value
-      }
-    }
-    
-    //convert tmp string values to Data
-    //assume all variables are type Text, deal with length
-    val dataMap = mutable.Map[String,Data]()
-    
-    for (scalar <- getOrigScalars) {
-      val name = scalar.getName
-      val buffer = map(name)
-      //TODO: if length = 0?          
-      val length: Int = scalar.getMetadata("length") match {
-        case Some(l) => l.toInt
-        case None => buffer.map(_.length).max
-      }
-      val data = Data(buffer, length)
-      dataMap += (name -> data)
-    }
-    
-    dataMap
   }
   
   override def close {context.close}

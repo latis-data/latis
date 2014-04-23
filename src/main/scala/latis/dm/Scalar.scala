@@ -29,7 +29,7 @@ object Scalar {
     case "time"    => Time(metadata, data) //TODO: if type text, set default length=23? or get from 'format'
     case "binary"  => new AbstractScalar(metadata, data) with Binary
     //TODO: vtype = class name, dynamicly construct 
-    case _ => ???
+    case _ => throw new Error("No Scalar type defined for " + vtype)
   }
   
   def apply(value: AnyVal): Scalar = value match {
@@ -43,11 +43,18 @@ object Scalar {
   def apply(value: String) = Text(value)
   
   def apply(metadata: Metadata, value: Any): Scalar = value match {
+    //primitive values
     case d: Double => Real(metadata, d)
     case f: Float  => Real(metadata, f)
     case l: Long   => Integer(metadata, l)
     case i: Int    => Integer(metadata, i)
     case s: String => Text(metadata, s)
+    //Data Value types
+    case dv: DoubleValue => Real(metadata, dv)
+    case lv: LongValue   => Integer(metadata, lv)
+    case IndexValue(i)   => Index(i)
+    case sv: StringValue => Text(metadata, sv)
+    
     case _ => throw new Error("Unable to make Scalar from value: " + value)
   }
   
