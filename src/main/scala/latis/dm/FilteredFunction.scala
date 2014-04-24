@@ -11,6 +11,7 @@ import latis.util.PeekIterator2
  * This Function will represent a subset of the samples of the original.
  * The type of the variables will not change.
  */
+@Deprecated //use WrappedFunction
 class FilteredFunction(function: Function, val filter: Filter) 
   extends SampledFunction(function.getDomain, function.getRange) {
   //NOTE: Filter can only from samples, can't change type: same domain and range

@@ -17,14 +17,14 @@ class Test2D {
     AsciiWriter.write(Dataset(v))
   }
   
-  //@Test
-  def write_scalar_function_3x3 = write(Test2D.scalar_function_3x3)
-  
-  @Test
-  def scalar_function_3x3_length {
-    val l = Test2D.scalar_function_3x3.getLength
-    assertEquals(9, l)
-  }
+//  //@Test
+//  def write_scalar_function_3x3 = write(Test2D.scalar_function_3x3)
+//  
+//  //@Test
+//  def scalar_function_3x3_length {
+//    val l = Test2D.scalar_function_3x3.getLength
+//    assertEquals(9, l)
+//  }
 }
 
 /**
@@ -32,11 +32,12 @@ class Test2D {
  */
 object Test2D {
   
-  def scalar_function_3x3 = {
-    val x = Real(List(0.0, 1.0, 2.0))
-    val y = Real(List(0.0, 1.0, 2.0))
-    val a = Real((0 until 9).map(_.toDouble))
-    Function(Tuple(x,y), a)
-  }
+//  def scalar_function_3x3 = {
+//    val x = Real(List(0.0, 1.0, 2.0))
+//    val y = Real(List(0.0, 1.0, 2.0))
+//    val a = Real((0 until 9).map(_.toDouble))
+//    //TODO: use Seq.tabulate or fill to make Data
+//    Function(Tuple(x,y), a)
+//  }
   
 }

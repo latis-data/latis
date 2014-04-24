@@ -27,11 +27,11 @@ object Tuple {
   
   def apply(v: Variable, vars: Variable*): Tuple = Tuple(v +: vars) 
 
-  def apply(vals: Seq[Seq[Double]])(implicit ignore: Double): Tuple = {  //resolve type erasure ambiguity with implicit
-    //for ((v,i) <- vals.zipWithIndex)
-    val reals = vals.zipWithIndex.map(p => Real(Metadata("real"+p._2), p._1))
-    Tuple(reals)
-  }
+//  def apply(vals: Seq[Seq[Double]])(implicit ignore: Double): Tuple = {  //resolve type erasure ambiguity with implicit
+//    //for ((v,i) <- vals.zipWithIndex)
+//    val reals = vals.zipWithIndex.map(p => Real(Metadata("real"+p._2), p._1))
+//    Tuple(reals)
+//  }
 
   //  //TODO: apply(vals: Seq[_]) = vals(0) match ...
 //  //def apply(vals: Seq[Double]*): Tuple = Tuple(vals.map(Real(_)))  //same after erasure

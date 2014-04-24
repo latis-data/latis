@@ -12,7 +12,8 @@ import latis.data.IterableData
  * Each element is assumed to have the same type and size.
  */
 class DataSeq extends IterableData {
-  //TODO: extend SeqData?
+  //TODO: refactor to work with other SeqData?
+  //Data vs Datum
   
   private val datas = mutable.ArrayBuffer[Data]()
   
@@ -35,6 +36,11 @@ class DataSeq extends IterableData {
     
     datas += data //append to collection
     this
+  }
+  
+  def zip(that: DataSeq): DataSeq = {
+    if (that.length != this.length) throw new Error("zip requires both DataSeq-s to be the same length")
+    DataSeq((this.datas zip that.datas).map(p => p._1.concat(p._2)))
   }
 }
 

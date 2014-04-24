@@ -29,8 +29,8 @@ object Real {
   }
   
 //TODO: deprecate scalars holding SeqData, use Index Function
-  def apply(vs: Seq[Double]): Real = new AbstractScalar(data = Data(vs)) with Real
-  def apply(md: Metadata, vs: Seq[Double]): Real = new AbstractScalar(md, Data(vs)) with Real
+//  def apply(vs: Seq[Double]): Real = new AbstractScalar(data = Data(vs)) with Real
+//  def apply(md: Metadata, vs: Seq[Double]): Real = new AbstractScalar(md, Data(vs)) with Real
   
   def apply(md: Metadata, data: Data): Real = new AbstractScalar(md, data) with Real
   

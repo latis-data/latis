@@ -8,16 +8,21 @@ import Assert._
 import latis.reader.tsml.TsmlReader
 import latis.metadata.Metadata
 import latis.ops.filter.Selection
+import latis.data.seq.DataSeq
+import latis.data.Data
 
 class TestSelection {
   
-  implicit def stringToMetadata(name: String): Metadata = Metadata(name)
+  //implicit def stringToMetadata(name: String): Metadata = Metadata(name)
   
   // time -> value, column oriented data
   lazy val scalarFunction: Function = {
-    val domain = Real("time", Seq(1.0,2.0,3.0,4.0,5.0))
-    val range = Real("value", Seq(1.0,2.0,3.0,4.0,3.0))
-    Function(domain, range)
+    val domain = Real(Metadata("time"))
+    val range = Real(Metadata("value"))
+    val ddata = Data.fromDoubles(1,2,3,4,5)
+    val rdata = Data.fromDoubles(1,2,3,4,3)
+    val data = ddata zip rdata
+    Function(domain, range, data)
   }
   
   //TODO: run same tests against multiple Functions
@@ -34,7 +39,11 @@ class TestSelection {
   
   @Test
   def select_equal_value {
-    val expected = Function(Real("time", Seq(3.0,5.0)), Real("value", Seq(3.0,3.0)))
+    val domain = Real(Metadata("time"))
+    val range = Real(Metadata("value"))
+    val ddata = Data.fromDoubles(3,5)
+    val rdata = Data.fromDoubles(3,3)
+    val expected = Function(domain, range, ddata zip rdata)
     testSelection(scalarFunction, "value=3", expected)
   }
   
@@ -99,8 +108,8 @@ class TestSelection {
     //AsciiWriter().write(ds)
     //NOTE: iterable once issues
     
-    val f = ds(0).asInstanceOf[Function]
-    val n = f.length
+    //val f = ds(0).asInstanceOf[Function]
+    val n = ds.length
     assertEquals(5, n)
   }
   

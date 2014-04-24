@@ -8,6 +8,8 @@ import latis.reader.tsml.ml.Tsml
 import latis.util.DataUtils
 import latis.util.PeekIterator2
 import scala.collection.Map
+import latis.util.IndexedIterator
+import latis.data.IndexData
 
 /**
  * Base class for Adapters for data sources that have 'record' semantics.
@@ -19,8 +21,19 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
   def getRecordIterator: Iterator[R] //TODO: return same one or make new one? hook to iterate more than once?
   def parseRecord(record: R): Option[Map[String,Data]] 
   
-  private lazy val parsedRecordIterator: PeekIterator2[R, Map[String,Data]] = new PeekIterator2(getRecordIterator, (record: R) => parseRecord(record))
-  def getCurrentIndex = parsedRecordIterator.getIndex
+  def parseRecordWithIndex(record: R, index: Int): Option[Map[String,Data]] = {
+    parseRecord(record) match {
+      case Some(dataMap) => {
+        //replace Index data with current index
+        if (dataMap.contains("index")) Some(dataMap + ("index" -> IndexData(index)))
+        else Some(dataMap)
+      }
+      case None => None
+    }
+  }
+  
+  private lazy val parsedRecordIterator = new IndexedIterator(getRecordIterator, (record: R, index: Int) => parseRecordWithIndex(record, index))
+  //def getCurrentIndex = parsedRecordIterator.getIndex
   
   def makeDataIterator(sampleTemplate: Sample): Iterator[Data] = {
     if (cacheIsEmpty) {

@@ -56,7 +56,7 @@ object TestReal {
   def half = Real(Metadata("half"), 0.5)
   def anon = Real(3.14)
   
-  def _123 = Real(List(1.0, 2.0, 3.0))
+  //def _123 = Real(List(1.0, 2.0, 3.0))
   //TODO: unlimited, Stream
   
 }

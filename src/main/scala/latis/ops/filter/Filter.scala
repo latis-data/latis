@@ -9,16 +9,13 @@ import latis.dm.Variable
 import scala.Option.option2Iterable
 import latis.ops.Operation
 import latis.dm.FilteredFunction
-import latis.ops.SampleHomomorphism
+import latis.ops.IndexedSampleMappingOperation
 
 /**
  * Subtype of Operation that may drop samples.
  */
-trait Filter extends Operation with SampleHomomorphism {
+class Filter extends IndexedSampleMappingOperation {
   //TODO: see scala's withFilter, FilterMonadic
-  
-  //SampleHomomorphism method
-  def apply(sample: Sample): Option[Sample] = applyToSample(sample)
   
   /**
    * Default filter for Samples. Handle like any other Tuple: exclude if any element is invalid.
@@ -35,6 +32,7 @@ trait Filter extends Operation with SampleHomomorphism {
     case Some(_) => None //found an invalid variable, exclude the entire tuple
     case None => Some(tuple)
   }
+
   
 //  /**
 //   * Apply this Operation to the given Dataset.

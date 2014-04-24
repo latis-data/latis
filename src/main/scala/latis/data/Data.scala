@@ -55,7 +55,7 @@ trait Data extends Any {
   def size: Int // = length * recordSize //total number of bytes
   
   def getByteBuffer: ByteBuffer 
-  //TODO: just byteBuffer?
+  def getBytes: Array[Byte] = getByteBuffer.array
   
   //TODO: beware of mixing getters that increment with iterator
   //def iterator: Iterator[Data] //= List(DoubleValue(doubleValue)).iterator
@@ -63,6 +63,8 @@ trait Data extends Any {
     
   def isEmpty: Boolean //= length == 0
   def notEmpty = ! isEmpty
+  
+  def concat(data: Data) = Data(this.getBytes ++ data.getBytes)
 
   
   /*
@@ -104,7 +106,6 @@ object Data {
   //pattern match to deal with type erasure
   //TODO: assert all of the same type
   //TODO: use primitive Arrays?
-//TODO: deprecate SeqData, use IterableData
   def apply(seq: Seq[Any]): Data = seq.head match {
     case _: Double => new DoubleSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Double]])
     case _: Long   => new LongSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Long]])
@@ -117,6 +118,10 @@ object Data {
   }
   
   def apply(strings: Seq[String], length: Int): Data = new StringSeqData(strings.toIndexedSeq, length)
+  
+  def fromDoubles(ds: Double*): DataSeq = DataSeq(ds.map(DoubleValue(_)))
+  def fromLongs(ls: Seq[Long]):     DataSeq = DataSeq(ls.map(LongValue(_)))
+  def fromStrings(ss: Seq[String]): DataSeq = DataSeq(ss.map(StringValue(_)))
   
   //takes Buffer so user's don't have to cast after "rewind"
 //  def apply(buffer: Buffer, sampleSize: Int): Data = {
@@ -141,18 +146,18 @@ object Data {
   //def apply(bytes: Seq[Byte]): Data = Data(ByteBuffer.wrap(bytes.toArray))
   def apply(bytes: Array[Byte]): Data = Data(ByteBuffer.wrap(bytes))
   
-  //Concatenate Data, used by Variable.concatData
-  //Use to create a single record with multiple variables (e.g. tuple)
-  //TODO: allow Seq[Any]? need diff method
-  //  or should the SeqData constructor be the special case?
-  def apply(data: Seq[Data])(implicit ignore: Data): Data = { //implicit hack for type erasure ambiguity
-  //def apply(head: Data, tail: Data*): Data = { 
-    //val data = head +: tail
-    val size = data.foldLeft(0)(_ + _.size) //total size of all elements
-    val buffer = data.foldLeft(ByteBuffer.allocate(size))(_ put _.getByteBuffer) //build ByteBuffer with all Data
-    val bb = buffer.rewind.asInstanceOf[ByteBuffer] //reset to the beginning
-    Data(bb)
-  }
+//  //Concatenate Data, used by Variable.concatData
+//  //Use to create a single record with multiple variables (e.g. tuple)
+//  //TODO: allow Seq[Any]? need diff method
+//  //  or should the SeqData constructor be the special case?
+//  def apply(data: Seq[Data])(implicit ignore: Data): Data = { //implicit hack for type erasure ambiguity
+//  //def apply(head: Data, tail: Data*): Data = { 
+//    //val data = head +: tail
+//    val size = data.foldLeft(0)(_ + _.size) //total size of all elements
+//    val buffer = data.foldLeft(ByteBuffer.allocate(size))(_ put _.getByteBuffer) //build ByteBuffer with all Data
+//    val bb = buffer.rewind.asInstanceOf[ByteBuffer] //reset to the beginning
+//    Data(bb)
+//  }
   
 //  def apply(dit: Iterator[Data]) : Data = new Data {
 //    override def iterator = dit

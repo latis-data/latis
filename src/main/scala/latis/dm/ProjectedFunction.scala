@@ -7,18 +7,14 @@ import latis.util.PeekIterator
 /**
  * Wrapper for a Function that applies a "projection" to each sample.
  * The resulting Function will include only the Variables named in the Projection.
+ * 
  */
+@Deprecated //?
 class ProjectedFunction(function: Function, val projection: Projection) 
   extends SampledFunction(null, null) {
-//pass null domain and range since we override them here
+  //pass null domain and range since we override them here
   
-  /*
-   * TODO: can this be a WrappedFunction?
-   * needs logic to insert index
-   * don't think we can delegate to Projection to do that since it won't know index value
-   * also need to override domain and range
-   * can we generally apply as below? probably not since most operation op on data
-   */
+//TODO: just use WrappedFunction
   
   //TODO: return data in projected order
   

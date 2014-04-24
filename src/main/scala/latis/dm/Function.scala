@@ -65,13 +65,24 @@ object Function {
     Function((ds zip rs).map(s => Sample(s._1, s._2)))
   }
   
+  //TODO: names arg
   def fromValues(vals: Seq[Seq[Double]]): Function = Function.fromValues(vals.head, vals.tail: _*)
   
   def fromValues(dvals: Seq[Double], vals: Seq[Double]*): Function = {
-    val domain = Real(Metadata("domain"), dvals)
+    val domain = Real(Metadata("domain"))
+    val range = vals.length match {
+      case 1 => Real(Metadata("range"))
+      case n: Int => Tuple((0 until n).map(i => Real(Metadata("real"+i)))) //auto-gen names
+    }
+    val data = {
+      //assert that all Seq are same length
+      if (vals.exists(_.length != dvals.length)) throw new Error("Value sequences must be the same length.")
+      vals.foldLeft(Data.fromDoubles(dvals: _*))(_ zip Data.fromDoubles(_: _*))
+    }
+    
     //make Real if vals.length == 1
-    val range = if (vals.length == 1) Real(Metadata("range"), vals(0)) else Tuple(vals)(0d) //hack to get around type erasure ambiguity
-    Function(domain, range)
+    //val range = if (vals.length == 1) Real(Metadata("range"), vals(0)) else Tuple(vals)(0d) //hack to get around type erasure ambiguity
+    Function(domain, range, data)
   }
   
   //def apply(samples: Seq[Sample]): Function = 

@@ -33,7 +33,7 @@ trait Operation {
    * If the resulting range is invalid, the whole sample is invalid.
    */
   def applyToSample(sample: Sample): Option[Variable] = {
- //TODO: return Var since ops like reduce can change type? SampleApplicable trait with method that returns Sample?
+    //return Var since ops like reduce can change type
     applyToVariable(sample.range) match {
       case Some(r) => Some(Sample(sample.domain, r))
       case None => None
@@ -54,7 +54,8 @@ trait Operation {
    * Default operation for a Function. Wrap the original Function Apply operation to each sample.
    */
   def applyToFunction(function: Function): Option[Variable] = this match {
-    case homo: SampleHomomorphism => Some(WrappedFunction(function, homo))
+    case op: IndexedSampleMappingOperation => Some(WrappedFunction(function, op))
+    //case homo: SampleHomomorphism => Some(WrappedFunction(function, homo))
     case _ => throw new UnsupportedOperationException("Only homomorphic operations can use the default Function application.")
   }
 }

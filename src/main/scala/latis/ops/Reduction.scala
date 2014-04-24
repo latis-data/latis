@@ -2,7 +2,7 @@ package latis.ops
 
 import latis.dm._
 
-class Reduction extends Operation with SampleHomomorphism {
+class Reduction extends Operation  {
   //TODO: changing types, can't use default WrappedFunction?
 
   /**

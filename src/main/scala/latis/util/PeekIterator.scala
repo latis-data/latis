@@ -7,13 +7,18 @@ package latis.util
  * sample but this will keep looking for the next valid sample.
  * You can also "peek" at the next sample without advancing.
  */
-abstract class PeekIterator[T] extends Iterator[T] {
-  //TODO: construct by wrapping another Iterator with a predicate: T=>Boolean
+abstract class PeekIterator[T >: Null] extends Iterator[T] {
+  //Note, the bound on Null allows us to return null for generic type T.
   
   /**
    * Cached next value. Will be null if there is no more elements.
    */
-  private var _next: T = _ //Note, can't use null due to type checker
+  private var _next: T = null
+
+  /**
+   * Take a look at the next sample without advancing to it.
+   */
+  final def peek: T = _next
   
   /**
    * Use this lazy val so initialization will happen when this is first asked
@@ -26,34 +31,29 @@ abstract class PeekIterator[T] extends Iterator[T] {
   
   /**
    * True if there is a cached next value.
-   * Note, the first call to this will cause the first value to be accessed and cached.
+   * The first call to this will cause the first value to be accessed and cached.
    */
   final def hasNext: Boolean = _initialized && _next != null
-  
+
+    
   /**
-   * Return the next value and cache the next next value
+   * Return the 'next' value and cache the next 'next' value
    * to effectively advance to the next sample.
    */
   final def next: T = {
-    //TODO: assume hasNext has been called so we don't have to check if this has been initialized?
-    //  not sure if this works for it.map
-    _initialized
+    _initialized //make sure we have cached the first value
     val current = _next
     _next = getNext //TODO: get next value to cache asynchronously?
+    //_index += 1 //increment the current index
     current
   }
   
   /**
-   * Take a look at the next sample without advancing to it.
+   * Responsible for getting the next transformed item 
+   * or null if there are no more valid items.
+   * This should keep trying until a valid sample is found 
+   * or it hits the end of the original iterator.
    */
-  final def peek: T = _next
-  
-  /**
-   * Override to apply internal logic for getting the next sample.
-   * Return null if there are no more elements.
-   */
-  protected def getNext: T 
-  //TODO: use option?
-  
+  protected def getNext: T
 }
 

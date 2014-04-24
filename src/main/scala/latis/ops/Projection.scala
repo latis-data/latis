@@ -7,13 +7,24 @@ import latis.util.RegEx._
 /**
  * Exclude variables not named in the given list.
  */
-class Projection(val names: Seq[String]) extends Operation {
+class Projection(val names: Seq[String]) extends IndexedSampleMappingOperation {
   //TODO: support long names, e.g. tupA.foo  , build into hasName?
   //TODO: preserve order of requested variables
   //TODO: consider projecting only part of nD domain. only if it is a product set
+
+  override def applyToSample(sample: Sample): Option[Sample] = {
+    val pd = applyToVariable(sample.domain)
+    val pr = applyToVariable(sample.range)
+    (pd,pr) match {
+      case (Some(d), Some(r)) => Some(Sample(d,r))
+      case (None, Some(r))    => Some(Sample(Index(getIndex), r)) //TODO: do we need a valid value here? 
+      case (Some(d), None)    => Some(Sample(Index(getIndex), d)) //no range, so make domain the range of an index function
+      case (None, None) => ??? //TODO: nothing projected, could return Null but is it an error if we get this far?
+    }
+  }
   
-//TODO: with WrappedFunction, we aren't getting the model munging
-  override def applyToFunction(function: Function): Option[Variable] = Some(ProjectedFunction(function, this))
+  
+  //override def applyToFunction(function: Function): Option[Variable] = Some(ProjectedFunction(function, this))
   
   override def applyToVariable(variable: Variable): Option[Variable] = {
     //Note, always project Index since it is used as a place holder for a non-projected domain.
@@ -21,8 +32,8 @@ class Projection(val names: Seq[String]) extends Operation {
     else super.applyToVariable(variable)
   }
    
-  override def applyToScalar(scalar: Scalar): Option[Scalar] = scalar match {
-    case i: Index => Some(i) //always project Index since it is used as a place holder for a non-projected domain.
+  override def applyToScalar(scalar: Scalar): Option[Scalar] = super.applyToScalar(scalar) match {
+    case Some(i: Index) => Some(i) //always project Index since it is used as a place holder for a non-projected domain.
     case _ => None //name didn't match above
   }
   
