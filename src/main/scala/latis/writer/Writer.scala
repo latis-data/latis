@@ -110,8 +110,7 @@ object Writer {
     //TODO: will treat name without a "." as a suffix, do we want to allow that?
     val suffix = fileName.split("""\.""").last
     val writer = Writer.fromSuffix(suffix)
-    writer.file = new File(fileName)
-    writer.outputStream = new FileOutputStream(writer.file)
+    writer.setFile(new File(fileName))
     writer
   }
   

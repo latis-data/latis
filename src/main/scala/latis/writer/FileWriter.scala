@@ -41,10 +41,13 @@ abstract class FileWriter extends Writer {
       //TODO: smelly: makes sense for subclass to implement writeFile given file
       //  more in your face that having to call getFile
       //  but feels odd since Writer has-a file, needed to support Writer(file)
-      writeFile(dataset, tmpFile)
+      try {
+        writeFile(dataset, tmpFile)
+        FileUtils.streamFile(tmpFile, out)}
+      catch {case e: Exception => tmpFile.delete}
       //TODO: make sure file is closed even though contract says it should be?
       //  good idea since this is what the server will be using and wouldn't want rogue writer breaking it
-      FileUtils.streamFile(tmpFile, out)
+      tmpFile.delete
     }
   }
 
