@@ -8,6 +8,7 @@ import java.io.OutputStream
 
 import scala.collection.immutable
 import scala.collection.mutable
+import java.io.FileOutputStream
 
 /**
  * Base class for Dataset writers.
@@ -110,6 +111,7 @@ object Writer {
     val suffix = fileName.split("""\.""").last
     val writer = Writer.fromSuffix(suffix)
     writer.file = new File(fileName)
+    writer.outputStream = new FileOutputStream(writer.file)
     writer
   }
   

@@ -11,7 +11,11 @@ object FileUtils {
   
   def getTmpDir: File = new File(System.getProperty("java.io.tmpdir"))
   
-  def getTmpFile: File = ???   //TODO: 
+  def getTmpFile: File = {
+    val f = File.createTempFile("latis", "temp")
+    f.deleteOnExit
+    f
+  }
   
   /**
    * Get a list of all the files in the given directory and nested directories.

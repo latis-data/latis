@@ -4,7 +4,7 @@
   <dataset name="composite_lyman_alpha" long_name="Composite Solar Lyman-alpha">
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
              delimiter="\s+"
-             commentCharacter="#"
+             commentCharacter=";"
              location="/lisird/public/lasp/lyman_alpha/composite_lya.dat" />
     
     <time name="time" type="text" length="7" units="yyyyDDD"/>
