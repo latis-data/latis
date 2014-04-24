@@ -6,7 +6,6 @@ import latis.data.value.{DoubleValue,StringValue}
 import latis.util.StringUtils
 
 case class StringSeqData(ss: immutable.Seq[String], textLength: Int) extends SeqData {
-  //TODO: what if textLength < the default = 4?
   
   override def getByteBuffer: ByteBuffer = {
     val bb = ByteBuffer.allocate(size)
@@ -23,4 +22,11 @@ case class StringSeqData(ss: immutable.Seq[String], textLength: Int) extends Seq
   def iterator = ss.iterator.map(s => StringValue(StringUtils.padOrTruncate(s, textLength)))
   
   def apply(index: Int) = StringValue(ss(index))
+}
+
+object StringSeqData {
+  def apply(ss: Seq[String]): StringSeqData = {
+    val length = ss.map(_.length).max
+    StringSeqData(ss.toIndexedSeq, length)
+  }
 }

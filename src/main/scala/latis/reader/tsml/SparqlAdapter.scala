@@ -12,10 +12,11 @@ class SparqlAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
   private var query: String = ""
   
   /**
-   * Override to make sure the required 'query' selection has been made.
+   * Make sure the required 'query' selection has been made.
    * Encode any special characters so they are suitable for a URL.
    */
   override def getDataset(ops: Seq[Operation]): Dataset = {
+//TODO: use handleOps
     //TODO: reconsider how/when PIs are applied
     //Note, this allows user to override what the tsml PI has
     query = findSelection(ops ++ piOps, "query") match {

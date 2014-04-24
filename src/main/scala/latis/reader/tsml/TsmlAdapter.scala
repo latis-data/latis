@@ -1,7 +1,7 @@
 package latis.reader.tsml
 
 import latis.data.Data
-import latis.data.DataSeq
+import latis.data.seq.DataSeq
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Index
@@ -159,29 +159,30 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   private lazy val dataset: Dataset = {
     val ods = origDataset //invoke lazy first Dataset construction pass
+    
+    //give Adapter the opportunity to be responsible for handling Processing Instructions
+    val otherOps = piOps.filterNot(handleOperation(_))
+    
     init //let subclasses do something before we start thinking about data access.
-    makeDataset(ods)
+    
+    //Invoke 2nd pass to build (possibly lazy) Data
+    val ds = makeDataset(ods)
+    
+    //Apply PIs that the adapter didn't handle.
+    //Reverse because foldRight applies them in reverse order.
+    otherOps.reverse.foldRight(ds)(_(_)) 
   }
   
   def getDataset: Dataset = dataset
-    //TODO: PIs not applied!?
   
   def getDataset(ops: Seq[Operation]): Dataset = {
-    
-    //Use handleOps to let adapter handle some and leave rest for here
-    //TODO: what can we do about preserving operation order if we let adapters handle what they want?
-    //  require adapter to override then be responsible for applying all ops?
-    //  what about leaving some for the writer? wrap in "write(format="",...)" function?
-    //  Note, PIs already processed, consider rename PI breaking sql...
-    
-    //Combine data provider processing instructions with user ops.
-    //Give the adapter the opportunity to handle them. 
-    val others = (piOps ++ ops).filterNot(handleOperation(_))
+    //Give the adapter the opportunity to handle operations.
+    val otherOps = ops.filterNot(handleOperation(_))
     
     //Apply operations that the adapter didn't handle.
     //Reverse because foldRight applies them in reverse order.
-    //This may be the first use of the lazy 'dataset' so it may trigger its final construction.
-    others.reverse.foldRight(getDataset)(_(_))
+    //This should be the first use of the lazy 'dataset' so it may trigger its final construction.
+    otherOps.reverse.foldRight(getDataset)(_(_))
   }
   
   //TODO: "build" vs "make"? consider scala Builder
@@ -244,10 +245,6 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     
     //TODO: function may have _iterator already (e.g. agg)
     
-    
-    
-    
-    
     for (domain <- makeVariable(function.getDomain); 
          range  <- makeVariable(function.getRange)
     ) yield Function(domain, range, md)
@@ -296,6 +293,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * TODO: do we need diff place to hold tsml values so we don't have partial cache confusion?
    * allow mutable and require getCachedData? hard to enforce
    * use tsmlData?
+   * just put tsml data into the model in the first pass
    */
   //val tsmlData = Map[String, Data]() //TODO: immutable?
   
@@ -303,6 +301,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   //TODO: consider mutability issues
   //TODO: consider ehcache
+  
+  def cacheIsEmpty: Boolean = dataCache.isEmpty
   
   /**
    * Add Data to the cache.

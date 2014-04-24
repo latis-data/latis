@@ -6,7 +6,6 @@ import latis.data.value.DoubleValue
 
 case class DoubleSeqData(ds: immutable.Seq[Double]) extends SeqData {
   
-  //TODO: is this any better than IterableData's?
   override def getByteBuffer: ByteBuffer = ds.foldLeft(ByteBuffer.allocate(size))(_.putDouble(_)).rewind.asInstanceOf[ByteBuffer]
   
   override def length = ds.length

@@ -9,6 +9,10 @@ import latis.util.DataUtils
 import latis.util.PeekIterator2
 import scala.collection.Map
 
+/**
+ * Base class for Adapters for data sources that have 'record' semantics.
+ * By default, data will be cached so we don't have an IterableOnce problem.
+ */
 abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
   //R is the type of record
   
@@ -19,28 +23,27 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
   def getCurrentIndex = parsedRecordIterator.getIndex
   
   def makeDataIterator(sampleTemplate: Sample): Iterator[Data] = {
-    //if (cacheIsEmpty)
-    new PeekIterator2(parsedRecordIterator, (vals: Map[String,Data]) =>  makeDataFromValueMap(vals, sampleTemplate))
-    
-    //else get from cache
-    //"sample" maps to Data, which could be constructed with record size, so we could just iterate on it
-    //cache.getData("sample").iterator
+    if (cacheIsEmpty) {
+      new PeekIterator2(parsedRecordIterator, (vals: Map[String,Data]) =>  makeDataFromValueMap(vals, sampleTemplate))
+    } else {
+      getCachedData("sample") match {
+        case Some(data) => data.iterator
+        case None => throw new Error("No data in the cache for: sample")
+      }
+    }
   }
     
   private def makeDataFromValueMap(dataMap: Map[String,Data], sampleTemplate: Sample): Option[Data] = {
-    //TODO: cache base on caching strategy
-    //default: key = "sample", append Data to IterableData
-    
     val data = DataUtils.makeDataFromDataMap(dataMap, sampleTemplate, parsedRecordIterator.getIndex)
     
+    //cache based upon caching strategy //TODO: async?
     getProperty("cache") match {
       case Some("none") =>
-      case None => 
+      case _ => appendToCache("sample", data)
     }
     
     Some(data)
   }
-  
   
   /**
    * Override to make Function with IterableData.

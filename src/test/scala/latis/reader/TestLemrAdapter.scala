@@ -24,8 +24,8 @@ class TestLmerAdapter {
 
     assertEquals(10, ds.length)
     
-    //TODO: FilteredFunction needs to redo index
-    //Writer.fromSuffix("asc").write(ds)
+//TODO: FilteredFunction needs to redo index
+    Writer.fromSuffix("asc").write(ds)
   }
   
   //@Test

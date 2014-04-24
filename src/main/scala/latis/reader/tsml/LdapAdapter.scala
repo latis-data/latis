@@ -1,15 +1,22 @@
 package latis.reader.tsml
 
-import latis.reader.tsml.ml.Tsml
-import scala.collection._
-import java.util.Hashtable
-import javax.naming._
-import javax.naming.directory._
 import latis.data.Data
-import scala.collection.mutable.ArrayBuffer
-import latis.data.DataSeq
-import latis.util.StringUtils
 import latis.dm.Text
+import latis.reader.tsml.ml.Tsml
+import latis.util.StringUtils
+
+import java.util.Hashtable
+
+import scala.collection.Iterator
+import scala.collection.JavaConversions
+import scala.collection.Map
+import scala.collection.mutable
+
+import javax.naming.Context
+import javax.naming.directory.BasicAttribute
+import javax.naming.directory.BasicAttributes
+import javax.naming.directory.InitialDirContext
+import javax.naming.directory.SearchResult
 
 class LdapAdapter(tsml: Tsml) extends IterativeAdapter[SearchResult](tsml) {
   
