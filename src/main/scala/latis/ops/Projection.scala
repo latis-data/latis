@@ -23,8 +23,9 @@ class Projection(val names: Seq[String]) extends IndexedSampleMappingOperation {
     }
   }
   
+//TODO: apply to Tuple?
   
-  //override def applyToFunction(function: Function): Option[Variable] = Some(ProjectedFunction(function, this))
+  override def applyToFunction(function: Function): Option[Variable] = Some(ProjectedFunction(function, this))
   
   override def applyToVariable(variable: Variable): Option[Variable] = {
     //Note, always project Index since it is used as a place holder for a non-projected domain.

@@ -205,7 +205,8 @@ abstract class AdapterTests {
   @Test
   def select_on_index_when_no_projected_domain {
     val ops = List(Projection("myReal"), Selection("index > 1"))
-    val data = getDataset(ops).toDoubleMap
+    val ds = getDataset(ops)
+    val data = ds.toDoubleMap
     assertEquals(2, data.keySet.size)  //index and myReal
     assertEquals(1, data("index").length)
     assertEquals(2, data("index").head, 0.0)

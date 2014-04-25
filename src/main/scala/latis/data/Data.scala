@@ -119,7 +119,7 @@ object Data {
   
   def apply(strings: Seq[String], length: Int): Data = new StringSeqData(strings.toIndexedSeq, length)
   
-  def fromDoubles(ds: Double*): DataSeq = DataSeq(ds.map(DoubleValue(_)))
+  def fromDoubles(ds: Double*):     DataSeq = DataSeq(ds.map(DoubleValue(_)))
   def fromLongs(ls: Seq[Long]):     DataSeq = DataSeq(ls.map(LongValue(_)))
   def fromStrings(ss: Seq[String]): DataSeq = DataSeq(ss.map(StringValue(_)))
   
