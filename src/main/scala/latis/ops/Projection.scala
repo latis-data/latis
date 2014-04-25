@@ -23,7 +23,11 @@ class Projection(val names: Seq[String]) extends IndexedSampleMappingOperation {
     }
   }
   
-//TODO: apply to Tuple?
+  override def applyToTuple(tuple: Tuple): Option[Tuple] = {
+    val vars = tuple.getVariables.flatMap(applyToVariable(_))
+    if (vars.length == 0) None
+    else Some(Tuple(vars)) //TODO: metadata
+  }
   
   override def applyToFunction(function: Function): Option[Variable] = Some(ProjectedFunction(function, this))
   

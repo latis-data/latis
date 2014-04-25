@@ -164,6 +164,20 @@ object Operation {
      * --
      * Filter: return Option
      * Transform: return Var
+     * always use Option: invalid operation could return None
+     *   (1 -> 2,a,b) * 2 => (1 -> 4) ?  a*2 => None?
+     * 
+     * ***AlgebraicOperation
+     *   doesn't affect data
+     *   needs to munge model
+     *     op.applyToSampleType?
+     *     safe to call since it wont access data
+     *   Projection?
+     *   applied before vs after 2nd construction pass
+     *   
+     * ++should WrappedFunction test Op type and invoke as needed?
+     *   if algebraic munge type
+     * what about diff Iterator types?
      * 
      * 
      * MungedFunction (Filter, Transform)

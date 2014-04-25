@@ -101,6 +101,7 @@ class TestProjection {
     //println(ds)
   }
   
+  //TODO: project nothing
   //TODO: def project_scalar_in_function_scalar_range_without_domain => IndexFunction
   //TODO: domain only
   //TODO: reorder

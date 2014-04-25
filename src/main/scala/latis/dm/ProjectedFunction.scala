@@ -11,19 +11,6 @@ import latis.util.PeekIterator
  */
 class ProjectedFunction(function: Function, val projection: Projection) 
   extends WrappedFunction(function, projection) {
-  //extends SampledFunction(null, null) {
-  //pass null domain and range since we override them here
-  
-/*
- * TODO: domain, range types
- * get from peek iterator?
- * but triggers data read
- * can't generally use applyToSample, filter may need data
- * filters don't need type mod
- * applyToModel/Type?
- * 
- */
-  
   //TODO: return data in projected order
   
   override def getDomain: Variable = _domain
