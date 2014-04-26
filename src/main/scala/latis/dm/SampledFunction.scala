@@ -5,6 +5,7 @@ import latis.metadata.EmptyMetadata
 import latis.data.EmptyData
 import latis.data.Data
 import latis.util.DataUtils
+import latis.data.IterableData
 
 class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sample] = null,
     metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
@@ -46,6 +47,11 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
     else getDataIterator.map(DataUtils.dataToSample(_, Sample(domain, range)))
   }
   
+  def getDataIterator: Iterator[Data] = {
+    if (data.notEmpty) data.asInstanceOf[IterableData].iterator
+    else ???
+  }
+    
 //  private def iterateFromKids: Iterator[Sample] = {
 //    //val dit = domain.getDataIterator.map(data => DataUtils.dataToVariable(data, domain))
 //    val dit = domain.getDomainDataIterator.map(data => DataUtils.dataToVariable(data, domain))

@@ -35,7 +35,7 @@ trait Variable {
   def hasName(name: String): Boolean
   
   def toSeq: Seq[Scalar]
-  def getDataIterator: Iterator[Data]
+//  def getDataIterator: Iterator[Data]
 //  def getDomainDataIterator: Iterator[Data]
   
   def getVariables: Seq[Variable] //TODO: immutable.Seq?

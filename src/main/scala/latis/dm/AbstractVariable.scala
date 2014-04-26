@@ -332,19 +332,19 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
   
  // def iterator
   
-  /**
-   * Get a Data Iterator for this Variable.
-   * If it doesn't contain data, gather it from the kids.
-   */
-  def getDataIterator: Iterator[Data] = {
-    if (data.notEmpty) data.asInstanceOf[IterableData].iterator
-    else ???
-//    else this match {
-//      case Tuple(vars) => concatData(vars) 
-//      case Function(d, r) => concatData(Seq(d,r))
-//      case s: Scalar => s.data.iterator //TODO: not possible? only if scalar has no data = error
-//    }
-  }
+//  /**
+//   * Get a Data Iterator for this Variable.
+//   * If it doesn't contain data, gather it from the kids.
+//   */
+//  def getDataIterator: Iterator[Data] = {
+//    if (data.notEmpty) data.asInstanceOf[IterableData].iterator
+//    else ???
+////    else this match {
+////      case Tuple(vars) => concatData(vars) 
+////      case Function(d, r) => concatData(Seq(d,r))
+////      case s: Scalar => s.data.iterator //TODO: not possible? only if scalar has no data = error
+////    }
+//  }
 
 //  /**
 //   * Iterate over all combinations of the scalar values in a tuple
