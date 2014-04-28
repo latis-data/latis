@@ -90,6 +90,8 @@ trait Data extends Any {
 object Data {
   import scala.collection._
   
+  //TODO: review given that all Data are no longer iterable
+  
   val empty = EmptyData
   
   def apply(v: AnyVal): Data = v match {
@@ -138,12 +140,16 @@ object Data {
 //    }
 //  }
   
-  //to be used for a single sample: sampleSize = limit
-  //def apply(buffer: Buffer): Data = Data(buffer, buffer.limit)
-  //TODO: make sure buffer is rewound? if (buffer.limit > 0 && buffer.position != 0) buffer.flip else buffer
-  def apply(buffer: ByteBuffer): Data = new ByteBufferData(buffer)
+
+  def apply(buffer: ByteBuffer): Data = {
+    //If it looks like this buffer isn't set to the beginning, do so.
+    //Note, 'flip' will set the limit to the current position. 
+    //This makes sense for clients that just add to a buffer without sizing it correctly.
+    val bb = if (buffer.limit > 0 && buffer.position != 0) buffer.flip.asInstanceOf[ByteBuffer]
+    else buffer
+    new ByteBufferData(bb)
+  }
   
-  //def apply(bytes: Seq[Byte]): Data = Data(ByteBuffer.wrap(bytes.toArray))
   def apply(bytes: Array[Byte]): Data = Data(ByteBuffer.wrap(bytes))
   
 //  //Concatenate Data, used by Variable.concatData
