@@ -54,9 +54,9 @@ trait Operation {
    * Default operation for a Function. Wrap the original Function Apply operation to each sample.
    */
   def applyToFunction(function: Function): Option[Variable] = this match {
-    case op: IndexedSampleMappingOperation => Some(WrappedFunction(function, op))
+    case op: SampleMappingOperation => Some(WrappedFunction(function, op))
     //case homo: SampleHomomorphism => Some(WrappedFunction(function, homo))
-    case _ => throw new UnsupportedOperationException("Only homomorphic operations can use the default Function application.")
+    case _ => throw new UnsupportedOperationException("Only SampleMappingOperations can use the default Function application.")
   }
 }
 
@@ -194,5 +194,10 @@ object Operation {
      * 
      * isomorphic: same type, has inverse
      * homomorphic: same type
+     * 
+     * should we be able to select/filter on index even if domain is projected?
+     * like hyperslab
+     * implicit coord system transform between index and domain
+     * (index <-> time) -> foo
      * 
      */

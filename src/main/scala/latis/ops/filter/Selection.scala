@@ -20,7 +20,7 @@ protected class Selection(val vname: String, val operation: String, val value: S
       scalar match {
       //Special handling for Text regex matching with "=~"
       // except Time which can be handled like any other Scalar.
-      case text: Text if (! text.isInstanceOf[Time]) => filterText(text)
+      case text: Text if (! text.isInstanceOf[Time]) => applyToText(text)
       case s: Scalar => if (scalar.hasName(vname)) {
         if (isValid(scalar.compare(value))) Some(scalar) else None
         } else Some(scalar) //operation doesn't apply to this Scalar Variable, no-op
@@ -33,7 +33,7 @@ protected class Selection(val vname: String, val operation: String, val value: S
     }
   }
     
-  def filterText(text: Text): Option[Text] = {
+  def applyToText(text: Text): Option[Text] = {
     if (text.hasName(vname)) operation match {
       case "=~" => {
         if (text.getValue.asInstanceOf[String].matches(value)) Some(text) //TODO: getStringValue on Variable?

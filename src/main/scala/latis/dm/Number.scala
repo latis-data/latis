@@ -9,5 +9,6 @@ trait Number { this: Scalar =>
 }
 
 object Number {
+  //TODO: None if Data isEmpty
   def unapply(num: Number): Option[Double] = Some(num.doubleValue)
 }

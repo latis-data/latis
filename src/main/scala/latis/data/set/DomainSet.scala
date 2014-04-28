@@ -4,17 +4,23 @@ import latis.data.Data
 import java.nio.ByteBuffer
 import latis.data.IterableData
 
-abstract class DomainSet extends IterableData {
+class DomainSet extends IterableData {
 
-  def apply(index: Int): Data
+  def apply(index: Int): Data = ???
   
-  def indexOf(data: Data): Int
+  def indexOf(data: Data): Int = ???
   
-  def getByteBuffer: ByteBuffer 
+  private var _iterableData: IterableData = null
+  def recordSize: Int = _iterableData.recordSize
   
-  def isEmpty: Boolean
-  def recordSize: Int
-  //override def length: Int =
+  def iterator: Iterator[Data] = _iterableData.iterator //TODO: error if null
+}
+
+object DomainSet {
   
-  def iterator: Iterator[Data]
+  def apply(data: IterableData) = {
+    val ds = new DomainSet
+    ds._iterableData = data
+    ds
+  }
 }

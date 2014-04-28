@@ -10,6 +10,12 @@ import latis.util.PeekIterator2
 import scala.collection.Map
 import latis.util.IndexedIterator
 import latis.data.IndexData
+import latis.data.SampledData
+import latis.data.SampleData
+import latis.dm.Index
+import latis.data.set.IndexSet
+import latis.dm.Variable
+import latis.data.set.DomainSet
 
 /**
  * Base class for Adapters for data sources that have 'record' semantics.
@@ -21,42 +27,129 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
   def getRecordIterator: Iterator[R] //TODO: return same one or make new one? hook to iterate more than once?
   def parseRecord(record: R): Option[Map[String,Data]] 
   
-  def parseRecordWithIndex(record: R, index: Int): Option[Map[String,Data]] = {
-    parseRecord(record) match {
-      case Some(dataMap) => {
-        //replace Index data with current index
-        if (dataMap.contains("index")) Some(dataMap + ("index" -> IndexData(index)))
-        else Some(dataMap)
-      }
-      case None => None
-    }
-  }
+//  def parseRecordWithIndex(record: R, index: Int): Option[Map[String,Data]] = {
+//    parseRecord(record) match {
+//      case Some(dataMap) => {
+//        //replace Index data with current index
+//        if (dataMap.contains("index")) Some(dataMap + ("index" -> IndexData(index)))
+//        else Some(dataMap)
+//      }
+//      case None => None
+//    }
+//  }
   
-  private lazy val parsedRecordIterator = new IndexedIterator(getRecordIterator, (record: R, index: Int) => parseRecordWithIndex(record, index))
+//  private lazy val parsedRecordIterator = new IndexedIterator(getRecordIterator, (record: R, index: Int) => parseRecordWithIndex(record, index))
   //def getCurrentIndex = parsedRecordIterator.getIndex
+//----
+  //private lazy val parsedRecordIterator = new PeekIterator2(getRecordIterator, (record: R) => parseRecord(record))
+
   
-  def makeDataIterator(sampleTemplate: Sample): Iterator[Data] = {
-    if (cacheIsEmpty) {
-      new PeekIterator2(parsedRecordIterator, (vals: Map[String,Data]) =>  makeDataFromValueMap(vals, sampleTemplate))
+/*
+ * TODO: make SampledData with DomainSet
+ * do we still need parseRecordWithIndex?
+ *   hopefully not
+ *   makeSampledData should make IndexSet if needed
+ *   this will apply the correct Index value when iterating (or via apply(index))
+ * 
+ * if domain of sampleTemplate is Index (consider nD)
+ *   make IterableData with MappedIterator for range
+ *   
+ * +don't iterate on samples too soon when we could be iterating on data
+ * class of ops that iter on data?
+ * 
+ * +compose functions instead of wrapping with Iterators?
+ * f andThen g
+ * g needs to take and return Option
+ * and need to pass in sampleTemplate
+ * consider implicit sampleTemplate?
+ * curry: f(sampleTemplate)(X): Y
+ * 
+ * it.flatMap(f).flatMap(g)
+ * 
+ * cache in SampledData instead of here in adapter?
+ * special subclass of SampledData
+ * + with Cache mixin!
+ * 
+ */
+  def makeSampledData(sampleTemplate: Sample): SampledData = {
+    val domainTemplate = sampleTemplate.domain
+    val rangeTemplate  = sampleTemplate.range
+    
+    //TODO: consider other ways to define domain set in tsml
+    
+    if (domainTemplate.isInstanceOf[Index]) {
+      //TODO: consider nD domain with one or more Index dims
+      val dset = IndexSet() //undefined length
+      //TODO: if Function length is defined
+      //  getLength match {
+      //  case n: Int if (n < 0) => IndexSet() //undefined length
+      //  case n: Int => IndexSet(n)
+      //}
+      val rdata = makeIterableData(rangeTemplate, getRecordIterator)
+//        new IterableData {
+//        def recordSize: Int = rangeTemplate.getSize
+//        val f = parseRecord _ andThen makeDataFromDataMap(rangeTemplate) _
+//        def iterator = new PeekIterator2(getRecordIterator, f)
+//      }
+      SampledData(dset, rdata)
     } else {
-      getCachedData("sample") match {
-        case Some(data) => data.iterator
-        case None => throw new Error("No data in the cache for: sample")
-      }
+//      val it: Iterator[SampleData] = {
+//        val f = parseRecord _ andThen makeSampleDataFromDataMap(sampleTemplate) _
+//        new PeekIterator2(getRecordIterator, f)
+//      }
+//      SampledData(it)
+      //Make with domain set so it is at least easier to replace with Index Set if not projected
+      //TODO try Iterator.duplicate, at record iterator? test how it caches
+      val (dit, rit) = getRecordIterator.duplicate
+      val dset = DomainSet(makeIterableData(domainTemplate, dit))
+      val rdata = makeIterableData(rangeTemplate, rit)
+      SampledData(dset, rdata)
     }
   }
-    
-  private def makeDataFromValueMap(dataMap: Map[String,Data], sampleTemplate: Sample): Option[Data] = {
-    val data = DataUtils.makeDataFromDataMap(dataMap, sampleTemplate, parsedRecordIterator.getIndex)
-    
-    //cache based upon caching strategy //TODO: async?
-    getProperty("cache") match {
-      case Some("none") =>
-      case _ => appendToCache("sample", data)
-    }
-    
-    Some(data)
+  
+  private def makeIterableData(template: Variable, recordIterator: Iterator[R]) = new IterableData {
+    def recordSize: Int = template.getSize
+    val f = parseRecord _ andThen makeDataFromDataMap(template) _
+    def iterator = new PeekIterator2(recordIterator, f)
   }
+  
+  private def makeDataFromDataMap(template: Variable)(dataMap: Option[Map[String,Data]]): Option[Data] = dataMap match {
+    case None => None
+    case Some(m) => Some(DataUtils.makeDataFromDataMap(m, template))
+    //TODO: should DataUtils.makeDataFromDataMap return Option?
+  }
+  
+  private def makeSampleDataFromDataMap(sampleTemplate: Sample)(dataMap: Option[Map[String,Data]]): Option[SampleData] = dataMap match {
+    case None => None
+    case Some(m) => Some(DataUtils.makeSampleDataFromDataMap(m, sampleTemplate))
+  }
+  
+  
+//-----  
+//  def makeDataIterator(sampleTemplate: Sample): Iterator[Data] = {
+//    if (cacheIsEmpty) {
+//      new PeekIterator2(parsedRecordIterator, (vals: Map[String,Data]) =>  makeDataFromValueMap(vals, sampleTemplate))
+//    } else {
+//      getCachedData("sample") match {
+//        case Some(data) => data.iterator
+//        case None => throw new Error("No data in the cache for: sample")
+//      }
+//    }
+//  }
+//    
+//  private def makeDataFromValueMap(dataMap: Map[String,Data], sampleTemplate: Sample): Option[Data] = {
+//    val data = DataUtils.makeDataFromDataMap(dataMap, sampleTemplate, parsedRecordIterator.getIndex)
+//    
+//    //cache based upon caching strategy //TODO: async?
+//    getProperty("cache") match {
+//      case Some("none") =>
+//      case _ => appendToCache("sample", data)
+//    }
+//    
+//    Some(data)
+//  }
+  
+  
   
   /**
    * Override to make Function with IterableData.
@@ -66,18 +159,22 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
     val template = Sample(f.getDomain, f.getRange)
     makeSample(template) match {
       case Some(sample) => {
-        val data: Data = makeIterableData(sample)
+        //val data: Data = makeIterableData(sample)
+        val data: Data = makeSampledData(sample)
         Some(Function(sample.domain, sample.range, f.getMetadata, data))
       }
       case None => None
     }
   }
   
-  def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
-    def recordSize = sampleTemplate.getSize
-    def iterator = makeDataIterator(sampleTemplate)
-  }
+//  def makeIterableData(sampleTemplate: Sample): Data = new IterableData {
+//    def recordSize = sampleTemplate.getSize
+//    def iterator = makeDataIterator(sampleTemplate)
+//  }
 }
+
+
+
     /*
      * ascii adapters' parseRecord returns String instead of Data
      * ++can we simply use StringValue? size issue when converting to bytes? apply when building from template

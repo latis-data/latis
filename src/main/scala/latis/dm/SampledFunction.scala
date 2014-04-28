@@ -31,7 +31,7 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
    * property of adapter for when we really can't cache?
    * 
    * iterator.toStream here?
-   * or add 'stream' in place of 'iterate'?
+   * +or add 'stream' in place of 'iterate'?
    * need hook to disable for really large datasets
    */
   
@@ -42,11 +42,12 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
   //private var _iterator: Iterator[Sample] = null
   
   def iterator: Iterator[Sample] = {
-    if (_iterator != null) _iterator
+    if (_iterator != null) _iterator //TODO: do we use this? WrappedFunction may want to intervene at DataIterator (new SampledData)
     else if (getData.isEmpty) ??? //iterateFromKids
     else getDataIterator.map(DataUtils.dataToSample(_, Sample(domain, range)))
   }
   
+  //TODO: require SampledFunction to have SampledData?
   def getDataIterator: Iterator[Data] = {
     if (data.notEmpty) data.asInstanceOf[IterableData].iterator
     else ???

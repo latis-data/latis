@@ -8,6 +8,7 @@ package latis.util
  * You can also "peek" at the next sample without advancing.
  */
 class PeekIterator2[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) extends PeekIterator[T] {
+  //TODO: MappedIterator
   //Note, the bound on Null allows us to return null for generic type T.
 
   /**

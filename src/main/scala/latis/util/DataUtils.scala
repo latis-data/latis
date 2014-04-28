@@ -15,7 +15,8 @@ object DataUtils {
    * Given a dataMap mapping Variable names to Data and a Variable template,
    * construct a Data object with data from the dataMap.
    */
-  def makeDataFromDataMap(dataMap: Map[String, Data], variableTemplate: Variable, index: Int = -1): Data = {
+  //def makeDataFromDataMap(dataMap: Map[String, Data], variableTemplate: Variable, index: Int = -1): Data = {
+  def makeDataFromDataMap(dataMap: Map[String, Data], variableTemplate: Variable): Data = {
     //build a ByteBuffer to contain the data
     val size = variableTemplate.getSize
     val bb = ByteBuffer.allocate(size)
@@ -32,7 +33,7 @@ object DataUtils {
           bb.put(bytes)
         }
         case None => v match {
-          case _: Index => bb.putInt(index)  //handle Index which should not have a value in the dataMap
+          //case _: Index => //bb.putInt(index)  //handle Index which should not have a value in the dataMap
           case Tuple(vars) => vars.map(accumulateData(_))
           case f: Function => f.iterator.map(accumulateData(_))
           case _: Scalar => throw new Error("No data found for " + v.getName)
@@ -48,6 +49,13 @@ object DataUtils {
     Data(bb.flip.asInstanceOf[ByteBuffer])
   }
   
+  def makeSampleDataFromDataMap(dataMap: Map[String, Data], sampleTemplate: Sample): SampleData = {
+    val ddata = makeDataFromDataMap(dataMap, sampleTemplate.domain)
+    val rdata = makeDataFromDataMap(dataMap, sampleTemplate.range)
+    SampleData(ddata, rdata)
+  }
+
+
 
   def dataToSample(data: Data, template: Sample): Sample = {
     //TODO: could we just rely on Sample's Tuple behavior here?

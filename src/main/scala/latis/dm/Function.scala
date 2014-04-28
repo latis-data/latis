@@ -20,6 +20,7 @@ trait Function extends Variable { //this: Variable =>
   //TODO: put in Variable?
   //def length: Int  getLength?
   def iterator: Iterator[Sample]
+  //TODO: only applicable to SampledFunction
 }
 
 
