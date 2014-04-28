@@ -1,9 +1,10 @@
 package latis.data
 
 import latis.data.set.DomainSet
-import latis.data.SampleData
+import latis.dm.Sample
 
 class SampledData extends IterableData {
+  //TODO: manage caching here? special subclass?
   
   def recordSize: Int = domainSet.recordSize + rangeData.recordSize
   
@@ -60,25 +61,25 @@ class SampledData extends IterableData {
    * Return a new SampledData with the given domainSet but the original
    * range Data without invoking its iterator.
    */
-  def replaceDomain(newDomainSet: DomainSet): SampledData = {
-    SampledData(newDomainSet, _range)
-    /*
-     * is it enough to do: SampledData(newDomainSet, _range)
-     * where does that leave the original?
-     * the orig SampledFunction would still have it
-     * might be able to get away with it in server but dangerous in DSL
-     * dare we make Data mutable? hope not
-     * hazards of iterable once that we might have to suffer for long data?
-     * to be safe, this new SD should have cached data
-     * try Iterator.duplicate
-     * 
-     * +could our PeekIterator optionally cache?
-     * at the lowest level so we could reuse - rewind?
-     * can't really do that at the Iterator level, need to do with Iterable
-     * but see Iterator.isTraversableAgain
-     * 
-     */
-  }
+//  def replaceDomain(newDomainSet: DomainSet): SampledData = {
+//    SampledData(newDomainSet, _range)
+//    /*
+//     * is it enough to do: SampledData(newDomainSet, _range)
+//     * where does that leave the original?
+//     * the orig SampledFunction would still have it
+//     * might be able to get away with it in server but dangerous in DSL
+//     * dare we make Data mutable? hope not
+//     * hazards of iterable once that we might have to suffer for long data?
+//     * to be safe, this new SD should have cached data
+//     * try Iterator.duplicate
+//     * 
+//     * +could our PeekIterator optionally cache?
+//     * at the lowest level so we could reuse - rewind?
+//     * can't really do that at the Iterator level, need to do with Iterable
+//     * but see Iterator.isTraversableAgain
+//     * 
+//     */
+//  }
   
   private var _iterator: Iterator[SampleData] = null
   
@@ -91,16 +92,26 @@ class SampledData extends IterableData {
 
 object SampledData {
   
-  def apply(domainSet: DomainSet, rangeData: IterableData) = {
+  def apply(domainData: IterableData, rangeData: IterableData): SampledData = SampledData(DomainSet(domainData), rangeData)
+    
+  def apply(domainSet: DomainSet, rangeData: IterableData): SampledData = {
     val sd = new SampledData
     sd._domain = domainSet
     sd._range = rangeData
     sd
   }
   
-  def apply(sampleIterator: Iterator[SampleData]) = {
-    val sd = new SampledData
-    sd._iterator = sampleIterator
-    sd
+  //TODO: explore implications of duplicated Iterators (e.g. its caching)
+  def apply(sampleIterator: Iterator[SampleData], sampleTemplate: Sample): SampledData = {
+    val (dit,rit) = sampleIterator.duplicate
+    val dset = DomainSet(IterableData(dit.map(_.domainData), sampleTemplate.domain.getSize))
+    val rdata = IterableData(rit.map(_.rangeData), sampleTemplate.range.getSize)
+    SampledData(dset, rdata)
   }
+  
+//  def apply(sampleIterator: Iterator[SampleData]) = {
+//    val sd = new SampledData
+//    sd._iterator = sampleIterator
+//    sd
+//  }
 }

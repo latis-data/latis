@@ -2,7 +2,7 @@
 <tsml>
 
   <dataset name="nested_function">
-    <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+    <adapter class="latis.reader.tsml.AsciiAdapter"
              delimiter="\s+"
              location="datasets/test/nested_function.txt" />
     

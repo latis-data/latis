@@ -8,14 +8,55 @@ import latis.time.Time
 import latis.data.seq.SeqData
 import latis.time.TimeFormat
 import scala.collection.Map
+import scala.collection.mutable
 
 object DataUtils {
+  
+  def reshapeData(data: Data, variableTemplate1: Variable, variableTemplate2: Variable): Data = {
+    val dataMap = dataToDataMap(data, variableTemplate1)
+    makeDataFromDataMap(dataMap, variableTemplate2)
+  }
+  
+  def reshapeSampleData(sampleData: SampleData, sampleTemplate1: Sample, sampleTemplate2: Sample): SampleData = {
+    val dataMap = dataToDataMap(sampleData, sampleTemplate1)
+    dataMapToSampleData(dataMap, sampleTemplate2)
+  }
+  
+  def dataToDataMap(data: Data, variableTemplate: Variable): Map[String, Data] = {
+    buildMapFromBuffer(data.getByteBuffer, mutable.Map[String,Data](), variableTemplate)
+  }
 
+  private def buildMapFromBuffer(bb: ByteBuffer, dataMap: mutable.Map[String,Data], variableTemplate: Variable): Map[String,Data] = variableTemplate match {
+    case s: Scalar => {
+      val bytes = new Array[Byte](s.getSize)
+      bb.get(bytes)
+      val data = Data(bytes)
+      val name = s.getName
+      dataMap.get(name) match {
+        case Some(d) => dataMap += (name -> (d concat data))
+        case None    => dataMap += (name -> data)
+      }
+    }
+    
+    //assume Tuple does not contain data
+    case Tuple(vars) => vars.foreach(buildMapFromBuffer(bb, dataMap, _)); dataMap
+    
+    //apply to each sample
+    case f: Function => f.iterator.foreach(buildMapFromBuffer(bb, dataMap, _)); dataMap
+  }
+  
+  def dataMapToSampleData(dataMap: Map[String, Data], sampleTemplate: Sample): SampleData = {
+    val domainData = makeDataFromDataMap(dataMap, sampleTemplate.domain)
+    val rangeData = makeDataFromDataMap(dataMap, sampleTemplate.range)
+    SampleData(domainData, rangeData)
+  }
+  
+  
   /**
    * Given a dataMap mapping Variable names to Data and a Variable template,
    * construct a Data object with data from the dataMap.
    */
-  //def makeDataFromDataMap(dataMap: Map[String, Data], variableTemplate: Variable, index: Int = -1): Data = {
+  //TODO: dataMapToData?
   def makeDataFromDataMap(dataMap: Map[String, Data], variableTemplate: Variable): Data = {
     //build a ByteBuffer to contain the data
     val size = variableTemplate.getSize
@@ -55,8 +96,20 @@ object DataUtils {
     SampleData(ddata, rdata)
   }
 
+  def sampleToData(sample: Sample): SampleData = {
+    val ddata = buildDataFromVariable(sample.domain)
+    val rdata = buildDataFromVariable(sample.range)
+    SampleData(ddata, rdata)
+  }
 
-
+  private def buildDataFromVariable(variable: Variable, data: Data = EmptyData): Data = variable match {
+    case s: Scalar => data concat s.getData
+    case Tuple(vars) => vars.foldLeft(data)(_ concat _.getData)
+    case f: Function => f.iterator.foldLeft(data)(_ concat _.getData)
+  }
+  
+  
+//TODO: require SampledData?
   def dataToSample(data: Data, template: Sample): Sample = {
     //TODO: could we just rely on Sample's Tuple behavior here?
     val bb = data.getByteBuffer

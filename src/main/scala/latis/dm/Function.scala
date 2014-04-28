@@ -2,6 +2,7 @@ package latis.dm
 
 import scala.collection._
 import latis.data._
+import latis.data.set.DomainSet
 import latis.metadata._
 import java.nio.ByteBuffer
 
@@ -21,6 +22,12 @@ trait Function extends Variable { //this: Variable =>
   //def length: Int  getLength?
   def iterator: Iterator[Sample]
   //TODO: only applicable to SampledFunction
+  
+  /**
+   * Function should always have SampledData, for now
+   */
+  //def getData: SampledData
+  def getDataIterator: Iterator[SampleData]
 }
 
 
@@ -32,7 +39,7 @@ object Function {
   
   def apply(domain: Variable, range: Variable, md: Metadata): Function = new SampledFunction(domain, range, metadata = md)
   
-  def apply(domain: Variable, range: Variable, data: Data): Function = new SampledFunction(domain, range, data = data)
+  def apply(domain: Variable, range: Variable, data: SampledData): Function = new SampledFunction(domain, range, data = data)
 
   
   //build from Iterator[Sample]
@@ -45,7 +52,7 @@ object Function {
   def apply(domain: Variable, range: Variable, sampleIterator: Iterator[Sample]): Function = 
     Function(domain, range, sampleIterator, EmptyMetadata)
   
-  def apply(domain: Variable, range: Variable, md: Metadata, data: Data): Function = {
+  def apply(domain: Variable, range: Variable, md: Metadata, data: SampledData): Function = {
     new SampledFunction(domain, range, metadata = md, data = data)
   }
   
@@ -75,10 +82,13 @@ object Function {
       case 1 => Real(Metadata("range"))
       case n: Int => Tuple((0 until n).map(i => Real(Metadata("real"+i)))) //auto-gen names
     }
-    val data = {
+    val data: SampledData = {
       //assert that all Seq are same length
       if (vals.exists(_.length != dvals.length)) throw new Error("Value sequences must be the same length.")
-      vals.foldLeft(Data.fromDoubles(dvals: _*))(_ zip Data.fromDoubles(_: _*))
+      //vals.foldLeft(Data.fromDoubles(dvals: _*))(_ zip Data.fromDoubles(_: _*))
+      val rdata = vals.tail.foldLeft(Data.fromDoubles(vals.head: _*))(_ zip Data.fromDoubles(_: _*))
+      SampledData(DomainSet(Data.fromDoubles(dvals: _*)), rdata)
+      //TODO: SampledData.fromValues?
     }
     
     //make Real if vals.length == 1
@@ -89,7 +99,7 @@ object Function {
   //def apply(samples: Seq[Sample]): Function = 
   
   def unapply(f: Function): Option[(Variable, Variable)] = Some((f.getDomain, f.getRange))
-  //TODO: expose Seq[Samples]?
+//TODO: expose Seq[Samples]?
   
 }
 

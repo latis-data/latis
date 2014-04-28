@@ -10,6 +10,7 @@ import latis.metadata.Metadata
 import latis.ops.filter.Selection
 import latis.data.seq.DataSeq
 import latis.data.Data
+import latis.data.SampledData
 
 class TestSelection {
   
@@ -21,7 +22,8 @@ class TestSelection {
     val range = Real(Metadata("value"))
     val ddata = Data.fromDoubles(1,2,3,4,5)
     val rdata = Data.fromDoubles(1,2,3,4,3)
-    val data = ddata zip rdata
+    //val data = ddata zip rdata
+    val data = SampledData(ddata, rdata)
     Function(domain, range, data)
   }
   
@@ -43,7 +45,8 @@ class TestSelection {
     val range = Real(Metadata("value"))
     val ddata = Data.fromDoubles(3,5)
     val rdata = Data.fromDoubles(3,3)
-    val expected = Function(domain, range, ddata zip rdata)
+    val data = SampledData(ddata, rdata)
+    val expected = Function(domain, range, data)
     testSelection(scalarFunction, "value=3", expected)
   }
   

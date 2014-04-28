@@ -1,8 +1,14 @@
 package latis.ops
 
 import latis.dm._
-//import scala.Option.option2Iterable
+import latis.util.DataUtils
 import latis.util.RegEx._
+import latis.data.SampledData
+import latis.data.set.IndexSet
+import latis.util.PeekIterator2
+import latis.data.Data
+import latis.data.SampleData
+import latis.data.IterableData
 
 /**
  * Exclude variables not named in the given list.
@@ -29,12 +35,94 @@ class Projection(val names: Seq[String]) extends SampleMappingOperation {
   }
   
   override def applyToTuple(tuple: Tuple): Option[Tuple] = {
+    //TODO: apply projection order?
     val vars = tuple.getVariables.flatMap(applyToVariable(_))
     if (vars.length == 0) None
     else Some(Tuple(vars)) //TODO: metadata
   }
   
-  //override def applyToFunction(function: Function): Option[Variable] = Some(ProjectedFunction(function, this))
+  /**
+   * Since we may replace a dropped domain with Index, we may need to make a new SampledFunction
+   * with SampledData with an IndexSet for the domain.
+   */
+  override def applyToFunction(function: Function): Option[Variable] = {
+    
+    val sample1 = Sample(function.getDomain, function.getRange)
+    
+    val sample2 = applyToSample(sample1) match {
+      case Some(s) => s
+      case None => throw new Error("Failed to project the sample: " + sample1)
+    }
+ 
+    /*
+     * TODO: what if orig f had index, or any DomainSet for that matter?
+     * no harm done for Index
+     * ++ reuse DomainSet if it is projected
+     * 
+     * TODO: what if function is a WrappedFunction without data?
+     * do we dare convert Samples back to Data?
+     * via f.getDataIterator?
+     * could we just op on samples?
+     * back to same index set problem
+     */
+    
+    val Sample(d,r) = sample2
+    val sampledData = if (d.isInstanceOf[Index]) {
+      //Only need to process range, but orig data includes all
+      val tmp2 = sample2.range
+      val f = (data: SampleData) => Some(DataUtils.reshapeData(data, sample1, tmp2))
+      val dataIt = new PeekIterator2(function.getDataIterator, f)
+      SampledData(IndexSet(), IterableData(dataIt, tmp2.getSize))
+    } else {
+      val f = (data: SampleData) => Some(DataUtils.reshapeSampleData(data, sample1, sample2))
+      val dataIt = new PeekIterator2(function.getDataIterator, f)
+      SampledData(dataIt, sample2)
+    }
+    
+    Some(Function(d, r, sampledData))
+  }
+
+/*
+ * TODO: consider doing the data munging here so the WrappedFunction starts with the correct type
+ * apply projection order while we are at it
+ * if we do that all here, then don't even need WrappedFunction
+ * should we define a function to map the Data then wrap it in an iterator and sampled data? (see IterativeAdapter)
+ * 
+ * DataUtil reshapeData(data, sample1, sample2): SampledData
+ *   dataToDataMap(data, sample): Map[String,Data]
+ *   no need to go all the way to Samples just to come back to data
+ *   if we did go to Samples, then we could do like WrappedFunction, applyToSample, but need to be careful about how we manage type change
+ *  *would waste time converting non-projected data to Vars, couldn't avoid buggy data by not projecting
+ *  dataToDataMap then 'reshape' here?
+ *  revisit when we start reshaping nD domains
+ *  or other Ops that need to muck with data
+ * 
+ * call dataToDataMap on entire Function?
+ * or iterate around it?
+ * iterate on SampledData to get SampleData-s
+ * consider nested Functions
+ * 
+ * make PeekIterator2(function.getData.iterator, f)
+ * function to map data for an original sample to data for the new sample
+ * based on variable size, without creating Variables
+ * use dataToDataMap
+ * within reshapeData?
+ */
+//      //function to map data for an original sample to data for the new sample
+//      //based on variable size, without creating Variables
+//      val f = (data: SampleData) => Some(DataUtils.reshapeData(data, sample1, sample2))
+//      
+//      val dataIt = new PeekIterator2(function.getData.iterator, f)
+//      val data = SampledData(dataIt, sample2)
+//      
+//      Some(Function(d, r, data))
+//      //Some(WrappedFunction(function, this))
+//    }
+//   
+//    ???
+//    //Some(ProjectedFunction(function, this))
+  
+  
   
   override def applyToVariable(variable: Variable): Option[Variable] = {
     //Note, always project Index since it is used as a place holder for a non-projected domain.

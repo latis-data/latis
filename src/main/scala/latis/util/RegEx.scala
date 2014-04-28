@@ -28,6 +28,9 @@ object RegEx {
     lazy val VALUE = """[\w\.\+\-eE\:\*\?\{\}\<\>#\s/]+"""
     //Note, needed to match regex for "=~" op: "*?"
     //  SPARQL: "{}<>#?/" and space
+    //TODO: find alternative to being so liberal:
+    //  just don't support such queries, not a good idea anyway?
+    //  require encapsulation within 'quotes'?
     //TODO: work out the kinks in: lazy val VALUE = s"(?:$TIME)|(?:$NUMBER)|(?:$VARIABLE)" //TODO: OPERATION? but recursive
     
     /**

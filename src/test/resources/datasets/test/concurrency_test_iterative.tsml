@@ -2,7 +2,7 @@
 <tsml>
 
   <dataset name="concurrency_test_iterative">
-    <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+    <adapter class="latis.reader.tsml.AsciiAdapter"
              delimiter=","
              commentCharacter="#"
              location="/data/latis/con_test.csv" />

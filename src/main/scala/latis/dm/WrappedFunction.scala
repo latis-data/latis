@@ -4,41 +4,26 @@ import latis.ops.SampleMappingOperation
 import latis.util.IndexedIterator
 import latis.util.PeekIterator2
 import latis.ops.Projection
+import latis.data.SampleData
+import latis.util.DataUtils
 
-class WrappedFunction(function: Function, val operation: SampleMappingOperation) 
-  extends SampledFunction(null, null) {
-  //Note, pass nulls for domain and range, override getDomain, getRange
 //TODO: SampleMappedFunction?
+class WrappedFunction(function: Function, val operation: SampleMappingOperation) 
+  extends SampledFunction(function.getDomain, function.getRange) {
   
-  private var _domain = function.getDomain
-  private var _range  = function.getRange
-  
-  override def getDomain: Variable = _domain
-  override def getRange: Variable = _range
-  
-  
-  /*
-   * TODO: instead of a subclass for each class of operation, handle diffs here?
-   *  * Op could extend multiple traits, test for each one here
-   *     more functional (pattern match) than subclass polymorphism
-   *   Filter: no need to munge type
-   *   AlgebraicOperation: safe to munge type since data wont be touched
-   *     but might not be applicable by sample
-   *   instead of all or nothing, use multiple traits
-   *     one that simply says it's safe to use applyToSample for domain/range types
-   *     
-   * WrappedFunction subclass for each?
-   *   FilteredFunction
-   *   TransformedFunction?
-   * but this expects to map samples, might we have other wrapped Functions that don't op on samples?
-   *   probably not, otherwise op would act in applyToFunction instead of delegating to wrapped function
-   *   SampleMappedFunction? 
+  /**
+   * Override iterator to apply the Operation to each sample as it iterates (lazy).
    */
-  type FooOperation = Projection //TODO: define a trait for Ops that can safely use applyToSample for domain/range types, unlike Filters
-  if (operation.isInstanceOf[FooOperation]) operation(Sample(function.getDomain, function.getRange)) match {
-    case Some(sample) => _domain = sample.domain; _range = sample.range
-    case None => ??? //TODO: error? shouldn't happen for this class of Operations
-  }
+  override def iterator: Iterator[Sample] = new PeekIterator2(function.iterator, (s: Sample) => operation(s))
+  
+  //only needed for projection?
+  override def getDataIterator: Iterator[SampleData] = iterator.map(DataUtils.sampleToData(_))
+
+}
+
+object WrappedFunction {
+  def apply(function: Function, operation: SampleMappingOperation) = new WrappedFunction(function, operation)
+}
   
   /*
    * +++ Use Case: Operation (e.g. Projection) replaces domain with Index
@@ -102,6 +87,18 @@ class WrappedFunction(function: Function, val operation: SampleMappingOperation)
    *   just make sure SampledData matches sample used in dataToSample
    *   proj may want to drop other vars, but may be easier to do with samples instead of data
    * 
+   * * See how Projection applyToFunction deals with type changes before delegating to WrappedFunction
+   * but still need to munge type since we didn't munge data
+   * do we need ProjectedFunction for that, or just more work in Projection?
+   * 
+   * ++require Op to munge model and data so we don't have to worry about changing domain and range here
+   * 
+   * bug projecting WrappedFunction (with selection)
+   * getData = null
+   * do we need to use getDataIterator? 
+   *   sounds like a mess
+   * always do projection first?
+   * 
    * +++
    */
   
@@ -141,15 +138,3 @@ class WrappedFunction(function: Function, val operation: SampleMappingOperation)
    * at least domain set should cache so it can iterate again?
    * 
    */
-  
-  /**
-   * Override iterator to apply the Operation to each sample as it iterates (lazy).
-   */
-  //override def iterator: Iterator[Sample] = new IndexedIterator(function.iterator, (s: Sample, index: Int) => operation(s, index))
-  override def iterator: Iterator[Sample] = new PeekIterator2(function.iterator, (s: Sample) => operation(s))
-
-}
-
-object WrappedFunction {
-  def apply(function: Function, operation: SampleMappingOperation) = new WrappedFunction(function, operation)
-}

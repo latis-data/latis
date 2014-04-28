@@ -131,9 +131,9 @@ class TestRegEx {
   @Test def match_selection_with_quotes = assertTrue("foo>'bar'" matches RegEx.SELECTION)
   @Test def match_selection_with_number = assertTrue("foo>-1.23e+12" matches RegEx.SELECTION)
   @Test def match_selection_with_time = assertTrue("foo>1970-01-01T00:00:00" matches RegEx.SELECTION)
-  @Test def dont_match_selection_with_bad_value = assertFalse("foo>#00" matches RegEx.SELECTION)
-  @Test def dont_match_selection_with_bad_variable = assertFalse("#oo>bar" matches RegEx.SELECTION)
-  @Test def dont_match_selection_with_bad_operator = assertFalse("foo=>bar" matches RegEx.SELECTION)
+  @Test def dont_match_selection_with_bad_value = assertFalse("foo>`00" matches RegEx.SELECTION)
+  @Test def dont_match_selection_with_bad_variable = assertFalse("`oo>bar" matches RegEx.SELECTION)
+  @Test def dont_match_selection_with_bad_operator = assertFalse("foo=`bar" matches RegEx.SELECTION)
   @Test def dont_match_selection_with_mismatched_quotes = assertFalse("foo=bar'" matches RegEx.SELECTION)
   
   //Extract Selection
@@ -154,7 +154,7 @@ class TestRegEx {
     assertEquals(3, ms.length)
     assertEquals("1970-01-01T00:00", ms(2))
   }
-  @Test def dont_extract_bad_selection = assertEquals(0, getMatchingGroups(RegEx.SELECTION, "foo=>bar").length)
+  @Test def dont_extract_bad_selection = assertEquals(0, getMatchingGroups(RegEx.SELECTION, "foo=`bar").length)
 
   //Projection expression
   @Test def match_projection_of_one = assertTrue("foo" matches RegEx.PROJECTION)
@@ -195,7 +195,8 @@ class TestRegEx {
   @Test def extract_operation_with_two_args = {
     val ms = getMatchingGroups(RegEx.OPERATION, "foo( -1.23e+12, 1970-01-01T00:00 )")
     assertEquals(2, ms.length)
-    assertEquals("-1.23e+12, 1970-01-01T00:00", ms(1))
+    //TODO: had to trim result now that " " is allowed in value
+    assertEquals("-1.23e+12, 1970-01-01T00:00", ms(1).trim)
   }
 
 }

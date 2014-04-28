@@ -5,7 +5,7 @@
   <adapter class="latis.reader.tsml.agg.CollectionAdapter"/>
   
     <dataset name="ds1">
-      <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+      <adapter class="latis.reader.tsml.AsciiAdapter"
                delimiter="\s+"
                location="datasets/test/agg/scalar_ts_2col_0-9.txt" />
       <time name="T" />
@@ -13,7 +13,7 @@
     </dataset>
 
     <dataset name="ds2">
-      <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+      <adapter class="latis.reader.tsml.AsciiAdapter"
                delimiter="\s+"
                location="datasets/test/agg/scalar_ts_2col_10-19.txt" />
       <time name="T" />

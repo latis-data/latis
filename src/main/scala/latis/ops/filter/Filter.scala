@@ -8,7 +8,7 @@ import latis.dm.Tuple
 import latis.dm.Variable
 import scala.Option.option2Iterable
 import latis.ops.Operation
-import latis.dm.FilteredFunction
+//import latis.dm.FilteredFunction
 import latis.ops.SampleMappingOperation
 
 /**
