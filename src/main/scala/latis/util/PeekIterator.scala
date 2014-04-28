@@ -18,7 +18,10 @@ abstract class PeekIterator[T >: Null] extends Iterator[T] {
   /**
    * Take a look at the next sample without advancing to it.
    */
-  final def peek: T = _next
+  final def peek: T = {
+    _initialized //make sure we have cached the first value
+    _next
+  }
   
   /**
    * Use this lazy val so initialization will happen when this is first asked
