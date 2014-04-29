@@ -3,32 +3,44 @@ package latis.data.set
 import latis.data.value.IndexValue
 import latis.data.Data
 
-class IndexSet extends DomainSet {
+class IndexSet(val start: Int, val stop: Int, val stride: Int) extends DomainSet {
 
-  override def apply(index: Int) = IndexValue(index)
-  
-  override def indexOf(data: Data) = data match {
-    case IndexValue(i) => i
-  }
+  override def recordSize: Int = 4
+  override def length: Int = (stop - start) / stride + 1
 
-  override def iterator = new Iterator[Data]() {
-    var index = -1
+  def iterator = new Iterator[Data]() {
+    var index = start - stride
   
-    def hasNext: Boolean = true //index + 1 < myLength
+    def hasNext(): Boolean = index + stride < IndexSet.this.length
   
-    def next = {
-      index += 1
+    def next() = {
+      index += stride
       IndexValue(index)
     }
   }
   
-  override def recordSize: Int = 4
+  def apply(index: Int): Data = IndexValue(start + stride * index)
+    
+  override def indexOf(data: Data) = data match {
+    case IndexValue(i) => (i - start) / stride 
+    //TODO: error if not a multiple of stride?
+    //TODO: other Data that evaluates to Int
+  }
+  
+  override def equals(that: Any) = that match {
+    case d: IndexSet => d.start == start && d.stop == stop && d.stride == stride
+    case _ => false
+  }
+  
+  override def hashCode = start + 7 * stop + 17 * stride
+
 }
 
 object IndexSet {
-  
-  def apply() = new IndexSet
-  
-  //def apply(length: Int) = new IndexSet(length)
+    
+  def apply(start: Int, stop: Int, stride: Int): IndexSet = new IndexSet(start, stop, stride)
+  def apply(start: Int, stop: Int): IndexSet = IndexSet(start, stop, 1)
+  def apply(length: Int): IndexSet = IndexSet(0, length-1, 1)
+  def apply() = new IndexSet(0, Int.MaxValue, 1) //TODO: support infinite? length = -1?
   
 }
