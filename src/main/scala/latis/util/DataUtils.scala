@@ -42,7 +42,7 @@ object DataUtils {
     case Tuple(vars) => vars.foreach(buildMapFromBuffer(bb, dataMap, _)); dataMap
     
     //apply to each sample
-    case f: Function => f.iterator.foreach(buildMapFromBuffer(bb, dataMap, _)); dataMap
+    case Function(it) => it.foreach(buildMapFromBuffer(bb, dataMap, _)); dataMap
   }
   
   def dataMapToSampleData(dataMap: Map[String, Data], sampleTemplate: Sample): SampleData = {
@@ -76,7 +76,7 @@ object DataUtils {
         case None => v match {
           //case _: Index => //bb.putInt(index)  //handle Index which should not have a value in the dataMap
           case Tuple(vars) => vars.map(accumulateData(_))
-          case f: Function => f.iterator.map(accumulateData(_))
+          case Function(it) => it.map(accumulateData(_))
           case _: Scalar => throw new Error("No data found for " + v.getName)
         }
       }
@@ -105,7 +105,7 @@ object DataUtils {
   private def buildDataFromVariable(variable: Variable, data: Data = EmptyData): Data = variable match {
     case s: Scalar => data concat s.getData
     case Tuple(vars) => vars.foldLeft(data)(_ concat _.getData)
-    case f: Function => f.iterator.foldLeft(data)(_ concat _.getData)
+    case Function(it) => it.foldLeft(data)(_ concat _.getData)
   }
   
   
@@ -180,7 +180,7 @@ object DataUtils {
       
     case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _)), template.getMetadata)
 
-    case Function(d, r) => { //entire function, designed for inner functions
+    case f: Function => { //entire function, designed for inner functions
       //Function(buildVarFromData(bb, d), buildVarFromData(bb, r))
       //TODO: interleave
       //iterate over sample size

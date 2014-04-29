@@ -104,7 +104,7 @@ object DataMap {
     
     case Tuple(vars) => for (v <- vars) putDoublesInMap(v, m)
     
-    case f: Function => for (sample <- f.iterator) putDoublesInMap(sample, m)
+    case Function(it) => for (sample <- it) putDoublesInMap(sample, m)
   }
       
   //=========================================================================
@@ -156,6 +156,6 @@ object DataMap {
     
     case Tuple(vars) => for (v <- vars) putStringsInMap(v, m)
     
-    case f: Function => for (sample <- f.iterator) putStringsInMap(sample, m)
+    case Function(it) => for (sample <- it) putStringsInMap(sample, m)
   }
 }

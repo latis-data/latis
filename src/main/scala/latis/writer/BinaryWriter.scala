@@ -21,7 +21,7 @@ class BinaryWriter extends Writer {
   
   //write top level variables
   def writeVariable(variable: Variable) = variable match {
-    case f: Function => for (sample <- f.iterator) writer.write(varToBytes(sample))
+    case Function(it) => for (sample <- it) writer.write(varToBytes(sample))
     case _ => writer.write(varToBytes(variable))
   }
   

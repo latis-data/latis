@@ -26,8 +26,8 @@ class DataDdsWriter extends BinaryWriter {
   }
 
   override def writeVariable(variable: Variable) = variable match {
-    case f: Function => {
-      for (sample <- f.iterator){
+    case Function(it) => {
+      for (sample <- it){
         writer.write(START_OF_INSTANCE)
         writer.write(varToBytes(sample))
       }

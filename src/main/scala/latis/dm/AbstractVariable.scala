@@ -60,7 +60,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     } 
     
     case Tuple(vars) => vars.foldLeft(0)(_ + _.getSize)
-    case f @ Function(d,r) => f.getLength * (d.getSize + r.getSize)
+    case f: Function => f.getLength * (f.getDomain.getSize + f.getRange.getSize)
   }
   
   /**
@@ -75,7 +75,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    */
   lazy val sampleSize: Int = getSampleSize
   protected def getSampleSize: Int = this match {
-    case Function(d,r) => d.getSize + r.getSize 
+    case f: Function => f.getDomain.getSize + f.getRange.getSize
     case _ => size //default to size for Scalars and Tuples
   }
   
@@ -87,7 +87,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
   def toSeq: Seq[Scalar] = this match {
     case s: Scalar => Seq(s)
     case Tuple(vars) => vars.foldLeft(Seq[Scalar]())(_ ++ _.toSeq)
-    case Function(d,r) => d.toSeq ++ r.toSeq
+    case f: Function => f.getDomain.toSeq ++ f.getRange.toSeq
   }
   
   /**
@@ -176,7 +176,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
             //TODO: warn and return first?
         }
       }
-      case Function(domain, range) => Sample(domain, range).getVariableByName(name) //delegate to Tuple
+      case f: Function => Sample(f.getDomain, f.getRange).getVariableByName(name) //delegate to Tuple
     }
   }
 

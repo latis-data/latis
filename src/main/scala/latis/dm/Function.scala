@@ -98,8 +98,7 @@ object Function {
   
   //def apply(samples: Seq[Sample]): Function = 
   
-  def unapply(f: Function): Option[(Variable, Variable)] = Some((f.getDomain, f.getRange))
-//TODO: expose Seq[Samples]?
+  def unapply(f: Function): Option[Iterator[Sample]] = Some((f.iterator))
   
 }
 

@@ -24,7 +24,7 @@ class MetadataWriter extends JsonWriter {
         sb append makeMetadata(variable)
       }
       case Tuple(vars) => sb append vars.map(varToString(_)).mkString(",\n")
-      case Function(d,r) => sb append varToString(Sample(d,r))
+      case f: Function => sb append varToString(Sample(f.getDomain, f.getRange))
     }
     
     sb.toString
