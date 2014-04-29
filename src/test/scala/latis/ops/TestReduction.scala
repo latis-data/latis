@@ -51,7 +51,7 @@ class TestReduction {
     assertTrue(v.isInstanceOf[Function])
   }
   
-  @Test
+  //TODO: need to define valid dataset @Test
   def iterable_function_of_one {
     val ds = Dataset(TestFunction.function_with_one_sample_of_scalar_with_iterable_data)
     val ds2 = reduce(ds)
@@ -59,7 +59,7 @@ class TestReduction {
     assertTrue(v.isInstanceOf[Sample])
   }
   
-  @Test
+  //TODO: need to define valid dataset @Test
   def iterable_function_of_many {
     val ds = Dataset(TestFunction.function_of_scalar_with_iterable_data)
     val ds2 = reduce(ds)

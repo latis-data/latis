@@ -11,6 +11,8 @@ import latis.writer.AsciiWriter
 
 class TestFunction {
   
+  //TODO: reexamine test Functions now that we no longer 'iterate from kids'
+  
   //@Test
   //def function_of_scalar_with_data_from_kids = AsciiWriter.write(TestFunction.function_of_scalar_with_data_from_kids)
   //def function_of_scalar_with_iterable_data = AsciiWriter.write(TestFunction.function_of_scalar_with_iterable_data)
