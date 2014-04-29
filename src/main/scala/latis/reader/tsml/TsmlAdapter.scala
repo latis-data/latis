@@ -212,7 +212,6 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   protected def makeSample(sample: Sample): Option[Sample] = {
     //Note this uses a -1 place holder for Index.
-    //ProjectedFunction will set the appropriate index value
     val odomain = makeVariable(sample.domain)
     val orange  = makeVariable(sample.range)
     (odomain, orange) match {
