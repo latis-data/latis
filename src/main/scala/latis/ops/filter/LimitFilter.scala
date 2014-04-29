@@ -3,22 +3,31 @@ package latis.ops.filter
 import latis.dm.Function
 import latis.ops.OperationFactory
 import latis.dm.Sample
+import latis.metadata.Metadata
 
 /**
  * Keep only the first 'limit' samples of any outer Function in the Dataset.
  */
 class LimitFilter(val limit: Int) extends Filter {
   
-  private var count = 0
-  
-  /**
-   * Only allow this to be applied 'limit' times.
-   */
-  override def applyToSample(sample: Sample): Option[Sample] = {
-    count += 1
-    if (count > limit) None
-    else Some(sample)
+  override def applyToFunction(function: Function) = {
+    //set the new length in the metadata
+    val md = Metadata(function.getMetadata.getProperties + ("length" -> limit.toString))
+    
+    val it = function.iterator.take(limit)
+    Some(Function(function.getDomain, function.getRange, it, md))
   }
+  
+//  private var count = 0
+//  
+//  /**
+//   * Only allow this to be applied 'limit' times.
+//   */
+//  override def applyToSample(sample: Sample): Option[Sample] = {
+//    count += 1
+//    if (count > limit) None
+//    else Some(sample)
+//  }
 
 }
 

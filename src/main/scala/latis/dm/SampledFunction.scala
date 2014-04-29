@@ -47,9 +47,12 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
   //private var _iterator: Iterator[Sample] = null
   
   def iterator: Iterator[Sample] = {
-    if (_iterator != null) _iterator //TODO: do we use this? WrappedFunction may want to intervene at DataIterator (new SampledData)
-    else if (getData.isEmpty) ??? //iterateFromKids
-    else getDataIterator.map(DataUtils.dataToSample(_, Sample(domain, range)))
+//    if (_iterator != null) _iterator //TODO: do we use this? WrappedFunction may want to intervene at DataIterator (new SampledData)
+//    else if (getData.isEmpty) ??? //iterateFromKids
+//    else 
+    getDataIterator.map(DataUtils.dataToSample(_, Sample(domain, range)))
+    //TODO: use PeekIterator2(getDataIterator, (s: Sample) => DataUtils.dataToSample(_, Sample(domain, range))) ?
+    //  then users could peek
   }
   
   //TODO: require SampledFunction to have SampledData?
@@ -70,16 +73,16 @@ class SampledFunction(domain: Variable, range: Variable, _iterator: Iterator[Sam
   //Support first and last filters
   //TODO: consider more optimal approaches
   //TODO: consider immutability, iterator position
-  def getFirstSample: Sample = iterator.next //TODO: peek
-  def getLastSample: Sample = {
-    //iterator.drop(length-1).next  //dataIterator is giving DataUtils.dataToSample null Data!?
-    var sample: Sample = null
-    for (s <- iterator) sample = s
-    sample 
-  }
-  
-  def getSample(index: Int): Sample = {
-    iterator.drop(index-1).next
-  }
+//  def getFirstSample: Sample = iterator.next //TODO: peek
+//  def getLastSample: Sample = {
+//    //iterator.drop(length-1).next  //dataIterator is giving DataUtils.dataToSample null Data!?
+//    var sample: Sample = null
+//    for (s <- iterator) sample = s
+//    sample 
+//  }
+//  
+//  def getSample(index: Int): Sample = {
+//    iterator.drop(index-1).next
+//  }
 
 }

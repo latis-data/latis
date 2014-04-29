@@ -32,8 +32,7 @@ trait Operation {
    * Default operation for Samples. Apply operation to the range, keeping the same domain.
    * If the resulting range is invalid, the whole sample is invalid.
    */
-  def applyToSample(sample: Sample): Option[Variable] = {
-    //return Var since ops like reduce can change type
+  def applyToSample(sample: Sample): Option[Sample] = {
     applyToVariable(sample.range) match {
       case Some(r) => Some(Sample(sample.domain, r))
       case None => None
@@ -51,13 +50,16 @@ trait Operation {
   }
   
   /**
-   * Default operation for a Function. Wrap the original Function Apply operation to each sample.
+   * Default operation for a Function. Encapsulate with operation in WrappedFunction
+   * to be applied to each sample as it iterates.
    */
-  def applyToFunction(function: Function): Option[Variable] = this match {
-    case op: SampleMappingOperation => Some(WrappedFunction(function, op))
-    //case homo: SampleHomomorphism => Some(WrappedFunction(function, homo))
-    case _ => throw new UnsupportedOperationException("Only SampleMappingOperations can use the default Function application.")
-  }
+  def applyToFunction(function: Function): Option[Variable] = Some(WrappedFunction(function, this))
+  //TODO: do in SampleMappingOperation???
+//  = this match {
+//    case op: SampleMappingOperation => Some(WrappedFunction(function, op))
+//    //case homo: SampleHomomorphism => Some(WrappedFunction(function, homo))
+//    case _ => throw new UnsupportedOperationException("Only SampleMappingOperations can use the default Function application.")
+//  }
 }
 
 
