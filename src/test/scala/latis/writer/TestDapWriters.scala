@@ -11,7 +11,7 @@ class TestDapWriters {
   var tmpFile = java.io.File.createTempFile("writer", "test")
   tmpFile.deleteOnExit
     
-  val names = List("scalar","tsi","db")
+  val names = List("scalar","tsi") //,"db") //TODO: database dataset won't work without the setup in TestJdbcAdapter
     
   @Test
   def test_all {
