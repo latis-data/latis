@@ -2,20 +2,18 @@ package latis.reader.tsml
 
 import latis.data.Data
 import latis.data.IterableData
+import latis.data.SampleData
+import latis.data.SampledData
+import latis.data.set.IndexSet
 import latis.dm.Function
+import latis.dm.Index
 import latis.dm.Sample
+import latis.dm.Variable
 import latis.reader.tsml.ml.Tsml
 import latis.util.DataUtils
 import latis.util.PeekIterator2
+
 import scala.collection.Map
-import latis.util.IndexedIterator
-import latis.data.IndexData
-import latis.data.SampledData
-import latis.data.SampleData
-import latis.dm.Index
-import latis.data.set.IndexSet
-import latis.dm.Variable
-import latis.data.set.DomainSet
 
 /**
  * Base class for Adapters for data sources that have 'record' semantics.
