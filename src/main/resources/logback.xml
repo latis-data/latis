@@ -7,19 +7,9 @@
   </appender>
   
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>/data/latis/log/latis.log</file>
+    <!-- Get the log file from latis.properties. If not defined, log to /dev/null -->
+    <file>${log.file}:-/dev/null</file> 
     <append>true</append>
-    <encoder>
-      <pattern>[%d{yyyy-MM-dd'T'HH:mm:ss.SSS, GMT} %-5level %logger{36} (%thread\)] %msg%n</pattern>
-    </encoder>
-  </appender>
-  
-  <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>/data/latis/log/mms.log</file>
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>/data/latis/log/mms.%d{yyyy-MM}.log</fileNamePattern>
-      <maxHistory>12</maxHistory>
-    </rollingPolicy>
     <encoder>
       <pattern>[%d{yyyy-MM-dd'T'HH:mm:ss.SSS, GMT} %-5level %logger{36} (%thread\)] %msg%n</pattern>
     </encoder>
