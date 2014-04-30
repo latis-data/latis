@@ -97,7 +97,7 @@ class Projection(val names: Seq[String]) extends Operation {
       SampledData(dataIt, sample2)
     }
     
-    Some(Function(d, r, sampledData))
+    Some(Function(d, r, data = sampledData))
   }
 
 
