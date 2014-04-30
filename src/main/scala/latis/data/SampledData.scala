@@ -2,9 +2,12 @@ package latis.data
 
 import latis.data.set.DomainSet
 import latis.dm.Sample
+import scala.collection.mutable.ArrayBuffer
+import com.typesafe.scalalogging.slf4j.Logging
 
-class SampledData extends IterableData {
-  //TODO: manage caching here? special subclass?
+class SampledData extends IterableData with Logging {
+  
+  //TODO: get length from domain set
   
   def recordSize: Int = domainSet.recordSize + rangeData.recordSize
   
@@ -15,16 +18,38 @@ class SampledData extends IterableData {
   def domainSet: DomainSet = _domain
   def rangeData: IterableData = _range
 
-  //TODO: get length from domain set
+  /*
+   * TODO: cache to avoid iterable once problems
+   * (should try to avoid iterating twice, debug log?)
+   * make special subclass and let Function constructor (e.g. adapter) decide which to use
+   * cache is only complete if the original iteration was not interrupted?
+   * thus GranuleAdapter should force full iteration, or EagerlyCachedSampledData
+   * consider Stream, ehcache...
+   * 
+   * manage iterator coupling with cache instead of using duplicate?
+   * but only if we do cache, subclass thing?
+   * 
+   * +define length after caching
+   */
   
-  //private var _iterator: Iterator[SampleData] = null
+  private val dataCache = ArrayBuffer[SampleData]()
   
-  def iterator: Iterator[SampleData] = (_domain.iterator zip _range.iterator).map(p => SampleData(p._1,p._2))
-//    _iterator match {
-//    case null => (_domain.iterator zip _range.iterator).map(p => SampleData(p._1,p._2))
-//    case _ => _iterator
-//  }
-    //(domainSet.iterator zip rangeData.iterator).map(p => p._1.concat(p._2))
+  private def pairToSample = (ddata: Data, rdata: Data) => {
+    val sd = SampleData(ddata, rdata)
+    //TODO: enable cache    dataCache += sd
+    sd
+  }
+  
+  def iterator: Iterator[SampleData] = {
+    if (dataCache.isEmpty) {
+      logger.debug("Make SampleData Iterator from domain and range Data")
+      (_domain.iterator zip _range.iterator).map(p => pairToSample(p._1,p._2))
+    } else {
+      logger.debug("Make SampleData Iterator from cache.")
+      dataCache.iterator
+    }
+  }
+  
 }
 
 object SampledData {
@@ -47,10 +72,4 @@ object SampledData {
     SampledData(dset, rdata)
   }
   
-  //TODO: need to peek to get recordSize
-//  def apply(sampleIterator: Iterator[SampleData]) = {
-//    val sd = new SampledData
-//    sd._iterator = sampleIterator
-//    sd
-//  }
 }
