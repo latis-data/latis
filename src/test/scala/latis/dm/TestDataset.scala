@@ -86,7 +86,7 @@ object TestDataset {
   def empty_function = Dataset(Function(Real(Metadata("domain")), Real(Metadata("range")), Iterator.empty))
   
   //def index_function = Dataset(Function(List(Text("msg", "Hi"), Text("msg", "Bye")), "myIndexFunction"), "indexFunctionDS")
-  def index_function = Dataset(Function(List(Integer(1), Integer(2)), Metadata("myIndexFunction")), Metadata("indexFunctionDS"))
+  def index_function = Dataset(Function(List(Integer(1), Integer(2))), Metadata("indexFunctionDS"))
   
   //TODO: time_series with res: micro, milli, sec, hour, day, year
   

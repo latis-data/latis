@@ -68,6 +68,6 @@ object TestFunction {
   def empty_function = Dataset(Function(Real(Metadata("domain")), Real(Metadata("range")), Iterator.empty))
   
   //def index_function = Dataset(Function(List(Text("msg", "Hi"), Text("msg", "Bye")), "myIndexFunction"), "indexFunctionDS")
-  def index_function = Function(List(Integer(1), Integer(2)), Metadata("myIndexFunction"))
+  def index_function = Function(List(Integer(1), Integer(2)))
   
 }

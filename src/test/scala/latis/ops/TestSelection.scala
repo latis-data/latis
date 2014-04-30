@@ -24,7 +24,7 @@ class TestSelection {
     val rdata = Data.fromDoubles(1,2,3,4,3)
     //val data = ddata zip rdata
     val data = SampledData(ddata, rdata)
-    Function(domain, range, data)
+    Function(domain, range, data=data)
   }
   
   //TODO: run same tests against multiple Functions
@@ -46,7 +46,7 @@ class TestSelection {
     val ddata = Data.fromDoubles(3,5)
     val rdata = Data.fromDoubles(3,3)
     val data = SampledData(ddata, rdata)
-    val expected = Function(domain, range, data)
+    val expected = Function(domain, range, data=data)
     testSelection(scalarFunction, "value=3", expected)
   }
   
