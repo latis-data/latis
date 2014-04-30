@@ -4,7 +4,8 @@ import latis.data.value.IndexValue
 import latis.data.Data
 
 class IndexSet(val start: Int, val stop: Int, val stride: Int) extends DomainSet {
-
+  //TODO: support unlimited with current length: -n
+  
   override def recordSize: Int = 4
   override def length: Int = (stop - start) / stride + 1
 
@@ -41,6 +42,6 @@ object IndexSet {
   def apply(start: Int, stop: Int, stride: Int): IndexSet = new IndexSet(start, stop, stride)
   def apply(start: Int, stop: Int): IndexSet = IndexSet(start, stop, 1)
   def apply(length: Int): IndexSet = IndexSet(0, length-1, 1)
-  def apply() = new IndexSet(0, Int.MaxValue, 1) //TODO: support infinite? length = -1?
+  def apply() = new IndexSet(0, Int.MaxValue-1, 1) //TODO: support infinite? length = -1?
   
 }
