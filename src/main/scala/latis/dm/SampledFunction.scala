@@ -23,7 +23,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   //private var _iterator: Iterator[Sample] = null
   //TODO: do we have a use case to construct with a set of Samples as opposed to data values?
   
-  def iterator: PeekIterator[Sample] = PeekIterator2(getDataIterator, (s: Sample) => DataUtils.dataToSample(_, Sample(domain, range)))
+  def iterator: PeekIterator[Sample] = new PeekIterator2(getDataIterator, (d: Data) => Some(DataUtils.dataToSample(d, Sample(domain, range))))
   
 //  {
 ////    if (_iterator != null) _iterator //TODO: do we use this? WrappedFunction may want to intervene at DataIterator (new SampledData)
