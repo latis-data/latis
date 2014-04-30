@@ -86,8 +86,7 @@ object DataUtils {
     accumulateData(variableTemplate)
 
     //TODO: test that we got the size right
-    //rewind for use
-    Data(bb.flip.asInstanceOf[ByteBuffer])
+    Data(bb)
   }
   
   def makeSampleDataFromDataMap(dataMap: Map[String, Data], sampleTemplate: Sample): SampleData = {
