@@ -9,6 +9,7 @@ import latis.util.PeekIterator2
 import latis.data.Data
 import latis.data.SampleData
 import latis.data.IterableData
+import latis.data.seq.DataSeq
 
 /**
  * Exclude variables not named in the given list.
@@ -85,10 +86,11 @@ class Projection(val names: Seq[String]) extends Operation {
     //Deal with case where domain type is Index.
     val sampledData = if (d.isInstanceOf[Index]) {
       //Only need to process range, use IndexSet for domain.
-      val tmp2 = sample2.range
-      val f = (data: SampleData) => Some(DataUtils.reshapeData(data, sample1, tmp2))
+      val f = (data: SampleData) => Some(DataUtils.reshapeData(data, sample1, r))
       val dataIt = new PeekIterator2(function.getDataIterator, f)
-      SampledData(IndexSet(), IterableData(dataIt, tmp2.getSize))
+      //SampledData(IndexSet(), IterableData(dataIt, r.getSize)) //TODO: bug trying to build on iterator
+      val idata = DataSeq(dataIt.toList)
+      SampledData(IndexSet(), idata)
     } else {
       //process all data
       //TODO: try to preserve original DomainSet
