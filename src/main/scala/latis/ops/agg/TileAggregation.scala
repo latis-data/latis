@@ -1,10 +1,8 @@
-package latis.ops
+package latis.ops.agg
 
-import latis.dm._
-import latis.data.IterableData
-import latis.data.Data
+import latis.dm.Dataset
+import latis.dm.Function
 import latis.dm.Sample
-import latis.util.PeekIterator
 
 /**
  * Assumes aggregates have the same type and domain sets
@@ -27,21 +25,7 @@ class TileAggregation extends Aggregation {
     
     //TODO: munge metadata
     
-    val ds = Dataset(f, dataset.metadata)
-    ds
-    /*
-     * TODO: 2014-03-03
-     * this is being generated for the origDataset
-     * the makeDataset pass will make a new Dataset but it misses that this function already has an iterator
-     * in TsmlAdapter.makeFunction
-     * 
-     * 
-     * are there other implications of the two pass construction of Datasets for aggregations?
-     * makes sense to do some aggregation logic in the 1st pass since we need to present a single dataset
-     * but we shouldn't add/apply operations until the 2nd pass?
-     * should 1st pass just give us the collection?
-     * 
-     */
+    Dataset(f, dataset.metadata)
   }
   
 }

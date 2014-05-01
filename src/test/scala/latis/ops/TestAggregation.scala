@@ -4,6 +4,8 @@ import org.junit._
 import Assert._
 import latis.reader.tsml.TsmlReader
 import latis.writer._
+import latis.ops.agg.CollectionAggregation
+import latis.ops.agg.TileAggregation
 
 class TestAggregation {
   
