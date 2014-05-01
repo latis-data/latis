@@ -1,9 +1,12 @@
 package latis.data.seq
 
-import scala.collection._
-import java.nio.ByteBuffer
-import latis.data.value.{DoubleValue,StringValue}
+import latis.data.value.StringValue
 import latis.util.StringUtils
+
+import java.nio.ByteBuffer
+
+import scala.collection.Seq
+import scala.collection.immutable
 
 case class StringSeqData(ss: immutable.Seq[String], textLength: Int) extends SeqData {
   

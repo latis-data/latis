@@ -1,9 +1,10 @@
 package latis.data.seq
 
-import scala.collection._
-import java.nio.ByteBuffer
-import latis.data.value.DoubleValue
 import latis.data.value.LongValue
+
+import java.nio.ByteBuffer
+
+import scala.collection.immutable
 
 case class LongSeqData(ds: immutable.Seq[Long]) extends SeqData {
   

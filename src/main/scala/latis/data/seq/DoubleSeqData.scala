@@ -1,8 +1,10 @@
 package latis.data.seq
 
-import scala.collection._
-import java.nio.ByteBuffer
 import latis.data.value.DoubleValue
+
+import java.nio.ByteBuffer
+
+import scala.collection.immutable
 
 case class DoubleSeqData(ds: immutable.Seq[Double]) extends SeqData {
   
