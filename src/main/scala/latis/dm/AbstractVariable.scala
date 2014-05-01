@@ -1,12 +1,12 @@
 package latis.dm
 
-import latis.data._
-import latis.metadata._
-import latis.ops.math.BasicMath
-import latis.time.Time
-import scala.collection._
-import scala.collection.mutable.ArrayBuilder
-import scala.collection.mutable.ArrayBuffer
+import latis.data.Data
+import latis.data.EmptyData
+import latis.metadata.Metadata
+import latis.metadata.EmptyMetadata
+
+import scala.Option.option2Iterable
+import scala.collection.Seq
 
 /**
  * Implementation for much of what Variables need to do.

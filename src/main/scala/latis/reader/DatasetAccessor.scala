@@ -1,6 +1,6 @@
 package latis.reader
 
-import latis.dm._
+import latis.dm.Dataset
 
 /**
  * Trait that provide data access for a Dataset.
