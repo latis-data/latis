@@ -47,7 +47,7 @@ class ImageWriter extends Writer{
     val data = latis.util.DataMap.toDoubleMap(dataset)
     val xycol = new XYSeriesCollection()
     y match{
-      case _:Tuple => for (b <- y.getVariables) xycol.addSeries(makeSeries(x, b, data))
+      case t:Tuple => for (b <- t.getVariables) xycol.addSeries(makeSeries(x, b, data))
       case _:Scalar => xycol.addSeries(makeSeries(x, y, data))
     }
     chart = ChartFactory.createXYLineChart(dataset.getName, x.getName, y.getName, xycol, org.jfree.chart.plot.PlotOrientation.VERTICAL, true, false, false)

@@ -1,43 +1,25 @@
 package latis.dm
 
-import scala.collection._
-import latis.data.EmptyData
 import latis.data.Data
+import latis.data.EmptyData
 import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
-import latis.ops.math.BasicMath
-import latis.ops._
-import latis.util.DataMap
+import latis.ops.Projection
 import latis.ops.filter.Selection
+import latis.ops.math.BasicMath
+import latis.util.DataMap
 
+import scala.Option.option2Iterable
+import scala.collection.Seq
+import scala.collection.immutable
+
+/**
+ * The main container for a dataset. It is a special type of Tuple
+ * that encapsulates everything about the dataset. Most operations
+ * are performed on Datasets and return new Datasets.
+ */
 class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
   extends AbstractTuple(variables, metadata, data) with BasicMath {
-  
-  //TODO: considering Monadic role of Dataset, maybe Dataset should not BE-A Variable?
-  
-  //TODO: evaluate for given domain value, impl as Operation
-  //TODO: Variable already has apply(int)
-//  def apply(v: Any): Dataset = v match {
-//    case index: Int => ??? //get index-th sample of function, or element of tuple? what about F of Tuple? probably better to use diff method
-//    case p: Product => ??? //multi-dim domain
-//    case _ => ??? //TODO: make Scalar and eval Function?
-//    //error if ds does not have single Function? or recurse till we find a function with a consistent domain?
-//  }
-  
-/*
- * TODO: 
- * consider map(f: Variable => Variable)
- * encapsulate the usual pattern match
- * 
- * flatMap(f: Variable => Dataset) ?
- */
-//  def map(f: Variable => Variable): Dataset = {
-//    Dataset(variables.map(v => v match {
-//      case _: Scalar => f(v)
-//      case Tuple(vars) => vars.map(f(_))
-//      case fun: Function => Function(fun.iterator.map(f(_)))
-//    }))
-//  }
   
   //convenient method, get number of samples in top level Function
   //TODO: what if we have multiple Functions...?
@@ -48,6 +30,9 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
     case _ => if (variables.isEmpty) 0 else 1  //TODO: delegate to super? but want "1" as in only one sample, more indications that "length" is too overloaded
   }
   
+  /**
+   * Return the first top level Function in this Dataset.
+   */
   def findFunction: Option[Function] = findFunction(this)
   
   //TODO: put in Variable?
@@ -61,43 +46,7 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   }
   
   
-  /*
-   * TODO: 2013-06-11
-   * careful: is Dataset a collection of Variables or a collection of samples in our monadic context?
-   * do we need multiple monads:
-   *   Dataset: metadata and data? (currently any Variable)
-   *   Tuple: member Variables
-   *   Function: samples (but may be continuous)
-   *   Scalar: single datum?
-   * what should we get from Dataset.iterator?
-   *   should we require that a Dataset have only a single top level Var = Function?
-   *   or just iterate over member Vars like any other Tuple?
-   * consider Variables as scala collections
-   *   Function IS-A SortedMap (at least for sampled functions) and has its notion of iteration
-   *   Tuple contains Vars thus should iterate over Vars, Dataset likewise?
-   *   it's the recursion via pattern matching that invokes the appropriate behavior
-   * 
-   *   
-   * DSL user should always operate at the Dataset level, maintain provenance...
-   * morphisms and writers need unfettered access to stuff
-   * ++avoid wrapping Function samples as Scalars?
-   * save for next version, with better use of monads, flatMap,...
-   * 
-   * Should Dataset be a separate class from Tuple?
-   * not a Variable but the Monad that encapsulates Variables, and Morphisms?
-   * Do we ever need Dataset to behave like a Tuple?
-   * Can we safely add a morphism to a Dataset instead of making a MorphedFunction?
-   * but if Function is a different kind of monad (samples) we may want to attach the morphism there
-   * 
-   * What about DatasetWrapper as decorator?
-   * maybe a Dataset can contain a Dataset? 
-   *   consider aggregation: a Dataset encapsulating multiple Datasets with instructions to combine them into a single Dataset
-   * ++compare to scala's FilterMonadic, collections have inner class WithFilter
-   * 
-   */
-  
   //convenience methods for transforming Dataset
-  //TODO: operate?
   def filter(selection: Selection): Dataset = selection(this)
   def filter(expression: String): Dataset = Selection(expression)(this)
   
@@ -113,15 +62,10 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   
   def groupBy(name: String): Dataset = {
     //TODO: impl as Operation?
-    val vs = getVariables.map(_.groupVariableBy(name))
+    val vs = variables.map(_.groupVariableBy(name))
     Dataset(vs) //TODO: metadata
   }
   
-  //TODO: operate?
-  
-  
-  //def foreach(f: (Variable,Variable) => (Variable,Variable)): Unit
-  //TODO: need to impl "filter" so we can use generator: "for((d,r) <- ds)"
   
   /**
    * Expose the top level Variables in this Dataset as a Single Variable.
@@ -136,19 +80,13 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   }
 }
 
+
 object Dataset {
   
   def apply(vars: Seq[Variable]): Dataset = new Dataset(vars.toIndexedSeq)
   
-  //TODO: should metadata be first? e.g. variable name
   def apply(vars: Seq[Variable], md: Metadata): Dataset = new Dataset(vars.toIndexedSeq, metadata = md)
   def apply(v: Variable, md: Metadata): Dataset = new Dataset(List(v), metadata = md)
-  
-//  def apply(vars: Seq[Variable], ops: Seq[Operation], md: Metadata): Dataset = {
-//    val ds = new Dataset(vars.toIndexedSeq, ops.toIndexedSeq)
-//    ds._metadata = md
-//    ds
-//  }
   
   def apply(v: Variable, vars: Variable*): Dataset = Dataset(v +: vars)
   

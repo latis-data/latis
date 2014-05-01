@@ -29,7 +29,8 @@ class CompactJsonWriter extends JsonWriter {
     val Sample(d, r) = sample
     d match {
       case _: Index => varToString(r) //drop Index domain
-      case _ => varToString(Tuple(d.getVariables ++ r.getVariables)) //combine domain and range vars into one Tuple //TODO: flatten?
+      case _ => varToString(Tuple(d.toSeq ++ r.toSeq)) //combine domain and range vars into one Tuple
+      //TODO: not tested for nested variables
     }
   }
     

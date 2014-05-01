@@ -8,6 +8,9 @@ import scala.collection._
 import scala.collection.mutable.ArrayBuilder
 import scala.collection.mutable.ArrayBuffer
 
+/**
+ * Implementation for much of what Variables need to do.
+ */
 abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data: Data = EmptyData) extends Variable {
   
   def getMetadata(): Metadata = metadata
@@ -23,7 +26,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     }
   }
   
-  def stringToValue(string: String): Any = ??? //just works for Scalars for now
+  //def stringToValue(string: String): Any = ??? //just works for Scalars for now
   
   /**
    * Length of the Variable depending on type.
@@ -73,11 +76,11 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    * This is problematic if they have different lengths 
    * and/or incompatible domain sets.
    */
-  lazy val sampleSize: Int = getSampleSize
-  protected def getSampleSize: Int = this match {
-    case f: Function => f.getDomain.getSize + f.getRange.getSize
-    case _ => size //default to size for Scalars and Tuples
-  }
+//  lazy val sampleSize: Int = getSampleSize
+//  protected def getSampleSize: Int = this match {
+//    case f: Function => f.getDomain.getSize + f.getRange.getSize
+//    case _ => size //default to size for Scalars and Tuples
+//  }
   
   /**
    * Return this Variable as a "flattened" Seq of Scalars.
@@ -93,12 +96,13 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
   /**
    * Return this Variable as a Seq of Variables.
    */
-  def getVariables: Seq[Variable] = this match {
-    case s: Scalar => Seq(s)
-    //case Sample(d,r) => d.getVariables ++ r.getVariables  more like flatten
-    //case tup: Tuple => tup.
-    //TODO: Function?
-  }
+//  def getVariables: Seq[Variable] = this match {
+//    case s: Scalar => Seq(s)
+//    case Tuple(vars) => vars
+//    //case Sample(d,r) => d.getVariables ++ r.getVariables  more like flatten
+//    //case tup: Tuple => tup.
+//    //TODO: Function?
+//  }
   
   /*
    * TODO: "reduce"? function with one sample to its range
@@ -163,20 +167,23 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
   //TODO: stop as soon as first is found, like Seq.find
   //Get the actual Variable object with the given name or alias.
   //Don't try to maintain the entire model structure.
-  def getVariableByName(name: String): Option[Variable] = {
+  
+  /**
+   * Find the first Variable within this Variable by the given name.
+   */
+  def findVariableByName(name: String): Option[Variable] = {
     if (hasName(name)) Some(this)
     else this match {
       case _: Scalar => None  //didn't match above
       case Tuple(vars) => {
-        val matchingVars = vars.flatMap(_.getVariableByName(name))
+        val matchingVars = vars.flatMap(_.findVariableByName(name))
         matchingVars.length match {
           case 0 => None
-          case 1 => Some(matchingVars.head)
-          case n: Int => throw new RuntimeException("Found " + n + " variables that match the name: " + name)
-            //TODO: warn and return first?
+          case _ => Some(matchingVars.head)
+          //case n: Int => throw new RuntimeException("Found " + n + " variables that match the name: " + name)
         }
       }
-      case f: Function => Sample(f.getDomain, f.getRange).getVariableByName(name) //delegate to Tuple
+      case f: Function => Sample(f.getDomain, f.getRange).findVariableByName(name) //delegate to Tuple
     }
   }
 

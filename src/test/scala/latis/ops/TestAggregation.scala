@@ -52,7 +52,7 @@ class TestAggregation {
     val dss = ds.getVariables
     assertEquals(1, dss.length) //successfully aggregated into one Function
     assertEquals("(T -> A)", ds.toString)
-    assertEquals(20, ds(0).getLength) //20 samples
+    assertEquals(20, ds.getVariables(0).getLength) //20 samples
     //AsciiWriter.write(ds)
   }
     

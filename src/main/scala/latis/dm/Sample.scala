@@ -5,8 +5,7 @@ package latis.dm
  * As a pair of domain and range "values", it is a special kind of Tuple.
  */
 class Sample(val domain: Variable, val range: Variable) extends AbstractTuple(List(domain,range)) 
-//TODO: add metadata, data?
-//TODO: require getDomain, getRange?
+
 
 object Sample {
   def apply(domain: Variable, range: Variable) = new Sample(domain, range)
@@ -16,5 +15,8 @@ object Sample {
     new Sample(vars(0), vars(1))
   }
   
+  /**
+   * Expose the domain and range components of the Sample as a pair.
+   */
   def unapply(sample: Sample): Option[(Variable, Variable)] = Some((sample.domain, sample.range))
 }

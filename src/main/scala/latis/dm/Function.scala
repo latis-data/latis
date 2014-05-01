@@ -1,19 +1,20 @@
 package latis.dm
 
-import scala.collection._
-import latis.data._
-import latis.data.set.DomainSet
-import latis.metadata._
-import java.nio.ByteBuffer
-import latis.data.set.RealSampledSet
+import latis.data.EmptyData
+import latis.data.SampleData
+import latis.data.SampledData
+import latis.metadata.EmptyMetadata
+import latis.metadata.Metadata
 
+import scala.collection.Iterator
+import scala.collection.Seq
+
+/**
+ * Variable that represents a mapping from one Variable to another.
+ */
 trait Function extends Variable {
   def getDomain: Variable
   def getRange: Variable
-  
-  //evaluate for given domain sample
-  //TODO: delegate to Operation
-  //def apply(v: Variable): Variable
   
   //TODO: only applicable to SampledFunction, need to replace lots of pattern matches...
   def iterator: Iterator[Sample]
@@ -46,7 +47,6 @@ object Function {
   /**
    * Construct from Seq of Variable which are assumed to contain their own data.
    */
-  //def apply(vs: Seq[Variable], md: Metadata = EmptyMetadata): Function = vs.head match {
   def apply(vs: Seq[Variable]): SampledFunction = vs.head match {
     case sample: Sample => Function(sample.domain, sample.range, vs.asInstanceOf[Seq[Sample]].iterator)
     case _ => {

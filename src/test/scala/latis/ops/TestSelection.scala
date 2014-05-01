@@ -28,7 +28,7 @@ class TestSelection {
     val ds = filter(f)
     //AsciiWriter().write(expected)
     //AsciiWriter().write(ds)
-    assert(expected equals ds(0))
+    assert(expected equals ds.getVariables(0))
   }
 
   

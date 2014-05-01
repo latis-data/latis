@@ -25,14 +25,14 @@ class TestProjection {
   def project_scalar_alt_form {
     val ds = Dataset(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val ds2 = ds.project(Projection(List("b")))
-    assertEquals("b", ds2(0).getName)
+    assertEquals("b", ds2.getVariables(0).getName)
   }
   
   @Test
   def project_scalar_alt_form_with_names {
     val ds = Dataset(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val ds2 = ds.project(List("b"))
-    assertEquals("b", ds2(0).getName)
+    assertEquals("b", ds2.getVariables(0).getName)
   }
   
   @Test
@@ -48,7 +48,7 @@ class TestProjection {
     val tup = Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val proj = new Projection(List("b"))
     val ds = proj(tup)
-    val n = ds(0).asInstanceOf[Tuple].getLength
+    val n = ds.getVariables(0).asInstanceOf[Tuple].getLength
     assertEquals(1, n)
   }
   
@@ -57,7 +57,7 @@ class TestProjection {
     val tup = Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val proj = new Projection(List("a","c"))
     val ds = proj(tup)
-    val n = ds(0).asInstanceOf[Tuple].getLength
+    val n = ds.getVariables(0).asInstanceOf[Tuple].getLength
     assertEquals(2, n)
   }
   
@@ -68,7 +68,7 @@ class TestProjection {
     val proj = new Projection(List("t","a"))
     val ds = proj(f)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
-    val n = ds(0).asInstanceOf[Function].getRange.toSeq.length
+    val n = ds.getVariables(0).asInstanceOf[Function].getRange.toSeq.length
     assertEquals(1, n)
   }
   
@@ -79,7 +79,7 @@ class TestProjection {
     val proj = new Projection(List("t","b"))
     val ds = proj(f)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
-    val n = ds(0).asInstanceOf[Function].getRange.asInstanceOf[Tuple].getLength
+    val n = ds.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Tuple].getLength
     assertEquals(1, n)
   }
   
@@ -90,7 +90,7 @@ class TestProjection {
     val proj = new Projection(List("t","b","a")) //note, diff order, but not used, //TODO: enforce order
     val ds = proj(f)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
-    val n = ds(0).asInstanceOf[Function].getRange.asInstanceOf[Tuple].getLength
+    val n = ds.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Tuple].getLength
     assertEquals(2, n)
   }
   
@@ -100,7 +100,7 @@ class TestProjection {
     val f = Function(Real(Metadata("t")), Function(Real(Metadata("w")), Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))))
     val proj = new Projection(List("t","w","b","c")) 
     val ds = proj(f)
-    val n = ds(0).asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getLength
+    val n = ds.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getLength
     assertEquals(2, n)
     //println(ds)
   }

@@ -1,13 +1,11 @@
 package latis.dm
 
-import latis.data.value.StringValue
-import latis.metadata.VariableMetadata
-import latis.metadata.Metadata
-import latis.metadata.EmptyMetadata
-import latis.data.TextData
 import latis.data.Data
-import latis.data.seq.StringSeqData
+import latis.metadata.Metadata
 
+/**
+ * Trait for Scalars representing text data.
+ */
 trait Text extends Scalar { 
   
   //Get the nominal/max length of this Text Variable.
@@ -29,19 +27,12 @@ object Text {
   val DEFAULT_LENGTH = 4
   
   def apply(v: String): Text = new AbstractScalar(data = Data(v)) with Text
-  
-  //def apply(name: String, v: String): Text = new AbstractVariable(Metadata(name), Data(v)) with Text
 
   def apply(md: Metadata): Text = new AbstractScalar(md) with Text
   
   def apply(md: Metadata, data: Data): Text = new AbstractScalar(md, data) with Text
   
   def apply(md: Metadata, v: String): Text = new AbstractScalar(md, Data(v)) with Text
-  
-  def apply(md: Metadata, vs: Seq[String]): Text = {
-    val data = new StringSeqData(vs.toIndexedSeq, md("length").toInt) 
-    new AbstractScalar(md, data) with Text
-  }
 
   def unapply(v: Text): Option[String] = Some(v.getValue.asInstanceOf[String])
 }

@@ -1,13 +1,18 @@
 package latis.dm
 
 import latis.data.Data
-import latis.data.value._
-import latis.metadata.Metadata
-import latis.util.RegEx
-import latis.time.Time
-import latis.metadata.EmptyMetadata
 import latis.data.EmptyData
+import latis.data.value.DoubleValue
+import latis.data.value.IndexValue
+import latis.data.value.LongValue
+import latis.data.value.StringValue
+import latis.metadata.EmptyMetadata
+import latis.metadata.Metadata
+import latis.time.Time
 
+/**
+ * Base type for all Scalar Variables.
+ */
 trait Scalar extends Variable {
   
   //move to AbstractScalar since mixing in Time with Text means that anything here overrides Time?
@@ -21,6 +26,9 @@ trait Scalar extends Variable {
 
 object Scalar {
   
+  /**
+   * Construct a Scalar of the appropriate type based on the type (e.g. as used in TSML).
+   */
   def apply(vtype: String, metadata: Metadata = EmptyMetadata, data: Data = EmptyData): Scalar = vtype match {
     case "index"   => new AbstractScalar(metadata, data) with Index
     case "real"    => new AbstractScalar(metadata, data) with Real
@@ -32,6 +40,9 @@ object Scalar {
     case _ => throw new Error("No Scalar type defined for " + vtype)
   }
   
+  /**
+   * Construct a Scalar of the appropriate type based on the type of the data value.
+   */
   def apply(value: AnyVal): Scalar = value match {
     case d: Double => Real(d)
     case f: Float  => Real(f)
@@ -40,8 +51,14 @@ object Scalar {
     case _ => throw new Error("Unable to make Scalar from value: " + value)
   }
   
+  /**
+   * Construct a Text Variable with the given string value.
+   */
   def apply(value: String) = Text(value)
   
+  /**
+   * Construct a Scalar of the appropriate type based on the type of the data value, with metadata.
+   */
   def apply(metadata: Metadata, value: Any): Scalar = value match {
     //primitive values
     case d: Double => Real(metadata, d)
@@ -58,16 +75,9 @@ object Scalar {
     case _ => throw new Error("Unable to make Scalar from value: " + value)
   }
   
-//  def fromAny(value: Any): Scalar = value match {
-//    //Note, can't match on AnyVal so we need to repeat these
-//    case d: Double => Real(d)
-//    case f: Float  => Real(f)
-//    case l: Long   => Integer(l)
-//    case i: Int    => Integer(i)
-//    case s: String => Text(s)
-//    case _ => throw new Error("Unable to make Scalar from value: " + value)
-//  }
-  
+  /**
+   * Expose the value represented by this Scalar.
+   */
   def unapply(s: Scalar) = Some(s.getValue)
 }
 

@@ -83,9 +83,9 @@ class JsonWriter extends TextWriter {
   override def makeSample(sample: Sample): String = {
     val Sample(d, r) = sample
     val vars = d match {
-      case _: Index => r.getVariables //drop Index domain
-      case _ => d.getVariables ++ r.getVariables
-      //TODO: breaks for nested Function
+      case _: Index => r.toSeq //drop Index domain
+      case _ => d.toSeq ++ r.toSeq
+      //TODO: breaks for nested Function,  nested tuples?
       //TODO:  Need to keep domain and range of Sample within {}
       //  label with name or "domain"/"range"
       //  [{"domain":{...}, "range":{...}},...]

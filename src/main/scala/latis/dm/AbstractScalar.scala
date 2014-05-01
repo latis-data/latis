@@ -24,20 +24,22 @@ abstract class AbstractScalar(metadata: Metadata = EmptyMetadata, data: Data = E
     case StringValue(s) => s.trim //TODO: match any TextData?
   }
   
-  /**
-   * Try to parse the given string into the appropriate primitive type for this Scalar.
-   * If there is a parse exception, return the fill value, missing value, or NaN
-   * or throw an error if there is no such value defined.
-   */
-  override def stringToValue(string: String): Any = {
-    try {
-      _stringToValue(string)
-    } catch {
-      case _: NumberFormatException => {
-        getFillValue
-      }
-    }
-  }
+//TODO: test other projects
+  
+//  /**
+//   * Try to parse the given string into the appropriate primitive type for this Scalar.
+//   * If there is a parse exception, return the fill value, missing value, or NaN
+//   * or throw an error if there is no such value defined.
+//   */
+//  override def stringToValue(string: String): Any = {
+//    try {
+//      _stringToValue(string)
+//    } catch {
+//      case _: NumberFormatException => {
+//        getFillValue
+//      }
+//    }
+//  }
 
   /**
    * Based on the CF convention.

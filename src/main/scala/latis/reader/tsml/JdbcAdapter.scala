@@ -142,7 +142,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   lazy val varsWithTypes = {
     //Get list of projected Scalars in projection order
     val vars: Seq[Variable] = if (projection == "*") getOrigScalars
-    else projection.split(",").flatMap(getOrigDataset.getVariableByName(_))
+    else projection.split(",").flatMap(getOrigDataset.findVariableByName(_))
 
     //Get the types of these variables in the database
     val md = resultSet.getMetaData
@@ -174,7 +174,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   override def handleOperation(operation: Operation): Boolean = operation match {
     case p: Projection => {
       //make sure these match variable names or aliases
-      if (!p.names.forall(getOrigDataset.getVariableByName(_).nonEmpty))
+      if (!p.names.forall(getOrigDataset.findVariableByName(_).nonEmpty))
         throw new Error("Not all variables are available for the projection: " + p)
 
       this.projection = p.toString
@@ -222,7 +222,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     //TODO: assumes value is ISO, what if dataset does have a var named "time" with other units?
 
     //this should work because any time variable should have the alias "time"
-    val tvar = getOrigDataset.getVariableByName("time") match {
+    val tvar = getOrigDataset.findVariableByName("time") match {
       case Some(t) => t
       case None => throw new Error("No time variable found in dataset.")
     }
