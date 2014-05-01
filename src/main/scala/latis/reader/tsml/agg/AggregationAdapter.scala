@@ -1,17 +1,13 @@
 package latis.reader.tsml.agg
 
 import latis.dm.Dataset
-import scala.collection.mutable.ArrayBuffer
-import latis.dm.Variable
-import latis.reader.tsml.ml.Tsml
 import latis.reader.tsml.TsmlAdapter
+import latis.reader.tsml.ml.Tsml
 
+/**
+ * Base class for Adapters that aggregate (combine) Datasets.
+ */
 abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
-  //TODO: use metadata for agg'd dataset from tsml
-  //  should we just make a single Dataset containing datasets?
-  //  aggregation will look for all child datasets
-  //  more consistent with other Operations
-  //  keep things in the Dataset monad
   
   def aggregate(dataset: Dataset): Dataset
   
