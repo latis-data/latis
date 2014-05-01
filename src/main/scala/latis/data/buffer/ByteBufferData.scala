@@ -1,8 +1,8 @@
 package latis.data.buffer
 
-import java.nio.ByteBuffer
-import latis.data.value.DoubleValue
 import latis.data.Data
+
+import java.nio.ByteBuffer
 
 /**
  * Implement Data with a ByteBuffer.
