@@ -1,17 +1,14 @@
 package latis.writer
 
-import latis.dm._
-import java.io.OutputStream
-import java.io.PrintWriter
-//import latis.time.Time
-//import latis.time.TimeFormat
-import java.util.Date
+import latis.dm.Dataset
+import latis.dm.Index
+import latis.dm.Variable
 
 /**
  * Assume 1D, non-nested Function for now.
  */
 class CsvWriter extends TextWriter {
-  //TODO: Non-flat SSI,...
+  //TODO: more complex datasets
   
   override def makeHeader(dataset: Dataset): String = {
     //don't include Index variable
@@ -29,12 +26,10 @@ class CsvWriter extends TextWriter {
     variable.getName + units
   }
   
-  override def mimeType: String = getProperty("mimeType", "text/csv")
-  
-  /*
-   * TODO: CSV "standard":
-   * http://tools.ietf.org/html/rfc4180
-   * "there is no formal specification in existence"
-   * tend not to have " " in delim
+  /**
+   * Override to define csv mime type. This tends to cause a web browser
+   * to want to invoke an application instead of displaying it in the browser.
    */
+  override def mimeType: String = getProperty("mimeType", "text/csv")
+
 }

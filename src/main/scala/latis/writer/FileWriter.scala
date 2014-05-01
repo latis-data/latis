@@ -1,11 +1,10 @@
 package latis.writer
 
 import latis.dm.Dataset
-import java.io.BufferedInputStream
-import java.io.FileInputStream
 import latis.util.FileUtils
-import java.io.OutputStream
+
 import java.io.File
+import java.io.OutputStream
 
 /**
  * Base class for Writers of formats that must be written to a file as opposed to any
@@ -27,7 +26,7 @@ abstract class FileWriter extends Writer {
         case f: File => f
         case null => {
           val f = new File(dataset.getName + "." + getProperty("suffix")) //default file name
-          setFile(f) //TODO: needed? just smells wrong
+          setFile(f) //TODO: better way? just smells wrong
           f
         }
       }

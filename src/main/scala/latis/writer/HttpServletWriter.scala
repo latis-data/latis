@@ -8,35 +8,16 @@ import latis.util.LatisProperties
  * Decorate a Writer to write via a ServletResponse.
  */
 class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends Writer {
-  //TODO: consider writers that can't stream, write tmp file
   
   def write(dataset: Dataset): Unit = {
-    //write http header stuff
+    //TODO: write other http headers
             
     //Define the allowed origin for cross-origin resource sharing (CORS)
     LatisProperties.get("cors.allow.origin") match {
       case Some(s) => response.addHeader("Access-Control-Allow-Origin", s)
       case None => 
     }
-        
-//TODO: add other headers
-//        //Set the Content-Description HTTP header
-//        String cd = writer.getContentDescription(); 
-//        if (cd == null) cd = "tss-" + type;
-//        response.setHeader("Content-Description", cd);
-//        
-//        //Set date headers
-//        long date = System.currentTimeMillis();
-//        response.addDateHeader("Date", date);
-//        response.addDateHeader("Last-Modified", date);
-//        //TODO: use data publish date for Last-Modified? 
-//        
-//        //Set other HTTP headers
-//        String dodsServer = TSSProperties.getProperty("server.dods");
-//        response.setHeader("XDODS-Server", dodsServer); 
-//        String server = TSSProperties.getProperty("server.tss");
-//        response.setHeader("Server", server); 
-        
+
     writer.write(dataset)
     
     response.setStatus(HttpServletResponse.SC_OK);
@@ -53,7 +34,7 @@ object HttpServletWriter {
     val writer = Writer.fromSuffix(suffix)
     response.setContentType(writer.mimeType)
     //TODO: why do we still need to set character encoding? 
-    //response.setCharacterEncoding("UTF-8") //is this required? maybe ISO-8859-1 (as seen from TSDS)
+    //response.setCharacterEncoding("UTF-8") //is this required? maybe ISO-8859-1
     response.setCharacterEncoding("ISO-8859-1")
     writer.setOutputStream(response.getOutputStream)
     new HttpServletWriter(writer, response)

@@ -1,41 +1,56 @@
 package latis.writer
 
-import latis.dm._
-import java.io.OutputStream
-import java.io.PrintWriter
+import latis.dm.Binary
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Index
+import latis.dm.Integer
+import latis.dm.Real
+import latis.dm.Sample
+import latis.dm.Scalar
+import latis.dm.Text
+import latis.dm.Tuple
+import latis.dm.Variable
 import latis.util.FirstThenOther
 
+import java.io.PrintWriter
+
+/**
+ * Generic writer for tabulated ASCII output.
+ */
 class TextWriter extends Writer {
-  //TODO: with Text, Binary trait?
-  //TODO: Dataset.write ?
-  //TODO: with Header
-  
-  /*
-   * TODO: generalize to all writers?
-   * write vs makeString
-   * but makeString seems more reusable
-   * use mkString?
-   * use record semantics?
-   * top level scalars and tuples, top level function samples
-   * buildRecord, varToString...?
-   */
   
   private[this] lazy val _writer = new PrintWriter(getOutputStream)
   def printWriter: PrintWriter = _writer
-  //TODO: what happens to PrintWriter when out is closed?
   
-  //platform indep new line
+  /**
+   * Platform independent new-line.
+   */
   val newLine = System.getProperty("line.separator") //"\n"
     
+  /**
+   * Get delimiter from writer properties. Default to comma plus space.
+   */
   lazy val delimiter = getProperty("delimiter", ", ")
     
-  
+  /**
+   * Write a header before writing data values.
+   */
   def writeHeader(dataset: Dataset) = printWriter.print(makeHeader(dataset)) //NOTE: just "print" w/o nl
+  
+  /**
+   * Write a footer after writing data values.
+   */
   def writeFooter(dataset: Dataset) = printWriter.print(makeFooter(dataset)) //NOTE: just "print" w/o nl
   
-  //Override these if you need to add a header or footer
-  //TODO: use Header class from writer.sfx.header property
+  /**
+   * Extension point to define a header.
+   */
   def makeHeader(dataset: Dataset): String = ""
+  
+  /**
+   * Extension point to define a footer.
+   */
   def makeFooter(dataset: Dataset): String = ""
     
   /**
@@ -49,7 +64,7 @@ class TextWriter extends Writer {
   }
   
   /**
-   * Write the given Variable.
+   * Write the given Variable recursively.
    * Designed for top level Variables so we can support arbitrarily large datasets.
    * Otherwise, use "make*" to create a String.
    */
@@ -69,8 +84,9 @@ class TextWriter extends Writer {
     printWriter.println
   }
   
-  //make lots of extension points
-  
+  /**
+   * Recursively build String representation of the given Variable's data.
+   */
   def varToString(variable: Variable): String = variable match {
     case   scalar: Scalar   => makeScalar(scalar)
     case   sample: Sample   => makeSample(sample)
@@ -78,7 +94,9 @@ class TextWriter extends Writer {
     case function: Function => makeFunction(function)
   }
   
-  
+  /**
+   * Convert Scalar value to a String.
+   */
   def makeScalar(scalar: Scalar): String = scalar match {
     case Index(i)   => i.toString
     case Real(d)    => d.toString
@@ -89,18 +107,32 @@ class TextWriter extends Writer {
     //TODO: deal with Time format
   }
   
+  /**
+   * Delegate to makeTuple.
+   */
   def makeSample(sample: Sample): String = makeTuple(sample)
   
+  /**
+   * Default String representation of a Tuple.
+   * Delimited list of member Variables.
+   */
   def makeTuple(tuple: Tuple): String = tuple match {
     case Sample(d: Index, r) => varToString(r) //drop Index domain
     case Tuple(vars) => vars.map(varToString(_)).mkString(delimiter)
   }
   
+  /**
+   * Default String representation of a function.
+   * Delimited list of Samples.
+   */
   def makeFunction(function: Function): String = {
     function.iterator.map(varToString(_)).mkString(delimiter)
     // TODO: support non-flat, one row for each inner sample, repeat previous values
   }
   
- 
+  /**
+   * Override mime type. Try to get from 'mimeType' writer property.
+   * Default to "text/plain".
+   */
   override def mimeType: String = getProperty("mimeType", "text/plain")
 }

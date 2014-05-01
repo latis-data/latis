@@ -51,7 +51,7 @@ abstract class Writer {
   private[writer] def setOutputStream(out: OutputStream) = {
     //Make sure we have only one output option. Last one wins.
     file = null
-    this.outputStream = out //TODO: set file to null?
+    this.outputStream = out
   }
   def getOutputStream = outputStream
   
@@ -66,12 +66,6 @@ abstract class Writer {
     case null => null //TODO: if file is null, dataset.getName + suffix, but don't have access to dataset
     case f: File => f
   }
-  
-//  def getFileName = getFile match {
-//    case f: File => file.getName
-//    case _ => null
-//  }
-
   
   //---- Define mime type for server output -----------------------------------
     

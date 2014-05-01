@@ -1,12 +1,15 @@
 package latis.writer
 
-import latis.dm._
-import org.jfree.chart.JFreeChart
-import org.jfree.chart.ChartUtilities
+import latis.dm.Dataset
+import latis.dm.Scalar
+import latis.dm.Tuple
+import latis.dm.Variable
+
 import org.jfree.chart.ChartFactory
-import org.jfree.data.xy.XYSeriesCollection
+import org.jfree.chart.ChartUtilities
+import org.jfree.chart.JFreeChart
 import org.jfree.data.xy.XYSeries
-import java.io.File
+import org.jfree.data.xy.XYSeriesCollection
 
   /**
    * Writes a line graph of the data to the output stream. 

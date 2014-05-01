@@ -4,6 +4,9 @@ import latis.dm._
 import java.io.OutputStream
 import java.io.PrintWriter
 
+/**
+ * Writer to present a Dataset in a way that reflects how it is modeled.
+ */
 class AsciiWriter extends TextWriter {
   //TODO: rename ModelWriter?
   

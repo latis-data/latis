@@ -1,11 +1,15 @@
 package latis.writer
 
-import latis.dm._
-import latis.time._
-import java.io._
-import scala.collection.mutable.MapBuilder
-import latis.util.FirstThenOther
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Sample
+import latis.dm.Scalar
+import latis.dm.Tuple
+import latis.dm.Variable
 
+/**
+ * Write a Dataset's DAP2 Dataset Attribute Structure.
+ */
 class DasWriter extends TextWriter {
   
   val indentSize = 4

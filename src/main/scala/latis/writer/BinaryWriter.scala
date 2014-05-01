@@ -6,26 +6,33 @@ import latis.dm._
 import java.nio.ByteOrder
 import java.nio.ByteBuffer
 
+/**
+ * 
+ */
 class BinaryWriter extends Writer {
 
-  //TODO: support byte order, default to big-endian (network, java default)
+  //TODO: support byte order property, default to big-endian (network, java default)
   private val order = ByteOrder.BIG_ENDIAN
   //private val order = ByteOrder.LITTLE_ENDIAN
 
-  private[this] lazy val writer = new DataOutputStream(getOutputStream)
+  private lazy val writer = new DataOutputStream(getOutputStream)
   
   def write(dataset: Dataset) {
     dataset.getVariables.map(writeVariable(_))
     writer.flush()
   }
   
-  //write top level variables
+  /**
+   * Write top level variables.
+   */
   def writeVariable(variable: Variable) = variable match {
     case Function(it) => for (sample <- it) writer.write(varToBytes(sample))
     case _ => writer.write(varToBytes(variable))
   }
   
-  //Iteratively build up a ByteBuffer
+  /**
+   * Recursively build up a ByteBuffer
+   */
   def varToBytes(variable: Variable): Array[Byte] = {
     val bb = ByteBuffer.allocate(variable.getSize) //potentially bigger than what we write (e.g. Index)
     //set the byte order
@@ -54,7 +61,8 @@ class BinaryWriter extends Writer {
     for (v <- tuple.getVariables) buildVariable(v, bb)
     bb
   }
-  def buildFunction(function: Function, bb: ByteBuffer): ByteBuffer = ??? //nested function
+  
+  def buildFunction(function: Function, bb: ByteBuffer): ByteBuffer = ??? //TODO: nested function
 }
 
 

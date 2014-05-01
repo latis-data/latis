@@ -1,6 +1,11 @@
 package latis.writer
 
-import latis.dm._
+import latis.dm.Dataset
+import latis.dm.Index
+import latis.dm.Sample
+import latis.dm.Scalar
+import latis.dm.Tuple
+import latis.dm.Variable
 import latis.time.Time
 
 /**
@@ -8,7 +13,6 @@ import latis.time.Time
  * One inner array for each sample.
  * Time will be presented in native JavaScript time: milliseconds since 1970.
  * Handy for clients that just want the data (e.g. HighCharts).
- * Like CSV, table as 2D array.
  */
 class CompactJsonWriter extends JsonWriter {
 
@@ -34,7 +38,10 @@ class CompactJsonWriter extends JsonWriter {
     }
   }
     
+  /**
+   * Represent a tuple as an array with each element being an array of values.
+   */
   override def makeTuple(tuple: Tuple): String = {
-    tuple.getVariables.map(varToString(_)).mkString("[", ",", "]") //represent a tuple as an array
+    tuple.getVariables.map(varToString(_)).mkString("[", ",", "]") 
   }
 }

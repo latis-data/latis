@@ -1,10 +1,15 @@
 package latis.writer
 
-import latis.dm._
-import java.nio.ByteBuffer
-import java.io.DataOutputStream
-import java.io.PrintWriter
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Variable
 
+import java.io.DataOutputStream
+import java.nio.ByteBuffer
+
+/**
+ * Write a Dataset's DAP2 Data Dataset Descriptor Structure.
+ */
 class DataDdsWriter extends BinaryWriter {
   
   private[this] lazy val writer = new DataOutputStream(getOutputStream)
