@@ -11,6 +11,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 object DapConstraintParser {
+  //TODO: consider a parser combinator
 
   /**
    * Parse the query args into a sequence of Operations.
@@ -31,40 +32,11 @@ object DapConstraintParser {
 
     buffer.result
   }
-  
-//  /**
-//   * Parse the query string into a sequence of Operations.
-//   */
-//  def parseQuery(query: String): Seq[Operation] = {
-//    
-//    //buffer for accumulating the Seq of operations
-//    val buffer = new ArrayBuffer[Operation]() 
-//    
-//    if (query != null) {
-//      //decode special characters (e.g. >,<)
-//      val q = URLDecoder.decode(query, "UTF-8") //TODO: TSDS uses ISO-8859-1
-//      
-//      //break up query into individual expressions
-//      val ss = q.split("&")
-//
-//      //projection expression should be first, may be empty
-//      if (ss.head.length > 0) buffer += Projection(ss(0).split(","))
-//
-//      //handle expressions for selections and other operations
-//      //for (s <- ss.tail) buffer += parseExpression(s)
-//      buffer ++= ss.tail.map(parseExpression(_))
-// 
-//  //try projection last    
-//      //made Function instead of wrapping
-//  //if (ss.head.length > 0) buffer += ProjectionFilter(ss(0).split(","))
-// 
-//    } //else return an empty list
-//
-//    buffer.result
-//  }
+
 
   /**
-   * Parse the individual expression into an Operation.
+   * Parse the individual expression into an Operation. These are based on
+   * regular expression matches that will reject invalid requests.
    */
   def parseExpression(expression: String): Operation = {
     //TODO: Option? error handling

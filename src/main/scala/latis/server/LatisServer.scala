@@ -14,7 +14,6 @@ class LatisServer extends HttpServlet with Logging {
 
   override def init() {
     logger.info("Initializing LatisServer.")
-    //LatisProperties.init(getServletConfig)
     LatisProperties.init(new LatisServerProperties(getServletConfig))
     //TODO: should we reload properties with every request?
   }
@@ -65,7 +64,6 @@ class LatisServer extends HttpServlet with Logging {
       //Write the dataset. 
       //Note, data might not be read until the Writer asks for it.
       //  So don't blame the Writer if this seems slow.
-      //TODO: pass remaining operations to the Writer
       writer.write(dataset)
       
       logger.info("Request complete.") //TODO: "with status...", do in finally?
@@ -79,14 +77,12 @@ class LatisServer extends HttpServlet with Logging {
         
         logger.error("Exception in LatisServer: " + e.getMessage, e)
         
-        //Return an error page.
-        //Use the Writer mapped with the "error" suffix in the latis properties.        
+        //Return an error response.
+        //TODO: Use the Writer mapped with the "error" suffix in the latis properties?       
         //TODO: deal with exceptions thrown after writing starts
         val writer = ErrorWriter(response)
         writer.write(e)
         
-        //Return error status 500, if all else fails
-        //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "LaTiS was not able to fulfill this request.")
       }
       
     } finally {
