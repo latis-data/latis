@@ -82,9 +82,14 @@ class JsonWriter extends TextWriter {
   
   override def makeSample(sample: Sample): String = {
     val Sample(d, r) = sample
-    val vars = d match {
-      case _: Index => r.getVariables //drop Index domain
-      case _ => d.getVariables ++ r.getVariables
+    val rvar = r match {
+      case f: Function => varToString(f)
+      case t: Tuple => t.getVariables.map(varToString(_)).mkString(", ")
+      case _ => varToString(r)
+    }
+    val dvar = d match {
+      case _: Index => "" //drop Index domain
+      case _ => varToString(d)
       //TODO: breaks for nested Function
       //TODO:  Need to keep domain and range of Sample within {}
       //  label with name or "domain"/"range"
@@ -94,7 +99,8 @@ class JsonWriter extends TextWriter {
       //  but often range is tuple only because range has to be a single Variable
       //  not bad to drop extra {} if no name, still need sample {}, the only ones that can't have a label
     }
-    vars.map(varToString(_)).mkString("{", ", ", "}") //note, sample shouldn't have name
+    val vars = dvar + ", " + rvar
+    vars.mkString("{","","}") //note, sample shouldn't have name
   }
     
   override def makeTuple(tuple: Tuple): String = {

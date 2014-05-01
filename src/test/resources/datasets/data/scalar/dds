@@ -3,4 +3,4 @@ Dataset {
         Float64 foo;
         Float64 ssn;
     } samples;
-} Scalar Test;
+} scalar;

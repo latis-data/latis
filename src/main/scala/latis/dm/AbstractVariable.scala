@@ -94,9 +94,9 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
    */
   def getVariables: Seq[Variable] = this match {
     case s: Scalar => Seq(s)
-    //case Sample(d,r) => d.getVariables ++ r.getVariables  more like flatten
+    case Sample(d,r) => d.getVariables ++ r.getVariables // more like flatten
     //case tup: Tuple => tup.
-    //TODO: Function?
+    case f: Function => f.iterator.toSeq
   }
   
   /*

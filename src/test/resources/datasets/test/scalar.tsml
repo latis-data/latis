@@ -2,7 +2,7 @@
 <tsml>
 
   <dataset>
-    <metadata name="Scalar Test"/>
+    <metadata name="scalar" />
     <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
              delimiter="\s+"
              location="datasets/scalar.txt" />

@@ -1,0 +1,11 @@
+{"tuple_of_functions": {
+"unknown": {"samples": [{"myInt0": 10, "myReal0": 0.0},
+{"myInt0": 11, "myReal0": 1.0},
+{"myInt0": 12, "myReal0": 2.0}], "samples": [{"myInt1": 10, "myReal1": 10.0},
+{"myInt1": 11, "myReal1": 11.0},
+{"myInt1": 12, "myReal1": 12.0}], "samples": [{"myInt2": 10, "myReal2": 20.0},
+{"myInt2": 11, "myReal2": 21.0},
+{"myInt2": 12, "myReal2": 22.0}], "samples": [{"myInt3": 10, "myReal3": 30.0},
+{"myInt3": 11, "myReal3": 31.0},
+{"myInt3": 12, "myReal3": 32.0}]}
+}}

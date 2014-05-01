@@ -7,26 +7,43 @@ import scala.io.Source
 import latis.reader.tsml.TsmlReader
 import java.io.DataOutputStream
 import java.io.File
+import latis.dm._
+import latis.metadata.Metadata
 
 class TestDapWriters {
 
   var tmpFile = java.io.File.createTempFile("writer", "test")
   tmpFile.deleteOnExit
     
-  val names = List("scalar", "tsi","dap2")
+  val TsmlNames = List("scalar", "tsi","dap2")
+ 
+  val fof = Dataset(TestNestedFunction.function_of_functions,Metadata("function_of_functions"))
+  val tof = Dataset(TestNestedFunction.tuple_of_functions,Metadata("tuple_of_functions"))
+  val datasets = List(fof, tof)
     
   @Test
-  def test_all {
-    for(name <- names) {
-      test(name,"dds")
-      test(name,"das")
-      test(name,"dods")
+  def test_tsmls {
+    for(name <- TsmlNames) {
+      test(getTsmlDataset(name),"dds")
+      test(getTsmlDataset(name),"das")
+      test(getTsmlDataset(name),"dods")
+      test(getTsmlDataset(name),"asc")
+      test(getTsmlDataset(name),"bin")
     }
   }
   
-  def test(name: String, suffix: String) {
+  @Test
+  def test_others {
+    for(ds <- datasets){
+      test(ds,"dds")
+      test(ds,"das")
+      test(ds,"dods")
+    }
+  }
+  
+  def test(ds: Dataset, suffix: String) {
     val fos = new FileOutputStream(tmpFile)
-    val ds = TsmlReader(s"datasets/test/$name.tsml").getDataset
+    val name = ds.getName
     Writer(fos,suffix).write(ds)
     fos.close()
     val s = Source.fromFile(tmpFile).getLines
@@ -35,11 +52,14 @@ class TestDapWriters {
     assert(s.isEmpty)
   }
   
+  def getTsmlDataset(name: String): Dataset = TsmlReader(s"datasets/test/$name.tsml").getDataset
+  
   //@Test
   def write_dds {
     val reader = TsmlReader("datasets/test/historical_tsi.tsml")
     val ds = reader.getDataset()
-    Writer.fromSuffix("csv").write(ds)
+    //val ds = Dataset(TestNestedFunction.tuple_of_functions) 
+    Writer.fromSuffix("dds").write(ds)
   }
     
   //@Test
@@ -51,9 +71,10 @@ class TestDapWriters {
   
   //@Test 
   def write_dods {
-    val fos = new DataOutputStream(new FileOutputStream(new File("src/test/resources/datasets/data/dap2/dods")))
-    val ds = TsmlReader("datasets/test/dap2.tsml").getDataset
-    Writer(fos,"dods").write(ds)
+    val fos = new DataOutputStream(new FileOutputStream(new File("src/test/resources/datasets/data/tuple_of_functions/asc")))
+    //val ds = TsmlReader("datasets/test/tsi.tsml").getDataset
+    val ds = Dataset(TestNestedFunction.tuple_of_functions,Metadata("tuple_of_functions")) 
+    Writer(fos,"asc").write(ds)
     fos.close()
   }
 }

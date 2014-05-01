@@ -3,12 +3,12 @@
 
   <dataset name="international_sunspot_number" long_name="International Sunspot Number - Daily">
     <adapter class="latis.reader.tsml.ColumnarAdapter"
-    		 columns="1;2"
+    		 columns="0;2"
              delimiter="\s+"
              commentCharacter="#"
              location="http://sidc.oma.be/DATA/dayssn_import.dat" />
     
-    <time name="time" type="Real" length="10" units="Julian years"/>
+    <time name="time" type="text" length="8" units="yyyyMMdd"/>
    
     <real name="ssn" long_name="Sunspot Number"/>
     

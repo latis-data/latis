@@ -17,7 +17,7 @@ class AsciiWriter extends TextWriter {
    */
   override def makeTuple(tuple: Tuple): String = tuple match {
     case Sample(d, r) => varToString(d) + " -> " + varToString(r)
-    case Tuple(vars) => vars.map(varToString(_)).mkString("(", delimiter, ")")
+    case Tuple(vars) => vars.map(varToString(_)).mkString("(", delimiter + newLine, ")")
   }
   
   /**
