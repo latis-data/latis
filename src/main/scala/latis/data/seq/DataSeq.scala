@@ -1,10 +1,10 @@
 package latis.data.seq
 
-import scala.collection._
-import java.nio.ByteBuffer
-import latis.data.value.DoubleValue
 import latis.data.Data
 import latis.data.IterableData
+
+import scala.collection.Seq
+import scala.collection.mutable
 
 /**
  * Data that represents multiple data records.
