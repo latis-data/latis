@@ -1,9 +1,11 @@
 package latis.data.set
 
 import latis.data.Data
-import java.nio.ByteBuffer
 import latis.data.IterableData
 
+/**
+ * Base class for Data representing SampledFunction domain values.
+ */
 abstract class DomainSet extends IterableData {
 
   def apply(index: Int): Data

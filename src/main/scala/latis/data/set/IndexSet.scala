@@ -1,8 +1,11 @@
 package latis.data.set
 
-import latis.data.value.IndexValue
 import latis.data.Data
+import latis.data.value.IndexValue
 
+/**
+ * One dimensional DomainSet representing index values by start, stop, and stride.
+ */
 class IndexSet(val start: Int, val stop: Int, val stride: Int) extends DomainSet {
   //TODO: support unlimited with current length: -n
   
