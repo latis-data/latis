@@ -1,8 +1,19 @@
 package latis.ops
 
-import latis.dm._
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Sample
+import latis.dm.Scalar
+import latis.dm.Tuple
+import latis.dm.Variable
+import latis.dm.WrappedFunction
 import latis.util.LatisProperties
 
+import scala.Option.option2Iterable
+
+/**
+ * Basse type for operations that transform on Dataset into another.
+ */
 trait Operation {
 
   /**
@@ -54,12 +65,7 @@ trait Operation {
    * to be applied to each sample as it iterates.
    */
   def applyToFunction(function: Function): Option[Variable] = Some(WrappedFunction(function, this))
-  //TODO: do in SampleMappingOperation???
-//  = this match {
-//    case op: SampleMappingOperation => Some(WrappedFunction(function, op))
-//    //case homo: SampleHomomorphism => Some(WrappedFunction(function, homo))
-//    case _ => throw new UnsupportedOperationException("Only SampleMappingOperations can use the default Function application.")
-//  }
+
 }
 
 
@@ -106,100 +112,3 @@ object Operation {
   }
     
 }
-//    
-//    //type not necessarily preserved
-//    protected def applyToScalar(scalar: Scalar): Variable = scalar //no-op
-//    protected def applyToTuple(tuple: Tuple): Variable = Tuple(tuple.variables.map(applyToVariable(_)))
-//    protected def applyToFunction(function: Function): Variable = WrappedFunction(function, this)
-//      //TODO: or Function(applyToVariable(function.domain), applyToVariable(function.range)) ?
-//      
-//    //typically invoked by WrappedFunction
-//    protected def applyToSample(sample: Sample): Variable = 
-//      Sample(applyToVariable(sample.domain), applyToVariable(sample.range))
-
-    /*
-     * Operations: subclass of Operation for each? easier to reason about
-     *   Selection: exclude Function samples, affect only provenance metadata
-     *   Projection: exclude Variables from the model, affect only provenance metadata
-     *   Transformation
-     *     ++need a type of op that doesn't change type/model?
-     *       e.g. unit conversion, basic math
-     *       change values (and metadata)
-     *       do we need a subclass? easier to reason about?
-     *     traits for ModelChanging, DataChanging, ...
-     *   ("Rename" is also part of relational algebra)
-     * 
-     * Things that can change in a Dataset operation
-     * - model, same values
-     *     projection
-     *     reduction
-     *     factorization
-     * - model, diff values
-     *     derived field, FFT, ...
-     * - number of samples, same values
-     *     filter
-     *     selection
-     *     limit
-     *     subset (without reduction: removing dimensions of length 1)
-     * - number of samples, same values, diff model (reduced dimensions)
-     *     slice (subset + reduce)
-     *     first, last, min, max (filter + reduce)
-     * - number of samples, diff values, diff model (reduced dimensions)
-     *     integrate
-     * - number of samples, diff values
-     *     resample
-     *     bin 
-     * - data values, same number of samples
-     *     basic math
-     *     unit conversion
-     *     replace
-     * - metadata only
-     *     rename
-     *     enhance/repair
-     * aggregation
-     * 
-     * pivot
-     * coordinate transform
-     * evaluate
-     * op on domain vs range
-     * 
-     * --
-     * Filter: return Option
-     * Transform: return Var
-     * always use Option: invalid operation could return None
-     *   (1 -> 2,a,b) * 2 => (1 -> 4) ?  a*2 => None?
-     * 
-     * ***AlgebraicOperation
-     *   doesn't affect data
-     *   needs to munge model
-     *     op.applyToSampleType?
-     *     safe to call since it wont access data
-     *   Projection?
-     *   applied before vs after 2nd construction pass
-     *   
-     * ++should WrappedFunction test Op type and invoke as needed?
-     *   if algebraic munge type
-     * what about diff Iterator types?
-     * 
-     * 
-     * MungedFunction (Filter, Transform)
-     * need to count on Sample remaining a Sample for iteration
-     * 3 kinds of munging?
-     *   Filter may drop sample
-     *   sample preserving: modified, morphed, ...?
-     *     transform implies changing form
-     *   all bets off, maybe not even iterable
-     * Projection: may need to fill with Index, not sure if we can do that with generic TransformedFunction
-     * 
-     * Ops extend SampleApplicable trait
-     *   applySample(sample: Sample): Option[Sample]
-     * 
-     * isomorphic: same type, has inverse
-     * homomorphic: same type
-     * 
-     * should we be able to select/filter on index even if domain is projected?
-     * like hyperslab
-     * implicit coord system transform between index and domain
-     * (index <-> time) -> foo
-     * 
-     */
