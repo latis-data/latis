@@ -1,8 +1,6 @@
 package latis.data
 
 import java.nio.ByteBuffer
-import scala.collection.mutable
-import latis.util.PeekIterator
 
 
 abstract class IterableData extends Data { //TODO: with Iterable[Data]? problem with 'size' {
@@ -11,7 +9,6 @@ abstract class IterableData extends Data { //TODO: with Iterable[Data]? problem 
   
   def length: Int = -1 //unknown, potentially unlimited //TODO: iterate and count?
   def size: Int = length * recordSize //total number of bytes
-  def isEmpty: Boolean = length == 0
   
   //not a good idea since it realizes all the data, iterate and act on each sample instead
   def getByteBuffer: ByteBuffer = {

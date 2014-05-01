@@ -10,10 +10,9 @@ import scala.collection.mutable
  * Data that represents multiple data records.
  * Not multiple data values in a single record.
  * Each element is assumed to have the same type and size.
+ * Note, this is different from *SeqData which encapsulate a sequence of primitive values.
  */
 class DataSeq extends IterableData {
-  //TODO: refactor to work with other SeqData?
-  //Data vs Datum
   
   private val datas = mutable.ArrayBuffer[Data]()
   

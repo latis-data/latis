@@ -9,7 +9,6 @@ import java.nio.ByteBuffer
  */
 case class IndexValue(val value: Int) extends AnyVal with NumberData { 
   def size = 4
-  def isEmpty = false
   
   def intValue = value
   def longValue = value.toLong

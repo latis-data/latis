@@ -5,6 +5,7 @@ import latis.data._
 import latis.data.set.DomainSet
 import latis.metadata._
 import java.nio.ByteBuffer
+import latis.data.set.RealSampledSet
 
 trait Function extends Variable {
   def getDomain: Variable
@@ -80,14 +81,8 @@ object Function {
       case 1 => Real(Metadata("range"))
       case n: Int => Tuple((0 until n).map(i => Real(Metadata("real"+i)))) //auto-gen names
     }
-    val data: SampledData = {
-      //assert that all Seq are same length as the domain
-      if (vals.exists(_.length != dvals.length)) throw new Error("Value sequences must be the same length.")
-      val rdata = vals.tail.foldLeft(Data.fromDoubles(vals.head: _*))(_ zip Data.fromDoubles(_: _*))
-      SampledData(DomainSet(Data.fromDoubles(dvals: _*)), rdata)
-      //TODO: SampledData.fromValues?
-    }
-    
+    val data = SampledData.fromValues(dvals, vals: _*)
+
     Function(domain, range, data = data)
   }
   

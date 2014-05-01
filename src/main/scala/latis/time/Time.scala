@@ -174,21 +174,21 @@ object Time {
     }
   }
   
-  def apply(md: Metadata, values: Seq[AnyVal]): Time = {
-    var metadata = md
-    val scale = md.get("units") match {
-      case Some(u) => TimeScale(u)
-      case None => {
-        //Use default time scale, add units to metadata
-        metadata = new VariableMetadata(md.getProperties + ("units" -> TimeScale.DEFAULT.toString))
-        TimeScale.DEFAULT
-      }
-    }
-    values.head match {
-      case _: Double => new Time(scale, metadata, Data(values)) with Real
-      case _: Long => new Time(scale, metadata, Data(values)) with Integer
-    }
-  }
+//  def apply(md: Metadata, values: Seq[AnyVal]): Time = {
+//    var metadata = md
+//    val scale = md.get("units") match {
+//      case Some(u) => TimeScale(u)
+//      case None => {
+//        //Use default time scale, add units to metadata
+//        metadata = new VariableMetadata(md.getProperties + ("units" -> TimeScale.DEFAULT.toString))
+//        TimeScale.DEFAULT
+//      }
+//    }
+//    values.head match {
+//      case _: Double => new Time(scale, metadata, Data(values)) with Real
+//      case _: Long => new Time(scale, metadata, Data(values)) with Integer
+//    }
+//  }
   
       
   def apply(scale: TimeScale, value: AnyVal): Time = {
@@ -279,32 +279,32 @@ object Time {
     }
   }
   
-  def fromStrings(md: Metadata, values: Seq[String]): Time = {
-    md.get("units") match {
-      case Some(u) => {
-        if (u.contains(" since ")) Time(md, stringsToNumbers(values))  //numeric units
-        else { //formatted time
-          //store as strings, Time with Text
-          //assume type is text
-          new Time(TimeScale.DEFAULT, md, Data(values)) with Text
-          
-//          //convert to java time scale for now, //TODO: use arbitrary default time scale
-//          val scale = TimeScale.JAVA
-//          //make sure units metedata is correct //TODO: add type="integer" to metadata?
-//          val md2 = Metadata(md.getProperties + ("units" -> scale.toString))
-// //TODO: since we are changing the units, at least let us write with native format
-// //  use 'format'? also could be used by format_time filter         
-//          //parse times into longs
-//          val format = TimeFormat(u)
-//          val times: Seq[Long] = values.map(format.parse(_).getTime())
-//          //note, tempted to delegate to Time(Metadata, Seq[Any]) to get default time scale,
-//          //  but we are assuming JAVA time here
-//          new Time(scale, md2, Data(times)) with Integer
-        }
-      }
-      case None => Time(md, values.map(_.toDouble))
-    }
-  }
+//  def fromStrings(md: Metadata, values: Seq[String]): Time = {
+//    md.get("units") match {
+//      case Some(u) => {
+//        if (u.contains(" since ")) Time(md, stringsToNumbers(values))  //numeric units
+//        else { //formatted time
+//          //store as strings, Time with Text
+//          //assume type is text
+//          new Time(TimeScale.DEFAULT, md, Data(values)) with Text
+//          
+////          //convert to java time scale for now, //TODO: use arbitrary default time scale
+////          val scale = TimeScale.JAVA
+////          //make sure units metedata is correct //TODO: add type="integer" to metadata?
+////          val md2 = Metadata(md.getProperties + ("units" -> scale.toString))
+//// //TODO: since we are changing the units, at least let us write with native format
+//// //  use 'format'? also could be used by format_time filter         
+////          //parse times into longs
+////          val format = TimeFormat(u)
+////          val times: Seq[Long] = values.map(format.parse(_).getTime())
+////          //note, tempted to delegate to Time(Metadata, Seq[Any]) to get default time scale,
+////          //  but we are assuming JAVA time here
+////          new Time(scale, md2, Data(times)) with Integer
+//        }
+//      }
+//      case None => Time(md, values.map(_.toDouble))
+//    }
+//  }
     
   //TODO: use in Data object?
   //def stringToNumberData(s: String): Data = Data(stringToNumber(s))

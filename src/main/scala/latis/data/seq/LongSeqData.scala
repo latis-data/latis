@@ -1,12 +1,13 @@
 package latis.data.seq
 
+import latis.data.IterableData
 import latis.data.value.LongValue
 
 import java.nio.ByteBuffer
 
 import scala.collection.immutable
 
-case class LongSeqData(ds: immutable.Seq[Long]) extends SeqData {
+case class LongSeqData(ds: immutable.Seq[Long]) extends IterableData {
   
   override def getByteBuffer: ByteBuffer = ds.foldLeft(ByteBuffer.allocate(size))(_.putLong(_)).rewind.asInstanceOf[ByteBuffer]
   

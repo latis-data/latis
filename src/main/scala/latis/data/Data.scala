@@ -1,69 +1,52 @@
 package latis.data
 
-import latis.dm._
-import latis.ops.math._
-import java.nio.ByteBuffer
-import latis.data.value._
 import latis.data.buffer.ByteBufferData
+import latis.data.seq.DataSeq
+import latis.data.seq.DoubleSeqData
+import latis.data.seq.LongSeqData
+import latis.data.seq.StringSeqData
+import latis.data.value.DoubleValue
+import latis.data.value.LongValue
+import latis.data.value.StringValue
+import java.nio.ByteBuffer
+import scala.Array.canBuildFrom
+import scala.collection.Seq
+import scala.collection.immutable
 import java.nio.Buffer
-import latis.data.seq._
 
-/*
- * TODO: 2013-05-30
- * simplifying assumptions:
- *   ok for scalars to have array Data
- *     like column oriented database
- *     implicit IndexFunction
- *     FunctionIterator can stitch them together
- *     Arrays or ByteBuffers?
- *   outer function can have Data (Iterable) to support sample iteration
- *     ByteBuffer
- *     what about Text? IndexFunction of Chars?
- *   don't worry about iterating into nested functions, yet
- *   embrace sample/record abstraction (outer function)
- * 
- * 2013-08-05
- * ultimate form of the data is array of bytes
- * any other form should be a convenience wrapper/producer
- * getDouble... should not be available for Data in general
- *   use via pattern matching
- *   use NumberData trait?
- * but pattern matching will make instance of value class
- *   matching on the Variable (e.g. Real) instead
+/**
+ * Base type for representing data values.
  */
-
-/*
- * TODO: WrappedData?
- * stride for subset, used during access, on top of orig data
- */
-
 trait Data extends Any {
-  //TODO: head::tail semantics? Stream? View?
-  //TODO: word = Array of 4 chars, 8 bytes
-  //TODO: String as Index array of Char, or Word?
-  //TODO: Blob: fixed length byte array
-//TODO: move record semantics to IterableData? deprecate SeqData?
   
-  //try Set behavior
-  //def indexToRecord(index: Int): Data
- //only apllicable to IterableData  def apply(index: Int): Data
-  //TODO: or Index? could encapsulate n-D
-  //TODO: valueToIndex? indexOf?
+  /**
+   * Size in bytes.
+   */
+  def size: Int 
   
-  //def length: Int  //number of records, Experimental: "-n" is unlimited, currently n
-  //def recordSize: Int //bytes per record
-  def size: Int // = length * recordSize //total number of bytes
-  
+  /**
+   * Return the data as a ByteBuffer.
+   */
   def getByteBuffer: ByteBuffer 
+  
+  /**
+   * Return the data as an array of bytes.
+   */
   def getBytes: Array[Byte] = getByteBuffer.array
   
-  //TODO: beware of mixing getters that increment with iterator
-  //def iterator: Iterator[Data] //= List(DoubleValue(doubleValue)).iterator
-  //TODO: support foreach, (d <- data)
-    
-  def isEmpty: Boolean //= length == 0
+  /**
+   * Is the Data empty.
+   */
+  def isEmpty: Boolean = size == 0
+  
+  /**
+   * Are there any values represented by this Data object.
+   */
   def notEmpty = ! isEmpty
   
+  /**
+   * Concatenate the given Data onto the end of this Data.
+   */
   def concat(data: Data) = Data(this.getBytes ++ data.getBytes)
 
   
@@ -88,9 +71,6 @@ trait Data extends Any {
 //-----------------------------------------------------------------------------
 
 object Data {
-  import scala.collection._
-  
-  //TODO: review given that all Data are no longer iterable
   
   val empty = EmptyData
   
@@ -100,73 +80,22 @@ object Data {
   }
   
   def apply(s: String): Data = StringValue(s)
-  
-  /**
-   * Construct Data with a record for each Seq element.
-   * Assumes all of the same type which each sample should be.
-   */
-  //pattern match to deal with type erasure
-  //TODO: assert all of the same type
-  //TODO: use primitive Arrays?
-  def apply(seq: Seq[Any]): Data = seq.head match {
-    case _: Double => new DoubleSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Double]])
-    case _: Long   => new LongSeqData(seq.toIndexedSeq.asInstanceOf[immutable.Seq[Long]])
-    case _: String => {
-      val strings = seq.toIndexedSeq.asInstanceOf[immutable.Seq[String]]
-      val maxLength = strings.map(_.length).max  //foldLeft(0)((l,s) => Math.max(l, s.length))
-      new StringSeqData(strings, maxLength)
-    }
-    case _ => throw new RuntimeException("Unsupported data sequence type.")
-  }
-  
-  def apply(strings: Seq[String], length: Int): Data = new StringSeqData(strings.toIndexedSeq, length)
-  
-  def fromDoubles(ds: Double*):     DataSeq = DataSeq(ds.map(DoubleValue(_)))
-  def fromLongs(ls: Seq[Long]):     DataSeq = DataSeq(ls.map(LongValue(_)))
-  def fromStrings(ss: Seq[String]): DataSeq = DataSeq(ss.map(StringValue(_)))
-  
-  //takes Buffer so user's don't have to cast after "rewind"
-//  def apply(buffer: Buffer, sampleSize: Int): Data = {
-//    //TODO: if buffer is empty, return EmptyData?
-//    //flip if not positioned at 0, sets limit to current position and rewinds
-//    //If position is 0, assume the provider already flipped it.
-//    //TODO: potential for buffer capacity to be larger than desired, e.g. rewind called instead of flip
-//    //  but most cases should allocate just the right size: limit = capacity
-//    val b = if (buffer.limit > 0 && buffer.position != 0) buffer.flip else buffer
-//    b match {
-//      case bb: ByteBuffer => new ByteBufferData(bb, sampleSize)
-//      case _ => throw new RuntimeException("Data buffer must be a ByteBuffer")
-//      //Note, can't take CharBuffer, need to start with a ByteBuffer and use asFooBuffer only as a wrapper
-//    }
-//  }
-  
 
-  def apply(buffer: ByteBuffer): Data = {
+  /**
+   * Construct a Data implementation that encapsulates a ByteBuffer.
+   * This will set the limit and rewind the buffer if needed.
+   */
+  def apply(buffer: Buffer): Data = {
     //If it looks like this buffer isn't set to the beginning, do so.
-    //Note, 'flip' will set the limit to the current position. 
-    //This makes sense for clients that just add to a buffer without sizing it correctly.
-    val bb = if (buffer.limit > 0 && buffer.position != 0) buffer.flip.asInstanceOf[ByteBuffer]
-    else buffer
-    new ByteBufferData(bb)
+    //Note, 'flip' will set the limit to the current position and the position to 0. 
+    //This msupports clients that just add to a buffer without sizing it correctly.
+    val b = if (buffer.limit > 0 && buffer.position != 0) buffer.flip else buffer
+    b match {
+      case bb: ByteBuffer => new ByteBufferData(bb)
+      //TODO: support other types of Buffer?
+    }
   }
   
   def apply(bytes: Array[Byte]): Data = Data(ByteBuffer.wrap(bytes))
   
-//  //Concatenate Data, used by Variable.concatData
-//  //Use to create a single record with multiple variables (e.g. tuple)
-//  //TODO: allow Seq[Any]? need diff method
-//  //  or should the SeqData constructor be the special case?
-//  def apply(data: Seq[Data])(implicit ignore: Data): Data = { //implicit hack for type erasure ambiguity
-//  //def apply(head: Data, tail: Data*): Data = { 
-//    //val data = head +: tail
-//    val size = data.foldLeft(0)(_ + _.size) //total size of all elements
-//    val buffer = data.foldLeft(ByteBuffer.allocate(size))(_ put _.getByteBuffer) //build ByteBuffer with all Data
-//    val bb = buffer.rewind.asInstanceOf[ByteBuffer] //reset to the beginning
-//    Data(bb)
-//  }
-  
-//  def apply(dit: Iterator[Data]) : Data = new Data {
-//    override def iterator = dit
-//    //TODO: deal with recordSize, length..., unknown
-//  }
 }

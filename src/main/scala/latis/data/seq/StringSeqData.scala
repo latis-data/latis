@@ -1,5 +1,6 @@
 package latis.data.seq
 
+import latis.data.IterableData
 import latis.data.value.StringValue
 import latis.util.StringUtils
 
@@ -8,7 +9,7 @@ import java.nio.ByteBuffer
 import scala.collection.Seq
 import scala.collection.immutable
 
-case class StringSeqData(ss: immutable.Seq[String], textLength: Int) extends SeqData {
+case class StringSeqData(ss: immutable.Seq[String], textLength: Int) extends IterableData {
   
   override def getByteBuffer: ByteBuffer = {
     val bb = ByteBuffer.allocate(size)

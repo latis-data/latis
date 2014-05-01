@@ -12,7 +12,6 @@ case class DoubleValue(val value: Double) extends AnyVal with NumberData {
   //  http://docs.scala-lang.org/overviews/core/value-classes.html
   
   def size = 8
-  def isEmpty = false
   
   //TODO: round or truncate?
   def intValue = value.toInt

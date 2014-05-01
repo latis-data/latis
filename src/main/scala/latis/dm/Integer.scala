@@ -17,7 +17,7 @@ object Integer {
 
   def apply(md: Metadata, data: Data): Integer = new AbstractScalar(md, data) with Integer
   def apply(md: Metadata, v: Long): Integer = new AbstractScalar(md, Data(v)) with Integer
-  def apply(md: Metadata, vs: Seq[Long]): Integer = new AbstractScalar(md, Data(vs)) with Integer
+ // def apply(md: Metadata, vs: Seq[Long]): Integer = new AbstractScalar(md, Data(vs)) with Integer
   
   //def apply(name: String, v: Long): Integer = new AbstractVariable(Metadata(name), Data(v)) with Integer
 
@@ -30,7 +30,7 @@ object Integer {
     case st: scala.collection.immutable.StringOps => Integer(st.toLong)
   }
   
-  def apply(vs: Seq[Long]): Integer = new AbstractScalar(data = Data(vs)) with Integer
+//  def apply(vs: Seq[Long]): Integer = new AbstractScalar(data = Data(vs)) with Integer
     
 //  def apply(name: String): Integer = {
 //    //new Integer(Metadata(name), EmptyData)

@@ -1,12 +1,22 @@
 package latis.util
 
-import latis.data._
-import latis.data.value.StringValue
-import latis.dm._
-import java.nio.ByteBuffer
+import latis.data.Data
+import latis.data.EmptyData
+import latis.data.SampleData
+import latis.dm.Binary
+import latis.dm.Function
+import latis.dm.Index
+import latis.dm.Integer
+import latis.dm.Real
+import latis.dm.Sample
+import latis.dm.Scalar
+import latis.dm.Text
+import latis.dm.Tuple
+import latis.dm.Variable
 import latis.time.Time
-import latis.data.seq.SeqData
-import latis.time.TimeFormat
+
+import java.nio.ByteBuffer
+
 import scala.collection.Map
 import scala.collection.mutable
 

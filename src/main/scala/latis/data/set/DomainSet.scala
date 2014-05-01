@@ -19,6 +19,7 @@ abstract class DomainSet extends IterableData {
 
 object DomainSet {
   
+  //temporary hack
   def apply(data: IterableData) = new DomainSet {
     def apply(index: Int): Data = ???
     def indexOf(data: Data): Int = ???
@@ -26,4 +27,5 @@ object DomainSet {
     def recordSize: Int = data.recordSize
     def iterator: Iterator[Data] = data.iterator
   }
+  
 }

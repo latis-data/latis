@@ -9,7 +9,6 @@ import java.nio.ByteBuffer
  */
 case class LongValue(val value: Long) extends AnyVal with NumberData {
   def size = 8
-  def isEmpty = false
   
   def intValue = value.toInt
   def longValue = value

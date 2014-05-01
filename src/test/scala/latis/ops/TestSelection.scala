@@ -14,16 +14,11 @@ import latis.data.SampledData
 
 class TestSelection {
   
-  //implicit def stringToMetadata(name: String): Metadata = Metadata(name)
-  
-  // time -> value, column oriented data
+  // time -> value
   lazy val scalarFunction: Function = {
     val domain = Real(Metadata("time"))
     val range = Real(Metadata("value"))
-    val ddata = Data.fromDoubles(1,2,3,4,5)
-    val rdata = Data.fromDoubles(1,2,3,4,3)
-    //val data = ddata zip rdata
-    val data = SampledData(ddata, rdata)
+    val data = SampledData.fromValues(Seq(1,2,3,4,5), Seq(1,2,3,4,5))
     Function(domain, range, data=data)
   }
   
@@ -35,17 +30,13 @@ class TestSelection {
     //AsciiWriter().write(ds)
     assert(expected equals ds(0))
   }
-  
-  
-  //TODO: test more than length
+
   
   @Test
   def select_equal_value {
     val domain = Real(Metadata("time"))
     val range = Real(Metadata("value"))
-    val ddata = Data.fromDoubles(3,5)
-    val rdata = Data.fromDoubles(3,3)
-    val data = SampledData(ddata, rdata)
+    val data = SampledData.fromValues(Seq(3,5), Seq(3,3))
     val expected = Function(domain, range, data=data)
     testSelection(scalarFunction, "value=3", expected)
   }
@@ -79,7 +70,7 @@ class TestSelection {
     val filter = Selection("value<=3")
     val ds = filter(scalarFunction)
     val n = ds.length
-    assertEquals(4, n)
+    assertEquals(3, n)
   }
   
   @Test
@@ -87,9 +78,8 @@ class TestSelection {
     val filter = Selection("value!=3")
     val ds = filter(scalarFunction)
     val n = ds.length
-    assertEquals(3, n)
+    assertEquals(4, n)
   }
-  
   
   @Test
   def select_equal_time {
@@ -97,27 +87,8 @@ class TestSelection {
     val ds = filter(scalarFunction)
     val n = ds.length
     assertEquals(1, n)
-    //AsciiWriter().write(ds)
   }
   
-  //@Test
-  def test_data_from_file {
-    val reader = TsmlReader("datasets/test/scalar.tsml")
-    val ds0 = reader.getDataset
-    //println(ds)
-    //val filter = SelectionFilter("foo>=5")
-    val filter = Selection("ssn>=15")
-    val ds = filter(ds0)
-    //AsciiWriter().write(ds)
-    //NOTE: iterable once issues
-    
-    //val f = ds(0).asInstanceOf[Function]
-    val n = ds.length
-    assertEquals(5, n)
-  }
-  
-  //TODO: iterable once issues
-  //TODO: Text data
 }
 
 

@@ -1,14 +1,13 @@
 package latis.data
 
+import java.nio.ByteBuffer
+
 /**
  * Data for a Function Sample that keeps the domain and range data separate.
  */
 case class SampleData(val domainData: Data, val rangeData: Data) extends Data {
 
-  def getByteBuffer = (domainData concat rangeData).getByteBuffer
-  
-  def isEmpty = rangeData.isEmpty
-  //TODO: also test if domain is empty? or default to index?
+  def getByteBuffer = ByteBuffer.wrap(domainData.getBytes ++ rangeData.getBytes)
   
   def size = domainData.size + rangeData.size
 }

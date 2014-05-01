@@ -39,7 +39,6 @@ abstract class AbstractScalar(metadata: Metadata = EmptyMetadata, data: Data = E
     }
   }
 
-  //TODO: generalize for all Vars?  
   /**
    * Based on the CF convention.
    */

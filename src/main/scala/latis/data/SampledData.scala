@@ -1,8 +1,13 @@
 package latis.data
 
+import latis.data.seq.DataSeq
 import latis.data.set.DomainSet
+import latis.data.set.RealSampledSet
+import latis.data.value.DoubleValue
 import latis.dm.Sample
+
 import scala.collection.mutable.ArrayBuffer
+
 import com.typesafe.scalalogging.slf4j.Logging
 
 class SampledData extends IterableData with Logging {
@@ -72,4 +77,15 @@ object SampledData {
     SampledData(dset, rdata)
   }
   
+  def fromValues(dvals: Seq[Double], vals: Seq[Double]*) ={
+    //assert that all Seq are same length as the domain
+    if (vals.exists(_.length != dvals.length)) throw new Error("Value sequences must be the same length.")
+    
+    val dset = RealSampledSet(dvals)
+    //DataSeq(ds.map(DoubleValue(_)))
+    val d1 = DataSeq(vals.head.map(DoubleValue(_)))
+    val f = (ds1: DataSeq, ds2: Seq[Double]) => ds1 zip DataSeq(ds2.map(DoubleValue(_)))
+    val rdata = vals.tail.foldLeft(d1)(f)
+    SampledData(dset, rdata)
+  }
 }

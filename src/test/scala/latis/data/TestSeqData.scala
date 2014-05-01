@@ -7,7 +7,6 @@ import latis.writer._
 import org.junit._
 import Assert._
 import latis.data.value.DoubleValue
-import latis.data.seq.SeqData
 
 class TestSeqData {
 

@@ -144,11 +144,11 @@ class TestByteBuffer {
   @Test def double_datum_equals             = assertTrue(doubleDatum.equals(Data(3.14)))
   @Test def double_datum_not_rewound_equals = assertTrue(doubleDatumNotRewound.equals(Data(3.14)))
     //assertTrue(doubleDataRecord.equals(Data(Seq(1.0, 2.0, 3.0)))) //TODO: but Data from Seq assumes one datum per record, need support for Tuple data?
-  @Test def double_datum_records_equals     = assertTrue(doubleDatumRecords.equals(Data(Seq(1.0, 2.0, 3.0))))
+//  @Test def double_datum_records_equals     = assertTrue(doubleDatumRecords.equals(Data(Seq(1.0, 2.0, 3.0))))
     //assertTrue(doubleDataRecords.equals()) //TODO: but Data from Seq assumes one datum per record
   @Test def char_datum_equals               = assertTrue(charDatum.equals(Data("A")))
   @Test def string_datum_equals             = assertTrue(stringDatum.equals(Data("Hello")))
-  @Test def string_data_records_equals      = assertTrue(stringDataRecords.equals(Data(Seq("Hello", "World"))))
+//  @Test def string_data_records_equals      = assertTrue(stringDataRecords.equals(Data(Seq("Hello", "World"))))
   
   
 //  // Test Data.iterator
