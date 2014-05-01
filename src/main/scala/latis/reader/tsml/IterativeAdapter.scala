@@ -88,7 +88,7 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
    */
   private def makeSampleDataFromDataMap(sampleTemplate: Sample)(dataMap: Option[Map[String,Data]]): Option[SampleData] = dataMap match {
     case None => None
-    case Some(m) => Some(DataUtils.makeSampleDataFromDataMap(m, sampleTemplate))
+    case Some(m) => Some(DataUtils.dataMapToSampleData(m, sampleTemplate))
   }
   
   
