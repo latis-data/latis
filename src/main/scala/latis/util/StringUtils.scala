@@ -1,15 +1,22 @@
 package latis.util
 
+/**
+ * Utility methods for manipulating Strings.
+ */
 object StringUtils {
     
   /**
-   * Resolve any property references in the given string, 
+   * Resolve any property references in the given string.
    * e.g. ${dataset.dir}
+   * This will ask LatisProperties which has access to properties from
+   * the latis.properties file, systems properties, and environment variables.
    */
   def resolveParameterizedString(s: String): String = {
     //val pattern = """${(.+)}""".r //TODO: restrict to \w\\.
     //pattern.replaceAllIn(s, (m: Match) => LatisProperties(m.matched))
     //TODO: support more than one parameter?
+    //TODO: default with ${foo:-default} like logback (and bash)
+    
     s.indexOf("${") match {
       case -1 => s
       case i1: Int => s.indexOf('}', i1) match {

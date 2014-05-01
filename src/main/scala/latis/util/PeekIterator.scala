@@ -47,7 +47,6 @@ abstract class PeekIterator[T >: Null] extends Iterator[T] {
     _initialized //make sure we have cached the first value
     val current = _next
     _next = getNext //TODO: get next value to cache asynchronously?
-    //_index += 1 //increment the current index
     current
   }
   

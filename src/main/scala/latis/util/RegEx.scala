@@ -1,5 +1,8 @@
 package latis.util
 
+/**
+ * A collection of handy regular expressions used to parse constraint expressions.
+ */
 object RegEx {
   //TODO: consider Parser Combinators
       
@@ -63,8 +66,6 @@ object RegEx {
      * Selection clause. Match variable name, operator, value.
      * Allow white space around the operator.
      */
-    //lazy val SELECTION = s"($VARIABLE)\\s*($SELECTION_OPERATOR)\\s*($VALUE)"
-    //TODO: consider quotes around value
     lazy val SELECTION = s"($VARIABLE)\\s*($SELECTION_OPERATOR)\\s*($VALUE|'$VALUE')"
     
     /**
@@ -72,7 +73,7 @@ object RegEx {
      * Don't try to match groups since we have a variable number of groups and this
      * would only capture the first and last elements.
      */
-    lazy val PROJECTION = s"$VARIABLE(?:(?:$DELIMITER)$VARIABLE)*"  //TODO: use DELIMITER?
+    lazy val PROJECTION = s"$VARIABLE(?:(?:$DELIMITER)$VARIABLE)*"
     
     /**
      * List of arguments, such as for a function call.

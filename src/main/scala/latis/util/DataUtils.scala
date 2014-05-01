@@ -20,22 +20,37 @@ import java.nio.ByteBuffer
 import scala.collection.Map
 import scala.collection.mutable
 
+/**
+ * Utility methods for manipulating data.
+ */
 object DataUtils {
   
+  /**
+   * Convert the Data representing variableTemplate1 to Data representing variableTemplate2.
+   */
   def reshapeData(data: Data, variableTemplate1: Variable, variableTemplate2: Variable): Data = {
     val dataMap = dataToDataMap(data, variableTemplate1)
     makeDataFromDataMap(dataMap, variableTemplate2)
   }
-  
+    
+  /**
+   * Convert the SampleData representing sampleTemplate1 to SampleData representing sampleTemplate2.
+   */
   def reshapeSampleData(sampleData: SampleData, sampleTemplate1: Sample, sampleTemplate2: Sample): SampleData = {
     val dataMap = dataToDataMap(sampleData, sampleTemplate1)
     dataMapToSampleData(dataMap, sampleTemplate2)
   }
   
+  /**
+   * Convert Data for a given variableTemplate to a Map from Variable name to its Data.
+   */
   def dataToDataMap(data: Data, variableTemplate: Variable): Map[String, Data] = {
     buildMapFromBuffer(data.getByteBuffer, mutable.Map[String,Data](), variableTemplate)
   }
 
+  /**
+   * Recursively build Data Map from a ByteBuffer representing the given variableTemplate.
+   */
   private def buildMapFromBuffer(bb: ByteBuffer, dataMap: mutable.Map[String,Data], variableTemplate: Variable): Map[String,Data] = variableTemplate match {
     case s: Scalar => {
       val bytes = new Array[Byte](s.getSize)
@@ -55,6 +70,9 @@ object DataUtils {
     case Function(it) => it.foreach(buildMapFromBuffer(bb, dataMap, _)); dataMap
   }
   
+  /**
+   * Convert a Data Map to SampledData representing the given sampleTemplate.
+   */
   def dataMapToSampleData(dataMap: Map[String, Data], sampleTemplate: Sample): SampleData = {
     val domainData = makeDataFromDataMap(dataMap, sampleTemplate.domain)
     val rangeData = makeDataFromDataMap(dataMap, sampleTemplate.range)
@@ -66,8 +84,9 @@ object DataUtils {
    * Given a dataMap mapping Variable names to Data and a Variable template,
    * construct a Data object with data from the dataMap.
    */
-  //TODO: dataMapToData?
   def makeDataFromDataMap(dataMap: Map[String, Data], variableTemplate: Variable): Data = {
+    //TODO: dataMapToData?
+    
     //build a ByteBuffer to contain the data
     val size = variableTemplate.getSize
     val bb = ByteBuffer.allocate(size)
@@ -98,19 +117,19 @@ object DataUtils {
     //TODO: test that we got the size right
     Data(bb)
   }
-  
-  def makeSampleDataFromDataMap(dataMap: Map[String, Data], sampleTemplate: Sample): SampleData = {
-    val ddata = makeDataFromDataMap(dataMap, sampleTemplate.domain)
-    val rdata = makeDataFromDataMap(dataMap, sampleTemplate.range)
-    SampleData(ddata, rdata)
-  }
 
+  /**
+   * Convert a Sample (with data) to SampledData.
+   */
   def sampleToData(sample: Sample): SampleData = {
     val ddata = buildDataFromVariable(sample.domain)
     val rdata = buildDataFromVariable(sample.range)
     SampleData(ddata, rdata)
   }
 
+  /**
+   * Recursively accumulate Data (bytes) for a given Variable (that contains Data).
+   */
   private def buildDataFromVariable(variable: Variable, data: Data = EmptyData): Data = variable match {
     case s: Scalar => data concat s.getData
     case Tuple(vars) => vars.foldLeft(data)(_ concat _.getData)
@@ -118,17 +137,21 @@ object DataUtils {
   }
   
   
-//TODO: require SampledData?
+  /**
+   * Construct a Sample from the template with the Data.
+   */
   def dataToSample(data: Data, template: Sample): Sample = {
-    //TODO: could we just rely on Sample's Tuple behavior here?
+    //TODO: require SampleData?
     val bb = data.getByteBuffer
-    //val sample = buildVarFromBuffer(bb, template)
     val domain = buildVarFromBuffer(bb, template.domain)
     val range = buildVarFromBuffer(bb, template.range)
     bb.rewind //reset to the beginning in case we want to reuse it
     Sample(domain, range)
   }
 
+  /**
+   * Construct a Variable from the template with the Data.
+   */
   def dataToVariable(data: Data, template: Variable): Variable = template match {
     case tup: Tuple => {
       //don't allow tuple to contain its own data, for now
@@ -137,7 +160,6 @@ object DataUtils {
       bb.rewind //reset to the beginning in case we want to reuse it
       v
     }
-    //TODO: use builder
     case _: Time    => Time(template.getMetadata, data)
     case _: Real    => Real(template.getMetadata, data)
     case _: Integer => Integer(template.getMetadata, data)
@@ -148,11 +170,10 @@ object DataUtils {
     case f: Function => ???
   }
 
-
+  /**
+   * Recursively construct Variables with the given template and ByteBuffer data.
+   */
   def buildVarFromBuffer(bb: ByteBuffer, template: Variable): Variable = template match {
-
-    //TODO: use builder?
-    
     case v: Time => v match {
       case _: Real => Time(template.getMetadata, bb.getDouble)
       case _: Integer => Time(template.getMetadata, bb.getLong)
@@ -183,18 +204,10 @@ object DataUtils {
       val buffer = ByteBuffer.wrap(bytes)
       Binary(template.getMetadata, buffer)
     }
-
-    //TODO: Don't include Index?
-    //case Sample(_: Index, r: Variable) => Tuple(buildVarFromBuffer(bb, r), template.getMetadata)
       
     case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _)), template.getMetadata)
 
-    case f: Function => { //entire function, designed for inner functions
-      //Function(buildVarFromData(bb, d), buildVarFromData(bb, r))
-      //TODO: interleave
-      //iterate over sample size
-
-      ???
-    }
+    //TODO: deal with nested Function
+    case f: Function => ???
   }
 }

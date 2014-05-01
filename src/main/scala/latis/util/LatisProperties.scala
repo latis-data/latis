@@ -6,60 +6,44 @@ import java.io.FileInputStream
 import java.net.URL
 import com.typesafe.scalalogging.slf4j.Logging
 import scala.collection.JavaConversions
-//import javax.servlet.ServletConfig
 
 /**
- * TODO: 2013-10-25
- * refactor LatisProperties to better separate server specific stuff
- * complicated by need to init with ServletConfig
- * init with function? inject dependency
- * also used to 'resolvePath'
- *   so need server subclass
- *   could init with path resolver function, too?
- * any other need to be a subclass, override?
- *   property file name from web.xml
- * how does spray config these things?
- * seems that these functions don't belong in "Properties"
- *   need a diff class?
- *   FileUtils?
- *   but same problem with needing a subclass
- *   
- * can server just say LatisProperties.init(new ServerProperties)?
- *   it would simply set instance
+ * Singleton for access to properties with the following precedence:
+ * 1) System properties (e.g. so "-Dprop=value" at command line can override)
+ * 2) LaTiS properties file
+ * 3) Environment variable
  */
-
 class LatisProperties extends Properties with Logging {
-  //TODO: consider https://github.com/typesafehub/config
-  //TODO: enforce immutabily? disable setters? extend immutable Map?
-  //but might be useful to change properties on the fly?
-  //Tempted to use any URL, but could open up complications.
-
-  //Load properties
+  
+  /**
+   * The name of the properties file.
+   */
   val file = getPropertyFileName()
-  
-  //Resolve path
-//TODO: not assigned to anything!?
-//  if (file.startsWith(File.separator)) file //already fully resolved
-//  else resolvePath(file)
-  
+
+  /**
+   * Load the properties when singleton is constructed.
+   */
   try {
     logger.debug("Loading properties file: " + file)
     val in = new FileInputStream(file)
     load(in)
-    in.close //TODO: do we need to close the stream?
+    in.close
   } catch {
     case e: Exception => {
       //logger.warn("Unable to load properties file: " + file)
-      //e.printStackTrace()
       throw new RuntimeException("Unable to load properties file: " + file, e)
     }
   }
             
   /**
-   * Find the property file.
+   * Find the property file with the following precedence:
+   * 1) latis.config system property
+   * 2) latis.properties file in LATIS_HOME (environment variable) directory
+   * 3) latis.properties file in the classpath
+   * latis.properties is traditionally managed in src/main/resources/
+   * which gets deployed to the classpath.
    */
   def getPropertyFileName(): String = {
-    //Get the property file location
     System.getProperty("latis.config") match { //try system property
       case s: String => s
       case null => System.getenv("LATIS_HOME") match { //try under LATIS_HOME
@@ -85,13 +69,7 @@ class LatisProperties extends Properties with Logging {
   }
 }
   
-/*
- * Just using LatisProperties.getProperty will cause the singleton to be generated.
- * See LatisServer for getting a LatisServerProperties
- * which will delegate to the ServletConfig for paths and such.
- * TODO: seems like there should be a cleaner way. 
- *   Put if(config!=null) logic here instead of using inheritance polymorphism?
- */
+
 object LatisProperties {
   
   //---- Manage singleton instance ------------------------------------------//
@@ -103,10 +81,7 @@ object LatisProperties {
     _instance
   }
   
-  //def init(config: ServletConfig) {_instance = new LatisServerProperties(config)}
   def init(latisProps: LatisProperties) {_instance = latisProps}
-  //TODO: support any Properties
-  
   
   //---- Property value access methods --------------------------------------//
   
@@ -151,31 +126,10 @@ object LatisProperties {
    * This will only include those in the latis.properties file.
    */
   def keys: Iterable[String] = JavaConversions.dictionaryAsScalaMap(instance).keys.map(_.asInstanceOf[String])
-  
-  //----  -------------------------------------------------------------------//
-    
-//  //Convenient "static" methods so user doesn't have to get instance first
-//  def getProperty(name: String): String = instance.getProperty(name)
-//  def getProperty(name: String, default: String ): String = instance.getProperty(name, default)
-//
+
+  /**
+   * Return the full file system path for the given relative path.
+   */
   def resolvePath(path: String): String = instance.resolvePath(path)
   
-  
-//  /**
-//   * Return the full file system pathname of the directory where the default TSML lives.
-//   * Defined in latis.properties as "dataset.dir".
-//   * Default to the "datasets" directory in the root of the LaTiS web app.
-//   */
-//   def getDatasetDir() {
-//        var datadir = getProperty("dataset.dir", "datasets"); 
-//
-//        //Prepend absolute path if dataset.dir is relative.
-//        if (! datadir.startsWith(File.separator)) {
-//            datadir = getRealPath(datadir);
-//        }
-//        //make sure dir ends with "/"
-//        if (! datadir.endsWith(File.separator)) datadir += File.separator;
-//        
-//        return datadir;
-//    }
 }

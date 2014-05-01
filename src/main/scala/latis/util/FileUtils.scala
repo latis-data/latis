@@ -1,17 +1,28 @@
 package latis.util
 
-import java.io.File
-import scala.collection.mutable.ArrayBuffer
-import java.io.OutputStream
-import java.io.FileInputStream
-import java.nio.channels.FileChannel
 import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.OutputStream
 
+import scala.Array.canBuildFrom
+import scala.collection.mutable.ArrayBuffer
+
+/**
+ * Utility methods for working with files.
+ */
 object FileUtils {
   
+  /**
+   * Get the temporary directory (as a File) as defined by the java.io.tmpdir property.
+   */
   def getTmpDir: File = new File(System.getProperty("java.io.tmpdir"))
   
-  def getTmpFile: File = ???   //TODO: 
+  /**
+   * Get a unique temporary File.
+   */
+  def getTmpFile: File = File.createTempFile("latis", null, getTmpDir)
+  //TODO: use deleteOnExit?
   
   /**
    * Get a list of all the files in the given directory and nested directories.
@@ -19,6 +30,7 @@ object FileUtils {
    */
   def listAllFiles(dir: String): Seq[String] = {  
     //TODO: performance concern, especially since we are sorting
+    //TODO: consider new file io in Java7
     
     def accumulateFiles(file: File, buffer: ArrayBuffer[String]) {
       if (file.isDirectory()) file.listFiles().map(accumulateFiles(_, buffer))

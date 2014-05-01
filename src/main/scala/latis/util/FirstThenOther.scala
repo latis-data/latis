@@ -1,5 +1,10 @@
 package latis.util
 
+/**
+ * Utility class that produces the first value once
+ * then the other on subsequent calls.
+ * Handy for delimiters.
+ */
 class FirstThenOther[T](first: T, other: T) {
 
   private var _hasBeenCalled = false
