@@ -8,10 +8,10 @@ import latis.ops.Projection
 import latis.ops.filter.Selection
 import latis.ops.math.BasicMath
 import latis.util.DataMap
-
 import scala.Option.option2Iterable
 import scala.collection.Seq
 import scala.collection.immutable
+import latis.ops.Factorization
 
 /**
  * The main container for a dataset. It is a special type of Tuple
@@ -61,8 +61,7 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   def toStrings   = DataMap.toStrings(this)
   
   def groupBy(name: String): Dataset = {
-    //TODO: impl as Operation?
-    val vs = variables.map(_.groupVariableBy(name))
+    val vs = variables.map(v => Factorization.groupVariableBy(v, name))
     Dataset(vs) //TODO: metadata
   }
   

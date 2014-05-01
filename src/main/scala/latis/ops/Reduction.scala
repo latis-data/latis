@@ -30,6 +30,13 @@ class Reduction extends Operation  {
       case 1 => Some(vars.head)
       case _ => Some(Tuple(vars)) //TODO: metadata
     }
+    
+    /*
+     * TODO: consider (a,(b,c)) => (a,b,c)
+     * just like scala flatten
+     * can only reduce the inner tuple if it's parent can take kids
+     */
+
   }
 
   /**
