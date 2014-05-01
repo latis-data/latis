@@ -115,28 +115,4 @@ object Tsml {
     node.isInstanceOf[Elem] && (! exclusions.contains(node.label)) 
   }
   
-  //note, metadata name takes precedence, TODO: dangerous if diff from attribute name
-//  def getVariableName(node: Node): Option[String] = (node \ "metadata@name").text match {
-//    case "" => {
-//      //not defined in metadata element, try attribute
-//      (node \ "@name").text match {
-//        case "" => node.label match {
-//          //try "time" and "index" (with implicit name)
-//          case "time" => Some("time")
-//          case "index" => Some("index")
-//          case _ => None  //no name
-//        }
-//        case name: String => Some(name) //from attribute
-//      }
-//    }
-//    case name: String => Some(name) //from metadata
-//  }
-  
-//  def hasLabel(xml: Node, label: String): Boolean = xml.find(_.label == label) match {
-//    case Some(_) => true
-//    case None => false
-//  }
-  
-  //def hasChildWithLabel(xml: Node, label: String): Boolean = xml.child.exists(_.label == label)
-  
 }

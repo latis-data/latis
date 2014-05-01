@@ -1,6 +1,5 @@
 package latis.metadata
 
-
 /**
  * Just name/value pairs, for now.
  */
@@ -11,26 +10,25 @@ trait Metadata {
   
   def apply(key: String): String = get(key) match {
     case Some(s) => s
-    case None => null //TODO: error? "unknown"?
+    case None => null //TODO: error? default?
   }
   
   def has(key: String): Boolean
-  
-//  lazy val name = get("name") match {
-//    case Some(s) => s
-//    case None => "unknown" //TODO: do we want default name to be "unknown"? generate a unique id?
-//  }
-//  
-//  override def toString() = name
+   
+  override def toString() = getProperties.toString
 }
 
 
 object Metadata {
   
-  import scala.collection._
+  import scala.collection.immutable
+  import scala.collection.Map
   
   val empty = EmptyMetadata
   
+  /**
+   * Convenience for providing Variables with a name.
+   */
   def apply(name: String): Metadata = {
     //TODO: make sure this is a valid name
     val props = immutable.HashMap(("name", name))
