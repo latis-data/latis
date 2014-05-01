@@ -1,11 +1,12 @@
 package latis.data.value
 
+import latis.data.NumberData
+
 import java.nio.ByteBuffer
-import latis.data._
 
-//TODO: test if we are getting the benefit of value classes
-//TODO: ValueData trait?
-
+/**
+ * Data implementation for a single Long value.
+ */
 case class LongValue(val value: Long) extends AnyVal with NumberData {
   def size = 8
   def isEmpty = false
@@ -15,5 +16,5 @@ case class LongValue(val value: Long) extends AnyVal with NumberData {
   def floatValue = value.toFloat
   def doubleValue = value.toDouble
   
-  def getByteBuffer: ByteBuffer = ByteBuffer.allocate(size).putLong(longValue).rewind.asInstanceOf[ByteBuffer]
+  def getByteBuffer: ByteBuffer = ByteBuffer.allocate(size).putLong(value).rewind.asInstanceOf[ByteBuffer]
 }

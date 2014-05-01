@@ -1,23 +1,21 @@
 package latis.data.value
 
-import latis.data.Data
-import java.nio.ByteBuffer
 import latis.data.TextData
-import latis.dm.Text
 
-//Note: beware, scala has a StringValue?
+import java.nio.ByteBuffer
 
+
+/**
+ * Data implementation for a single String value.
+ */
 case class StringValue(val value: String) extends AnyVal with TextData {
+  //Note: beware, scala has a StringValue
+  
   def size = 2 * value.length
   def isEmpty = false
   
   def stringValue = value
 
-  def getByteBuffer: ByteBuffer = {
-    value.foldLeft(ByteBuffer.allocate(size))(_.putChar(_))
-    val bb = ByteBuffer.allocate(size)
-    bb.asCharBuffer.put(value).rewind
-    bb
-  }
+  def getByteBuffer: ByteBuffer = value.foldLeft(ByteBuffer.allocate(size))(_.putChar(_))
 
 }
