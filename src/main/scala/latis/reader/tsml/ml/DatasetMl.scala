@@ -4,7 +4,7 @@ import scala.xml.Node
 import latis.util.StringUtils
 
 /**
- * Representation of a TSML "dataset" element.
+ * Wrapper for TSML that defines a Dataset.
  */
 class DatasetMl(xml: Node) extends TupleMl(xml) {
   

@@ -1,43 +1,20 @@
 package latis.reader.tsml.ml
 
-import java.net.URL
-import scala.xml._
 import java.io.File
-import scala.Option.option2Iterable
+import java.net.URL
+
+import scala.xml.Elem
+import scala.xml.Node
+import scala.xml.ProcInstr
+import scala.xml.XML
 
 
-/**import latis.reader.tsml.ml.DatasetMl
-
+/**
  * Convenient wrapper for dealing with the TSML XML.
  */
-class Tsml(val xml: Elem) { //extends VariableMl(xml) { //TODO: should this extend VariableMl? not a Variable
-  //Note: XML utilities methods in the companion object are designed for use during VariableMl construction.
-  //  TODO: move to TsmlUtils?
-  //  Instance methods are designed for use by Adapters after the VariableMl has been constructed.
-  //  The goal is for adapters to get what they need from TSML instance methods, 
-  //    though they may want to use util methods if they have special xml parsing needs.
+class Tsml(val xml: Elem) { 
   
   lazy val dataset = new DatasetMl((xml \ "dataset").head) //assumes only one "dataset" element
-  
-//deprecated: adapters should have access to initial Dataset from which they can get variable names
-//  /**
-//   * Gather the Names of all Scalar Variables.
-//   */
-//  def getScalarNames: Seq[String] = {
-//    val scalars = dataset.toSeq.filter(ml => ml.isInstanceOf[ScalarMl])
-//    val names = scalars.map(_.getName) //TODO: error if empty?, .filter(_.nonEmpty)
-//    //don't include "index"
-//    names.filter(_ != "index")
-//    /*
-//     * TODO: 2013-10-14
-//     * consider source names vs exposed names
-//     * These are usually (always?) used to map to source data.
-//     * Index is a special case.
-//     * Are there other special cases that should be applied here 
-//     *   as opposed to operations after the dataset has been constructed?
-//     * References?
-//     */
-//  }
   
   /**
    * Get a sequence of processing instructions' text values (proctext) 
@@ -51,7 +28,6 @@ class Tsml(val xml: Elem) { //extends VariableMl(xml) { //TODO: should this exte
    * Get all the processing instructions (ProcInstr) for the Dataset
    * as a Map from the type (target) to a Seq of values (proctext).
    */
-  //def getProcessingInstructions(): Map[String, Seq[String]] = {
   lazy val processingInstructions: Map[String, Seq[String]] = {
     val pis: Seq[ProcInstr] = (xml \ "dataset")(0).child.filter(_.isInstanceOf[ProcInstr]).map(_.asInstanceOf[ProcInstr])
     val pimap: Map[String, Seq[ProcInstr]] = pis.groupBy(_.target) //put into Map by target name

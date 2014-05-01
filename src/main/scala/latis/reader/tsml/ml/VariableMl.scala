@@ -1,7 +1,12 @@
 package latis.reader.tsml.ml
 
-import scala.xml._
-import scala.collection._
+import scala.collection.Map
+import scala.collection.Seq
+import scala.collection.mutable
+import scala.xml.Attribute
+import scala.xml.Elem
+import scala.xml.Node
+import scala.xml.NodeSeq.seqToNodeSeq
 
 /**
  * Wrapper for an Element within the TSML that represents a Variable.
@@ -26,11 +31,6 @@ abstract class VariableMl(xml: Node) {
   }
   
   /**
-   * Shortcut to directly get an attribute value
-   */
-  //def apply(name: String) = (xml \ ("@"+name)).text
-  
-  /**
    * Get the text content of this element.
    */
   def getContent(): Option[String] = {
@@ -51,8 +51,9 @@ abstract class VariableMl(xml: Node) {
     }
   }
   
-  //getElements(label: String): Seq[Elem] ?
-  
+  /**
+   * Get all the metadata attributes from the tsml for this Variable as key/value pairs.
+   */
   def getMetadataAttributes: Map[String, String] = {
     //Gather the XML attributes from the "metadata" element for this Variable.
     val map = mutable.HashMap[String,String]()
@@ -60,19 +61,6 @@ abstract class VariableMl(xml: Node) {
     Map[String, String](seq: _*)
   }
 
-  //flatten VariableMl tree into Seq, depth first
-//  def toSeq: Seq[VariableMl] = this match {
-//    case s: ScalarMl => Seq(s)
-//    case TupleMl(vars) => vars.foldLeft(Seq[VariableMl]())(_ ++ _.toSeq)
-//    case FunctionMl(d,r) => d.toSeq ++ r.toSeq
-//  }
-  
-//  def getName = Tsml.getVariableName(xml) match {
-//    case Some(name) => name
-//    case None => "" //TODO: something better than empty string?
-//  }
-  
-  
   override def toString = xml.toString
 }
 

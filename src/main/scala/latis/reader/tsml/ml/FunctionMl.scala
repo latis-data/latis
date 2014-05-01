@@ -1,9 +1,10 @@
 package latis.reader.tsml.ml
 
-import scala.xml._
+import scala.xml.Node
 
 /**
- * Representation of a TSML "function" element.
+ * Wrapper for TSML that defines a Function Variable.
+ * This will fill in the details allowing for briefer syntax in the TSML.
  */
 class FunctionMl(xml: Node) extends VariableMl(xml) {
   
@@ -28,9 +29,4 @@ class FunctionMl(xml: Node) extends VariableMl(xml) {
       _range = VariableMl(kids.tail)
     }
   }
-}
-
-object FunctionMl {
-  
-  //def unapply(fml: FunctionMl): Option[(VariableMl, VariableMl)] = Some((fml._domain, fml._range))
 }
