@@ -11,7 +11,7 @@ import latis.dm.Sample
 import latis.dm.Variable
 import latis.reader.tsml.ml.Tsml
 import latis.util.DataUtils
-import latis.util.PeekIterator2
+import latis.util.MappingIterator
 
 import scala.collection.Map
 
@@ -39,7 +39,7 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
 //  private lazy val parsedRecordIterator = new IndexedIterator(getRecordIterator, (record: R, index: Int) => parseRecordWithIndex(record, index))
   //def getCurrentIndex = parsedRecordIterator.getIndex
 //----
-  //private lazy val parsedRecordIterator = new PeekIterator2(getRecordIterator, (record: R) => parseRecord(record))
+  //private lazy val parsedRecordIterator = new MappingIterator(getRecordIterator, (record: R) => parseRecord(record))
 
   
 /*
@@ -88,7 +88,7 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
     } else {
       val it: Iterator[SampleData] = {
         val f = parseRecord _ andThen makeSampleDataFromDataMap(sampleTemplate) _
-        new PeekIterator2(getRecordIterator, f)
+        new MappingIterator(getRecordIterator, f)
       }
       SampledData(it, sampleTemplate) //will make duplicate/coupled iterators with unexplored caching implications
       
@@ -106,7 +106,7 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
   private def makeIterableData(template: Variable, recordIterator: Iterator[R]) = new IterableData {
     def recordSize: Int = template.getSize
     val f = parseRecord _ andThen makeDataFromDataMap(template) _
-    def iterator = new PeekIterator2(recordIterator, f)
+    def iterator = new MappingIterator(recordIterator, f)
   }
   
   private def makeDataFromDataMap(template: Variable)(dataMap: Option[Map[String,Data]]): Option[Data] = dataMap match {
@@ -124,7 +124,7 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
 //-----  
 //  def makeDataIterator(sampleTemplate: Sample): Iterator[Data] = {
 //    if (cacheIsEmpty) {
-//      new PeekIterator2(parsedRecordIterator, (vals: Map[String,Data]) =>  makeDataFromValueMap(vals, sampleTemplate))
+//      new MappingIterator(parsedRecordIterator, (vals: Map[String,Data]) =>  makeDataFromValueMap(vals, sampleTemplate))
 //    } else {
 //      getCachedData("sample") match {
 //        case Some(data) => data.iterator
@@ -247,7 +247,7 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
 //  
 //  //will be invoked when client tries to iterate on IterableData via iterating on WrappedFunction
 //  //lazy val dataIterator = makeDataIterator
-//  lazy val dataIterator = ??? //new PeekIterator2(getRecordIterator, (record: Any) => parseData(record))
+//  lazy val dataIterator = ??? //new MappingIterator(getRecordIterator, (record: Any) => parseData(record))
 ////TODO: abstract out parts to be overridden
 ////  def getRecordIterator: Iterator[Any]
 // // def parseData(record: Any): Option[Data]
@@ -257,7 +257,7 @@ abstract class IterativeAdapter[R](tsml: Tsml) extends TsmlAdapter(tsml) {
 //   * both based on 
 //   *   recordIterator
 //   *   parseRecord => vname -> data
-//   * Iterative does PeekIterator2 as above
+//   * Iterative does MappingIterator as above
 //   * Granule has readData that adds parsed record to cache
 //   * parameterize adapter with record type?
 //   * keep in mind that trait can't have state

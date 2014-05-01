@@ -5,7 +5,7 @@ import latis.util.DataUtils
 import latis.util.RegEx._
 import latis.data.SampledData
 import latis.data.set.IndexSet
-import latis.util.PeekIterator2
+import latis.util.MappingIterator
 import latis.data.Data
 import latis.data.SampleData
 import latis.data.IterableData
@@ -87,7 +87,7 @@ class Projection(val names: Seq[String]) extends Operation {
     val sampledData = if (d.isInstanceOf[Index]) {
       //Only need to process range, use IndexSet for domain.
       val f = (data: SampleData) => Some(DataUtils.reshapeData(data, sample1, r))
-      val dataIt = new PeekIterator2(function.getDataIterator, f)
+      val dataIt = new MappingIterator(function.getDataIterator, f)
       //SampledData(IndexSet(), IterableData(dataIt, r.getSize)) //TODO: bug trying to build on iterator
       val idata = DataSeq(dataIt.toList)
       SampledData(IndexSet(), idata)
@@ -95,7 +95,7 @@ class Projection(val names: Seq[String]) extends Operation {
       //process all data
       //TODO: try to preserve original DomainSet
       val f = (data: SampleData) => Some(DataUtils.reshapeSampleData(data, sample1, sample2))
-      val dataIt = new PeekIterator2(function.getDataIterator, f)
+      val dataIt = new MappingIterator(function.getDataIterator, f)
       SampledData(dataIt, sample2)
     }
     

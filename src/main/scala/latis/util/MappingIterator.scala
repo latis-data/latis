@@ -6,9 +6,10 @@ package latis.util
  * when we are filtering. The original source may have another 
  * sample but this will keep looking for the next valid sample.
  * You can also "peek" at the next sample without advancing.
+ * This implementation of the PeekIterator applies a function
+ * mapping to each element as it iterates.
  */
-class PeekIterator2[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) extends PeekIterator[T] {
-  //TODO: MappedIterator
+class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) extends PeekIterator[T] {
   //Note, the bound on Null allows us to return null for generic type T.
 
   /**

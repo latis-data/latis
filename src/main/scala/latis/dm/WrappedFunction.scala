@@ -3,7 +3,7 @@ package latis.dm
 import latis.data.SampleData
 import latis.ops.Operation
 import latis.util.DataUtils
-import latis.util.PeekIterator2
+import latis.util.MappingIterator
 import latis.util.PeekIterator
 import com.typesafe.scalalogging.slf4j.Logging
 
@@ -16,7 +16,7 @@ class WrappedFunction(function: Function, val operation: Operation)
    */
   override def iterator: PeekIterator[Sample] = {
     logger.debug("Sample Iterating: " + this)
-    new PeekIterator2(function.iterator, (s: Sample) => operation.applyToSample(s))
+    new MappingIterator(function.iterator, (s: Sample) => operation.applyToSample(s))
   }
   
   /**

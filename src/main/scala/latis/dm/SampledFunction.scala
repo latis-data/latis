@@ -9,7 +9,7 @@ import latis.data.IterableData
 import latis.data.SampledData
 import latis.data.SampleData
 import latis.util.PeekIterator
-import latis.util.PeekIterator2
+import latis.util.MappingIterator
 import latis.data.EmptyData
 import com.typesafe.scalalogging.slf4j.Logging
 
@@ -34,7 +34,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   def iterator: PeekIterator[Sample] = _iterator match {
     case null => {
       logger.debug("Make Iterator from DataIterator: " + this)
-      new PeekIterator2(getDataIterator, (d: Data) => Some(DataUtils.dataToSample(d, Sample(domain, range))))
+      new MappingIterator(getDataIterator, (d: Data) => Some(DataUtils.dataToSample(d, Sample(domain, range))))
     }
     case pit: PeekIterator[Sample] => {
       logger.debug("Return existing Iterator: " + this)
@@ -42,7 +42,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
     }
     case _ => {
       logger.debug("Wrap existing Iterator: " + this)
-      new PeekIterator2(_iterator, (s: Sample) => Some(s))
+      new MappingIterator(_iterator, (s: Sample) => Some(s))
     }
   }
   
@@ -54,7 +54,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
     val d = getData
     if (d.isEmpty) {
       logger.debug("Make Data Iterator from existing Sample Iterator: " + this)
-      new PeekIterator2(_iterator, (s: Sample) => Some(DataUtils.sampleToData(s)))
+      new MappingIterator(_iterator, (s: Sample) => Some(DataUtils.sampleToData(s)))
     } else {
       logger.debug("Make Data Iterator from SampledData: " + this)
       d.asInstanceOf[SampledData].iterator
