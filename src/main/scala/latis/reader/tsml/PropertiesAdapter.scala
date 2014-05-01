@@ -16,4 +16,5 @@ class PropertiesAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     }) 
   }
   
+  def close = {}
 }

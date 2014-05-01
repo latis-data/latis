@@ -3,7 +3,8 @@ package latis.reader.tsml
 import latis.reader.tsml.ml.Tsml
 
 /**
- * Use a regular expression to extract data values from a data record.
+ * Use a regular expression with groups to extract data values from a data record.
+ * This must be defined as a 'pattern' attribute for this adapter in the tsml.
  */
 class RegexAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
   

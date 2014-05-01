@@ -31,11 +31,15 @@ import scala.io.Source
 
 
 /**
- * Base class for Adapters that read dataset as defined by TSML.
- * The "dsml" constructor argument is single "dataset" child XML 
- * element of the tsml element.
+ * Base class for Adapters that read a dataset as defined by TSML.
  */
 abstract class TsmlAdapter(val tsml: Tsml) {
+  
+  /**
+   * Abstract method to remind subclasses that they need to clean up their resources.
+   */
+  def close: Unit
+  
   
   //---- Adapter properties from TSML -----------------------------------------
   
@@ -58,6 +62,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   }
   
   //---- Original Dataset Construction ----------------------------------------
+  // First pass just defines the data model without any data. 
+  // It is generally used as a template while building the final Dataset.
   
   /**
    * The original Dataset as defined by the TSML.
@@ -80,7 +86,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   private lazy val origScalarNames = origScalars.map(_.getName)
   def getOrigScalarNames = origScalarNames
   
-  
+  /**
+   * Construct the data model for this Dataset.
+   */
   protected def makeOrigDataset: Dataset = {
     val md = makeMetadata(tsml.dataset)
     val vars = tsml.dataset.getVariableMl.flatMap(makeOrigVariable(_))
@@ -93,9 +101,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   protected def makeMetadata(vml: VariableMl): Metadata = {
     //Note, not recursive, each Variable's metadata is independent
-    //TODO: could this be private? AggregationAdapter overrides it
     
     //Add tsml attributes for the variable element to attributes from the metadata element.
+    //TODO: deprecate, reserve vml attributes for config options for the adapter?
     var atts = vml.getAttributes ++ vml.getMetadataAttributes
     
     //internal helper method to add default name for special variable types
@@ -109,16 +117,16 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     }
  
     //Add implicit metadata for "time" and "index" variables.
-    //TODO: need to make them unique? consider finding "time" variable, finds first
-    //  do only when time domain is implied?
+    //TODO: consider uniqueness
     if (vml.label == "time") addImplicitName("time")
     if (vml.label == "index") addImplicitName("index")
 
     Metadata(atts)
   }
     
-  //this will be used only by top level Variables (or kids of top level Tuples)
-  //TODO: do we need Option since we are only building what tsml defines?
+  /**
+   * Construct the Variables of the model recursively.
+   */
   private def makeOrigVariable(vml: VariableMl): Option[Variable] = {
     //TODO: support Data values defined in tsml
     val md = makeMetadata(vml)
@@ -133,29 +141,18 @@ abstract class TsmlAdapter(val tsml: Tsml) {
 
   //---- Dataset Construction -------------------------------------------------
   
-  /*
-   * Apply the given sequence of operations and return the resulting Dataset.
-   * This will also apply the TSML Processing Instructions.
-   * This will trigger the construction of an original Dataset based
-   * only on the tsml, without these constraints applied.
-   * Adapters can override this to apply operations more effectively during
-   * the Dataset construction process (e.g. use in SQL query).
-   * 
-   */
-  //TODO: save dataset for reuse?
-  //TODO: use this dataset as cache? data with PIs applied but not user ops,
-//TODO: Note that these are no longer Tsml specific! could we use them elsewhere? 
-  //e.g. ProjectedFunction makeSample, but we do count on special adapters overriding these
+  //TODO: "build" vs "make"? consider scala Builder
   
   /**
    * Hook for subclasses to do something before constructing the Dataset.
-   * Note, this happens after the first Dataset construction pass (loading TSML)
+   * Note, this happens after the first Dataset construction pass (building model from TSML)
    * but before the second (reading data).
    */
   def init: Unit = {}
   
   /**
    * The final Dataset that this Adapter produces.
+   * It will be constructed when it is first requested.
    */
   private lazy val dataset: Dataset = {
     val ods = origDataset //invoke lazy first Dataset construction pass
@@ -173,9 +170,19 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     otherOps.reverse.foldRight(ds)(_(_)) 
   }
   
+  /**
+   * Public accessor to get the Dataset served by this Adapter.
+   */
   def getDataset: Dataset = dataset
   
+  /**
+   * Return the Dataset with the given sequence of operations applied.
+   * It is likely that these operations will be applied lazily and 
+   * only invoked as the client iterates on the Dataset.
+   */
   def getDataset(ops: Seq[Operation]): Dataset = {
+    //TODO: consider implications of calling twice
+    
     //Give the adapter the opportunity to handle operations.
     val otherOps = ops.filterNot(handleOperation(_))
     
@@ -185,15 +192,19 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     otherOps.reverse.foldRight(getDataset)(_(_))
   }
   
-  //TODO: "build" vs "make"? consider scala Builder
-  
+  /**
+   * Initiate construction of the final Dataset. 
+   * This will be triggered the the client requests the Dataset.
+   */
   protected def makeDataset(ds: Dataset): Dataset = {
     val vars = ds.getVariables.flatMap(makeVariable(_))
     Dataset(vars, ds.getMetadata) 
   } 
   
-  //lots of extension points
-  
+  /**
+   * Build the Variables for the final Dataset recursively using the model from the first pass as a template.
+   * These steps are broken into methods for each Variable type so subclasses can more easily override behavior.
+   */
   protected def makeVariable(variable: Variable): Option[Variable] = variable match {
     case scalar:   Scalar   => makeScalar(scalar)
     case sample:   Sample   => makeSample(sample)
@@ -201,106 +212,75 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     case function: Function => makeFunction(function)
   }
   
-  //TODO: deal with data defined in tsml
-  //protected def makeScalar(scalar: Scalar): Option[Scalar] = Some(scalar)
-  //if we made it this far, this should be a top level scalar with a single value in the cache
-  //or is it possible that the Scalar has Data? would have had to be done in first dataset construction pass - from data in tsml?
+  /**
+   * Build a Scalar from the original model by adding Data.
+   * This will look to see if data for this variable has been cached.
+   */
   protected def makeScalar(scalar: Scalar): Option[Scalar] = getCachedData(scalar.getName) match {
     case Some(ds) => Some(Scalar(scalar.getMetadata, ds(0)))
-    case None => Some(scalar) //no-op, but might as well throw an error since this means no data is defined?
+    case None => Some(scalar) //no-op, //TODO: might as well throw an error since this means no data is defined?
   }
   
+  /**
+   * Build a Sample Variable from the domain and range components.
+   * This will replace the domain with an Index as a placeholder if it is needed.
+   */
   protected def makeSample(sample: Sample): Option[Sample] = {
-    //Note this uses a -1 place holder for Index.
     val odomain = makeVariable(sample.domain)
     val orange  = makeVariable(sample.range)
     (odomain, orange) match {
       case (Some(d), Some(r)) => Some(Sample(d,r))
-      case (None, Some(r))    => Some(Sample(Index(-1), r)) //no domain, so replace with Index. 
-      case (Some(d), None)    => Some(Sample(Index(-1), d)) //no range, so make domain the range of an index function
+      case (None, Some(r))    => Some(Sample(Index(), r)) //no domain, so replace with Index. 
+      case (Some(d), None)    => Some(Sample(Index(), d)) //no range, so make domain the range of an index function
       case (None, None)       => None //nothing projected
     }
   }
   
-  
+  /**
+   * Build a Tuple.
+   */
   protected def makeTuple(tuple: Tuple): Option[Tuple] = {
     val md = tuple.getMetadata
     val vars = tuple.getVariables.flatMap(makeVariable(_)) 
     vars.length match {
       case 0 => None
       case n => Some(Tuple(vars, md))
-      //TODO: make scalar if only one variable?
+      //TODO: make scalar if only one variable? reduce
     }
   }
   
+  /**
+   * Build a Function.
+   */
   protected def makeFunction(function: Function): Option[Function] = {
-    //TODO: use Builder? Variable.build[T](template: Variable): T  CanBuildFrom...  builder += (elem), don't want to do it one elem at a time
-    //  buildWith(template, metadata, data)?
     val md = function.getMetadata
-    //TODO: if domain or range None, use IndexFunction
-    //  where else is this handled? makeSample above and ProjectionFunction
-    //  do we need to worry about makeVar returning None here?
-    //  this case assumes kids with data, if one is missing replace with Index.withLength
-    
-    //TODO: function may have _iterator already (e.g. agg)
-    
     for (domain <- makeVariable(function.getDomain); 
          range  <- makeVariable(function.getRange)
     ) yield Function(domain, range, md)
   }
-  /*
-   * TODO: consider how Iterative vs Granule adapters should handle extension
-   * traits that override makeFunction?
-   * but no state for data map...
-   * would like to have FooAdapter with either mixed-in, but probably no do-able
-   * do at Data level?
-   *   DataGranule: column-oriented, Map, Data for each Scalar
-   *   DataIterator: ByteBufferData with sample size, Data in Function
-   */
-  
   
   /**
    * Hook for subclasses to apply operations during data access
    * to reduce data volumes. (e.g. query constraints to database or web service)
    * Return true if it will be handled. Otherwise, it will be applied
-   * to the Dataset by the TsmlAdapter superclass.
+   * to the Dataset by the TsmlAdapter class.
    * The default behavior is for the Adapter subclass to handle no operations.
    */
   def handleOperation(op: Operation): Boolean = false 
   
+  //---- Caching --------------------------------------------------------------
+  //TODO: consider mutability issues
+  //TODO: consider caching in SampledData
   
   /**
-   * Get the TSML Processing Instructions as a Seq of Operations.
+   * Cache the Data as a Map from the Variable name to a sequence of Data records, 
+   * one per sample of the outer Function.
    */
-  def piOps: Seq[Operation] = {
-    val projections = tsml.getProcessingInstructions("project").map(Projection(_)) //TODO: do these need to be last?
-    val selections  = tsml.getProcessingInstructions("select").map(Selection(_))
-    projections ++ selections
-  }
-  
-  /**
-   * Find a Selection among the given Operations for the given variable name.
-   */
-  def findSelection(ops: Seq[Operation], name: String): Option[Selection] = {
-    ops.filter(_.isInstanceOf[Selection]).map(_.asInstanceOf[Selection]).find(_.vname == name)
-  }
-  //TODO: ByName and ByType?
-
-  //-------------------------------------------------------------------------//
-
-  /*
-   * TODO: do we need diff place to hold tsml values so we don't have partial cache confusion?
-   * allow mutable and require getCachedData? hard to enforce
-   * use tsmlData?
-   * just put tsml data into the model in the first pass
-   */
-  //val tsmlData = Map[String, Data]() //TODO: immutable?
-  
   private val dataCache = mutable.Map[String, DataSeq]()
   
-  //TODO: consider mutability issues
-  //TODO: consider ehcache
-  
+  /**
+   * Is the cache empty.
+   */
   def cacheIsEmpty: Boolean = dataCache.isEmpty
   
   /**
@@ -338,22 +318,33 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   //TODO: if None throw new Error("No data found in cache for Variable: " + variableName)? or return empty Data?
 
   
-  //-------------------------------------------------------------------------//
-  
-  private var source: Source = null
+  //---------------------------------------------------------------------------
   
   /**
-   * Source from which we will read data.
+   * Get the TSML Processing Instructions as a Seq of Operations.
    */
-  def getDataSource: Source = {
-    if (source == null) source = Source.fromURL(getUrl())
-    source
+  def piOps: Seq[Operation] = {
+    //TODO: consider order
+    //TODO: add other PI types? rename,...
+    val projections = tsml.getProcessingInstructions("project").map(Projection(_)) 
+    val selections  = tsml.getProcessingInstructions("select").map(Selection(_))
+    projections ++ selections
   }
-    
-    
+  
+  /**
+   * Find a Selection among the given Operations for the given variable name.
+   */
+  def findSelection(ops: Seq[Operation], name: String): Option[Selection] = {
+    ops.filter(_.isInstanceOf[Selection]).map(_.asInstanceOf[Selection]).find(_.vname == name)
+  }
+  //TODO: move to util? ByName and ByType?
+
   
   /**
    * Get the URL of the data source from this adapter's definition.
+   * This will come from the adapter's 'location' attribute.
+   * It will try to resolve relative paths by looking in the classpath
+   * then looking in the current working directory.
    */
   def getUrl(): URL = {
     //Note, can't be relative to the tsml file since we only have xml here. Tsml could be from any source.
@@ -371,317 +362,10 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     }
   }
   
-//  /**
-//   * Get the URL of the data source from this adapter's definition.
-//   */
-//  def getUrl(): String = {
-//    //Note, can't be relative to the tsml file since we only have xml here. Tsml could be from any source.
-//    properties.get("location") match {
-//      case Some(loc) => {
-//        //TODO: use URI API?
-//        if (loc.contains(":")) loc //Assume URL is absolute (has scheme) if ":" exists.
-//        else if (loc.startsWith(File.separator)) "file:" + loc //full path
-//        else getClass.getResource("/"+loc) match { //try in the classpath
-//          case url: URL => url.toString
-//          case null => "file:" + scala.util.Properties.userDir + File.separator + loc //relative to current working directory
-//        }
-//      }
-//      case None => throw new RuntimeException("No 'location' attribute in TSML adapter definition.")
-//    }
-//  }
   
-  def close() {
-    if (source != null) source.close
-  }
-  
-  //=================================================================================================
-
-
-//  
-//  /**
-//   * Cache for Variables defined with "values".
-//   * Such Variables may be used elsewhere by variable definitions that have the "ref" attribute.
-//   * The "ref" attribute must match the "name" attribute which is the key for this cache.
-//   */
-//  lazy val refCache = new HashMap[String,Variable]()
-
-//  
-//  /**
-//   * Construct the Metadata for the Dataset and it's Variables.
-//   * Cache any variables that have values defined in the TSML.
-//   */  
-//  private def makeMetadata(elem: Elem): Option[Metadata] = {
-//    val props = getProperties(elem)
-//    
-//    elem match {
-//      
-//      case <dataset>{ns @ _*}</dataset> => {
-//        //If there is a top level "time" element, make a time series Function to wrap everything
-//        //with all following variables as the range.
-//        //Require that the time element is the first.
-//        
-//        //Keep only the element nodes as a seq of Elem, drop the adapter definition
-//        val es = getElements(ns).tail
-//        
-//        if (es.head.label == "time") {
-//          //implicit time series Function
-//          //TODO: allow previous nodes (e.g. SSI wavelengths)
-///*
-// * TODO: support values, ref for time
-// */       
-//          val timeMd = ScalarMd(getProperties(es.head) ++ Time.defaultMd) //TODO: allow diff name and subtype?
-//          val rangeMd = TupleMd(HashMap[String,String](), es.tail.flatMap(makeMetadata(_))).flatten() //TODO: add some metadata
-//          val tsmd = FunctionMd(HashMap[String,String](), timeMd, rangeMd) //TODO: add some metadata
-//          Some(TupleMd(props, Seq(tsmd)))
-//        } else {
-//          Some(TupleMd(props, es.flatMap(makeMetadata(_))))
-//        }
-//      }
-//      
-//      case <scalar>{ns @ _*}</scalar> => {
-//        //If this scalar is a ref, copy the metadata from the ref'd scalar.
-//        //TODO: allow additional attributes to be defined in this ref and merge?
-//        if (props.contains("ref")) {
-//          val refname = props("ref")
-//          refCache.get(refname) match {
-//            case Some(v: Variable) => {
-//              //Add the metadata properties form the ref'd variable
-//              //TODO: assuming that the ref'd variable is an index function defined as a scalar, just get the range for the md
-//              //TODO: keeping the "ref" for now so the data parser knows
-//              val mdref = v.metadata.asInstanceOf[FunctionMd].range
-//              val md = ScalarMd(props ++ mdref.properties)
-//              Some(md)
-//            }
-//            case None => throw new RuntimeException("No Variable found for reference: " + refname)
-//          }
-//        } else {
-//          val md = ScalarMd(props)
-//          //If values are defined, make the variable and cache it
-///*
-// * TODO: allow definition of values for tuples and functions AND time
-// * No, tuple and function still need scalar defs within them, put values there
-// * just use text content instead of a "values" element?
-// * consider "metadata" elements
-// */
-//
-//          ns.find(_.label == "values") match {
-//            case Some(elem: Elem) => {
-//              makeVariableFromValues(md, elem) match {
-//                case Some(v) => refCache += ((md.name, v)) //add variable to the cache
-//                case None => throw new RuntimeException("Unable to make Variable from values for " + md.name)
-//              }
-//              //exclude from model, use by ref only
-//              //TODO: look for processing instruction
-//              md.get("exclude") match {
-//                case Some(s) if (s.toLowerCase() == "true") => None
-//                case _ => Some(md) //keep the variable with defined values in the model
-//              }
-//            }
-//            case None => Some(md) //no values defined
-//          }
-//          
-//        }
-//      }
-//      
-//      case <tuple>{ns @ _*}</tuple>     => Some(TupleMd(props, getElements(ns).flatMap(makeMetadata(_))))
-//      case <domain>{ns @ _*}</domain>   => Some(TupleMd(props, getElements(ns).flatMap(makeMetadata(_))).flatten())
-//      case <range>{ns @ _*}</range>     => Some(TupleMd(props, getElements(ns).flatMap(makeMetadata(_))).flatten())
-//      
-//      case <function>{ns @ _*}</function> => {
-//        val es = getElements(ns)
-//        //Look for domain and range definitions.
-//        if (es.head.label == "domain") {
-//          val domain = makeMetadata(es.head)
-//          //TODO: assert that there is only one other element that is "range"
-//          val range = makeMetadata(es.tail.head)
-//          //TODO: deal with Option, error if None
-//          Some(FunctionMd(props, domain.get, range.get))
-//        } else {
-//          //No domain defined. Assume the first variable is the domain and the rest are the range.
-//          val domain = makeMetadata(es.head).get 
-//          val range = TupleMd(HashMap[String,String](), es.tail.flatMap(makeMetadata(_))).flatten() //TODO: add some metadata
-//          Some(FunctionMd(props, domain, range))
-//        }
-//      } 
-//      
-//      case _ => None
-//    }
-//  }
-//
-//  
-//  private def makeVariableFromValues(md: Metadata, elem: Elem): Option[Variable] = {
-//    //check for start, increment, length definition
-//    //TODO: make sure all 3 are defined
-//    elem.attributes.find(_.key == "start") match {
-///*
-// *  
-// * should cache just be array instead of IndexFunction?
-// *   complications with metadata, have scalar metadata but need md for index funtion
-// *   can't be the same because of "type"
-// *   should IndexFunction getMd return range.md? but length is important
-// */
-//      case Some(att) => {
-//        //TODO: don't assume doubles, look at type from md
-//        val start = att.value.text.toDouble
-//        val increment = (elem \ "@increment").text.toDouble
-//        val length = (elem \ "@length").text.toInt //TODO: allow infinite length
-//        val domain = IndexSet(length)
-//        val seq = makeLinearSeq(md, start, increment, length)
-//        val range = VariableSeq(seq)
-//        //hack together some metedata
-//        val dmd = ScalarMd(HashMap(("name", "index_"+md.name), ("type", "Integer")))
-//        val fmd = FunctionMd(HashMap(("name", md.name)), dmd, md)
-//        Some(Function(fmd, domain, range)) //TODO: make metadata with at least the same name/id as the scalar?
-//      }
-//
-//      //values not defined as attributes, get from text content
-//      case None => { 
-//        elem.child.find(_.isInstanceOf[scala.xml.Text]) match { //TODO: better way to get content?
-//          case Some(tnode) => {
-//            //split values on white space
-//            val ss = tnode.text.trim().split("""\s+""") //TODO: allow comma? use RegEx.DELIMITER? 
-//            ss.length match {
-//              case 0 => None
-//              case 1 => Some(Scalar(md, ss(0)))
-//              case n: Int => md match {
-//                case md: ScalarMd => {
-//                  val range = VariableSeq(ss.map(Scalar(md, _)))   //VariableSeq((0 until n).map(i => Scalar(md, ss(i))))
-//                  //Some(IndexFunction(range)) //TODO: include scalar metadata? make new FunctionMd? but need parentage...? do we need name for cache?
-//        //hack together some metedata
-//                  val domain = IndexSet(n)
-//        val dmd = ScalarMd(HashMap(("name", "index_"+md.name), ("type", "Integer")))
-//        val fmd = FunctionMd(HashMap(("name", md.name)), dmd, md)
-//        Some(Function(fmd, domain, range)) 
-//                }
-//                case md: TupleMd => Some(Tuple(md, ss.map(s => Real(s.toDouble)))) //assume reals, TODO: make Text if defined with ""?
-//                //TODO: values for Function
-//              }
-//            }
-//          }
-//          case None => None //no values defined in text content
-//        }
-//      }
-//    }
-//  }
-//  
-//  
-////--- Variable Construction ---------------------------------------------------
-// /* TODO: ssi_flat is trying to read wavelength from currentRecord
-// * look into excluding correctly      
-// * permutations of excluding from model vs other source of value
-// *   values defined outside function, ref in function
-// *     cache and exclude from model, use ref to get it from cache instead of source
-// *   in-line values within function def
-// *     cache but don't exclude, replace with ref for building?
-// *     no need to support this option
-// *   defining data in source but not wanting to expose
-// *     define all columns for parsing purposes, exclude some from model
-// *     "exclude" att? PI?
-// *     
-// *   
-// *
-// */
-//  
-//  
-//    private def makeMetadata(vml: VariableMl): Option[Metadata] = vml match {
-//    //TODO: keep Map from var name to its metadata?
-//    case ml: ScalarMl => 
-//  }
-//  
-//  /**
-//   * Recursively construct the data model components based on the Metadata.
-//   * Note, this gets called for top level Variables: direct children
-//   * of the dataset xml element. Top-level Tuples may also call it recursively.
-//   * Lower level Variables (e.g. within Functions) are typically handled by subclasses'
-//   * makeFunctionIterator.
-//   */
-//  def makeVariable(md: Metadata): Option[Variable] = {
-//    //Try getting the Variable from the cache, e.g. had values defined in TSML.
-//    var variable = if (refCache.contains(md.name)) refCache(md.name) 
-//    else md match {
-//      case md: FunctionMd => makeFunction(md)
-//      case md: TupleMd => makeTuple(md) //could be Tuple or Index -> Tuple
-//      case md: ScalarMd => makeScalar(md) //could be Scalar or Index -> Scalar
-//    }
-//    
-//    variable match {
-//      case v: Variable =>  md.get("exclude") match {
-//        //Note, we do not exclude earlier because this may be needed to 
-//        //read "junk" data from the source to get to the good stuff.
-//  //TODO: use exclude processing instruction, apply as we would a projection constraint
-//        case Some(s) if (s.toBoolean) => None //exclude from Dataset
-//        case _ => Some(variable)
-//      }
-//      case _ => None //variable is null, not successfully constructed
-//    }
-//  }
-//  
-//  /**
-//   * Construct a Tuple or Index -> Tuple from tuple Metadata. 
-//   * If there are multiple samples, a subclass could create a Function of Index.
-//   * This will typically be called only for Tuples defined outside the context
-//   * of a Function.
-//   */
-//  protected def makeTuple(md: TupleMd): Variable = Tuple(md.elements.flatMap(makeVariable(_)))
-//  
-//    
-//  /**
-//   * Make the top-level, primary, outer Function for this Dataset by wrapping a FunctionIterator.
-//   * Note, this will delegate to makeFunctionIterator to construct the Variables encapsulated
-//   * within this Function. This allows us to keep our memory footprint low by constructing 
-//   * Variables only as they are being requested. 
-//   */
-//  protected def makeFunction(metadata: FunctionMd): Function = Function(metadata, makeFunctionIteratorMaker)
-//  
-//  /**
-//   * This abstract method should be implemented by subclasses to return a function
-//   * (Scala, not LaTiS) that constructs a FunctionIterator from a Function's Metadata.
-//   * This allows us to avoid accessing the data source until something invokes the
-//   * function's "iterator". Construction of the FunctionIterator typically requires that
-//   * the first data record be cached to simplify the hasNext contract.
-//   * This might not be much better once we start doing operations on Variables.
-//   * We may need to re-evaluate how to be lazy so we can manipulate the data model
-//   * without accessing data.
-//   */
-//  protected val makeFunctionIteratorMaker: FunctionMd => FunctionIterator = null
-//  //TODO: provide a default impl because this isn't applicable for all Adapters
-//  
-//  
-//  /**
-//   * Construct a Scalar or Index -> Scalar from scalar Metadata.
-//   * This will typically be called only outside the context of a Function.
-//   * Default to null. Some data formats have no support for Scalars outside
-//   * the context of a Function.
-//   */
-//  protected def makeScalar(md: ScalarMd): Variable = null
-//  
-//  
-//
-//  /**
-//   * Make a Seq of Reals representing monotonic values defined by
-//   * start, increment, and length.
-//   * TODO: could just use a Linear DomainSet, support more than Reals?
-//   */
-//  private def makeLinearSeq(md: Metadata, start: Double, increment: Double, _length: Int) = new Seq[Variable] {
-//    //Note, use "_length" to avoid stack overflow due to Iterable's use of "length"
-//    private var _index = 0
-//    
-//    def iterator = new Iterator[Variable] {
-//      def hasNext = _index < _length
-//      def next() = {
-//        val r = Real(md, start + increment*_index)
-//        _index += 1
-//        r
-//      }
-//    }
-//    
-//    def length = _length
-//    
-//    def apply(index: Int) = Real(md, start + increment*index)
-//    
-//  }
-
 }
+
+//=============================================================================
 
 object TsmlAdapter {
   

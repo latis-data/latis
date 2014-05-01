@@ -40,4 +40,6 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     Dataset(datasets, md) 
   }
 
+  //TODO: close all contributing adapters
+  def close = {}
 }

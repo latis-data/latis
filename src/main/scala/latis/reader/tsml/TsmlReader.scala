@@ -35,7 +35,7 @@ class TsmlReader(tsml: Tsml) extends DatasetAccessor {
   /**
    * Clean up any resources that the reader used.
    */
-  def close() = adapter.close()
+  def close = adapter.close
   
 }
 

@@ -1,15 +1,35 @@
 package latis.reader.tsml
 
-import latis.util.RegEx
-import latis.reader.tsml.ml.Tsml
 import latis.data.Data
+import latis.dm.Integer
+import latis.dm.Real
+import latis.dm.Text
 import latis.dm.Variable
-import latis.data.value.IndexValue
-import latis.dm._
+import latis.reader.tsml.ml.Tsml
 import latis.util.StringUtils
+
+import scala.io.Source
 
 
 class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) {
+
+  //---- Manage data source ---------------------------------------------------
+  
+  private var source: Source = null
+  
+  /**
+   * Get the Source from which we will read data.
+   */
+  def getDataSource: Source = {
+    if (source == null) source = Source.fromURL(getUrl())
+    source
+  }
+  
+  override def close {
+    if (source != null) source.close
+  }
+  
+  //---- Adapter Properties ---------------------------------------------------
   
   /**
    * Get the String (one or more characters) that is used at the start of a 
@@ -92,9 +112,6 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) {
    * Return Map with Variable name to value(s) as Data.
    */
   def parseRecord(record: String): Option[Map[String,Data]] = {
-    //TODO: consider factoring out extractValues(record) to get more reuse,
-    //e.g. testing that we got the expected number of values
-    
     /*
      * TODO: consider nested functions
      * if not flattened, lines per record will be length of inner Function (assume cartesian?)

@@ -5,24 +5,24 @@ import latis.data.Data
 
 /**
  * Use string index properties to parse ascii tabular data.
+ * The specification must be defined as a 'substring' attribute in the tsml.
+ * Each Variable should have a start and stop index value separated by a comma (,).
+ * These will be applied with Java's String.substring (character at final index not included).
+ * each set of indices should be separated by a semi-colon (;).
  */
 class SubstringAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
 
-//  lazy val indexMap: Map[String, Array[Int]] = getProperty("substring") match {
-//    case Some(s: String) => {
-//      val vnames = getOrigScalarNames
-//      val specs = s.split(";")
-//      if (vnames.length != specs.length) throw new Error("Must have a substring specification for each variable.")
-//      (vnames zip specs.map(_.split(",").map(_.toInt))).toMap
-//    }
-//    case None => throw new RuntimeException("SubstringAdapter requires a substring definition.")
-//  }
-  
+  /**
+   * Parse the substring indices and store by variable name.
+   */
   lazy val substringIndices: Seq[Array[Int]] = getProperty("substring") match {
     case Some(s: String) => s.split(";").map(p => p.split(",").map(_.toInt))
     case None => throw new RuntimeException("SubstringAdapter requires a substring definition.")
   }
   
+  /**
+   * Extract the value of each Variable as a String.
+   */
   override def extractValues(record: String): Seq[String] = {
     substringIndices.flatMap( is => {
       val i0 = is(0)
@@ -33,19 +33,5 @@ class SubstringAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
       else Some(record.substring(i0, i1))
     })
   }
-  
-//  override def parseRecord(record: String): Option[Map[String, Data]] = {
-//    
-//    def makeValue(name: String): Option[String] = {
-//      val i0 = indexMap(name)(0)
-//      val i1 = indexMap(name)(1)
-//      if (i1 > record.length) None //skip records that are too short
-//      else Some(record.substring(i0, i1))
-//    }
-//    
-//    //Map variable names to their string values.
-//    //Map will be empty if makeValue failed to parse thie record.
-//    (for (name <- getOrigScalarNames; value <- makeValue(name)) yield (name, value)).toMap
-//  }
   
 }
