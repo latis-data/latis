@@ -1,11 +1,10 @@
 package latis.time
 
-import java.util.Date
-import latis.time.TimeScaleType._
-import java.text.SimpleDateFormat
-import scala.util.matching.Regex
+import latis.time.TimeScaleType.TimeScaleType
 import latis.units.UnitOfMeasure
 import latis.util.RegEx
+
+import java.util.Date
 import java.util.GregorianCalendar
 import java.util.TimeZone
 
@@ -23,7 +22,6 @@ class TimeScale(val epoch: Date, val unit: TimeUnit, val tsType: TimeScaleType) 
 }
 
 object TimeScale {
-  //TODO: case objects?
   lazy val JAVA = new TimeScale(new Date(0), TimeUnit.MILLISECOND, TimeScaleType.NATIVE)
   lazy val DEFAULT = JAVA
   
@@ -48,18 +46,11 @@ object TimeScale {
     //see javax.xml.bind.DatatypeConverter.parseDateTime("2010-01-01T12:00:00Z") or Joda time
   }
   
-  //TODO: other options with defaults
-  
   /**
    * Make TimeScale from "unit since epoch" or time format String.
    * Assume Native TimeScaleType (no leap second consideration).
    */
   def apply(scale: String): TimeScale = {
-    //TODO: encode type (e.g. UTC) in scale string?
-    //TODO: allow named TimeScales, e.g. GPS
-    
-    //val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + "("+RegEx.TIME+")").r
-    //Note, scala regex will extract group for nested ()s
     val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """(-?[0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
     scale.trim match {
       case regex(unit, epoch) => TimeScale(epoch, TimeUnit.withName(unit), TimeScaleType.NATIVE)

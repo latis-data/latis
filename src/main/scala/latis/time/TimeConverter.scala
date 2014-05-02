@@ -9,8 +9,6 @@ abstract class TimeConverter(scale1: TimeScale, scale2: TimeScale) extends UnitC
 }
 
 object TimeConverter {
-  import latis.time.TimeScaleType._
-  import latis.units.NoOpUnitConverter
   
   def apply(scale1: TimeScale, scale2: TimeScale): TimeConverter = {
     if (scale1 == scale2) new NoOpTimeConverter(scale1, scale2)

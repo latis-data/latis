@@ -1,7 +1,5 @@
 package latis.time
 
-import latis.data.NumberData
-
 class BasicTimeConverter(scale1: TimeScale, scale2: TimeScale) extends TimeConverter(scale1, scale2) {
 
   // Get time zero for each time scale in seconds since 1970

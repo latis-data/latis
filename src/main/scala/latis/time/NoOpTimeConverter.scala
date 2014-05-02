@@ -1,7 +1,5 @@
 package latis.time
 
-import latis.dm.Variable
-
 /**
  * Return the value that was passed in.
  */

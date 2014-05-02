@@ -1,8 +1,8 @@
 package latis.time
 
 import java.text.SimpleDateFormat
-import java.util.TimeZone
 import java.util.Date
+import java.util.TimeZone
 
 /**
  * TimeFormat support that is thread safe and assumes GMT time zone.

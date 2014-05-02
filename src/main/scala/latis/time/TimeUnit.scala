@@ -69,7 +69,5 @@ object TimeUnit {
    * Get the TimeUnit instance by name.
    */
   def withName(name: String): TimeUnit = units(name.toLowerCase)
-  //def withName(name: String): Option[TimeUnit] = units.get(name)
-  //TODO: error instead of Option?
 
 }
