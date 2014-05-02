@@ -1,37 +1,32 @@
 package latis.dm
 
-/**
- * The basic unit of the LaTiS data model.
- */
-abstract class Variable {
+import latis.data.Data
+import latis.data.NumberData
+import latis.metadata.Metadata
 
-  /**
-   * The parent of this Variable in the context of a Dataset.
-   */
-  private[this] var _parent: Variable = null
+import scala.collection.Seq
+
+/**
+ * Base type for all Variables in the LaTiS data model.
+ */
+trait Variable {
+  def getMetadata(): Metadata //need () to avoid ambiguity
+  def getMetadata(name: String): Option[String] = getMetadata.get(name)
+  def getData: Data
   
-  /**
-   * Return the parent Variable of this Variable.
-   */
-  def getParent() = _parent
+  def getName: String
   
-  /**
-   * Tell kids who their parent is when parent is constructed.
-   * TODO: restrict to factory method, Tuple and Function construction
-   */
-  def setParent(parent: Variable) {
-    _parent = parent
-  }
+  def isNumeric: Boolean = getData.isInstanceOf[NumberData]
+  def getNumberData: NumberData = getData.asInstanceOf[NumberData]
+  //TODO: deal with TextData
   
+  def getLength: Int
+  def getSize: Int
   
-  /**
-   * Return the Dataset that this Variable belongs to.
-   * Iterate up the ancestry until we find a Variable that is a Dataset.
-   */
-  def getDataset(): Dataset = {
-    this match {
-      case ds: Dataset => ds
-      case _ => this.getParent().getDataset()
-    }
-  }
+  def findVariableByName(name: String): Option[Variable]
+  def hasName(name: String): Boolean
+  
+  def toSeq: Seq[Scalar]
+  
 }
+

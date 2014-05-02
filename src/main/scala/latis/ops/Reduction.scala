@@ -1,0 +1,61 @@
+package latis.ops
+
+import latis.dm._
+
+/**
+ * Reduce any Tuples of one element to that element and reduce any 
+ * Functions with one Sample to that Sample.
+ */
+class Reduction extends Operation  {
+  
+  /**
+   * Apply to the domain and range of the sample and package in a new sample.
+   */
+  override def applyToSample(sample: Sample): Option[Sample] = sample match {
+    case Sample(d,r) => for (d2 <- applyToVariable(d); r2 <- applyToVariable(r)) yield Sample(d2,r2)
+  }
+  
+  /**
+   * Recursively apply to all elements.
+   * If a Tuple has only one element, reduce it to that element.
+   */
+  override def applyToTuple(tuple: Tuple): Option[Variable] = {
+    //TODO: assumes the tuple does not own the data
+    //TODO: don't reduce if tuple is named, preserve namespace
+    //  option to force?
+    //  what about other metadata? concat names with "_"?
+    val vars = tuple.getVariables.flatMap(applyToVariable(_)) 
+    vars.length match {
+      case 0 => None
+      case 1 => Some(vars.head)
+      case _ => Some(Tuple(vars)) //TODO: metadata
+    }
+    
+    /*
+     * TODO: consider (a,(b,c)) => (a,b,c)
+     * just like scala flatten
+     * can only reduce the inner tuple if it's parent can take kids
+     */
+
+  }
+
+  /**
+   * If the given Function has only one sample, reduce to that Sample.
+   * If the Function has no samples, return None.
+   */
+  override def applyToFunction(function: Function) = {
+    val n = function.getLength
+    if (n == 0) None
+    else if (n == 1) applyToSample(function.iterator.next)
+    else Some(WrappedFunction(function, this))
+  }
+  
+}
+
+object Reduction {
+  //TODO: extend OptionFactory, allow in server request?
+  
+  def reduce(dataset: Dataset): Dataset = {
+    (new Reduction)(dataset)
+  }
+}

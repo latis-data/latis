@@ -1,0 +1,135 @@
+package latis.util
+
+import java.util.Properties
+import java.io.File
+import java.io.FileInputStream
+import java.net.URL
+import com.typesafe.scalalogging.slf4j.Logging
+import scala.collection.JavaConversions
+
+/**
+ * Singleton for access to properties with the following precedence:
+ * 1) System properties (e.g. so "-Dprop=value" at command line can override)
+ * 2) LaTiS properties file
+ * 3) Environment variable
+ */
+class LatisProperties extends Properties with Logging {
+  
+  /**
+   * The name of the properties file.
+   */
+  val file = getPropertyFileName()
+
+  /**
+   * Load the properties when singleton is constructed.
+   */
+  try {
+    logger.debug("Loading properties file: " + file)
+    val in = new FileInputStream(file)
+    load(in)
+    in.close
+  } catch {
+    case e: Exception => {
+      //logger.warn("Unable to load properties file: " + file)
+      throw new RuntimeException("Unable to load properties file: " + file, e)
+    }
+  }
+            
+  /**
+   * Find the property file with the following precedence:
+   * 1) latis.config system property
+   * 2) latis.properties file in LATIS_HOME (environment variable) directory
+   * 3) latis.properties file in the classpath
+   * latis.properties is traditionally managed in src/main/resources/
+   * which gets deployed to the classpath.
+   */
+  def getPropertyFileName(): String = {
+    System.getProperty("latis.config") match { //try system property
+      case s: String => s
+      case null => System.getenv("LATIS_HOME") match { //try under LATIS_HOME
+        case s: String => s + File.separator + "latis.properties"
+        case null => getClass.getResource("/latis.properties") match { //try in the classpath
+          case url: URL => url.getPath
+          case null => throw new RuntimeException("Unable to locate property file.")
+        }
+      }
+    }
+  }
+    
+  /**
+   * Return the full file system path for the given relative path.
+   */
+  def resolvePath(path: String): String = {
+    //try classpath
+    getClass.getResource(File.separator + path) match {
+      case url: URL => url.getPath
+      //else try the current working directory
+      case null => scala.util.Properties.userDir + File.separator + path
+    }
+  }
+}
+  
+
+object LatisProperties {
+  
+  //---- Manage singleton instance ------------------------------------------//
+  
+  private var _instance: LatisProperties = null
+  
+  def instance: LatisProperties= {
+    if (_instance == null) _instance = new LatisProperties
+    _instance
+  }
+  
+  def init(latisProps: LatisProperties) {_instance = latisProps}
+  
+  //---- Property value access methods --------------------------------------//
+  
+  /**
+   * Directly access the property value. Could be null.
+   */
+  def apply(property: String): String = get(property) match {
+    case Some(s: String) => s
+    case _ => null
+  }
+  
+  /**
+   * Get the property value or the given default if it does not exist.
+   */
+  def getOrElse(property: String, default: => String): String = get(property) match {
+    case Some(s: String) => s
+    case _ => default
+  }
+  
+  /**
+   * Get the property as an Option.
+   * Order of precedence:
+   * 1) System properties (e.g. so "-Dprop=value" at command line can override)
+   * 2) LaTiS properties file
+   * 3) Environment variable
+   */
+  def get(property: String): Option[String] = {
+    System.getProperty(property) match {
+      case s: String => Some(s)
+      case _ => instance.getProperty(property) match {
+        case s: String => Some(s)
+        case _ => System.getenv(property) match {
+          case s: String => Some(s)
+          case _ => None
+        }
+      }
+    }
+  }
+  
+  /**
+   * Return the known property names.
+   * This will only include those in the latis.properties file.
+   */
+  def keys: Iterable[String] = JavaConversions.dictionaryAsScalaMap(instance).keys.map(_.asInstanceOf[String])
+
+  /**
+   * Return the full file system path for the given relative path.
+   */
+  def resolvePath(path: String): String = instance.resolvePath(path)
+  
+}

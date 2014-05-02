@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="scalar_ts_3col_0to9">
+    <adapter class="latis.reader.tsml.AsciiAdapter"
+             delimiter="\s+"
+             location="datasets/test/agg/scalar_ts_3col_0-9.txt" />
+             
+    <time name="T"/>
+    <integer name="B"/>
+    <integer name="C"/>
+
+  </dataset>
+
+</tsml>

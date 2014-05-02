@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="lemr">
+    <adapter class="latis.reader.tsml.SparqlAdapter"
+             location="http://lemr-dev:3030/VIVO/sparql" />
+             
+      <index/>
+      <text name="subject" length="256"/>
+      <text name="predicate" length="256"/>
+      <text name="object" length="256"/>
+   
+  </dataset>
+
+</tsml>

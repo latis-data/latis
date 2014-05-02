@@ -1,2 +1,10 @@
+/build
 /classes
-/.cache
+.project
+.classpath
+.settings/
+.cache
+.gradle/
+*.log
+*~
+/bin

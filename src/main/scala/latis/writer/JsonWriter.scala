@@ -1,0 +1,93 @@
+package latis.writer
+
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Index
+import latis.dm.Integer
+import latis.dm.Real
+import latis.dm.Sample
+import latis.dm.Scalar
+import latis.dm.Text
+import latis.dm.Tuple
+import latis.dm.Variable
+import latis.util.FirstThenOther
+
+/**
+ * Write a Dataset as JSON. This is designed to be verbose with all the Metadata.
+ * If you just need data values, consider the CompactJsonWriter.
+ */
+class JsonWriter extends TextWriter {
+  //TODO: Include metadata in this long form with objects
+  //TODO: assumes only one top level var, need to add delim
+  
+  override def makeHeader(dataset: Dataset) = "{\"" + dataset.getName + "\": {\n"
+  override def makeFooter(dataset: Dataset) = "}}"
+
+  override def writeFunction(function: Function) {
+    printWriter.print(makeLabel(function) + "[")
+    val startThenDelim = FirstThenOther("", "," + newLine)
+    //note, calling makeSample directly to avoid the label
+    for (sample <- function.iterator) printWriter.print(startThenDelim.value + makeSample(sample))
+    //TODO: deal with error during write, at least close "]"?
+    printWriter.print("]" + newLine)
+  }
+  
+
+  /**
+   * Make a label for the given Variable.
+   */
+  def makeLabel(variable: Variable): String = "\"" + variable.getName + "\": "
+
+  
+  /**
+   * Override to add label before each variable.
+   */
+  override def varToString(variable: Variable): String = {
+    makeLabel(variable) + super.varToString(variable) //will in turn call our make* methods below
+  }
+  
+  /**
+   * Override to escape any special characters in Text values.
+   */
+  override def makeScalar(scalar: Scalar): String = scalar match {
+    case Real(d)    => if (d.isNaN) "null" else d.toString //replace NaNs with null //TODO: format?
+    case Integer(l) => l.toString 
+    case Text(s)    => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters      
+  }
+  
+  override def makeSample(sample: Sample): String = {
+    val Sample(d, r) = sample
+    val vars = d match {
+      case _: Index => r.toSeq //drop Index domain
+      case _ => d.toSeq ++ r.toSeq
+      //TODO: breaks for nested Function,  nested tuples?
+    }
+    vars.map(varToString(_)).mkString("{", ", ", "}") //note, sample shouldn't have name
+  }
+    
+  /**
+   * Represent a Tuple as a JSON object.
+   */
+  override def makeTuple(tuple: Tuple): String = {
+    tuple.getVariables.map(varToString(_)).mkString("{", ", ", "}")
+  }
+  
+  /**
+   * Represent Function Samples as a JSON array.
+   */
+  override def makeFunction(function: Function): String = {
+    //note, calling makeSample directly to avoid the label
+    function.iterator.map(makeSample(_)).mkString("[", ","+newLine, "]")
+  }
+  
+  /**
+   * Escape quotes and back-slashes
+   */
+  def escape(s: String): String = {
+    //TODO: find cleaner solution
+    s.replaceAllLiterally("""\""", """\\""").replaceAllLiterally(""""""", """\"""")
+  }
+  
+  override def mimeType: String = "application/json" 
+  
+}

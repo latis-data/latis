@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+
+    <servlet>
+        <servlet-name>LatisServer</servlet-name>
+        <servlet-class>latis.server.LatisServer</servlet-class>
+        <!--  init-param>
+            <param-name>config</param-name>
+            <param-value>resources/latis.properties</param-value>
+        </init-param-->
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>LatisServer</servlet-name>
+        <url-pattern>/dap/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>
+

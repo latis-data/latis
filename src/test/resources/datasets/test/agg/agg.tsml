@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="agg_test">
+  <adapter class="latis.reader.tsml.agg.CollectionAdapter"/>
+  
+    <dataset name="ds1">
+      <adapter class="latis.reader.tsml.AsciiAdapter"
+               delimiter="\s+"
+               location="datasets/test/agg/scalar_ts_2col_0-9.txt" />
+      <time name="T" />
+      <real name="A"/>
+    </dataset>
+
+    <dataset name="ds2">
+      <adapter class="latis.reader.tsml.AsciiAdapter"
+               delimiter="\s+"
+               location="datasets/test/agg/scalar_ts_2col_10-19.txt" />
+      <time name="T" />
+      <real name="A"/>
+    </dataset>
+
+  </dataset>
+  
+</tsml>

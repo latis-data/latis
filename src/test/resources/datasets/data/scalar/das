@@ -1,0 +1,9 @@
+attributes {
+    unknown{
+        foo{
+            string alias "time";
+        }
+        ssn{
+        }
+    }
+}

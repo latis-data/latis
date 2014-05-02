@@ -1,0 +1,187 @@
+package latis.time
+
+import latis.dm._
+import java.util.Date
+import latis.metadata._
+import latis.data.value._
+import latis.data._
+import latis.util.RegEx
+import java.util.TimeZone
+import latis.metadata.VariableMetadata
+import latis.data.value.LongValue
+
+
+class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
+  extends AbstractScalar(metadata, data) { 
+
+  def getUnits = timeScale
+  
+  def convert(scale: TimeScale): Time = TimeConverter(this.timeScale, scale).convert(this)
+  
+  def toIso: String = TimeFormat.ISO.format(getJavaTime)
+  
+  def format(format: String): String = TimeFormat(format).format(getJavaTime)
+  
+  def format(format: TimeFormat): String = format.format(getJavaTime)
+  
+  def getJavaTime: Long = getData match {
+    case num: NumberData => convert(TimeScale.JAVA).getNumberData.longValue
+    case text: TextData => {
+      val format = getMetadata.get("units") match {  //note: using units for format 
+        case Some(f) => f
+        case None => TimeFormat.ISO.toString //default to ISO format
+      }
+      TimeFormat(format).parse(text.stringValue)
+    }
+  }
+  
+  def compare(that: Time): Int = {
+    //Convert 'that' Time to our time scale.
+    //Note, converted Times will have numeric (double or long) data values.
+    val otherData = that.convert(timeScale).getNumberData
+    //Base comparison on our type so we can get the benefit of double precision or long accuracy
+    getData match {
+      case LongValue(l) => l compare otherData.longValue
+      case NumberData(d) => d compare otherData.doubleValue
+      case _: TextData => getJavaTime compare otherData.longValue
+    }
+  }
+  
+  //override to deal with ISO formatted time strings  
+  override def compare(that: String): Int = {
+    //TODO: look for units and see if 'that' matches...
+    RegEx.TIME.r findFirstIn that match {
+      //If the string matches the ISO format
+      case Some(s) => compare(Time.fromIso(s)) //Make Time from ISO formatted time string, convert to our time scale
+      //Otherwise assume we have a numeric value in our time scale
+      case _ => getData match {
+        case LongValue(l) => l compare that.toLong
+        case NumberData(d) => d compare that.toDouble
+        case _: TextData => getJavaTime compare that.toLong
+        //TODO: handle format errors
+      }
+    }
+  }
+
+}
+
+//=============================================================================
+
+object Time {
+  import scala.collection.mutable.HashMap
+  //TODO: DEFAULT vs JAVA time scale
+  
+  def fromIso(s: String): Time = Time(isoToJava(s))
+  //TODO: make sure format is valid
+  
+  def isoToJava(s: String): Long = {
+    val cal = javax.xml.bind.DatatypeConverter.parseDateTime(s)
+    cal.setTimeZone(TimeZone.getTimeZone("GMT")) //Assume UTC. //TODO: support other time zones?
+    cal.getTimeInMillis()
+  }
+  
+  //no data, used as a template in adapters
+  def apply(md: Metadata, data: Data = EmptyData): Time = {
+    var metadata = md
+    val scale = md.get("units") match {
+      case Some(u) => TimeScale(u)
+      case None => {
+        //Use default time scale, add units to metadata
+        metadata = new VariableMetadata(md.getProperties + ("units" -> TimeScale.DEFAULT.toString))
+        TimeScale.DEFAULT
+      }
+    }
+    //Mixin the appropriate type
+    md.get("type") match {
+      case Some(s) => s.toLowerCase match {
+        case "real" => new Time(scale, md, data) with Real
+        case "integer" => new Time(scale, md, data) with Integer
+        case "text" => new Time(scale, md, data) with Text
+        case _ => throw new RuntimeException("Unsupported Time type: " + s)
+      }
+      //default to Real
+      case None => new Time(scale, md, data) with Real
+    }
+  }
+  
+  
+  def apply(md: Metadata, value: AnyVal): Time = {
+    var metadata = md
+    val scale = md.get("units") match {
+      case Some(u) => TimeScale(u)
+      case None => {
+        //Use default time scale, add units to metadata
+        metadata = new VariableMetadata(md.getProperties + ("units" -> TimeScale.DEFAULT.toString))
+        TimeScale.DEFAULT
+      }
+    }   
+    value match {
+      case _: Double => new Time(scale, metadata, Data(value)) with Real
+      case _: Long => new Time(scale, metadata, Data(value)) with Integer
+    }
+  }
+  
+      
+  def apply(scale: TimeScale, value: AnyVal): Time = {
+    //make some metadata
+    val md = Metadata(Map("name" -> "time", "units" -> scale.toString))
+    value match {
+      case _: Double => new Time(scale, md, Data(value)) with Real
+      case _: Long => new Time(scale, md, Data(value)) with Integer
+    }
+  }
+
+  def apply(value: AnyVal): Time = Time(TimeScale.DEFAULT, value)
+  
+  def apply(date: Date): Time = Time(date.getTime())
+
+  def apply(md: Metadata, value: String): Time = {
+    md.get("units") match {
+      case Some(u) => {
+        //If it is a numeric time, units should have "since".
+        //TODO: special case for JulianDate? 
+        if (u.contains(" since ")) {
+          //look for md("type"), default to Real
+          md("type") match {
+            case "integer" => new Time(TimeScale(u), md, Data(value.toLong)) with Integer
+            case _ => new Time(TimeScale(u), md, Data(value.toDouble)) with Real
+          }
+        }
+        //Otherwise, store data as StringValue.
+        //Use java time scale so we can count on using SimpleDateFormat conversions.
+        //TODO: consider implications of ignoring leap seconds for formatted times, 
+        //  could java format conversions still work for UTC scale?
+        else new Time(TimeScale.JAVA, md, StringValue(value)) with Text
+      }
+      //No units specified, assume default numeric units or ISO format
+      case None => md("type") match {
+        case "integer" => new Time(TimeScale.DEFAULT, md, Data(value.toLong)) with Integer
+        case "real"    => new Time(TimeScale.DEFAULT, md, Data(value.toDouble)) with Real
+        case "text"    => new Time(TimeScale.DEFAULT, md, Data(value)) with Text
+        //TODO: add length metadata based on length of units format
+        //  default length of 23 (ISO format)
+      }
+    }
+  }
+  
+    
+  //TODO: move to util?
+  def stringsToNumbers(ss: Seq[String]): Seq[AnyVal] = ss.map(stringToNumber(_))
+  def stringToNumber(s: String): AnyVal = {
+    try {s.toLong}  //try converting to Long
+    catch {
+      case e: Exception => {
+        try {s.toDouble}  //try converting to Double
+        catch {
+          case e: Exception => throw new RuntimeException("Can't convert String into number: " + s)
+        }
+      }
+    }
+  }
+  
+  
+//TODO: 
+//  val NOW = new Time() {
+//    override def getTime() = (new Date()).getTime().toDouble
+//  }
+}

@@ -4,47 +4,46 @@ import latis.dm._
 import java.io.OutputStream
 import java.io.PrintWriter
 
-class AsciiWriter(out: OutputStream) extends Writer {
-
-  private[this] val _writer = new PrintWriter(out)
+/**
+ * Writer to present a Dataset in a way that reflects how it is modeled.
+ */
+class AsciiWriter extends TextWriter {
+  //TODO: rename ModelWriter?
   
-  def write(dataset: Dataset) = {
-    writeVariable(dataset)
-    _writer.println()
-    _writer.flush()
-  }
+  private var indent = 0
   
-  def writeVariable(variable: Variable): Unit = variable match {
+  override def makeHeader(dataset: Dataset) = dataset.toString + newLine
     
-    case Scalar(v) => _writer.print(v)
-    
-    case Tuple(vars) => {
-      //surround Tuple's Variables with parens
-      _writer.print("(")
-      //write each Variable contained in this Tuple separated by commas
-      var first = true
-      for (v <- vars) {
-        if (!first) _writer.print(",")
-        else first = false
-        writeVariable(v) //recursive
-      }
-      //close parens
-      _writer.print(")")
-    }
-    
-    case f: Function => {
-      for ((domain, range) <- f.iterator) {
-        writeVariable(domain)
-        _writer.print(" -> ")
-        writeVariable(range)
-        _writer.println()
-      }
-    }
-  }
-
   /**
-   * Note, don't close 'out' because it was given to us.
+   * Override to add arrow for mapping domain values to range values 
+   * and to put "()" around tuple elements.
    */
-  def close() {}
+  override def makeTuple(tuple: Tuple): String = tuple match {
+    case Sample(d, r) => varToString(d) + " -> " + varToString(r)
+    case Tuple(vars) => vars.map(varToString(_)).mkString("(", delimiter, ")")
+  }
+  
+  /**
+   * Override to indent nested function samples.
+   */
+  override def makeFunction(function: Function): String = {
+    indent += 5
+    val s = function.iterator.map(varToString(_)).mkString(newLine + " "*indent)
+    indent -= 5
+    s
+  }
 
+}
+
+object AsciiWriter {
+  
+  def apply(out: OutputStream): AsciiWriter = {
+    val writer = new AsciiWriter()
+    writer.setOutputStream(out)
+    writer
+  }
+  
+  def apply(): AsciiWriter = AsciiWriter(System.out)
+  
+  def write(dataset: Dataset) = AsciiWriter().write(dataset)
 }
