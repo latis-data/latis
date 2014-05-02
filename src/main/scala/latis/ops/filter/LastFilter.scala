@@ -9,7 +9,9 @@ import latis.ops.OperationFactory
 class LastFilter extends Filter {
 
   override def applyToFunction(function: Function) = {
-    val s = function.iterator.drop(function.getLength-1).next
+    //TODO: IterableOnce problem?
+    //val s = function.iterator.drop(function.getLength-1).next
+    val s = function.iterator.toList.last
     Some(s)
   }
 }
