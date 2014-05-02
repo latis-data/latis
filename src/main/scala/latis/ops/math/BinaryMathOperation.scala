@@ -1,6 +1,14 @@
 package latis.ops.math
 
-import latis.dm._
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Number
+import latis.dm.Real
+import latis.dm.Sample
+import latis.dm.Scalar
+import latis.dm.Text
+import latis.dm.Tuple
+import latis.dm.Variable
 
 class BinaryMathOperation(op: (Double, Double) => Double, other: Dataset) extends MathOperation {
   //TODO: consider integer math, complex math

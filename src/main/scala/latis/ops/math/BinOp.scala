@@ -2,7 +2,7 @@ package latis.ops.math
 
 abstract class BinOp extends Function2[Double, Double, Double]
 
-//TODO: see Numeric.Ops
+//TODO: see scala.math.Numeric.Ops
 
 class Add      extends BinOp {def apply(a: Double, b: Double): Double = a + b}
 class Subtract extends BinOp {def apply(a: Double, b: Double): Double = a - b}
