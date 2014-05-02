@@ -8,7 +8,7 @@
   
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
     <!-- Get the log file from latis.properties. If not defined, log to /dev/null -->
-    <file>${log.file}:-/dev/null</file> 
+    <file>${log.file:-/dev/null}</file> 
     <append>true</append>
     <encoder>
       <pattern>[%d{yyyy-MM-dd'T'HH:mm:ss.SSS, GMT} %-5level %logger{36} (%thread\)] %msg%n</pattern>
