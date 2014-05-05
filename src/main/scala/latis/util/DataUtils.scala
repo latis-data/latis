@@ -14,11 +14,12 @@ import latis.dm.Text
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.time.Time
-
 import java.nio.ByteBuffer
-
 import scala.collection.Map
 import scala.collection.mutable
+import latis.data.SampledData
+import latis.data.seq.DataSeq
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Utility methods for manipulating data.
@@ -79,7 +80,30 @@ object DataUtils {
     SampleData(domainData, rangeData)
   }
   
-  
+    
+  /**
+   * Given a data map from variable name to DataSeq (e.g. TsmlAdapter cache) and a Sample template,
+   * construct SampledData that can be used when constructing a Sampled Function.
+   */
+  def dataMapToSampledData(dataMap: Map[String,DataSeq], sampleTemplate: Sample): SampledData = {
+    /*
+     * TODO: generalize for more complex data
+     * +IndexSet
+     */
+    val vars = sampleTemplate.toSeq
+    val n = dataMap(vars(0).getName).length
+    //TODO: zip with index...?
+    val data = ArrayBuffer[SampleData]()
+    for (i <- 0 until n) {
+      val f = (v: Variable) => (v.getName, dataMap(v.getName)(i))
+      val m: Map[String,Data] = vars.foldLeft(Map[String,Data]())(_ + f(_))
+      val sdata = DataUtils.dataMapToSampleData(m, sampleTemplate)
+      data += sdata
+    }
+    
+    SampledData(data.iterator, sampleTemplate)
+  }
+    
   /**
    * Given a dataMap mapping Variable names to Data and a Variable template,
    * construct a Data object with data from the dataMap.
