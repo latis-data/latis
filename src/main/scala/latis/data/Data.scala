@@ -74,28 +74,30 @@ object Data {
   
   val empty = EmptyData
   
-  def apply(v: AnyVal): Data = v match {
+  def apply(any: Any): Data = any match {
     case d: Double => DoubleValue(d)
+    case f: Float  => DoubleValue(f) //represent floats as doubles
     case l: Long   => LongValue(l)
+    case i: Int    => LongValue(i) //represent ints as longs
+    case s: String => StringValue(s)
+    
+    case buffer: Buffer     => fromBuffer(buffer)
+    case bytes: Array[Byte] => fromBuffer(ByteBuffer.wrap(bytes))
   }
-  
-  def apply(s: String): Data = StringValue(s)
 
   /**
    * Construct a Data implementation that encapsulates a ByteBuffer.
    * This will set the limit and rewind the buffer if needed.
    */
-  def apply(buffer: Buffer): Data = {
+  def fromBuffer(buffer: Buffer): Data = {
     //If it looks like this buffer isn't set to the beginning, do so.
     //Note, 'flip' will set the limit to the current position and the position to 0. 
-    //This msupports clients that just add to a buffer without sizing it correctly.
+    //This supports clients that just add to a buffer without sizing it correctly.
     val b = if (buffer.limit > 0 && buffer.position != 0) buffer.flip else buffer
     b match {
       case bb: ByteBuffer => new ByteBufferData(bb)
       //TODO: support other types of Buffer?
     }
   }
-  
-  def apply(bytes: Array[Byte]): Data = Data(ByteBuffer.wrap(bytes))
   
 }
