@@ -26,6 +26,7 @@ import java.net.URL
 import scala.Option.option2Iterable
 import scala.collection.Map
 import scala.collection.Seq
+import scala.collection.immutable
 import scala.collection.mutable
 import scala.io.Source
 
@@ -212,14 +213,15 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     case function: Function => makeFunction(function)
   }
   
-  /**
+  protected def makeScalar(scalar: Scalar): Option[Scalar] = Some(scalar)
+  /*
    * Build a Scalar from the original model by adding Data.
    * This will look to see if data for this variable has been cached.
    */
-  protected def makeScalar(scalar: Scalar): Option[Scalar] = getCachedData(scalar.getName) match {
-    case Some(ds) => Some(Scalar(scalar.getMetadata, ds(0)))
-    case None => Some(scalar) //no-op, //TODO: might as well throw an error since this means no data is defined?
-  }
+//  protected def makeScalar(scalar: Scalar): Option[Scalar] = getCachedData(scalar.getName) match {
+//    case Some(ds) => Some(Scalar(scalar.getMetadata, ds(0))) //Note, not designed for scalars within Functions. 
+//    case None => Some(scalar) //no-op, //TODO: might as well throw an error since this means no data is defined?
+//  }
   
   /**
    * Build a Sample Variable from the domain and range components.
@@ -253,6 +255,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * Build a Function.
    */
   protected def makeFunction(function: Function): Option[Function] = {
+    //TODO: use data cache for default impl, complication with makeScalar which uses cache in a way that only works for top level scalars?
     val md = function.getMetadata
     for (domain <- makeVariable(function.getDomain); 
          range  <- makeVariable(function.getRange)
@@ -277,6 +280,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * one per sample of the outer Function.
    */
   private val dataCache = mutable.Map[String, DataSeq]()
+  
+  def getCache: immutable.Map[String, DataSeq] = dataCache.toMap
   
   /**
    * Is the cache empty.
@@ -316,7 +321,6 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   def getCachedData(variableName: String): Option[DataSeq] = dataCache.get(variableName)
   //TODO: if None throw new Error("No data found in cache for Variable: " + variableName)? or return empty Data?
-
   
   //---------------------------------------------------------------------------
   
