@@ -4,10 +4,8 @@
   <dataset name="properties">
     
     <adapter class="latis.reader.tsml.PropertiesAdapter"/>
-            
-    <tuple>
-      <text name="version" length="8"/>
-    </tuple> 
+    
+    <text name="version" length="8"/>
   
   </dataset>
   
