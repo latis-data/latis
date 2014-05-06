@@ -45,15 +45,15 @@ dependencies {
     
     testCompile 'junit:junit:4.+'
     testCompile 'org.apache.derby:derby:10.10.1.1'
-    testRuntime 'postgres:postgresql:9.2-1002'
-    testRuntime 'sybase:jconn3:6.0'
-    testRuntime 'oracle:ojdbc6:11.2'
+    //testRuntime 'postgres:postgresql:9.2-1002'
+    //testRuntime 'sybase:jconn3:6.0'
+    //testRuntime 'oracle:ojdbc6:11.2'
 	
 	//Support for writing png images
 	compile 'jfree:jfreechart:1.0.12'
 	
 	//Support for writing NetCDF4 and HDF5
-	compile 'edu.ucar.ral:nujan:1.4.2'
+	//compile 'edu.ucar.ral:nujan:1.4.2'
 }
 
 //For testing
