@@ -4,6 +4,7 @@
 apply plugin: 'scala'
 apply plugin: 'war'
 apply plugin: 'ivy-publish'
+apply plugin: 'eclipse-wtp'
 
 //Define the release version. Used for published jar.
 //TODO: get from latis.properties?
