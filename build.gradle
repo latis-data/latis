@@ -2,9 +2,42 @@
 
 apply plugin: 'scala'
 apply plugin: 'war'
+apply plugin: 'ivy-publish'
+apply plugin: 'eclipse-wtp'
+
+//Define the release version. Used for published jar.
+//TODO: get from latis.properties?
+version = '2.5-SNAPSHOT'
 
 //Define Java version for generated class files.
 targetCompatibility = 1.6
+
+//Repositories for dependencies.
+repositories {
+    ivy {
+      url "http://dsweb:8080/ivy"
+    }
+    mavenCentral()
+}
+
+dependencies {    
+    providedCompile "javax.servlet:servlet-api:2.5" //not deployed
+    compile 'org.scala-lang:scala-library:2.10.4'
+    
+    //Support for logging
+    compile 'com.typesafe:scalalogging-slf4j_2.10:1.1.0'
+    compile 'ch.qos.logback:logback-classic:1.0.13'
+    
+    testCompile 'junit:junit:4.+'
+    testCompile 'org.apache.derby:derby:10.10.1.1'
+    //testRuntime 'postgres:postgresql:9.2-1002'
+    //testRuntime 'sybase:jconn3:6.0'
+    //testRuntime 'oracle:ojdbc6:11.2'
+	
+	//Support for writing png images
+	compile 'jfree:jfreechart:1.0.12'
+}
+
 
 //Repositories for dependencies.
 repositories {
@@ -24,5 +57,19 @@ dependencies {
 	
 	//Support for writing png images
 	compile 'jfree:jfreechart:1.0.12'
+}
 	
+//Define the Ivy repository for publishing build artifacts.
+group = 'lasp'
+publishing {
+    publications {
+        ivyJava(IvyPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        ivy {
+            url "/data_systems/ivy"
+        }
+    }
 }

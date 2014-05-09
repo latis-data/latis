@@ -44,10 +44,17 @@ class DataSeq extends IterableData {
 }
 
 object DataSeq {
-  def apply() = new DataSeq()
+  def apply(): DataSeq = new DataSeq()
   
-  def apply(data: Data) = (new DataSeq()).append(data) 
+  def apply(data: Data): DataSeq = (new DataSeq()).append(data) 
   
-  def apply(datas: Seq[Data]) = datas.foldLeft(new DataSeq())(_ append _)
+  def apply(datas: Seq[Data]): DataSeq = datas.foldLeft(new DataSeq())(_ append _)
   //Note, will fail if not all elements are the same size
+  
+  /**
+   * Make a DataSeq out of a single Data by breaking it up by the given record size.
+   */
+  def apply(data: Data, recordSize: Int): DataSeq = {
+    DataSeq(data.getBytes.grouped(recordSize).map(Data(_)).toSeq)
+  }
 }
