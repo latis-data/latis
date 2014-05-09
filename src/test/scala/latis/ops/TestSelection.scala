@@ -89,6 +89,15 @@ class TestSelection {
     assertEquals(1, n)
   }
   
+  @Test
+  def select_twice {
+    val ds = Dataset(scalarFunction)
+    val ds2 = ds.filter("value >= 2")
+    val ds3 = ds2.filter("value < 5")
+    val n = ds3.length
+    assertEquals(3, n)
+  }
+  
 }
 
 
