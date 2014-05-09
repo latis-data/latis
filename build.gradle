@@ -4,6 +4,7 @@
 apply plugin: 'scala'
 apply plugin: 'war'
 apply plugin: 'ivy-publish'
+apply plugin: 'eclipse-wtp'
 
 //Define the release version. Used for published jar.
 //TODO: get from latis.properties?
@@ -26,7 +27,7 @@ dependencies {
     
     //Support for logging
     compile 'com.typesafe:scalalogging-slf4j_2.10:1.1.0'
-    //compile 'ch.qos.logback:logback-classic:1.0.13'
+    compile 'ch.qos.logback:logback-classic:1.0.13'
     
     testCompile 'junit:junit:4.+'
     testCompile 'org.apache.derby:derby:10.10.1.1'
