@@ -47,17 +47,20 @@ object Function {
   /**
    * Construct from Seq of Variable which are assumed to contain their own data.
    */
-  def apply(vs: Seq[Variable]): SampledFunction = vs.head match {
-    case sample: Sample => Function(sample.domain, sample.range, vs.asInstanceOf[Seq[Sample]].iterator)
+  def apply(vs: Seq[Variable], md: Metadata): SampledFunction = vs.head match {
+    case sample: Sample => Function(sample.domain, sample.range, vs.asInstanceOf[Seq[Sample]].iterator, md)
     case _ => {
       //make Seq of samples where domain is index
       //TODO: make sure every Variable in the Seq has the same type
       //TODO: make from SampledData with IndexSet
       val samples = vs.zipWithIndex.map(s => Sample(Index(s._2), s._1))
       val sample = samples.head
-      Function(sample.domain, sample.range, samples.iterator)
+      Function(sample.domain, sample.range, samples.iterator, md)
     }
   }
+  
+  def apply(vs: Seq[Variable]): SampledFunction = Function(vs, EmptyMetadata)
+  
   
   /**
    * Construct from a Seq of domain Variables and a Seq of range Variables.
