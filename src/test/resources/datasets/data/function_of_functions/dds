@@ -5,5 +5,5 @@ Dataset {
             Int64 unknown;
             Float64 unknown;
         } samples;
-    } samples;
+    } function_of_functions;
 } function_of_functions;

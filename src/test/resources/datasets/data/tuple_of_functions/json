@@ -1,5 +1,5 @@
 {"tuple_of_functions": {
-"unknown": {"samples": [{"myInt0": 10, "myReal0": 0.0},
+"tuple_of_functions": {"samples": [{"myInt0": 10, "myReal0": 0.0},
 {"myInt0": 11, "myReal0": 1.0},
 {"myInt0": 12, "myReal0": 2.0}], "samples": [{"myInt1": 10, "myReal1": 10.0},
 {"myInt1": 11, "myReal1": 11.0},

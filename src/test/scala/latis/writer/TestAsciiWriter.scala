@@ -10,11 +10,11 @@ import java.io.File
 import latis.dm._
 import latis.metadata.Metadata
 
-class TestDapWriters {
-
-  var tmpFile = java.io.File.createTempFile("writer", "test")
+class TestAsciiWriter {
+  
+  var tmpFile = java.io.File.createTempFile("asc", "test")
   tmpFile.deleteOnExit
-    
+  
   val fof = TestNestedFunction.function_of_functions
   val tof = TestNestedFunction.tuple_of_functions
   
@@ -22,14 +22,10 @@ class TestDapWriters {
   
   @Test
   def test_sets {
-    for(name <- names) {
-      test_dap(getDataset(name),"das")
-      test_dap(getDataset(name),"dds")
-      test_dap(getDataset(name),"dods")
-    }
+    for(name <- names) test_asc(getDataset(name),"asc")
   }
   
-  def test_dap(ds: Dataset, suffix: String) {
+  def test_asc(ds: Dataset, suffix: String) {
     val fos = new FileOutputStream(tmpFile)
     val name = ds.getName
     Writer(fos,suffix).write(ds)
@@ -45,20 +41,21 @@ class TestDapWriters {
     case v: Variable => Dataset(v,Metadata(v.getName))
   }
   
+  
   //@Test
-  def print_dap {
-    val reader = TsmlReader("datasets/test/historical_tsi.tsml")
-    val ds = reader.getDataset()
-    //val ds = Dataset(tof,Metadata(tof.getName)) 
-    Writer.fromSuffix("dds").write(ds)
+  def print_asc {
+    val reader = TsmlReader("datasets/test/dap2.tsml")
+    //val ds = reader.getDataset()
+    val ds = getDataset(tof)
+    Writer.fromSuffix("asc").write(ds)
   }
   
   //@Test 
-  def write_dap {
-    val fos = new DataOutputStream(new FileOutputStream(new File("src/test/resources/datasets/data/function_of_functions/das")))
-    //val ds = TsmlReader("datasets/test/tsi.tsml").getDataset
-    val ds = Dataset(fof,Metadata(fof.getName)) 
-    Writer(fos,"das").write(ds)
+  def write_to_file {
+    val fos = new DataOutputStream(new FileOutputStream(new File("src/test/resources/datasets/data/function_of_functions/asc")))
+    //val ds = TsmlReader("datasets/test/scalar.tsml").getDataset
+    val ds = getDataset(fof)
+    Writer(fos,"asc").write(ds)
     fos.close()
   }
 }

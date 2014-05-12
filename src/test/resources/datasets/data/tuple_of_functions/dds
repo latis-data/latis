@@ -16,5 +16,5 @@ Dataset {
             Int64 myInt3;
             Float64 myReal3;
         } samples;
-    } unknown;
+    } tuple_of_functions;
 } tuple_of_functions;

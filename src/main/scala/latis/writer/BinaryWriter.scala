@@ -54,7 +54,10 @@ class BinaryWriter extends Writer {
     for (v <- tuple.getVariables) buildVariable(v, bb)
     bb
   }
-  def buildFunction(function: Function, bb: ByteBuffer): ByteBuffer = ??? //nested function
+  def buildFunction(function: Function, bb: ByteBuffer): ByteBuffer = {
+    for(s <- function.iterator) buildVariable(s,bb) //nested function
+    bb
+  }
 }
 
 

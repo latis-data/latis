@@ -7,7 +7,7 @@
              commentCharacter=";"
              location="/lisird/public/lasp/historical_tsi/TSI_TIM_Reconstruction.txt" />
     
-    <time name="time" long_name="Year" type="real" units="years since 0000-01-01"/>
+    <time name="time" long_name="Year" type="real" units="year"/>
    
     <real name="Irradiance" long_name="Total Solar Irradiance" units="W/m^2"/>
     

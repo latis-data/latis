@@ -1,5 +1,5 @@
 {"function_of_functions": {
-"samples": [{"unknown": 0, "samples": [{"unknown": 10, "unknown": 0.0},
+"function_of_functions": [{"unknown": 0, "samples": [{"unknown": 10, "unknown": 0.0},
 {"unknown": 11, "unknown": 1.0},
 {"unknown": 12, "unknown": 2.0}]},
 {"unknown": 1, "samples": [{"unknown": 10, "unknown": 10.0},

@@ -17,7 +17,7 @@ class AsciiWriter extends TextWriter {
    */
   override def makeTuple(tuple: Tuple): String = tuple match {
     case Sample(d, r) => varToString(d) + " -> " + varToString(r)
-    case Tuple(vars) => vars.map(varToString(_)).mkString("(", delimiter + newLine, ")")
+    case Tuple(vars) => vars.map(varToString(_)).mkString("(", delimiter, ")")
   }
   
   /**
@@ -25,7 +25,7 @@ class AsciiWriter extends TextWriter {
    */
   override def makeFunction(function: Function): String = {
     indent += 5
-    val s = function.iterator.map(varToString(_)).mkString(newLine + " "*indent)
+    val s = function.iterator.map(varToString(_)).mkString("", newLine + " "*indent, "")
     indent -= 5
     s
   }

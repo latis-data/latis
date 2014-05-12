@@ -1,5 +1,5 @@
 attributes {
-    unknown{
+    tuple_of_functions{
         samples{
             myInt0{
             }

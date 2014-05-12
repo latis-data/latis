@@ -20,27 +20,17 @@ class TestJsonWriter {
   var tmpFile = java.io.File.createTempFile("json", "test")
   tmpFile.deleteOnExit
   
-  val TsmlNames = List("scalar", "tsi","dap2")
- 
-  val fof = Dataset(TestNestedFunction.function_of_functions,Metadata("function_of_functions"))
-  val tof = Dataset(TestNestedFunction.tuple_of_functions,Metadata("tuple_of_functions"))
-  val datasets = List(fof, tof)
-    
-  @Test
-  def test_tsmls {
-    for(name <- TsmlNames) {
-    	test(getTsmlDataset(name),"json")
-    }
-  }
+  val fof = TestNestedFunction.function_of_functions
+  val tof = TestNestedFunction.tuple_of_functions
+  
+  val names = List("scalar", "tsi","dap2", fof, tof)
   
   @Test
-  def test_others {
-    for(ds <- datasets){
-      test(ds,"json")
-    }
+  def test_sets {
+    for(name <- names) test_json(getDataset(name),"json")
   }
   
-  def test(ds: Dataset, suffix: String) {
+  def test_json(ds: Dataset, suffix: String) {
     val fos = new FileOutputStream(tmpFile)
     val name = ds.getName
     Writer(fos,suffix).write(ds)
@@ -51,22 +41,24 @@ class TestJsonWriter {
     assert(s.isEmpty)
   }
   
-  def getTsmlDataset(name: String): Dataset = TsmlReader(s"datasets/test/$name.tsml").getDataset
-  
+  def getDataset(name: Object): Dataset = name match {
+    case s: String => TsmlReader(s"datasets/test/$s.tsml").getDataset
+    case v: Variable => Dataset(v,Metadata(v.getName))
+  }  
   
   //@Test
   def print_json {
     val reader = TsmlReader("datasets/test/scalar.tsml")
     //val ds = reader.getDataset()
-    val ds = tof
+    val ds = Dataset(tof,Metadata(tof.getName))
     Writer.fromSuffix("json").write(ds)
   }
   
   //@Test 
   def write_to_file {
-    val fos = new DataOutputStream(new FileOutputStream(new File("src/test/resources/datasets/data/tuple_of_functions/json")))
+    val fos = new DataOutputStream(new FileOutputStream(new File("src/test/resources/datasets/data/function_of_functions/json")))
     //val ds = TsmlReader("datasets/test/scalar.tsml").getDataset
-    val ds = tof
+    val ds = Dataset(fof,Metadata(fof.getName))
     Writer(fos,"json").write(ds)
     fos.close()
   }

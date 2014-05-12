@@ -12,7 +12,7 @@ class TestImageWriter {
   def testPng{
     val file = new File("/tmp/latis_image_writer_test.png")
     val fos = new FileOutputStream(file)
-    val ds = TsmlReader("datasets/test/international_sunspot_number.tsml").getDataset
+    val ds = TsmlReader("datasets/test/sorce_tsi_24hr.tsml").getDataset
     Writer(fos, "png").write(ds)
     fos.close()
   }
@@ -20,7 +20,7 @@ class TestImageWriter {
   //@Test
   def testFileWriter{
     val file = new File("/tmp/latis_image_writer_test.png")
-    val ds = TsmlReader("datasets/test/international_sunspot_number.tsml").getDataset
+    val ds = TsmlReader("datasets/test/historical_tsi.tsml").getDataset
     Writer(file.toString).write(ds)
   }
 

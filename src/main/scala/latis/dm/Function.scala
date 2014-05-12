@@ -65,6 +65,11 @@ object Function {
     Function((ds zip rs).map(s => Sample(s._1, s._2)))
   }
   
+  def apply(ds: Seq[Variable], rs: Seq[Variable], md: Metadata): Function = {
+    //TODO: assert same length?
+    Function((ds zip rs).map(s => Sample(s._1, s._2)), md)
+  }
+  
   def fromValues(vals: Seq[Seq[Double]]): Function = Function.fromValues(vals.head, vals.tail: _*)
   
   def fromValues(dvals: Seq[Double], vals: Seq[Double]*): Function = {
