@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="values">
+    <adapter class="latis.reader.tsml.AsciiAdapter"
+             delimiter="\s+"
+             commentCharacter="#"
+             location="datasets/test/mixed.txt" />
+    
+    <time name="myTime" units="yyyy/MM/dd" type="text" length="10"/>
+   
+    <integer name="myInt">
+      
+    </integer>
+    
+    <real    name="myReal"/>
+    <text    name="myText"/>
+    
+  </dataset>
+
+</tsml>
+
+<!--
+how do we add values to the model
+describe orig dataset 
+aggregate?
+ 
+<integer name="foo">
+ <values>10 11 12</values>
+</integer>
+ds1: i -> foo
+ds2: i -> bar from file
+ds3 = agg(ds1, ds2) => foo -> bar
+what kind of aggregation would that be?
+same index domain so like "join"
+i -> (foo, bar)
+then factor out foo:
+foo -> bar
+
+<values start="10" stride="1"/>
+impl as DomainSet
+or some other type of Data
+  Generator: x <- Range(...)
+not just for domain
+just worry about doing this for domains for now?
+special handling to make a DomainSet out of it
+
+concatenate
+merge
+join (left, right)
+union
+intersect
+conglomerate
+
+combine
+fuse
+connect
+marry
+append
+prepend
+attach
+hook together
+meet
+mate
+
+
+-->
