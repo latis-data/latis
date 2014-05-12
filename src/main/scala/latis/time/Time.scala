@@ -80,13 +80,16 @@ object Time {
     cal.getTimeInMillis()
   }
   
-  //no data, used as a template in adapters
+  //may have no data, used as a template in adapters
   def apply(md: Metadata, data: Data = EmptyData): Time = {
+  //def apply(md: Metadata): Time = {
     var metadata = md
     val scale = md.get("units") match {
       case Some(u) => TimeScale(u)
       case None => {
         //Use default time scale, add units to metadata
+        //TODO: if type is text, set units to ISO
+        
         metadata = new VariableMetadata(md.getProperties + ("units" -> TimeScale.DEFAULT.toString))
         TimeScale.DEFAULT
       }
@@ -94,13 +97,19 @@ object Time {
     //Mixin the appropriate type
     md.get("type") match {
       case Some(s) => s.toLowerCase match {
-        case "real" => new Time(scale, md, data) with Real
-        case "integer" => new Time(scale, md, data) with Integer
-        case "text" => new Time(scale, md, data) with Text
+        case "real" => new Time(scale, metadata, EmptyData) with Real
+        case "integer" => new Time(scale, metadata, EmptyData) with Integer
+        case "text" => {
+          //TODO: Use the units length to define the text length, but units from above not ISO
+          //TODO: what if the metadata already defines the text length?
+          //val length = metadata("units").length
+          //val md2 = new VariableMetadata(md.getProperties + ("length" -> length.toString))
+          new Time(scale, metadata, EmptyData) with Text
+        }
         case _ => throw new RuntimeException("Unsupported Time type: " + s)
       }
       //default to Real
-      case None => new Time(scale, md, data) with Real
+      case None => new Time(scale, md, EmptyData) with Real
     }
   }
   
@@ -157,27 +166,30 @@ object Time {
       case None => md("type") match {
         case "integer" => new Time(TimeScale.DEFAULT, md, Data(value.toLong)) with Integer
         case "real"    => new Time(TimeScale.DEFAULT, md, Data(value.toDouble)) with Real
-        case "text"    => new Time(TimeScale.DEFAULT, md, Data(value)) with Text
+        case "text"    => {
+          new Time(TimeScale.DEFAULT, md, Data(value)) with Text
+        }
         //TODO: add length metadata based on length of units format
-        //  default length of 23 (ISO format)
+        //  default length of 23 (ISO format), but actual unit string for ISO has quotes around T, so 25
+        //  consider time zone? 'Z'
       }
     }
   }
   
     
   //TODO: move to util?
-  def stringsToNumbers(ss: Seq[String]): Seq[AnyVal] = ss.map(stringToNumber(_))
-  def stringToNumber(s: String): AnyVal = {
-    try {s.toLong}  //try converting to Long
-    catch {
-      case e: Exception => {
-        try {s.toDouble}  //try converting to Double
-        catch {
-          case e: Exception => throw new RuntimeException("Can't convert String into number: " + s)
-        }
-      }
-    }
-  }
+//  def stringsToNumbers(ss: Seq[String]): Seq[AnyVal] = ss.map(stringToNumber(_))
+//  def stringToNumber(s: String): AnyVal = {
+//    try {s.toLong}  //try converting to Long
+//    catch {
+//      case e: Exception => {
+//        try {s.toDouble}  //try converting to Double
+//        catch {
+//          case e: Exception => throw new RuntimeException("Can't convert String into number: " + s)
+//        }
+//      }
+//    }
+//  }
   
   
 //TODO: 
