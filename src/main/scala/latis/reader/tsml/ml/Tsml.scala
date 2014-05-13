@@ -78,6 +78,9 @@ object Tsml {
       case null => "file:" + scala.util.Properties.userDir + File.separator + path //relative file path
     }
     //TODO: resolve relative url from LatisProperties, e.g. dataset.dir
+    //TODO: apply same logic with dataset.dir prepended, but avoid inf loop
+    //val dsdir = LatisProperties.getOrElse("dataset.dir", "datasets")
+    
     Tsml(new URL(url))
   }
   
