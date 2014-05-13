@@ -28,6 +28,8 @@ import scala.collection.immutable
 import scala.collection.mutable
 import scala.io.Source
 import latis.util.DataUtils
+import latis.reader.tsml.ml.TimeMl
+import latis.time.Time
 
 
 /**
@@ -131,6 +133,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //TODO: support Data values defined in tsml
     val md = makeMetadata(vml)
     vml match {
+      case tml: TimeMl => Some(Time(tml.getType, md))
       case sml: ScalarMl => Some(Scalar(sml.label, md))
       case tml: TupleMl  => Some(Tuple(tml.variables.flatMap(makeOrigVariable(_)), md))
       case fml: FunctionMl => for (domain <- makeOrigVariable(fml.domain); range <- makeOrigVariable(fml.range)) 
