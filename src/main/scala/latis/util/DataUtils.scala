@@ -184,7 +184,7 @@ object DataUtils {
       bb.rewind //reset to the beginning in case we want to reuse it
       v
     }
-    case _: Time    => Time(template.getMetadata, data)
+    case t: Time    => t(data) //Time(template.getMetadata, data)
     case _: Real    => Real(template.getMetadata, data)
     case _: Integer => Integer(template.getMetadata, data)
     case _: Text    => Text(template.getMetadata, data)
@@ -204,7 +204,8 @@ object DataUtils {
       case t: Text => {
         val sb = new StringBuilder
         for (i <- 0 until t.length) sb append bb.getChar
-        Time(template.getMetadata, sb.toString)
+        //Time(template.getMetadata, sb.toString)
+        template(Data(sb.toString))
       }
     }
     
