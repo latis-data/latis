@@ -48,7 +48,7 @@ object TimeScale {
   
   /**
    * Make TimeScale from "unit since epoch" or time format String.
-   * Assume Native TimeScaleType (no leap second consideration).
+   * Assume Native TimeScaleType (no leap second consideration), for now.
    */
   def apply(scale: String): TimeScale = {
     val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """(-?[0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
@@ -56,7 +56,8 @@ object TimeScale {
       case regex(unit, epoch) => TimeScale(epoch, TimeUnit.withName(unit), TimeScaleType.NATIVE)
       case _ => {
         //assume formatted time (http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html)
-        TimeScale.JAVA
+        //TODO: test for valid TimeFormat
+        TimeScale.DEFAULT
       }
     }
   }
