@@ -15,7 +15,7 @@ class HtmlWriter extends TextWriter {
   
   override def makeHeader(dataset: Dataset): String = {
     val sb = new StringBuilder
-    val name = dataset.getMetadata("long_name").get
+    val name = dataset.getMetadata("long_name").getOrElse(dataset.getName)
     sb append "<!DOCTYPE html>"
     sb append "\n<html lang=\"en-us\">"
     sb append "\n<head>"
@@ -33,7 +33,7 @@ class HtmlWriter extends TextWriter {
   def writeBody(dataset: Dataset) = printWriter.print(makeBody(dataset))
   
   def makeBody(dataset: Dataset): String = {
-    val name = dataset.getMetadata("long_name").get
+    val name = dataset.getMetadata("long_name").getOrElse(dataset.getName)
     val sb = new StringBuilder
     sb append "\n<body>"
     sb append s"\n<h1>$name</h1>"
@@ -84,23 +84,14 @@ class HtmlWriter extends TextWriter {
     sb.toString
   }
   
-  def image(dataset: Dataset): String = {
-    val sb = new StringBuilder
-    val file = new File("/tmp/html_image.png")
-    file.createNewFile
-    val fos = new FileOutputStream(file)
-    val ds = TsmlReader("datasets/test/historical_tsi.tsml").getDataset
-    Writer(fos, "png").write(ds)
-    fos.close()
-    sb append "\n<img src=\"" + file + "\" alt=\"no image found\">"
-    sb.toString
-  }
-
   def queryForms(dataset: Dataset) = {
     val sb = new StringBuilder
     sb append "\n<h2>Data Set Query Form</h2>"
     for(v <- dataset.getVariables) sb append makeForm(v)
-    sb append "\nSelect Output Type: <select id=\"output\"><option value=\"asc\">asc</option><br/><option value=\"bin\">bin</option><br/><option value=\"csv\">csv</option><br/><option value=\"das\">das</option><br/><option value=\"dds\">dds</option><br/><option value=\"dods\">dods</option><br/><option value=\"html\">html</option><option value=\"info\">info</option><option value=\"json\">json</option><br/><option value=\"jsond\">jsond</option><br/><option value=\"meta\">meta</option><option value=\"png\">png</option><option value=\"txt\">txt</option><br/></select><br/>\n<input type=\"button\" value=\"Submit\" onclick=\"handle_dataset_request()\"/>"
+    sb append "\nSelect Output Type: <select id=\"output\">"
+    val suffix = List("asc", "bin", "csv", "das", "dds", "dods", "html", "info", "json", "jsond", "meta", "png", "txt")
+    for(suf <- suffix) sb append "<option value=\"" + suf + "\">" + suf + "</option><br/>"
+    sb append "</select><br/>\n<input type=\"button\" value=\"Submit\" onclick=\"handle_dataset_request()\"/>"
     sb.toString
   }
   

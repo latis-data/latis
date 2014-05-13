@@ -6,22 +6,26 @@ import latis.reader.tsml.TsmlReader
 import java.io.File
 import java.io.FileOutputStream
 
-class TestImageWriter {
-
+class TestImageWriter extends WriterTest {
+  
+  override val names = List("scalar", "dap2", "tsi")
+  
   //@Test
-  def testPng{
-    val file = new File("/tmp/latis_image_writer_test.png")
-    val fos = new FileOutputStream(file)
-    val ds = TsmlReader("datasets/test/sorce_tsi_24hr.tsml").getDataset
-    Writer(fos, "png").write(ds)
-    fos.close()
+  def test_png {
+    for(name <- names) test_writer(getDataset(name),"png")
   }
   
   //@Test
-  def testFileWriter{
+  def writeToTestFile{
     val file = new File("/tmp/latis_image_writer_test.png")
-    val ds = TsmlReader("datasets/test/historical_tsi.tsml").getDataset
+    val ds = getDataset("historical_tsi")
     Writer(file.toString).write(ds)
+  }
+
+  //@Test 
+  def write_image_file {
+    for(name <- names)
+    write_to_file(name, "png")
   }
 
 }

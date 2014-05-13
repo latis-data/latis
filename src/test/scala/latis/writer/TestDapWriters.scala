@@ -10,55 +10,25 @@ import java.io.File
 import latis.dm._
 import latis.metadata.Metadata
 
-class TestDapWriters {
-
-  var tmpFile = java.io.File.createTempFile("writer", "test")
-  tmpFile.deleteOnExit
-    
-  val fof = TestNestedFunction.function_of_functions
-  val tof = TestNestedFunction.tuple_of_functions
-  
-  val names = List("scalar", "tsi","dap2", fof, tof)
+class TestDapWriters extends WriterTest{
   
   @Test
-  def test_sets {
+  def test_dap {
     for(name <- names) {
-      test_dap(getDataset(name),"das")
-      test_dap(getDataset(name),"dds")
-      test_dap(getDataset(name),"dods")
+      test_writer(getDataset(name),"das")
+      test_writer(getDataset(name),"dds")
+      test_writer(getDataset(name),"dods")
     }
-  }
-  
-  def test_dap(ds: Dataset, suffix: String) {
-    val fos = new FileOutputStream(tmpFile)
-    val name = ds.getName
-    Writer(fos,suffix).write(ds)
-    fos.close()
-    val s = Source.fromFile(tmpFile).getLines
-    val t = Source.fromFile(s"src/test/resources/datasets/data/$name/$suffix").getLines
-    while(t.hasNext) assertEquals(t.next, s.next)
-    assert(s.isEmpty)
-  }
-  
-  def getDataset(name: Object): Dataset = name match {
-    case s: String => TsmlReader(s"datasets/test/$s.tsml").getDataset
-    case v: Variable => Dataset(v,Metadata(v.getName))
   }
   
   //@Test
   def print_dap {
-    val reader = TsmlReader("datasets/test/historical_tsi.tsml")
-    val ds = reader.getDataset()
-    //val ds = Dataset(tof,Metadata(tof.getName)) 
-    Writer.fromSuffix("dds").write(ds)
+    print(fof, "dds")
   }
   
   //@Test 
-  def write_dap {
-    val fos = new DataOutputStream(new FileOutputStream(new File("src/test/resources/datasets/data/function_of_functions/das")))
-    //val ds = TsmlReader("datasets/test/tsi.tsml").getDataset
-    val ds = Dataset(fof,Metadata(fof.getName)) 
-    Writer(fos,"das").write(ds)
-    fos.close()
+  def write_dap_file {
+    write_to_file(fof, "dds")
   }
+  
 }

@@ -32,7 +32,7 @@ class ImageWriter extends FileWriter{
   def writeFile(dataset: Dataset, file: File) {
     plotDataset(dataset)
     if(plotIndex>3) plot.setFixedRangeAxisSpace(new AxisSpace)
-    chart = new JFreeChart(dataset.getName, plot)
+    chart = new JFreeChart(dataset.getMetadata("long_name").getOrElse(dataset.getName), plot)
     ChartUtilities.writeBufferedImageAsPNG(new FileOutputStream(file), chart.createBufferedImage(500, 300))
   }
 
@@ -77,17 +77,12 @@ class ImageWriter extends FileWriter{
   }
   
   def makeSeries(a: Variable, b: Scalar, data: scala.collection.Map[String,Array[Double]]): XYSeries = {
-    val mv = {
-      try b.getMetadata("missing_value").get
-      catch {
-        case e: Exception => "None"
-      }
-    }
+    val mv = b.getMetadata.get("missing_value").getOrElse("") 
     val x = data(a.getName)
     val y = data(b.getName)
     val series = new XYSeries(b.getName)
     for(i <- 0 until x.length) {
-      if (mv=="None")
+      if (mv=="")
         series.add(x(i),y(i))
       else if (y(i)!=mv.toDouble)
         series.add(x(i),y(i)) 

@@ -10,21 +10,22 @@ import java.io.File
 import latis.dm._
 import latis.metadata.Metadata
 
-class TestAsciiWriter extends WriterTest{
-  
+class TestTextWriter extends WriterTest{
+
   @Test
-  def test_ascii {
-    for(name <- names) test_writer(getDataset(name),"asc")
+  def test_txt {
+    for(name <- names) test_writer(getDataset(name),"txt")
   }
   
   //@Test
-  def print_asc {
-    print(fof, "asc")
+  def print_txt {
+    print(fof, "txt")
   }
   
   //@Test 
-  def write_asc_file {
-    write_to_file(fof, "asc")
+  def write_txt_file {
+    for(name <- names)
+    write_to_file(name, "txt")
   }
   
 }

@@ -4,13 +4,22 @@ import org.junit._
 import latis.reader.tsml.TsmlReader
 import latis.ops.Selection
 
-class TestInfoWriter {
+class TestInfoWriter extends WriterTest{
+  
+  @Test
+  def test_info {
+    for(name <- names) test_writer(getDataset(name),"info")
+  }
   
   //@Test
-  def write_info {
-    val reader = TsmlReader("datasets/test/tsi.tsml")
-    val ds = reader.getDataset()
-    Writer.fromSuffix("info").write(ds)
+  def print_info {
+    print(fof, "info")
+  }
+  
+  //@Test 
+  def write_info_file {
+    for(name <- names)
+    write_to_file(name, "info")
   }
 
 }
