@@ -55,14 +55,15 @@ class JsonWriter extends TextWriter {
     case Text(s)    => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters      
   }
   
-  override def makeSample(sample: Sample): String = {
-    val Sample(d, r) = sample
-    val vars = d match {
-      case _: Index => r.toSeq //drop Index domain
-      case _ => d.toSeq ++ r.toSeq
-      //TODO: breaks for nested Function,  nested tuples?
+  /**
+   * Represent a Sample like a Tuple except if the domain is an Index.
+   */
+  override def makeSample(sample: Sample): String = sample match {
+    case Sample(_: Index, r) => r match {
+      case tup: Tuple => makeTuple(tup) //no label, for now //TODO: include label if tuple has name
+      case _ => varToString(r)
     }
-    vars.map(varToString(_)).mkString("{", ", ", "}") //note, sample shouldn't have name
+    case Sample(d, r) => "{" + varToString(d) + ", " + varToString(r) + "}" //no label for sample
   }
     
   /**
