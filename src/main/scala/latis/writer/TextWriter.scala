@@ -19,6 +19,8 @@ import java.io.PrintWriter
  * Generic writer for tabulated ASCII output.
  */
 class TextWriter extends Writer {
+  //TODO: consider putting make* methods (that return Strings and require no state) in companion object so others can use them
+  //  e.g. JsonMetadataAndDataWriter needs content from two
   
   private[this] lazy val _writer = new PrintWriter(getOutputStream)
   def printWriter: PrintWriter = _writer
