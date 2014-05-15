@@ -1,6 +1,7 @@
 //Gradle build for core LaTiS code.
 
 apply plugin: 'scala'
+apply plugin: 'eclipse'
 apply plugin: 'ivy-publish'
 
 //Define the release version. Used for published jar.
@@ -43,6 +44,9 @@ dependencies {
 	
 	//Support for writing png images
 	compile 'jfree:jfreechart:1.0.12'
+	
+	//iCalendar support
+	compile 'net.sf.biweekly:biweekly:0.3.2'
 }
 
 
