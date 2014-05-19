@@ -50,9 +50,9 @@ object TestDataset {
 //  def tuple_scalar
 //  
 
-  def function_of_scalar_with_data_from_kids = {
-    Dataset(Function.fromValues(List(List(0.0, 1.0, 2.0), List(0.0, 1.0, 2.0))))
-  }
+//  def function_of_scalar_with_data_from_kids = {
+//    Dataset(Function.fromValues(List(List(0.0, 1.0, 2.0), List(0.0, 1.0, 2.0))))
+//  }
 
   def function_of_scalar_with_iterable_data = {
     val samples = List(Sample(Real(0), Real(0)), 
@@ -61,9 +61,9 @@ object TestDataset {
     Dataset(Function(samples))
   }
 
-  def function_of_tuple_with_data_from_kids = {
-    Dataset(Function.fromValues(List(List(0.0, 1.0, 2.0), List(0.0, 1.0, 2.0), List(10.0, 11.0, 12.0))))
-  }
+//  def function_of_tuple_with_data_from_kids = {
+//    Dataset(Function.fromValues(List(List(0.0, 1.0, 2.0), List(0.0, 1.0, 2.0), List(10.0, 11.0, 12.0))))
+//  }
 
   def function_of_tuple_with_iterable_data = {
     val samples = List(Sample(Real(0), Tuple(Real(0), Real(10))), 

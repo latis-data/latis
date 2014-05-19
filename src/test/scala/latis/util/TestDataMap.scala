@@ -33,21 +33,21 @@ class TestDataMap {
     assertEquals(1000.0, map("myRealTime")(0), 0.0)
   }
   
-  @Test
-  def function_of_scalar_with_data_from_kids {
-    val map = DataMap.toDoubleMap(TestDataset.function_of_scalar_with_data_from_kids)
-    //for ((n,v) <- map; d <- v) println(n + ": " + d)
-    assertEquals(2.0, map("domain")(2), 0.0)
-    assertEquals(0.0, map("range")(0), 0.0)
-  }
-  
-  @Test
-  def doubles_from_function_of_scalar_with_data_from_kids {
-    val ds = DataMap.toDoubles(TestDataset.function_of_scalar_with_data_from_kids)
-    //for (a <- ds; d <- a) println(d)
-    assertEquals(2.0, ds(0)(2), 0.0)
-    assertEquals(0.0, ds(1)(0), 0.0)
-  }
+//  @Test
+//  def function_of_scalar_with_data_from_kids {
+//    val map = DataMap.toDoubleMap(TestDataset.function_of_scalar_with_data_from_kids)
+//    //for ((n,v) <- map; d <- v) println(n + ": " + d)
+//    assertEquals(2.0, map("domain")(2), 0.0)
+//    assertEquals(0.0, map("range")(0), 0.0)
+//  }
+//  
+//  @Test
+//  def doubles_from_function_of_scalar_with_data_from_kids {
+//    val ds = DataMap.toDoubles(TestDataset.function_of_scalar_with_data_from_kids)
+//    //for (a <- ds; d <- a) println(d)
+//    assertEquals(2.0, ds(0)(2), 0.0)
+//    assertEquals(0.0, ds(1)(0), 0.0)
+//  }
   
   @Test
   def doubles_from_function_of_tuple_with_mixed_types {

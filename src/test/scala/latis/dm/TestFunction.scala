@@ -23,13 +23,13 @@ class TestFunction {
 
 object TestFunction {
 
-  def function_with_one_sample_of_scalar_with_data_from_kids = {
-    Function.fromValues(List(List(0.0), List(0.0)))
-  }
-
-  def function_of_scalar_with_data_from_kids = {
-    Function.fromValues(List(List(0.0, 1.0, 2.0), List(0.0, 1.0, 2.0)))
-  }
+//  def function_with_one_sample_of_scalar_with_data_from_kids = {
+//    Function.fromValues(List(List(0.0), List(0.0)))
+//  }
+//
+//  def function_of_scalar_with_data_from_kids = {
+//    Function.fromValues(List(List(0.0, 1.0, 2.0), List(0.0, 1.0, 2.0)))
+//  }
 
   def function_with_one_sample_of_scalar_with_iterable_data = {
     val samples = List(Sample(Real(0), Real(0)))
@@ -43,13 +43,13 @@ object TestFunction {
     Function(samples)
   }
 
-  def function_with_one_sample_of_tuple_with_data_from_kids = {
-    Function.fromValues(List(List(0.0), List(0.0), List(10.0)))
-  }
-
-  def function_of_tuple_with_data_from_kids = {
-    Function.fromValues(List(List(0.0, 1.0, 2.0), List(0.0, 1.0, 2.0), List(10.0, 11.0, 12.0)))
-  }
+//  def function_with_one_sample_of_tuple_with_data_from_kids = {
+//    Function.fromValues(List(List(0.0), List(0.0), List(10.0)))
+//  }
+//
+//  def function_of_tuple_with_data_from_kids = {
+//    Function.fromValues(List(List(0.0, 1.0, 2.0), List(0.0, 1.0, 2.0), List(10.0, 11.0, 12.0)))
+//  }
 
   def function_of_tuple_with_iterable_data = {
     val samples = List(Sample(Real(0), Tuple(Real(0), Real(10))), 

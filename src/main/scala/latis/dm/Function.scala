@@ -73,8 +73,9 @@ object Function {
   /**
    * Construct from a 2D sequence of double values. Assume the first is for a 1D domain.
    */
-  def fromValues(vals: Seq[Seq[Double]]): SampledFunction = Function.fromValues(vals.head, vals.tail: _*)
-    
+//  def fromValues(vals: Seq[Seq[Double]]): SampledFunction = Function.fromValues(vals.head, vals.tail: _*)
+//TODO: assume index function
+  
   /**
    * Construct from a sequence of double values and a sequence of range values for multiple variables.
    */

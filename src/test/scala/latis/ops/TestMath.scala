@@ -29,12 +29,12 @@ class TestMath  {
   }
 
   //@Test
-  def add_double_to_function {
-    val f = TestFunction.function_of_scalar_with_data_from_kids
-    //AsciiWriter.write(f)
-    val f2 = f + 1
-    //AsciiWriter.write(f2)
-    val dd = f2.toDoubles //TODO: breaks without named scalars
-    assertEquals(1.0, dd(1)(0), 0.0)
-  }
+//  def add_double_to_function {
+//    val f = TestFunction.function_of_scalar_with_data_from_kids
+//    //AsciiWriter.write(f)
+//    val f2 = f + 1
+//    //AsciiWriter.write(f2)
+//    val dd = f2.toDoubles //TODO: breaks without named scalars
+//    assertEquals(1.0, dd(1)(0), 0.0)
+//  }
 }
