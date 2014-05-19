@@ -1,5 +1,8 @@
 package latis.util
 
+import scala.collection.Map
+import scala.collection.mutable
+
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Index
@@ -10,9 +13,7 @@ import latis.dm.Scalar
 import latis.dm.Text
 import latis.dm.Tuple
 import latis.dm.Variable
-
-import scala.collection.Map
-import scala.collection.mutable
+import latis.time.Time
 
 /**
  * Utility methods for getting convenient data structures out of a Dataset.
@@ -65,6 +66,7 @@ object DataMap {
       //Add double to buffer for Numbers, otherwise NaN
       v match {
         case Number(d) => buffer += d
+        case t:Time => buffer += t.getJavaTime.toDouble
         case _ => buffer += Double.NaN
       }
     }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="historical_tsi" long_name="Historical TSI Reconstruction">
+    <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+             delimiter="\s+"
+             commentCharacter=";"
+             location="/lisird/public/lasp/historical_tsi/TSI_TIM_Reconstruction.txt" />
+    
+    <time name="time" long_name="Year" type="real" units="year"/>
+   
+    <real name="Irradiance" long_name="Total Solar Irradiance" units="W/m^2"/>
+    
+  </dataset>
+
+</tsml>

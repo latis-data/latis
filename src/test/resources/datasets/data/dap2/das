@@ -1,0 +1,26 @@
+attributes {
+    samples{
+        myTime{
+            string alias "time";
+            string units "yyyy/MM/dd";
+            string length "10";
+            string type "text";
+        }
+        unknown{
+            myInt{
+                string missing_value "3";
+                string long_name "myInteger";
+                string units "N";
+            }
+            myReal{
+                string units "m/s^2";
+                string long_name "myReal";
+            }
+            myText{
+                string units "letters";
+                string missing_value "D";
+                string long_name "text";
+            }
+        }
+    }
+}

@@ -46,7 +46,7 @@ object TestNestedFunction {
     
     val data = SampledData(dset1, IterableData(List(s1,s2,s3,s4).iterator, 32))
     
-    Function(domain, range, data = data)
+    Function(domain, range, Metadata("function_of_functions_with_sampled_data"), data)
   }
   
   //TODO: all data in outer Function
@@ -56,13 +56,14 @@ object TestNestedFunction {
     val domain  = (0 until n).map(Integer(Metadata("x"), _))
     val range = for (i <- 0 until n) yield Function((0 until 3).map(j => 
       Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * i + j))))
-    Function(domain, range)
+    Function(domain, range, Metadata("function_of_functions_with_data_in_scalar"))
+
   }
     
   def tuple_of_functions = {
     val fs = for (i <- 0 until 4) yield Function((0 until 3).map(j =>
       Sample(Integer(Metadata("myInt"+i), 10 + j), Real(Metadata("myReal"+i), 10 * i + j))))
-    Tuple(fs)
+    Tuple(fs, Metadata("tuple_of_functions"))
   }
   
   

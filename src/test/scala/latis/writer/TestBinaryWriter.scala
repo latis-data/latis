@@ -10,9 +10,19 @@ import latis.time.Time
 import latis.dm.TestDataset
 import java.io.FileOutputStream
 
-class TestBinaryWriter {
+class TestBinaryWriter extends WriterTest{
   
   var fos: FileOutputStream = null
+    
+  @Test
+  def test_bin {
+    for(name <- names) test_writer(getDataset(name),"json")
+  }
+  
+  //@Test 
+  def write_bin_file {
+    write_to_file(tof, "bin")
+  }
   
   @Before
   def open_output_file {
@@ -31,7 +41,7 @@ class TestBinaryWriter {
   def text = Writer(fos, "bin").write(TestDataset.text)
   
   //@Test
-  def test = Writer(fos, "bin").write(TestDataset.index_function)
+  def testb = Writer(fos, "bin").write(TestDataset.index_function)
   
   //@Test 
   def empty_dataset = Writer(fos, "bin").write(TestDataset.empty)

@@ -53,7 +53,7 @@ class BinaryWriter extends Writer {
     case _: Index   => bb //don't write index
     case Integer(l) => bb.putLong(l)
     case Real(d)    => bb.putDouble(d)
-    case Text(s)    => ??? //TODO: see JdbcAdapter
+    case Text(s)    => bb.put(s.getBytes()) //??? //TODO: see JdbcAdapter
     case Binary(b)  => bb.put(b)
   }
   
@@ -61,8 +61,12 @@ class BinaryWriter extends Writer {
     for (v <- tuple.getVariables) buildVariable(v, bb)
     bb
   }
-  
-  def buildFunction(function: Function, bb: ByteBuffer): ByteBuffer = ??? //TODO: nested function
+
+  //TODO: consider DataUtils
+  def buildFunction(function: Function, bb: ByteBuffer): ByteBuffer = {
+    for(s <- function.iterator) buildVariable(s,bb) //nested function
+    bb
+  }
 }
 
 

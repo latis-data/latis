@@ -84,6 +84,11 @@ object Function {
    */
 //  def fromValues(vals: Seq[Seq[Double]]): SampledFunction = Function.fromValues(vals.head, vals.tail: _*)
 //TODO: assume index function
+
+  def apply(ds: Seq[Variable], rs: Seq[Variable], md: Metadata): Function = {
+    //TODO: assert same length?
+    Function((ds zip rs).map(s => Sample(s._1, s._2)), md)
+  }
   
   /**
    * Construct from a sequence of double values and a sequence of range values for multiple variables.

@@ -10,7 +10,7 @@ import latis.ops.filter.Selection
 
 class TestCalendarAdapter {
   
-  @Test
+  //@Test
   def ical {
     val ops = ArrayBuffer[Operation]()
     ops += Selection("time >= 2014-05-01")

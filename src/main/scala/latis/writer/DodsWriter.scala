@@ -1,16 +1,11 @@
 package latis.writer
 
-import latis.dm.Dataset
-import latis.dm.Function
-import latis.dm.Variable
-
-import java.io.DataOutputStream
+import latis.dm._
 import java.nio.ByteBuffer
+import java.io.DataOutputStream
+import java.io.PrintWriter
 
-/**
- * Write a Dataset's DAP2 Data Dataset Descriptor Structure.
- */
-class DataDdsWriter extends BinaryWriter {
+class DodsWriter extends BinaryWriter {
   
   private[this] lazy val writer = new DataOutputStream(getOutputStream)
 
@@ -26,13 +21,13 @@ class DataDdsWriter extends BinaryWriter {
   
   def writeHeader(dataset: Dataset) = {
     val w = new DdsWriter()
-    val s = w.makeHeader(dataset) + dataset.getVariables.map(w.varToString(_)).mkString("") + w.makeFooter(dataset) + "Data:\n"
+    val s = w.makeHeader(dataset) + dataset.getVariables.map(w.varToString(_)).mkString("") + w.makeFooter(dataset) + "\nData:\n"
     writer.write(s.getBytes)    
   }
 
   override def writeVariable(variable: Variable) = variable match {
-    case Function(it) => {
-      for (sample <- it){
+    case f: Function => {
+      for (sample <- f.iterator){
         writer.write(START_OF_INSTANCE)
         writer.write(varToBytes(sample))
       }
