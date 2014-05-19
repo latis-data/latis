@@ -2,7 +2,7 @@
 <tsml>
 
   <dataset name="dap2">
-    <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+    <adapter class="latis.reader.tsml.AsciiAdapter"
              delimiter="\s+"
              commentCharacter="#"
              location="datasets/test/mixed.txt" />

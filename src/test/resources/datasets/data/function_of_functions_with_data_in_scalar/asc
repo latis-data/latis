@@ -1,4 +1,4 @@
-function_of_functions: (unknown -> unknown -> unknown)
+function_of_functions_with_data_in_scalar: (x -> y -> z)
 0 -> 10 -> 0.0
      11 -> 1.0
      12 -> 2.0

@@ -14,7 +14,7 @@ import latis.data.value.DoubleValue
 
 class TestNestedFunction {
 
-  @Test
+  //@Test
   def function_of_functions {
     //val ds = Dataset(TestNestedFunction.function_of_functions)
     val ds = Dataset(TestNestedFunction.function_of_functions_with_sampled_data)

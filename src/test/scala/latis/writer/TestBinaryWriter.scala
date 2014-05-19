@@ -1,6 +1,5 @@
 package latis.writer
 
-import latis.dm.implicits._
 import org.junit._
 import Assert._
 import com.typesafe.scalalogging.slf4j.Logging
@@ -16,12 +15,12 @@ class TestBinaryWriter extends WriterTest{
     
   @Test
   def test_bin {
-    for(name <- names) test_writer(getDataset(name),"json")
+    for(name <- names) test_writer(getDataset(name),"bin")
   }
   
   //@Test 
   def write_bin_file {
-    write_to_file(tof, "bin")
+    write_to_file(fof, "bin")
   }
   
   @Before

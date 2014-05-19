@@ -1,0 +1,12 @@
+attributes {
+    function_of_functions_with_data_in_scalar{
+        x{
+        }
+        samples{
+            y{
+            }
+            z{
+            }
+        }
+    }
+}

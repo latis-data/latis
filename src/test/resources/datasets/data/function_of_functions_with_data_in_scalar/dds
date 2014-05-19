@@ -1,0 +1,9 @@
+Dataset {
+    Sequence {
+        Int64 x;
+        Sequence {
+            Int64 y;
+            Float64 z;
+        } samples;
+    } function_of_functions_with_data_in_scalar;
+} function_of_functions_with_data_in_scalar;

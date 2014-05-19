@@ -19,7 +19,7 @@ class TestMetadataWriter extends WriterTest{
   
   //@Test
   def print_meta {
-    print(fof, "meta")
+    print("scalar", "meta")
   }
   
   //@Test 

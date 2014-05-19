@@ -1,5 +1,4 @@
 import latis.dm._
-import latis.dm.implicits._
 import latis.data._
 import org.junit._
 import Assert._
@@ -19,7 +18,6 @@ import java.sql._
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
 import scala.collection.mutable.ArrayBuffer
-import latis.ops._
 import latis.dm._
 import latis.writer.Writer
 

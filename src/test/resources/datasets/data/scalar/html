@@ -26,6 +26,7 @@ No description available
     samples{
         foo{
             string alias "time";
+            string units "milliseconds since 1970-01-01";
         }
         ssn{
         }
@@ -34,7 +35,7 @@ No description available
 </blockquote>
 </div>
 <h2>Data Set Query Form</h2>
-<form name="foo">foo (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+<form name="foo">foo (milliseconds since 1970-01-01)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
 <form name="ssn">ssn (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
 Select Output Type: <select id="output"><option value="asc">asc</option><br/><option value="bin">bin</option><br/><option value="csv">csv</option><br/><option value="das">das</option><br/><option value="dds">dds</option><br/><option value="dods">dods</option><br/><option value="html">html</option><br/><option value="info">info</option><br/><option value="json">json</option><br/><option value="jsond">jsond</option><br/><option value="meta">meta</option><br/><option value="png">png</option><br/><option value="txt">txt</option><br/></select><br/>
 <input type="button" value="Submit" onclick="handle_dataset_request()"/>
