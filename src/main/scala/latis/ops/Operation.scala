@@ -64,7 +64,9 @@ trait Operation {
    * Default operation for a Function. Encapsulate with operation in WrappedFunction
    * to be applied to each sample as it iterates.
    */
-  def applyToFunction(function: Function): Option[Variable] = Some(WrappedFunction(function, this))
+  def applyToFunction(function: Function): Option[Variable] = {
+    Some(WrappedFunction(function, this))
+  }
 
 }
 

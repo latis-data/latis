@@ -14,6 +14,17 @@ import latis.ops.Operation
 class Filter extends Operation {
   //TODO: see scala's withFilter, FilterMonadic
   
+  /*
+   * Nested Function
+   * if inner domain value is filtered out, just drop the internal sample
+   * if range value is filtered out, drop entire outer sample?
+   *   need to maintain same samples if cartesian
+   * 
+   * do we need to process entire inner Function instead of trying to wrap it?
+   * 
+   * 
+   */
+  
   /**
    * Default filter for Samples. Handle like any other Tuple: exclude if any element is invalid.
    */

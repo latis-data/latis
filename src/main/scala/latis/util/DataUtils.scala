@@ -233,6 +233,10 @@ object DataUtils {
     case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _)), template.getMetadata)
 
     //TODO: deal with nested Function
-    case f: Function => ???
+    case f: Function => {
+      
+      
+      ???
+    }
   }
 }
