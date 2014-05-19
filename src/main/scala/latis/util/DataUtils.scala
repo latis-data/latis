@@ -165,7 +165,10 @@ object DataUtils {
    * Construct a Sample from the template with the Data.
    */
   def dataToSample(data: Data, template: Sample): Sample = {
-    //TODO: require SampleData?
+//    data match {
+//TODO: could use Tuple with Data
+//    case sd: SampleData => 
+
     val bb = data.getByteBuffer
     val domain = buildVarFromBuffer(bb, template.domain)
     val range = buildVarFromBuffer(bb, template.range)
@@ -190,8 +193,11 @@ object DataUtils {
     case _: Text    => Text(template.getMetadata, data)
     case _: Binary  => Binary(template.getMetadata, data)
     
-    //TODO: deal with nested Function
-    case f: Function => ???
+    //deal with nested Function
+    case f: Function => data match {
+      case sd: SampledData => Function(f, sd) //data already structured as SampledData
+      case _ => buildVarFromBuffer(data.getByteBuffer, f) //stitch it together from bytes
+    }
   }
 
   /**
@@ -233,10 +239,16 @@ object DataUtils {
     case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _)), template.getMetadata)
 
     //TODO: deal with nested Function
-    case f: Function => {
-      
-      
-      ???
-    }
+    case f: Function => ???
+//      {
+//      val n = f.getLength
+//      if (n < 0) throw new Error("Function length not defined") //TODO: consider "-n" as unlimited but currently has n
+//      //TODO: warn if 0?
+//      else {
+//        for (i <- 0 until n) {
+//          
+//        }
+//      }
+//    }
   }
 }

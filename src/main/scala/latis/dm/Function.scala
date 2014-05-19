@@ -32,7 +32,16 @@ trait Function extends Variable {
 object Function {
   //TODO: make sure samples are sorted!
   
-  def apply(domain: Variable, range: Variable, md: Metadata = EmptyMetadata, data: SampledData = EmptyData): SampledFunction = new SampledFunction(domain, range, md, data)
+  def apply(domain: Variable, range: Variable, md: Metadata = EmptyMetadata, data: SampledData = EmptyData): SampledFunction = {
+    new SampledFunction(domain, range, md, data)
+  }
+  
+  /**
+   * Construct a Function from the given template (e.g. model from tsml) and data.
+   */
+  def apply(template: Function, data: SampledData): SampledFunction = {
+    new SampledFunction(template.getDomain, template.getRange, template.getMetadata, data)
+  }
   
   /**
    * Construct from Iterator of Samples.
