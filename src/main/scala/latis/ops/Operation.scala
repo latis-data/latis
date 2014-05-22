@@ -20,8 +20,11 @@ trait Operation {
    * Apply this Operation to the given Dataset.
    */
   def apply(dataset: Dataset): Dataset = {
-    Dataset(dataset.getVariables.flatMap(applyToVariable(_)))
-    //TODO: provenance metadata
+    val md = dataset.getMetadata
+    //TODO: delegate to subclass to munge metadata
+    //TODO: add provenance metadata, getProvMsg, append to "history"
+    val vars = dataset.getVariables.flatMap(applyToVariable(_))
+    Dataset(vars, md)
   }
   
   /**

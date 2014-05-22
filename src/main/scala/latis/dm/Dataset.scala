@@ -12,6 +12,7 @@ import scala.Option.option2Iterable
 import scala.collection.Seq
 import scala.collection.immutable
 import latis.ops.Factorization
+import latis.ops.RenameOperation
 
 /**
  * The main container for a dataset. It is a special type of Tuple
@@ -53,6 +54,8 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   def project(proj: Projection): Dataset = proj(this)
   def project(varNames: Seq[String]): Dataset = Projection(varNames)(this)
   def project(vname: String): Dataset = Projection(Seq(vname))(this)
+  
+  def rename(origName: String, newName: String): Dataset = RenameOperation(origName, newName)(this)
   
   //Convenient data dumping methods.
   def toDoubleMap = DataMap.toDoubleMap(this)
