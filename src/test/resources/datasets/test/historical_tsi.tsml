@@ -2,7 +2,7 @@
 <tsml>
 
   <dataset name="historical_tsi" long_name="Historical TSI Reconstruction">
-    <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+    <adapter class="latis.reader.tsml.AsciiAdapter"
              delimiter="\s+"
              commentCharacter=";"
              location="/lisird/public/lasp/historical_tsi/TSI_TIM_Reconstruction.txt" />

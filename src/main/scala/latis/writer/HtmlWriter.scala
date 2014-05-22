@@ -1,9 +1,6 @@
 package latis.writer
 
 import latis.dm._
-import java.io.File
-import java.io.FileOutputStream
-import latis.reader.tsml.TsmlReader
 
 class HtmlWriter extends TextWriter {
   

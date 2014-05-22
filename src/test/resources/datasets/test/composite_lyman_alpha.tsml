@@ -2,7 +2,7 @@
 <tsml>
 
   <dataset name="composite_lyman_alpha" long_name="Composite Solar Lyman-alpha">
-    <adapter class="latis.reader.tsml.IterativeAsciiAdapter"
+    <adapter class="latis.reader.tsml.AsciiAdapter"
              delimiter="\s+"
              commentCharacter=";"
              location="/lisird/public/lasp/lyman_alpha/composite_lya.dat" />

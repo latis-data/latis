@@ -55,7 +55,7 @@ class WriterTest extends Logging {
   //@Test
   def make_test_file {
     val names = List("scalar", "tsi","dap2", fof, tof)
-    val suffixes = List("asc", "bin", "csv", "das", "dds", "dods", "html", "info", "json", "jsond", "meta", "txt")
+    val suffixes = List("asc", "bin", "csv", "das", "dds", "dods", "html", "info", "json", "jsond", "meta", "proto", "txt")
     for(name <- names)
       for(suffix <- suffixes)
         write_to_file(name, suffix)
