@@ -1,0 +1,7 @@
+message Scalar {
+    message Samples {
+        repeated float foo = 1;
+        repeated float ssn = 2;
+    }
+    optional Samples samples = 1;
+}

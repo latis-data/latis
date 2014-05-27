@@ -1,0 +1,11 @@
+message FunctionOfFunctionsWithDataInScalar {
+    message FunctionOfFunctionsWithDataInScalar {
+        repeated int64 x = 1;
+        message Samples {
+            repeated int64 y = 1;
+            repeated float z = 2;
+        }
+        repeated Samples samples = 2;
+    }
+    optional FunctionOfFunctionsWithDataInScalar function_of_functions_with_data_in_scalar = 1;
+}

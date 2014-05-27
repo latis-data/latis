@@ -1,0 +1,25 @@
+message TupleOfFunctions {
+    message TupleOfFunctions {
+        message Samples {
+            repeated int64 myInt0 = 1;
+            repeated float myReal0 = 2;
+        }
+        optional Samples samples = 1;
+        message Samples {
+            repeated int64 myInt1 = 1;
+            repeated float myReal1 = 2;
+        }
+        optional Samples samples = 2;
+        message Samples {
+            repeated int64 myInt2 = 1;
+            repeated float myReal2 = 2;
+        }
+        optional Samples samples = 3;
+        message Samples {
+            repeated int64 myInt3 = 1;
+            repeated float myReal3 = 2;
+        }
+        optional Samples samples = 4;
+    }
+    optional TupleOfFunctions tuple_of_functions = 1;
+}

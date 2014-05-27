@@ -2,7 +2,7 @@ package latis.writer
 
 import latis.dm._
 
-class ProtobufWriter extends TextWriter {
+class ProtoWriter extends TextWriter {
   
   override def makeHeader(dataset: Dataset) = "message " + toCamelCase(dataset.getName) + " {" + newLine
     
@@ -18,8 +18,8 @@ class ProtobufWriter extends TextWriter {
     val name = scalar.getName
     scalar match{
       case _: Index   => ""
-      case _: Real    => indent(count) + "optional float " + name + " = " + tag + ";" + newLine
-      case _: Integer => indent(count) + "optional int32 " + name + " = " + tag + ";" + newLine
+      case _: Real    => indent(count) + "optional double " + name + " = " + tag + ";" + newLine
+      case _: Integer => indent(count) + "optional int64 " + name + " = " + tag + ";" + newLine
       case _: Text    => indent(count) + "optional string " + name + " = " + tag + ";" + newLine
       case _: Binary  => ""
     }
@@ -30,22 +30,24 @@ class ProtobufWriter extends TextWriter {
     scalar match{
       case _: Index   => ""
       case _: Real    => indent(count) + "repeated float " + name + " = " + tag + ";" + newLine
-      case _: Integer => indent(count) + "repeated int32 " + name + " = " + tag + ";" + newLine
+      case _: Integer => indent(count) + "repeated int64 " + name + " = " + tag + ";" + newLine
       case _: Text    => indent(count) + "repeated string " + name + " = " + tag + ";" + newLine
       case _: Binary  => ""
     }
+  }
+  
+  def makeSampleMessage(sample: Sample) = {
+    sample.getVariables.map(varToString(_)).mkString("")
   }
   
   def makeTupleMessage(tuple: Tuple) = {
     val temp = tag
     tag = 0
     count += indentSize
-    val s = tuple match {
-      case Sample(d: Index, r) => varToString(r)
-      case Tuple(vars) => indent(count-indentSize) + "message " + toCamelCase(tuple.getName) + " {" + newLine + 
-                          vars.map(varToString(_)).mkString("") + 
-                          indent(count-indentSize) + "}" + newLine
-    }
+    val vars = tuple.getVariables
+    val s = indent(count-indentSize) + "message " + toCamelCase(tuple.getName) + " {" + newLine + 
+            vars.map(varToString(_)).mkString("") + 
+            indent(count-indentSize) + "}" + newLine
     tag = temp 
     count -= indentSize
     s
@@ -68,6 +70,7 @@ class ProtobufWriter extends TextWriter {
     tag += 1
     variable match {
       case s: Scalar => makeScalarLabel(s)
+      case _: Sample => ""
       case t: Tuple => indent(count) + "optional " + toCamelCase(t.getName) + " " + t.getName + " = " + tag + ";" + newLine
       case f: Function => indent(count) + "optional " + toCamelCase(f.getName) + " " + f.getName + " = " + tag + ";" + newLine
     }
@@ -77,6 +80,7 @@ class ProtobufWriter extends TextWriter {
     tag += 1
     variable match {
       case s: Scalar => makeScalarRep(s)
+      case _: Sample => ""
       case t: Tuple => indent(count) + "repeated " + toCamelCase(t.getName) + " " + t.getName + " = " + tag + ";" + newLine
       case f: Function => indent(count) + "repeated " + toCamelCase(f.getName) + " " + f.getName + " = " + tag + ";" + newLine  
     }
@@ -84,7 +88,7 @@ class ProtobufWriter extends TextWriter {
   
   def makeMessage(variable: Variable): String = variable match{
     case   scalar: Scalar   => ""
-    //case   sample: Sample   => makeSample(sample)
+    case   sample: Sample   => makeSampleMessage(sample)
     case    tuple: Tuple    => makeTupleMessage(tuple)
     case function: Function => makeFunctionMessage(function)
   }
@@ -101,4 +105,6 @@ class ProtobufWriter extends TextWriter {
     string.split('_').map(_.capitalize).mkString("")
   }
     
+  override def mimeType: String = "text/proto" 
+
 }

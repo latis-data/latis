@@ -2,16 +2,16 @@ package latis.writer
 
 import org.junit.Test
 
-class TestProtobufWriter extends WriterTest {
+class TestProtoWriter extends WriterTest {
   
-  //@Test
+  @Test
   def test_proto {
     for(name <- names) test_writer(getDataset(name),"proto")
   }
   
   //@Test
   def print_proto {
-    print(fof, "proto")
+    print("dap2", "proto")
   }
   
   //@Test 

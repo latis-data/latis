@@ -1,0 +1,12 @@
+message Dap2 {
+    message Samples {
+        repeated string myTime = 1;
+        message Unknown {
+            optional int64 myInt = 1;
+            optional double myReal = 2;
+            optional string myText = 3;
+        }
+        repeated Unknown unknown = 2;
+    }
+    optional Samples samples = 1;
+}
