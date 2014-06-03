@@ -14,6 +14,8 @@ class ProtoWriter extends TextWriter {
     makeMessage(variable) + makeOpLabel(variable)
   }
   
+  def varToRepString(variable: Variable) = makeMessage(variable) + makeRepLabel(variable)
+  
   def makeScalarLabel(scalar: Scalar) = {
     val name = scalar.getName
     scalar match{
@@ -37,7 +39,14 @@ class ProtoWriter extends TextWriter {
   }
   
   def makeSampleMessage(sample: Sample) = {
-    sample.getVariables.map(varToString(_)).mkString("")
+    val temp = tag
+    tag = 0
+    val s = sample match {
+      case Sample(d, r: Tuple) => varToRepString(d) + r.getVariables.map(varToRepString(_)).mkString("")
+      case _ => sample.getVariables.map(varToRepString(_)).mkString("")
+    }
+    tag = temp
+    s
   }
   
   def makeTupleMessage(tuple: Tuple) = {
@@ -57,12 +66,11 @@ class ProtoWriter extends TextWriter {
     val temp = tag
     tag = 0
     count += indentSize
-    val x = makeMessage(function.getDomain) + makeRepLabel(function.getDomain)
-    val y = makeMessage(function.getRange) + makeRepLabel(function.getRange)
+    val s = varToRepString(Sample(function.getDomain, function.getRange))
     count -= indentSize
     tag = temp
     
-    indent(count) + "message " + toCamelCase(function.getName) + " {" + newLine + x + y + indent(count) + "}" + newLine
+    indent(count) + "message " + toCamelCase(function.getName) + " {" + newLine + s + indent(count) + "}" + newLine
         
   }
   

@@ -1,12 +1,9 @@
 message Dap2 {
     message Samples {
         repeated string myTime = 1;
-        message Unknown {
-            optional int64 myInt = 1;
-            optional double myReal = 2;
-            optional string myText = 3;
-        }
-        repeated Unknown unknown = 2;
+        repeated int64 myInt = 2;
+        repeated float myReal = 3;
+        repeated string myText = 4;
     }
     optional Samples samples = 1;
 }
