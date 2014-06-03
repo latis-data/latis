@@ -9,6 +9,9 @@ import latis.metadata.Metadata
 import latis.time.Time
 import latis.writer.AsciiWriter
 import latis.writer.Writer
+import latis.data.Data
+import latis.data.SampledData
+import latis.data.seq.DataSeq
 
 class Test2D {
   
@@ -17,9 +20,15 @@ class Test2D {
     AsciiWriter.write(Dataset(v))
   }
   
-//  //@Test
-//  def write_scalar_function_3x3 = write(Test2D.scalar_function_3x3)
-//  
+  //@Test
+  def write_scalar_function_3x3 = write(Test2D.scalar_function_3x3)
+  
+  @Test
+  def scalar_function_3x3 {
+    val data = Test2D.scalar_function_3x3.toDoubles
+    assertEquals(4, data(2)(8), 0.0)
+  }
+  
 //  //@Test
 //  def scalar_function_3x3_length {
 //    val l = Test2D.scalar_function_3x3.getLength
@@ -32,12 +41,17 @@ class Test2D {
  */
 object Test2D {
   
-//  def scalar_function_3x3 = {
-//    val x = Real(List(0.0, 1.0, 2.0))
-//    val y = Real(List(0.0, 1.0, 2.0))
-//    val a = Real((0 until 9).map(_.toDouble))
-//    //TODO: use Seq.tabulate or fill to make Data
-//    Function(Tuple(x,y), a)
-//  }
+  def scalar_function_3x3 = {
+    val x = Integer(Metadata("X"))
+    val y = Integer(Metadata("Y"))
+    val a = Integer(Metadata("A"))
+    
+    val domainData = DataSeq(for (x <- 0 until 3; y <- 0 until 3) yield Data(x) concat Data(y))
+    val rangeData = DataSeq(Seq.tabulate(3, 3)((x,y) => Data(x+y)).flatten)
+    val data = SampledData(domainData, rangeData)
+    
+    Dataset(Function(Tuple(x,y), a, data = data))
+  }
   
+  //TODO: support 2D Seq from Seq.tabulate
 }
