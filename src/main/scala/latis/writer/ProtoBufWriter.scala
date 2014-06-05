@@ -4,8 +4,13 @@ import java.nio.ByteBuffer
 import latis.dm._
 import java.nio.ByteOrder
 import scala.math._
+import java.io.DataOutputStream
 
 class ProtoBufWriter extends BinaryWriter {
+  
+  private lazy val writer = new DataOutputStream(getOutputStream)
+  
+  override def writeVariable(variable: Variable) = writer.write(varToBytes(variable))
   
   override def varToBytes(variable: Variable): Array[Byte] = {
     val bb = ByteBuffer.allocate(getBufSize(variable))
@@ -28,7 +33,16 @@ class ProtoBufWriter extends BinaryWriter {
   }
   
   override def buildSample(sample: Sample, bb: ByteBuffer): ByteBuffer = {
-    for(v <- sample.getVariables) buildVariable(v, bb)
+    val temp = tag
+    tag = 0
+    sample match {
+      case Sample(d, r: Tuple) => {
+        buildVariable(d, bb)
+        for(v <- r.getVariables) buildVariable(v, bb)
+      }
+      case _ => for(v <- sample.getVariables) buildVariable(v, bb)
+    }
+    tag = temp
     bb
   }
   
@@ -57,12 +71,12 @@ class ProtoBufWriter extends BinaryWriter {
   }
   
   def buildVarint(long: Long, bb: ByteBuffer) = {
-    var num = long
-    while((num & (~0x00<<7))!=0x00) {
-      bb.put(((num & 0x7F) | 0x80).toByte)
-      num = num>>>7
+    var n = long
+    while((n & (~0x00<<7))!=0x00) {
+      bb.put(((n & 0x7F) | 0x80).toByte)
+      n = n>>>7
     }
-    bb.put((num & 0x7f).toByte)
+    bb.put((n & 0x7f).toByte)
   }
   
   def buildKey(tag: Int, wtype: Int, bb: ByteBuffer) = {
@@ -80,10 +94,12 @@ class ProtoBufWriter extends BinaryWriter {
         case None => throw new Error("Must declare length of Binary Variable.")
       }
       case Tuple(vars) => vars.map(getBufSize(_)).sum + getBufSize(Integer(vars.map(getBufSize(_)).sum)) + keySize
-      case f: Function => f.getLength * (getBufSize(f.getDomain) + getBufSize(f.getRange)) + getBufSize( Integer(f.getLength * (getBufSize(f.getDomain) + getBufSize(f.getRange))) ) + keySize
+      case f: Function => {
+        f.getLength * (getBufSize(f.getDomain) + getBufSize(f.getRange)) + getBufSize( Integer(f.getLength * (getBufSize(f.getDomain) + getBufSize(f.getRange))) ) + keySize
+      }
     }
   }
-  def keySize = if(tag<15) 1 else 2 + tag/128
+  def keySize = if(tag<16) 1 else (2 + tag/2048)
 
   var tag = 0
   

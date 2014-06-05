@@ -18,17 +18,16 @@ class TestProtoBufWriter extends WriterTest{
   
   //@Test 
   def write_protod_file {
-    for(name <- names)
-    write_to_file(name, "protod")
+    //for(name <- names)
+    write_to_file("tsi", "protod")
   }  
   
   //@Test
   def print_bytes {
     val w = new ProtoBufWriter
-    val ds = Dataset(Tuple(Integer(150), Text("testing")))//getDataset(fof)
+    val ds = getDataset("scalar")
     for(v <- ds.getVariables) {
-      val a = w.varToBytes(v)
-      for(b <- a) println(b.toInt.toHexString.replaceAll("ffffff",""))
+      for(b <- w.varToBytes(v)) println(b.toInt.toHexString.replaceAll("ffffff",""))
     }
   }
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="proto">
+
+    <adapter class="latis.reader.tsml.ProtoBufAdapter"
+    		 delimiter="/s+"
+             location="datasets/data/tsi/protod" />
+             
+    <function length="403">
+      <time name="year" 
+            units="years since 0000-01-01" 
+            long_name="Year"/>
+    
+      <real name="tsi"
+            units="W/m^2"
+            long_name="Total Solar Irradiance"/>
+    </function>
+
+  </dataset>
+
+</tsml>
