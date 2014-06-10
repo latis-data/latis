@@ -22,6 +22,8 @@ trait Scalar extends Variable {
   def getValue: Any
   def getFillValue: Any
   def getMissingValue: Any
+  
+  def isMissing: Boolean
 }
 
 object Scalar {
