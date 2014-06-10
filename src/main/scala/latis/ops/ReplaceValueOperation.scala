@@ -9,7 +9,6 @@ import latis.dm.Real
  * Operation to replace any occurrence of a given numeric value in a Dataset with another.
  */
 class ReplaceValueOperation(v1: ScalaNumericAnyConversions, v2: ScalaNumericAnyConversions) extends Operation {
-  //TODO: name should be a noun?
   //TODO: support text? DataValue?
   //TODO: allow change of type?
 
