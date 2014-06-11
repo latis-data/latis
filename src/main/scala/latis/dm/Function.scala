@@ -101,7 +101,10 @@ object Function {
     }
     val data = SampledData.fromValues(dvals, vals: _*)
 
-    Function(domain, range, data = data)
+    //get length for metadata
+    val md = Metadata(Map("length" -> dvals.length.toString))
+    
+    Function(domain, range, md, data)
   }
   
   /**
