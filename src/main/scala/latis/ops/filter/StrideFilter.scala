@@ -5,11 +5,20 @@ import latis.dm.Sample
 import latis.metadata.Metadata
 import latis.ops.OperationFactory
 
+
+/**
+ * Take every "stride-th" element of a Function in the Dataset.
+ */
 class StrideFilter(val stride: Int) extends Filter {
   
   override def applyToFunction(function: Function) = {
     val it = function.iterator.grouped(stride).map(_(0))
-    val md = Metadata(function.getMetadata.getProperties + ("length" -> it.length.toString))
+    val nlen = function.getLength match {
+      case -1 => throw new Exception("Function has undefined length")
+      case 0 => 0
+      case n => ((n - 1) / stride) + 1
+    }
+    val md = Metadata(function.getMetadata.getProperties + ("length" -> nlen.toString))
 
     Some(Function(function.getDomain, function.getRange, it, md))
   }
