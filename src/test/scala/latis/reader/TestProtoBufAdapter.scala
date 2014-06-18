@@ -2,18 +2,30 @@ package latis.reader
 
 import latis.reader.tsml.ProtoBufAdapter
 import org.junit.Test
+import org.junit.Assert._
 import java.nio.ByteBuffer
 import latis.reader.tsml.ml.Tsml
 import latis.reader.tsml.TsmlReader
 import latis.writer.TextWriter
 import latis.writer.Writer
+import java.io.FileOutputStream
+import scala.io.Source
 
 class TestProtoBufAdapter {
   
-  //@Test
+  var tmpFile = java.io.File.createTempFile("LaTiS", "WriterTest")
+  tmpFile.deleteOnExit
+  
+  @Test
   def test_reader{
-    val ds = TsmlReader("src/test/resources/datasets/test/proto.tsml").getDataset
-    Writer.fromSuffix("asc").write(ds)
+    val fos = new FileOutputStream(tmpFile)
+    val ds = TsmlReader("datasets/test/proto.tsml").getDataset
+    Writer(fos,"txt").write(ds)
+    fos.close()
+    val s = Source.fromFile(tmpFile).getLines
+    val t = Source.fromFile(s"src/test/resources/datasets/data/tsi/txt").getLines
+    while(t.hasNext) assertEquals(t.next, s.next)
+    assert(s.isEmpty)
   }
   
   //@Test

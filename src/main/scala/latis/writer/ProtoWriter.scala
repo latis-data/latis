@@ -2,6 +2,9 @@ package latis.writer
 
 import latis.dm._
 
+/**
+ * Writes the .proto file that describes the dataset but contains no data or metadata.
+ */
 class ProtoWriter extends TextWriter {
   
   override def makeHeader(dataset: Dataset) = "message " + toCamelCase(dataset.getName) + " {" + newLine
@@ -9,24 +12,37 @@ class ProtoWriter extends TextWriter {
   override def makeFooter(dataset: Dataset) = "}"
   
   override def writeVariable(variable: Variable) = printWriter.print(varToString(variable))
-    
+  
   override def varToString(variable: Variable) = {
     makeMessage(variable) + makeOpLabel(variable)
   }
   
+  /**
+   * Provided for repeated variables in functions.
+   */
   def varToRepString(variable: Variable) = makeMessage(variable) + makeRepLabel(variable)
   
-  def makeScalarLabel(scalar: Scalar) = {
+  /**
+   * Matches each scalar type to an appropriate protobuf type:
+   *   Real -> double
+   *   Integer -> int64
+   *   Text -> string
+   *   (Indexes are dropped)
+   */
+  override def makeScalar(scalar: Scalar) = {
     val name = scalar.getName
     scalar match{
       case _: Index   => ""
       case _: Real    => indent(count) + "optional double " + name + " = " + tag + ";" + newLine
       case _: Integer => indent(count) + "optional int64 " + name + " = " + tag + ";" + newLine
       case _: Text    => indent(count) + "optional string " + name + " = " + tag + ";" + newLine
-      case _: Binary  => ""
+      case _: Binary  => indent(count) + "optional bytes " + name + " = " + tag + ";" + newLine
     }
   }
   
+  /**
+   * Makes the label for a repeated scalar.
+   */
   def makeScalarRep(scalar: Scalar) = {
     val name = scalar.getName
     scalar match{
@@ -34,11 +50,14 @@ class ProtoWriter extends TextWriter {
       case _: Real    => indent(count) + "repeated float " + name + " = " + tag + ";" + newLine
       case _: Integer => indent(count) + "repeated int64 " + name + " = " + tag + ";" + newLine
       case _: Text    => indent(count) + "repeated string " + name + " = " + tag + ";" + newLine
-      case _: Binary  => ""
+      case _: Binary  => indent(count) + "repeated bytes " + name + " = " + tag + ";" + newLine
     }
   }
   
-  def makeSampleMessage(sample: Sample) = {
+  /**
+   * Ignores the sample and looks at the inner variables
+   */
+  override def makeSample(sample: Sample) = {
     val temp = tag
     tag = 0
     val s = sample match {
@@ -49,7 +68,10 @@ class ProtoWriter extends TextWriter {
     s
   }
   
-  def makeTupleMessage(tuple: Tuple) = {
+  /**
+   * Makes a message of the tuple. 
+   */
+  override def makeTuple(tuple: Tuple) = {
     val temp = tag
     tag = 0
     count += indentSize
@@ -62,7 +84,10 @@ class ProtoWriter extends TextWriter {
     s
   }
   
-  def makeFunctionMessage(function: Function) = {
+ /**
+  * Make a message from a function. 
+  */
+  override def makeFunction(function: Function) = {
     val temp = tag
     tag = 0
     count += indentSize
@@ -74,16 +99,22 @@ class ProtoWriter extends TextWriter {
         
   }
   
+  /**
+   * Makes an optional label for a variable.
+   */
   def makeOpLabel(variable: Variable) = {
     tag += 1
     variable match {
-      case s: Scalar => makeScalarLabel(s)
+      case s: Scalar => makeScalar(s)
       case _: Sample => ""
       case t: Tuple => indent(count) + "optional " + toCamelCase(t.getName) + " " + t.getName + " = " + tag + ";" + newLine
       case f: Function => indent(count) + "optional " + toCamelCase(f.getName) + " " + f.getName + " = " + tag + ";" + newLine
     }
   }
   
+  /**
+   * Makes a repeated label for a variable.
+   */
   def makeRepLabel(variable: Variable) = {
     tag += 1
     variable match {
@@ -94,13 +125,19 @@ class ProtoWriter extends TextWriter {
     }
   }
   
+  /**
+   * For non-scalar Variables, creates a nested message.
+   */
   def makeMessage(variable: Variable): String = variable match{
     case   scalar: Scalar   => ""
-    case   sample: Sample   => makeSampleMessage(sample)
-    case    tuple: Tuple    => makeTupleMessage(tuple)
-    case function: Function => makeFunctionMessage(function)
+    case   sample: Sample   => makeSample(sample)
+    case    tuple: Tuple    => makeTuple(tuple)
+    case function: Function => makeFunction(function)
   }
   
+  /**
+   * Uses a counter to indent each line by the proper amount.
+   */
   def indent(num: Int): String = {
     " " * num
   }
