@@ -35,20 +35,19 @@ object TestDataset {
   def empty = Dataset(List(), Metadata("emptyDS"))
   
   def real = Dataset(Real(Metadata("myReal"), 3.14), Metadata("realDS"))
-  
-  
   def integer = Dataset(Integer(Metadata("myInteger"), 42), Metadata("intDS"))
   def text = Dataset(Text(Metadata("myText"), "Hi"), Metadata("textDS"))
-  def time = Dataset(Time(Metadata("myRealTime"), 1000.0), Metadata("timeDS"))
+  def real_time = Dataset(Time(Metadata("myRealTime"), 1000.0), Metadata("timeDS"))
   def text_time = Dataset(Time(Metadata(Map[String, String]("name" -> "myTextTime", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd")), "1970/01/01"), Metadata("text_timeDS"))
   def int_time = Dataset(Time(Metadata(Map[String, String]("name" -> "myIntegerTime", "type" -> "integer")), 1000), Metadata("integer_timeDS"))
   def scalars = Dataset(List(Real(Metadata("myReal"), 3.14), Integer(Metadata("myInteger"), 42), Text(Metadata("myText"), "Hi"), Time(Metadata("myRealTime"), 1000.0)), Metadata("scalarDS"))
   
   def tuple_of_scalars = Dataset(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero")), Metadata("tupleDS"))
-//  def tuple_of_tuple_text
   def tuple_of_tuples = Dataset(Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1.1))), Metadata("tuple_of_tuplesDS"))
   def tuple_of_functions = Dataset(TestNestedFunction.tuple_of_functions)
   def scalar_tuple = Dataset(Tuple(Integer(Metadata("myInteger"), 1)))
+  def mixed_tuple = Dataset(Tuple(Real(Metadata("myReal"), 0.0), Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), function_of_scalar_with_iterable_data.getVariables(0)), Metadata("mixed_tuple"))
+//  def tuple_of_tuple_text
 //  def tuple_scalar
 //  
 
@@ -81,7 +80,14 @@ object TestDataset {
     Dataset(Function(samples))
   }
   
-  def function_of_function = Dataset(TestNestedFunction.function_of_functions_with_sampled_data)
+  def function_of_functions = Dataset(TestNestedFunction.function_of_functions_with_sampled_data)
+  
+  def mixed_function = {
+    val samples = List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), (function_of_scalar_with_iterable_data+(0)).getVariables(0))),
+                       Sample(Real(Metadata("myReal"), 1.1), Tuple(Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1)), (function_of_scalar_with_iterable_data+(1)).getVariables(0))),
+                       Sample(Real(Metadata("myReal"), 2.2), Tuple(Tuple(Integer(Metadata("myInteger"), 2), Real(Metadata("myReal"), 2)), (function_of_scalar_with_iterable_data+(2)).getVariables(0))))
+    Dataset(Function(samples), Metadata("mixed_function"))
+  }
   
   def time_series_of_scalar = {
     val samples = List(Sample(Time(Metadata("myTime"), 1000.0), Integer(Metadata("myInteger"), 3)),
