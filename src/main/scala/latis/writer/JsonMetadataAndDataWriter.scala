@@ -11,7 +11,7 @@ import latis.dm.Dataset
 
 class JsonMetadataAndDataWriter extends JsonWriter {
   //TODO: refactor to reuse these pieces from Metadata and CompactJson Writers
-  
+    
   /**
    * Override to insert metadata.
    */
@@ -69,9 +69,14 @@ class JsonMetadataAndDataWriter extends JsonWriter {
   /**
    * Override to present time in native JavaScript units: milliseconds since 1970.
    */
-  override def makeScalar(scalar: Scalar): String = scalar match {
-    case t: Time => t.getJavaTime.toString  //use java time for "compact" json
-    case _ => super.makeScalar(scalar)
+  override def makeScalar(scalar: Scalar): String = {
+    //quick fix to replace missing data with "null"
+    //TODO: user should apply replace_missing(NaN) once that is working
+    if (scalar.isMissing) "null"
+    else scalar match {
+      case t: Time => t.getJavaTime.toString  //use java time for "compact" json
+      case _ => super.makeScalar(scalar)
+    }
   }
   
   override def makeSample(sample: Sample): String = {

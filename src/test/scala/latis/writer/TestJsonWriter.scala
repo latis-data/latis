@@ -3,6 +3,8 @@ package latis.writer
 import org.junit._
 import Assert._
 import latis.dm._
+import latis.metadata.Metadata
+import latis.data.SampledData
 
 class TestJsonWriters extends WriterTest {
 
@@ -39,4 +41,15 @@ class TestJsonWriters extends WriterTest {
   
   //@Test
   def empty_function = Writer.fromSuffix("json").write(TestDataset.empty_function)
+  
+  //@Test
+  def missing_value {
+    val domain = Real(Metadata(Map("name" -> "domain")))
+    val range = Real(Metadata(Map("name" -> "range", "missing_value" -> "0")))
+    val data = SampledData.fromValues(List(0,1,2,3), List(1,2,0,4))
+    val ds = Dataset(Function(domain, range, data = data))
+    
+    //Writer.fromSuffix("csv").write(ds)
+    Writer.fromSuffix("jsond").write(ds)
+  }
 }
