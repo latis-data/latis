@@ -35,16 +35,20 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
   /*
    * TODO: is 'length' too overloaded?
    * should Text return length of string?
+   * Tuple: getElementCount, Arity?
+   * Function: getSampleCount
    */
-  def getLength: Int = this match {
-    case _: Scalar => 1  //TODO: consider Scalars with SeqData, implicit IndexFunction
-    case Tuple(vars) => vars.length
-    case f: Function => getMetadata.get("length") match {
-      case Some(l) => l.toInt
-      case None => f.iterator.length //may be costly, problem with IterableOnce? try looking at data?
-      //TODO: need to account for nested Functions? maybe Dataset should but not Function?
-    }
-  }
+//  def getLength: Int = this match {
+//    case _: Scalar => 1  //TODO: consider Scalars with SeqData, implicit IndexFunction
+//    case Tuple(vars) => vars.length
+//    case f: Function => getMetadata.get("length") match {
+//      case Some(l) => l.toInt
+////      case None => f.iterator.length //may be costly, problem with IterableOnce? try looking at data?
+//      //TODO: need to account for nested Functions? maybe Dataset should but not Function?
+//      //  this does fail for nested Function which is not backed by iterable data
+////TODO: error or unknown = -1?
+//    }
+//  }
   
   /**
    * Size of this Variable in bytes.

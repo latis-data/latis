@@ -16,6 +16,9 @@ trait Function extends Variable {
   def getDomain: Variable
   def getRange: Variable
   
+  //TODO: only applies to SampledFunction
+  def getLength: Int //TODO: long?
+  
   //TODO: only applicable to SampledFunction, need to replace lots of pattern matches...
   def iterator: Iterator[Sample]
   def getDataIterator: Iterator[SampleData]
@@ -67,7 +70,7 @@ object Function {
       Function(sample.domain, sample.range, samples.iterator, md)
     }
   }
-  
+
   def apply(vs: Seq[Variable]): SampledFunction = Function(vs, EmptyMetadata)
   
   
@@ -87,6 +90,8 @@ object Function {
 
   def apply(ds: Seq[Variable], rs: Seq[Variable], md: Metadata): Function = {
     //TODO: assert same length?
+    //TODO: make SampledData?
+    //TODO: use metadata from Variables
     Function((ds zip rs).map(s => Sample(s._1, s._2)), md)
   }
   

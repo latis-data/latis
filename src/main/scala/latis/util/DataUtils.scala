@@ -238,17 +238,21 @@ object DataUtils {
       
     case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _)), template.getMetadata)
 
-    //TODO: deal with nested Function
-    case f: Function => ???
-//      {
-//      val n = f.getLength
-//      if (n < 0) throw new Error("Function length not defined") //TODO: consider "-n" as unlimited but currently has n
-//      //TODO: warn if 0?
-//      else {
-//        for (i <- 0 until n) {
-//          
-//        }
-//      }
-//    }
+    /*
+     * deal with nested Function
+     * TODO: just put data in new Function as SampledData?
+     * just iterate through the whole thing, for now
+     */
+    case f: Function => {
+      val n = f.getLength
+      val smp = Sample(f.getDomain, f.getRange)
+      if (n < 0) throw new Error("Function length not defined") //TODO: consider "-n" as unlimited but currently has n
+      //TODO: warn if 0?
+      else {
+        val samples = (0 until n).map(i => buildVarFromBuffer(bb, smp))
+        Function(samples, f.getMetadata)
+      }
+
+    }
   }
 }

@@ -45,7 +45,7 @@ class TestSelection {
   def select_gt_value {
     val filter = Selection("value>2")
     val ds = filter(scalarFunction)
-    val n = ds.length
+    val n = ds.getLength
     assertEquals(3, n)
   }
   
@@ -53,7 +53,7 @@ class TestSelection {
   def select_lt_value {
     val filter = Selection("value<3")
     val ds = filter(scalarFunction)
-    val n = ds.length
+    val n = ds.getLength
     assertEquals(2, n)
   }
   
@@ -61,7 +61,7 @@ class TestSelection {
   def select_ge_value {
     val filter = Selection("value>=3")
     val ds = filter(scalarFunction)
-    val n = ds.length
+    val n = ds.getLength
     assertEquals(3, n)
   }
   
@@ -69,7 +69,7 @@ class TestSelection {
   def select_le_value {
     val filter = Selection("value<=3")
     val ds = filter(scalarFunction)
-    val n = ds.length
+    val n = ds.getLength
     assertEquals(3, n)
   }
   
@@ -77,7 +77,7 @@ class TestSelection {
   def select_ne_value {
     val filter = Selection("value!=3")
     val ds = filter(scalarFunction)
-    val n = ds.length
+    val n = ds.getLength
     assertEquals(4, n)
   }
   
@@ -85,7 +85,7 @@ class TestSelection {
   def select_equal_time {
     val filter = Selection("time=3")
     val ds = filter(scalarFunction)
-    val n = ds.length
+    val n = ds.getLength
     assertEquals(1, n)
   }
   
@@ -94,7 +94,7 @@ class TestSelection {
     val ds = Dataset(scalarFunction)
     val ds2 = ds.filter("value >= 2")
     val ds3 = ds2.filter("value < 5")
-    val n = ds3.length
+    val n = ds3.getLength
     assertEquals(3, n)
   }
   

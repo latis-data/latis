@@ -27,10 +27,9 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   //convenient method, get number of samples in top level Function
   //TODO: what if we have multiple Functions...?
   //TODO: better name: getSampleCount?
-  //TODO: vs var.getLength?
-  def length: Int = findFunction match {
+  def getLength = findFunction match {
     case Some(f: Function) => f.getLength
-    case _ => if (variables.isEmpty) 0 else 1  //TODO: delegate to super? but want "1" as in only one sample, more indications that "length" is too overloaded
+    case None => ??? 
   }
   
   /**

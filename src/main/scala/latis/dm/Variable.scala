@@ -20,7 +20,7 @@ trait Variable {
   def getNumberData: NumberData = getData.asInstanceOf[NumberData]
   //TODO: deal with TextData
   
-  def getLength: Int
+//  def getLength: Int
   def getSize: Int
   
   def findVariableByName(name: String): Option[Variable]

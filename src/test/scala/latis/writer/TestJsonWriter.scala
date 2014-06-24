@@ -52,4 +52,11 @@ class TestJsonWriters extends WriterTest {
     //Writer.fromSuffix("csv").write(ds)
     Writer.fromSuffix("jsond").write(ds)
   }
+  
+  @Test
+  def nested_function {
+    val ds = Dataset(TestNestedFunction.function_of_functions_with_sampled_data)
+    Writer.fromSuffix("asc").write(ds)
+    
+  }
 }

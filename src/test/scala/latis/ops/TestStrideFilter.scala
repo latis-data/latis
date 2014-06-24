@@ -23,13 +23,13 @@ class TestStrideFilter {
   @Test
   def test_length {
     val ds = StrideFilter(4)(dataset)
-    assertEquals(1, ds.length)
+    assertEquals(1, ds.getLength)
     val ds2 = StrideFilter(3)(dataset)
-    assertEquals(1, ds2.length)
+    assertEquals(1, ds2.getLength)
     val ds3 = StrideFilter(2)(dataset)
-    assertEquals(2, ds3.length)
+    assertEquals(2, ds3.getLength)
     val ds4 = StrideFilter(1)(dataset)
-    assertEquals(3, ds4.length)
+    assertEquals(3, ds4.getLength)
   }
 
 }
