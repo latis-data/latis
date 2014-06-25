@@ -73,6 +73,7 @@ class JsonWriter extends TextWriter {
       case _: Index => "" //drop Index domain
       case _ => varToString(d)
       //TODO: breaks for nested Function
+      //  seems ok for x->y->a  not sure about x->y->(a,b)
       //TODO:  Need to keep domain and range of Sample within {}
       //  label with name or "domain"/"range"
       //  [{"domain":{...}, "range":{...}},...]
