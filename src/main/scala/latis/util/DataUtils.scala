@@ -165,10 +165,6 @@ object DataUtils {
    * Construct a Sample from the template with the Data.
    */
   def dataToSample(data: Data, template: Sample): Sample = {
-//    data match {
-//TODO: could use Tuple with Data
-//    case sd: SampleData => 
-
     val bb = data.getByteBuffer
     val domain = buildVarFromBuffer(bb, template.domain)
     val range = buildVarFromBuffer(bb, template.range)
@@ -235,16 +231,25 @@ object DataUtils {
       val buffer = ByteBuffer.wrap(bytes)
       Binary(template.getMetadata, buffer)
     }
-      
+    
+    //make sure Samples remain Samples
+    case Sample(domain, range) => Sample(buildVarFromBuffer(bb, domain), buildVarFromBuffer(bb, range))
+    
     case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _)), template.getMetadata)
 
     /*
      * deal with nested Function
      * TODO: just put data in new Function as SampledData?
      * just iterate through the whole thing, for now
+     * TODO: does this only get called for nested Functions?
      */
     case f: Function => {
-      val n = f.getLength
+      //Require that length of nested Function be specified in metadata. It likely doesn't contain its own data so can't iterate to get length.
+      val n = f.getMetadata("length") match {
+        case Some(s) => s.toInt
+        case None => throw new Error("Nested Function must have 'length' defined.")
+      }
+      
       val smp = Sample(f.getDomain, f.getRange)
       if (n < 0) throw new Error("Function length not defined") //TODO: consider "-n" as unlimited but currently has n
       //TODO: warn if 0?
