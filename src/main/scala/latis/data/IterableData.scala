@@ -22,6 +22,7 @@ abstract class IterableData extends Data { //TODO: with Iterable[Data]? problem 
 object IterableData {
   
   def apply(it: Iterator[Data], recSize: Int) = new IterableData {
+    //TODO: enforce that each sample is the same size?
     def recordSize: Int = recSize
     def iterator: Iterator[Data] = it
   }  
