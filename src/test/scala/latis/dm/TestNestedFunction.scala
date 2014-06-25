@@ -14,7 +14,7 @@ import latis.data.value.DoubleValue
 
 class TestNestedFunction {
 
-  //@Test
+  @Test
   def function_of_functions {
     //val ds = Dataset(TestNestedFunction.function_of_functions)
     val ds = Dataset(TestNestedFunction.function_of_functions_with_sampled_data)
@@ -35,7 +35,9 @@ object TestNestedFunction {
     
   def function_of_functions_with_sampled_data = {
     val domain = Integer(Metadata("x"))
-    val range = Function(Integer(Metadata("y")), Real(Metadata("z")))
+    val range = Function(Integer(Metadata("y")), Real(Metadata("z")), Metadata(Map("length" -> "3")))
+    //TODO: Function construction should add "length" to metadata
+    
     val dset1 = IntegerSampledSet(List(0,1,2,3))
     val dset2 = IntegerSampledSet(List(10,11,12))
     
