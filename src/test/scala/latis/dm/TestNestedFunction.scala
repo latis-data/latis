@@ -20,8 +20,8 @@ class TestNestedFunction {
     val ds = Dataset(TestNestedFunction.function_of_functions_with_sampled_data)
     //val ds2 = Selection("x>1")(ds)
     //val ds2 = Selection("y>=11")(ds)
-    AsciiWriter.write(ds)
-    //Writer("json").write(ds)
+    //AsciiWriter.write(ds)
+    Writer.fromSuffix("jsond").write(ds)
   }
   
   //@Test
@@ -32,6 +32,10 @@ class TestNestedFunction {
 }
 
 object TestNestedFunction {
+  
+  //TODO: easier way to construct Function
+  //TODO: Tuple in range of nested function
+  //TODO: triple nested function, t -> (lon,lat) -> wl -> (a,b,c)
     
   def function_of_functions_with_sampled_data = {
     val domain = Integer(Metadata("x"))

@@ -8,6 +8,7 @@ import latis.dm.Index
 import latis.dm.Tuple
 import latis.dm.Function
 import latis.dm.Dataset
+import scala.collection.mutable.ArrayBuffer
 
 class JsonMetadataAndDataWriter extends JsonWriter {
   //TODO: refactor to reuse these pieces from Metadata and CompactJson Writers
@@ -79,12 +80,35 @@ class JsonMetadataAndDataWriter extends JsonWriter {
     }
   }
   
-  override def makeSample(sample: Sample): String = {
+  override def makeSample(sample: Sample) = makeSample(sample, List[String]()) //invoke with no prefix
+  
+  //use optional pre to duplicate leading values when we have a nested function
+  //One element for each preceding variable as a String      
+  def makeSample(sample: Sample, pre: Seq[String]): String = {
+    //break sample into domain and range components
     val Sample(d, r) = sample
+    
     d match {
       case _: Index => varToString(r) //drop Index domain
-      case _ => varToString(Tuple(d.toSeq ++ r.toSeq)) //combine domain and range vars into one Tuple
-      //TODO: not tested for nested variables
+      
+      //handle case with nested function but no other range vars  
+      //TODO: handle more general cases with scalars and tuples in the range with the function
+      //TODO: handle 'flattened' option - one row per outer sample without inner domain values
+      case _ => r match {
+        case f: Function => {
+          val pre = List(varToString(d)) //only the domain values are repeated, for now
+          val lines = f.iterator.map(makeSample(_, pre))
+          //lines.mkString("[", sys.props("line.separator"), "]") 
+          val delim = "," + sys.props("line.separator")
+          lines.mkString("", delim , "") 
+        }
+        case _ => {
+          //varToString(Tuple(d.toSeq ++ r.toSeq)) //combine domain and range vars into one Tuple, just a way to get the "[]"?
+          val vars = d.toSeq ++ r.toSeq
+          val vs = vars.map(varToString(_))
+          (pre ++ vs).mkString("[", ",", "]") 
+        }
+      }
     }
   }
     
