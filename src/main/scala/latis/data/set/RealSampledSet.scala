@@ -15,6 +15,8 @@ class RealSampledSet(values: immutable.Seq[Double]) extends DomainSet {
   
   def recordSize: Int = 8
   
+  override def length: Int = values.length
+  
   def iterator: Iterator[Data] = values.iterator.map(DoubleValue(_))
 }
 

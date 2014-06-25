@@ -7,7 +7,7 @@ abstract class IterableData extends Data { //TODO: with Iterable[Data]? problem 
   def recordSize: Int
   def iterator: Iterator[Data]
   
-  def length: Int = -1 //unknown, potentially unlimited //TODO: iterate and count?
+  def length: Int = -1 //unknown, potentially unlimited //TODO: iterate and count? IterableOnce problem, cache?
   def size: Int = length * recordSize //total number of bytes
   
   //not a good idea since it realizes all the data, iterate and act on each sample instead

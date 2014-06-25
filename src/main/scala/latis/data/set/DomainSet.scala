@@ -15,6 +15,7 @@ abstract class DomainSet extends IterableData {
   def recordSize: Int
   
   def iterator: Iterator[Data]
+  
 }
 
 object DomainSet {

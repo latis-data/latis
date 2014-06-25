@@ -27,6 +27,7 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   //convenient method, get number of samples in top level Function
   //TODO: what if we have multiple Functions...?
   //TODO: better name: getSampleCount?
+  //TODO: should we account for length of nested Functions?
   def getLength = findFunction match {
     case Some(f: Function) => f.getLength
     case None => ??? 

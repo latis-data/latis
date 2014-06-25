@@ -6,6 +6,7 @@ import latis.data.Data
 import latis.data.value.LongValue
 
 class IntegerSampledSet(values: immutable.Seq[Long]) extends DomainSet {
+  //TODO: factor out SampledSet?
 
   def apply(index: Int): Data = LongValue(values(index))
   
@@ -14,6 +15,8 @@ class IntegerSampledSet(values: immutable.Seq[Long]) extends DomainSet {
   }
   
   def recordSize: Int = 8
+  
+  override def length: Int = values.length
   
   def iterator: Iterator[Data] = values.iterator.map(LongValue(_))
 }

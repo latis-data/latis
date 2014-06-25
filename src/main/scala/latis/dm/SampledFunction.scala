@@ -13,7 +13,7 @@ import latis.util.MappingIterator
 import latis.data.EmptyData
 import com.typesafe.scalalogging.slf4j.Logging
 
-class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
+class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = EmptyMetadata, data: SampledData = EmptyData) 
     extends AbstractVariable(metadata, data) with Function with Logging {
 
   //expose domain and range via defs only so we can override
@@ -24,14 +24,22 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   /**
    * Return the number of samples represented by this SampledFunction.
    */
-  def getLength: Int = {//TODO: long?
-    //TODO: is length too overloaded? getSampleCount?
-    //TODO: look at domain data
+  def getLength: Int = { //TODO: long?
     //TODO: consider -n = unlimited but currently at n?
-    //get from metadata, too dangerous to get from iterator: IterableOnce, nested Function...
+    
+    //try metadata
     getMetadata.get("length") match {
       case Some(l) => l.toInt
-      case None => throw new Error("Function length not defined.")
+      case None => {
+        //try looking at data
+        if (data.notEmpty) {
+          data.domainSet.length //may be undefined/unlimited = -1
+        } else {
+          //get length from iterator
+          //TODO: IterableOnce problem, cache?
+          iterator.length
+        }
+      }
     }
   }
   

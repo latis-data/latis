@@ -12,11 +12,11 @@ import latis.writer.AsciiWriter
 class TestFunction {
   
   //TODO: reexamine test Functions now that we no longer 'iterate from kids'
-  @Test
+  //@Test
   def getLength_reiterable {
     val a = TestFunction.function_of_scalar_with_iterable_data
-    assert(a.getLength == 3)
-    assert(a.getLength == 3)
+    assertEquals(3, a.getLength)
+    assertEquals(3, a.getLength)
   }
   //@Test
   //def function_of_scalar_with_data_from_kids = AsciiWriter.write(TestFunction.function_of_scalar_with_data_from_kids)

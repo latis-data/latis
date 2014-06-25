@@ -22,6 +22,7 @@ trait Tuple extends Variable {
    * Return the number of elements in this Tuple.
    */
   def getArity: Int = getVariables.length
+  def getElementCount: Int = getVariables.length //more intuitive?
 }
 
   
