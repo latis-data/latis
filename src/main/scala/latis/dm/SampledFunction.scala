@@ -75,6 +75,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   def getDataIterator: Iterator[SampleData] = {
     val d = getData
     if (d.isEmpty) {
+      //TODO: try to avoid this, not efficient
       logger.debug("Make Data Iterator from existing Sample Iterator: " + this)
       new MappingIterator(_iterator, (s: Sample) => Some(DataUtils.sampleToData(s)))
     } else {
