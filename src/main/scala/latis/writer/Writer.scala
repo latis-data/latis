@@ -102,6 +102,7 @@ object Writer {
    */
   def apply(fileName: String) : Writer = {
     //TODO: will treat name without a "." as a suffix, do we want to allow that?
+    //TODO: getting null lock error in java.io.Writer when fileName = "json", should have been using fromSuffix, but why?
     val suffix = fileName.split("""\.""").last
     val writer = Writer.fromSuffix(suffix)
     writer.setFile(new File(fileName))
