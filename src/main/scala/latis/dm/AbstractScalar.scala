@@ -24,7 +24,6 @@ abstract class AbstractScalar(metadata: Metadata = EmptyMetadata, data: Data = E
     case StringValue(s) => s.trim //TODO: match any TextData?
   }
   
-//TODO: test other projects
   
 //  /**
 //   * Try to parse the given string into the appropriate primitive type for this Scalar.
@@ -40,7 +39,29 @@ abstract class AbstractScalar(metadata: Metadata = EmptyMetadata, data: Data = E
 //      }
 //    }
 //  }
-
+  
+  /**
+   * Does this Scalar represent a missing data value.
+   */
+  def isMissing: Boolean = {
+    //TODO: optimize so we don't have to do so much for every sample?
+    val value = getValue
+    if (isNaN(value)) true                           //assume NaN always means missing
+    else getMetadata("missing_value") match {        //try matching "missing_value"
+      case Some(s) => value == _stringToValue(s)     //Note, equality test won't work for NaN but we deal with that above.
+      case None => getMetadata("_FillValue") match { //try matching "_FillValue"
+        case Some(s) => value == _stringToValue(s)
+        case None => false                           //no defined missing value, and we already passed the NaN test
+      }
+    }
+  }
+  
+  private def isNaN(value: Any): Boolean = value match {
+    case d: Double => d.isNaN
+    case f: Float  => f.isNaN
+    case _ => false
+  }
+  
   /**
    * Based on the CF convention.
    */

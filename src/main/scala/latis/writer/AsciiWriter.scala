@@ -28,7 +28,7 @@ class AsciiWriter extends TextWriter {
    */
   override def makeFunction(function: Function): String = {
     indent += 5
-    val s = function.iterator.map(varToString(_)).mkString(newLine + " "*indent)
+    val s = function.iterator.map(varToString(_)).mkString("", newLine + " "*indent, "")
     indent -= 5
     s
   }

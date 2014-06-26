@@ -1,0 +1,7 @@
+message Tsi {
+    message Samples {
+        repeated float year = 1;
+        repeated float tsi = 2;
+    }
+    optional Samples samples = 1;
+}

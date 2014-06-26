@@ -1,7 +1,8 @@
 attributes {
-    unknown{
+    samples{
         foo{
             string alias "time";
+            string units "milliseconds since 1970-01-01";
         }
         ssn{
         }

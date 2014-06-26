@@ -1,5 +1,5 @@
 attributes {
-    unknown{
+    samples{
         year{
             string long_name "Year";
             string units "years since 0000-01-01";

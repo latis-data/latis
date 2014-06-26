@@ -22,7 +22,7 @@ class TestLmerAdapter {
     ops += Selection("object=~11")
     val ds = TsmlReader("datasets/test/lemr.tsml").getDataset(ops)
 
-    assertEquals(10, ds.length)
+    assertEquals(10, ds.getLength)
     
 //TODO: FilteredFunction needs to redo index
     Writer.fromSuffix("asc").write(ds)

@@ -12,7 +12,12 @@ import latis.writer.AsciiWriter
 class TestFunction {
   
   //TODO: reexamine test Functions now that we no longer 'iterate from kids'
-  
+  //@Test
+  def getLength_reiterable {
+    val a = TestFunction.function_of_scalar_with_iterable_data
+    assertEquals(3, a.getLength)
+    assertEquals(3, a.getLength)
+  }
   //@Test
   //def function_of_scalar_with_data_from_kids = AsciiWriter.write(TestFunction.function_of_scalar_with_data_from_kids)
   //def function_of_scalar_with_iterable_data = AsciiWriter.write(TestFunction.function_of_scalar_with_iterable_data)
@@ -23,13 +28,13 @@ class TestFunction {
 
 object TestFunction {
 
-  def function_with_one_sample_of_scalar_with_data_from_kids = {
-    Function.fromValues(List(List(0.0), List(0.0)))
-  }
-
-  def function_of_scalar_with_data_from_kids = {
-    Function.fromValues(List(List(0.0, 1.0, 2.0), List(0.0, 1.0, 2.0)))
-  }
+//  def function_with_one_sample_of_scalar_with_data_from_kids = {
+//    Function.fromValues(List(List(0.0), List(0.0)))
+//  }
+//
+//  def function_of_scalar_with_data_from_kids = {
+//    Function.fromValues(List(List(0.0, 1.0, 2.0), List(0.0, 1.0, 2.0)))
+//  }
 
   def function_with_one_sample_of_scalar_with_iterable_data = {
     val samples = List(Sample(Real(0), Real(0)))
@@ -43,13 +48,13 @@ object TestFunction {
     Function(samples)
   }
 
-  def function_with_one_sample_of_tuple_with_data_from_kids = {
-    Function.fromValues(List(List(0.0), List(0.0), List(10.0)))
-  }
-
-  def function_of_tuple_with_data_from_kids = {
-    Function.fromValues(List(List(0.0, 1.0, 2.0), List(0.0, 1.0, 2.0), List(10.0, 11.0, 12.0)))
-  }
+//  def function_with_one_sample_of_tuple_with_data_from_kids = {
+//    Function.fromValues(List(List(0.0), List(0.0), List(10.0)))
+//  }
+//
+//  def function_of_tuple_with_data_from_kids = {
+//    Function.fromValues(List(List(0.0, 1.0, 2.0), List(0.0, 1.0, 2.0), List(10.0, 11.0, 12.0)))
+//  }
 
   def function_of_tuple_with_iterable_data = {
     val samples = List(Sample(Real(0), Tuple(Real(0), Real(10))), 

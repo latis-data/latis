@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="composite_mg_index" long_name="Composite Magnesium II Core-to-Wing Index">
+    <adapter class="latis.reader.tsml.ColumnarAdapter"
+             columns="1;2"
+             delimiter="\s+"
+             commentCharacter="#"
+             location="/lisird/public/lasp/mgii/composite_mg2.dat" />
+    
+    <time name="time" type="real" units="Julian days"/>
+   
+    <real name="mg_index" long_name="Magnesium II Index" units ="core to wing ratio"/>
+    
+  </dataset>
+
+</tsml>

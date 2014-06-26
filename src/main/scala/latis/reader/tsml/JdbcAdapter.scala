@@ -63,7 +63,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     val rs = record.resultSet
     
     for (vt <- varsWithTypes) vt match {
-      case (v: Time, t: Int) if (t == java.sql.Types.TIMESTAMP) => {
+      case (v: Time, dbtype: Int) if (dbtype == java.sql.Types.TIMESTAMP) => {
         //time stored as timestamp must be declared as type text
         var time = rs.getTimestamp(v.getName, gmtCalendar).getTime
         if (rs.wasNull) map += (v.getName -> Data(v.getFillValue.asInstanceOf[String]))

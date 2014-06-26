@@ -165,7 +165,6 @@ object DataUtils {
    * Construct a Sample from the template with the Data.
    */
   def dataToSample(data: Data, template: Sample): Sample = {
-    //TODO: require SampleData?
     val bb = data.getByteBuffer
     val domain = buildVarFromBuffer(bb, template.domain)
     val range = buildVarFromBuffer(bb, template.range)
@@ -184,14 +183,17 @@ object DataUtils {
       bb.rewind //reset to the beginning in case we want to reuse it
       v
     }
-    case _: Time    => Time(template.getMetadata, data)
+    case t: Time    => t(data) //Time(template.getMetadata, data)
     case _: Real    => Real(template.getMetadata, data)
     case _: Integer => Integer(template.getMetadata, data)
     case _: Text    => Text(template.getMetadata, data)
     case _: Binary  => Binary(template.getMetadata, data)
     
-    //TODO: deal with nested Function
-    case f: Function => ???
+    //deal with nested Function
+    case f: Function => data match {
+      case sd: SampledData => Function(f, sd) //data already structured as SampledData
+      case _ => buildVarFromBuffer(data.getByteBuffer, f) //stitch it together from bytes
+    }
   }
 
   /**
@@ -204,7 +206,8 @@ object DataUtils {
       case t: Text => {
         val sb = new StringBuilder
         for (i <- 0 until t.length) sb append bb.getChar
-        Time(template.getMetadata, sb.toString)
+        //Time(template.getMetadata, sb.toString)
+        template(Data(sb.toString))
       }
     }
     
@@ -228,10 +231,33 @@ object DataUtils {
       val buffer = ByteBuffer.wrap(bytes)
       Binary(template.getMetadata, buffer)
     }
-      
+    
+    //make sure Samples remain Samples
+    case Sample(domain, range) => Sample(buildVarFromBuffer(bb, domain), buildVarFromBuffer(bb, range))
+    
     case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _)), template.getMetadata)
 
-    //TODO: deal with nested Function
-    case f: Function => ???
+    /*
+     * deal with nested Function
+     * TODO: just put data in new Function as SampledData?
+     * just iterate through the whole thing, for now
+     * TODO: does this only get called for nested Functions?
+     */
+    case f: Function => {
+      //Require that length of nested Function be specified in metadata. It likely doesn't contain its own data so can't iterate to get length.
+      val n = f.getMetadata("length") match {
+        case Some(s) => s.toInt
+        case None => throw new Error("Nested Function must have 'length' defined.")
+      }
+      
+      val smp = Sample(f.getDomain, f.getRange)
+      if (n < 0) throw new Error("Function length not defined") //TODO: consider "-n" as unlimited but currently has n
+      //TODO: warn if 0?
+      else {
+        val samples = (0 until n).map(i => buildVarFromBuffer(bb, smp))
+        Function(samples, f.getMetadata)
+      }
+
+    }
   }
 }

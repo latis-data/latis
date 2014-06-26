@@ -55,14 +55,37 @@ class JsonWriter extends TextWriter {
     case Text(s)    => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters      
   }
   
+  /**
+   * Represent a Sample like a Tuple except if the domain is an Index.
+   */
+//  override def makeSample(sample: Sample): String = sample match {
+//    case Sample(_: Index, r) => r match {
+//      case tup: Tuple => makeTuple(tup) //no label, for now //TODO: include label if tuple has name
+//      case _ => varToString(r)
   override def makeSample(sample: Sample): String = {
     val Sample(d, r) = sample
-    val vars = d match {
-      case _: Index => r.toSeq //drop Index domain
-      case _ => d.toSeq ++ r.toSeq
-      //TODO: breaks for nested Function,  nested tuples?
+    val rvar = r match {
+      case f: Function => varToString(f)
+      case t: Tuple => t.getVariables.map(varToString(_)).mkString(", ")
+      case _ => varToString(r)
     }
-    vars.map(varToString(_)).mkString("{", ", ", "}") //note, sample shouldn't have name
+    val dvar = d match {
+      case _: Index => "" //drop Index domain
+      case _ => varToString(d)
+      //TODO: breaks for nested Function
+      //  seems ok for x->y->a  not sure about x->y->(a,b)
+      //TODO:  Need to keep domain and range of Sample within {}
+      //  label with name or "domain"/"range"
+      //  [{"domain":{...}, "range":{...}},...]
+      //  what about index domain, need "range"?
+      //  want to avoid special logic based on whether is has a name
+      //  but often range is tuple only because range has to be a single Variable
+      //  not bad to drop extra {} if no name, still need sample {}, the only ones that can't have a label
+    }
+
+//    case Sample(d, r) => "{" + varToString(d) + ", " + varToString(r) + "}" //no label for sample
+    val vars = dvar + ", " + rvar
+    vars.mkString("{","","}") //note, sample shouldn't have name
   }
     
   /**

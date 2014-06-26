@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="sfo_sunspot_indices" long_name="San Fernando Observatory/CSUN Sunspot Indices">
+    <adapter class="latis.reader.tsml.ColumnarAdapter"
+             columns="0,1,2;3;4"
+             delimiter=","
+             commentCharacter="#"
+             location="/lisird/public/san_fernando_observatory/sunspot/sunspot_indices.csv" />
+    
+    <time name="time" type="text" length="10" units="yyyy MM dd"/>
+   
+    <real name="sunspot_area" long_name="Sunspot Area" units ="millionths of the solar hemisphere" missing_value="-999999"/>
+    <real  name="sunspot_deficit" long_name="Sunspot Deficit" units="percent change in TSI due to sunspots" missing_value = "-999999"/>
+    
+  </dataset>
+
+</tsml>

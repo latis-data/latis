@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<title>function_of_functions_with_data_in_scalar</title>
+<link rel="stylesheet" type="text/css" href="http://lasp.colorado.edu/lisird/tss/resources/tss.css"><script type="text/javascript" src="http://lasp.colorado.edu/lisird/tss/resources/tss.js"></script>
+</head>
+
+<body>
+<h1>function_of_functions_with_data_in_scalar</h1>
+<blockquote>
+<div class="info">
+No description available
+</div>
+</blockquote>
+<div class="dds">
+<h2>Dataset Descriptor Structure</h2><blockquote>Dataset {
+    Sequence {
+        Int64 x;
+        Sequence {
+            Int64 y;
+            Float64 z;
+        } samples;
+    } function_of_functions_with_data_in_scalar;
+} function_of_functions_with_data_in_scalar;
+</blockquote>
+</div>
+<div class="das">
+<h2>Dataset Attribute Structure</h2><blockquote>attributes {
+    function_of_functions_with_data_in_scalar{
+        x{
+        }
+        samples{
+            y{
+            }
+            z{
+            }
+        }
+    }
+}
+</blockquote>
+</div>
+<h2>Data Set Query Form</h2>
+<form name="x">x (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+<form name="y">y (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+<form name="z">z (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+Select Output Type: <select id="output"><option value="asc">asc</option><br/><option value="bin">bin</option><br/><option value="csv">csv</option><br/><option value="das">das</option><br/><option value="dds">dds</option><br/><option value="dods">dods</option><br/><option value="html">html</option><br/><option value="info">info</option><br/><option value="json">json</option><br/><option value="jsond">jsond</option><br/><option value="meta">meta</option><br/><option value="png">png</option><br/><option value="txt">txt</option><br/></select><br/>
+<input type="button" value="Submit" onclick="handle_dataset_request()"/>
+</body>
+</html>

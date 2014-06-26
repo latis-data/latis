@@ -10,6 +10,7 @@ import latis.dm.Scalar
 import latis.dm.Text
 import latis.dm.Tuple
 import latis.dm.Variable
+import latis.dm.Index
 
 /**
  * Write a Dataset's DAP2 Dataset Descriptor Structure.
@@ -37,6 +38,7 @@ class DdsWriter extends TextWriter {
     case _: Integer => indent(count) + "Int64 "   + scalar.getName + ";\n"
     case _: Text    => indent(count) + "String "  + scalar.getName + ";\n"
     case _: Binary  => "NaN"
+    case _: Index => indent(count) + "Int64 " + scalar.getName + ";\n"
   }
   
   override def makeTuple(tuple: Tuple): String = tuple match{ 
@@ -49,7 +51,7 @@ class DdsWriter extends TextWriter {
     }
   }
   
-  override def makeFooter(dataset: Dataset) = "} " + dataset.getName + ";\n"
+  override def makeFooter(dataset: Dataset) = "} " + dataset.getName + ";"
   
   var count = indentSize
   

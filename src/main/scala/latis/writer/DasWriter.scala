@@ -31,14 +31,20 @@ class DasWriter extends TextWriter {
     else indent(count) + "}\n"
   }
 
-  override def makeFunction(function: Function): String = varToString(Sample(function.getDomain, function.getRange))
+  override def makeFunction(function: Function): String = {
+    makeLabel(function) + varToString(Sample(function.getDomain, function.getRange))
+  }
   
   override def makeScalar(scalar:Scalar): String = {
     makeLabel(scalar) + makeAttributes(scalar)
   }
   
   override def makeTuple(tuple: Tuple): String = {
-    val label = makeLabel(tuple)
+    var label = ""
+    tuple match{
+      case _:Sample => label = ""
+      case _ => label = makeLabel(tuple)
+    }
     val s = tuple.getVariables.map(varToString(_))
     count-=indentSize
     label + s.mkString("","",indent(count)+"}\n")

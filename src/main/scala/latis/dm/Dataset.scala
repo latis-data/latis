@@ -12,6 +12,9 @@ import scala.Option.option2Iterable
 import scala.collection.Seq
 import scala.collection.immutable
 import latis.ops.Factorization
+import latis.ops.RenameOperation
+import latis.ops.ReplaceValueOperation
+import scala.math.ScalaNumericAnyConversions
 
 /**
  * The main container for a dataset. It is a special type of Tuple
@@ -24,10 +27,10 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   //convenient method, get number of samples in top level Function
   //TODO: what if we have multiple Functions...?
   //TODO: better name: getSampleCount?
-  //TODO: vs var.getLength?
-  def length: Int = findFunction match {
+  //TODO: should we account for length of nested Functions?
+  def getLength = findFunction match {
     case Some(f: Function) => f.getLength
-    case _ => if (variables.isEmpty) 0 else 1  //TODO: delegate to super? but want "1" as in only one sample, more indications that "length" is too overloaded
+    case None => ??? 
   }
   
   /**
@@ -53,6 +56,11 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   def project(proj: Projection): Dataset = proj(this)
   def project(varNames: Seq[String]): Dataset = Projection(varNames)(this)
   def project(vname: String): Dataset = Projection(Seq(vname))(this)
+  
+  def rename(origName: String, newName: String): Dataset = RenameOperation(origName, newName)(this)
+  
+  def replaceValue(v1: ScalaNumericAnyConversions, v2: ScalaNumericAnyConversions): Dataset = ReplaceValueOperation(v1,v2)(this)
+  
   
   //Convenient data dumping methods.
   def toDoubleMap = DataMap.toDoubleMap(this)

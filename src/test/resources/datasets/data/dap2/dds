@@ -6,5 +6,5 @@ Dataset {
             Float64 myReal;
             String myText;
         } unknown;
-    } unknown;
-} Database Test;
+    } samples;
+} dap2;

@@ -1,9 +1,8 @@
 //Gradle build for core LaTiS code.
 
 apply plugin: 'scala'
-apply plugin: 'war'
+apply plugin: 'eclipse'
 apply plugin: 'ivy-publish'
-apply plugin: 'eclipse-wtp'
 
 //Define the release version. Used for published jar.
 //TODO: get from latis.properties?
@@ -20,9 +19,18 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    scalaCompiler
+    scalaLibrary
+}
+
 dependencies {    
-    providedCompile "javax.servlet:servlet-api:2.5" //not deployed
-    compile 'org.scala-lang:scala-library:2.10.4'
+    //providedCompile "javax.servlet:servlet-api:2.5" //not deployed
+    compile "javax.servlet:servlet-api:2.5"
+    
+    //compile 'org.scala-lang:scala-library:2.10.4'
+    scalaCompiler "org.scala-lang:scala-compiler:2.10"
+    scalaLibrary "org.scala-lang:scala-library:2.10"
     
     //Support for logging
     compile 'com.typesafe:scalalogging-slf4j_2.10:1.1.0'
@@ -36,6 +44,9 @@ dependencies {
 	
 	//Support for writing png images
 	compile 'jfree:jfreechart:1.0.12'
+	
+	//iCalendar support
+	compile 'net.sf.biweekly:biweekly:0.3.2'
 }
 
 

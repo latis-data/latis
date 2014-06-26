@@ -22,6 +22,8 @@ trait Scalar extends Variable {
   def getValue: Any
   def getFillValue: Any
   def getMissingValue: Any
+  
+  def isMissing: Boolean
 }
 
 object Scalar {
@@ -34,8 +36,8 @@ object Scalar {
     case "real"    => new AbstractScalar(metadata, data) with Real
     case "integer" => new AbstractScalar(metadata, data) with Integer
     case "text"    => new AbstractScalar(metadata, data) with Text
-    case "time"    => Time(metadata, data) //TODO: if type text, set default length=23? or get from 'format'
     case "binary"  => new AbstractScalar(metadata, data) with Binary
+    case "time"    => ??? //Time(metadata, data)  
     //TODO: vtype = class name, dynamicly construct 
     case _ => throw new Error("No Scalar type defined for " + vtype)
   }

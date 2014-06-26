@@ -12,7 +12,17 @@ import scala.collection.immutable
  * Base type for a Variable that represents a group of other Variables.
  */
 trait Tuple extends Variable {
+  
+  /**
+   * Return the Variables directly contained in this Tuple as a Seq.
+   */
   def getVariables: Seq[Variable]
+  
+  /**
+   * Return the number of elements in this Tuple.
+   */
+  def getArity: Int = getVariables.length
+  def getElementCount: Int = getVariables.length //more intuitive?
 }
 
   

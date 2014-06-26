@@ -70,6 +70,7 @@ object VariableMl {
     xml.label match {
       case "tuple" => new TupleMl(xml)
       case "function" => new FunctionMl(xml)
+      case "time" => new TimeMl(xml)
       case _ => new ScalarMl(xml)
     }
   }

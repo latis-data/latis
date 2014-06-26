@@ -18,7 +18,7 @@ class TestProjection {
     val r = Real(Metadata("a"))
     val proj = new Projection(List("a","c"))
     val ds = proj(r)
-    assertEquals(1, ds.getLength)
+    assertEquals(1, ds.getElementCount)
   }
   
   @Test
@@ -40,7 +40,7 @@ class TestProjection {
     val r = Real(Metadata("a"))
     val proj = new Projection(List("b","c"))
     val ds = proj(r)
-    assertEquals(0, ds.getLength)
+    assertEquals(0, ds.getElementCount)
   }
   
   @Test
@@ -48,7 +48,7 @@ class TestProjection {
     val tup = Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val proj = new Projection(List("b"))
     val ds = proj(tup)
-    val n = ds.getVariables(0).asInstanceOf[Tuple].getLength
+    val n = ds.getVariables(0).asInstanceOf[Tuple].getElementCount
     assertEquals(1, n)
   }
   
@@ -57,7 +57,7 @@ class TestProjection {
     val tup = Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val proj = new Projection(List("a","c"))
     val ds = proj(tup)
-    val n = ds.getVariables(0).asInstanceOf[Tuple].getLength
+    val n = ds.getVariables(0).asInstanceOf[Tuple].getElementCount
     assertEquals(2, n)
   }
   
@@ -79,7 +79,7 @@ class TestProjection {
     val proj = new Projection(List("t","b"))
     val ds = proj(f)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
-    val n = ds.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Tuple].getLength
+    val n = ds.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
     assertEquals(1, n)
   }
   
@@ -90,7 +90,7 @@ class TestProjection {
     val proj = new Projection(List("t","b","a")) //note, diff order, but not used, //TODO: enforce order
     val ds = proj(f)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
-    val n = ds.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Tuple].getLength
+    val n = ds.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
     assertEquals(2, n)
   }
   
@@ -100,7 +100,7 @@ class TestProjection {
     val f = Function(Real(Metadata("t")), Function(Real(Metadata("w")), Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))))
     val proj = new Projection(List("t","w","b","c")) 
     val ds = proj(f)
-    val n = ds.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getLength
+    val n = ds.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
     assertEquals(2, n)
     //println(ds)
   }

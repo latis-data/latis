@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<title>tsi</title>
+<link rel="stylesheet" type="text/css" href="http://lasp.colorado.edu/lisird/tss/resources/tss.css"><script type="text/javascript" src="http://lasp.colorado.edu/lisird/tss/resources/tss.js"></script>
+</head>
+
+<body>
+<h1>tsi</h1>
+<blockquote>
+<div class="info">
+No description available
+</div>
+</blockquote>
+<div class="dds">
+<h2>Dataset Descriptor Structure</h2><blockquote>Dataset {
+    Sequence {
+        Float64 year;
+        Float64 tsi;
+    } samples;
+} tsi;
+</blockquote>
+</div>
+<div class="das">
+<h2>Dataset Attribute Structure</h2><blockquote>attributes {
+    samples{
+        year{
+            string long_name "Year";
+            string units "years since 0000-01-01";
+            string alias "time";
+        }
+        tsi{
+            string long_name "Total Solar Irradiance";
+            string units "W/m^2";
+        }
+    }
+}
+</blockquote>
+</div>
+<h2>Data Set Query Form</h2>
+<form name="year">year (years since 0000-01-01)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+<form name="tsi">tsi (W/m^2)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+Select Output Type: <select id="output"><option value="asc">asc</option><br/><option value="bin">bin</option><br/><option value="csv">csv</option><br/><option value="das">das</option><br/><option value="dds">dds</option><br/><option value="dods">dods</option><br/><option value="html">html</option><br/><option value="info">info</option><br/><option value="json">json</option><br/><option value="jsond">jsond</option><br/><option value="meta">meta</option><br/><option value="png">png</option><br/><option value="txt">txt</option><br/></select><br/>
+<input type="button" value="Submit" onclick="handle_dataset_request()"/>
+</body>
+</html>

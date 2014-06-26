@@ -7,13 +7,15 @@
     		 delimiter="\s+"
              location="datasets/tsi.txt" />
              
-    <time name="year" 
-          units="years since 0000-01-01" 
-          long_name="Year"/>
+    <function length="403">
+      <time name="year" 
+            units="years since 0000-01-01" 
+            long_name="Year"/>
     
-    <real name="tsi"
-          units="W/m^2"
-          long_name="Total Solar Irradiance"/>
+      <real name="tsi"
+            units="W/m^2"
+            long_name="Total Solar Irradiance"/>
+    </function>
 
   </dataset>
 

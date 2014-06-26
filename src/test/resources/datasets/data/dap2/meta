@@ -1,0 +1,21 @@
+{"dap2": {
+"myTime": {
+"alias": "time",
+"units": "yyyy/MM/dd",
+"length": "10",
+"type": "text"
+},
+"myInt": {
+"missing_value": "3",
+"long_name": "myInteger",
+"units": "N"
+},
+"myReal": {
+"units": "m/s^2",
+"long_name": "myReal"
+},
+"myText": {
+"units": "letters",
+"missing_value": "D",
+"long_name": "text"
+}}}

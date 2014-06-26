@@ -23,6 +23,7 @@ object FileUtils {
    */
   def getTmpFile: File = File.createTempFile("latis", null, getTmpDir)
   //TODO: use deleteOnExit?
+
   
   /**
    * Get a list of all the files in the given directory and nested directories.

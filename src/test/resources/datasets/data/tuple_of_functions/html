@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<title>tuple_of_functions</title>
+<link rel="stylesheet" type="text/css" href="http://lasp.colorado.edu/lisird/tss/resources/tss.css"><script type="text/javascript" src="http://lasp.colorado.edu/lisird/tss/resources/tss.js"></script>
+</head>
+
+<body>
+<h1>tuple_of_functions</h1>
+<blockquote>
+<div class="info">
+No description available
+</div>
+</blockquote>
+<div class="dds">
+<h2>Dataset Descriptor Structure</h2><blockquote>Dataset {
+    Structure {
+        Sequence {
+            Int64 myInt0;
+            Float64 myReal0;
+        } samples;
+        Sequence {
+            Int64 myInt1;
+            Float64 myReal1;
+        } samples;
+        Sequence {
+            Int64 myInt2;
+            Float64 myReal2;
+        } samples;
+        Sequence {
+            Int64 myInt3;
+            Float64 myReal3;
+        } samples;
+    } tuple_of_functions;
+} tuple_of_functions;
+</blockquote>
+</div>
+<div class="das">
+<h2>Dataset Attribute Structure</h2><blockquote>attributes {
+    tuple_of_functions{
+        samples{
+            myInt0{
+            }
+            myReal0{
+            }
+        }
+        samples{
+            myInt1{
+            }
+            myReal1{
+            }
+        }
+        samples{
+            myInt2{
+            }
+            myReal2{
+            }
+        }
+        samples{
+            myInt3{
+            }
+            myReal3{
+            }
+        }
+    }
+}
+</blockquote>
+</div>
+<h2>Data Set Query Form</h2>
+<form name="myInt0">myInt0 (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+<form name="myReal0">myReal0 (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+<form name="myInt1">myInt1 (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+<form name="myReal1">myReal1 (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+<form name="myInt2">myInt2 (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+<form name="myReal2">myReal2 (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+<form name="myInt3">myInt3 (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+<form name="myReal3">myReal3 (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+Select Output Type: <select id="output"><option value="asc">asc</option><br/><option value="bin">bin</option><br/><option value="csv">csv</option><br/><option value="das">das</option><br/><option value="dds">dds</option><br/><option value="dods">dods</option><br/><option value="html">html</option><br/><option value="info">info</option><br/><option value="json">json</option><br/><option value="jsond">jsond</option><br/><option value="meta">meta</option><br/><option value="png">png</option><br/><option value="txt">txt</option><br/></select><br/>
+<input type="button" value="Submit" onclick="handle_dataset_request()"/>
+</body>
+</html>

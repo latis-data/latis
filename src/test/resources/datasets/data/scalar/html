@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<title>scalar</title>
+<link rel="stylesheet" type="text/css" href="http://lasp.colorado.edu/lisird/tss/resources/tss.css"><script type="text/javascript" src="http://lasp.colorado.edu/lisird/tss/resources/tss.js"></script>
+</head>
+
+<body>
+<h1>scalar</h1>
+<blockquote>
+<div class="info">
+No description available
+</div>
+</blockquote>
+<div class="dds">
+<h2>Dataset Descriptor Structure</h2><blockquote>Dataset {
+    Sequence {
+        Float64 foo;
+        Float64 ssn;
+    } samples;
+} scalar;
+</blockquote>
+</div>
+<div class="das">
+<h2>Dataset Attribute Structure</h2><blockquote>attributes {
+    samples{
+        foo{
+            string alias "time";
+            string units "milliseconds since 1970-01-01";
+        }
+        ssn{
+        }
+    }
+}
+</blockquote>
+</div>
+<h2>Data Set Query Form</h2>
+<form name="foo">foo (milliseconds since 1970-01-01)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+<form name="ssn">ssn (unknown units)<br/>Select Range: <input type="text" name="x1" /><input type="text" name="x2" /><br/></form><br/>
+Select Output Type: <select id="output"><option value="asc">asc</option><br/><option value="bin">bin</option><br/><option value="csv">csv</option><br/><option value="das">das</option><br/><option value="dds">dds</option><br/><option value="dods">dods</option><br/><option value="html">html</option><br/><option value="info">info</option><br/><option value="json">json</option><br/><option value="jsond">jsond</option><br/><option value="meta">meta</option><br/><option value="png">png</option><br/><option value="txt">txt</option><br/></select><br/>
+<input type="button" value="Submit" onclick="handle_dataset_request()"/>
+</body>
+</html>
