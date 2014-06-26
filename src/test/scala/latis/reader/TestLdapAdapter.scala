@@ -11,7 +11,7 @@ import latis.writer.AsciiWriter
 
 class TestLdapAdapter {
   
-  @Test
+  //@Test
   def test_ldap {
     //TODO: index name "unknown"
     //TODO: use "sequence"
