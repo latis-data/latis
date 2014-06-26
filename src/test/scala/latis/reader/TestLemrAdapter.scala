@@ -11,7 +11,7 @@ import latis.writer.AsciiWriter
 
 class TestLmerAdapter {
   
-  @Test
+  //@Test
   def test_sparql_in_url {
     val ops = ArrayBuffer[Operation]()
     //ops += Selection("query=PREFIX+dcat:%3Chttp://www.w3.org/ns/dcat%23%3EPREFIX+dcterms:%3Chttp://purl.org/dc/terms/%3ESELECT?s?p?o+WHERE{?s+a+dcat:Dataset.?s+dcterms:identifier?name.+FILTER%28?name=%22sorce_tim_tsi_6hr_v15%22%29?s?p?o}")
