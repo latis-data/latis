@@ -24,7 +24,7 @@ configurations {
     scalaLibrary
 }
 
-dependencies {    
+dependencies {
     //providedCompile "javax.servlet:servlet-api:2.5" //not deployed
     compile "javax.servlet:servlet-api:2.5"
     
@@ -50,26 +50,6 @@ dependencies {
 }
 
 
-//Repositories for dependencies.
-repositories {
-    mavenCentral()
-}
-
-dependencies {    
-    providedCompile "javax.servlet:servlet-api:2.5" //not deployed
-    compile 'org.scala-lang:scala-library:2.10.3'
-    
-    //Support for logging
-    compile 'com.typesafe:scalalogging-slf4j_2.10:1.0.1'
-    compile 'ch.qos.logback:logback-classic:1.0.13'
-    
-    testCompile 'junit:junit:4.+'
-    testCompile 'org.apache.derby:derby:10.10.1.1'
-	
-	//Support for writing png images
-	compile 'jfree:jfreechart:1.0.12'
-}
-	
 //Define the Ivy repository for publishing build artifacts.
 group = 'lasp'
 publishing {
