@@ -1,3 +1,25 @@
-[[0,1,1.1,"A"],
+{"dap2": {
+"metadata": {"myTime": {
+"alias": "time",
+"units": "yyyy/MM/dd",
+"length": "10",
+"type": "text"
+},
+"myInt": {
+"missing_value": "3",
+"long_name": "myInteger",
+"units": "N"
+},
+"myReal": {
+"units": "m/s^2",
+"long_name": "myReal"
+},
+"myText": {
+"units": "letters",
+"missing_value": "D",
+"long_name": "text"
+}},
+"data": [[0,1,1.1,"A"],
 [86400000,2,2.2,"B"],
-[172800000,3,3.3,"C"]]
+[172800000,null,3.3,"C"]]
+}}

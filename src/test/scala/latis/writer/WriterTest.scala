@@ -30,11 +30,12 @@ class WriterTest extends Logging {
     fos.close()
     val s = Source.fromFile(tmpFile).getLines
     val t = Source.fromFile(s"src/test/resources/datasets/data/$name/$suffix").getLines
-    while(t.hasNext) assertEquals(t.next, s.next)
+    while(t.hasNext) assertEquals(suffix + " writer failed for " + name, t.next, s.next)
     assert(s.isEmpty)
   }
   
   def getDataset(name: Object): Dataset = name match {
+    case ds: Dataset => ds
     case s: String => TsmlReader(s"datasets/test/$s.tsml").getDataset
     case v: Variable => Dataset(v,Metadata(v.getName))
   }  

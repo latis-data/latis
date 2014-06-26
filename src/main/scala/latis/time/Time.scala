@@ -9,6 +9,7 @@ import latis.util.RegEx
 import java.util.TimeZone
 import latis.metadata.VariableMetadata
 import latis.data.value.LongValue
+import scala.collection.immutable.StringOps
 
 
 class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
@@ -175,6 +176,7 @@ object Time {
     value match {
       case _: Double => new Time(scale, metadata, Data(value)) with Real
       case _: Long => new Time(scale, metadata, Data(value)) with Integer
+      case _: StringOps => new Time(scale, metadata, Data(value.toString)) with Text
     }
   }
   
