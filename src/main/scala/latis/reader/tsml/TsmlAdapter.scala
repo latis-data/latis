@@ -317,6 +317,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     }
   }
   
+  //TODO: performance note: parameter with 150100 samples ended up with an ArrayBuffer with 262144 samples
+  
   /**
    * Get the Data that has been cached for the given variable.
    */
