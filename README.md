@@ -3,7 +3,7 @@ LaTiS
 
 LaTiS is a software framework for data access, processing, and output. The modular architecture supports reusable and custom *Readers* to read a dataset from its native source, *Operations* to manipulate the dataset, and *Writers* to output the dataset in the desired form. Datasets can be read from diverse sources, combined in various ways to derive new datasets, and written to any number of formats. LaTiS can enable simple access to a single data file or it can be used to orchestrate an entire data processing workflow.
 
-The core feature of LaTiS that enables these capabilities is its *Functional Data Model*. This data model extends the Relational Data Model to add the concept of Functional Relationships which are prevalant in scientific data. This model provides a mathematical foundation for describing any dataset in terms of only three variable types:
+The core feature of LaTiS that enables these capabilities is its *Functional Data Model*. This data model extends the Relational Data Model to add the concept of Functional Relationships which are prevalent in scientific data. This model provides a mathematical foundation for describing any dataset in terms of only three variable types:
 
     Scalar:   A single Variable.
     Tuple:    A group of Variables.
