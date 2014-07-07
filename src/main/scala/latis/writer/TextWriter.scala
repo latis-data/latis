@@ -110,9 +110,16 @@ class TextWriter extends Writer {
   }
   
   /**
-   * Delegate to makeTuple.
+   * Save domain value to repeat for nested functions.
    */
-  def makeSample(sample: Sample): String = makeTuple(sample)
+  def makeSample(sample: Sample): String = sample match {
+    case Sample(d: Index, r) => varToString(r)
+    case Sample(d, r: Function) => {
+      prepend = varToString(d) + delimiter
+      varToString(r)
+    }
+    case _ => makeTuple(sample)
+  }
   
   /**
    * Default String representation of a Tuple.
@@ -128,8 +135,7 @@ class TextWriter extends Writer {
    * Delimited list of Samples.
    */
   def makeFunction(function: Function): String = {
-    function.iterator.map(varToString(_)).mkString(delimiter)
-    // TODO: support non-flat, one row for each inner sample, repeat previous values
+    function.iterator.map(varToString(_)).mkString(prepend, newLine + prepend, "")
   }
   
   /**
@@ -137,4 +143,6 @@ class TextWriter extends Writer {
    * Default to "text/plain".
    */
   override def mimeType: String = getProperty("mimeType", "text/plain")
+  
+  private var prepend = ""
 }
