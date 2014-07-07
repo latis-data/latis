@@ -21,8 +21,6 @@ class WriterTest extends Logging {
   val fof = TestNestedFunction.function_of_functions_with_data_in_scalars
   val tof = TestNestedFunction.tuple_of_functions
   
-  val names = List("scalar", "tsi","dap2", fof, tof)
-
   def test_writer(ds: Dataset, suffix: String) {
     val fos = new FileOutputStream(tmpFile)
     val name = ds.getName
@@ -51,22 +49,6 @@ class WriterTest extends Logging {
     val fos = new DataOutputStream(new FileOutputStream(new File(s"src/test/resources/datasets/data/$n/$suffix")))
     Writer(fos,suffix).write(ds)
     fos.close()
-  }
-  
-  //@Test
-  def make_test_file {
-    val names = List("scalar", "tsi","dap2", fof, tof)
-    val suffixes = List("asc", "bin", "csv", "das", "dds", "dods", "html", "info", "json", "jsond", "meta", "proto", "txt")
-    for(name <- names)
-      for(suffix <- suffixes)
-        write_to_file(name, suffix)
-  }
-  
-  //@Test
-  def test {
-    val w = Writer(System.out, "csv")
-    logger.info("Hodwy")
-    //w.write(1.0)
   }
   
 }

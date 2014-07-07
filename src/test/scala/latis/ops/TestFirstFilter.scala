@@ -88,15 +88,15 @@ class TestFirstFilter {
   
   @Test
   def test_function_of_scalars = {
-    val ds = TestDataset.function_of_scalar_with_iterable_data
+    val ds = TestDataset.function_of_scalar
     val expected = Dataset(Sample(Real(0), Real(0)), ds.getMetadata)
     assertEquals(expected, Operation("first")(ds))
   }
   
   @Test
   def test_function_of_tuples = {
-    val ds = TestDataset.function_of_tuple_with_iterable_data
-    val expected = Dataset(Sample(Real(0), Tuple(Real(0), Real(10))), ds.getMetadata)
+    val ds = TestDataset.function_of_tuple
+    val expected = Dataset(Sample(Integer(Metadata("myInteger"), 0), Tuple(Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero"))), ds.getMetadata)
     assertEquals(expected, Operation("first")(ds))
   }
   
@@ -110,7 +110,7 @@ class TestFirstFilter {
   @Test
   def test_mixed_function = {
     val ds = TestDataset.mixed_function
-    val expected = Dataset(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), TestDataset.function_of_scalar_with_iterable_data.getVariables(0))), ds.getMetadata)
+    val expected = Dataset(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), TestDataset.function_of_scalar.getVariables(0))), ds.getMetadata)
     assertEquals(expected, Operation("first")(ds))
   }
   
@@ -146,7 +146,7 @@ class TestFirstFilter {
   @Test
   def test_combo = {
     val ds = TestDataset.combo
-    val expected = Dataset(List(Sample(Real(0), Tuple(Real(0), Real(10))), TestDataset.tuple_of_tuples.getVariables(0), TestDataset.text.getVariables(0)), ds.getMetadata)
+    val expected = Dataset(List(Sample(Integer(Metadata("myInteger"), 0), Tuple(Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero"))), TestDataset.tuple_of_tuples.getVariables(0), TestDataset.text.getVariables(0)), ds.getMetadata)
     assertEquals(expected, Operation("first")(ds))
   }
   

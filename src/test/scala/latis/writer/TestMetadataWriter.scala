@@ -13,8 +13,24 @@ import latis.metadata.Metadata
 class TestMetadataWriter extends WriterTest{
   
   @Test
-  def test_meta {
-    for(name <- names) test_writer(getDataset(name),"meta")
+  def test_dap2 {
+    test_writer(getDataset("dap2"),"meta")
+  }
+  @Test
+  def test_fof {
+    test_writer(getDataset(fof),"meta")
+  }
+  @Test
+  def test_scalar {
+    test_writer(getDataset("scalar"),"meta")
+  }
+  @Test
+  def test_tsi {
+    test_writer(getDataset("tsi"),"meta")
+  }
+  @Test
+  def test_tof {
+    test_writer(getDataset(tof),"meta")
   }
   
   //@Test
@@ -24,8 +40,7 @@ class TestMetadataWriter extends WriterTest{
   
   //@Test 
   def write_meta_file {
-    for(name <- names)
-    write_to_file(name, "meta")
+    write_to_file(fof, "meta")
   }
   
 }

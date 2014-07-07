@@ -113,12 +113,14 @@ class TextWriter extends Writer {
    * Save domain value to repeat for nested functions.
    */
   def makeSample(sample: Sample): String = sample match {
-    case Sample(d: Index, r) => varToString(r)
     case Sample(d, r: Function) => {
-      prepend = varToString(d) + delimiter
+      prepend :+= varToString(d)
       varToString(r)
     }
-    case _ => makeTuple(sample)
+    case _ => {
+      if(prepend isEmpty) makeTuple(sample)
+      else prepend.mkString("", delimiter, delimiter) + makeTuple(sample)
+    }
   }
   
   /**
@@ -135,7 +137,9 @@ class TextWriter extends Writer {
    * Delimited list of Samples.
    */
   def makeFunction(function: Function): String = {
-    function.iterator.map(varToString(_)).mkString(prepend, newLine + prepend, "")
+    val s = function.iterator.map(varToString(_)).mkString("", newLine, "")
+    prepend = prepend.dropRight(1)
+    s
   }
   
   /**
@@ -144,5 +148,5 @@ class TextWriter extends Writer {
    */
   override def mimeType: String = getProperty("mimeType", "text/plain")
   
-  private var prepend = ""
+  private var prepend = List[String]()
 }

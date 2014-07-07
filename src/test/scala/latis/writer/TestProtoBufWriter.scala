@@ -7,9 +7,8 @@ import java.nio.ByteBuffer
 class TestProtoBufWriter extends WriterTest{
 
   @Test
-  def test_protod {
-    val names = List("tsi")
-    for(name <- names) test_writer(getDataset("tsi"),"protod")
+  def test_tsi {
+    test_writer(getDataset("tsi"),"protod")
   }
   
   //@Test

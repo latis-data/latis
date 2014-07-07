@@ -6,16 +6,27 @@ import latis.dm._
 import latis.metadata.Metadata
 import latis.data.SampledData
 
-class TestJsonWriters extends WriterTest {
+class TestJsonWriter extends WriterTest {
 
   @Test
-  def test_json {
-    for(name <- names) test_writer(getDataset(name),"json")
+  def test_dap2 {
+    test_writer(getDataset("dap2"),"json")
   }
-  
   @Test
-  def test_jsond {
-    for(name <- names) test_writer(getDataset(name),"jsond")
+  def test_fof {
+    test_writer(getDataset(fof),"json")
+  }
+  @Test
+  def test_scalar {
+    test_writer(getDataset("scalar"),"json")
+  }
+  @Test
+  def test_tsi {
+    test_writer(getDataset("tsi"),"json")
+  }
+  @Test
+  def test_tof {
+    test_writer(getDataset(tof),"json")
   }
   
   //@Test
@@ -26,12 +37,8 @@ class TestJsonWriters extends WriterTest {
   //@Test 
   def write_json_file {
     //for(name <- names)
-    write_to_file(fof, "jsond")
+    write_to_file(fof, "json")
   }
-  
-  def real = Writer.fromSuffix("json").write(TestDataset.real)
-  def integer = Writer.fromSuffix("json").write(TestDataset.integer)
-  def text = Writer.fromSuffix("json").write(TestDataset.text)
   
   //@Test
   def testj = Writer.fromSuffix("json").write(TestDataset.index_function)

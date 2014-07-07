@@ -13,8 +13,24 @@ import latis.metadata.Metadata
 class TestAsciiWriter extends WriterTest{
   
   @Test
-  def test_ascii {
-    for(name <- names) test_writer(getDataset(name),"asc")
+  def test_dap2 {
+    test_writer(getDataset("dap2"),"asc")
+  }
+  @Test
+  def test_fof {
+    test_writer(getDataset(fof),"asc")
+  }
+  @Test
+  def test_scalar {
+    test_writer(getDataset("scalar"),"asc")
+  }
+  @Test
+  def test_tsi {
+    test_writer(getDataset("tsi"),"asc")
+  }
+  @Test
+  def test_tof {
+    test_writer(getDataset(tof),"asc")
   }
   
   //@Test

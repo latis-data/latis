@@ -5,8 +5,24 @@ import org.junit.Test
 class TestProtoWriter extends WriterTest {
   
   @Test
-  def test_proto {
-    for(name <- names) test_writer(getDataset(name),"proto")
+  def test_dap2 {
+    test_writer(getDataset("dap2"),"proto")
+  }
+  @Test
+  def test_fof {
+    test_writer(getDataset(fof),"proto")
+  }
+  @Test
+  def test_scalar {
+    test_writer(getDataset("scalar"),"proto")
+  }
+  @Test
+  def test_tsi {
+    test_writer(getDataset("tsi"),"proto")
+  }
+  @Test
+  def test_tof {
+    test_writer(getDataset(tof),"proto")
   }
   
   //@Test
@@ -16,8 +32,7 @@ class TestProtoWriter extends WriterTest {
   
   //@Test 
   def write_proto_file {
-    for(name <- names)
-    write_to_file(name, "proto")
+    write_to_file(fof, "proto")
   }
 
 }
