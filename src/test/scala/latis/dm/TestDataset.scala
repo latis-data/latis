@@ -40,14 +40,14 @@ object TestDataset {
     val samples = List(Sample(Real(0), Real(0)), 
                        Sample(Real(1), Real(1)), 
                        Sample(Real(2), Real(2)))
-    Dataset(Function(samples), Metadata("function_of_scalar_with_iterable_data"))
+    Dataset(Function(samples), Metadata("function_of_scalar"))
   }
   
   def function_of_tuple = {
     val samples = List(Sample(Integer(Metadata("myInteger"), 0), Tuple(Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero"))), 
                        Sample(Integer(Metadata("myInteger"), 1), Tuple(Real(Metadata("myReal"), 1), Text(Metadata("myText"), "one"))), 
                        Sample(Integer(Metadata("myInteger"), 2), Tuple(Real(Metadata("myReal"), 2), Text(Metadata("myText"), "two"))))
-    Dataset(Function(samples), Metadata("function_of_tuple_with_mixed_types"))
+    Dataset(Function(samples), Metadata("function_of_tuple"))
   }
   
   def function_of_functions = Dataset(TestNestedFunction.function_of_functions_with_data_in_scalars, Metadata("function_of_functions"))
@@ -59,20 +59,13 @@ object TestDataset {
     Dataset(Function(samples), Metadata("mixed_function"))
   }
   
-  def time_series_of_scalar = {
-    val samples = List(Sample(Time(Metadata("myTime"), 1000.0), Integer(Metadata("myInteger"), 3)),
-                       Sample(Time(Metadata("myTime"), 2000.0), Integer(Metadata("myInteger"), 2)),
-                       Sample(Time(Metadata("myTime"), 3000.0), Integer(Metadata("myInteger"), 1)))
-    Dataset(Function(samples), Metadata("time_series_of_scalar"))
-  }
-  def time_series_of_tuple = {
-    val md = Map("name" -> "time", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd")
-    val samples = List(Sample(Time(Metadata(md), "1970/01/01"), Tuple(Integer(Metadata("int"), 1), Real(Metadata("real"), 1.1), Text(Metadata("text"), "A"))),
-                       Sample(Time(Metadata(md), "1970/01/02"), Tuple(Integer(Metadata("int"), 2), Real(Metadata("real"), 2.2), Text(Metadata("text"), "B"))),
-                       Sample(Time(Metadata(md), "1970/01/03"), Tuple(Integer(Metadata("int"), 3), Real(Metadata("real"), 3.3), Text(Metadata("text"), "C"))))
-    Dataset(Function(samples), Metadata("time_series_of_tuple"))
-    
-  }
+//  def time_series_of_tuple = {
+//    val md = Map("name" -> "time", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd")
+//    val samples = List(Sample(Time(Metadata(md), "1970/01/01"), Tuple(Integer(Metadata("int"), 1), Real(Metadata("real"), 1.1), Text(Metadata("text"), "A"))),
+//                       Sample(Time(Metadata(md), "1970/01/02"), Tuple(Integer(Metadata("int"), 2), Real(Metadata("real"), 2.2), Text(Metadata("text"), "B"))),
+//                       Sample(Time(Metadata(md), "1970/01/03"), Tuple(Integer(Metadata("int"), 3), Real(Metadata("real"), 3.3), Text(Metadata("text"), "C"))))
+//    Dataset(Function(samples), Metadata("time_series_of_tuple"))
+//  }
   
   def empty_function = Dataset(Function(Real(Metadata("domain")), Real(Metadata("range")), Iterator.empty), Metadata("empty_function"))
   
@@ -82,6 +75,5 @@ object TestDataset {
   
   def datasets = Seq(empty, real, integer, text, real_time, text_time, int_time, scalars, binary, tuple_of_scalars,
                      tuple_of_tuples, tuple_of_functions, scalar_tuple, mixed_tuple, function_of_scalar,
-                     function_of_tuple, function_of_functions,
-                     mixed_function, time_series_of_scalar, time_series_of_tuple, empty_function, index_function, combo)
+                     function_of_tuple, function_of_functions, mixed_function, empty_function, index_function, combo)
 }

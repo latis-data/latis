@@ -115,21 +115,6 @@ class TestFirstFilter {
   }
   
   @Test
-  def test_scalar_time_series = {
-    val ds = TestDataset.time_series_of_scalar
-    val expected = Dataset(Sample(Time(Metadata("myTime"), 1000.0), Integer(Metadata("myInteger"), 3)), ds.getMetadata)
-    assertEquals(expected, Operation("first")(ds))
-  }
-  
-  @Test
-  def test_tuple_time_series = {
-    val ds = TestDataset.time_series_of_tuple
-    val md = Map("name" -> "time", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd")
-    val expected = Dataset(Sample(Time(Metadata(md), "1970/01/01"), Tuple(Integer(Metadata("int"), 1), Real(Metadata("real"), 1.1), Text(Metadata("text"), "A"))), ds.getMetadata)
-    assertEquals(expected, Operation("first")(ds))
-  }
-  
-  @Test
   def test_empty_function = {
     val ds = TestDataset.empty_function
     val expected = Dataset(Sample(Real(Metadata("domain")), Real(Metadata("range"))), ds.getMetadata)

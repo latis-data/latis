@@ -12,7 +12,7 @@ class LimitFilter(val limit: Int) extends Filter {
   
   override def applyToFunction(function: Function) = {
     //set the new length in the metadata
-    val md = Metadata(function.getMetadata.getProperties + ("length" -> limit.toString))
+    val md = Metadata(function.getMetadata.getProperties + ("length" -> (limit min function.getLength).toString))
 
     val it = function.iterator.take(limit)
     Some(Function(function.getDomain, function.getRange, it, md))
