@@ -1,11 +1,13 @@
 package latis.ops.filter
 
+import latis.dm.Function
 import latis.dm.Scalar
 import latis.dm.Text
 import latis.time.Time
 import latis.util.RegEx.SELECTION
-
 import com.typesafe.scalalogging.slf4j.Logging
+import latis.util.MappingIterator
+import latis.dm.Sample
 
 /**
  * Filter based on a basic boolean expression.
@@ -43,6 +45,13 @@ protected class Selection(val vname: String, val operation: String, val value: S
     } else Some(text) //operation doesn't apply to this Scalar Variable, no-op
   }
   
+  override def applyToSample(sample: Sample): Option[Sample] = {
+    val x = sample.getVariables.map(applyToVariable(_))
+    x.find(_.isEmpty) match{
+      case Some(_) => None //found an invalid variable, exclude the entire sample
+      case None => Some(Sample(x(0).get, x(1).get))
+    }
+  }
   
   private def isValid(comparison: Int): Boolean = {
     if (operation == "!=") {
