@@ -9,6 +9,7 @@ import latis.metadata.Metadata
 import latis.time.Time
 import latis.writer.AsciiWriter
 import java.nio.ByteBuffer
+import latis.data.value.DoubleValue
 
 class TestDataset {
 
@@ -28,7 +29,7 @@ object TestDataset {
   def text_time = Dataset(Time(Metadata(Map("name" -> "myTextTime", "type" -> "text", "length" -> "10", "units" -> "yyyy-MM-dd")), "1970/01/01"), Metadata("text_timeDS"))
   def int_time = Dataset(Time(Metadata(Map("name" -> "myIntegerTime", "type" -> "integer")), 1000.toLong), Metadata("integer_timeDS"))
   def scalars = Dataset(List(Real(Metadata("myReal"), 3.14), Integer(Metadata("myInteger"), 42), Text(Metadata("myText"), "Hi"), Time(Metadata("myRealTime"), 1000.0)), Metadata("scalarDS"))
-  def binary = Dataset(Binary(Metadata(Map("name" -> "myBinary", "size" -> "8")), ByteBuffer.allocate(8).putDouble(1.1)), Metadata("binaryDS"))
+  def binary = Dataset(Binary(Metadata("myBinary"), DoubleValue(1.1).getByteBuffer), Metadata("binaryDS"))
   
   def tuple_of_scalars = Dataset(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero")), Metadata("tupleDS"))
   def tuple_of_tuples = Dataset(Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1.1))), Metadata("tuple_of_tuplesDS"))

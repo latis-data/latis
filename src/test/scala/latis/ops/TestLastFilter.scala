@@ -73,7 +73,9 @@ class TestLastFilter {
   
   @Test
   def test_tuple_of_functions = {
-    assertEquals(TestDataset.tuple_of_functions, Operation("last")(TestDataset.tuple_of_functions))
+    val ds = TestDataset.tuple_of_functions
+    val expected = Dataset(Tuple(Sample(Integer(Metadata("myInt0"), 12), Real(Metadata("myReal0"), 2)), Sample(Integer(Metadata("myInt1"), 12), Real(Metadata("myReal1"), 12)), Sample(Integer(Metadata("myInt2"), 12), Real(Metadata("myReal2"), 22)), Sample(Integer(Metadata("myInt3"), 12), Real(Metadata("myReal3"), 32))), ds.getMetadata)
+    assertEquals(expected, Operation("last")(ds))
   }
   
   @Test
@@ -83,7 +85,10 @@ class TestLastFilter {
   
   @Test
   def test_mixed_tuple = {
-    assertEquals(TestDataset.mixed_tuple, Operation("last")(TestDataset.mixed_tuple))
+    val ds = TestDataset.mixed_tuple
+    val expected = Dataset(Tuple(Real(Metadata("myReal"), 0.0), Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), Sample(Real(2), Real(2))), ds.getMetadata)
+    //Writer.fromSuffix("asc").write(TestDataset.tuple_of_functions)
+    assertEquals(expected, Operation("last")(ds))
   }
   
   @Test

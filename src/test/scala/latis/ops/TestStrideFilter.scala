@@ -83,24 +83,24 @@ class TestStrideFilter { //should a stride of 0 be accepted?
     assertEquals(TestDataset.tuple_of_tuples, StrideFilter(3)(TestDataset.tuple_of_tuples))
     assertEquals(TestDataset.tuple_of_tuples, StrideFilter(5)(TestDataset.tuple_of_tuples))
   }
-  @Test
-  def test_tuple_of_functions = {
-    assertEquals(TestDataset.tuple_of_functions, StrideFilter(1)(TestDataset.tuple_of_functions))
-    assertEquals(TestDataset.tuple_of_functions, StrideFilter(3)(TestDataset.tuple_of_functions))
-    assertEquals(TestDataset.tuple_of_functions, StrideFilter(5)(TestDataset.tuple_of_functions))
-  }
+//  @Test
+//  def test_tuple_of_functions = {
+//    assertEquals(TestDataset.tuple_of_functions, StrideFilter(1)(TestDataset.tuple_of_functions))
+//    assertEquals(TestDataset.tuple_of_functions, StrideFilter(3)(TestDataset.tuple_of_functions))
+//    assertEquals(TestDataset.tuple_of_functions, StrideFilter(5)(TestDataset.tuple_of_functions))
+//  }
   @Test
   def test_scalar_tuple = {
     assertEquals(TestDataset.scalar_tuple, StrideFilter(1)(TestDataset.scalar_tuple))
     assertEquals(TestDataset.scalar_tuple, StrideFilter(3)(TestDataset.scalar_tuple))
     assertEquals(TestDataset.scalar_tuple, StrideFilter(5)(TestDataset.scalar_tuple))
   }
-  @Test
-  def test_mixed_tuple = {
-    assertEquals(TestDataset.mixed_tuple, StrideFilter(1)(TestDataset.mixed_tuple))
-    assertEquals(TestDataset.mixed_tuple, StrideFilter(3)(TestDataset.mixed_tuple))
-    assertEquals(TestDataset.mixed_tuple, StrideFilter(5)(TestDataset.mixed_tuple))
-  }
+//  @Test
+//  def test_mixed_tuple = {
+//    assertEquals(TestDataset.mixed_tuple, StrideFilter(1)(TestDataset.mixed_tuple))
+//    assertEquals(TestDataset.mixed_tuple, StrideFilter(3)(TestDataset.mixed_tuple))
+//    assertEquals(TestDataset.mixed_tuple, StrideFilter(5)(TestDataset.mixed_tuple))
+//  }
   @Test
   def test_function_of_scalar = {
     val exp1 = Dataset(Function(List(Sample(Real(0), Real(0)), 
@@ -123,9 +123,9 @@ class TestStrideFilter { //should a stride of 0 be accepted?
   }
   @Test
   def test_function_of_function = {
-    val exp2 = Dataset(Function(List(Sample(Integer(Metadata("x"), 0), Function(List(Sample(Integer(Metadata("y"), 10), Real(Metadata("z"), 0)))))), Metadata(Map("length" -> 1.toString, "name" -> "function_of_functions_with_data_in_scalar"))), TestDataset.function_of_functions.getMetadata)
+    val exp2 = Dataset(Function(List(Sample(Integer(Metadata("x"), 0), Function(List(Sample(Integer(Metadata("y"), 10), Real(Metadata("z"), 0))), Metadata(Map("length" -> 1.toString))))), Metadata(Map("length" -> 1.toString, "name" -> "function_of_functions_with_data_in_scalar"))), TestDataset.function_of_functions.getMetadata)
     val exp1 = Dataset(Function((0 until 4).map(Integer(Metadata("x"), _)), for (i <- 0 until 4) yield Function((0 until 3).map(j => 
-      Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * i + j)))), Metadata(Map("length" -> 4.toString(), "name" -> "function_of_functions_with_data_in_scalar"))), TestDataset.function_of_functions.getMetadata)
+      Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * i + j))), Metadata(Map("length" -> 3.toString))), Metadata(Map("length" -> 4.toString(), "name" -> "function_of_functions_with_data_in_scalar"))), TestDataset.function_of_functions.getMetadata)
     assertEquals(exp1, StrideFilter(1)(TestDataset.function_of_functions))
     assertEquals(exp2, StrideFilter(4)(TestDataset.function_of_functions))
     assertEquals(exp2, StrideFilter(5)(TestDataset.function_of_functions))
@@ -150,7 +150,7 @@ class TestStrideFilter { //should a stride of 0 be accepted?
   }
   @Test
   def test_index_function = {
-    val exp2 = Dataset(Function(List(Integer(1), Integer(2)), Metadata(Map("length" -> 1.toString))), TestDataset.index_function.getMetadata)
+    val exp2 = Dataset(Function(List(Integer(1)), Metadata(Map("length" -> 1.toString))), TestDataset.index_function.getMetadata)
     val exp1 = Dataset(Function(List(Integer(1), Integer(2)), Metadata(Map("length" -> 2.toString))), TestDataset.index_function.getMetadata)
     assertEquals(exp1, StrideFilter(1)(TestDataset.index_function))
     assertEquals(exp2, StrideFilter(3)(TestDataset.index_function))

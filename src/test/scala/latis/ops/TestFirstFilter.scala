@@ -13,6 +13,7 @@ import org.junit.Assert._
 import latis.time.Time
 import latis.dm.Text
 import latis.dm.Index
+import latis.writer.Writer
 
 class TestFirstFilter {
   
@@ -73,7 +74,9 @@ class TestFirstFilter {
   
   @Test
   def test_tuple_of_functions = {
-    assertEquals(TestDataset.tuple_of_functions, Operation("first")(TestDataset.tuple_of_functions))
+    val ds = TestDataset.tuple_of_functions
+    val expected = Dataset(Tuple(Sample(Integer(Metadata("myInt0"), 10), Real(Metadata("myReal0"), 0)), Sample(Integer(Metadata("myInt1"), 10), Real(Metadata("myReal1"), 10)), Sample(Integer(Metadata("myInt2"), 10), Real(Metadata("myReal2"), 20)), Sample(Integer(Metadata("myInt3"), 10), Real(Metadata("myReal3"), 30))), ds.getMetadata)
+    assertEquals(expected, Operation("first")(ds))
   }
   
   @Test
@@ -83,7 +86,10 @@ class TestFirstFilter {
   
   @Test
   def test_mixed_tuple = {
-    assertEquals(TestDataset.mixed_tuple, Operation("first")(TestDataset.mixed_tuple))
+    val ds = TestDataset.mixed_tuple
+    val expected = Dataset(Tuple(Real(Metadata("myReal"), 0.0), Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), Sample(Real(0), Real(0))), ds.getMetadata)
+    //Writer.fromSuffix("asc").write(TestDataset.tuple_of_functions)
+    assertEquals(expected, Operation("first")(ds))
   }
   
   @Test
