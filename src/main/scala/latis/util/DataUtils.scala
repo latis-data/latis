@@ -89,7 +89,24 @@ object DataUtils {
     /*
      * TODO: generalize for more complex data
      * +IndexSet
+     * 
+     * nested Function
+     * assume nested domain var is repeated for all outer samples
+     * 
+     * need to iterate while maintaining pointer into array based on outer
      */
+//    val domain = sampleTemplate.domain
+//    val domainData = dataMap(domain.getName)
+//    //TODO: assumes 1D domain
+//    
+//    val range = sampleTemplate.range
+//    
+//    //loop over all samples of the outer Function
+//    for (indexOuter <- 0 until domainData.length) {
+//      
+//      
+//    }
+    
     val vars = sampleTemplate.toSeq
     val n = dataMap(vars(0).getName).length
     //TODO: zip with index...?
