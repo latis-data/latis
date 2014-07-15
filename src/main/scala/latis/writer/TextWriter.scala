@@ -82,7 +82,10 @@ class TextWriter extends Writer {
    */
   def writeFunction(function: Function) {
     val startThenDelim = FirstThenOther("", newLine)
-    for (sample <- function.iterator) printWriter.print(startThenDelim.value + varToString(sample))
+    for (sample <- function.iterator) {
+      val s = varToString(sample)
+      printWriter.print(startThenDelim.value + s)
+    }
     printWriter.println
   }
   
