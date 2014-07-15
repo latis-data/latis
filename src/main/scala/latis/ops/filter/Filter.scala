@@ -36,9 +36,12 @@ class Filter extends Operation {
   /**
    * Default filter for Tuples. Filter each element and exclude the entire Tuple if any element is invalid (None).
    */
-  override def applyToTuple(tuple: Tuple): Option[Tuple] = tuple.getVariables.map(applyToVariable(_)).find(_.isEmpty) match {
-    case Some(_) => None //found an invalid variable, exclude the entire tuple
-    case None => Some(tuple)
+  override def applyToTuple(tuple: Tuple): Option[Tuple] = {
+    val x = tuple.getVariables.map(applyToVariable(_))
+    x.find(_.isEmpty) match{
+      case Some(_) => None //found an invalid variable, exclude the entire tuple
+      case None => Some(Tuple(x.map(_.get), tuple.getMetadata))
+    }
   }
 
 }

@@ -74,7 +74,7 @@ class TestLastFilter {
   @Test
   def test_tuple_of_functions = {
     val ds = TestDataset.tuple_of_functions
-    val expected = Dataset(Tuple(Sample(Integer(Metadata("myInt0"), 12), Real(Metadata("myReal0"), 2)), Sample(Integer(Metadata("myInt1"), 12), Real(Metadata("myReal1"), 12)), Sample(Integer(Metadata("myInt2"), 12), Real(Metadata("myReal2"), 22)), Sample(Integer(Metadata("myInt3"), 12), Real(Metadata("myReal3"), 32))), ds.getMetadata)
+    val expected = Dataset(Tuple(Seq(Sample(Integer(Metadata("myInt0"), 12), Real(Metadata("myReal0"), 2)), Sample(Integer(Metadata("myInt1"), 12), Real(Metadata("myReal1"), 12)), Sample(Integer(Metadata("myInt2"), 12), Real(Metadata("myReal2"), 22)), Sample(Integer(Metadata("myInt3"), 12), Real(Metadata("myReal3"), 32))), Metadata("tuple_of_functions")), ds.getMetadata)
     assertEquals(expected, Operation("last")(ds))
   }
   
