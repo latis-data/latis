@@ -261,6 +261,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     val sampleTemplate = Sample(f.getDomain, f.getRange)
     val data = DataUtils.dataMapToSampledData(dataMap, sampleTemplate)
     Some(Function(f.getDomain, f.getRange, f.getMetadata, data=data))
+    //TODO: make sure function md has length?
   }
   
   /**
