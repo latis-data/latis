@@ -129,8 +129,9 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
       v1.getVariables == v2.getVariables 
     
     //iterate through all samples
-    case (v1: Function, v2: Function) => v1.getMetadata == v2.getMetadata && 
-      (v1.iterator zip v2.iterator).forall(p => p._1 == p._2)
+    case (v1: Function, v2: Function) => v1.getMetadata == v2.getMetadata &&
+      v1.iterator.corresponds(v2.iterator)(_==_)
+      //(v1.iterator zip v2.iterator).forall(p => p._1 == p._2)
       //TODO: confirm same length? iterate once issues
     
     case _ => false

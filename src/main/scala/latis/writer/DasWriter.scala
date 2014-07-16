@@ -9,6 +9,7 @@ import latis.dm.Variable
 
 /**
  * Write a Dataset's DAP2 Dataset Attribute Structure.
+ * Contains only metadata, no data
  */
 class DasWriter extends TextWriter {
   
@@ -20,6 +21,9 @@ class DasWriter extends TextWriter {
     printWriter.print(varToString(variable))
   }
 
+  /**
+   * Makes the metadata string for a variable. 
+   */
   def makeAttributes(variable: Variable): String = {
     val props = variable.getMetadata.getProperties
     count-=indentSize
@@ -31,20 +35,35 @@ class DasWriter extends TextWriter {
     else indent(count) + "}\n"
   }
 
+  /**
+   * Avoids unnecessary iteration of the function.
+   */
   override def makeFunction(function: Function): String = {
-    makeLabel(function) + varToString(Sample(function.getDomain, function.getRange))
+    val label = makeLabel(function) 
+    val s = varToString(Sample(function.getDomain, function.getRange))
+    count-=indentSize
+    label + s
   }
   
+  /**
+   * Labels variable and provides metadata.
+   */
   override def makeScalar(scalar:Scalar): String = {
     makeLabel(scalar) + makeAttributes(scalar)
   }
   
+  /**
+   * prevents labeling of samples, just looks at inner variables.
+   */
+  override def makeSample(sample: Sample): String = {
+    sample.getVariables.map(varToString(_)).mkString("","",indent(count-indentSize)+"}\n")
+  }
+  
+  /**
+   * Make a label for the tuple before considering inner variables.
+   */
   override def makeTuple(tuple: Tuple): String = {
-    var label = ""
-    tuple match{
-      case _:Sample => label = ""
-      case _ => label = makeLabel(tuple)
-    }
+    val label = makeLabel(tuple)
     val s = tuple.getVariables.map(varToString(_))
     count-=indentSize
     label + s.mkString("","",indent(count)+"}\n")
@@ -54,12 +73,18 @@ class DasWriter extends TextWriter {
 
   var count = indentSize
 
+  /**
+   * Used with a counter to create the proper indentation for each line of output.
+   */
   def indent(num: Int): String = {
     val sb = new StringBuilder()
     for(a <- 1 to num) sb append " "
     sb.toString
   }
 
+  /**
+   * Makes a label for a given variable.
+   */
   def makeLabel(variable: Variable): String ={
     count +=indentSize
     indent(count-indentSize) + variable.getName + "{\n"

@@ -8,11 +8,9 @@ import java.io.FileOutputStream
 
 class TestImageWriter extends WriterTest {
   
-  override val names = List("scalar", "dap2", "tsi")
-  
   //@Test
-  def test_png {
-    for(name <- names) test_writer(getDataset(name),"png")
+  def test_tsi {
+    test_writer(getDataset("tsi"),"png")
   }
   
   //@Test
@@ -24,8 +22,7 @@ class TestImageWriter extends WriterTest {
 
   //@Test 
   def write_image_file {
-    for(name <- names)
-    write_to_file(name, "png")
+    write_to_file("tsi", "png")
   }
 
 }

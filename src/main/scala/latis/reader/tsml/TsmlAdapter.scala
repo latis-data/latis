@@ -261,6 +261,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     val sampleTemplate = Sample(f.getDomain, f.getRange)
     val data = DataUtils.dataMapToSampledData(dataMap, sampleTemplate)
     Some(Function(f.getDomain, f.getRange, f.getMetadata, data=data))
+    //TODO: make sure function md has length?
   }
   
   /**
@@ -316,6 +317,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
       case None => cache(variableName, data) //first sample
     }
   }
+  
+  //TODO: performance note: parameter with 150100 samples ended up with an ArrayBuffer with 262144 samples
   
   /**
    * Get the Data that has been cached for the given variable.

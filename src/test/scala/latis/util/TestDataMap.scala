@@ -51,7 +51,7 @@ class TestDataMap {
   
   @Test
   def doubles_from_function_of_tuple_with_mixed_types {
-    val ds = DataMap.toDoubles(TestDataset.function_of_tuple_with_mixed_types)
+    val ds = DataMap.toDoubles(TestDataset.function_of_tuple)
     //for (a <- ds; d <- a) println(d)
     assertEquals(2.0, ds(0)(2), 0.0)
     assertEquals(0.0, ds(1)(0), 0.0)
@@ -60,7 +60,7 @@ class TestDataMap {
   
   @Test
   def strings_from_function_of_tuple_with_mixed_types {
-    val ss = DataMap.toStrings(TestDataset.function_of_tuple_with_mixed_types)
+    val ss = DataMap.toStrings(TestDataset.function_of_tuple)
     //for (a <- ss; s <- a) println(s)
     assertEquals("2", ss(0)(2))
     assertEquals("0.0", ss(1)(0))

@@ -2,6 +2,9 @@ package latis.writer
 
 import latis.dm._
 
+/**
+ * Writes an html landing page for a dataset.
+ */
 class HtmlWriter extends TextWriter {
   
   override def write(dataset: Dataset) {
@@ -10,6 +13,9 @@ class HtmlWriter extends TextWriter {
     printWriter.flush
   }
   
+  /**
+   * Makes the header of the html
+   */
   override def makeHeader(dataset: Dataset): String = {
     val sb = new StringBuilder
     val name = dataset.getMetadata("long_name").getOrElse(dataset.getName)
@@ -22,13 +28,18 @@ class HtmlWriter extends TextWriter {
     sb append "\n</head>\n"    
     sb.toString
   }
-  
+
   val scripts = "<script type=\"text/javascript\" src=\"http://lasp.colorado.edu/lisird/tss/resources/tss.js\"></script>"
-  
+
   val style = "\n<link rel=\"stylesheet\" type=\"text/css\" href=\"http://lasp.colorado.edu/lisird/tss/resources/tss.css\">"  
     
   def writeBody(dataset: Dataset) = printWriter.print(makeBody(dataset))
   
+  /**
+   * The body includes a description of the data if available, 
+   * the DDS and DAS dataset structure descriptions,
+   * and a query form for selection of each variable.
+   */
   def makeBody(dataset: Dataset): String = {
     val name = dataset.getMetadata("long_name").getOrElse(dataset.getName)
     val sb = new StringBuilder
@@ -45,6 +56,9 @@ class HtmlWriter extends TextWriter {
     sb.toString
   }
   
+  /**
+   * Uses the InfoWriter to get a dataset description.
+   */
   def makeInfo(dataset: Dataset): String = {
     val sb = new StringBuilder
     val w = new InfoWriter
@@ -57,6 +71,9 @@ class HtmlWriter extends TextWriter {
     sb.toString
   }
   
+  /**
+   * Uses DdsWriter to show the structure of the dataset.
+   */
   def dds(dataset: Dataset): String = {
     val w = new DdsWriter
     val sb = new StringBuilder
@@ -69,6 +86,9 @@ class HtmlWriter extends TextWriter {
     sb.toString
   }
   
+  /**
+   * Uses DasWriter to show metadata.
+   */
   def das(dataset: Dataset): String = {
     val w = new DasWriter
     val sb = new StringBuilder
@@ -81,6 +101,9 @@ class HtmlWriter extends TextWriter {
     sb.toString
   }
   
+  /**
+   * Makes a form for retrieval of data in any supported format.
+   */
   def queryForms(dataset: Dataset) = {
     val sb = new StringBuilder
     sb append "\n<h2>Data Set Query Form</h2>"
@@ -92,6 +115,9 @@ class HtmlWriter extends TextWriter {
     sb.toString
   }
   
+  /**
+   * Makes a form for a selection operation.
+   */
   def makeForm(variable: Variable): String = variable match {
     case s:Scalar => "\n<form name=\"" + s.getName + "\">" + s.getName + " (" + s.getMetadata("units").getOrElse("unknown units") + ")" + "<br/>Select Range: <input type=\"text\" name=\"x1\" /><input type=\"text\" name=\"x2\" /><br/></form><br/>"
     case Tuple(vars) => vars.map(makeForm(_)).mkString("")

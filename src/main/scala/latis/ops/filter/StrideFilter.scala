@@ -4,6 +4,7 @@ import latis.dm.Function
 import latis.dm.Sample
 import latis.metadata.Metadata
 import latis.ops.OperationFactory
+import latis.util.MappingIterator
 
 
 /**
@@ -12,16 +13,25 @@ import latis.ops.OperationFactory
 class StrideFilter(val stride: Int) extends Filter {
   
   override def applyToFunction(function: Function) = {
-    val it = function.iterator.grouped(stride).map(_(0))
-    val nlen = function.getLength match {
-      case -1 => throw new Exception("Function has undefined length")
-      case 0 => 0
-      case n => ((n - 1) / stride) + 1
-    }
-    val md = Metadata(function.getMetadata.getProperties + ("length" -> nlen.toString))
+    val it = new MappingIterator(function.iterator.grouped(stride).map(_(0)), (s: Sample) => this.applyToSample(s))
+//    val nlen = function.getLength match {
+//      case -1 => throw new Exception("Function has undefined length")
+//      case 0 => 0
+//      case n => ((n - 1) / stride) + 1
+//    }
+//    val md = Metadata(function.getMetadata.getProperties + ("length" -> nlen.toString))
 
-    Some(Function(function.getDomain, function.getRange, it, md))
+    Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
   }
+  
+  override def applyToSample(sample: Sample): Option[Sample] = {
+    val x = sample.getVariables.map(applyToVariable(_))
+    x.find(_.isEmpty) match{
+      case Some(_) => None //found an invalid variable, exclude the entire sample
+      case None => Some(Sample(x(0).get, x(1).get))
+    }
+  }
+  
 }
 
 object StrideFilter extends OperationFactory {

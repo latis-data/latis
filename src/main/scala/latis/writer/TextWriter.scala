@@ -82,7 +82,10 @@ class TextWriter extends Writer {
    */
   def writeFunction(function: Function) {
     val startThenDelim = FirstThenOther("", newLine)
-    for (sample <- function.iterator) printWriter.print(startThenDelim.value + varToString(sample))
+    for (sample <- function.iterator) {
+      val s = varToString(sample)
+      printWriter.print(startThenDelim.value + s)
+    }
     printWriter.println
   }
   
@@ -110,9 +113,18 @@ class TextWriter extends Writer {
   }
   
   /**
-   * Delegate to makeTuple.
+   * Save domain value to repeat for nested functions.
    */
-  def makeSample(sample: Sample): String = makeTuple(sample)
+  def makeSample(sample: Sample): String = sample match {
+    case Sample(d, r: Function) => {
+      prepend :+= varToString(d)
+      varToString(r)
+    }
+    case _ => {
+      if(prepend isEmpty) makeTuple(sample)
+      else prepend.mkString("", delimiter, delimiter) + makeTuple(sample)
+    }
+  }
   
   /**
    * Default String representation of a Tuple.
@@ -128,8 +140,9 @@ class TextWriter extends Writer {
    * Delimited list of Samples.
    */
   def makeFunction(function: Function): String = {
-    function.iterator.map(varToString(_)).mkString(delimiter)
-    // TODO: support non-flat, one row for each inner sample, repeat previous values
+    val s = function.iterator.map(varToString(_)).mkString("", newLine, "")
+    prepend = prepend.dropRight(1)
+    s
   }
   
   /**
@@ -137,4 +150,6 @@ class TextWriter extends Writer {
    * Default to "text/plain".
    */
   override def mimeType: String = getProperty("mimeType", "text/plain")
+  
+  private var prepend = List[String]()
 }

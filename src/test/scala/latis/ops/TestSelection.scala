@@ -36,7 +36,7 @@ class TestSelection {
   def select_equal_value {
     val domain = Real(Metadata("time"))
     val range = Real(Metadata("value"))
-    val data = SampledData.fromValues(Seq(3,5), Seq(3,3))
+    val data = SampledData.fromValues(Seq(3), Seq(3))
     val expected = Function(domain, range, data=data)
     testSelection(scalarFunction, "value=3", expected)
   }

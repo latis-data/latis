@@ -7,8 +7,24 @@ import latis.ops.filter.Selection
 class TestInfoWriter extends WriterTest{
   
   @Test
-  def test_info {
-    for(name <- names) test_writer(getDataset(name),"info")
+  def test_dap2 {
+    test_writer(getDataset("dap2"),"info")
+  }
+  @Test
+  def test_fof {
+    test_writer(getDataset(fof),"info")
+  }
+  @Test
+  def test_scalar {
+    test_writer(getDataset("scalar"),"info")
+  }
+  @Test
+  def test_tsi {
+    test_writer(getDataset("tsi"),"info")
+  }
+  @Test
+  def test_tof {
+    test_writer(getDataset(tof),"info")
   }
   
   //@Test
@@ -18,8 +34,7 @@ class TestInfoWriter extends WriterTest{
   
   //@Test 
   def write_info_file {
-    for(name <- names)
-    write_to_file(name, "info")
+    write_to_file(fof, "info")
   }
 
 }

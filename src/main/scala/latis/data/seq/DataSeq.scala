@@ -23,7 +23,8 @@ class DataSeq extends IterableData {
   
   def apply(index: Int): Data = datas(index)
   
-  def iterator = datas.iterator
+  //def iterator = datas.iterator
+  def iterator = datas.toList.iterator  //test if this will behave better from a List, yep!?
   
   def append(data: Data): DataSeq = {
     val bb = data.getByteBuffer
@@ -35,6 +36,10 @@ class DataSeq extends IterableData {
     
     datas += data //append to collection
     this
+  }
+  
+  def concat(data: DataSeq): DataSeq = {
+    DataSeq(datas ++ data.datas)
   }
   
   def zip(that: DataSeq): DataSeq = {
@@ -50,6 +55,8 @@ object DataSeq {
   
   def apply(datas: Seq[Data]): DataSeq = datas.foldLeft(new DataSeq())(_ append _)
   //Note, will fail if not all elements are the same size
+  
+  def apply(datas: Iterator[Data]): DataSeq = DataSeq(datas.toSeq)
   
   /**
    * Make a DataSeq out of a single Data by breaking it up by the given record size.

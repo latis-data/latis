@@ -1,11 +1,16 @@
 package latis.ops.filter
 
+import latis.dm.Function
 import latis.dm.Scalar
 import latis.dm.Text
 import latis.time.Time
 import latis.util.RegEx.SELECTION
-
 import com.typesafe.scalalogging.slf4j.Logging
+import latis.util.MappingIterator
+import latis.dm.Sample
+import latis.dm.Variable
+import latis.dm.WrappedFunction
+import latis.dm.Tuple
 
 /**
  * Filter based on a basic boolean expression.
@@ -43,6 +48,29 @@ protected class Selection(val vname: String, val operation: String, val value: S
     } else Some(text) //operation doesn't apply to this Scalar Variable, no-op
   }
   
+  override def applyToSample(sample: Sample): Option[Sample] = {
+    val x = sample.getVariables.map(applyToVariable(_))
+    x.find(_.isEmpty) match{
+      case Some(_) => None //found an invalid variable, exclude the entire sample
+      case None => Some(Sample(x(0).get, x(1).get))
+    }
+  }
+  
+  override def applyToTuple(tuple: Tuple): Option[Tuple] = {
+    val x = tuple.getVariables.map(applyToVariable(_))
+    x.find(_.isEmpty) match{
+      case Some(_) => None //found an invalid variable, exclude the entire tuple
+      case None => Some(Tuple(x.map(_.get), tuple.getMetadata))
+    }
+  }
+  
+  override def applyToFunction(function: Function): Option[Variable] = {
+    val it = WrappedFunction(function, this).iterator
+    it.isEmpty match {
+      case true => None
+      case false => Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
+    }
+  }
   
   private def isValid(comparison: Int): Boolean = {
     if (operation == "!=") {

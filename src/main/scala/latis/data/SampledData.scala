@@ -5,10 +5,9 @@ import latis.data.set.DomainSet
 import latis.data.set.RealSampledSet
 import latis.data.value.DoubleValue
 import latis.dm.Sample
-
 import scala.collection.mutable.ArrayBuffer
-
 import com.typesafe.scalalogging.slf4j.Logging
+import latis.util.PeekIterator
 
 class SampledData extends IterableData with Logging {
   
@@ -48,7 +47,9 @@ class SampledData extends IterableData with Logging {
   def iterator: Iterator[SampleData] = {
     if (dataCache.isEmpty) {
       logger.debug("Make SampleData Iterator from domain and range Data")
-      (_domain.iterator zip _range.iterator).map(p => pairToSample(p._1,p._2))
+      val dit = _domain.iterator
+      val rit = _range.iterator
+      (dit zip rit).map(p => pairToSample(p._1, p._2))
     } else {
       logger.debug("Make SampleData Iterator from cache.")
       dataCache.iterator
@@ -83,8 +84,8 @@ object SampledData {
     
     val dset = RealSampledSet(dvals)
     //DataSeq(ds.map(DoubleValue(_)))
-    val d1 = DataSeq(vals.head.map(DoubleValue(_)))
-    val f = (ds1: DataSeq, ds2: Seq[Double]) => ds1 zip DataSeq(ds2.map(DoubleValue(_)))
+    val d1: IterableData = IterableData(vals.head.map(DoubleValue(_)))
+    val f = (ds1: IterableData, ds2: Seq[Double]) => ds1 zip DataSeq(ds2.map(DoubleValue(_)))
     val rdata = vals.tail.foldLeft(d1)(f)
     SampledData(dset, rdata)
   }

@@ -10,37 +10,37 @@ import java.io.File
 import latis.dm._
 import latis.metadata.Metadata
 
-class TestTextWriter extends WriterTest{
-
+class TestDasWriter extends WriterTest{
+  
   @Test
   def test_dap2 {
-    test_writer(getDataset("dap2"),"txt")
+    test_writer(getDataset("dap2"),"das")
   }
   @Test
   def test_fof {
-    test_writer(getDataset(fof),"txt")
+    test_writer(getDataset(fof),"das")
   }
   @Test
   def test_scalar {
-    test_writer(getDataset("scalar"),"txt")
+    test_writer(getDataset("scalar"),"das")
   }
   @Test
   def test_tsi {
-    test_writer(getDataset("tsi"),"txt")
+    test_writer(getDataset("tsi"),"das")
   }
   @Test
   def test_tof {
-    test_writer(getDataset(tof),"txt")
+    test_writer(getDataset(tof),"das")
   }
   
   //@Test
-  def print_txt {
-    print(fof, "txt")
+  def print_das {
+    print(fof, "das")
   }
   
   //@Test 
-  def write_txt_file {
-    write_to_file(fof, "txt")
+  def write_das_file {
+    write_to_file(fof, "das")
   }
   
 }

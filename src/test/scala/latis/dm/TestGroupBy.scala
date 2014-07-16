@@ -10,14 +10,14 @@ class TestGroupBy {
   @Test
   def group_by_domain {
     //should have no change
-    val ds = TestDataset.function_of_tuple_with_mixed_types.groupBy("myInteger")
+    val ds = TestDataset.function_of_tuple.groupBy("myInteger")
     //AsciiWriter.write(ds)
     assertEquals("(myInteger -> myReal -> (myText))", ds.toString)
   }
   
   @Test
   def change_domain {
-    val ds = TestDataset.function_of_tuple_with_mixed_types.groupBy("myReal")
+    val ds = TestDataset.function_of_tuple.groupBy("myReal")
     //val ds = TestDataset.function_of_tuple_with_mixed_types.groupBy("myText")
     //AsciiWriter.write(ds)
     assertEquals("(myReal -> myInteger -> (myText))", ds.toString)

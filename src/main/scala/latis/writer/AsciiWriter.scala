@@ -14,6 +14,8 @@ class AsciiWriter extends TextWriter {
   
   override def makeHeader(dataset: Dataset) = dataset.toString + newLine
     
+  override def makeSample(sample: Sample): String = makeTuple(sample)
+  
   /**
    * Override to add arrow for mapping domain values to range values 
    * and to put "()" around tuple elements.
