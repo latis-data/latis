@@ -20,12 +20,13 @@ import scala.collection.mutable
 import latis.data.SampledData
 import latis.data.seq.DataSeq
 import scala.collection.mutable.ArrayBuffer
+import latis.data.IterableData
 
 /**
  * Utility methods for manipulating data.
  */
 object DataUtils {
-  
+
   /**
    * Convert the Data representing variableTemplate1 to Data representing variableTemplate2.
    */
@@ -33,7 +34,7 @@ object DataUtils {
     val dataMap = dataToDataMap(data, variableTemplate1)
     makeDataFromDataMap(dataMap, variableTemplate2)
   }
-    
+
   /**
    * Convert the SampleData representing sampleTemplate1 to SampleData representing sampleTemplate2.
    */
@@ -41,18 +42,18 @@ object DataUtils {
     val dataMap = dataToDataMap(sampleData, sampleTemplate1)
     dataMapToSampleData(dataMap, sampleTemplate2)
   }
-  
+
   /**
    * Convert Data for a given variableTemplate to a Map from Variable name to its Data.
    */
   def dataToDataMap(data: Data, variableTemplate: Variable): Map[String, Data] = {
-    buildMapFromBuffer(data.getByteBuffer, mutable.Map[String,Data](), variableTemplate)
+    buildMapFromBuffer(data.getByteBuffer, mutable.Map[String, Data](), variableTemplate)
   }
 
   /**
    * Recursively build Data Map from a ByteBuffer representing the given variableTemplate.
    */
-  private def buildMapFromBuffer(bb: ByteBuffer, dataMap: mutable.Map[String,Data], variableTemplate: Variable): Map[String,Data] = variableTemplate match {
+  private def buildMapFromBuffer(bb: ByteBuffer, dataMap: mutable.Map[String, Data], variableTemplate: Variable): Map[String, Data] = variableTemplate match {
     case s: Scalar => {
       val bytes = new Array[Byte](s.getSize)
       bb.get(bytes)
@@ -60,17 +61,18 @@ object DataUtils {
       val name = s.getName
       dataMap.get(name) match {
         case Some(d) => dataMap += (name -> (d concat data))
-        case None    => dataMap += (name -> data)
+        case None => dataMap += (name -> data)
       }
     }
-    
+
     //assume Tuple does not contain data
-    case Tuple(vars) => vars.foreach(buildMapFromBuffer(bb, dataMap, _)); dataMap
-    
+    case Tuple(vars) =>
+      vars.foreach(buildMapFromBuffer(bb, dataMap, _)); dataMap
+
     //apply to each sample
     case Function(it) => it.foreach(buildMapFromBuffer(bb, dataMap, _)); dataMap
   }
-  
+
   /**
    * Convert a Data Map to SampledData representing the given sampleTemplate.
    */
@@ -79,55 +81,92 @@ object DataUtils {
     val rangeData = makeDataFromDataMap(dataMap, sampleTemplate.range)
     SampleData(domainData, rangeData)
   }
-  
-    
+
   /**
-   * Given a data map from variable name to DataSeq (e.g. TsmlAdapter cache) and a Sample template,
+   * Given a data map from variable name to DataSeq (column oriented, e.g. TsmlAdapter cache) and a Sample template,
    * construct SampledData that can be used when constructing a Sampled Function.
    */
-  def dataMapToSampledData(dataMap: Map[String,DataSeq], sampleTemplate: Sample): SampledData = {
-    /*
-     * TODO: generalize for more complex data
-     * +IndexSet
-     * 
-     * nested Function
-     * assume nested domain var is repeated for all outer samples
-     * 
-     * need to iterate while maintaining pointer into array based on outer
+  def dataMapToSampledData(dataMap: Map[String, DataSeq], sampleTemplate: Sample): SampledData = {
+    //TODO: consider IndexSet
+    //TODO: consider nD domain
+    //TODO: consider nested function without consistent domain samples (non-cartesian)
+    //TODO: consider laziness, always wrap iterator? IterableOnce issues, Stream?
+
+    /**
+     * Internal helper function to make IterableData from map of Data Iterators so we can recursively pull off samples as we need.
      */
-//    val domain = sampleTemplate.domain
-//    val domainData = dataMap(domain.getName)
-//    //TODO: assumes 1D domain
-//    
-//    val range = sampleTemplate.range
-//    
-//    //loop over all samples of the outer Function
-//    for (indexOuter <- 0 until domainData.length) {
-//      
-//      
-//    }
-    
-    val vars = sampleTemplate.toSeq
-    val n = dataMap(vars(0).getName).length
-    //TODO: zip with index...?
-    val data = ArrayBuffer[SampleData]()
-    for (i <- 0 until n) {
-      val f = (v: Variable) => (v.getName, dataMap(v.getName)(i))
-      val m: Map[String,Data] = vars.foldLeft(Map[String,Data]())(_ + f(_))
-      val sdata = DataUtils.dataMapToSampleData(m, sampleTemplate)
-      data += sdata
+    def iteratorMapToIterableData(iteratorMap: Map[String, Iterator[Data]], variableTemplate: Variable, length: Int): IterableData = variableTemplate match {
+      case s: Scalar => {
+        val it = iteratorMap(s.getName)  // IndexedSeqLike$Elements, same object each time but doesn't act like iterator!?
+        val datas = it.take(length).toList
+        DataSeq(datas)
+        //DataSeq(iteratorMap(s.getName).take(length).toSeq)
+      }
+      case Tuple(vars) => {
+        val datass: Seq[IterableData] = vars.map(iteratorMapToIterableData(iteratorMap, _, length))
+        //interleave tuple elements
+        datass.tail.fold(datass.head)(_.toSeq zip _.toSeq) //TODO: cleaner way? add util method
+      }
+      case f: Function => { //just a Function template
+        //TODO: support arbitrary nested Function domains (non-cartesian)
+        //use dataMap to reuse same inner domain values for each outer sample
+        val domainData = dataMap(f.getDomain.getName)
+        
+        //for each outer sample, construct the SampledData for this nested Function
+        val datas = (0 until length).map{ i =>
+          val rangeData = iteratorMapToIterableData(iteratorMap, f.getRange, domainData.length);
+          //val rangeData = DataSeq(rdatas)
+          SampledData(domainData, rangeData)
+        }
+        
+        //combine the 'length' Function Data-s into a single IterableData
+        DataSeq(datas)
+      }
     }
+
+    //TODO: clean up duplication below with inner function above
     
-    SampledData(data.iterator, sampleTemplate)
+    //turn data map into map of iterators so we can pull off samples as we build this
+    //val iteratorMap = dataMap.map(kv => (kv._1, kv._2.iterator))
+    val iteratorMap = dataMap.map{ kv => 
+      val name = kv._1
+      val datas = kv._2
+      (name, datas.iterator)
+    }
+
+    val domain = sampleTemplate.domain
+    val domainData = dataMap(domain.getName)
+    //TODO: assumes 1D domain, toSeq? what about nD domain set?
+
+    val range = sampleTemplate.range
+
+    val length = domainData.length
+
+    val rangeData = iteratorMapToIterableData(iteratorMap, range, length)
+
+    SampledData(domainData, rangeData)
+
+    //    val vars = sampleTemplate.toSeq
+    //    val n = dataMap(vars(0).getName).length
+    //    //TODO: zip with index...?
+    //    val data = ArrayBuffer[SampleData]()
+    //    for (i <- 0 until n) {
+    //      val f = (v: Variable) => (v.getName, dataMap(v.getName)(i))
+    //      val m: Map[String,Data] = vars.foldLeft(Map[String,Data]())(_ + f(_))
+    //      val sdata = DataUtils.dataMapToSampleData(m, sampleTemplate)
+    //      data += sdata
+    //    }
+    //    
+    //    SampledData(data.iterator, sampleTemplate)
   }
-    
+
   /**
    * Given a dataMap mapping Variable names to Data and a Variable template,
    * construct a Data object with data from the dataMap.
    */
   def makeDataFromDataMap(dataMap: Map[String, Data], variableTemplate: Variable): Data = {
     //TODO: dataMapToData?
-    
+
     //build a ByteBuffer to contain the data
     val size = variableTemplate.getSize
     val bb = ByteBuffer.allocate(size)
@@ -176,8 +215,7 @@ object DataUtils {
     case Tuple(vars) => vars.foldLeft(data)(_ concat _.getData)
     case Function(it) => it.foldLeft(data)(_ concat _.getData)
   }
-  
-  
+
   /**
    * Construct a Sample from the template with the Data.
    */
@@ -200,12 +238,12 @@ object DataUtils {
       bb.rewind //reset to the beginning in case we want to reuse it
       v
     }
-    case t: Time    => t(data) //Time(template.getMetadata, data)
-    case _: Real    => Real(template.getMetadata, data)
+    case t: Time => t(data) //Time(template.getMetadata, data)
+    case _: Real => Real(template.getMetadata, data)
     case _: Integer => Integer(template.getMetadata, data)
-    case _: Text    => Text(template.getMetadata, data)
-    case _: Binary  => Binary(template.getMetadata, data)
-    
+    case _: Text => Text(template.getMetadata, data)
+    case _: Binary => Binary(template.getMetadata, data)
+
     //deal with nested Function
     case f: Function => data match {
       case sd: SampledData => Function(f, sd) //data already structured as SampledData
@@ -227,11 +265,11 @@ object DataUtils {
         template(Data(sb.toString))
       }
     }
-    
+
     case v: Index => Index(bb.getInt)
     case v: Real => Real(template.getMetadata, bb.getDouble)
     case v: Integer => Integer(template.getMetadata, bb.getLong)
-    
+
     case v: Text => {
       val cs = new Array[Char](v.length)
       bb.asCharBuffer.get(cs)
@@ -241,17 +279,17 @@ object DataUtils {
       val s = new String(cs)
       Text(template.getMetadata, s)
     }
-    
+
     case v: Binary => {
       val bytes = new Array[Byte](v.getSize)
       bb.get(bytes)
       val buffer = ByteBuffer.wrap(bytes)
       Binary(template.getMetadata, buffer)
     }
-    
+
     //make sure Samples remain Samples
     case Sample(domain, range) => Sample(buildVarFromBuffer(bb, domain), buildVarFromBuffer(bb, range))
-    
+
     case Tuple(vars) => Tuple(vars.map(buildVarFromBuffer(bb, _)), template.getMetadata)
 
     /*
@@ -266,7 +304,7 @@ object DataUtils {
         case Some(s) => s.toInt
         case None => throw new Error("Nested Function must have 'length' defined.")
       }
-      
+
       val smp = Sample(f.getDomain, f.getRange)
       if (n < 0) throw new Error("Function length not defined") //TODO: consider "-n" as unlimited but currently has n
       //TODO: warn if 0?
