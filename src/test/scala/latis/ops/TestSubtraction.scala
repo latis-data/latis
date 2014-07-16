@@ -98,7 +98,6 @@ class TestSubtraction {
   def test_index_function = {
     val exp = Dataset(Function(List(Integer(2), Integer(3))), TestDataset.index_function.getMetadata)
     assertEquals(exp, TestDataset.index_function - (-1))
-    //assertEquals(Dataset(exp.getVariables(0)), (-1) + TestDataset.index_function)
   }
 
 }

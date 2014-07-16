@@ -17,7 +17,7 @@ class BinaryAdapter(tsml: Tsml) extends IterativeAdapter[ByteBuffer](tsml) {
   private var source: Source = null 
 
   def getDataSource: Source = {
-    if (source == null) source = Source.fromURL(getUrl())
+    if (source == null) source = Source.fromURL(getUrl(), "ISO-8859-1")
     source
   }
   

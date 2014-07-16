@@ -14,6 +14,7 @@ import latis.time.Time
 import latis.dm.Text
 import latis.dm.Index
 import latis.writer.Writer
+import latis.dm.Variable
 
 class TestFirstFilter {
   
@@ -75,7 +76,7 @@ class TestFirstFilter {
   @Test
   def test_tuple_of_functions = {
     val ds = TestDataset.tuple_of_functions
-    val expected = Dataset(Tuple(Sample(Integer(Metadata("myInt0"), 10), Real(Metadata("myReal0"), 0)), Sample(Integer(Metadata("myInt1"), 10), Real(Metadata("myReal1"), 10)), Sample(Integer(Metadata("myInt2"), 10), Real(Metadata("myReal2"), 20)), Sample(Integer(Metadata("myInt3"), 10), Real(Metadata("myReal3"), 30))), ds.getMetadata)
+    val expected = Dataset(Tuple(Seq(Sample(Integer(Metadata("myInt0"), 10), Real(Metadata("myReal0"), 0)), Sample(Integer(Metadata("myInt1"), 10), Real(Metadata("myReal1"), 10)), Sample(Integer(Metadata("myInt2"), 10), Real(Metadata("myReal2"), 20)), Sample(Integer(Metadata("myInt3"), 10), Real(Metadata("myReal3"), 30))), Metadata("tuple_of_functions")), ds.getMetadata)
     assertEquals(expected, Operation("first")(ds))
   }
   
