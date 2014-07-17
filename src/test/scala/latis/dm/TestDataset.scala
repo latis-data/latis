@@ -60,13 +60,13 @@ object TestDataset {
     Dataset(Function(samples), Metadata("mixed_function"))
   }
   
-//  def time_series_of_tuple = {
-//    val md = Map("name" -> "time", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd")
-//    val samples = List(Sample(Time(Metadata(md), "1970/01/01"), Tuple(Integer(Metadata("int"), 1), Real(Metadata("real"), 1.1), Text(Metadata("text"), "A"))),
-//                       Sample(Time(Metadata(md), "1970/01/02"), Tuple(Integer(Metadata("int"), 2), Real(Metadata("real"), 2.2), Text(Metadata("text"), "B"))),
-//                       Sample(Time(Metadata(md), "1970/01/03"), Tuple(Integer(Metadata("int"), 3), Real(Metadata("real"), 3.3), Text(Metadata("text"), "C"))))
-//    Dataset(Function(samples), Metadata("time_series_of_tuple"))
-//  }
+  def canonical = {
+    val md = Map("name" -> "myTime", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd")
+    val samples = List(Sample(Time(Metadata(md), "1970/01/01"), Tuple(Integer(Metadata("myInt"), 1), Real(Metadata("myReal"), 1.1), Text(Metadata("myText"), "A"))),
+                       Sample(Time(Metadata(md), "1970/01/02"), Tuple(Integer(Metadata("myInt"), 2), Real(Metadata("myReal"), 2.2), Text(Metadata("myText"), "B"))),
+                       Sample(Time(Metadata(md), "1970/01/03"), Tuple(Integer(Metadata("myInt"), 3), Real(Metadata("myReal"), 3.3), Text(Metadata("myText"), "C"))))
+    Dataset(Function(samples), Metadata("canonical"))
+  }
   
   def empty_function = Dataset(Function(Real(Metadata("domain")), Real(Metadata("range")), Iterator.empty), Metadata("empty_function"))
   

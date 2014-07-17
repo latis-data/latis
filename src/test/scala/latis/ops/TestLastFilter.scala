@@ -17,6 +17,13 @@ import latis.dm.Index
 class TestLastFilter {
   
   @Test
+  def test_canonical = {
+    val md = Map("name" -> "myTime", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd")
+    val expected = Dataset(Sample(Time(Metadata(md), "1970/01/03"), Tuple(Integer(Metadata("myInt"), 3), Real(Metadata("myReal"), 3.3), Text(Metadata("myText"), "C"))), TestDataset.canonical.getMetadata)
+    assertEquals(expected, Operation("last")(TestDataset.canonical))
+  }
+  
+  @Test
   def test_empty = {
     assertEquals(TestDataset.empty, Operation("last")(TestDataset.empty))
   }

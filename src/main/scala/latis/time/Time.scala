@@ -161,7 +161,18 @@ object Time {
   // 
   
   
-  
+  def apply(md: Metadata): Time = {
+    var metadata = md
+    val scale = md.get("units") match {
+      case Some(u) => TimeScale(u)
+      case None => {
+        //Use default time scale, add units to metadata
+        metadata = new VariableMetadata(md.getProperties + ("units" -> TimeScale.DEFAULT.toString))
+        TimeScale.DEFAULT
+      }
+    }
+    new Time(scale, metadata)
+  }
   
   def apply(md: Metadata, value: AnyVal): Time = {
     var metadata = md

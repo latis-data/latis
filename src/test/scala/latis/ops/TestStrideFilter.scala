@@ -15,9 +15,22 @@ import latis.dm.Integer
 import latis.dm.Tuple
 import latis.dm.Text
 import latis.writer.Writer
+import latis.time.Time
 
 class TestStrideFilter {
   
+  @Test
+  def test_canonical = {
+    val md = Map("name" -> "myTime", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd")
+    val exp3 = Dataset(Function(List(Sample(Time(Metadata(md), "1970/01/01"), Tuple(Integer(Metadata("myInt"), 1), Real(Metadata("myReal"), 1.1), Text(Metadata("myText"), "A"))))), TestDataset.canonical.getMetadata)
+    val exp2 = Dataset(Function(List(Sample(Time(Metadata(md), "1970/01/01"), Tuple(Integer(Metadata("myInt"), 1), Real(Metadata("myReal"), 1.1), Text(Metadata("myText"), "A"))))), TestDataset.canonical.getMetadata)
+    val exp1 = Dataset(Function(List(Sample(Time(Metadata(md), "1970/01/01"), Tuple(Integer(Metadata("myInt"), 1), Real(Metadata("myReal"), 1.1), Text(Metadata("myText"), "A"))),
+                       Sample(Time(Metadata(md), "1970/01/02"), Tuple(Integer(Metadata("myInt"), 2), Real(Metadata("myReal"), 2.2), Text(Metadata("myText"), "B"))),
+                       Sample(Time(Metadata(md), "1970/01/03"), Tuple(Integer(Metadata("myInt"), 3), Real(Metadata("myReal"), 3.3), Text(Metadata("myText"), "C"))))), TestDataset.canonical.getMetadata)
+    assertEquals(exp1, StrideFilter(1)(TestDataset.canonical))
+    assertEquals(exp2, StrideFilter(3)(TestDataset.canonical))
+    assertEquals(exp3, StrideFilter(5)(TestDataset.canonical))
+  }
   @Test
   def test_empty = {
     assertEquals(TestDataset.empty, StrideFilter(1)(TestDataset.empty))
