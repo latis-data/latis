@@ -17,9 +17,10 @@ class TestDataUtils {
   def test {
     val ds = Dataset(function_of_functions_of_tuple_from_data_map)
     //val ds2 = FirstFilter()(ds)
+    val ds2 = FirstFilter()(ds)
     //AsciiWriter.write(ds)
     //Writer.fromSuffix("txt").write(ds)
-    //Writer.fromSuffix("jsond").write(ds2)
+    Writer.fromSuffix("jsond").write(ds2)
     
     val data = ds.toDoubleMap
     assertEquals(10.0, data("a")(0), 0.0)

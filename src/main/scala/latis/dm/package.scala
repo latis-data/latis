@@ -1,5 +1,7 @@
 package latis.dm
 
+import scala.language.implicitConversions
+
 package object implicits {
   
   /**

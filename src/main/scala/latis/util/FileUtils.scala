@@ -66,7 +66,7 @@ object FileUtils {
 //    out.write(mbb.get)
     
     val input = new BufferedInputStream(new FileInputStream(file))
-    Iterator.continually(input.read).takeWhile (-1 !=).foreach (out.write)
+    Iterator.continually(input.read).takeWhile(_ != -1).foreach (out.write)
     input.close
   }
 }
