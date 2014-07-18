@@ -29,7 +29,7 @@ class WrappedFunction(function: Function, val operation: Operation)
     iterator.map(DataUtils.sampleToData(_))
   }
 
-  override def toString = super.toString + " + " + operation
+  //override def toString = super.toString + " + " + operation
 }
 
 object WrappedFunction {
