@@ -3,6 +3,7 @@ package latis.ops.filter
 import latis.dm.Function
 import latis.ops.OperationFactory
 import latis.dm.Sample
+import latis.metadata.Metadata
 
 /**
  * Keep only the last sample of any outer Function in the Dataset.
@@ -10,12 +11,19 @@ import latis.dm.Sample
 class LastFilter extends Filter {
 
   override def applyToFunction(function: Function) = {
-    //TODO: IterableOnce problem?
-    //val s = function.iterator.drop(function.getLength-1).next
-    val l = function.iterator.toList
-    l.length match{
-      case 0 => Some(Sample(function.getDomain, function.getRange))
-      case _ => Some(l.last)
+    //get the last sample, or none if empty, as List
+    val samples = function.iterator match {
+      case it: Iterator[Sample] if (it.nonEmpty) => List(it.reduceLeft((_,e) => e))  //keep last sample
+      case _ => List[Sample]()  //empty
+    }
+    
+    //change length of Function in metadata
+    val md = Metadata(function.getMetadata.getProperties + ("length" -> samples.length.toString))
+    
+    //make the new function with the updated metadata
+    samples.length match {
+      case 0 => Some(Function(function.getDomain, function.getRange, md)) //empty Function with type of original
+      case 1 => Some(Function(samples, md))
     }
   }
 }

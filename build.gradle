@@ -24,7 +24,7 @@ configurations {
     scalaLibrary
 }
 
-dependencies {    
+dependencies {
     //providedCompile "javax.servlet:servlet-api:2.5" //not deployed
     compile "javax.servlet:servlet-api:2.5"
     

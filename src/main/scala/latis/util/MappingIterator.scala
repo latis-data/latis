@@ -1,5 +1,7 @@
 package latis.util
 
+import scala.annotation.tailrec
+
 /**
  * An Iterator that looks ahead and caches the next sample.
  * This makes it easier to know when we are done, especially 
@@ -11,6 +13,7 @@ package latis.util
  */
 class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) extends PeekIterator[T] {
   //Note, the bound on Null allows us to return null for generic type T.
+  //TODO: could we do it.flatMap(f)? but would no longer be a PeekIterator? unless we do CanBuildFrom...?
 
   /**
    * Responsible for getting the next transformed item 
@@ -18,13 +21,14 @@ class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) ext
    * This will keep trying until a valid sample is found 
    * or it hits the end of the original iterator.
    */
-  protected def getNext: T = {
-    if (iterator.hasNext) {
+  @tailrec final protected def getNext: T = {
+    if (! iterator.hasNext) null
+    else {
       //apply the operation
       f(iterator.next) match {
-        case None => getNext //invalid value, try another
         case Some(t) => t
+        case None => getNext //invalid value, try another
       }
-    } else null
+    }
   }
 }

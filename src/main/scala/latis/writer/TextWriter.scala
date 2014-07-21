@@ -121,7 +121,7 @@ class TextWriter extends Writer {
       varToString(r)
     }
     case _ => {
-      if(prepend isEmpty) makeTuple(sample)
+      if(prepend.isEmpty) makeTuple(sample)
       else prepend.mkString("", delimiter, delimiter) + makeTuple(sample)
     }
   }

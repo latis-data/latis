@@ -13,21 +13,20 @@ import latis.util.MappingIterator
 class LimitFilter(val limit: Int) extends Filter {
   
   override def applyToFunction(function: Function) = {
-    //set the new length in the metadata
-    //val md = Metadata(function.getMetadata.getProperties + ("length" -> (limit min function.getLength).toString))
-    //TODO: 'length' metadata cannot be safely set until getLength does not cause IterableOnce problem
-    val it = new MappingIterator(function.iterator.take(limit), (s: Sample) => this.applyToSample(s))
-    Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
-  }
-  
-  override def applyToSample(sample: Sample): Option[Sample] = {
-    val x = sample.getVariables.map(applyToVariable(_))
-    x.find(_.isEmpty) match{
-      case Some(_) => None //found an invalid variable, exclude the entire sample
-      case None => Some(Sample(x(0).get, x(1).get))
+    //Assume we can hold this all in memory.
+    
+    //get the first 'limit' samples, or all if we had less
+    val samples = function.iterator.take(limit).toList
+    
+    //change length of Function in metadata
+    val md = Metadata(function.getMetadata.getProperties + ("length" -> samples.length.toString))
+    
+    //make the new function with the updated metadata
+    samples.length match {
+      case 0 => Some(Function(function.getDomain, function.getRange, md)) //empty Function with type of original
+      case _ => Some(Function(samples, md))
     }
   }
-  
 }
 
 object LimitFilter extends OperationFactory {

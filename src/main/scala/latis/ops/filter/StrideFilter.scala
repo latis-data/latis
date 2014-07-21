@@ -21,6 +21,7 @@ class StrideFilter(val stride: Int) extends Filter {
 //    }
 //    val md = Metadata(function.getMetadata.getProperties + ("length" -> nlen.toString))
 
+    //TODO: change 'length' metadata
     Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
   }
   

@@ -69,6 +69,7 @@ protected class Selection(val vname: String, val operation: String, val value: S
     it.isEmpty match {
       case true => None
       case false => Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
+      //TODO: change 'length' metadata
     }
   }
   
