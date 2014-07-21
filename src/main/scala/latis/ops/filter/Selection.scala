@@ -32,7 +32,7 @@ protected class Selection(val vname: String, val operation: String, val value: S
       }
     } catch {
       case e: Exception => {
-        logger.warn("Selection filter threw an exception: " + e.getMessage, e)
+        logger.warn("Selection filter threw an exception: " + e.getMessage)
         None
       }
     }
