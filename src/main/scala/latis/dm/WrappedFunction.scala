@@ -11,6 +11,8 @@ import com.typesafe.scalalogging.slf4j.Logging
 class WrappedFunction(function: Function, val operation: Operation) 
   extends SampledFunction(function.getDomain, function.getRange) with Logging {
   
+  //TODO: deal with Function metadata, length
+  
   /**
    * Override iterator to apply the Operation to each sample as it iterates (lazy).
    */
