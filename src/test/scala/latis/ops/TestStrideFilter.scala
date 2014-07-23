@@ -99,14 +99,9 @@ class TestStrideFilter {
   }
   @Test
   def test_tuple_of_functions = {
-    val exp1 = TestDataset.tuple_of_functions
-    val exp2 = Dataset(Tuple(for (i <- 0 until 4) yield Function((0 until 1).map(j =>
-      Sample(Integer(Metadata("myInt"+i), 10 + j), Real(Metadata("myReal"+i), 10 * i + j)))), Metadata("tuple_of_functions")), TestDataset.tuple_of_functions.getMetadata)
-    val exp3 = Dataset(Tuple(for (i <- 0 until 4) yield Function((0 until 1).map(j =>
-      Sample(Integer(Metadata("myInt"+i), 10 + j), Real(Metadata("myReal"+i), 10 * i + j)))), Metadata("tuple_of_functions")), TestDataset.tuple_of_functions.getMetadata)
-    assertEquals(exp1, StrideFilter(1)(TestDataset.tuple_of_functions))
-    assertEquals(exp2, StrideFilter(3)(TestDataset.tuple_of_functions))
-    assertEquals(exp3, StrideFilter(5)(TestDataset.tuple_of_functions))
+    assertEquals(TestDataset.tuple_of_functions, StrideFilter(1)(TestDataset.tuple_of_functions))
+    assertEquals(TestDataset.tuple_of_functions, StrideFilter(3)(TestDataset.tuple_of_functions))
+    assertEquals(TestDataset.tuple_of_functions, StrideFilter(5)(TestDataset.tuple_of_functions))
   }
   @Test
   def test_scalar_tuple = {
@@ -116,12 +111,9 @@ class TestStrideFilter {
   }
   @Test
   def test_mixed_tuple = {
-    val exp1 = TestDataset.mixed_tuple
-    val exp2 = Dataset(Tuple(Real(Metadata("myReal"), 0.0), Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), Function(List(Sample(Real(0), Real(0))))), TestDataset.mixed_tuple.getMetadata)
-    val exp3 = Dataset(Tuple(Real(Metadata("myReal"), 0.0), Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), Function(List(Sample(Real(0), Real(0))))), TestDataset.mixed_tuple.getMetadata)
-    assertEquals(exp1, StrideFilter(1)(TestDataset.mixed_tuple))
-    assertEquals(exp2, StrideFilter(3)(TestDataset.mixed_tuple))
-    assertEquals(exp3, StrideFilter(5)(TestDataset.mixed_tuple))
+    assertEquals(TestDataset.mixed_tuple, StrideFilter(1)(TestDataset.mixed_tuple))
+    assertEquals(TestDataset.mixed_tuple, StrideFilter(3)(TestDataset.mixed_tuple))
+    assertEquals(TestDataset.mixed_tuple, StrideFilter(5)(TestDataset.mixed_tuple))
   }
   @Test
   def test_function_of_scalar = {
@@ -147,8 +139,10 @@ class TestStrideFilter {
   }
   @Test
   def test_function_of_function = {
-    val exp3 = Dataset(Function(List(Sample(Integer(Metadata("x"), 0), Function(List(Sample(Integer(Metadata("y"), 10), Real(Metadata("z"), 0)))))), Metadata("function_of_functions_with_data_in_scalar")), TestDataset.function_of_functions.getMetadata)
-    val exp2 = Dataset(Function(List(Sample(Integer(Metadata("x"), 0), Function(List(Sample(Integer(Metadata("y"), 10), Real(Metadata("z"), 0)))))), Metadata("function_of_functions_with_data_in_scalar")), TestDataset.function_of_functions.getMetadata)
+    val exp3 = Dataset(Function((0 until 1).map(Integer(Metadata("x"), _)), for (i <- 0 until 1) yield Function((0 until 3).map(j => 
+      Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * i + j)))), Metadata("function_of_functions_with_data_in_scalar")), TestDataset.function_of_functions.getMetadata)
+    val exp2 = Dataset(Function((0 until 1).map(Integer(Metadata("x"), _)), for (i <- 0 until 1) yield Function((0 until 3).map(j => 
+      Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * i + j)))), Metadata("function_of_functions_with_data_in_scalar")), TestDataset.function_of_functions.getMetadata)
     val exp1 = Dataset(Function((0 until 4).map(Integer(Metadata("x"), _)), for (i <- 0 until 4) yield Function((0 until 3).map(j => 
       Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * i + j)))), Metadata("function_of_functions_with_data_in_scalar")), TestDataset.function_of_functions.getMetadata)
     assertEquals(exp1, StrideFilter(1)(TestDataset.function_of_functions))
@@ -157,8 +151,8 @@ class TestStrideFilter {
   }
   @Test
   def test_mixed_function = {
-    val exp3 = Dataset(Function(List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), Function(List(Sample(Real(0), Real(0)))))))), TestDataset.mixed_function.getMetadata)
-    val exp2 = Dataset(Function(List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), Function(List(Sample(Real(0), Real(0)))))))), TestDataset.mixed_function.getMetadata)
+    val exp3 = Dataset(Function(List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), (TestDataset.function_of_scalar).getVariables(0))))), TestDataset.mixed_function.getMetadata)
+    val exp2 = Dataset(Function(List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), (TestDataset.function_of_scalar).getVariables(0))))), TestDataset.mixed_function.getMetadata)
     val exp1 = Dataset(Function(List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), (TestDataset.function_of_scalar).getVariables(0))),
                        Sample(Real(Metadata("myReal"), 1.1), Tuple(Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1)), (TestDataset.function_of_scalar+(1)).getVariables(0))),
                        Sample(Real(Metadata("myReal"), 2.2), Tuple(Tuple(Integer(Metadata("myInteger"), 2), Real(Metadata("myReal"), 2)), (TestDataset.function_of_scalar+(2)).getVariables(0))))), TestDataset.mixed_function.getMetadata)

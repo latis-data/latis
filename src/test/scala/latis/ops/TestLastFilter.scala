@@ -19,7 +19,7 @@ class TestLastFilter {
   @Test
   def test_canonical = {
     val md = Map("name" -> "myTime", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd")
-    val expected = Dataset(Sample(Time(Metadata(md), "1970/01/03"), Tuple(Integer(Metadata("myInt"), 3), Real(Metadata("myReal"), 3.3), Text(Metadata("myText"), "C"))), TestDataset.canonical.getMetadata)
+    val expected = Dataset(Function(Seq(Sample(Time(Metadata(md), "1970/01/03"), Tuple(Integer(Metadata("myInt"), 3), Real(Metadata("myReal"), 3.3), Text(Metadata("myText"), "C")))), Metadata(Map("length" -> 1.toString))), TestDataset.canonical.getMetadata)
     assertEquals(expected, Operation("last")(TestDataset.canonical))
   }
   
@@ -80,9 +80,7 @@ class TestLastFilter {
   
   @Test
   def test_tuple_of_functions = {
-    val ds = TestDataset.tuple_of_functions
-    val expected = Dataset(Tuple(Seq(Sample(Integer(Metadata("myInt0"), 12), Real(Metadata("myReal0"), 2)), Sample(Integer(Metadata("myInt1"), 12), Real(Metadata("myReal1"), 12)), Sample(Integer(Metadata("myInt2"), 12), Real(Metadata("myReal2"), 22)), Sample(Integer(Metadata("myInt3"), 12), Real(Metadata("myReal3"), 32))), Metadata("tuple_of_functions")), ds.getMetadata)
-    assertEquals(expected, Operation("last")(ds))
+    assertEquals(TestDataset.tuple_of_functions, Operation("last")(TestDataset.tuple_of_functions))
   }
   
   @Test
@@ -92,58 +90,55 @@ class TestLastFilter {
   
   @Test
   def test_mixed_tuple = {
-    val ds = TestDataset.mixed_tuple
-    val expected = Dataset(Tuple(Real(Metadata("myReal"), 0.0), Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), Sample(Real(2), Real(2))), ds.getMetadata)
-    //Writer.fromSuffix("asc").write(TestDataset.tuple_of_functions)
-    assertEquals(expected, Operation("last")(ds))
+    assertEquals(TestDataset.mixed_tuple, Operation("last")(TestDataset.mixed_tuple))
   }
   
   @Test
   def test_function_of_scalars = {
     val ds = TestDataset.function_of_scalar
-    val expected = Dataset(Sample(Real(2), Real(2)), ds.getMetadata)
+    val expected = Dataset(Function(Seq(Sample(Real(2), Real(2))), Metadata(Map("length" -> 1.toString))), ds.getMetadata)
     assertEquals(expected, Operation("last")(ds))
   }
   
   @Test
   def test_function_of_tuples = {
     val ds = TestDataset.function_of_tuple
-    val expected = Dataset(Sample(Integer(Metadata("myInteger"), 2), Tuple(Real(Metadata("myReal"), 2), Text(Metadata("myText"), "two"))), ds.getMetadata)
+    val expected = Dataset(Function(Seq(Sample(Integer(Metadata("myInteger"), 2), Tuple(Real(Metadata("myReal"), 2), Text(Metadata("myText"), "two")))), Metadata(Map("length" -> 1.toString))), ds.getMetadata)
     assertEquals(expected, Operation("last")(ds))
   }
   
   @Test
   def test_function_of_functions = {
     val ds = TestDataset.function_of_functions
-    val expected = Dataset(Sample(Integer(Metadata("x"), 3), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * 3 + j))))), ds.getMetadata)
+    val expected = Dataset(Function(Seq(Sample(Integer(Metadata("x"), 3), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * 3 + j)))))), Metadata(Map("name" -> "function_of_functions_with_data_in_scalar", "length" -> 1.toString))), ds.getMetadata)
     assertEquals(expected, Operation("last")(ds))
   }
   
   @Test
   def test_mixed_function = {
     val ds = TestDataset.mixed_function
-    val expected = Dataset(Sample(Real(Metadata("myReal"), 2.2), Tuple(Tuple(Integer(Metadata("myInteger"), 2), Real(Metadata("myReal"), 2)), (TestDataset.function_of_scalar+(Dataset(Real(2)))).getVariables(0))), ds.getMetadata)
+    val expected = Dataset(Function(Seq(Sample(Real(Metadata("myReal"), 2.2), Tuple(Tuple(Integer(Metadata("myInteger"), 2), Real(Metadata("myReal"), 2)), (TestDataset.function_of_scalar+(Dataset(Real(2)))).getVariables(0)))), Metadata(Map("length" -> 1.toString))), ds.getMetadata)
     assertEquals(expected, Operation("last")(ds))
   }
   
   @Test
   def test_empty_function = {
     val ds = TestDataset.empty_function
-    val expected = Dataset(Sample(Real(Metadata("domain")), Real(Metadata("range"))), ds.getMetadata)
+    val expected = Dataset(Function(Real(Metadata("domain")), Real(Metadata("range")), Iterator.empty, Metadata(Map("length" -> 0.toString))), ds.getMetadata)
     assertEquals(expected, Operation("last")(ds))
   }
   
   @Test
   def test_index_function = {
     val ds = TestDataset.index_function
-    val expected = Dataset(Sample(Index(1), Integer(2)), ds.getMetadata)
+    val expected = Dataset(Function(Seq(Sample(Index(1), Integer(2))), Metadata(Map("length" -> 1.toString))), ds.getMetadata)
     assertEquals(expected, Operation("last")(ds))
   }
   
   @Test
   def test_combo = {
     val ds = TestDataset.combo
-    val expected = Dataset(List(Sample(Integer(Metadata("myInteger"), 2), Tuple(Real(Metadata("myReal"), 2), Text(Metadata("myText"), "two"))), TestDataset.tuple_of_tuples.getVariables(0), TestDataset.text.getVariables(0)), ds.getMetadata)
+    val expected = Dataset(List(Function(Seq(Sample(Integer(Metadata("myInteger"), 2), Tuple(Real(Metadata("myReal"), 2), Text(Metadata("myText"), "two")))), Metadata(Map("length" -> 1.toString))), TestDataset.tuple_of_tuples.getVariables(0), TestDataset.text.getVariables(0)), ds.getMetadata)
     assertEquals(expected, Operation("last")(ds))
   }
 

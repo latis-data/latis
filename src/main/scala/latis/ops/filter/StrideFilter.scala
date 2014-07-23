@@ -25,14 +25,6 @@ class StrideFilter(val stride: Int) extends Filter {
     Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
   }
   
-  override def applyToSample(sample: Sample): Option[Sample] = {
-    val x = sample.getVariables.map(applyToVariable(_))
-    x.find(_.isEmpty) match{
-      case Some(_) => None //found an invalid variable, exclude the entire sample
-      case None => Some(Sample(x(0).get, x(1).get))
-    }
-  }
-  
 }
 
 object StrideFilter extends OperationFactory {

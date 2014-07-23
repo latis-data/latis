@@ -23,7 +23,7 @@ class LimitFilter(val limit: Int) extends Filter {
     
     //make the new function with the updated metadata
     samples.length match {
-      case 0 => Some(Function(function.getDomain, function.getRange, md)) //empty Function with type of original
+      case 0 => Some(Function(function.getDomain, function.getRange, Iterator.empty, md)) //empty Function with type of original
       case _ => Some(Function(samples, md))
     }
   }
