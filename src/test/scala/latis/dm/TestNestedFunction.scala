@@ -14,14 +14,44 @@ import latis.data.value.DoubleValue
 
 class TestNestedFunction {
 
+  @Test
+  def select_outer_domain {
+    val ds = Dataset(TestNestedFunction.function_of_functions_with_sampled_data)
+    val ds2 = Selection("x>1")(ds)
+    assertEquals(2, ds2.getLength)
+  }
+  
+  @Test
+  def select_inner_domain {
+    val ds = Dataset(TestNestedFunction.function_of_functions_with_sampled_data)
+    val ds2 = Selection("y>10")(ds)
+    val f = ds2.findFunction.get.iterator.next.asInstanceOf[Sample].range.asInstanceOf[Function]
+    val n = f.getLength
+    assertEquals(3, n)
+  }
+  
+  @Test
+  def select_inner_range {
+    val ds = Dataset(TestNestedFunction.function_of_functions_with_sampled_data)
+    val ds2 = Selection("z>20")(ds)
+    val fs = ds2.findFunction.get.iterator.map(_.range.asInstanceOf[Function]).toList
+    assertEquals(2, fs.length)
+    //AsciiWriter.write(Dataset(fs(0)))
+    //assertEquals(2, fs(0).getLength) //TODO: currently returning only matching samples, not complete spectrum, but md has orig length
+    assertEquals(3, fs(1).getLength)
+  }
+  
   //@Test
   def function_of_functions {
     //val ds = Dataset(TestNestedFunction.function_of_functions)
     val ds = Dataset(TestNestedFunction.function_of_functions_with_sampled_data)
     //val ds2 = Selection("x>1")(ds)
     //val ds2 = Selection("y>=11")(ds)
-    //AsciiWriter.write(ds)
-    Writer.fromSuffix("jsond").write(ds)
+    //val ds2 = ds.filter("y>=11").filter("x>1")
+    //val ds2 = ds.filter("x>1").filter("y>=11")
+    val ds2 = ds.filter("z>20") //TODO: doesn't drop entire x sample
+    AsciiWriter.write(ds2)
+    //Writer.fromSuffix("jsond").write(ds)
   }
   
   //@Test

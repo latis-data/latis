@@ -18,6 +18,17 @@ class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends W
       case None => 
     }
 
+    //Provide a file name based on the Dataset name.
+    //May be different from the dataset identifier used in the request URL.
+    //TODO: generalize for all formats, need to get suffix from writer
+    writer match {
+      case _: CsvWriter => {
+        val fileName = dataset.getName + ".csv"
+        response.addHeader("Content-Disposition", "inline; filename=\"" + fileName)
+      }
+      case _ =>
+    }
+    
     writer.write(dataset)
     
     response.setStatus(HttpServletResponse.SC_OK);

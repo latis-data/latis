@@ -32,7 +32,7 @@ protected class Selection(val vname: String, val operation: String, val value: S
       }
     } catch {
       case e: Exception => {
-        logger.warn("Selection filter threw an exception: " + e.getMessage, e)
+        logger.warn("Selection filter threw an exception: " + e.getMessage)
         None
       }
     }
@@ -64,12 +64,15 @@ protected class Selection(val vname: String, val operation: String, val value: S
     }
   }
   
-  override def applyToFunction(function: Function): Option[Variable] = {
+  override def applyToFunction(function: Function): Option[Function] = {
     val it = WrappedFunction(function, this).iterator
     it.isEmpty match {
       case true => None
-      case false => Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
-      //TODO: change 'length' metadata
+      case false => {
+        //TODO: is this used for only inner functions? outer with kids have data?
+        //  can we determine the new length? is this just used as a template?
+        Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
+      }
     }
   }
   
@@ -82,6 +85,8 @@ protected class Selection(val vname: String, val operation: String, val value: S
       (comparison == 0 && operation.contains("="))
     }
   }
+  
+  //TODO: almost equals (nearest neighbor) "~'
   
   override def toString = vname + operation + value
 }
