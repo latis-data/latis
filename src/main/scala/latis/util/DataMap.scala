@@ -19,6 +19,7 @@ import latis.time.Time
  * Utility methods for getting convenient data structures out of a Dataset.
  */
 object DataMap {
+  //TODO: exclude Index?
 
   /**
    * Convert the Scalars within the given Dataset to a Map from name to Double array.
@@ -51,6 +52,7 @@ object DataMap {
    * Recursively build the data Map.
    */
   private def putDoublesInMap(v: Variable, m: mutable.Map[String, mutable.ArrayBuffer[Double]]): Unit = v match {
+    //case _: Index => //don't include Index
     case s: Scalar => {
       val name = v.getName
       if (name == "unknown") throw new Error("Scalar Variables must have names to be put into a data Map.")
@@ -109,6 +111,7 @@ object DataMap {
    * Recursively build the data Map.
    */
   private def putStringsInMap(v: Variable, m: mutable.Map[String, mutable.ArrayBuffer[String]]): Unit = v match {
+    //case _: Index => //don't include Index
     case s: Scalar => {
       val name = v.getName
       if (name == "unknown") throw new Error("Scalar Variables must have names to be put into a data Map.")
@@ -121,7 +124,7 @@ object DataMap {
           ab
         }
       }
-      //Add double to buffer for Numbers, otherwise NaN
+      //Add string value to buffer
       v match {
         case Index(i) => buffer += i.toString
         case Real(d) => buffer += d.toString
