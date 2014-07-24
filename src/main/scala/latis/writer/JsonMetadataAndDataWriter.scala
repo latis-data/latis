@@ -57,10 +57,18 @@ class JsonMetadataAndDataWriter extends JsonWriter {
     val props = variable.getMetadata.getProperties
     if (props.nonEmpty) {
       val ss = for ((name, value) <- props.filterNot(_._1 == "name")) //don't include name (redundant)
-        yield "\"" + name + "\": \"" + escape(value) + "\""
+        yield "\"" + name + "\": " + format(value)
       ss.mkString("{\n", ",\n", "\n}")
     }
     else ""
+  }
+  
+  /**
+   * Hack to allow encoding complex metadata as json.
+   */
+  private def format(value: String): String = {
+    if (value.startsWith("{")) value
+    else "\"" + escape(value) + "\"" //put in quotes and escape inner quotes so these will be value json values
   }
   
   //==== everything below from CompactJsonWriter which does the data part

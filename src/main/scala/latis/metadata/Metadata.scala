@@ -14,6 +14,9 @@ trait Metadata {
   }
   
   def has(key: String): Boolean
+  
+  def isEmpty = getProperties.isEmpty
+  def nonEmpty = getProperties.nonEmpty
    
   override def toString() = getProperties.toString
 }
