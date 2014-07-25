@@ -64,10 +64,10 @@ class JsonMetadataAndDataWriter extends JsonWriter {
   }
   
   /**
-   * Hack to allow encoding complex metadata as json.
+   * Hack to allow encoding complex metadata as json in addition to escaping quotes within values.
    */
   private def format(value: String): String = {
-    if (value.startsWith("{")) value
+    if (value.startsWith("{") || value.startsWith("[")) value
     else "\"" + escape(value) + "\"" //put in quotes and escape inner quotes so these will be value json values
   }
   
