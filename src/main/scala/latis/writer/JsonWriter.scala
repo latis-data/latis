@@ -84,7 +84,8 @@ class JsonWriter extends TextWriter {
     }
 
 //    case Sample(d, r) => "{" + varToString(d) + ", " + varToString(r) + "}" //no label for sample
-    val vars = dvar + ", " + rvar
+    val vars = if (dvar.isEmpty) rvar  //drop Index
+               else dvar + ", " + rvar
     vars.mkString("{","","}") //note, sample shouldn't have name
   }
     
