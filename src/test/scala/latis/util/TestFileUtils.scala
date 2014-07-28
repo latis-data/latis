@@ -45,4 +45,10 @@ class TestFileUtils {
     val dir = FileUtils.getTmpDir
     assertNotEquals(File.separator, dir.getPath.last.toString)
   }
+  
+  //@Test
+  def stream_file {
+    val file = new File("/data_systems/data/web-tcad/catalog_cache/live/catalog.json?&schemaName=MMS_schema001")
+    FileUtils.streamFile(file, System.out)
+  }
 }
