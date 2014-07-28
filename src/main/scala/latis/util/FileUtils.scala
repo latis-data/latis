@@ -67,6 +67,7 @@ object FileUtils {
     
     val input = new BufferedInputStream(new FileInputStream(file))
     Iterator.continually(input.read).takeWhile(_ != -1).foreach (out.write)
+    out.flush
     input.close
   }
 }
