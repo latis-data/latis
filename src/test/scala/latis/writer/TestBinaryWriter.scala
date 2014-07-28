@@ -34,7 +34,17 @@ class TestBinaryWriter extends WriterTest{
     test_writer(getDataset(tof),"bin")
   }
   
-  //@Test 
+  //@Test
+  def print_bytes {
+    val w = new BinaryWriter
+    val ds = getDataset(fof)
+    for(v <- ds.getVariables) {
+      for(b <- w.varToBytes(v)) println(b.toInt.toHexString.replace("ffffff", ""))
+    }
+    AsciiWriter.write(getDataset("dap2"))
+  }
+  
+//  @Test 
   def write_bin_file {
     write_to_file(fof, "bin")
   }
