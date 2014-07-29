@@ -10,6 +10,7 @@ import latis.dm.Text
 import latis.dm.Variable
 import scala.io.Source
 import latis.util.StringUtils
+import java.nio.ByteOrder
 
 class ProtoBufAdapter(tsml: Tsml) extends IterativeAdapter[Array[ByteBuffer]](tsml) {
   
@@ -66,7 +67,7 @@ class ProtoBufAdapter(tsml: Tsml) extends IterativeAdapter[Array[ByteBuffer]](ts
         buffer.get(arr)
         ByteBuffer.wrap(arr).rewind.asInstanceOf[ByteBuffer]
       }
-      case 1 => ByteBuffer.allocate(8).putDouble(buffer.getDouble).rewind.asInstanceOf[ByteBuffer]
+      case 1 => ByteBuffer.allocate(8).putDouble(buffer.order(ByteOrder.LITTLE_ENDIAN).getDouble).rewind.asInstanceOf[ByteBuffer]
       case 2 => {
         val arr = Array.ofDim[Byte](parseVarint(buffer))
         buffer.get(arr)
