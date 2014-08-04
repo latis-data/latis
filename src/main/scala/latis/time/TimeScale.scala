@@ -15,7 +15,8 @@ class TimeScale(val epoch: Date, val unit: TimeUnit, val tsType: TimeScaleType) 
     val sb = new StringBuilder()
     sb.append(unit.name)
     sb.append(" since ")
-    sb.append(TimeFormat.DATE.format(epoch.getTime))
+    sb.append(TimeFormat.DATE.format(epoch.getTime)) //TODO: include time, e.g. Julian Date starts at noon
+    //TODO: override for Julian Date?
     
     sb.toString()
   }
@@ -54,6 +55,7 @@ object TimeScale {
     val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """(-?[0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
     scale.trim match {
       case regex(unit, epoch) => TimeScale(epoch, TimeUnit.withName(unit), TimeScaleType.NATIVE)
+      case s: String if (s.startsWith("Julian")) => JULIAN_DATE
       case _ => {
         //assume formatted time (http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html)
         //TODO: test for valid TimeFormat
