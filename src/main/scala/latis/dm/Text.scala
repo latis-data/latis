@@ -19,6 +19,13 @@ trait Text extends Scalar {
     }
   }
   
+  def stringValue = getValue.asInstanceOf[String]
+  
+  override def compare(that: Scalar): Int = that match {
+    case Text(s) => stringValue compare s
+    case _ => throw new Error("Can't compare " + this + " with " + that)
+  }
+  
   //TODO: getStringValue? akin to Number.doubleValue, stringValue for all Vars?
 }
 
