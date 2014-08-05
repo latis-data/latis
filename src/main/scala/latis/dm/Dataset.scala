@@ -15,6 +15,7 @@ import latis.ops.Factorization
 import latis.ops.RenameOperation
 import latis.ops.ReplaceValueOperation
 import scala.math.ScalaNumericAnyConversions
+import latis.ops.agg.Intersection
 
 /**
  * The main container for a dataset. It is a special type of Tuple
@@ -61,6 +62,7 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   
   def replaceValue(v1: ScalaNumericAnyConversions, v2: ScalaNumericAnyConversions): Dataset = ReplaceValueOperation(v1,v2)(this)
   
+  def intersect(that: Dataset): Dataset = Intersection()(this, that)
   
   //Convenient data dumping methods.
   def toDoubleMap = DataMap.toDoubleMap(this)
