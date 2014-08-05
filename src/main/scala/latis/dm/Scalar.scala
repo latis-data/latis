@@ -18,9 +18,14 @@ trait Scalar extends Variable {
   //move to AbstractScalar since mixing in Time with Text means that anything here overrides Time?
   //note, we tried overriding this in subclasses but ran into inheritance trouble with "new Time with Real"
   def compare(that: String): Int
-  
-  def compare(that: Scalar): Int
-  
+    
+  //TODO: unit conversions...
+  def compare(that: Scalar): Int = (this,that) match {
+    case (Number(d1), Number(d2)) => d1 compare d2
+    case (Text(s1), Text(s2)) => s1 compare s2
+    case _ => throw new Error("Can't compare " + this + " with " + that)
+  }
+
   def getValue: Any
   def getFillValue: Any
   def getMissingValue: Any

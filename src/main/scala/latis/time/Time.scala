@@ -36,7 +36,7 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
     }
   }
 
-  def compare(that: Scalar): Int = that match {
+  override def compare(that: Scalar): Int = that match {
     case t: Time => {
       //Convert 'that' Time to our time scale.
       //Note, converted Times will have numeric (double or long) data values.

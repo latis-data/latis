@@ -8,11 +8,7 @@ import java.nio.ByteBuffer
 /**
  * A single variable (Scalar) that represents an arbitrary binary 'blob'.
  */
-trait Binary extends Scalar {
-  
-  def compare(that: Scalar): Int = ???
-}
-
+trait Binary extends Scalar
 
 object Binary {
   
