@@ -7,6 +7,7 @@ import latis.dm.Scalar
 import scala.collection.mutable.ArrayBuffer
 import latis.dm.Tuple
 import latis.dm.Function
+import latis.ops.Reduction
 
 class Intersection extends Aggregation {
   //use case: x -> (a,b) intersect x -> (c,d) => x -> (a,b,c,d) 
@@ -27,6 +28,8 @@ class Intersection extends Aggregation {
     val dtype = fs(0).getDomain
     val rtype = Tuple(fs(0).getRange, fs(1).getRange)
     
+    val reduction = new Reduction
+    
     //make sample iterator
     val samples = new PeekIterator[Sample]() {
       def getNext = {
@@ -34,8 +37,9 @@ class Intersection extends Aggregation {
           case Some((s1, s2)) => {
             //use common domain sample
             val domain = s1.domain
-            //merge range values //TODO: reduce?
-            val range = Tuple(s1.range, s2.range)
+            //merge range values, reduce so we don't end up with extra Tuple nesting
+            //TODO: is reduce always appropriate? maybe just deal with this one layer we added? did this here because if iterable once problem?
+            val range = reduction.applyToTuple(Tuple(s1.range, s2.range)).get //Option
             Sample(domain, range)
           }
           case None => null
@@ -47,6 +51,7 @@ class Intersection extends Aggregation {
     Dataset(Function(dtype, rtype, samples))
   }
 
+  
   
   private def getNextMatchingSamplePair(it1: Iterator[Sample], it2: Iterator[Sample]): Option[(Sample,Sample)] = {
     if (! it1.hasNext || ! it2.hasNext) None

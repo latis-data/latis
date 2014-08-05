@@ -34,6 +34,14 @@ class TestReduction {
     assertTrue(v.isInstanceOf[Tuple])
     assertEquals(2, v.asInstanceOf[Tuple].getVariables.length)
   }
+  
+  @Test
+  def nested_tuples = {
+    val ds = TestDataset.tuple_of_tuples
+    val ds2 = ds.reduce
+    assertEquals(2, ds.getVariables.head.asInstanceOf[Tuple].getElementCount)
+    assertEquals(4, ds2.getVariables.head.asInstanceOf[Tuple].getElementCount)
+  }
 
 //  @Test
 //  def function_of_one {

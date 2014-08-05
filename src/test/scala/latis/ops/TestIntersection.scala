@@ -24,4 +24,14 @@ class TestIntersection {
     assertEquals(4, data(1).length) //# range values
     assertEquals(6.0, data(1)(3), 0.0)
   }
+  
+  //@Test
+  def test {
+    val ds1 = TsmlReader("/home/lindholm/git/web-tcad/src/test/resources/datasets/test/mms/Schemas.tsml").getDataset
+    val ds2 = TsmlReader("/home/lindholm/git/web-tcad/src/test/resources/datasets/test/mms/SchemasTimeRange.tsml").getDataset
+    
+    val ds = ds1.intersect(ds2) //iterable once problem? .reduce
+    AsciiWriter.write(ds)
+    //Writer.fromSuffix("asc").write(ds)
+  }
 }
