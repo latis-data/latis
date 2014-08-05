@@ -39,7 +39,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 import javax.naming.InitialContext
 import javax.sql.DataSource
 import java.sql.Statement
- 
+
 /* 
  * TODO: release connection as soon as possible?
  * risky leaving it open waiting for client to iterate
@@ -58,10 +58,10 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   /**
    * Parse the data based on the Variable type (and the database column type, for time).
    */
-  def parseRecord(record: JdbcAdapter.JdbcRecord): Option[Map[String,Data]] = {
-    val map = mutable.Map[String,Data]()
+  def parseRecord(record: JdbcAdapter.JdbcRecord): Option[Map[String, Data]] = {
+    val map = mutable.Map[String, Data]()
     val rs = record.resultSet
-    
+
     for (vt <- varsWithTypes) vt match {
       case (v: Time, dbtype: Int) if (dbtype == java.sql.Types.TIMESTAMP) => {
         //time stored as timestamp must be declared as type text
@@ -97,10 +97,10 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
 
       case (b: Binary, _) => map += (b.getName -> Data(rs.getBytes(b.getName))) //TODO: use getBlob? deal with null?
     }
-    
+
     Some(map)
   }
-  
+
   /**
    * Pairs of projected Variables (Scalars) and their database types.
    * Note, this will honor the order of the variables in the projection clause.
@@ -117,7 +117,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     //Combine the variables with their database types in a Seq of pairs.
     vars zip types
   }
-  
+
   //Define a Calendar so we get our times in the default GMT time zone.
   private lazy val gmtCalendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"))
 
@@ -157,7 +157,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
           else if (getOrigScalarNames.contains(name)) { //other variable (not time), even if not projected
             //TODO: quote text values, or expect selection to be that way?
             //we may want to do that for the same reason sql does: value could be a variable as opposed to a literal
-            
+
             //add a selection to the sql, may need to change operation
             op match {
               case "==" =>
@@ -165,7 +165,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
               case "=~" =>
                 selections append name + " like '%" + value + "%'"; true
               case "~" => false //almost equal (e.g. nearest sample) not supported by sql
-              case _ => selections append expression; true 
+              case _ => selections append expression; true
             }
           } else false //doesn't apply to our variables, so leave it for the next handler
         }
@@ -239,7 +239,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   }
 
   //---- Database Stuff -------------------------------------------------------
-  
+
   /**
    * Execute the SQL query.
    */
@@ -279,31 +279,37 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   /**
    * Construct the SQL query.
    */
-  protected def makeQuery: String = {
-    val sb = new StringBuffer()
-    sb append "select "
-    sb append projection
-    sb append " from " + getTable
+  protected def makeQuery: String = getProperty("sql") match {
+    //hack so we can define dataset with sql in the tsml file
+    //TODO: revise handleOperation to return false for projection, selection,...
+    case Some(sql) => sql
+    case None => {
+      //build query
+      val sb = new StringBuffer()
+      sb append "select "
+      sb append projection
+      sb append " from " + getTable
 
-    val p = predicate
-    if (p.nonEmpty) sb append " where " + p
+      val p = predicate
+      if (p.nonEmpty) sb append " where " + p
 
-    //Sort by domain variable.
-    //assume domain is scalar, for now
-    //Note 'dataset' should be the original before ops
-    //val dvar = findDomainVariable(dataset) 
-    getOrigDataset.findFunction match {
-      case Some(f) => f.getDomain match {
-        case i: Index => //implicit placeholder, use natural order
-        case v: Variable => v match {
-          case _: Scalar => sb append " ORDER BY " + v.getName + order
-          case _ => ??? //TODO: generalize for n-D domains
+      //Sort by domain variable.
+      //assume domain is scalar, for now
+      //Note 'dataset' should be the original before ops
+      //val dvar = findDomainVariable(dataset) 
+      getOrigDataset.findFunction match {
+        case Some(f) => f.getDomain match {
+          case i: Index => //implicit placeholder, use natural order
+          case v: Variable => v match {
+            case _: Scalar => sb append " ORDER BY " + v.getName + order
+            case _ => ??? //TODO: generalize for n-D domains
+          }
         }
+        case None => //no function so no domain variable to sort by
       }
-      case None => //no function so no domain variable to sort by
-    }
 
-    sb.toString
+      sb.toString
+    }
   }
 
   /**
@@ -317,7 +323,6 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     buffer.filter(_.nonEmpty).mkString(" AND ")
   }
 
-  
   //---------------------------------------------------------------------------
 
   /**
@@ -327,7 +332,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   private lazy val resultSet: ResultSet = executeQuery
   private lazy val statement: Statement = connection.createStatement()
   //Keep database resources global so we can close them.
-  
+
   /**
    * Allow subclasses to use the connection. They should not close it.
    */
@@ -395,28 +400,28 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     }
   }
 }
-  
+
 //=============================================================================  
-  
+
 /**
  * Define some inner classes to provide us with Record semantics for JDBC ResultSets.
  */
 object JdbcAdapter {
-  
-  case class JdbcRecord(resultSet: ResultSet) 
-  
+
+  case class JdbcRecord(resultSet: ResultSet)
+
   class JdbcRecordIterator(resultSet: ResultSet) extends Iterator[JdbcAdapter.JdbcRecord] {
     private var _didNext = false
     private var _hasNext = false
-    
+
     def next() = {
-      if (! _didNext) resultSet.next
+      if (!_didNext) resultSet.next
       _didNext = false
       JdbcRecord(resultSet)
     }
-    
+
     def hasNext() = {
-      if (! _didNext) {
+      if (!_didNext) {
         _hasNext = resultSet.next
         _didNext = true
       }
