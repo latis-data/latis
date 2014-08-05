@@ -1,6 +1,7 @@
 package latis.ops
 
 import latis.dm._
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Reduce any Tuples of one element to that element and reduce any 
@@ -27,16 +28,19 @@ class Reduction extends Operation  {
     val vars = tuple.getVariables.flatMap(applyToVariable(_)) 
     vars.length match {
       case 0 => None
-      case 1 => Some(vars.head)
-      case _ => Some(Tuple(vars)) //TODO: metadata
+      case 1 => Some(vars.head) //drop the redundant Tuple layer
+      case _ => {
+        //flatten, e.g. (a,(b,c)) => (a,b,c)
+        //Since we are a Tuple, we can contain the elements of nested Tuples (i.e. flatten)
+        //TODO: will this recurse
+        val flattenedVars = ArrayBuffer[Variable]()
+        for (v <- vars) v match {
+          case Tuple(vs) => flattenedVars ++= vs //flatten nested Tuple
+          case _ => flattenedVars += v
+        }
+        Some(Tuple(flattenedVars)) //TODO: metadata
+      }
     }
-    
-    /*
-     * TODO: consider (a,(b,c)) => (a,b,c)
-     * just like scala flatten
-     * can only reduce the inner tuple if it's parent can take kids
-     */
-
   }
 
   /**

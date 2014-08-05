@@ -10,7 +10,6 @@ import java.nio.ByteBuffer
  */
 trait Binary extends Scalar
 
-
 object Binary {
   
   def apply(buffer: ByteBuffer) = {

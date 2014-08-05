@@ -19,6 +19,8 @@ trait Text extends Scalar {
     }
   }
   
+  def stringValue = getValue.asInstanceOf[String]
+  
   //TODO: getStringValue? akin to Number.doubleValue, stringValue for all Vars?
 }
 
