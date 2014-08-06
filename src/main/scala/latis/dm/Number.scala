@@ -5,7 +5,7 @@ import latis.data.NumberData
 trait Number { this: Scalar =>
   def doubleValue: Double = getNumberData.doubleValue
   def longValue: Long = getNumberData.longValue
-  def intValue: Int = getNumberData.intValue
+  def intValue: Int = getNumberData.intValue  
 }
 
 object Number {

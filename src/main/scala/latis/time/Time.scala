@@ -35,17 +35,20 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
       TimeFormat(format).parse(text.stringValue)
     }
   }
-  
-  def compare(that: Time): Int = {
-    //Convert 'that' Time to our time scale.
-    //Note, converted Times will have numeric (double or long) data values.
-    val otherData = that.convert(timeScale).getNumberData
-    //Base comparison on our type so we can get the benefit of double precision or long accuracy
-    getData match {
-      case LongValue(l) => l compare otherData.longValue
-      case NumberData(d) => d compare otherData.doubleValue
-      case _: TextData => getJavaTime compare otherData.longValue
+
+  override def compare(that: Scalar): Int = that match {
+    case t: Time => {
+      //Convert 'that' Time to our time scale.
+      //Note, converted Times will have numeric (double or long) data values.
+      val otherData = t.convert(timeScale).getNumberData
+      //Base comparison on our type so we can get the benefit of double precision or long accuracy
+      getData match {
+        case LongValue(l) => l compare otherData.longValue
+        case NumberData(d) => d compare otherData.doubleValue
+        case _: TextData => getJavaTime compare otherData.longValue
+      }
     }
+    case _ => throw new Error("Can't compare " + this + " with " + that)
   }
   
   //override to deal with ISO formatted time strings  

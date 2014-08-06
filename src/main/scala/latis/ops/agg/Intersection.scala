@@ -4,6 +4,10 @@ import latis.dm.Dataset
 import latis.dm.Sample
 import latis.util.PeekIterator
 import latis.dm.Scalar
+import scala.collection.mutable.ArrayBuffer
+import latis.dm.Tuple
+import latis.dm.Function
+import latis.ops.Reduction
 
 class Intersection extends Aggregation {
   //use case: x -> (a,b) intersect x -> (c,d) => x -> (a,b,c,d) 
@@ -14,56 +18,65 @@ class Intersection extends Aggregation {
     //child datasets to aggregate
     val datasets = dataset.getVariables.map(_.asInstanceOf[Dataset])
     
-    //assume just 2 for now
+    //assume just 2 for now //TODO: fold
     //get functions from each, assuming each ds has only one
     val fs = datasets.flatMap(_.findFunction)
+    val it1 = fs(0).iterator
+    val it2 = fs(1).iterator
     
-    //make MappingIterator that only keeps samples that exist in both
-    //val mappingFunction = 
-      
-    //TODO: act on Samples or Data?
-    /*
-     * union domain sets, iterate over that keeping samples that have that value
-     * 'evaluate' functions?
-     * make Map of samples domain Data -> range Data
-     * join range data: simply append?
-     * use Data as hash key? bytes
-     * but need solution that works with long datasets
-     *   take advantage of them being sorted
-     *   but can't compare with Data alone, need type info
-     *   use Scalar compare? 
-     *   will that extend to tuple domains? or do we need to use DomainSet?
-     * can we make SampledData without having to separate domain and range? we have constructor for it
-     * consider how this could be used for other aggregators with a simple switch of logic
-     *   intersect: drop if not in both
-     *   union: add fill data
-     * 
-     * or use function iterators:
-     *   takes advantage of sorting, compare
-     * 
-     * getNextMatchingSample(fit1, fit2)
-     * equivalent vs equal? e.g. same metadata, unit conversion
-     * 
-     */
+    //need domain and range types for new Function
+    val dtype = fs(0).getDomain
+    val rtype = Tuple(fs(0).getRange, fs(1).getRange)
     
-    ???
-  }
-  
-  private def getNextMatchingSample(it1: Iterator[Sample], it2: Iterator[Sample]): Option[Sample] = {
-    if (! it1.hasNext || ! it2.hasNext) None
-    else {
-      val sample1 = it1.next
-      val sample2 = it2.next
-      
-      //assume Scalar domains for now, since only it impls compare, but only with String value
-      val d1 = sample1.domain.asInstanceOf[Scalar]
-      val d2 = sample2.domain.asInstanceOf[Scalar]
+    val reduction = new Reduction
     
-//      d1.compare(d2) match {
-//        
-//      }
-      ???
+    //make sample iterator
+    val samples = new PeekIterator[Sample]() {
+      def getNext = {
+        getNextMatchingSamplePair(it1, it2) match {
+          case Some((s1, s2)) => {
+            //use common domain sample
+            val domain = s1.domain
+            //merge range values, reduce so we don't end up with extra Tuple nesting
+            //TODO: is reduce always appropriate? maybe just deal with this one layer we added? did this here because if iterable once problem?
+            val range = reduction.applyToTuple(Tuple(s1.range, s2.range)).get //Option
+            Sample(domain, range)
+          }
+          case None => null
+        }
+      }
     }
+    
+    //TODO: metadata
+    Dataset(Function(dtype, rtype, samples))
   }
 
+  
+  
+  private def getNextMatchingSamplePair(it1: Iterator[Sample], it2: Iterator[Sample]): Option[(Sample,Sample)] = {
+    if (! it1.hasNext || ! it2.hasNext) None
+    else {
+      //recursive helper method
+      def findMatchingSample(s1: Sample, s2: Sample): Option[(Sample,Sample)] = {
+        val d1 = s1.domain.asInstanceOf[Scalar]
+        val d2 = s2.domain.asInstanceOf[Scalar]
+        val comparison = d1 compare d2
+        
+        if (comparison == 0) Some((s1, s2))
+        else if (comparison > 0 && it2.hasNext) findMatchingSample(s1, it2.next)
+        else if (comparison < 0 && it1.hasNext) findMatchingSample(it1.next, s2)
+        else None //one of the Iterators ran out
+      }
+      
+      val sample1 = it1.next
+      val sample2 = it2.next
+      findMatchingSample(sample1, sample2)
+    }
+  }
+  
+}
+
+object Intersection {
+  
+  def apply() = new Intersection()
 }
