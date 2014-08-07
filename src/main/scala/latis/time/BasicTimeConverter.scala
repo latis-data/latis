@@ -1,5 +1,7 @@
 package latis.time
 
+import latis.metadata.Metadata
+
 class BasicTimeConverter(scale1: TimeScale, scale2: TimeScale) extends TimeConverter(scale1, scale2) {
 
   // Get time zero for each time scale in seconds since 1970
@@ -25,6 +27,9 @@ class BasicTimeConverter(scale1: TimeScale, scale2: TimeScale) extends TimeConve
     //TODO: if LongValue preserve long
     //TODO: if StringValue...
     val t = convert(time.getNumberData.doubleValue)
-    Time(scale2, t)
+    //redefine units in metadata
+    val md = Metadata(time.getMetadata.getProperties + ("units" -> scale2.toString)) //TODO: make sure TimeScale(scale.toString) works
+    //Time(scale2, t)
+    Time(md, t)
   }
 }
