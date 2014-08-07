@@ -17,12 +17,12 @@ abstract class UnitConverter(from: UnitOfMeasure, to: UnitOfMeasure) {
   def convert(value: Double): Double 
   
   //TODO: operate on complex Variables
-  def convert(variable: Variable): Variable = variable match {
+  def convert(variable: Scalar): Scalar = variable match {
     case Number(d) => {
       //TODO: change units in metadata
       Real(convert(d)) //TODO: use builder to get type right
     } 
-    case _ => throw new UnsupportedOperationException("There is no unit conversion support for this Variable.")
+    case _ => throw new UnsupportedOperationException("There is no unit conversion support for this Variable: " + variable)
   }
   
 }
