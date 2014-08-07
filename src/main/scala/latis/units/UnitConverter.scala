@@ -19,7 +19,7 @@ abstract class UnitConverter(from: UnitOfMeasure, to: UnitOfMeasure) {
   //TODO: operate on complex Variables
   def convert(variable: Scalar): Scalar = variable match {
     case Number(d) => {
-      //TODO: change units in metadata
+      //TODO: change units in metadata, keep orig md, e.g. name
       Real(convert(d)) //TODO: use builder to get type right
     } 
     case _ => throw new UnsupportedOperationException("There is no unit conversion support for this Variable: " + variable)
