@@ -44,6 +44,13 @@ object TestDataset {
     Dataset(Function(samples), Metadata("function_of_scalar"))
   }
   
+  def function_of_named_scalar = {
+    val samples = List(Sample(Real(Metadata("t"), 0), Real(Metadata("a"), 0)), 
+                       Sample(Real(Metadata("t"), 1), Real(Metadata("a"), 1)), 
+                       Sample(Real(Metadata("t"), 2), Real(Metadata("a"), 2)))
+    Dataset(Function(samples), Metadata("function_of_scalar"))
+  }
+  
   def function_of_tuple = {
     val samples = List(Sample(Integer(Metadata("myInteger"), 0), Tuple(Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero"))), 
                        Sample(Integer(Metadata("myInteger"), 1), Tuple(Real(Metadata("myReal"), 1), Text(Metadata("myText"), "one"))), 
