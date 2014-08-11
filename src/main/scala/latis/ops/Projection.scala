@@ -73,12 +73,65 @@ class Projection(val names: Seq[String]) extends Operation {
   override def applyToFunction(function: Function): Option[Variable] = {
     //original sample type
     val sample1 = Sample(function.getDomain, function.getRange)
-    
+        
     //new sample type
-    val sample2 = applyToSample(sample1) match {
+    val sample2: Sample = applyToSample(sample1) match {
       case Some(s) => s
       case None => throw new Error("Failed to project the sample: " + sample1)
     }
+    
+//    if (functionNestingLevel > 1) {
+//      //hack so we only apply this to the type of nested functions
+//   //TODO: the test has data in the scalars of the inner function
+//   // can we live with wrapping both inner and outer functions?
+//      val d = sample2.domain
+//      val r = sample2.range
+//      val md = function.getMetadata
+//      Some(Function(d, r, md))
+//    } else {
+      
+    
+    
+
+    /*
+     * TODO: broken for nested Functions
+     * apply this to outer function only? can't assume that inner function has access to data
+     * applyToSample just to get type is a problem
+     *   diff method names?
+     *   ubiquitous problem: modify type/model vs dataset with data?
+     *   
+     * as we are iterating over outer function, the sample should be populated with data
+     * then it should be up to DataUtils.reshapeSampleData to handle nested function...
+     * only problem is getting the type above?
+     * could we have applyToSample deal with data?
+     *   it should have the nested function's data in there
+     *   then maybe getting the type is the special need,
+     *     e.g. have related problem adding derived field: not reflected in metadata until lazy iteration over data happens
+     *     applyToType? 
+     *     should we drop data?
+     *     keep Metadata? do we need to keep length, units,...?
+     * keep in mind use case: WrappedFunction with Operation, get metadata, types without iterating on data
+     *   consider diff types of operations: 
+     *     filter only drops samples, can't always know length
+     * consider how this might be different for diff ways of managing data
+     *   if model fully populated, just removing the scalar from the model is sufficient?
+     *   do we have to assume the inner function is a blob? already interleaved? probably
+     * but actual application (with data) duplicates the type separately, ich
+     * 
+     * back to the old mismatch: type vs data
+     *   really only problem for Functions? sample vs Seq of samples
+     *   is it fundamentally a laziness problem? 
+     * would v.getType help?
+     *   compare to ds.toString
+     *   simply var without data?
+     *   how would op munge it?
+     *     op still has to make new Function (wrapped or with new data...) so it must specify its new type
+     *     that part can't be lazy, only the iterating over samples?
+     *   only useful after munging
+     * could we use lack of data in Function in appyToFunction to just do type?
+     *   can't imagine that we can rely on that
+     *   is the only problem nested Functions?  hack isNested?
+     */
     
     //expose the domain and range types of the new dataset
     val Sample(d,r) = sample2
@@ -99,7 +152,8 @@ class Projection(val names: Seq[String]) extends Operation {
       SampledData(dataIt, sample2)
     }
     
-    Some(Function(d, r, data = sampledData))
+    Some(Function(d, r, function.getMetadata, sampledData))
+    //}
   }
 
 
