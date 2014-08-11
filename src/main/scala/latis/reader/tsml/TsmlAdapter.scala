@@ -30,6 +30,7 @@ import scala.io.Source
 import latis.util.DataUtils
 import latis.reader.tsml.ml.TimeMl
 import latis.time.Time
+import latis.ops.UnitConversion
 
 
 /**
@@ -336,7 +337,14 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //TODO: add other PI types? rename,...
     val projections = tsml.getProcessingInstructions("project").map(Projection(_)) 
     val selections  = tsml.getProcessingInstructions("select").map(Selection(_))
-    projections ++ selections
+    //Unit conversions: "convert vname units"
+    val conversions = tsml.getProcessingInstructions("convert").map(s => {
+      val index = s.indexOf(" ")
+      val vname = s.substring(0, index).trim
+      val units = s.substring(index).trim
+      UnitConversion(vname, units)
+    })
+    projections ++ selections ++ conversions
   }
   
   /**

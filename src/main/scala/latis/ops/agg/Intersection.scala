@@ -24,11 +24,11 @@ class Intersection extends Aggregation {
     val it1 = fs(0).iterator
     val it2 = fs(1).iterator
     
+    val reduction = new Reduction
+    
     //need domain and range types for new Function
     val dtype = fs(0).getDomain
-    val rtype = Tuple(fs(0).getRange, fs(1).getRange)
-    
-    val reduction = new Reduction
+    val rtype = reduction.applyToTuple(Tuple(fs(0).getRange, fs(1).getRange)).get //flatten, consistent with below
     
     //make sample iterator
     val samples = new PeekIterator[Sample]() {
