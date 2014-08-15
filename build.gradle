@@ -13,6 +13,9 @@ targetCompatibility = 1.6
 
 //Repositories for dependencies.
 repositories {
+    maven {
+      url "http://download.osgeo.org/webdav/geotools/" 
+    }
     ivy {
       url "http://dsweb:8080/ivy"
     }
@@ -44,6 +47,11 @@ dependencies {
 	
 	//Support for writing png images
 	compile 'jfree:jfreechart:1.0.12'
+	
+	//Support for GeoTools geotiff plugin
+	compile 'org.geotools:gt-geotiff:2.6.2'
+	compile 'org.geotools:gt-epsg-hsql:2.6.2'
+	//compile 'com.azavea.geotrellis:geotrellis-geotools:0.9.0'
 	
 	//iCalendar support
 	compile 'net.sf.biweekly:biweekly:0.3.2'
