@@ -18,7 +18,7 @@ class JsonMetadataAndDataWriter extends JsonWriter {
    */
   override def makeHeader(dataset: Dataset) = {
     val sb = new StringBuffer(super.makeHeader(dataset))
-    
+
     //assume single top level function
     val function = dataset.findFunction.get
     sb append "\"metadata\": {" //metadata object label
@@ -54,7 +54,11 @@ class JsonMetadataAndDataWriter extends JsonWriter {
    * Build a String representation of the Metadata for a given Variable.
    */
   private def makeMetadata(variable: Variable): String = {
-    val props = variable.getMetadata.getProperties
+    var props = variable.getMetadata.getProperties
+    
+    //change time units in metadata since this Writer always converts time to Java time
+    if (variable.isInstanceOf[Time]) props = props + ("units" -> "milliseconds since 1970-01-01")
+    
     if (props.nonEmpty) {
       val ss = for ((name, value) <- props.filterNot(_._1 == "name")) //don't include name (redundant)
         yield "\"" + name + "\": " + format(value)
