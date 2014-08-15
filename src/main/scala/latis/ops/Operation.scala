@@ -12,10 +12,15 @@ import latis.util.LatisProperties
 import scala.Option.option2Iterable
 
 /**
- * Basse type for operations that transform on Dataset into another.
+ * Base type for operations that transform on Dataset into another.
  */
-trait Operation {
+abstract class Operation {
 
+  /**
+   * Hack so we know when we are working on nested Functions: > 1.
+   */
+  protected var functionNestingLevel = 0
+  
   /**
    * Apply this Operation to the given Dataset.
    */
@@ -34,7 +39,7 @@ trait Operation {
     case scalar: Scalar     => applyToScalar(scalar)
     case sample: Sample     => applyToSample(sample)
     case tuple: Tuple       => applyToTuple(tuple)
-    case function: Function => applyToFunction(function)
+    case function: Function => functionNestingLevel += 1; applyToFunction(function)
   }
 
   /**
@@ -68,9 +73,10 @@ trait Operation {
    * to be applied to each sample as it iterates.
    */
   def applyToFunction(function: Function): Option[Variable] = {
-    Some(WrappedFunction(function, this))
+    if (functionNestingLevel > 1) Some(function) //hack to avoid wrapping nested functions
+    else Some(WrappedFunction(function, this))
   }
-
+  
 }
 
 

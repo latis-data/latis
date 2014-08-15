@@ -65,7 +65,11 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     } 
     
     case Tuple(vars) => vars.foldLeft(0)(_ + _.getSize)
-    case f: Function => f.getLength * (f.getDomain.getSize + f.getRange.getSize)
+    case f: Function => {
+      val length = f.getLength
+      if (length < 0) throw new Error("Can't get size of Function with undefined length: " + f)
+      else length * (f.getDomain.getSize + f.getRange.getSize)
+    }
   }
   
   /**

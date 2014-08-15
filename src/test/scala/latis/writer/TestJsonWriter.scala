@@ -50,6 +50,15 @@ class TestJsonWriter extends WriterTest {
   def empty_function = Writer.fromSuffix("json").write(TestDataset.empty_function)
   
   //@Test
+  def multple_top_level_variables {
+    val r = Real(Metadata("myReal"), 3.14)
+    val t = Text(Metadata("myText"), "Hi")
+    val i = Integer(Metadata("myInt"), 3)
+    val ds = Dataset(List(r,t,i), Metadata("three_scalars"))
+    Writer.fromSuffix("json").write(ds)
+  }
+  
+  //@Test
   def missing_value {
     val domain = Real(Metadata(Map("name" -> "domain")))
     val range = Real(Metadata(Map("name" -> "range", "missing_value" -> "0")))

@@ -61,48 +61,54 @@ class TestProjection {
     assertEquals(2, n)
   }
   
-  //@Test
-  //TODO: Function must have data
+  @Test
   def project_scalar_in_function_scalar_range {
-    val f = Function(Real(Metadata("t")), Real(Metadata("a")))
+    //val f = Function(Real(Metadata("t")), Real(Metadata("a")))
+    val ds1 = TestDataset.function_of_named_scalar
     val proj = new Projection(List("t","a"))
-    val ds = proj(f)
+    val ds2 = proj(ds1)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
-    val n = ds.getVariables(0).asInstanceOf[Function].getRange.toSeq.length
+    val n = ds2.getVariables(0).asInstanceOf[Function].getRange.toSeq.length
     assertEquals(1, n)
   }
   
-  //@Test
-  //TODO: Function must have data
+  @Test
   def project_scalar_in_function_tuple_range {
-    val f = Function(Real(Metadata("t")), Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c"))))
-    val proj = new Projection(List("t","b"))
-    val ds = proj(f)
+    //val f = Function(Real(Metadata("t")), Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c"))))
+    val ds1 = TestDataset.function_of_tuple
+    val proj = new Projection(List("myInteger","myReal"))
+    val ds2 = proj(ds1)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
-    val n = ds.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
+    val n = ds2.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
     assertEquals(1, n)
   }
   
-  //@Test
-  //TODO: Function must have data
+  @Test
   def project_scalars_in_function_tuple_range {
-    val f = Function(Real(Metadata("t")), Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c"))))
-    val proj = new Projection(List("t","b","a")) //note, diff order, but not used, //TODO: enforce order
-    val ds = proj(f)
+    //val f = Function(Real(Metadata("t")), Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c"))))
+    val ds1 = TestDataset.function_of_tuple
+    val proj = new Projection(List("myInteger","myReal", "myText"))
+    val ds2 = proj(ds1)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
-    val n = ds.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
+    val n = ds2.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
     assertEquals(2, n)
   }
   
   //@Test
-  //TODO: Function must have data
-  def project_scalars_in_function_function_range {
-    val f = Function(Real(Metadata("t")), Function(Real(Metadata("w")), Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))))
-    val proj = new Projection(List("t","w","b","c")) 
-    val ds = proj(f)
-    val n = ds.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
-    assertEquals(2, n)
+  def project_scalar_in_function_function_range {
+    //val f = Function(Real(Metadata("t")), Function(Real(Metadata("w")), Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))))
+    val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
+    val proj = new Projection(List("t","w","a")) 
+    val ds2 = proj(ds1)
+ AsciiWriter.write(ds2)
+    val n = ds2.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
+    assertEquals(1, n)
     //println(ds)
+    /*
+     * Projection.applyToFunction is being applied to both inner and outer
+     * make map out of function's data but inner F might not have any
+     * 
+     */
   }
   
   //TODO: project nothing
