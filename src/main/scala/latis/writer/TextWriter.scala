@@ -60,7 +60,12 @@ class TextWriter extends Writer {
    */
   def write(dataset: Dataset) {
     writeHeader(dataset)
-    dataset.getVariables.map(writeVariable(_)) //TODO: add hook for delimiter (other than new line) between top level vars
+//    dataset.getVariables.map(writeVariable(_)) 
+//TODO: add hook for delimiter (other than new line) between top level vars
+    //problem for json, too
+    //could we just treat a dataset as a tuple from here?
+    writeVariable(dataset)
+    
     writeFooter(dataset)
     printWriter.flush()
   }

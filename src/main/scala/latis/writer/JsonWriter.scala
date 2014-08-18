@@ -20,8 +20,8 @@ class JsonWriter extends TextWriter {
   //TODO: Include metadata in this long form with objects
   //TODO: assumes only one top level var, need to add delim
   
-  override def makeHeader(dataset: Dataset) = "{\"" + dataset.getName + "\": {\n"
-  override def makeFooter(dataset: Dataset) = "}}"
+  override def makeHeader(dataset: Dataset) = "{" //"{\"" + dataset.getName + "\": {\n"
+  override def makeFooter(dataset: Dataset) = "}" //"}}"
 
   override def writeFunction(function: Function) {
     printWriter.print(makeLabel(function) + "[")
