@@ -1,5 +1,4 @@
-{"dap2": {
-"metadata": {"myTime": {
+{"metadata": {"myTime": {
 "alias": "time",
 "units": "yyyy/MM/dd",
 "length": "10",
@@ -19,7 +18,7 @@
 "missing_value": "D",
 "long_name": "text"
 }},
-"data": [[0,1,1.1,"A"],
+"data": [[[0,1,1.1,"A"],
 [86400000,2,2.2,"B"],
-[172800000,null,3.3,"C"]]
-}}
+[172800000,null,3.3,"C"]]]
+}

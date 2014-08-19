@@ -1,5 +1,4 @@
-{"dap2": {
-"myTime": {
+{"myTime": {
 "alias": "time",
 "units": "yyyy/MM/dd",
 "length": "10",
@@ -18,4 +17,5 @@
 "units": "letters",
 "missing_value": "D",
 "long_name": "text"
-}}}
+}
+}
