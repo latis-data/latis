@@ -1,6 +1,6 @@
 {"metadata": {"myTime": {
 "alias": "time",
-"units": "yyyy/MM/dd",
+"units": "milliseconds since 1970-01-01",
 "length": "10",
 "type": "text"
 },
