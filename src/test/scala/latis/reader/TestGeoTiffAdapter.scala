@@ -1,18 +1,20 @@
 package latis.reader
 
+import java.io.File
+import java.io.FileOutputStream
+
 import org.junit.Test
+
 import latis.reader.tsml.TsmlReader
-import latis.writer.AsciiWriter
 import latis.writer.Writer
 
 class TestGeoTiffAdapter {
   
-  def datasetName = "tiff"
-  
   @Test
   def testread {
     val ds = TsmlReader("datasets/test/tiff.tsml").getDataset
-    Writer.fromSuffix("txt").write(ds)
+    val f = new File("src/test/resources/datasets/test.txt")
+    val w = Writer(new FileOutputStream(f), "txt").write(ds)
   }
 
 }

@@ -4,18 +4,14 @@
   <dataset name="tiff">
 
     <adapter class="latis.reader.tsml.GeoTiffAdapter"
-             location="datasets/little_tif.tif" />
+             location="datasets/bw.tif"/>
              
     <function>
       <tuple>
         <real name="lat"/>
         <real name="lon"/>
       </tuple>
-      <tuple>
-        <integer name="red"/>
-        <integer name="green"/>
-        <integer name="blue"/>
-      </tuple>
+      <integer name="color"/>
     </function>
 
   </dataset>

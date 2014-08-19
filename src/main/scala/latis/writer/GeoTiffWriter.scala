@@ -1,50 +1,40 @@
 package latis.writer
 
-import latis.util.FileUtils
-import latis.dm.Function
-import latis.dm.Dataset
-import scala.collection.mutable.ArrayBuilder
-import latis.dm.Tuple
 import java.awt.image.DataBuffer
-import java.awt.image.DataBufferInt
+import java.awt.image.PixelInterleavedSampleModel
 import java.awt.image.Raster
-import latis.dm.Sample
+import java.awt.image.WritableRaster
+import java.io.File
+import org.geotools.coverage.CoverageFactoryFinder
 import org.geotools.geometry.jts.ReferencedEnvelope
 import org.geotools.referencing.CRS
-import org.geotools.coverage.grid.GridCoverageFactory
-import java.io.File
-import java.io.DataOutputStream
-import java.io.BufferedOutputStream
-import java.io.OutputStream
-import java.io.FileOutputStream
-import java.awt.image.DataBufferDouble
-import java.io.DataInputStream
-import java.io.FileInputStream
-import latis.util.PeekIterator
-import java.awt.image.DataBufferUShort
-import java.awt.image.WritableRaster
 import org.opengis.geometry.Envelope
-import java.awt.image.SinglePixelPackedSampleModel
-import java.awt.image.PixelInterleavedSampleModel
-import org.geotools.coverage.CoverageFactoryFinder
-import org.geotools.factory.Hints
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Tuple
+import org.geotools.coverage.grid.GridCoverage2D
+import latis.dm.Scalar
 
 class GeoTiffWriter extends FileWriter {
   
-  def makeRaster(function: Function) = {
+  def makeRaster(function: Function): (WritableRaster, Seq[Double], Seq[Double], Int) = {
     val width = function.getMetadata("width").get.toInt
     val height = function.getMetadata("height").get.toInt
+    val bands = function.getRange match {
+      case _: Scalar => 1
+      case t: Tuple => t.getElementCount
+    }
     
-    val model = new PixelInterleavedSampleModel(DataBuffer.TYPE_INT, width, height, 3, width * 3, Array(0,1,2))
+    val model = new PixelInterleavedSampleModel(DataBuffer.TYPE_BYTE, width, height, bands, width * bands, (0 until bands).toArray)
     
-    val raster = Raster.createWritableRaster(model, null) //initRaster(width, height, width * height)
+    val raster = Raster.createWritableRaster(model, null)
     
     val (first, last, len) = fillRaster(function, raster)
     
     (raster, first, last, len)
   }
   
-  def fillRaster(function: Function, raster: WritableRaster) = {
+  def fillRaster(function: Function, raster: WritableRaster): (Seq[Double], Seq[Double], Int) = {
     val xs = (0 until raster.getWidth).iterator
     val ys = (0 until raster.getHeight)
     val indexes = for(x <- xs; y <- ys) yield (x, y)
@@ -65,19 +55,18 @@ class GeoTiffWriter extends FileWriter {
      last.getVariables(0).asInstanceOf[Tuple].getVariables.map(_.getNumberData.doubleValue), len)
   }
   
-  def makeCoverage(raster: WritableRaster, envelope: Envelope) = {
+  def makeCoverage(raster: WritableRaster, envelope: Envelope): GridCoverage2D = {
     val gcf = CoverageFactoryFinder.getGridCoverageFactory(null)
     gcf.create("grid", raster, envelope)
   }
   
   def writeFile(ds: Dataset, file: File) = {
     val function = ds.findFunction.get
-    val crs = function.getMetadata("crs").get
+    val crs = function.getMetadata("CRS").get
     
     val (raster, first, last, len) = makeRaster(function)
     
-    val env = new ReferencedEnvelope(first(0), last(0), first(1), last(1), CRS.decode(crs))
-    
+    val env = new ReferencedEnvelope(first(0), last(0), first(1), last(1), CRS.parseWKT(crs))
     val coverage = makeCoverage(raster, env)
     
     val writer = new org.geotools.gce.geotiff.GeoTiffWriter(file)
@@ -85,5 +74,7 @@ class GeoTiffWriter extends FileWriter {
     writer.dispose
     coverage.dispose(true)
   }
+  
+  override def mimeType = "image/tif"
 
 }
