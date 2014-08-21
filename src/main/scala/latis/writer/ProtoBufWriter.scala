@@ -5,6 +5,8 @@ import latis.dm._
 import java.nio.ByteOrder
 import java.nio.charset.Charset
 import java.io.DataOutputStream
+import scala.collection.mutable.ArrayBuilder
+import scala.collection.mutable.ArrayBuilder.ofByte
 
 /**
  * Writes the binary representation of the dataset corresponding to 
@@ -14,122 +16,91 @@ class ProtoBufWriter extends BinaryWriter {
   
   private lazy val writer = new DataOutputStream(getOutputStream)
   
+  override lazy val charset = Charset.forName("utf-8")
+  
   override def writeVariable(variable: Variable) = writer.write(varToBytes(variable))
   
   /**
-   * Allocates the correct amount of space to the ByteBuffer.
+   * Each variable type is handled in a different way
    */
-  override def varToBytes(variable: Variable): Array[Byte] = {
-    val bb = ByteBuffer.allocate(getBufSize(variable))
-    bb.order(ByteOrder.BIG_ENDIAN)
-    buildVariable(variable, bb)
-    val bytes = new Array[Byte](bb.position())
-    bb.flip.asInstanceOf[ByteBuffer].get(bytes)
-    bytes
+  override def varToBytes(variable: Variable): Array[Byte] = variable match {
+    case f: Function => makeFunction(f)
+    case s: Sample => makeSample(s)
+    case t: Tuple => makeTuple(t)
+    case s: Scalar => makeScalar(s)
   }
   
   /**
-   * Encode a scalar in the appropriate manner depending on type.
+   * Iterate through samples to get bytes
    */
-  override def buildScalar(scalar: Scalar, bb: ByteBuffer): ByteBuffer = {
+  def makeFunction(function: Function): Array[Byte] = {
+    val temp = tag
+    tag = 0
+    val bytes = function.iterator.map(varToBytes(_)).foldLeft(Array[Byte]())(_ ++_)
+    val len = bytes.length
+    tag = temp + 1
+    makeKey(tag, 2) ++ makeVarint(len) ++ bytes
+  }
+  
+  /**
+   * Much the same a MakeTuple, but does not add a key and length
+   */
+  def makeSample(sample: Sample): Array[Byte] = {
+    val temp = tag
+    tag = 0
+    val bytes = sample.getVariables.map(varToBytes(_)).toList
+    val len = bytes.map(_.length).sum
+    tag = temp
+    bytes.foldLeft(Array[Byte]())(_ ++ _)
+  }
+  
+  /**
+   * Get bytes for all of the tuple's variables, and prepend with key and length
+   */
+  def makeTuple(tuple: Tuple): Array[Byte] = {
+    val temp = tag
+    tag = 0
+    val bytes = tuple.getVariables.map(varToBytes(_)).toList
+    val len = bytes.map(_.length).sum
+    tag = temp + 1
+    bytes.foldLeft(makeKey(tag, 2) ++ makeVarint(len))(_ ++ _)
+  }
+  
+  /**
+   * Encode a scalar depending on type. 
+   */
+  def makeScalar(scalar: Scalar): Array[Byte] = {
     tag += 1
     scalar match {
-      case _: Index   => bb
-      case Integer(l) => buildVarint(l, buildKey(tag, 0, bb))
-      case Real(d)    => buildKey(tag, 1, bb).putDouble(d)
-      case Text(s)    => {
-        val charset = Charset.forName("utf-8")
-        buildVarint(s.length, buildKey(tag, 2, bb)).put(charset.encode(s).rewind.asInstanceOf[ByteBuffer])
-      }
-      case Binary(b)  => buildKey(tag, 2, bb).put(b)
+      case _: Index => Array[Byte]()
+      case Integer(l) => makeKey(tag, 0) ++ makeVarint(l)
+      case Real(d) => makeKey(tag, 1) ++ ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putDouble(d).array.take(8)
+      case Text(s) => makeKey(tag, 2) ++ makeVarint(s.length) ++ charset.encode(s).rewind.asInstanceOf[ByteBuffer].array.take(s.length)
+      case Binary(b) => makeKey(tag, 2) ++ b
     }
   }
   
   /**
-   * Ignore the sample and encode only the inner variables.
+   * Get the varint representation of a number as an array of bytes
    */
-  override def buildSample(sample: Sample, bb: ByteBuffer): ByteBuffer = {
-    val temp = tag
-    tag = 0
-    sample match {
-      case Sample(d, r: Tuple) => {
-        buildVariable(d, bb)
-        for(v <- r.getVariables) buildVariable(v, bb)
-      }
-      case _ => for(v <- sample.getVariables) buildVariable(v, bb)
-    }
-    tag = temp
-    bb
-  }
-  
-  /**
-   * Encodes the inner Variables with a prefix for the tuple.
-   */
-  override def buildTuple(tuple: Tuple, bb: ByteBuffer): ByteBuffer = {
-    val temp = tag
-    tag = 0
-    val aa = ByteBuffer.allocate(getBufSize(tuple))
-    for(v <- tuple.getVariables) buildVariable(v, aa)
-    tag = temp + 1
-    buildVarint(aa.position, buildKey(tag, 2, bb))
-    aa.flip
-    while(aa.hasRemaining) bb.put(aa.get)
-    bb
-  }
-  
-  /**
-   * Encodes the domain and range data with a function prefix.
-   */
-  override def buildFunction(function: Function, bb: ByteBuffer): ByteBuffer = {
-    val temp = tag
-    tag = 0
-    val aa = ByteBuffer.allocate(bb.capacity())
-    for(sample <- function.iterator) buildVariable(sample, aa)
-    tag = temp + 1
-    buildVarint(aa.position, buildKey(tag, 2, bb))
-    aa.flip
-    while(aa.hasRemaining) bb.put(aa.get)
-    bb
-  }
-  
-  /**
-   * Encode a number as a varint.
-   */
-  def buildVarint(long: Long, bb: ByteBuffer) = {
+  def makeVarint(long: Long): Array[Byte] = {
     var n = long
+    val ab = new ArrayBuilder.ofByte
     while((n & (~0x00<<7))!=0x00) {
-      bb.put(((n & 0x7F) | 0x80).toByte)
+      ab += (((n & 0x7F) | 0x80).toByte)
       n = n>>>7
     }
-    bb.put((n & 0x7f).toByte)
+    ab += ((n & 0x7f).toByte)
+    ab.result
   }
   
   /**
-   * Make a tag/type key encoded as a varint.
+   * Make a key given a tag and a type
    */
-  def buildKey(tag: Int, wtype: Int, bb: ByteBuffer) = {
-    buildVarint(((tag << 3) | wtype), bb)
+  def makeKey(tag: Int, wtype: Int) = {
+    makeVarint(((tag << 3) | wtype))
   }
   
-  /**
-   * The maximum bytes that a variable may require. 
-   */
-  def getBufSize(variable: Variable): Int = {
-    variable match {
-      case _: Index => 0
-      case r: Real => 8 + keySize
-      case i: Integer => 10 + keySize
-      case t: Text => t.getSize/2 + getBufSize(Integer(t.getSize/2)) + keySize
-      case _: Binary => variable.getMetadata("size") match {
-        case Some(l) => l.toInt + getBufSize(Integer(l.toInt)) + keySize
-        case None => throw new Error("Must declare length of Binary Variable.")
-      }
-      case Tuple(vars) => vars.map(getBufSize(_)).sum + getBufSize(Integer(vars.map(getBufSize(_)).sum)) + keySize
-      case f: Function => f.getLength * (getBufSize(f.getDomain) + getBufSize(f.getRange)) + getBufSize( Integer(f.getLength * (getBufSize(f.getDomain) + getBufSize(f.getRange))) ) + keySize
-    }
-  }
-  def keySize = if(tag<16) 1 else (2 + tag/2048)
-
   var tag = 0
   
 }

@@ -1,5 +1,4 @@
-{"function_of_functions_with_data_in_scalar": {
-"function_of_functions_with_data_in_scalar": [{"x": 0, "samples": [{"y": 10, "z": 0.0},
+{"function_of_functions_with_data_in_scalar": {"function_of_functions_with_data_in_scalar": [{"x": 0, "samples": [{"y": 10, "z": 0.0},
 {"y": 11, "z": 1.0},
 {"y": 12, "z": 2.0}]},
 {"x": 1, "samples": [{"y": 10, "z": 10.0},
@@ -10,5 +9,5 @@
 {"y": 12, "z": 22.0}]},
 {"x": 3, "samples": [{"y": 10, "z": 30.0},
 {"y": 11, "z": 31.0},
-{"y": 12, "z": 32.0}]}]
-}}
+{"y": 12, "z": 32.0}]}]}
+}

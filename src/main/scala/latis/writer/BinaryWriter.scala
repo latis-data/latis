@@ -5,6 +5,8 @@ import java.io.DataOutputStream
 import latis.dm._
 import java.nio.ByteOrder
 import java.nio.ByteBuffer
+import java.nio.charset.Charset
+import latis.util.StringUtils
 
 /**
  * 
@@ -14,6 +16,8 @@ class BinaryWriter extends Writer {
   //TODO: support byte order property, default to big-endian (network, java default)
   private val order = ByteOrder.BIG_ENDIAN
   //private val order = ByteOrder.LITTLE_ENDIAN
+
+  lazy val charset = Charset.forName("ISO-8859-1")
 
   private lazy val writer = new DataOutputStream(getOutputStream)
   
@@ -33,14 +37,20 @@ class BinaryWriter extends Writer {
   /**
    * Recursively build up a ByteBuffer
    */
-  def varToBytes(variable: Variable): Array[Byte] = {
-    val bb = ByteBuffer.allocate(variable.getSize) //potentially bigger than what we write (e.g. Index)
-    //set the byte order
-    bb.order(order)
-    buildVariable(variable, bb)
-    val bytes = new Array[Byte](bb.position())
-    bb.rewind.asInstanceOf[ByteBuffer].get(bytes)
-    bytes
+  def varToBytes(variable: Variable): Array[Byte] = variable match {
+    case function: Function => {
+      (for(s <- function.iterator) yield varToBytes(s)).foldLeft(Array[Byte]())(_ ++ _)
+    }
+    case t: Tuple => (for(v <- t.getVariables) yield varToBytes(v)).foldLeft(Array[Byte]())(_ ++ _)
+    case _ => {
+      val bb = ByteBuffer.allocate(variable.getSize) //potentially bigger than what we write (e.g. Index)
+      //set the byte order
+      bb.order(order)
+      buildVariable(variable, bb)
+      val bytes = new Array[Byte](bb.position())
+      bb.rewind.asInstanceOf[ByteBuffer].get(bytes)
+      bytes
+    }
   }
  
   def buildVariable(variable: Variable, bb: ByteBuffer): ByteBuffer = variable match {
@@ -54,7 +64,10 @@ class BinaryWriter extends Writer {
     case _: Index   => bb //don't write index
     case Integer(l) => bb.putLong(l)
     case Real(d)    => bb.putDouble(d)
-    case Text(s)    => bb.put(s.getBytes()) //??? //TODO: see JdbcAdapter
+    case Text(s)    => {
+      for(c <- StringUtils.padOrTruncate(s, scalar.getSize/2)) bb.putChar(c) //TODO: enforce charset? Is this using default charset?
+      bb//.put(charset.encode(StringUtils.padOrTruncate(s, scalar.getSize/2)).rewind.asInstanceOf[ByteBuffer]) //??? //TODO: see JdbcAdapter
+    }
     case Binary(b)  => bb.put(b)
   }
   

@@ -59,11 +59,11 @@ class BinaryAdapter(tsml: Tsml) extends IterativeAdapter[ByteBuffer](tsml) {
   }
   
   def extractPair(buffer: ByteBuffer, scalar: Scalar) = scalar match{
-    case _: Integer => (scalar.getName, Data(buffer.getDouble.toLong))
+    case _: Integer => (scalar.getName, Data(buffer.getLong))
     case _: Real => (scalar.getName, Data(buffer.getDouble))
     case t: Text => {
       val sb = new StringBuilder
-      for(a <- 0 to t.getSize) sb += buffer.get.asInstanceOf[Char]
+      for(a <- 0 until t.getSize/2) sb += buffer.getChar
       (scalar.getName, Data(StringUtils.padOrTruncate(sb.toString, t.length)))
     }
   }

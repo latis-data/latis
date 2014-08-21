@@ -5,6 +5,7 @@ import Assert._
 import latis.dm._
 import latis.metadata.Metadata
 import latis.data.SampledData
+import java.io.ByteArrayOutputStream
 
 class TestJsonWriter extends WriterTest {
 
@@ -48,6 +49,21 @@ class TestJsonWriter extends WriterTest {
   
   //@Test
   def empty_function = Writer.fromSuffix("json").write(TestDataset.empty_function)
+  
+  @Test
+  def multple_top_level_variables {
+    val r = Real(Metadata("myReal"), 3.14)
+    val t = Text(Metadata("myText"), "Hi")
+    val i = Integer(Metadata("myInt"), 3)
+    val ds = Dataset(List(r,t,i), Metadata("three_scalars"))
+    
+    //write to string then split on "," to make sure we got 3 components
+    val out = new ByteArrayOutputStream()
+    Writer(out, "json").write(ds)
+    val s = out.toString()
+    val ss = s.split(",")
+    assertEquals(3, ss.length) 
+  }
   
   //@Test
   def missing_value {

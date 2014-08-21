@@ -14,6 +14,16 @@ trait Variable {
   def getMetadata(name: String): Option[String] = getMetadata.get(name)
   def getData: Data
   
+//  /**
+//   * Get the model graph without data, including the current Variable
+//   * and it's descendants.
+//   */
+//  def getType: Variable = this match {
+//    case s: Scalar => s //TODO: copy without data
+//    case Tuple(vs) => Tuple(vs.map(_.getType), getMetadata)
+//    case f: Function => Function(f.getDomain.getType, f.getRange.getType, getMetadata)
+//  }
+  
   def getName: String
   
   def isNumeric: Boolean = getData.isInstanceOf[NumberData]

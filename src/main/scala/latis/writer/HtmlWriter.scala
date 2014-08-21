@@ -45,7 +45,7 @@ class HtmlWriter extends TextWriter {
     val sb = new StringBuilder
     sb append "\n<body>"
     sb append s"\n<h1>$name</h1>"
-    sb append makeInfo(dataset)
+    //sb append makeInfo(dataset)
     sb append dds(dataset)
     sb append das(dataset)
     //sb append image(dataset)
@@ -56,20 +56,20 @@ class HtmlWriter extends TextWriter {
     sb.toString
   }
   
-  /**
-   * Uses the InfoWriter to get a dataset description.
-   */
-  def makeInfo(dataset: Dataset): String = {
-    val sb = new StringBuilder
-    val w = new InfoWriter
-    val info = w.getInfo(dataset).toStringMap
-    sb append "\n<blockquote>"
-    sb append "\n<div class=\"info\">\n"
-    sb append w.makeDesc(info)
-    sb append "\n</div>"
-    sb append "\n</blockquote>"
-    sb.toString
-  }
+//  /**
+//   * Uses the InfoWriter to get a dataset description.
+//   */
+//  def makeInfo(dataset: Dataset): String = {
+//    val sb = new StringBuilder
+//    val w = new InfoWriter
+//    val info = w.getInfo(dataset).toStringMap
+//    sb append "\n<blockquote>"
+//    sb append "\n<div class=\"info\">\n"
+//    sb append w.makeDesc(info)
+//    sb append "\n</div>"
+//    sb append "\n</blockquote>"
+//    sb.toString
+//  }
   
   /**
    * Uses DdsWriter to show the structure of the dataset.

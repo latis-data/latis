@@ -1,7 +1,6 @@
-{"dap2": {
-"metadata": {"myTime": {
+{"metadata": {"myTime": {
 "alias": "time",
-"units": "yyyy/MM/dd",
+"units": "milliseconds since 1970-01-01",
 "length": "10",
 "type": "text"
 },
@@ -19,7 +18,7 @@
 "missing_value": "D",
 "long_name": "text"
 }},
-"data": [[0,1,1.1,"A"],
+"data": [[[0,1,1.1,"A"],
 [86400000,2,2.2,"B"],
-[172800000,null,3.3,"C"]]
-}}
+[172800000,null,3.3,"C"]]]
+}
