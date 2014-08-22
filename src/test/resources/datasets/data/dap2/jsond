@@ -1,4 +1,4 @@
-{"metadata": {"myTime": {
+{"dap2": {"metadata": {"myTime": {
 "alias": "time",
 "units": "milliseconds since 1970-01-01",
 "length": "10",
@@ -21,4 +21,4 @@
 "data": [[[0,1,1.1,"A"],
 [86400000,2,2.2,"B"],
 [172800000,null,3.3,"C"]]]
-}
+}}

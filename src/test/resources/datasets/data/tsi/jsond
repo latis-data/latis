@@ -1,4 +1,4 @@
-{"metadata": {"year": {
+{"tsi": {"metadata": {"year": {
 "long_name": "Year",
 "units": "milliseconds since 1970-01-01",
 "alias": "time"
@@ -410,4 +410,4 @@
 [1235736000000,1361.0833],
 [1267272000000,1361.348],
 [1298808000000,1361.511]]]
-}
+}}

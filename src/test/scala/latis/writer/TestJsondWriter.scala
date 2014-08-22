@@ -44,14 +44,15 @@ class TestJsondWriter extends WriterTest {
   @Test
   def units_metadata {
     val ds = TestDataset.canonical
-    //Writer.fromSuffix("jsond").write(ds)
     //Note: doesn't change ds model, need to test output
     //val units = ds.findVariableByName("time").get.getMetadata("units").get
     //assertEquals("milliseconds since 1970-01-01", units)
     
+    //convert dataset output to string
+    //TODO: utility method
     val out = new ByteArrayOutputStream()
     Writer(out, "jsond").write(ds)
-    val s = out.toString().replace('\n', ' ')
+    val s = out.toString().replace('\n', ' ') //new lines seem to complicate the regex
     
     val regex = """(.*units": ")([\w -]+)(".*)""".r
     val units = s match {
@@ -60,5 +61,28 @@ class TestJsondWriter extends WriterTest {
     }
     assertEquals("milliseconds since 1970-01-01", units)
     
+  }
+  
+  @Test 
+  def dataset_name {
+    val ds = TestDataset.canonical
+    
+    val out = new ByteArrayOutputStream()
+    Writer(out, "jsond").write(ds)
+    val s = out.toString().replace('\n', ' ')
+    
+    val regex = """(^\{")([\w]+)(".*)""".r
+    val dsname = s match {
+      case regex(_, name, _) => name
+      case _ => fail
+    }
+    
+    assertEquals("canonical", dsname)
+  }
+  
+  //@Test
+  def test {
+    val ds = getDataset(tof)
+    Writer.fromSuffix("jsond").write(ds)
   }
 }

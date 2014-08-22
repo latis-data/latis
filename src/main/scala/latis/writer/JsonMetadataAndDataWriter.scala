@@ -11,22 +11,36 @@ import latis.dm.Dataset
 import scala.collection.mutable.ArrayBuffer
 
 class JsonMetadataAndDataWriter extends JsonWriter {
-  //TODO: refactor to reuse these pieces from Metadata and CompactJson Writers
+  //TODO: refactor to reuse these pieces from Metadata and CompactJson Writers which are rapidly becoming obsolete
     
   /**
    * Override to insert metadata.
    */
   override def makeHeader(dataset: Dataset) = {
-    val sb = new StringBuffer(super.makeHeader(dataset))
+    //Hack in the dataset name. We lost this when treating dataset as a Tuple in JsonWriter
+    val sb = new StringBuffer("{\"" + dataset.getName + "\": ")
+    
+    //add usual json header ({)
+    sb append super.makeHeader(dataset)
 
     //assume single top level function
     val function = dataset.findFunction.get
+    
+    //Create the metadata content
     sb append "\"metadata\": {" //metadata object label
     sb append mdvarToString(Sample(function.getDomain, function.getRange)) //metadata
     sb append "},\n"
+    
     sb append "\"data\": " //start data object
     
     sb.toString
+  }
+  
+  /**
+   * Override to close extra "{" that we added in the header.
+   */
+  override def makeFooter(dataset: Dataset) = {
+    super.makeFooter(dataset) + "}"
   }
   
   //=== below mod'd from MetadataWriter
