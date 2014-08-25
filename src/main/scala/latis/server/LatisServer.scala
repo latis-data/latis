@@ -38,8 +38,8 @@ class LatisServer extends HttpServlet with Logging {
 
       //Get the dataset name and type of the output request from the dataset suffix.
       val index = path.lastIndexOf(".");
-      val suffix = path.substring(index + 1); //suffix for Writer
-      val dsname = path.substring(1, index); //dataset name, drop leading "/"
+      val suffix = if(index < 0) "html" else path.substring(index + 1); //suffix for Writer
+      val dsname = if(index < 0) path.substring(1) else path.substring(1, index); //dataset name, drop leading "/"
 
       //Get the URL to the Dataset's TSML descriptor.
       logger.debug("Locating dataset: " + dsname)

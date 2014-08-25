@@ -82,7 +82,7 @@ class TestJsondWriter extends WriterTest {
   
   //@Test
   def test {
-    val ds = getDataset(tof)
+    val ds = getDataset("dap2")
     Writer.fromSuffix("jsond").write(ds)
   }
 }

@@ -43,4 +43,9 @@ class TestMetadataWriter extends WriterTest{
     write_to_file(fof, "meta")
   }
   
+  //@Test
+  def test {
+    val ds = getDataset(tof) //TestDataset.canonical
+    Writer.fromSuffix("meta").write(ds)
+  }
 }
