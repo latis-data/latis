@@ -29,7 +29,8 @@ class HtmlWriter extends TextWriter {
     sb.toString
   }
 
-  val scripts = "<script type=\"text/javascript\" src=\"http://lasp.colorado.edu/lisird/tss/resources/tss.js\"></script>"
+  val scripts = "\n<script type=\"text/javascript\" src=\"http://lasp.colorado.edu/lisird/tss/resources/tss.js\"></script>" +
+                "\n<script type=\"text/javascript\" src=\"http://dygraphs.com/dygraph-combined.js\"></script>"
 
   val style = "\n<link rel=\"stylesheet\" type=\"text/css\" href=\"http://lasp.colorado.edu/lisird/tss/resources/tss.css\">"  
     
@@ -46,9 +47,9 @@ class HtmlWriter extends TextWriter {
     sb append "\n<body>"
     sb append s"\n<h1>$name</h1>"
     //sb append makeInfo(dataset)
+    sb append makeDygraph(dataset)
     sb append dds(dataset)
     sb append das(dataset)
-    //sb append image(dataset)
     sb append queryForms(dataset)
     
     sb append "\n</body>"
@@ -70,6 +71,20 @@ class HtmlWriter extends TextWriter {
 //    sb append "\n</blockquote>"
 //    sb.toString
 //  }
+  
+  def makeDygraph(dataset: Dataset): String = {
+    val name = dataset.getName
+    val sb = new StringBuilder
+    sb append "\n<div id=\"graphdiv\"></div>"
+    sb append "\n<script type=\"text/javascript\">"
+    sb append "\ng = new Dygraph("
+    sb append "\ndocument.getElementById(\"graphdiv\"),"
+    sb append "\n\"" + name + ".csv\""
+    //sb append "\n{}"
+    sb append "\n);"
+    sb append "\n</script>"
+    sb.result
+  }
   
   /**
    * Uses DdsWriter to show the structure of the dataset.
