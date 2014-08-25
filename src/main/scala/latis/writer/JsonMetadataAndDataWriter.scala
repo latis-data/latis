@@ -18,7 +18,9 @@ class JsonMetadataAndDataWriter extends JsonWriter {
    */
   override def makeHeader(dataset: Dataset) = {
     //Hack in the dataset name. We lost this when treating dataset as a Tuple in JsonWriter
-    val sb = new StringBuffer("{\"" + dataset.getName + "\": ")
+    //"{\"" + dataset.getName + "\": "
+    
+    val sb = new StringBuffer()
     
     //add usual json header ({)
     sb append super.makeHeader(dataset)
@@ -36,12 +38,12 @@ class JsonMetadataAndDataWriter extends JsonWriter {
     sb.toString
   }
   
-  /**
-   * Override to close extra "{" that we added in the header.
-   */
-  override def makeFooter(dataset: Dataset) = {
-    super.makeFooter(dataset) + "}"
-  }
+//  /**
+//   * Override to close extra "{" that we added in the header.
+//   */
+//  override def makeFooter(dataset: Dataset) = {
+//    super.makeFooter(dataset) + "}"
+//  }
   
   //=== below mod'd from MetadataWriter
   

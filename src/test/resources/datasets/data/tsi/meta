@@ -1,4 +1,5 @@
-{"year": {
+{"tsi": {
+"year": {
 "long_name": "Year",
 "units": "years since 0000-01-01",
 "alias": "time"
@@ -6,5 +7,4 @@
 "tsi": {
 "long_name": "Total Solar Irradiance",
 "units": "W/m^2"
-}
-}
+}}}
