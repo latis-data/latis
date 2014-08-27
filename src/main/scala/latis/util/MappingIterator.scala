@@ -24,8 +24,14 @@ class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) ext
   @tailrec final protected def getNext: T = {
     if (! iterator.hasNext) null
     else {
-      //apply the operation
-      f(iterator.next) match {
+      //Apply the operation. Skip element if there is an Exception.
+      val result = try {
+        f(iterator.next)
+      } catch {
+        case e: Exception => None //TODO: log warning?
+      }
+      
+      result match {
         case Some(t) => t
         case None => getNext //invalid value, try another
       }
