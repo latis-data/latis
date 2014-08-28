@@ -136,6 +136,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) {
   def extractValues(record: String): Seq[String] = record.trim.split(getDelimiter)
 
   //TODO: reuse, dataUtils?
+  //TODO: support regex property for each variable
   def parseStringValue(value: String, variableTemplate: Variable): Data = variableTemplate match {
     case _: Integer => try {
       Data(value.trim.toLong)
