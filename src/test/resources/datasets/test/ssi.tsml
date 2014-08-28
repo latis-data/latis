@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="ssi">
+    <adapter class="latis.reader.tsml.SsiAdapter"
+             location="/home/jast1399/git/LaTiS/src/test/resources/datasets/test/ssi/" />
+    
+    <function>
+      <real name="a"/>
+      <real name="b"/>
+      <real name="c"/>
+    </function>
+    
+  </dataset>
+
+</tsml>
