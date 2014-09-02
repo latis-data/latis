@@ -107,6 +107,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     
     //Add tsml attributes for the variable element to attributes from the metadata element.
     //TODO: deprecate, reserve vml attributes for config options for the adapter?
+    //      if there is a metadata element, add only name from attributes 
     var atts = vml.getAttributes ++ vml.getMetadataAttributes
     
     //internal helper method to add default name for special variable types
