@@ -75,4 +75,23 @@ class TestTime {
   //@Test def int_type_without_units = ???
   //@Test def int_type_with_invalid_units = ???
   
+  //@Test 
+  def time_as_tuple {
+//timed_see_ssi_l3a
+//    <time units="yyyyDDD ???"/>
+//      <text name="DATE" />
+//      <real name="TIME" units="seconds"/>
+//    </time>
+    //TODO: start with date+time only?
+    //as many text elements as needed: yyyy, mm, dd, hh...
+    //append text vars in order (comma delim?)
+    //always convert to java ms? or only if there is a numeric component?
+    //add numeric component, converted to ms
+    val d = Text(Metadata("Date"), "2014-01-01")
+    val t = Real(Metadata(Map("name" -> "Time", "units" -> "seconds")), 123.0)
+    //val time = Time(List(d,t), Metadata(Map("units" -> "seconds")))
+    
+    
+  }
+  
 }

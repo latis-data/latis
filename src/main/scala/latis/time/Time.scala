@@ -207,6 +207,28 @@ object Time {
   def apply(value: AnyVal): Time = Time(TimeScale.DEFAULT, value)
   
   def apply(date: Date): Time = Time(date.getTime())
+  
+  /*
+   * TODO: Time as Tuple. 
+   * But Time extends Scalar.
+   * Always convert to scalar?
+   * How to use as type without data, then apply data? 
+   *   have been avoiding letting tuple contain data
+   * use case: timed see netcdf, DATE (yyyyDDD) and TIME (seconds)
+   *   data end up in column oriented cache
+   *   can't make a scalar type for the template that can pull in multiple values
+   * 
+   * can tuple still play as a scalar?
+   *   compare to magnetic field magnitude
+   *   compare to value and uncertainty tuple
+   *   compare to bin average with min, max...
+   *   always use 1st element of tuple in scalar context?
+   * Derived field?
+   *   operation
+   * 
+   * Combine all text components delimited with comma.
+   * Add numeric component, converted to ms
+   */
 
 //  def apply(md: Metadata, value: String): Time = {
 //    md.get("units") match {
