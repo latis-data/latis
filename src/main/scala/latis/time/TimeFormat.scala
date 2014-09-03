@@ -34,4 +34,48 @@ object TimeFormat {
   
   def apply(format: String): TimeFormat = new TimeFormat(format)
   
+  
+  def fromIsoValue(s: String): TimeFormat = {
+    val (date, delim, time) = splitDateTime(s)
+    val dateFormat = getDateFormatString(date)
+    val timeFormat = getTimeFormatString(time)
+    val format = dateFormat + delim + timeFormat
+    new TimeFormat(format)
+  }
+  
+  private def splitDateTime(s: String): (String,String,String) = {
+    //need delimiter so we can reconstruct
+    val delim = if (s.contains("T")) "'T'" //need to put literal in quotes for TimeFormat
+    else if (s.contains(" ")) " "
+    else ""
+    //splitting on 'T' or space
+    val ss = s.split("[T ]")
+    if (ss.length == 2) (ss(0), delim, ss(1))  // date, time pair
+    else (ss(0), delim, "")  //date only
+  }
+  
+  private def getDateFormatString(s: String): String = s.length match {
+    case 4  => "yyyy"
+    case 6  => "yyMMdd"  //Note, yyyyMM not iso compliant
+    case 7  => {
+      if (s.contains("-")) "yyyy-MM"
+      else "yyyyDDD"
+    }
+    case 8  => {
+      if (s.contains("-")) "yyyy-DDD"
+      else "yyyyMMdd"
+    }
+    case 10 => "yyyy-MM-dd"
+  }
+  
+  private def getTimeFormatString(s: String): String = s.length match {
+    case 0 => ""
+    case 2 => "HH"
+    case 4 => "HHmm"
+    case 5 => "HH:mm"
+    case 6 => "HHmmss"
+    case 8 => "HH:mm:ss"
+    //TODO: fraction of sec? or just milliseconds?
+    //TODO: allow fraction of any trailing value (e.g. year + fraction of year). Not iso but handy
+  }
 }

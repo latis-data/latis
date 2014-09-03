@@ -14,7 +14,7 @@ class TestTime {
     assertEquals(0, ms)
   }
   
-  //@Test
+  @Test
   //TODO: not supported by javax.xml.bind.DatatypeConverter.parseDateTime
   def iso_without_T_to_millis {
     val ms = Time.isoToJava("1970-01-01 00:00:00")
@@ -27,14 +27,20 @@ class TestTime {
     assertEquals(0, ms)
   }
   
- //TODO: this is taking "001" as the month! @Test
+ @Test
   def ordinal_date {
     val ms = Time.isoToJava("1970-001")
     assertEquals(0, ms)
   }
+ 
+ @Test
+  def ordinal_date_not_month {
+    //javax.xml.bind.DatatypeConverter interprets day of year as month
+    val ms = Time.isoToJava("1970-002")
+    assertEquals(86400000, ms)
+  }
   
-  //@Test
-  //TODO: not supported by javax.xml.bind.DatatypeConverter.parseDateTime
+  @Test
   def ordinal_date_with_time {
     val ms = Time.isoToJava("1970-001T00:00:00")
     assertEquals(0, ms)
