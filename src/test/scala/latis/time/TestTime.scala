@@ -27,6 +27,19 @@ class TestTime {
     assertEquals(0, ms)
   }
   
+  @Test
+  def ordinal_date {
+    val ms = Time.isoToJava("1970-001")
+    assertEquals(0, ms)
+  }
+  
+  //@Test
+  //TODO: not supported by javax.xml.bind.DatatypeConverter.parseDateTime
+  def ordinal_date_with_time {
+    val ms = Time.isoToJava("1970-001T00:00:00")
+    assertEquals(0, ms)
+  }
+  
   //TODO: test other flavors, with time zone,...
 
   
