@@ -148,29 +148,26 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       true
     }
 
-    case sel: Selection =>
-      val expression = sel.toString; expression match {
-        //Break expression up into components
-        case SELECTION.r(name, op, value) => {
-          if (name == "time") handleTimeSelection(op, value) //special handling for "time"
-          //TODO: handle other Time variables (dependent)
-          else if (getOrigScalarNames.contains(name)) { //other variable (not time), even if not projected
-            //TODO: quote text values, or expect selection to be that way?
-            //we may want to do that for the same reason sql does: value could be a variable as opposed to a literal
-
-            //add a selection to the sql, may need to change operation
-            op match {
-              case "==" =>
-                selections append name + "=" + value; true
-              case "=~" =>
-                selections append name + " like '%" + value + "%'"; true
-              case "~" => false //almost equal (e.g. nearest sample) not supported by sql
-              case _ => selections append expression; true
-            }
-          } else false //doesn't apply to our variables, so leave it for the next handler
+    case sel @ Selection(name, op, value) => getOrigDataset.findVariableByName(name) match {
+      case Some(v) if (v.isInstanceOf[Time]) => handleTimeSelection(name, op, value)
+      case Some(v) if (getOrigScalarNames.contains(name)) => {
+        //add a selection to the sql, may need to change operation
+        op match {
+          case "==" =>
+            selections append name + "=" + value; true
+          case "=~" =>
+            selections append name + " like '%" + value + "%'"; true
+          case "~" => false //almost equal (e.g. nearest sample) not supported by sql
+          case _ => selections append sel.toString; true
         }
-        //TODO: case _ => doesn't match selection regex, error
       }
+      case _ => {
+        //Let LaTiS operations deal with constraints on index
+        if (name == "index") false
+        //This is not one of our variables. Err on the side of assuming this is a user mistake.
+        else throw new Error("JdbcAdapter can't process selection for unknown parameter: " + name)
+      }
+    }
 
     case _: FirstFilter =>
       first = true; true
@@ -186,16 +183,16 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   /**
    * Special handling for a time selection since there are various formatting issues.
    */
-  def handleTimeSelection(op: String, value: String): Boolean = {
+  def handleTimeSelection(vname: String, op: String, value: String): Boolean = {
     //support ISO time string as value
-    //TODO: assumes value is ISO, what if dataset does have a var named "time" with other units?
 
-    //this should work because any time variable should have the alias "time"
-    val tvar = getOrigDataset.findVariableByName("time") match {
-      case Some(t) => t
-      case None => throw new Error("No time variable found in dataset.")
+    //Get the Time variable with the given name
+    val tvar = getOrigDataset.findVariableByName(vname) match {
+      case Some(t: Time) => t
+      case _ => throw new Error("Time variable not found in dataset.")
     }
     val tvname = tvar.getName //original name which should match database column
+    //TODO: consider implications of rename, apply after this? consider "origName"?
 
     tvar.getMetadata("type") match {
       case Some("text") => {
@@ -203,22 +200,23 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
         //Parse value into a Time then format consistent with java.sql.Timestamp.toString: yyyy-mm-dd hh:mm:ss.fffffffff
         //This should also treat the time as GMT. (Timestamp has internal Gregorian$Date which has the local time zone.)
         val time = Time.fromIso(value).format("yyyy-MM-dd HH:mm:ss.SSS")
-        selections += tvname + op + "'" + time + "'"
+        selections += tvname + op + "'" + time + "'"  //sql wants quotes around time value
         true
       }
       case _ => tvar.getMetadata("units") match {
-        case None => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
+        //case None => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
+        //TODO: we haven't established that these aren't native units
+        case None => throw new Error("The dataset does not have time units defined for: " + tvname)
         //Note, The Time constructor will provide default units (ISO) if none are defined in the tsml.
         case Some(units) => {
           //convert ISO time selection value to dataset units
-          //regex ensures that the value is a valid ISO time
-          RegEx.TIME.r findFirstIn value match {
-            case Some(s) => {
-              val t = Time.fromIso(s).convert(TimeScale(units)).getValue
-              this.selections += tvname + op + t
-              true
-            }
-            case None => throw new Error("The time value is not in a supported ISO format: " + value)
+          try {
+            val t = Time.fromIso(value).convert(TimeScale(units)).getValue
+            this.selections += tvname + op + t
+            true
+          } catch {
+            case iae: IllegalArgumentException => throw new Error("The time value is not in a supported ISO format: " + value)
+            case e: Exception => throw new Error("Unable to parse time selection: " + value +". " + e.getMessage)
           }
         }
       }

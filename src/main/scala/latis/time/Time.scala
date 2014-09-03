@@ -79,6 +79,13 @@ object Time {
   //TODO: make sure format is valid
   
   def isoToJava(s: String): Long = {
+    /*
+     * Supported formats include:
+     * yyyy-MM-dd
+     * yyyy-MM-ddTHH:mm:ss
+     * yyyy-MM-ddTHH:mm:ss.S (unlimited decimal places)
+     * yyyy-DDD (but not with time component!?
+     */
     val cal = javax.xml.bind.DatatypeConverter.parseDateTime(s)
     cal.setTimeZone(TimeZone.getTimeZone("GMT")) //Assume UTC. //TODO: support other time zones?
     cal.getTimeInMillis()
@@ -207,6 +214,28 @@ object Time {
   def apply(value: AnyVal): Time = Time(TimeScale.DEFAULT, value)
   
   def apply(date: Date): Time = Time(date.getTime())
+  
+  /*
+   * TODO: Time as Tuple. 
+   * But Time extends Scalar.
+   * Always convert to scalar?
+   * How to use as type without data, then apply data? 
+   *   have been avoiding letting tuple contain data
+   * use case: timed see netcdf, DATE (yyyyDDD) and TIME (seconds)
+   *   data end up in column oriented cache
+   *   can't make a scalar type for the template that can pull in multiple values
+   * 
+   * can tuple still play as a scalar?
+   *   compare to magnetic field magnitude
+   *   compare to value and uncertainty tuple
+   *   compare to bin average with min, max...
+   *   always use 1st element of tuple in scalar context?
+   * Derived field?
+   *   operation
+   * 
+   * Combine all text components delimited with comma.
+   * Add numeric component, converted to ms
+   */
 
 //  def apply(md: Metadata, value: String): Time = {
 //    md.get("units") match {

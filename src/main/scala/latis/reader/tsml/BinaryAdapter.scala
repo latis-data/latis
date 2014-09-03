@@ -1,16 +1,17 @@
 package latis.reader.tsml
 
-import latis.reader.tsml.ml.Tsml
 import java.nio.ByteBuffer
-import scala.io.Source
-import latis.data.Data
-import scala.collection.mutable.Builder
+
 import scala.collection.mutable.ListBuffer
-import latis.dm.Scalar
+import scala.io.Source
+
+import latis.data.Data
 import latis.dm.Integer
 import latis.dm.Real
-import latis.util.StringUtils
+import latis.dm.Scalar
 import latis.dm.Text
+import latis.reader.tsml.ml.Tsml
+import latis.util.StringUtils
 
 class BinaryAdapter(tsml: Tsml) extends IterativeAdapter[ByteBuffer](tsml) {
   
