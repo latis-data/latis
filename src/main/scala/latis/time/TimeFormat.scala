@@ -76,7 +76,11 @@ object TimeFormat {
     case 5 => "HH:mm"
     case 6 => "HHmmss"
     case 8 => "HH:mm:ss"
-    case _ => throw new IllegalArgumentException("Failed to determine a time format for " + s)
+    case _ => "HH:mm:ss.SSS" 
+       //TODO: investigate how forgiving the number of decimal points are.
+      //  appears that 0.0010 is taken to be 10 ms !?
+      
+      //throw new IllegalArgumentException("Failed to determine a time format for " + s)
     //TODO: fraction of sec? or just milliseconds?
     //TODO: allow fraction of any trailing value (e.g. year + fraction of year). Not iso but handy
   }
