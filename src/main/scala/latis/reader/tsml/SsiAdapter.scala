@@ -19,14 +19,14 @@ class SsiAdapter(tsml: Tsml) extends TsmlAdapter(tsml){
   override def init {
     for (v <- getOrigScalars) {
       val vname = v.getName
-      val location = getUrl.toString + vname + ".dat"
+      val location = getUrl.getPath + vname + ".bin"
       val file = new File(location)
       //Some names contain "." which findVariable will interpret as a structure member
       //NetCDF library dropped NetcdfFile.escapeName between 4.2 and 4.3 so replicate with what it used to do.
       //TODO: replace with "_"?
       //val escapedName = EscapeStrings.backslashEscape(vname, ".") 
       //val vname = vname.replaceAll("""\.""", """\\.""")
-      val is = new DataInputStream(new FileInputStream(location))
+      val is = new DataInputStream(new FileInputStream(file))
       val arr = Array.ofDim[Byte](file.length.toInt)
       is.readFully(arr)
       val bb = ByteBuffer.wrap(arr)

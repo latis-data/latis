@@ -3,14 +3,17 @@
 
   <dataset name="ssi">
     <adapter class="latis.reader.tsml.SsiAdapter"
-             location="/home/jast1399/git/LaTiS/src/test/resources/datasets/test/ssi/" />
+             location="datasets/test/ssi/" />
     
     <function>
-      <real name="a"/>
-      <real name="b"/>
-      <real name="c"/>
-    </function>
-    
+      <integer name="a"/>
+      
+      <function>
+        <integer name="b"/>
+        <integer name="c"/>
+      </function>
+      
+    </function> 
   </dataset>
 
 </tsml>
