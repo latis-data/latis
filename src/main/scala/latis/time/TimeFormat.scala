@@ -66,6 +66,7 @@ object TimeFormat {
       else "yyyyMMdd"
     }
     case 10 => "yyyy-MM-dd"
+    case _ => throw new IllegalArgumentException("Failed to determine a date format for " + s)
   }
   
   private def getTimeFormatString(s: String): String = s.length match {
@@ -75,6 +76,7 @@ object TimeFormat {
     case 5 => "HH:mm"
     case 6 => "HHmmss"
     case 8 => "HH:mm:ss"
+    case _ => throw new IllegalArgumentException("Failed to determine a time format for " + s)
     //TODO: fraction of sec? or just milliseconds?
     //TODO: allow fraction of any trailing value (e.g. year + fraction of year). Not iso but handy
   }
