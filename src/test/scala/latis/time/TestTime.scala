@@ -42,8 +42,8 @@ class TestTime {
   
   @Test
   def ordinal_date_with_time {
-    val ms = Time.isoToJava("1970-001T00:00:00")
-    assertEquals(0, ms)
+    val ms = Time.isoToJava("1970-001T00:00:01")
+    assertEquals(1000, ms)
   }
   
   //TODO: test other flavors, with time zone,...
