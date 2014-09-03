@@ -80,16 +80,21 @@ object Time {
   
   def isoToJava(s: String): Long = {
     /*
-     * Supported formats include:
+     * javax.xml.bind.DatatypeConverter supported formats include:
+     * yyyy
+     * yyyy-MM
      * yyyy-MM-dd
      * yyyy-MM-ddTHH:mm:ss
      * yyyy-MM-ddTHH:mm:ss.S (unlimited decimal places)
-     * yyyy-DDD (but not with time component!?
      */
-    val cal = javax.xml.bind.DatatypeConverter.parseDateTime(s)
-    cal.setTimeZone(TimeZone.getTimeZone("GMT")) //Assume UTC. //TODO: support other time zones?
-    cal.getTimeInMillis()
+//    val cal = javax.xml.bind.DatatypeConverter.parseDateTime(s)
+//    cal.setTimeZone(TimeZone.getTimeZone("GMT")) //Assume UTC. //TODO: support other time zones?
+//    cal.getTimeInMillis()
+    
+    TimeFormat.fromIsoValue(s).parse(s)
   }
+  
+
   
   //may have no data, used as a template in adapters
 //  def apply(md: Metadata, data: Data = EmptyData): Time = {
