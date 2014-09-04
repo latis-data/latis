@@ -118,6 +118,17 @@ class TestTime {
     //append text vars in order (comma delim?)
     //always convert to java ms? or only if there is a numeric component?
     //add numeric component, converted to ms
+    /*
+     * can we use the tuple representation in the model (1st pass) then convert to scalar as we parse data?
+     * how attached are we to the idea of Time being a scalar?
+     *   domain tuple arity is a handy indicator of number of dimensions
+     *   (date,time) would be a 1D manifold in this case?
+     *   some data tables are 2D (year,month)
+     * derived field?
+     *   date and time could be in range, groupBy time after
+     *   just a sum
+     * consider how columnar adapter can stitch diff vars together
+     */
     val d = Text(Metadata("Date"), "2014-01-01")
     val t = Real(Metadata(Map("name" -> "Time", "units" -> "seconds")), 123.0)
     //val time = Time(List(d,t), Metadata(Map("units" -> "seconds")))
