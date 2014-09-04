@@ -56,8 +56,8 @@ class SsiAdapter(tsml: Tsml) extends TsmlAdapter(tsml){
       
       //Store data based on the type of varible as defined in the tsml
       val datas = v match {
-        case i: Integer => (0 until n).map(bb.getLong(_)).map(Data(_))
-        case r: Real    => (0 until n).map(bb.getDouble(_)).map(Data(_))
+        case i: Integer => (0 until n).map(i => bb.getLong()).map(Data(_))
+        case r: Real    => (0 until n).map(i => bb.getDouble()).map(Data(_))
 //        case t: Text    => (0 until n).map(bb.getObject(_)).map(o => Data(o.toString))
       }
       
