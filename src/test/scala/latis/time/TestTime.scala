@@ -19,6 +19,12 @@ class TestTime {
     val ms = Time.isoToJava("1970-01-01T00:00:00.001")
     assertEquals(1, ms)
   }
+
+  @Test
+  def iso_with_millis_to_millis_withZ {
+    val ms = Time.isoToJava("1970-01-01T00:00:00.001Z")
+    assertEquals(1, ms)
+  }
   
   @Test
   //TODO: not supported by javax.xml.bind.DatatypeConverter.parseDateTime
