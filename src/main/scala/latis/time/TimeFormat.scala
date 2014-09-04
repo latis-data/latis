@@ -72,9 +72,9 @@ object TimeFormat {
     /*
      * TODO: handle time zone:
      * <time>Z
-     * <time>±hh:mm
-     * <time>±hhmm 
-     * <time>±hh
+     * <time>+/-hh:mm
+     * <time>+/-hhmm 
+     * <time>+/-hh
      */
     //make sure we match times with "Z" for now
     val length = s.indexOf("Z") match {
