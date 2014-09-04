@@ -46,6 +46,8 @@ class DataSeq extends IterableData {
     if (that.length != this.length) throw new Error("zip requires both DataSeq-s to be the same length")
     DataSeq((this.datas zip that.datas).map(p => p._1.concat(p._2)))
   }
+  
+  //override def toSeq: Seq[Data] = datas.toList
 }
 
 object DataSeq {
