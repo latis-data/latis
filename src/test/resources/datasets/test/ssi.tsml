@@ -5,10 +5,10 @@
     <adapter class="latis.reader.tsml.SsiAdapter"
              location="datasets/test/ssi/" />
     
-    <function>
+    <function length="3">
       <integer name="a"/>
       
-      <function>
+      <function length="3">
         <integer name="b"/>
         <integer name="c"/>
       </function>
