@@ -29,7 +29,8 @@ dependencies {
     compile "javax.servlet:servlet-api:2.5"
     
     compile 'org.scala-lang:scala-library:2.10.4'
-    //compile 'org.scala-lang:scala-library:2.11.2' //need to fix xml dependency (LATIS-174)
+    //compile 'org.scala-lang:scala-xml:2.11.+ //+ not working
+    //compile 'org.scala-lang:scala-library:2.11.2'
     //scalaCompiler "org.scala-lang:scala-compiler:2.10"
     //scalaLibrary "org.scala-lang:scala-library:2.10"
     
