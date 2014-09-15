@@ -26,7 +26,7 @@ class WriterTest extends Logging {
     val name = ds.getName
     Writer(fos,suffix).write(ds)
     fos.close()
-    val s = Source.fromFile(tmpFile).getLines
+    val s = Source.fromFile(tmpFile, "ISO-8859-1").getLines
     val t = Source.fromFile(s"src/test/resources/datasets/data/$name/$suffix").getLines
     while(t.hasNext) assertEquals(suffix + " writer failed for " + name, t.next, s.next)
     assert(s.isEmpty)
