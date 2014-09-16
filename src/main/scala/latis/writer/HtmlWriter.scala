@@ -74,14 +74,18 @@ class HtmlWriter extends TextWriter {
   
   def makeDygraph(dataset: Dataset): String = {
     val name = dataset.getName
+    val function = dataset.findFunction.get
     val sb = new StringBuilder
     sb append "\n<div id=\"graphdiv\"></div>"
     sb append "\n<script type=\"text/javascript\">"
     sb append "\ng = new Dygraph("
     sb append "\ndocument.getElementById(\"graphdiv\"),"
-    sb append "\n\"" + name + ".csv\""
-    //sb append "\n{}"
-    sb append "\n);"
+    sb append "\n\"" + name + ".csv\","
+    sb append "\n{"
+    sb append "\ndelimiter: ',',"
+    sb append "\nxlabel: '" + function.getDomain.getName + "',"
+    sb append "\nylabel: '" + function.getRange.getName + "',"
+    sb append "\n});"
     sb append "\n</script>"
     sb.result
   }

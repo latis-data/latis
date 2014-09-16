@@ -2,16 +2,24 @@
 <html lang="en-us">
 <head>
 <title>tuple_of_functions</title>
-<link rel="stylesheet" type="text/css" href="http://lasp.colorado.edu/lisird/tss/resources/tss.css"><script type="text/javascript" src="http://lasp.colorado.edu/lisird/tss/resources/tss.js"></script>
+<link rel="stylesheet" type="text/css" href="http://lasp.colorado.edu/lisird/tss/resources/tss.css">
+<script type="text/javascript" src="http://lasp.colorado.edu/lisird/tss/resources/tss.js"></script>
+<script type="text/javascript" src="http://dygraphs.com/dygraph-combined.js"></script>
 </head>
 
 <body>
 <h1>tuple_of_functions</h1>
-<blockquote>
-<div class="info">
-No description available
-</div>
-</blockquote>
+<div id="graphdiv"></div>
+<script type="text/javascript">
+g = new Dygraph(
+document.getElementById("graphdiv"),
+"tuple_of_functions.csv",
+{
+delimiter: ',',
+xlabel: 'myInt0',
+ylabel: 'myReal0',
+});
+</script>
 <div class="dds">
 <h2>Dataset Descriptor Structure</h2><blockquote>Dataset {
     Structure {
