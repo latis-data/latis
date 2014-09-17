@@ -49,6 +49,15 @@ trait Data extends Any {
    */
   def concat(data: Data) = Data(this.getBytes ++ data.getBytes)
 
+  /**
+   * Debug method to see what values are in a Data object. Assumes doubles.
+   */
+  def writeDoubles = {
+    val bb = getByteBuffer.rewind.asInstanceOf[ByteBuffer]
+    val db = bb.asDoubleBuffer
+    val n = db.limit
+    for (i <- 0 until n) println(db.get(i))
+  }
   
   /*
    * TODO: is byte buffer equality sufficient?
