@@ -37,6 +37,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
         } else {
           //get length from iterator
           //TODO: IterableOnce problem, cache?
+          logger.debug("Using iterator to get length of Function " + this)
           iterator.length
         }
       }
@@ -75,6 +76,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   def getDataIterator: Iterator[SampleData] = {
     val d = getData
     if (d.isEmpty) {
+      //Data is presumably already dispersed throughout model, in Scalars
       //TODO: try to avoid this, not efficient
       logger.debug("Make Data Iterator from existing Sample Iterator: " + this)
       new MappingIterator(_iterator, (s: Sample) => Some(DataUtils.sampleToData(s)))
