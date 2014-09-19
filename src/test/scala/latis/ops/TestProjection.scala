@@ -94,21 +94,46 @@ class TestProjection {
     assertEquals(2, n)
   }
   
-  //@Test
+  @Test
   def project_scalar_in_function_function_range {
-    //val f = Function(Real(Metadata("t")), Function(Real(Metadata("w")), Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))))
     val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
     val proj = new Projection(List("t","w","a")) 
     val ds2 = proj(ds1)
- AsciiWriter.write(ds2)
     val n = ds2.getVariables(0).asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
     assertEquals(1, n)
-    //println(ds)
-    /*
-     * Projection.applyToFunction is being applied to both inner and outer
-     * make map out of function's data but inner F might not have any
-     * 
-     */
+  }
+  
+  @Test
+  def project_all_but_outer_domain_in_function_function {
+    val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
+    val proj = new Projection(List("w","a","b")) 
+    val ds2 = proj(ds1)
+    val f = ds2.getVariables(0).asInstanceOf[Function]
+    val domain = f.getDomain
+    assertEquals("index", domain.getName)
+    
+    val n = ds2.getLength
+    assertEquals(4, n)
+  }
+  
+  //@Test
+  def project_all_but_inner_domain_in_function_function {
+    val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
+    val proj = new Projection(List("t","a","b")) 
+    val ds2 = proj(ds1)
+    AsciiWriter.write(ds2)
+  }
+  
+  @Test
+  def project_outer_domain_only_in_function_function {
+    val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
+    val proj = new Projection(List("t")) 
+    val ds2 = proj(ds1)
+    val f = ds2.getVariables(0).asInstanceOf[Function]
+    val domain = f.getDomain
+    val range  = f.getRange
+    assertEquals("index", domain.getName)
+    assertEquals("t", range.getName)
   }
   
   //TODO: project nothing
