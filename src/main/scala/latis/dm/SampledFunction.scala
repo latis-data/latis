@@ -88,10 +88,11 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
 }
 
 object SampledFunction {
-  
+  //TODO: redundant with Function constructors?
   def apply(domain: Variable, range: Variable, samples: Iterator[Sample], metadata: Metadata = EmptyMetadata) = {
     val sf = new SampledFunction(domain, range, metadata=metadata)
     sf._iterator = samples
+    //TODO: should we make SampledData instead? resolve iterable once problem by caching in SampledData
     sf
   }
 }
