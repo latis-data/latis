@@ -123,8 +123,8 @@ class TestProjection {
     val proj = new Projection(List("t","a","b")) 
     //AsciiWriter.write(ds1)
     val ds2 = proj(ds1)
-//TODO: range of first sample disappears from ds1 after projection!? 
-    AsciiWriter.write(ds1)
+//TODO: range of first sample disappears from ds1 after projection!? due to transforming type of inner function
+    AsciiWriter.write(ds2)
   }
   
   @Test
