@@ -6,6 +6,7 @@ import java.io.FileInputStream
 import java.net.URL
 import com.typesafe.scalalogging.slf4j.Logging
 import scala.collection.JavaConversions
+import java.net.URLDecoder
 
 /**
  * Singleton for access to properties with the following precedence:
@@ -49,7 +50,9 @@ class LatisProperties extends Properties with Logging {
       case null => System.getenv("LATIS_HOME") match { //try under LATIS_HOME
         case s: String => s + File.separator + "latis.properties"
         case null => getClass.getResource("/latis.properties") match { //try in the classpath
-          case url: URL => url.getPath
+          //Decode URL. Needed for jenkins job. The workspace is the name of the project with spaces.
+          //TODO: should we allow loading of properties file from any URL?
+          case url: URL => URLDecoder.decode(url.getPath, "UTF-8")
           case null => throw new RuntimeException("Unable to locate property file.")
         }
       }
@@ -119,6 +122,15 @@ object LatisProperties {
         }
       }
     }
+  }
+  
+  /**
+   * Clear the existing properties causing the singleton to reload the properties.
+   */
+  def reset {
+    //TODO: do we really want to allow this?
+    //Used by tests.
+     _instance = null
   }
   
   /**

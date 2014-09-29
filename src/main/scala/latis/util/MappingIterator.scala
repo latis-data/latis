@@ -1,6 +1,7 @@
 package latis.util
 
 import scala.annotation.tailrec
+import com.typesafe.scalalogging.slf4j.Logging
 
 /**
  * An Iterator that looks ahead and caches the next sample.
@@ -11,7 +12,7 @@ import scala.annotation.tailrec
  * This implementation of the PeekIterator applies a function
  * mapping to each element as it iterates.
  */
-class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) extends PeekIterator[T] {
+class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) extends PeekIterator[T] with Logging {
   //Note, the bound on Null allows us to return null for generic type T.
   //TODO: could we do it.flatMap(f)? but would no longer be a PeekIterator? unless we do CanBuildFrom...?
 
@@ -28,7 +29,10 @@ class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) ext
       val result = try {
         f(iterator.next)
       } catch {
-        case e: Exception => None //TODO: log warning?
+        case e: Exception => {
+          logger.warn("MappingIterator got Exception trying to get next sample. It will be dropped. " + e)
+          None //TODO: log warning?
+        }
       }
       
       result match {

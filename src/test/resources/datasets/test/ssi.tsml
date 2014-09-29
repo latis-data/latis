@@ -8,7 +8,7 @@
     <function>
       <integer name="a"/>
       
-      <function>
+      <function length="3">
         <integer name="b"/>
         <integer name="c"/>
       </function>

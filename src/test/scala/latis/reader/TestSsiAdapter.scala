@@ -9,7 +9,7 @@ class TestSsiAdapter {
   //@Test
   def test {
     val ds = TsmlReader("datasets/test/ssi.tsml").getDataset
-    AsciiWriter.write(ds)
+    //AsciiWriter.write(ds)
   }
 
 }

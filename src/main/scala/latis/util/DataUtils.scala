@@ -22,38 +22,122 @@ import latis.data.seq.DataSeq
 import scala.collection.mutable.ArrayBuffer
 import latis.data.IterableData
 
+/*
+ * Use Cases
+ * 
+ * VariableTemplate + Data => Variable with Data
+ *   recurse to put data into kids? probably, otherwise don't need util?
+ *   assume no data in template?
+ * VariableTemplate + ByteBuffer => Variable with Data
+ *   needed? just getBuffer from Data? but Data could be structured, SeqData...
+ * 
+ * Routines:
+ *   dataToDataMap(data, vtmp): Map
+ *     data to buffer then take byes as we build
+ *   
+ *   dataMapToSampleData(Map, sampleTemplate: Sample): SampleData 
+ *   dataMapToSampledData(dataMap: Map[String, DataSeq], sampleTemplate: Sample): SampledData
+ *   makeDataFromDataMap //TODO: dataMapToData?
+ *   
+ *   dataToVariable
+ *   dataToSample
+ *   buildVarFromBuffer(bytes, vtemp): V  //TODO: bufferToVar?
+ *   
+ *   sampleToData(sample: Sample): SampleData
+ *   
+ *   reshapeData(data, vtmp1, vtmp2)
+ *     dataToMap with vtmp1
+ *     map to data with vtmp2
+ *   reshapeSampleData
+ *     allows us to do one sample at a time, e.g. Operation with MappingIterator
+ */
+
 /**
  * Utility methods for manipulating data.
  */
 object DataUtils {
+  
+  /*
+   * TODO: want Data to be immutable but often need to recursive access ByteBuffer which changes its position.
+   * should data.getByteBuffer always make duplicate? same data, diff pointer...
+   * 
+   */
 
   /**
    * Convert the Data representing variableTemplate1 to Data representing variableTemplate2.
    */
   def reshapeData(data: Data, variableTemplate1: Variable, variableTemplate2: Variable): Data = {
-    val dataMap = dataToDataMap(data, variableTemplate1)
-    makeDataFromDataMap(dataMap, variableTemplate2)
+    //TODO: won't work for nested Functions, use reshapeSampleData?
+    //val dataMap = dataToDataMap(data, variableTemplate1)
+    //makeDataFromDataMap(dataMap, variableTemplate2)
+    val bufferMap = dataToBufferMap(data, variableTemplate1)
+    bufferMapToData(bufferMap, variableTemplate2)
+ /*
+  * variableTemplate2 is (a,b) instead of (i,(a,b))
+  */
   }
 
   /**
    * Convert the SampleData representing sampleTemplate1 to SampleData representing sampleTemplate2.
    */
   def reshapeSampleData(sampleData: SampleData, sampleTemplate1: Sample, sampleTemplate2: Sample): SampleData = {
-    val dataMap = dataToDataMap(sampleData, sampleTemplate1)
-    dataMapToSampleData(dataMap, sampleTemplate2)
+    val bufferMap = dataToBufferMap(sampleData, sampleTemplate1) 
+ //*** range of sampleData is empty!? 1st outer sample, after writing, no projection yet/
+    bufferMapToSampleData(bufferMap, sampleTemplate2)
   }
 
+  private def writeBufferAsDoubles(bb: ByteBuffer) = {
+    //val bb = getByteBuffer.rewind.asInstanceOf[ByteBuffer]
+    val db = bb.rewind.asInstanceOf[ByteBuffer].asDoubleBuffer
+    val n = db.limit
+    for (i <- 0 until n) println(db.get(i))
+  }
+  
   /**
    * Convert Data for a given variableTemplate to a Map from Variable name to its Data.
    */
-  def dataToDataMap(data: Data, variableTemplate: Variable): Map[String, Data] = {
-    buildMapFromBuffer(data.getByteBuffer, mutable.Map[String, Data](), variableTemplate)
+  private def dataToDataMap(data: Data, variableTemplate: Variable): Map[String, Data] = {
+    val dataMap = mutable.Map[String, Data]()
+    buildMapFromBuffer(data.getByteBuffer, dataMap, variableTemplate)
+    dataMap
   }
 
+  private def dataToBufferMap(data: Data, variableTemplate: Variable): Map[String, ByteBuffer] = {
+    val bufferMap = mutable.Map[String, ByteBuffer]()
+    buildBufferMapFromBuffer(data.getByteBuffer, bufferMap, variableTemplate)
+    //TODO: don't include index value when getting bytes from data?
+    bufferMap
+  }
+    
+  //take from one, give to other organized by var name
+  private def buildBufferMapFromBuffer(bb: ByteBuffer, bufferMap: mutable.Map[String, ByteBuffer], variableTemplate: Variable): Unit = variableTemplate match {
+    //TODO: avoid putting index value in Data? 
+    //case _: Index => ???  //Note, from Tuple match below, let scalar handle it
+    case s: Scalar => {
+      //get the bytes for this scalar
+      val bytes = new Array[Byte](s.getSize)
+      bb.get(bytes)
+      
+      //add bytes to the ByteBuffer mapped by variable name
+      val name = s.getName
+      bufferMap.get(name) match {
+        case Some(buffer) => bufferMap += (name -> ByteBuffer.wrap(buffer.array ++ bytes))
+        case None => bufferMap += (name -> ByteBuffer.wrap(bytes))
+      }
+    }
+    case Tuple(vars) => vars.foreach(buildBufferMapFromBuffer(bb, bufferMap, _))
+    case f: Function => {
+      val n = f.getLength
+      val sampleTemplate = Sample(f.getDomain, f.getRange)  //TODO: bb 8,8, (w,(a, b))
+      for (_ <- 0 until n) buildBufferMapFromBuffer(bb, bufferMap, sampleTemplate)
+    }
+  }
+  
   /**
    * Recursively build Data Map from a ByteBuffer representing the given variableTemplate.
    */
-  private def buildMapFromBuffer(bb: ByteBuffer, dataMap: mutable.Map[String, Data], variableTemplate: Variable): Map[String, Data] = variableTemplate match {
+  private def buildMapFromBuffer(bb: ByteBuffer, dataMap: mutable.Map[String, Data], variableTemplate: Variable): Unit = variableTemplate match {
+    case _: Index => ???  
     case s: Scalar => {
       val bytes = new Array[Byte](s.getSize)
       bb.get(bytes)
@@ -66,19 +150,29 @@ object DataUtils {
     }
 
     //assume Tuple does not contain data
-    case Tuple(vars) =>
-      vars.foreach(buildMapFromBuffer(bb, dataMap, _)); dataMap
+    case Tuple(vars) => vars.foreach(buildMapFromBuffer(bb, dataMap, _))
 
     //apply to each sample
-    case Function(it) => it.foreach(buildMapFromBuffer(bb, dataMap, _)); dataMap
+    //Note, this Function is just a template, can't iterate over samples.
+    case f: Function => {
+      val n = f.getLength
+      val sampleTemplate = Sample(f.getDomain, f.getRange)
+      for (i <- 0 until n) buildMapFromBuffer(bb, dataMap, sampleTemplate)
+    }
   }
 
   /**
-   * Convert a Data Map to SampledData representing the given sampleTemplate.
+   * Convert a Data Map to SampleData representing the given sampleTemplate.
    */
   def dataMapToSampleData(dataMap: Map[String, Data], sampleTemplate: Sample): SampleData = {
     val domainData = makeDataFromDataMap(dataMap, sampleTemplate.domain)
     val rangeData = makeDataFromDataMap(dataMap, sampleTemplate.range)
+    SampleData(domainData, rangeData)
+  }  
+  
+  def bufferMapToSampleData(bufferMap: Map[String, ByteBuffer], sampleTemplate: Sample): SampleData = {
+    val domainData = bufferMapToData(bufferMap, sampleTemplate.domain)
+    val rangeData = bufferMapToData(bufferMap, sampleTemplate.range)
     SampleData(domainData, rangeData)
   }
 
@@ -96,6 +190,7 @@ object DataUtils {
      * Internal helper function to make IterableData from map of Data Iterators so we can recursively pull off samples as we need.
      */
     def iteratorMapToIterableData(iteratorMap: Map[String, Iterator[Data]], variableTemplate: Variable, length: Int): IterableData = variableTemplate match {
+      case _: Index => ???
       case s: Scalar => {
         val it = iteratorMap(s.getName)  // IndexedSeqLike$Elements, same object each time but doesn't act like iterator!?
         val datas = it.take(length).toList
@@ -160,11 +255,57 @@ object DataUtils {
     //    SampledData(data.iterator, sampleTemplate)
   }
 
+  private def bufferMapToData(dataMap: Map[String, ByteBuffer], variableTemplate: Variable): Data = {
+    //build a ByteBuffer to contain the data
+    val size = variableTemplate.getSize
+    val bb = ByteBuffer.allocate(size)
+    
+    //Internal method to recursively populate the buffer
+    def accumulateData(v: Variable) {
+      //See if we have cached data for the given variable.
+      //If not, keep iterating recursively.
+      //Assumes only scalars are mapped to data
+      dataMap.get(v.getName) match {
+        case Some(buffer) => {
+          val bytes = new Array[Byte](v.getSize)
+          buffer.get(bytes)
+          bb.put(bytes)
+        }
+        case None => v match {
+/*
+ * TODO: should Data contain Index values? hopefully we can just use IndexSet
+ * problem for TestProjection.project_all_but_inner_domain_in_function_function
+ * but getting BufferUnderflow before here (after writing starts)
+ * 
+ */     
+          case _: Index => {
+            ???
+          }
+          case Tuple(vars) => vars.map(accumulateData(_))
+          case f: Function => {
+            //TODO: recurring pattern; apply sample template f.length times
+            val sample = Sample(f.getDomain, f.getRange)
+            val n = f.getLength
+            for (i <- 0 until n) accumulateData(sample)
+          }
+          case _: Scalar => {
+            throw new Error("No data found for " + v.getName)
+          }
+        }
+      }
+    }
+    
+    //recursively populate the byte buffer
+    accumulateData(variableTemplate)
+    Data(bb)
+  }
+  
   /**
    * Given a dataMap mapping Variable names to Data and a Variable template,
    * construct a Data object with data from the dataMap.
    */
   def makeDataFromDataMap(dataMap: Map[String, Data], variableTemplate: Variable): Data = {
+    //Used here and by IterativeAdapter.
     //TODO: dataMapToData?
 
     //build a ByteBuffer to contain the data
@@ -172,28 +313,45 @@ object DataUtils {
     val bb = ByteBuffer.allocate(size)
 
     //Internal method to recursively populate the buffer
-    def accumulateData(v: Variable) {
+    def accumulateData(v: Variable): Unit = {
       //See if we have cached data for the given variable.
       //If not, keep iterating recursively.
       dataMap.get(v.getName) match {
         case Some(d) => {
           //TODO: consider trace debugging here
+          /*
+           * TODO: broken for nested Functions, use bufferMap
+           * dataMap gives us all samples for this scalar
+           * we need to get one but don't have the means to sub-select
+           */
           val dbb = d.getByteBuffer
           val bytes = dbb.array
           bb.put(bytes)
         }
         case None => v match {
-          //case _: Index => //bb.putInt(index)  //handle Index which should not have a value in the dataMap
-          case Tuple(vars) => vars.map(accumulateData(_))
-          case Function(it) => it.map(accumulateData(_))
-          case _: Scalar => throw new Error("No data found for " + v.getName)
+          case Tuple(vars) => vars.foreach(accumulateData(_))
+
+          //can't iterate on template case Function(it) => it.map(accumulateData(_)) 
+          case f: Function => {
+            //TODO: recurring pattern; apply sample template f.length times
+            val sample = Sample(f.getDomain, f.getRange)
+            val n = f.getLength
+            for (i <- 0 until n) {
+              accumulateData(sample)
+            }
+          }
+
+          case _: Index => ??? //bb.putInt(index)  //handle Index which should not have a value in the dataMap
+          case _: Scalar => {
+            throw new Error("No data found for " + v.getName)
+          }
         }
       }
     }
 
     //recursively populate the byte buffer
     accumulateData(variableTemplate)
-
+    
     //TODO: test that we got the size right
     Data(bb)
   }
@@ -211,9 +369,10 @@ object DataUtils {
    * Recursively accumulate Data (bytes) for a given Variable (that contains Data).
    */
   private def buildDataFromVariable(variable: Variable, data: Data = EmptyData): Data = variable match {
+    case _: Index => ???
     case s: Scalar => data concat s.getData
-    case Tuple(vars) => vars.foldLeft(data)(_ concat _.getData)
-    case Function(it) => it.foldLeft(data)(_ concat _.getData)
+    case Tuple(vars) => vars.foldLeft(data)((d,v) => buildDataFromVariable(v,d))
+    case f @ Function(it) => it.foldLeft(data)((d,v) => buildDataFromVariable(v,d))
   }
 
   /**
@@ -243,6 +402,7 @@ object DataUtils {
     case _: Integer => Integer(template.getMetadata, data)
     case _: Text => Text(template.getMetadata, data)
     case _: Binary => Binary(template.getMetadata, data)
+    case _: Index => ???
 
     //deal with nested Function
     case f: Function => data match {
@@ -266,7 +426,7 @@ object DataUtils {
       }
     }
 
-    case v: Index => Index(bb.getInt)
+    case v: Index => Index(bb.getInt) //Note, index data is kept in Variable's Data
     case v: Real => Real(template.getMetadata, bb.getDouble)
     case v: Integer => Integer(template.getMetadata, bb.getLong)
 

@@ -98,9 +98,9 @@ object TestNestedFunction {
   def function_of_functions_with_tuple_range = {
     val n = 4
     val m = 3
-    val domain  = (0 until n).map(Integer(Metadata("t"), _))
+    val domain  = (0 until n).map(Real(Metadata("t"), _))
     val range = for (i <- 0 until n) yield Function((0 until m).map(j => 
-      Sample(Integer(Metadata("w"), 10 + j), Tuple(Real(Metadata("a"), 10 * i + j), Real(Metadata("b"), 10 * i + j)) )), 
+      Sample(Real(Metadata("w"), 10 + j), Tuple(Real(Metadata("a"), 10 * i + j), Real(Metadata("b"), 10 * i + j)) )), 
         Metadata(Map("length" -> m.toString)))
     Function(domain, range, Metadata(Map("name" -> "function_of_functions_with_tuple_range", "length" -> n.toString)))
   }

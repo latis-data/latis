@@ -20,6 +20,7 @@ import latis.time.Time
  */
 object DataMap {
   //TODO: exclude Index?
+  //TODO: add aliases as keys pointing to the same values
 
   /**
    * Convert the Scalars within the given Dataset to a Map from name to Double array.
