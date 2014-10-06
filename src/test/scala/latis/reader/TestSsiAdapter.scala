@@ -6,10 +6,10 @@ import latis.writer.AsciiWriter
 
 class TestSsiAdapter {
   
-  @Test
+//  @Test
   def test {
     val ds = TsmlReader("datasets/test/ssi.tsml").getDataset
-    //AsciiWriter.write(ds)
+    AsciiWriter.write(ds)
   }
 
 }
