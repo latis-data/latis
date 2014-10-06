@@ -90,7 +90,7 @@ object Function {
 
   def apply(ds: Seq[Variable], rs: Seq[Variable], md: Metadata): Function = {
     //TODO: assert same length?
-    //TODO: make SampledData?
+//TODO: require SampledData? cacheable
     //TODO: use metadata from Variables
     Function((ds zip rs).map(s => Sample(s._1, s._2)), md)
   }

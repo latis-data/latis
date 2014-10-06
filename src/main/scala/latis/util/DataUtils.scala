@@ -56,6 +56,12 @@ import latis.data.IterableData
  * Utility methods for manipulating data.
  */
 object DataUtils {
+  
+  /*
+   * TODO: want Data to be immutable but often need to recursive access ByteBuffer which changes its position.
+   * should data.getByteBuffer always make duplicate? same data, diff pointer...
+   * 
+   */
 
   /**
    * Convert the Data representing variableTemplate1 to Data representing variableTemplate2.
@@ -76,7 +82,7 @@ object DataUtils {
    */
   def reshapeSampleData(sampleData: SampleData, sampleTemplate1: Sample, sampleTemplate2: Sample): SampleData = {
     val bufferMap = dataToBufferMap(sampleData, sampleTemplate1) 
- //*** range of sampleData is empty!?
+ //*** range of sampleData is empty!? 1st outer sample, after writing, no projection yet/
     bufferMapToSampleData(bufferMap, sampleTemplate2)
   }
 
@@ -99,12 +105,14 @@ object DataUtils {
   private def dataToBufferMap(data: Data, variableTemplate: Variable): Map[String, ByteBuffer] = {
     val bufferMap = mutable.Map[String, ByteBuffer]()
     buildBufferMapFromBuffer(data.getByteBuffer, bufferMap, variableTemplate)
+    //TODO: don't include index value when getting bytes from data?
     bufferMap
   }
     
   //take from one, give to other organized by var name
   private def buildBufferMapFromBuffer(bb: ByteBuffer, bufferMap: mutable.Map[String, ByteBuffer], variableTemplate: Variable): Unit = variableTemplate match {
-    case _: Index => ???  
+    //TODO: avoid putting index value in Data? 
+    //case _: Index => ???  //Note, from Tuple match below, let scalar handle it
     case s: Scalar => {
       //get the bytes for this scalar
       val bytes = new Array[Byte](s.getSize)

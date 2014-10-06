@@ -108,6 +108,7 @@ class TestProjection {
     val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
     val proj = new Projection(List("w","a","b")) 
     val ds2 = proj(ds1)
+    //TODO: ds1 appears empty, iterable once problem? need to rewind byte buffers?  AsciiWriter.write(ds1)
     val f = ds2.getVariables(0).asInstanceOf[Function]
     val domain = f.getDomain
     assertEquals("index", domain.getName)
@@ -120,7 +121,9 @@ class TestProjection {
   def project_all_but_inner_domain_in_function_function {
     val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
     val proj = new Projection(List("t","a","b")) 
+    //AsciiWriter.write(ds1)
     val ds2 = proj(ds1)
+//TODO: range of first sample disappears from ds1 after projection!? due to transforming type of inner function
     AsciiWriter.write(ds2)
   }
   

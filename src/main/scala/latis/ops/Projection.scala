@@ -84,11 +84,31 @@ class Projection(val names: Seq[String]) extends Operation {
         
     //new sample type
     //TODO: this is only needed for type, make sure it's not wasting time munging data
+    /*
+     * Looks like this is causing the range of the first sample to have empty data when not projecting inner function domain
+     * in the original dataset!
+     * iterable once problem? 
+     *   resolve by caching data? 
+     *   in SmapledData
+     *   should be ok for internal function
+     *   not working for test because it has all values in scalars? but then is iterable once a problem?
+     * special handling when doing only type?
+     * *Note, using applyToSample, we get an extra log message: Make Data Iterator from existing Sample Iterator: w -> (a, b)
+     *   before: Make Data Iterator from existing Sample Iterator: t -> w -> (a, b)
+     *   This would likely be the iterable once problem
+     *   
+     */
     val sample2: Sample = applyToSample(sample1) match {
       case Some(s) => s
       case None => return None //Note, this could be un-projected inner Function
       //throw new Error("Failed to project the sample: " + sample1)
     }
+//    val sample2 = {
+//      val d = function.getDomain
+//      val r0 = function.getRange.asInstanceOf[Function]
+//      val r = Function(Index(0), r0.getRange, r0.getMetadata)
+//      Sample(d,r)
+//    }
     
     //expose the domain and range types of the new dataset
     val Sample(d,r) = sample2
