@@ -2,7 +2,7 @@
 <tsml>
 
   <dataset name="ssi">
-    <adapter class="latis.reader.tsml.SsiAdapter3"
+    <adapter class="latis.reader.tsml.SsiAdapter4"
              location="datasets/test/ssi/" />
     
     <function>
