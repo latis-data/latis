@@ -16,7 +16,7 @@ import latis.data.SampleData
 import latis.util.DataUtils
 import latis.util.PeekIterator
 
-class SsiAdapter4(tsml: Tsml) extends TsmlAdapter(tsml) {
+class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
   
   override def makeFunction(f: Function): Option[Function] = {
     val template = Sample(f.getDomain, f.getRange)
