@@ -60,7 +60,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    */
   def parseRecord(record: JdbcAdapter.JdbcRecord): Option[Map[String, Data]] = {
     val map = mutable.Map[String, Data]()
-    val rs = record.resultSet
+    val rs = record.resultSet //TODO: needed? just get global resultSet?
 
     for (vt <- varsWithTypes) vt match {
       case (v: Time, dbtype: Int) if (dbtype == java.sql.Types.TIMESTAMP) => {
@@ -100,6 +100,10 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
 
     Some(map)
   }
+  
+//  protected parseTime(v: Time): Data = {
+//    
+//  }
 
   /**
    * Pairs of projected Variables (Scalars) and their database types.
@@ -123,7 +127,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
 
   //Handle the Projection and Selection Operation-s
   private var projection = "*"
-  private val selections = ArrayBuffer[String]()
+  protected val selections = ArrayBuffer[String]()
 
   //Handle first, last ops
   private var first = false
