@@ -24,7 +24,13 @@ class RenameOperation(val origName: String, val newName: String) extends Operati
 
 object RenameOperation {
   
-  def apply(name1: String, name2: String) = new RenameOperation(name1, name2)
+  def apply(expression: String): RenameOperation = {
+    //assume "name1,name2"
+    val ss = expression.split(",")
+    new RenameOperation(ss(0), ss(1))
+  }
+    
+  def apply(name1: String, name2: String): RenameOperation = new RenameOperation(name1, name2)
   
   def unapply(renameOp: RenameOperation) = Some(renameOp.origName, renameOp.newName)
 }
