@@ -40,6 +40,7 @@ import javax.naming.InitialContext
 import javax.sql.DataSource
 import java.sql.Statement
 import latis.ops.RenameOperation
+import latis.metadata.Metadata
 
 /* 
  * TODO: release connection as soon as possible?
@@ -63,7 +64,14 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   def parseRecord(record: JdbcAdapter.JdbcRecord): Option[Map[String, Data]] = {
     val map = mutable.Map[String, Data]()
     val rs = record.resultSet //TODO: needed? just get global resultSet?
-
+//TODO: getNames need to use new name, handle in varsWithTypes?
+    //is var only used for name? also md: units, fill value
+    
+    /*
+     * TODO: refactor so subclasses can override, e.g. Time in MavenTelemetryAdapater
+     * consider PartialFunction http://blog.bruchez.name/2011/10/scala-partial-functions-without-phd.html
+     */
+    
     for (vt <- varsWithTypes) vt match {
       case (v: Time, dbtype: Int) if (dbtype == java.sql.Types.TIMESTAMP) => {
         //time stored as timestamp must be declared as type text
@@ -112,9 +120,12 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * Note, this will honor the order of the variables in the projection clause.
    */
   lazy val varsWithTypes = {
-    //Get list of projected Scalars in projection order
-    val vars: Seq[Variable] = if (projectedVariableNames.isEmpty) getOrigScalars
-    else projectedVariableNames.flatMap(getOrigDataset.findVariableByName(_))
+    //Get list of projected Scalars in projection order.
+    //Note, this gets called when writing, so we could be using the new model here which has the rename applied
+    val vars: Seq[Variable] = if (projectedVariableNames.isEmpty) getDataset.toSeq.filterNot(_.isInstanceOf[Index])
+    else projectedVariableNames.flatMap(getDataset.findVariableByName(_))
+    //val vars: Seq[Variable] = if (projectedVariableNames.isEmpty) getOrigScalars
+    //else projectedVariableNames.flatMap(getOrigDataset.findVariableByName(_))
 
     //Get the types of these variables in the database
     val md = resultSet.getMetaData
@@ -130,6 +141,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   //Handle the Projection and Selection Operation-s
   //keep seq of names instead  //private var projection = "*"
   private var projectedVariableNames = Seq[String]()
+  private def getProjectedVariableNames = if (projectedVariableNames.isEmpty) getOrigScalarNames else projectedVariableNames
+  
   protected val selections = ArrayBuffer[String]()
   
   //Keep map to store Rename operations until they are needed when constructing the sql.
@@ -185,11 +198,10 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
 
     //Rename operation: apply in projection clause of sql: 'select origName as newName'
     //NOTE: counts on projection being applied first
-//TODO: need to change names in model
-//    case RenameOperation(origName, newName) => {
-//      renameMap += (origName -> newName)
-//      true
-//    }
+    case RenameOperation(origName, newName) => {
+      renameMap += (origName -> newName)
+      true
+    }
       
     //TODO: handle exception, return false (not handled)?
 
@@ -242,13 +254,26 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   /**
    * Override to apply projection. Exclude Variables not listed in the projection.
    * Only works for Scalars, for now.
+   * If the rename operation needs to be applied, a new temporary Scalar will be created
+   * with a copy of the original's metadata with the 'name' changed.
    */
   override def makeScalar(s: Scalar): Option[Scalar] = {
     //TODO: deal with composite names for nested vars
-    if (projectedVariableNames.isEmpty) super.makeScalar(s)  //if none selected, then include all
-    else projectedVariableNames.find(s.hasName(_)) match {  //account for aliases
-      case Some(_) => super.makeScalar(s) //found a match
-      case None => None //no match
+    getProjectedVariableNames.find(s.hasName(_)) match {  //account for aliases
+      case Some(_) => { //projected, see if it needs to be renamed
+        val tmpScalar = renameMap.get(s.getName) match {
+          case Some(newName) => {
+            //make new Scalar with metadata with new name
+            val md = Metadata(s.getMetadata.getProperties + ("name" -> newName))
+            //TODO: delegate to RenameOperation.applyToScalar
+            //assuming that scalars do not contain data here
+            Scalar(s.getType, md)
+          }
+          case None => s
+        }
+        super.makeScalar(tmpScalar)
+      }
+      case None => None //not projected
     }
   }
 
@@ -297,8 +322,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * Apply rename operations.
    */
   private def makeProjectionClause: String = {
-    val names = if (projectedVariableNames.isEmpty) getOrigScalarNames else projectedVariableNames
-    names.map(name => {
+    getProjectedVariableNames.map(name => {
       //if renamed, replace 'name' with 'name as name2'
       renameMap.get(name) match {
         case Some(name2) => name + " as " + name2
