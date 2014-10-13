@@ -31,6 +31,7 @@ import latis.util.DataUtils
 import latis.reader.tsml.ml.TimeMl
 import latis.time.Time
 import latis.ops.UnitConversion
+import latis.ops.RenameOperation
 
 
 /**
@@ -345,7 +346,10 @@ abstract class TsmlAdapter(val tsml: Tsml) {
       val units = s.substring(index).trim
       UnitConversion(vname, units)
     })
-    projections ++ selections ++ conversions
+    
+    val renames = tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
+    
+    projections ++ selections ++ conversions ++ renames
   }
   
   /**
