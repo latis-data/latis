@@ -11,6 +11,7 @@ import latis.ops.Operation
 import latis.dm.Dataset
 import latis.util.DataMap
 import latis.ops.filter._
+import latis.ops.RenameOperation
 
 abstract class AdapterTests {
   
@@ -222,4 +223,21 @@ abstract class AdapterTests {
     assertEquals(1, data("index").length)
     assertEquals(1, data("index").head.toInt)
   }
+  
+  //---- Test Rename Operation -------------------------------------------//
+  // RenameOp only supports Dataset renaming so far
+//  @Test
+//  def rename_range_variable {
+//    val ops = List(RenameOperation("myText", "theText"))
+//    val data = getDataset(ops).toStringMap
+//    assertEquals(3, data("theText").length)
+//  }  
+//  
+//  @Test
+//  def rename_time_variable {
+//    val ops = List(RenameOperation("myTime", "theTime"))
+//    val data = getDataset(ops).toStringMap
+//    assertEquals(3, data("theTime").length)
+//  }
+  //TODO: various combination with projection, selection, diff order...
 }
