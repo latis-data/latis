@@ -14,16 +14,6 @@ trait Variable {
   def getMetadata(name: String): Option[String] = getMetadata.get(name)
   def getData: Data
   
-//  /**
-//   * Get the model graph without data, including the current Variable
-//   * and it's descendants.
-//   */
-//  def getType: Variable = this match {
-//    case s: Scalar => s //TODO: copy without data
-//    case Tuple(vs) => Tuple(vs.map(_.getType), getMetadata)
-//    case f: Function => Function(f.getDomain.getType, f.getRange.getType, getMetadata)
-//  }
-  
   def getName: String
   
   def isNumeric: Boolean = getData.isInstanceOf[NumberData]
@@ -37,6 +27,19 @@ trait Variable {
   def hasName(name: String): Boolean
   
   def toSeq: Seq[Scalar]
+  
+  //Experimental: to help build a Scalar from an existing Scalar but with new metadata.
+  //should also match tsml element names
+  def getType: String = this match {
+    case _: Dataset  => "dataset"
+    case _: Tuple    => "tuple"
+    case _: Function => "function"
+    case _: Index    => "index"
+    case _: Real     => "real"
+    case _: Integer  => "integer"
+    case _: Text     => "text"
+    case _: Binary   => "binary"
+  }
   
   //experimental: build from template with data
   //TODO: consider scala's CanBuildFrom...

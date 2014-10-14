@@ -39,6 +39,8 @@ import com.typesafe.scalalogging.slf4j.Logging
 import javax.naming.InitialContext
 import javax.sql.DataSource
 import java.sql.Statement
+import latis.ops.RenameOperation
+import latis.metadata.Metadata
 
 /* 
  * TODO: release connection as soon as possible?
@@ -58,47 +60,65 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   /**
    * Parse the data based on the Variable type (and the database column type, for time).
    */
-  def parseRecord(record: JdbcAdapter.JdbcRecord): Option[Map[String, Data]] = {
-    val map = mutable.Map[String, Data]()
-    val rs = record.resultSet
+  def parseRecord(record: JdbcAdapter.JdbcRecord): Option[Map[String, Data]] = {    
+    val map = varsWithTypes.map(vt => {
+      val parse = (parseTime orElse parseReal orElse parseInteger orElse parseText orElse parseBinary)
+      parse(vt).asInstanceOf[(String,Data)]
+    }).toMap
+    
+    val sm = Some(map)
+    sm
+  }
 
-    for (vt <- varsWithTypes) vt match {
-      case (v: Time, dbtype: Int) if (dbtype == java.sql.Types.TIMESTAMP) => {
-        //time stored as timestamp must be declared as type text
-        var time = rs.getTimestamp(v.getName, gmtCalendar).getTime
-        if (rs.wasNull) map += (v.getName -> Data(v.getFillValue.asInstanceOf[String]))
-        else { //Get time format from Time variable units, default to ISO
-          val s = v.getMetadata("units") match {
-            case Some(units) => TimeFormat(units).format(time)
-            case None => TimeFormat.ISO.format(time) //default to ISO yyyy-MM-ddTHH:mm:ss.SSS
-          }
-          map += (v.getName -> Data(s))
-        }
-      }
-
-      case (r: Real, _) => {
-        var d = rs.getDouble(r.getName)
-        if (rs.wasNull) d = r.getFillValue.asInstanceOf[Double]
-        map += (r.getName -> Data(d))
-      }
-
-      case (i: Integer, _) => {
-        var l = rs.getLong(i.getName)
-        if (rs.wasNull) l = i.getFillValue.asInstanceOf[Long]
-        map += (i.getName -> Data(l))
-      }
-
-      case (t: Text, _) => {
-        var s = rs.getString(t.getName)
-        if (rs.wasNull) s = t.getFillValue.asInstanceOf[String]
-        s = StringUtils.padOrTruncate(s, t.length) //fix length as defined in tsml, default to 4
-        map += (t.getName -> Data(s))
-      }
-
-      case (b: Binary, _) => map += (b.getName -> Data(rs.getBytes(b.getName))) //TODO: use getBlob? deal with null?
+  /**
+   * Experiment with overriding just one case using PartialFunctions.
+   * Couldn't just delegate to function due to the "if' guard.
+   */
+  protected val parseTime: PartialFunction[(Variable, Int), (String,Data)] = {
+    //Note, need dbtype for filter but can't do anything outside the case
+    case (v: Time, dbtype: Int) if (dbtype == java.sql.Types.TIMESTAMP) => {
+      val name = getVariableName(v)
+      val gmtCalendar = Calendar.getInstance(TimeZone.getTimeZone("GMT")) //TODO: cache so we don't have to call for each sample?
+      var time = resultSet.getTimestamp(name, gmtCalendar).getTime
+      val s = if (resultSet.wasNull) v.getFillValue.asInstanceOf[String]
+      else TimeFormat.ISO.format(time) //default to ISO yyyy-MM-ddTHH:mm:ss.SSS
+      (name, Data(s))
     }
-
-    Some(map)
+  }
+  
+  protected val parseReal: PartialFunction[(Variable, Int), (String,Data)] = {
+    case (v: Real, _) => {
+      val name = getVariableName(v)
+      var d = resultSet.getDouble(name)
+      if (resultSet.wasNull) d = v.getFillValue.asInstanceOf[Double]
+      (name, Data(d))
+    }
+  }
+  
+  protected val parseInteger: PartialFunction[(Variable, Int), (String,Data)] = {
+    case (v: Integer, _) => {
+      val name = getVariableName(v)
+      var l = resultSet.getLong(name)
+      if (resultSet.wasNull) l = v.getFillValue.asInstanceOf[Long]
+      (name, Data(l))
+    }
+  }
+  
+  protected val parseText: PartialFunction[(Variable, Int), (String,Data)] = {
+    case (v: Text, _) => {
+      val name = getVariableName(v)
+      var s = resultSet.getString(name)
+      if (resultSet.wasNull) s = v.getFillValue.asInstanceOf[String]
+      s = StringUtils.padOrTruncate(s, v.length) //fix length as defined in tsml, default to 4
+      (name, Data(s))
+    }
+  }
+  
+  protected val parseBinary: PartialFunction[(Variable, Int), (String,Data)] = {
+    case (v: Binary, _) => {
+      val name = getVariableName(v)
+      (name, Data(resultSet.getBytes(name)))
+    }
   }
 
   /**
@@ -106,25 +126,42 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * Note, this will honor the order of the variables in the projection clause.
    */
   lazy val varsWithTypes = {
-    //Get list of projected Scalars in projection order
-    val vars: Seq[Variable] = if (projection == "*") getOrigScalars
-    else projection.split(",").flatMap(getOrigDataset.findVariableByName(_))
+    //Get list of projected Scalars in projection order paired with their database type.
+    //Saves us having to get the type for every sample.
+    //Note, uses original variable names which are replaced for a rename operation as needed.
+    val vars: Seq[Variable] = if (projectedVariableNames.isEmpty) getOrigScalars
+    else projectedVariableNames.flatMap(getOrigDataset.findVariableByName(_)) //TODO: error if not found? redundant with other (earlier?) test
 
-    //Get the types of these variables in the database
+//TODO: Consider case where PI does rename. User should never see orig names so should be able to use new name.
+    
+    //Get the types of these variables in the database.
+    //Note, ResultSet columns should have new names from rename.
     val md = resultSet.getMetaData
-    val types = vars.map(v => md.getColumnType(resultSet.findColumn(v.getName)))
+    val types = vars.map(v => md.getColumnType(resultSet.findColumn(getVariableName(v))))
 
     //Combine the variables with their database types in a Seq of pairs.
     vars zip types
   }
 
-  //Define a Calendar so we get our times in the default GMT time zone.
-  private lazy val gmtCalendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"))
 
   //Handle the Projection and Selection Operation-s
-  private var projection = "*"
-  private val selections = ArrayBuffer[String]()
-
+  //keep seq of names instead  //private var projection = "*"
+  private var projectedVariableNames = Seq[String]()
+  private def getProjectedVariableNames = if (projectedVariableNames.isEmpty) getOrigScalarNames else projectedVariableNames
+  
+  protected val selections = ArrayBuffer[String]()
+  
+  //Keep map to store Rename operations until they are needed when constructing the sql.
+  private val renameMap = mutable.Map[String, String]()
+  
+  /**
+   * Use this to get the name of a Variable so we can apply rename.
+   */
+  protected def getVariableName(v: Variable): String = renameMap.get(v.getName) match {
+    case Some(newName) => newName
+    case None => v.getName
+  }
+          
   //Handle first, last ops
   private var first = false
   private var last = false
@@ -139,16 +176,16 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * or false if it won't.
    */
   override def handleOperation(operation: Operation): Boolean = operation match {
-    case p: Projection => {
+    case p @ Projection(names) => {
       //make sure these match variable names or aliases
-      if (!p.names.forall(getOrigDataset.findVariableByName(_).nonEmpty))
+      if (!names.forall(getOrigDataset.findVariableByName(_).nonEmpty))
         throw new Error("Not all variables are available for the projection: " + p)
-
-      this.projection = p.toString
+      projectedVariableNames = names
       true
     }
 
     case sel @ Selection(name, op, value) => getOrigDataset.findVariableByName(name) match {
+      //TODO: allow use of renamed variable? but sql where wants orig name
       case Some(v) if (v.isInstanceOf[Time]) => handleTimeSelection(name, op, value)
       case Some(v) if (getOrigScalarNames.contains(name)) => {
         //add a selection to the sql, may need to change operation
@@ -174,10 +211,16 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     case _: LastFilter =>
       last = true; order = " DESC"; true
 
+    //Rename operation: apply in projection clause of sql: 'select origName as newName'
+    //These will be combined with the projected variables in the select clause with "old as new".
+    case RenameOperation(origName, newName) => {
+      renameMap += (origName -> newName)
+      true
+    }
+      
     //TODO: handle exception, return false (not handled)?
 
     case _ => false //not an operation that we can handle
-    //TODO: rename: select foo as bar?
   }
 
   /**
@@ -191,8 +234,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       case Some(t: Time) => t
       case _ => throw new Error("Time variable not found in dataset.")
     }
-    val tvname = tvar.getName //original name which should match database column
-    //TODO: consider implications of rename, apply after this? consider "origName"?
+    val tvname = getVariableName(tvar)
 
     tvar.getMetadata("type") match {
       case Some("text") => {
@@ -210,6 +252,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
         //Note, The Time constructor will provide default units (ISO) if none are defined in the tsml.
         case Some(units) => {
           //convert ISO time selection value to dataset units
+          //TODO: generalize for all unit conversions
           try {
             val t = Time.fromIso(value).convert(TimeScale(units)).getValue
             this.selections += tvname + op + t
@@ -226,13 +269,26 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   /**
    * Override to apply projection. Exclude Variables not listed in the projection.
    * Only works for Scalars, for now.
+   * If the rename operation needs to be applied, a new temporary Scalar will be created
+   * with a copy of the original's metadata with the 'name' changed.
    */
   override def makeScalar(s: Scalar): Option[Scalar] = {
     //TODO: deal with composite names for nested vars
-    if (projection == "*") super.makeScalar(s)
-    else projection.split(",").find(s.hasName(_)) match { //account for aliases
-      case Some(_) => super.makeScalar(s) //found a match
-      case None => None //no match
+    getProjectedVariableNames.find(s.hasName(_)) match {  //account for aliases
+      case Some(_) => { //projected, see if it needs to be renamed
+        val tmpScalar = renameMap.get(s.getName) match {
+          case Some(newName) => {
+            //make new Scalar with metadata with new name
+            val md = Metadata(s.getMetadata.getProperties + ("name" -> newName))
+            //TODO: delegate to RenameOperation.applyToScalar
+            //assuming that scalars do not contain data here
+            Scalar(s.getType, md)
+          }
+          case None => s
+        }
+        super.makeScalar(tmpScalar)
+      }
+      case None => None //not projected
     }
   }
 
@@ -275,17 +331,31 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   }
 
   /**
+   * Build the select clause. 
+   * If no projection operation was provided, include all 
+   * since the tsml might expose only some database columns.
+   * Apply rename operations.
+   */
+  private def makeProjectionClause: String = {
+    getProjectedVariableNames.map(name => {
+      //if renamed, replace 'name' with 'name as name2'
+      renameMap.get(name) match {
+        case Some(name2) => name + " as " + name2
+        case None => name
+      }
+    }).mkString(",")
+  }
+  
+  /**
    * Construct the SQL query.
+   * Look for "sql" defined in the tsml, otherwise construct it.
    */
   protected def makeQuery: String = getProperty("sql") match {
-    //hack so we can define dataset with sql in the tsml file
-    //TODO: revise handleOperation to return false for projection, selection,...
     case Some(sql) => sql
     case None => {
       //build query
-      val sb = new StringBuffer()
-      sb append "select "
-      sb append projection
+      val sb = new StringBuffer("select ")
+      sb append makeProjectionClause
       sb append " from " + getTable
 
       val p = predicate
@@ -294,12 +364,11 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       //Sort by domain variable.
       //assume domain is scalar, for now
       //Note 'dataset' should be the original before ops
-      //val dvar = findDomainVariable(dataset) 
       getOrigDataset.findFunction match {
         case Some(f) => f.getDomain match {
           case i: Index => //implicit placeholder, use natural order
           case v: Variable => v match {
-            case _: Scalar => sb append " ORDER BY " + v.getName + order
+            case _: Scalar => sb append " ORDER BY " + getVariableName(v) + order
             case _ => ??? //TODO: generalize for n-D domains
           }
         }
