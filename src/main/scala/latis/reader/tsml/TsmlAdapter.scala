@@ -367,7 +367,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * It will try to resolve relative paths by looking in the classpath
    * then looking in the current working directory.
    */
-  def getUrl(): URL = {
+  def getUrl: URL = {
     //Note, can't be relative to the tsml file since we only have xml here. Tsml could be from any source.
     properties.get("location") match {
       case Some(loc) => {
