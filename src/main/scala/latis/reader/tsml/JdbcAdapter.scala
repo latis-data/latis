@@ -282,7 +282,11 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
             val md = Metadata(s.getMetadata.getProperties + ("name" -> newName))
             //TODO: delegate to RenameOperation.applyToScalar
             //assuming that scalars do not contain data here
-            Scalar(s.getType, md)
+            val vtype = s.getType
+            s match {
+              case _: Time => Time(vtype, md)
+              case _       => Scalar(vtype, md)
+            }
           }
           case None => s
         }
