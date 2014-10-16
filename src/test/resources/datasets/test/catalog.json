@@ -1,0 +1,13 @@
+{"My_Catalog": {
+"catalog": [
+  {"name": "subsystem_a", "dataset": [
+    {"name": "item1", "description": "Item A1", "distribution": {"accessURL": "my_url_a1"}},
+    {"name": "item2", "description": "Item A2", "distribution": {"accessURL": "my_url_a2"}},
+    {"name": "item3", "description": "Item A3", "distribution": {"accessURL": "my_url_a3"}}
+  ]},
+  {"name": "subsystem_b", "dataset": [
+    {"name": "item1", "description": "Item B1", "distribution": {"accessURL": "my_url_b1"}},
+    {"name": "item2", "description": "Item B2", "distribution": {"accessURL": "my_url_b2"}},
+    {"name": "item3", "description": "Item B3", "distribution": {"accessURL": "my_url_b3"}}
+  ]}
+]}}

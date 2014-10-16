@@ -36,6 +36,9 @@ dependencies {
     compile 'com.typesafe:scalalogging-slf4j_2.10:1.1.0'
     compile 'ch.qos.logback:logback-classic:1.0.13'
     
+    //JSON from Play
+    compile 'com.typesafe.play:play-json_2.10:2.4.0-M1'
+    
     testCompile 'junit:junit:4.+'
     testCompile 'org.apache.derby:derby:10.10.1.1'
     //testRuntime 'postgres:postgresql:9.2-1002'

@@ -21,7 +21,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) {
    * Get the Source from which we will read data.
    */
   def getDataSource: Source = {
-    if (source == null) source = Source.fromURL(getUrl())
+    if (source == null) source = Source.fromURL(getUrl)
     source
   }
   

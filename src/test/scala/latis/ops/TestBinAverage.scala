@@ -1,14 +1,16 @@
 package latis.ops
 
 import org.junit.Test
+import scala.math._
 import org.junit.Assert._
 import latis.dm._
 import latis.metadata.Metadata
 import latis.writer.AsciiWriter
+import latis.time.Time
 
 class TestBinAverage {
   
-  //@Test //equality of NaNs is always false
+  @Test 
   def bin1 {
     val op = new BinAverage(1.0)
     val expected = Dataset(Function(Seq(Real(0.0), Real(1), Real(2)), 
@@ -18,11 +20,11 @@ class TestBinAverage {
     assertEquals(expected, op(TestDataset.function_of_scalar))
   }
   
-//  @Test 
+  @Test 
   def bin2 {
     val op = new BinAverage(2.0)
     val expected = Dataset(Function(Seq(Real(0.5), Real(2)), 
-                                    Seq(Tuple(Real(0.5),Real(Metadata("min"),0),Real(Metadata("max"),1),Real(Metadata("stddev"),Math.sqrt(2)),Integer(Metadata("count"),2)), 
+                                    Seq(Tuple(Real(0.5),Real(Metadata("min"),0),Real(Metadata("max"),1),Real(Metadata("stddev"),Math.sqrt(2)/2.0),Integer(Metadata("count"),2)), 
                                         Tuple(Real(2),Real(Metadata("min"),2),Real(Metadata("max"),2),Real(Metadata("stddev"),Double.NaN),Integer(Metadata("count"),1)))), Metadata("function_of_scalar"))
     assertEquals(expected, op(TestDataset.function_of_scalar))
   }
@@ -30,9 +32,42 @@ class TestBinAverage {
   @Test 
   def bin3 {
     val op = new BinAverage(3.0)
-    val expected = Dataset(Function(Seq(Real(1)), 
-                                    Seq(Tuple(Real(1),Real(Metadata("min"),0),Real(Metadata("max"),2),Real(Metadata("stddev"),1),Integer(Metadata("count"),3)))), Metadata("function_of_scalar"))
+    val expected = Dataset(Function(Seq(Real(1)), Seq(Tuple(Real(1),Real(Metadata("min"),0),Real(Metadata("max"),2),Real(Metadata("stddev"),1),Integer(Metadata("count"),3)))), Metadata("function_of_scalar"))
     assertEquals(expected, op(TestDataset.function_of_scalar))
+//    AsciiWriter.write(op(TestDataset.function_of_scalar))
+  }
+  
+  @Test
+  def time1 {
+    val op = new BinAverage(86400000.0)
+    val md = Metadata(Map("name" -> "myTime", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd"))
+    val expected = Dataset(Function(Seq(Time(md, 0.toLong), Time(md, 86400000.toLong), Time(md, 172800000.toLong)),
+                                    Seq(Tuple(Real(Metadata("myReal"), 1.1),Real(Metadata("min"),1.1),Real(Metadata("max"),1.1),Real(Metadata("stddev"),Double.NaN),Integer(Metadata("count"),1)), 
+                                        Tuple(Real(Metadata("myReal"), 2.2),Real(Metadata("min"),2.2),Real(Metadata("max"),2.2),Real(Metadata("stddev"),Double.NaN),Integer(Metadata("count"),1)), 
+                                        Tuple(Real(Metadata("myReal"), 3.3),Real(Metadata("min"),3.3),Real(Metadata("max"),3.3),Real(Metadata("stddev"),Double.NaN),Integer(Metadata("count"),1)))), Metadata("time_series"))
+//    AsciiWriter.write(op(TestDataset.time_series))
+    assertEquals(expected, op(TestDataset.time_series))
+  }
+  
+//  @Test
+  def time2 {
+    val op = new BinAverage(86400000.0*2)
+    val md = Metadata(Map("name" -> "myTime", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd"))
+    val expected = Dataset(Function(Seq(Time(md, 432000000.toLong), Time(md, 172800000.toLong)),
+                                    Seq(Tuple(Real(Metadata("myReal"), 1.65),Real(Metadata("min"),1.1),Real(Metadata("max"),2.2),Real(Metadata("stddev"),sqrt((pow(1.1-1.65,2)+pow(2.2-1.65,2)))),Integer(Metadata("count"),2)), 
+                                        Tuple(Real(Metadata("myReal"), 3.3),Real(Metadata("min"),3.3),Real(Metadata("max"),3.3),Real(Metadata("stddev"),Double.NaN),Integer(Metadata("count"),1)))), Metadata("time_series"))
+//    AsciiWriter.write(op(TestDataset.time_series))
+    assertEquals(expected, op(TestDataset.time_series))
+  }
+  
+//  @Test
+  def time3 {
+    val op = new BinAverage(86400000.0*3)
+    val md = Metadata(Map("name" -> "myTime", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd"))
+    val expected = Dataset(Function(Seq(Time(md, 86400000.toLong)),
+                                    Seq(Tuple(Real(Metadata("myReal"), 2.2),Real(Metadata("min"),1.1),Real(Metadata("max"),3.3),Real(Metadata("stddev"),1.1),Integer(Metadata("count"),3)))), Metadata("time_series"))
+//    AsciiWriter.write(op(TestDataset.time_series))
+    assertEquals(expected, op(TestDataset.time_series))
   }
 
 }
