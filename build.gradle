@@ -6,7 +6,7 @@ apply plugin: 'ivy-publish'
 
 //Define the release version. Used for published jar.
 //TODO: get from latis.properties?
-version = '2.7-SNAPSHOT'
+version = '2.7.0'
 
 //Define Java version for generated class files.
 targetCompatibility = 1.6
@@ -19,18 +19,11 @@ repositories {
     mavenCentral()
 }
 
-configurations {
-    scalaCompiler
-    scalaLibrary
-}
-
 dependencies {
     //providedCompile "javax.servlet:servlet-api:2.5" //not deployed
     compile "javax.servlet:servlet-api:2.5"
     
-    //compile 'org.scala-lang:scala-library:2.10.4'
-    scalaCompiler "org.scala-lang:scala-compiler:2.10"
-    scalaLibrary "org.scala-lang:scala-library:2.10"
+    compile 'org.scala-lang:scala-library:2.10.4'
     
     //Support for logging
     compile 'com.typesafe:scalalogging-slf4j_2.10:1.1.0'
@@ -41,9 +34,6 @@ dependencies {
     
     testCompile 'junit:junit:4.+'
     testCompile 'org.apache.derby:derby:10.10.1.1'
-    //testRuntime 'postgres:postgresql:9.2-1002'
-    //testRuntime 'sybase:jconn3:6.0'
-    //testRuntime 'oracle:ojdbc6:11.2'
 	
 	//Support for writing png images
 	compile 'jfree:jfreechart:1.0.12'
