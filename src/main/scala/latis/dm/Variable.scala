@@ -34,6 +34,7 @@ trait Variable {
     case _: Dataset  => "dataset"
     case _: Tuple    => "tuple"
     case _: Function => "function"
+    //case _: Time     => "time"  //TODO: how to deal with real vs int...?
     case _: Index    => "index"
     case _: Real     => "real"
     case _: Integer  => "integer"

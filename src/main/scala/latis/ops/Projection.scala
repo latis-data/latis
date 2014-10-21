@@ -61,7 +61,7 @@ class Projection(val names: Seq[String]) extends Operation {
     val vars = names.flatMap(tuple.findVariableByName(_)).flatMap(applyToVariable(_))
     //val vars = tuple.getVariables.flatMap(applyToVariable(_)) //orig var order
     if (vars.length == 0) None
-    else Some(Tuple(vars)) //TODO: metadata
+    else Some(Tuple(vars, tuple.getMetadata)) //assumes Tuple does not contain data
   }
   
   /**

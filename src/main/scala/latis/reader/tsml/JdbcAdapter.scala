@@ -69,6 +69,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     val sm = Some(map)
     sm
   }
+  
+  //TODO: might be nice to pass record to the PartialFunctions so we don't have to expose the ResultSet
 
   /**
    * Experiment with overriding just one case using PartialFunctions.
@@ -282,7 +284,11 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
             val md = Metadata(s.getMetadata.getProperties + ("name" -> newName))
             //TODO: delegate to RenameOperation.applyToScalar
             //assuming that scalars do not contain data here
-            Scalar(s.getType, md)
+            val vtype = s.getType
+            s match {
+              case _: Time => Time(vtype, md)
+              case _       => Scalar(vtype, md)
+            }
           }
           case None => s
         }
@@ -396,7 +402,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * The JDBC ResultSet from the query. This will lazily execute the query
    * when this result is requested.
    */
-  private lazy val resultSet: ResultSet = executeQuery
+  protected lazy val resultSet: ResultSet = executeQuery
   private lazy val statement: Statement = connection.createStatement()
   //Keep database resources global so we can close them.
 

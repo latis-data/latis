@@ -7,6 +7,8 @@ import latis.dm._
 import latis.metadata.Metadata
 import latis.writer.AsciiWriter
 import latis.time.Time
+import latis.reader.tsml.TsmlReader
+import latis.server.DapConstraintParser
 
 class TestBinAverage {
   
@@ -45,7 +47,11 @@ class TestBinAverage {
                                     Seq(Tuple(Real(Metadata("myReal"), 1.1),Real(Metadata("min"),1.1),Real(Metadata("max"),1.1),Real(Metadata("stddev"),Double.NaN),Integer(Metadata("count"),1)), 
                                         Tuple(Real(Metadata("myReal"), 2.2),Real(Metadata("min"),2.2),Real(Metadata("max"),2.2),Real(Metadata("stddev"),Double.NaN),Integer(Metadata("count"),1)), 
                                         Tuple(Real(Metadata("myReal"), 3.3),Real(Metadata("min"),3.3),Real(Metadata("max"),3.3),Real(Metadata("stddev"),Double.NaN),Integer(Metadata("count"),1)))), Metadata("time_series"))
-//    AsciiWriter.write(op(TestDataset.time_series))
+    val ds = TestDataset.time_series
+    //AsciiWriter.write(ds)
+    val ds2 = op(ds)
+    //AsciiWriter.write(ds2)
+                                        
     assertEquals(expected, op(TestDataset.time_series))
   }
   
@@ -56,7 +62,7 @@ class TestBinAverage {
     val expected = Dataset(Function(Seq(Time(md, 432000000.toLong), Time(md, 172800000.toLong)),
                                     Seq(Tuple(Real(Metadata("myReal"), 1.65),Real(Metadata("min"),1.1),Real(Metadata("max"),2.2),Real(Metadata("stddev"),sqrt((pow(1.1-1.65,2)+pow(2.2-1.65,2)))),Integer(Metadata("count"),2)), 
                                         Tuple(Real(Metadata("myReal"), 3.3),Real(Metadata("min"),3.3),Real(Metadata("max"),3.3),Real(Metadata("stddev"),Double.NaN),Integer(Metadata("count"),1)))), Metadata("time_series"))
-//    AsciiWriter.write(op(TestDataset.time_series))
+    //AsciiWriter.write(op(TestDataset.time_series))
     assertEquals(expected, op(TestDataset.time_series))
   }
   
@@ -70,4 +76,12 @@ class TestBinAverage {
     assertEquals(expected, op(TestDataset.time_series))
   }
 
+  //@Test
+  def quikscat_telemetry_data {
+    val op = DapConstraintParser.parseExpression("binave(60000)")
+    //val op = new BinAverage(60000.0) //1 minute
+    val ds = TsmlReader("binave.tsml").getDataset(List(op))
+  //  println(op(ds))
+    AsciiWriter.write(ds)
+  }
 }
