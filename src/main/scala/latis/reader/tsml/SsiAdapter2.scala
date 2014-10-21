@@ -18,11 +18,6 @@ import latis.util.PeekIterator
 
 class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
   
-  override def makeScalar(scalar: Scalar): Option[Scalar] = findData(scalar) match {
-    case Some(data) => Some(Scalar(scalar.getMetadata, data)) 
-    case None => None 
-  }
-  
   override def makeFunction(f: Function): Option[Function] = {
     val template = Sample(f.getDomain, f.getRange)
     makeSample(template) match {
