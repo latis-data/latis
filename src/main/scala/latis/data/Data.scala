@@ -104,7 +104,7 @@ object Data {
     //This supports clients that just add to a buffer without sizing it correctly.
     val b = if (buffer.limit > 0 && buffer.position != 0) buffer.flip else buffer
     b match {
-      case bb: ByteBuffer => ByteBufferData(bb)
+      case bb: ByteBuffer => new ByteBufferData(bb)
       //TODO: support other types of Buffer?
     }
   }

@@ -69,6 +69,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     val sm = Some(map)
     sm
   }
+  
+  //TODO: might be nice to pass record to the PartialFunctions so we don't have to expose the ResultSet
 
   /**
    * Experiment with overriding just one case using PartialFunctions.
@@ -400,7 +402,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * The JDBC ResultSet from the query. This will lazily execute the query
    * when this result is requested.
    */
-  private lazy val resultSet: ResultSet = executeQuery
+  protected lazy val resultSet: ResultSet = executeQuery
   private lazy val statement: Statement = connection.createStatement()
   //Keep database resources global so we can close them.
 

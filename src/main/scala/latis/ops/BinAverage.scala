@@ -24,7 +24,7 @@ class BinAverage(binWidth: Double) extends Operation {
       binStart += binWidth
     }
     val md = Metadata(Map("length" -> samples.length.toString) ++ f.getMetadata.getProperties.filterKeys(_ != "length"))
-    Some(Function(samples(0).domain, samples(0).range ,samples.iterator))
+    Some(Function(samples(0).domain, samples(0).range, samples.iterator))
   }
   
   def makeBin(it: PeekIterator[Sample], start: Double): Seq[Sample] = {
@@ -46,11 +46,35 @@ class BinAverage(binWidth: Double) extends Operation {
       }
       case n: Number => Real(n.getMetadata, bin.map(_.domain.getNumberData.doubleValue).sum/count)
     }
-    val max = Real(Metadata("max"), bin.map(_.range.getNumberData.doubleValue).max)
-    val min = Real(Metadata("min"), bin.map(_.range.getNumberData.doubleValue).min)
-    val mean = bin.map(_.range.getNumberData.doubleValue).sum/count
-    val stddev = Real(Metadata("stddev"), sqrt(bin.map(s => pow(s.range.getNumberData.doubleValue - mean, 2)).sum/(count - 1)))
+    
+    val max = Real(Metadata("max"), bin.map(s => reduce(s.range).getNumberData.doubleValue).max)
+    val min = Real(Metadata("min"), bin.map(s => reduce(s.range).getNumberData.doubleValue).min)
+    val mean = bin.map(s => reduce(s.range).getNumberData.doubleValue).sum/count
+    val stddev = Real(Metadata("stddev"), sqrt(bin.map(s => pow(reduce(s.range).getNumberData.doubleValue - mean, 2)).sum/(count - 1)))
 
-    Sample(dom,Tuple(List(Real(bin(0).range.getMetadata, mean), min, max, stddev, Integer(Metadata("count"), count))))
+    Sample(dom,Tuple(List(Real(reduce(bin(0).range).getMetadata, mean), min, max, stddev, Integer(Metadata("count"), count))))
   }
+  
+      
+  //If the range is a tuple, just use the first element
+  //TODO: could use some refactoring
+  def reduce(v: Variable) = v match {
+    case s: Scalar => s
+    case Tuple(vars) => vars.head
+    case _: Function => throw new Error("Can't perform a bin average over a nested Function.")
+  }
+}
+
+object BinAverage extends OperationFactory {
+  
+  override def apply(args: Seq[String]): BinAverage = {
+    if (args.length > 1) throw new UnsupportedOperationException("The BinAverage accepts only one argument")
+    try {
+      BinAverage(args.head.toDouble)
+    } catch {
+      case e: NumberFormatException => throw new UnsupportedOperationException("The BinAverage requires a single numeric argument")
+    }
+  }
+    
+  def apply(binWidth: Double): BinAverage = new BinAverage(binWidth)
 }

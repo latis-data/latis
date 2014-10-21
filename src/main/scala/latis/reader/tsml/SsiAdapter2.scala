@@ -23,7 +23,7 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     makeSample(template) match {
       case None => None
       case Some(sample) => findFunctionData(f) match{
-        case Some(data) => Some(Function(template.domain, template.range, new MappingIterator[SampleData, Sample](data.iterator, sd => Some(DataUtils.dataToSample(sd, sample))),f.getMetadata))
+        case Some(data) => Some(Function(sample.domain, sample.range, new MappingIterator[SampleData, Sample](data.iterator, sd => Some(DataUtils.dataToSample(sd, sample))),f.getMetadata))
         case None => None
       }
     }
@@ -31,12 +31,11 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
   
   private def findData(v: Variable): Option[IterableData] = v match {
     case scalar:   Scalar   => findScalarData(scalar)
-//    case sample:   Sample   => findSampleData(sample)
     case tuple:    Tuple    => findTupleData(tuple)
     case function: Function => findFunctionData(function)
   }
   
-  private def findScalarData(s: Scalar): Option[IterableData] = {
+  protected def findScalarData(s: Scalar): Option[IterableData] = {
     val name = s.getName
     val location = getUrl.getPath + name + ".bin"
     val file = new RandomAccessFile(location, "r")
@@ -47,7 +46,7 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     val bb = file.getChannel.map(MapMode.READ_ONLY, 0, file.length)
     bb.order(order)
     
-    Some(ByteBufferData(bb, s))
+    Some(IterableData(new BufferIterator(bb, s), s.getSize))
   }
     
   private def findTupleData(tuple: Tuple): Option[IterableData] = {
