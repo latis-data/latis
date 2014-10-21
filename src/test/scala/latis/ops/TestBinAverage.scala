@@ -50,7 +50,7 @@ class TestBinAverage {
   }
   
 //  @Test
-  def time2 {
+  def time2 {//subject to rounding errors
     val op = new BinAverage(86400000.0*2)
     val md = Metadata(Map("name" -> "myTime", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd"))
     val expected = Dataset(Function(Seq(Time(md, 432000000.toLong), Time(md, 172800000.toLong)),
