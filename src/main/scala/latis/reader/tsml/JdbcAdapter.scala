@@ -41,6 +41,7 @@ import javax.sql.DataSource
 import java.sql.Statement
 import latis.ops.RenameOperation
 import latis.metadata.Metadata
+import javax.naming.NameNotFoundException
 
 /* 
  * TODO: release connection as soon as possible?
@@ -60,23 +61,23 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   /**
    * Parse the data based on the Variable type (and the database column type, for time).
    */
-  def parseRecord(record: JdbcAdapter.JdbcRecord): Option[Map[String, Data]] = {    
+  def parseRecord(record: JdbcAdapter.JdbcRecord): Option[Map[String, Data]] = {
     val map = varsWithTypes.map(vt => {
       val parse = (parseTime orElse parseReal orElse parseInteger orElse parseText orElse parseBinary)
-      parse(vt).asInstanceOf[(String,Data)]
+      parse(vt).asInstanceOf[(String, Data)]
     }).toMap
-    
+
     val sm = Some(map)
     sm
   }
-  
+
   //TODO: might be nice to pass record to the PartialFunctions so we don't have to expose the ResultSet
 
   /**
    * Experiment with overriding just one case using PartialFunctions.
    * Couldn't just delegate to function due to the "if' guard.
    */
-  protected val parseTime: PartialFunction[(Variable, Int), (String,Data)] = {
+  protected val parseTime: PartialFunction[(Variable, Int), (String, Data)] = {
     //Note, need dbtype for filter but can't do anything outside the case
     case (v: Time, dbtype: Int) if (dbtype == java.sql.Types.TIMESTAMP) => {
       val name = getVariableName(v)
@@ -87,8 +88,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       (name, Data(s))
     }
   }
-  
-  protected val parseReal: PartialFunction[(Variable, Int), (String,Data)] = {
+
+  protected val parseReal: PartialFunction[(Variable, Int), (String, Data)] = {
     case (v: Real, _) => {
       val name = getVariableName(v)
       var d = resultSet.getDouble(name)
@@ -96,8 +97,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       (name, Data(d))
     }
   }
-  
-  protected val parseInteger: PartialFunction[(Variable, Int), (String,Data)] = {
+
+  protected val parseInteger: PartialFunction[(Variable, Int), (String, Data)] = {
     case (v: Integer, _) => {
       val name = getVariableName(v)
       var l = resultSet.getLong(name)
@@ -105,8 +106,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       (name, Data(l))
     }
   }
-  
-  protected val parseText: PartialFunction[(Variable, Int), (String,Data)] = {
+
+  protected val parseText: PartialFunction[(Variable, Int), (String, Data)] = {
     case (v: Text, _) => {
       val name = getVariableName(v)
       var s = resultSet.getString(name)
@@ -115,8 +116,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       (name, Data(s))
     }
   }
-  
-  protected val parseBinary: PartialFunction[(Variable, Int), (String,Data)] = {
+
+  protected val parseBinary: PartialFunction[(Variable, Int), (String, Data)] = {
     case (v: Binary, _) => {
       val name = getVariableName(v)
       (name, Data(resultSet.getBytes(name)))
@@ -134,8 +135,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     val vars: Seq[Variable] = if (projectedVariableNames.isEmpty) getOrigScalars
     else projectedVariableNames.flatMap(getOrigDataset.findVariableByName(_)) //TODO: error if not found? redundant with other (earlier?) test
 
-//TODO: Consider case where PI does rename. User should never see orig names so should be able to use new name.
-    
+    //TODO: Consider case where PI does rename. User should never see orig names so should be able to use new name.
+
     //Get the types of these variables in the database.
     //Note, ResultSet columns should have new names from rename.
     val md = resultSet.getMetaData
@@ -145,17 +146,16 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     vars zip types
   }
 
-
   //Handle the Projection and Selection Operation-s
   //keep seq of names instead  //private var projection = "*"
   private var projectedVariableNames = Seq[String]()
   private def getProjectedVariableNames = if (projectedVariableNames.isEmpty) getOrigScalarNames else projectedVariableNames
-  
+
   protected val selections = ArrayBuffer[String]()
-  
+
   //Keep map to store Rename operations until they are needed when constructing the sql.
   private val renameMap = mutable.Map[String, String]()
-  
+
   /**
    * Use this to get the name of a Variable so we can apply rename.
    */
@@ -163,7 +163,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     case Some(newName) => newName
     case None => v.getName
   }
-          
+
   //Handle first, last ops
   private var first = false
   private var last = false
@@ -219,7 +219,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       renameMap += (origName -> newName)
       true
     }
-      
+
     //TODO: handle exception, return false (not handled)?
 
     case _ => false //not an operation that we can handle
@@ -240,28 +240,34 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
 
     tvar.getMetadata("type") match {
       case Some("text") => {
-        //JDBC doesn't generally like the 'T' in the iso time.
+        //A JDBC dataset with time defined as text implies the times are represented as a Timestamp.
+        //JDBC doesn't generally like the 'T' in the iso time. (e.g. Derby)
         //Parse value into a Time then format consistent with java.sql.Timestamp.toString: yyyy-mm-dd hh:mm:ss.fffffffff
         //This should also treat the time as GMT. (Timestamp has internal Gregorian$Date which has the local time zone.)
         val time = Time.fromIso(value).format("yyyy-MM-dd HH:mm:ss.SSS")
-        selections += tvname + op + "'" + time + "'"  //sql wants quotes around time value
+        selections += tvname + op + "'" + time + "'" //sql wants quotes around time value
         true
       }
-      case _ => tvar.getMetadata("units") match {
-        //case None => throw new Error("The dataset does not have time units defined, so you must use the native time: " + tvname)
-        //TODO: we haven't established that these aren't native units
-        case None => throw new Error("The dataset does not have time units defined for: " + tvname)
-        //Note, The Time constructor will provide default units (ISO) if none are defined in the tsml.
-        case Some(units) => {
-          //convert ISO time selection value to dataset units
-          //TODO: generalize for all unit conversions
-          try {
-            val t = Time.fromIso(value).convert(TimeScale(units)).getValue
-            this.selections += tvname + op + t
-            true
-          } catch {
-            case iae: IllegalArgumentException => throw new Error("The time value is not in a supported ISO format: " + value)
-            case e: Exception => throw new Error("Unable to parse time selection: " + value)
+      case _ => {
+        //So, we have a numeric time variable but need to figure out if the selection value is
+        //  a numeric time (in native units) or an ISO time that needs to be converted.
+        if (StringUtils.isNumeric(value)) {
+          this.selections += tvname + op + value
+          true
+        } else tvar.getMetadata("units") match {
+          //Assumes selection value is an ISO 8601 formatted string
+          case None => throw new Error("The dataset does not have time units defined for: " + tvname)
+          case Some(units) => {
+            //convert ISO time selection value to dataset units
+            //TODO: generalize for all unit conversions
+            try {
+              val t = Time.fromIso(value).convert(TimeScale(units)).getValue
+              this.selections += tvname + op + t
+              true
+            } catch {
+              case iae: IllegalArgumentException => throw new Error("The time value is not in a supported ISO format: " + value)
+              case e: Exception => throw new Error("Unable to parse time selection: " + value)
+            }
           }
         }
       }
@@ -276,7 +282,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    */
   override def makeScalar(s: Scalar): Option[Scalar] = {
     //TODO: deal with composite names for nested vars
-    getProjectedVariableNames.find(s.hasName(_)) match {  //account for aliases
+    getProjectedVariableNames.find(s.hasName(_)) match { //account for aliases
       case Some(_) => { //projected, see if it needs to be renamed
         val tmpScalar = renameMap.get(s.getName) match {
           case Some(newName) => {
@@ -287,7 +293,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
             val vtype = s.getType
             s match {
               case _: Time => Time(vtype, md)
-              case _       => Scalar(vtype, md)
+              case _ => Scalar(vtype, md)
             }
           }
           case None => s
@@ -337,8 +343,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   }
 
   /**
-   * Build the select clause. 
-   * If no projection operation was provided, include all 
+   * Build the select clause.
+   * If no projection operation was provided, include all
    * since the tsml might expose only some database columns.
    * Apply rename operations.
    */
@@ -351,7 +357,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       }
     }).mkString(",")
   }
-  
+
   /**
    * Construct the SQL query.
    * Look for "sql" defined in the tsml, otherwise construct it.
@@ -431,9 +437,16 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   }
 
   private def getConnectionViaJndi(jndiName: String): Connection = {
-    val initCtx = new InitialContext();
-    val ds = initCtx.lookup(jndiName).asInstanceOf[DataSource];
-    ds.getConnection();
+    val initCtx = new InitialContext()
+    var ds: DataSource = null
+
+    try {
+      ds = initCtx.lookup(jndiName).asInstanceOf[DataSource]
+    } catch {
+      case e: NameNotFoundException => throw new Error("JdbcAdapter failed to locate JNDI resource: " + jndiName)
+    }
+
+    ds.getConnection()
   }
 
   private def getConnectionViaJdbc: Connection = {

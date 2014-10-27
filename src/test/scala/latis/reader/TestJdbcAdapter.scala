@@ -76,6 +76,15 @@ class TestJdbcAdapter extends AdapterTests {
     val data = getDataset(ops).toStringMap
     assertEquals(2, data("theInt").length)
   }
+  
+  @Test
+  def select_by_native_time {
+    //need a time var defined as an int
+    val ops = List(Selection("myInt>1"))
+    val ds = TsmlReader("db_with_int_time.tsml").getDataset(ops)
+    val data = ds.toStringMap
+    assertEquals(2, data("myInt").length)
+  }
 }
 
 object TestJdbcAdapter {

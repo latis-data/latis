@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="db_with_int_time" long_name="Database Test">
+    <adapter class="latis.reader.tsml.JdbcAdapter"
+             location="jdbc:derby:memory:testDB" 
+             driver="org.apache.derby.jdbc.EmbeddedDriver"
+             user="" password=""
+             table="test"/>
+    
+    <time name="myInt" type="integer"/>
+    <real name="myReal"/>
+    <text name="myText"/>
+    
+    <!--?select myReal>2?-->
+    <!--?project myInt,myText?-->
+    
+  </dataset>
+
+</tsml>
