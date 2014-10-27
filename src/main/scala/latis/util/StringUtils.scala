@@ -43,4 +43,14 @@ object StringUtils {
     //otherwise, the size is just right
     case _ => s
   }
+  
+  
+  def isNumeric(s: String): Boolean = {
+    try {
+      s.toDouble
+      true
+    } catch {
+      case e: NumberFormatException => false
+    }
+  }
 }
