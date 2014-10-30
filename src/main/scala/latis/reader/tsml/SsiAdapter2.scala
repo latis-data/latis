@@ -1,31 +1,47 @@
 package latis.reader.tsml
 
-import latis.reader.tsml.ml.Tsml
+import java.io.FileNotFoundException
 import latis.dm._
 import java.io.RandomAccessFile
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel.MapMode
-import latis.data.Data
-import latis.data.buffer.ByteBufferData
-import latis.data.SampledData
-import latis.util.BufferIterator
+import scala.Option.option2Iterable
+import latis.data.EmptyData
 import latis.data.IterableData
-import latis.data.seq.DataSeq
-import latis.util.MappingIterator
 import latis.data.SampleData
+import latis.data.SampledData
+import latis.data.seq.DataSeq
+import latis.dm.Function
+import latis.dm.Sample
+import latis.dm.Scalar
+import latis.dm.Tuple
+import latis.dm.Variable
+import latis.reader.tsml.ml.Tsml
+import latis.util.BufferIterator
 import latis.util.DataUtils
+import latis.util.MappingIterator
 import latis.util.PeekIterator
+import latis.dm.Real
+import latis.data.set.IndexSet
 
 class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
   
+  override def makeScalar(s: Scalar): Option[Scalar] = {
+    findData(s) match {
+      case Some(data) => s match {
+        case _: Real => Some(Real(s.getMetadata, data.iterator.next))
+        case _: Integer => Some(Integer(s.getMetadata, data.iterator.next))
+        case _: Text => Some(Text(s.getMetadata, data.iterator.next))
+      }
+      case None => None
+    }
+  }
+  
   override def makeFunction(f: Function): Option[Function] = {
     val template = Sample(f.getDomain, f.getRange)
-    makeSample(template) match {
+    findFunctionData(f) match {
+      case Some(data) => Some(Function(template.domain, template.range, new MappingIterator[SampleData, Sample](data.iterator, sd => Some(DataUtils.dataToSample(sd, template))),f.getMetadata))
       case None => None
-      case Some(sample) => findFunctionData(f) match{
-        case Some(data) => Some(Function(sample.domain, sample.range, new MappingIterator[SampleData, Sample](data.iterator, sd => Some(DataUtils.dataToSample(sd, sample))),f.getMetadata))
-        case None => None
-      }
     }
   }
   
@@ -35,7 +51,7 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     case function: Function => findFunctionData(function)
   }
   
-  protected def findScalarData(s: Scalar): Option[IterableData] = {
+  protected def findScalarData(s: Scalar): Option[IterableData] = try {
     val name = s.getName
     val location = getUrl.getPath + name + ".bin"
     val file = new RandomAccessFile(location, "r")
@@ -46,7 +62,12 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     val bb = file.getChannel.map(MapMode.READ_ONLY, 0, file.length)
     bb.order(order)
     
-    Some(IterableData(new BufferIterator(bb, s), s.getSize))
+    if(file.length == 0) None else Some(IterableData(new BufferIterator(bb, s), s.getSize))
+  } catch {
+    case fnfe: FileNotFoundException => s match {
+      case _: Index => Some(IndexSet())
+      case _ => None
+    }
   }
     
   private def findTupleData(tuple: Tuple): Option[IterableData] = {
@@ -62,16 +83,16 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     val rdata = f.getRange match {
       case nf: Function => {
         val len = nf.getMetadata("length").get.toInt
-        val sdata = findFunctionData(nf).get
+        val sdata = findFunctionData(nf).getOrElse(EmptyData)
         
         val loopData = IterableData(new LoopIterator(sdata.domainSet.iterator), sdata.domainSet.recordSize)
         
         IterableData(SampledData(loopData,sdata.rangeData).iterator.grouped(len).map(s => DataSeq(s)), sdata.recordSize * len)
       }
-      case e => findData(e).get
+      case e => findData(e).getOrElse(EmptyData)
     }
     val sdata = SampledData(ddata, rdata)
-    Some(sdata)
+    if(sdata.isEmpty) None else Some(sdata)
   }
   
   def close = {}
