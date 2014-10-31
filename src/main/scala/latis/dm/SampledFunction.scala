@@ -73,7 +73,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
     }
     case _ => {
       logger.debug("Wrap existing Iterator: " + this)
-      new MappingIterator(_iterator, (s: Sample) => Some(s))
+      PeekIterator(_iterator)
     }
     }
   }
