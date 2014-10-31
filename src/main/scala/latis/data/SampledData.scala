@@ -71,6 +71,7 @@ object SampledData {
   
   //TODO: explore implications of duplicated Iterators (e.g. its caching)
   //TODO: should we manage our own internal iterator and caching?
+  //TODO: require PekIterator then no need for template?
   def apply(sampleIterator: Iterator[SampleData], sampleTemplate: Sample): SampledData = {
     val (dit,rit) = sampleIterator.duplicate
     val dset = DomainSet(IterableData(dit.map(_.domainData), sampleTemplate.domain.getSize))
