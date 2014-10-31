@@ -20,9 +20,9 @@ class TestDataUtils {
     val ds2 = FirstFilter()(ds)
     //AsciiWriter.write(ds)
     //Writer.fromSuffix("txt").write(ds)
-    Writer.fromSuffix("jsond").write(ds2)
+    //Writer.fromSuffix("jsond").write(ds2)
     
-    val data = ds.toDoubleMap
+    val data = ds2.toDoubleMap
     assertEquals(10.0, data("a")(0), 0.0)
   }
 
