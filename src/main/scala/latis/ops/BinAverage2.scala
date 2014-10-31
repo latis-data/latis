@@ -11,7 +11,7 @@ import latis.data.SampledData
 
 class BinAverage2(binWidth: Double) extends Operation {
   //TODO: accept ISO 8601 time duration
-  
+
   /*
    * TODO: try alternate approach for making new Function
    * http://mods-jira.lasp.colorado.edu:8080/browse/LATIS-184
@@ -32,32 +32,36 @@ class BinAverage2(binWidth: Double) extends Operation {
    *   segmentLength
    *   takeWhile, but leaves iterator invalid, must look at next to know it went too far
    */
-  
+
   override def applyToFunction(f: Function): Option[Variable] = {
     val fit = PeekIterator(f.iterator)
-    //get initial domain value
-    //TODO: allow specification of initial value, e.g. so daily avg is midnight to midnight
-    val startValue = getDomainValue(fit.peek)
-    var nextValue = startValue
-    
-    //Make an iterator of new samples
-    val sampleIterator = new PeekIterator[Sample] {
-      def getNext = {
-        nextValue += binWidth
-        if (fit.isEmpty) null
-        else {
-          val binnedSamples = ListBuffer[Sample]()
-          while (fit.hasNext && getDomainValue(fit.peek) < nextValue) binnedSamples += fit.next
-          computeStatistics(binnedSamples) match {
-            case Some(sample) => sample
-            case None => getNext  //skip invalid or empty bins, TODO: insert NaNs?
+    //If the function has no samples, return None for now.
+    if (fit.isEmpty) None
+    else {
+      //get initial domain value
+      //TODO: allow specification of initial value, e.g. so daily avg is midnight to midnight
+      val startValue = getDomainValue(fit.peek)
+      var nextValue = startValue
+
+      //Make an iterator of new samples
+      val sampleIterator = new PeekIterator[Sample] {
+        def getNext = {
+          nextValue += binWidth
+          if (fit.isEmpty) null
+          else {
+            val binnedSamples = ListBuffer[Sample]()
+            while (fit.hasNext && getDomainValue(fit.peek) < nextValue) binnedSamples += fit.next
+            computeStatistics(binnedSamples) match {
+              case Some(sample) => sample
+              case None => getNext //skip invalid or empty bins, TODO: insert NaNs?
+            }
           }
         }
       }
+
+      val sampleTemplate = sampleIterator.peek
+      Some(Function(sampleTemplate.domain, sampleTemplate.range, sampleIterator))
     }
-    
-    val sampleTemplate = sampleIterator.peek
-    Some(Function(sampleTemplate.domain, sampleTemplate.range, sampleIterator))
   }
   
   /**
