@@ -1,15 +1,17 @@
 package latis.reader
 
 import org.junit.Test
+import org.junit.Assert._
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
+import latis.dm.TestDataset
 
 class TestSsiAdapter {
   
-//  @Test
+  @Test
   def test {
     val ds = TsmlReader("datasets/test/ssi.tsml").getDataset
-    AsciiWriter.write(ds)
+    assertEquals(TestDataset.function_of_named_scalar, ds)
   }
 
 }

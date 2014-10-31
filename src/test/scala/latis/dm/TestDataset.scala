@@ -48,7 +48,7 @@ object TestDataset {
     val samples = List(Sample(Real(Metadata("t"), 0), Real(Metadata("a"), 0)), 
                        Sample(Real(Metadata("t"), 1), Real(Metadata("a"), 1)), 
                        Sample(Real(Metadata("t"), 2), Real(Metadata("a"), 2)))
-    Dataset(Function(samples), Metadata("function_of_scalar"))
+    Dataset(Function(samples), Metadata("function_of_named_scalar"))
   }
   
   def function_of_tuple = {
