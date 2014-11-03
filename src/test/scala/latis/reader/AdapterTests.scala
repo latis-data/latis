@@ -12,6 +12,9 @@ import latis.dm.Dataset
 import latis.util.DataMap
 import latis.ops.filter._
 import latis.ops.RenameOperation
+import latis.ops.math.MathOperation
+import latis.ops.BinAverage2
+import latis.ops.BinAverage
 
 abstract class AdapterTests {
   
@@ -222,6 +225,15 @@ abstract class AdapterTests {
     assertEquals(2, data.keySet.size)  //index and time
     assertEquals(1, data("index").length)
     assertEquals(1, data("index").head.toInt)
+  }
+  
+  @Test
+  def apply_math_then_binave {
+    val ops = List(MathOperation((d: Double) => d*2), new BinAverage(172800000.0)) //2 days
+    val ds = getDataset(ops)
+    val data = ds.toDoubleMap
+    assertEquals(43200000, data("myTime").head, 0.0)
+    assertEquals(3.0, data("myInt").head, 0.0)
   }
   
   //---- Test Rename Operation -------------------------------------------//

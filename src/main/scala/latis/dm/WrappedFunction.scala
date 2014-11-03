@@ -13,11 +13,13 @@ class WrappedFunction(function: Function, val operation: Operation)
   
   //TODO: deal with Function metadata, length
   
+  logger.debug("Making WrappedFunction for " + function +" " + operation)
+  
   /**
    * Override iterator to apply the Operation to each sample as it iterates (lazy).
    */
   override def iterator: PeekIterator[Sample] = {
-    logger.debug("Sample Iterating: " + this)
+    logger.debug("WrappedFunction iterating Samples: " + this)
     new MappingIterator(function.iterator, (s: Sample) => operation.applyToSample(s))
   }
   
@@ -27,7 +29,7 @@ class WrappedFunction(function: Function, val operation: Operation)
    */
   //only needed for projection?
   override def getDataIterator: Iterator[SampleData] = {
-    logger.debug("Data Iterating: " + this)
+    logger.debug("WrappedFunction iterating Data: " + this)
     iterator.map(DataUtils.sampleToData(_))
   }
 

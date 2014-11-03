@@ -9,6 +9,7 @@ package latis.util
  */
 abstract class PeekIterator[T >: Null] extends Iterator[T] {
   //Note, the bound on Null allows us to return null for generic type T.
+  //TODO: implement something like takeWhile that leave the rest of the Iterator usable.
   
   /**
    * Cached next value. Will be null if there is no more elements.
@@ -59,3 +60,16 @@ abstract class PeekIterator[T >: Null] extends Iterator[T] {
   protected def getNext: T
 }
 
+object PeekIterator {
+  
+  /**
+   * Wrap an Iterator so we can use it as a PeekIterator.
+   */
+  def apply[T >: Null](iterator: Iterator[T]) = new PeekIterator[T] {
+    if (iterator == null) throw new Error("PeekIterator can't wrap a null Iterator.")
+    def getNext = {
+      if (iterator.hasNext) iterator.next
+      else null
+    }
+  }
+}

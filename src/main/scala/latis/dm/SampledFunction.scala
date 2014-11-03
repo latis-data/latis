@@ -49,12 +49,20 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
    */
   private var _iterator: Iterator[Sample] = null
   
+  //counter for testing iterable once problems
+  private var itcounter = 0
+  
   /**
    * If this SampledFunction was constructed with an Iterator, return it.
    * Wrap it as a PeekIterator if it isn't one already.
    * Otherwise, make the Iterator from the Data Iterator.
    */
-  def iterator: PeekIterator[Sample] = _iterator match {
+  def iterator: PeekIterator[Sample] = {
+    //test if we have tried to iterate more than once on this function
+    itcounter += 1
+    if (itcounter > 1) throw new Error("Iterating more than once on " + this)
+    
+    _iterator match {
     case null => {
       logger.debug("Make Iterator from DataIterator: " + this)
       new MappingIterator(getDataIterator, (d: Data) => Some(DataUtils.dataToSample(d, Sample(domain, range))))
@@ -65,7 +73,8 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
     }
     case _ => {
       logger.debug("Wrap existing Iterator: " + this)
-      new MappingIterator(_iterator, (s: Sample) => Some(s))
+      PeekIterator(_iterator)
+    }
     }
   }
   

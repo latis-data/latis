@@ -24,6 +24,14 @@ class TestFunction {
   //def function_of_tuple_with_data_from_kids = AsciiWriter.write(TestFunction.function_of_tuple_with_data_from_kids)
   //def function_of_tuple_with_iterable_data = AsciiWriter.write(TestFunction.function_of_tuple_with_iterable_data)
   //def function_of_tuple_with_mixed_types = AsciiWriter.write(TestFunction.function_of_tuple_with_mixed_types)
+  
+  
+  @Test(expected = classOf[Error])
+  def iterate_twice_error {
+    val f = TestFunction.function_of_scalar_with_iterable_data
+    val n1 = f.iterator.toList.length
+    val n2 = f.iterator.toList.length
+  }
 }
 
 object TestFunction {
