@@ -85,15 +85,21 @@ class TestBinAverage {
     val ops = ArrayBuffer[Operation]()
     //ops += MathOperation((d: Double) => d*2)
     ops += Projection("time,myReal")
-    ops += Selection("time>=2014-10-16T00:01")
-    ops += Selection("time<2014-10-16T00:10")
-    ops += new BinAverage(60000.0) //1 minute
+    ops += Selection("time>=2014-10-16T00:01")  //1413417660000
+    ops += Selection("time<2014-10-16T00:10")   //1413418200000
+    ops += new BinAverage2(60000.0) //1 minute
     val ds = TsmlReader("binave.tsml").getDataset(ops)
     //AsciiWriter.write(ds)
+    //BinAverage
     // ascii_iterative: (time -> (myReal, min, max, stddev, count))
     // 1413417689533 -> (21.631854255497455, 21.22629925608635, 21.65319925546646, 0.0938258653030056, 60)
+    //BinAverage2, bin center
+    // ascii_iterative: (time -> (myReal, min, max))
+    // 1.413417690033E12 -> (21.631854255497455, 21.22629925608635, 21.65319925546646)
+    //First matching sample: 2014-10-16T00:01:00.033 => 1413417660033
+    // plus half of bin (30s) => 1413417690033
     val data = ds.toDoubleMap
-    assertEquals(1413417689533.0, data("time").head, 0.0)
+    assertEquals(1413417690033.0, data("time").head, 0.0)
     assertEquals(21.631854255497455, data("myReal").head, 0.0)
   }
 }

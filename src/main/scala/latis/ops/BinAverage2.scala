@@ -2,6 +2,7 @@ package latis.ops
 
 import latis.dm._
 import latis.util.MappingIterator
+import scala.collection.Map
 import scala.collection.mutable.ListBuffer
 import scala.math._
 import latis.util.PeekIterator
@@ -9,39 +10,28 @@ import latis.time.Time
 import latis.metadata.Metadata
 import latis.data.SampledData
 
+/**
+ * Assume 1D domain.
+ * If range is tuple, take first element, for now.
+ * Nested Functions not yet supported.
+ */
 class BinAverage2(binWidth: Double) extends Operation {
   //TODO: accept ISO 8601 time duration
-
-  /*
-   * TODO: try alternate approach for making new Function
-   * http://mods-jira.lasp.colorado.edu:8080/browse/LATIS-184
-   * 
-   * Assume 1D domain.
-   * If range is tuple, take first element, for now.
-   * Nested Functions not yet supported.
-   * Assume Function has SampledData
-   * 
-   * consider if we want domain and range iterators linked or just use indices
-   * might as well iterate on SampleData
-   * try to preserve domain set
-   * or iterate over Samples
-   *   seems more idiomatic, make use of types
-   * what to do about length? leave undefined
-   * 
-   * get domain values as Seq
-   *   segmentLength
-   *   takeWhile, but leaves iterator invalid, must look at next to know it went too far
-   */
+  //TODO: use SampledData with DomainSet?
+  //TODO: deal with 'length' metadata
 
   override def applyToFunction(f: Function): Option[Variable] = {
     val fit = PeekIterator(f.iterator)
     //If the function has no samples, return None for now.
     if (fit.isEmpty) None
     else {
-      //get initial domain value
+      //get initial domain value so we know where to start
       //TODO: allow specification of initial value, e.g. so daily avg is midnight to midnight
       val startValue = getDomainValue(fit.peek)
       var nextValue = startValue
+      var index = 0
+      val domainMetadata = f.getDomain.getMetadata
+      val rangeMetadata = reduce(f.getRange).getMetadata //first scalar
 
       //Make an iterator of new samples
       val sampleIterator = new PeekIterator[Sample] {
@@ -49,12 +39,29 @@ class BinAverage2(binWidth: Double) extends Operation {
           nextValue += binWidth
           if (fit.isEmpty) null
           else {
+            //accumulate the samples for this bin
             val binnedSamples = ListBuffer[Sample]()
             while (fit.hasNext && getDomainValue(fit.peek) < nextValue) binnedSamples += fit.next
-            computeStatistics(binnedSamples) match {
-              case Some(sample) => sample
-              case None => getNext //skip invalid or empty bins, TODO: insert NaNs?
+            
+            //create domain with bin center as its value, reuse original metadata
+            //TODO: munge metadata
+            val domainValue = nextValue - 0.5 * binWidth //bin center
+            val domain = Real(domainMetadata, domainValue)
+            
+            //compute statistics on range values
+            val range = computeStatistics(binnedSamples) match {
+              case Some(range) => range
+              case None => {
+                //fill empty bin with NaNs
+                //TODO: or call getNext if we want to skip empty bins
+                val mean = Real(rangeMetadata, Double.NaN)
+                val min  = Real(Metadata("min"), Double.NaN)
+                val max  = Real(Metadata("max"), Double.NaN)
+                Tuple(mean, min, max) //TODO: add metadata, consider model for bins
+              }
             }
+            
+            Sample(domain, range)
           }
         }
       }
@@ -74,20 +81,57 @@ class BinAverage2(binWidth: Double) extends Operation {
     case _ => throw new Error("BinAverage supports only one dimensional numeric domains.")
   }
   
-  private def computeStatistics(samples: Seq[Sample]): Option[Sample] = {
+  private def computeStatistics(samples: Seq[Sample]): Option[Tuple] = {
+    //Assume all Samples have the same type
     //TODO: pattern match on range type so we can eventually extend this
-    //TODO: make Function from these samples then apply mean, min, max...
-    //scala Seq has: length, max, min, sum, (product)
-    //Compute mean domain value
-    
-//return first sample for testing
-    //TODO: compute stats
-    if (samples.nonEmpty) Some(samples.head)
-    else None
+    //TODO: make Function from these samples then apply mean, min, max?
+    //TODO: consider CF binning conventions
+    //TODO: use count to weigh bins
+
+    if (samples.isEmpty) None
+    else {
+      //process only the first scalar, for now
+      val rangeTemplate = reduce(samples.head.range)
+      
+      //get data as a Map: name -> array of values
+      val data = samplesToDoubleMap(samples)
+      val values = data(rangeTemplate.getName)
+      
+      val meanValue = values.sum / values.length
+      val mean = Real(rangeTemplate.getMetadata, meanValue)
+
+      //if the original data was already binned (i.e. has min and max value) then use them.
+      val minValue = data.get("min") match {
+        case Some(ms) => ms.min
+        case None => values.min
+      }
+      val min = Real(Metadata("min"), minValue)
+      
+      val maxValue = data.get("max") match {
+        case Some(ms) => ms.max
+        case None => values.max
+      }
+      val max = Real(Metadata("max"), maxValue)
+      
+      Some(Tuple(mean, min, max))
+    }
   }
   
+  //If the range is a tuple, just use the first element
+  private def reduce(v: Variable): Scalar = v match {
+    case s: Scalar => s
+    case Tuple(vars) => reduce(vars.head)
+    case _: Function => throw new Error("Can't perform a bin average over a nested Function.")
+  }
   
+  //TODO: move to DataUtils?
+  private def samplesToDoubleMap(samples: Seq[Sample]): Map[String, Array[Double]] = {
+    //make a dataset from these samples then op on it
+    val ds = Dataset(Function(samples))
+    ds.toDoubleMap
+  }
 }
+
 
 object BinAverage2 extends OperationFactory {
   
