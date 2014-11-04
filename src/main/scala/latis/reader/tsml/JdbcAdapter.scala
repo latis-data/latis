@@ -352,7 +352,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     getProjectedVariableNames.map(name => {
       //if renamed, replace 'name' with 'name as name2'
       renameMap.get(name) match {
-        case Some(name2) => name + " as " + name2
+        case Some(name2) => name + " as '" + name2 + "'"
         case None => name
       }
     }).mkString(",")
