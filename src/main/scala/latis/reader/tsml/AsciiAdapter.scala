@@ -139,7 +139,10 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) {
   //TODO: support regex property for each variable
   def parseStringValue(value: String, variableTemplate: Variable): Data = variableTemplate match {
     case _: Integer => try {
-      Data(value.trim.toLong)
+      //If value looks like a float, take everything up to the decimal point.
+      val s = if (value.contains(".")) value.substring(0, value.indexOf("."))
+      else value
+      Data(s.trim.toLong)
     } catch {
       case e: NumberFormatException => Data(variableTemplate.asInstanceOf[Integer].getFillValue.asInstanceOf[Long])
     }
