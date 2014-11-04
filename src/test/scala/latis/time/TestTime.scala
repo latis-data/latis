@@ -107,6 +107,14 @@ class TestTime {
   //@Test def int_type_with_invalid_units = ???
   
   //@Test 
+  def fractional_years {
+    //TODO: off due to leap days
+    val t = Time(Metadata(Map("units" -> "years since 2000-01-01")), 14)
+    val s = t.format("yyyy-MM-dd") //2013-12-28
+    println(s)
+  }
+  
+  //@Test 
   def time_as_tuple {
 //timed_see_ssi_l3a
 //    <time units="yyyyDDD ???"/>
