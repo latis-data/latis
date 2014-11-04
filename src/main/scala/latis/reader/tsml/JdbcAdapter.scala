@@ -350,9 +350,10 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    */
   private def makeProjectionClause: String = {
     getProjectedVariableNames.map(name => {
-      //if renamed, replace 'name' with 'name as name2'
+      //If renamed, replace 'name' with 'name as "name2"'.
+      //Use quotes so we can use reserved words like "min" (needed by Sybase).
       renameMap.get(name) match {
-        case Some(name2) => name + " as '" + name2 + "'"
+        case Some(name2) => name + """ as """" + name2 + """""""
         case None => name
       }
     }).mkString(",")
