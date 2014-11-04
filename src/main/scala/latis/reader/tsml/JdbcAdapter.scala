@@ -169,7 +169,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   private var last = false
 
   //Define sorting order.
-  private var order = " ASC"
+  private var order = "ASC"
 
   /**
    * Handle the operations if we can so we can reduce the data volume at the source
@@ -211,7 +211,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     case _: FirstFilter =>
       first = true; true
     case _: LastFilter =>
-      last = true; order = " DESC"; true
+      last = true; order = "DESC"; true
 
     //Rename operation: apply in projection clause of sql: 'select origName as newName'
     //These will be combined with the projected variables in the select clause with "old as new".
@@ -381,7 +381,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
         case Some(f) => f.getDomain match {
           case i: Index => //implicit placeholder, use natural order
           case v: Variable => v match {
-            case _: Scalar => sb append " ORDER BY " + getVariableName(v) + order
+            //Note, shouldn't matter if we sort on original name
+            case _: Scalar => sb append " ORDER BY " + v.getName + " " + order
             case _ => ??? //TODO: generalize for n-D domains
           }
         }
