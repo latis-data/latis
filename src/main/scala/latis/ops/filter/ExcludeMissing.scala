@@ -16,7 +16,7 @@ class ExcludeMissing extends Filter {
   /**
    * Exclude a Tuple if any element in it is excluded.
    */
-  override def applyToTuple(tuple: Tuple): Option[Variable] = {
+  override def applyToTuple(tuple: Tuple): Option[Tuple] = {
     val vars = tuple.getVariables.flatMap(applyToVariable(_))
     if (vars.length == tuple.getElementCount) Some(tuple)
     else None
