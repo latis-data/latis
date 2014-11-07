@@ -10,7 +10,7 @@ trait Real extends Scalar with Number
 
 
 object Real {
-  
+  def apply(): Real = new AbstractScalar() with Real
   def apply(v: Double): Real = new AbstractScalar(data = Data(v)) with Real
   def apply(v: AnyVal): Real = v match {
     case i: Int   => Real(i.toDouble)
