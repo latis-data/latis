@@ -200,7 +200,9 @@ object Time {
       }
     }   
     value match {
+      case _: Float => new Time(scale, metadata, Data(value)) with Real
       case _: Double => new Time(scale, metadata, Data(value)) with Real
+      case _: Int => new Time(scale, metadata, Data(value)) with Integer
       case _: Long => new Time(scale, metadata, Data(value)) with Integer
       case _: StringOps => new Time(scale, metadata, Data(value.toString)) with Text
     }
@@ -211,7 +213,9 @@ object Time {
     //make some metadata
     val md = Metadata(Map("name" -> "time", "units" -> scale.toString))
     value match {
+      case _: Float => new Time(scale, md, Data(value)) with Real
       case _: Double => new Time(scale, md, Data(value)) with Real
+      case _: Int => new Time(scale, md, Data(value)) with Integer
       case _: Long => new Time(scale, md, Data(value)) with Integer
     }
   }

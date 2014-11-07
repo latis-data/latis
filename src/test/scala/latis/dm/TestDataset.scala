@@ -30,18 +30,35 @@ object TestDataset {
   def int_time = Dataset(Time(Metadata(Map("name" -> "myIntegerTime", "type" -> "integer")), 1000.toLong), Metadata("integer_timeDS"))
   def scalars = Dataset(List(Real(Metadata("myReal"), 3.14), Integer(Metadata("myInteger"), 42), Text(Metadata("myText"), "Hi"), Time(Metadata("myRealTime"), 1000.0)), Metadata("scalarDS"))
   def binary = Dataset(Binary(Metadata("myBinary"), DoubleValue(1.1).getByteBuffer), Metadata("binaryDS"))
+  def nan = Dataset(Real(Metadata("myReal"), Double.NaN), Metadata("nanDS"))
   
   def tuple_of_scalars = Dataset(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero")), Metadata("tupleDS"))
   def tuple_of_tuples = Dataset(Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1.1))), Metadata("tuple_of_tuplesDS"))
   def tuple_of_functions = Dataset(TestNestedFunction.tuple_of_functions, Metadata("tuple_of_functions"))
   def scalar_tuple = Dataset(Tuple(Integer(Metadata("myInteger"), 1)), Metadata("scalar_tuple"))
   def mixed_tuple = Dataset(Tuple(Real(Metadata("myReal"), 0.0), Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), function_of_scalar.getVariables(0)), Metadata("mixed_tuple"))
-
+  def tuple_with_nan = Dataset(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), Double.NaN), Text(Metadata("myText"), "zero")), Metadata("tuple_with_nan"))
+  
   def function_of_scalar = {
     val samples = List(Sample(Real(0), Real(0)), 
                        Sample(Real(1), Real(1)), 
                        Sample(Real(2), Real(2)))
     Dataset(Function(samples), Metadata("function_of_scalar"))
+  }
+  
+  def function_of_scalar_with_nan = {
+    val samples = List(Sample(Real(0), Real(0)), 
+                       Sample(Real(1), Real(Double.NaN)), 
+                       Sample(Real(2), Real(2)))
+    Dataset(Function(samples), Metadata("function_of_scalar_with_nan"))
+  }
+  
+  //should be invalid since it can't be sorted...
+  def function_of_scalar_with_nan_in_domain = {
+    val samples = List(Sample(Real(0), Real(0)), 
+                       Sample(Real(Double.NaN), Real(1)), 
+                       Sample(Real(2), Real(2)))
+    Dataset(Function(samples), Metadata("function_of_scalar_with_nan_in_domain"))
   }
   
   def function_of_named_scalar = {
@@ -54,6 +71,13 @@ object TestDataset {
   def function_of_tuple = {
     val samples = List(Sample(Integer(Metadata("myInteger"), 0), Tuple(Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero"))), 
                        Sample(Integer(Metadata("myInteger"), 1), Tuple(Real(Metadata("myReal"), 1), Text(Metadata("myText"), "one"))), 
+                       Sample(Integer(Metadata("myInteger"), 2), Tuple(Real(Metadata("myReal"), 2), Text(Metadata("myText"), "two"))))
+    Dataset(Function(samples), Metadata("function_of_tuple"))
+  }
+  
+  def function_of_tuple_with_nan = {
+    val samples = List(Sample(Integer(Metadata("myInteger"), 0), Tuple(Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero"))), 
+                       Sample(Integer(Metadata("myInteger"), 1), Tuple(Real(Metadata("myReal"), Double.NaN), Text(Metadata("myText"), "one"))), 
                        Sample(Integer(Metadata("myInteger"), 2), Tuple(Real(Metadata("myReal"), 2), Text(Metadata("myText"), "two"))))
     Dataset(Function(samples), Metadata("function_of_tuple"))
   }
