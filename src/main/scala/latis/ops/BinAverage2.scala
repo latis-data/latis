@@ -17,8 +17,23 @@ import latis.data.SampledData
  */
 class BinAverage2(binWidth: Double) extends Operation {
   //TODO: accept ISO 8601 time duration
+  //TODO: support start value
   //TODO: use SampledData with DomainSet?
   //TODO: deal with 'length' metadata
+  //TODO: deal with missing values
+  
+  /*
+   * TODO: support 'number of bins' argument
+   * get time range from dataset metadata to compute binWidth?
+   * add hasDefiniteSize (like scala Seq) to Function and/or Dataset or any Variable?
+   * or should this use binWidth arg? 
+   *   or support both? diff name? int vs float?
+   *   2 ops, one extends other
+   * check if function hasDefiniteSize? or a DomainSet
+   * could we use the domain set without having to read all data?
+   *   make use of index to map domain set to range IterableData?
+   * 
+   */
 
   override def applyToFunction(f: Function): Option[Variable] = {
     val fit = PeekIterator(f.iterator)
@@ -88,6 +103,15 @@ class BinAverage2(binWidth: Double) extends Operation {
     //TODO: consider CF binning conventions
     //TODO: use count to weigh bins
 
+    /*
+     * TODO: remove missing values
+     * NaNs don't behave with min...
+     * use exclude_missing operation?
+     * use fill value instead of NaN to fill empty bins
+     * 
+     */
+    //val samples2 = samples.map()
+    
     if (samples.isEmpty) None
     else {
       //process only the first scalar, for now
