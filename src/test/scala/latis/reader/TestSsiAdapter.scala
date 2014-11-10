@@ -6,12 +6,8 @@ import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
 import latis.dm.TestDataset
 
-class TestSsiAdapter {
+class TestSsiAdapter extends AdapterTests {
   
-  @Test
-  def test {
-    val ds = TsmlReader("datasets/test/ssi.tsml").getDataset
-    assertEquals(TestDataset.function_of_named_scalar, ds)
-  }
+  def datasetName = "ssi"
 
 }
