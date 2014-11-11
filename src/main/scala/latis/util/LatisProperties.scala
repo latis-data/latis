@@ -105,7 +105,8 @@ object LatisProperties {
   }
   
   /**
-   * Get the property as an Option.
+   * Get the property as an Option. 
+   * Resolve nested properties (in latis.properties) of the form "${prop}".
    * Order of precedence:
    * 1) System properties (e.g. so "-Dprop=value" at command line can override)
    * 2) LaTiS properties file
@@ -115,7 +116,7 @@ object LatisProperties {
     System.getProperty(property) match {
       case s: String => Some(s)
       case _ => instance.getProperty(property) match {
-        case s: String => Some(s)
+        case s: String => Some(StringUtils.resolveParameterizedString(s))
         case _ => System.getenv(property) match {
           case s: String => Some(s)
           case _ => None
