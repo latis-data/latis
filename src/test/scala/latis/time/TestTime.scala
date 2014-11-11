@@ -58,6 +58,12 @@ class TestTime {
     assertEquals(1000, ms)
   }
   
+  @Test
+  def iso_to_iso_ordinal {
+    val iso_ord = Time.fromIso("2013-12-04T23:00:00").format("yyyy-DDD'T'HH:mm:ss.SSS")
+    assertEquals("2013-338T23:00:00.000", iso_ord)
+  }
+  
   //TODO: test other flavors, with time zone,...
 
   
