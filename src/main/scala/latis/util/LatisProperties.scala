@@ -70,6 +70,16 @@ class LatisProperties extends Properties with Logging {
       case null => scala.util.Properties.userDir + File.separator + path
     }
   }
+  
+  /**
+   * Override to apply parameter replacement.
+   */
+  override def getProperty(property: String): String = {
+    super.getProperty(property) match {
+      case s: String => StringUtils.resolveParameterizedString(s)
+      case _ => null
+    }
+  }
 }
   
 
@@ -116,7 +126,7 @@ object LatisProperties {
     System.getProperty(property) match {
       case s: String => Some(s)
       case _ => instance.getProperty(property) match {
-        case s: String => Some(StringUtils.resolveParameterizedString(s))
+        case s: String => Some(s)
         case _ => System.getenv(property) match {
           case s: String => Some(s)
           case _ => None
