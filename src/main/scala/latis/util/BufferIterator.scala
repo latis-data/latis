@@ -1,23 +1,30 @@
 package latis.util
 
 import java.nio.ByteBuffer
-import scala.annotation.tailrec
+import java.nio.charset.Charset
+
+import latis.data.Data
 import latis.dm.Integer
 import latis.dm.Real
+import latis.dm.Text
 import latis.dm.Variable
-import latis.data.Data
 
 class BufferIterator(buffer: ByteBuffer, v: Variable) extends PeekIterator[Data]{
   
-  @tailrec final protected def getNext: Data = {
+  final protected def getNext: Data = {
     if (! buffer.hasRemaining) null
     else {
       try v match {
         case i: Integer => Data(buffer.getLong)
         case r: Real => Data(buffer.getDouble)
-        //TODO: other types
-      } catch {
-        case e: Exception => getNext
+        case t: Text => {
+          val arr = Array.ofDim[Byte](t.getSize)
+          buffer.get(arr)
+          val s = StringUtils.padOrTruncate(new String(arr.filter(_!=0), Charset.forName("ISO_8859_1")), t.length)
+          Data(s)
+        }
+//      } catch {
+//        case e: Exception => getNext
       }
     }
   }
