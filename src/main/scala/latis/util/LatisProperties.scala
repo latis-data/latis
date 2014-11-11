@@ -70,6 +70,16 @@ class LatisProperties extends Properties with Logging {
       case null => scala.util.Properties.userDir + File.separator + path
     }
   }
+  
+  /**
+   * Override to apply parameter replacement.
+   */
+  override def getProperty(property: String): String = {
+    super.getProperty(property) match {
+      case s: String => StringUtils.resolveParameterizedString(s)
+      case _ => null
+    }
+  }
 }
   
 
@@ -105,7 +115,8 @@ object LatisProperties {
   }
   
   /**
-   * Get the property as an Option.
+   * Get the property as an Option. 
+   * Resolve nested properties (in latis.properties) of the form "${prop}".
    * Order of precedence:
    * 1) System properties (e.g. so "-Dprop=value" at command line can override)
    * 2) LaTiS properties file

@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tsml>
 
-  <dataset name="function_of_named_scalar">
+  <dataset name="ssi" long_name="SSI Test">
     <adapter class="latis.reader.tsml.SsiAdapter2"
              location="datasets/test/ssi/" />
     
-    <function>
-      <real name="t"/>
-      
-      <!--function length="3"-->
-        <!--integer name="b2"/-->
-        <real name="a"/>
-      <!--/function-->
-      
-    </function> 
+    <time name="myTime" type="text" length="10" units="yyyy/MM/dd"/> 
+   
+    <integer name="myInt"/>
+    <real    name="myReal"/>
+    <text    name="myText"/>
+    
   </dataset>
 
 </tsml>

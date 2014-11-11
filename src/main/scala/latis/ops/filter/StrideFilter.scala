@@ -13,16 +13,14 @@ import latis.util.MappingIterator
 class StrideFilter(val stride: Int) extends Filter {
   
   override def applyToFunction(function: Function) = {
-    val it = new MappingIterator(function.iterator.grouped(stride).map(_(0)), (s: Sample) => this.applyToSample(s))
-//    val nlen = function.getLength match {
-//      case -1 => throw new Exception("Function has undefined length")
-//      case 0 => 0
-//      case n => ((n - 1) / stride) + 1
-//    }
-//    val md = Metadata(function.getMetadata.getProperties + ("length" -> nlen.toString))
+    val it = new MappingIterator(function.iterator.grouped(stride).map(_(0)), (s: Sample) => Some(s))
+    val md = function.getMetadata("length") match {
+      case None => function.getMetadata
+      case Some("0") => function.getMetadata
+      case Some(n) => Metadata(function.getMetadata.getProperties + ("length" -> (((n.toInt - 1) / stride) + 1).toString))
+    }
 
-    //TODO: change 'length' metadata
-    Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
+    Some(Function(function.getDomain, function.getRange, it, md))
   }
   
 }

@@ -2,6 +2,7 @@ package latis.util
 
 import org.junit._
 import Assert._
+import java.io.File
 
 class TestProperties {
   
@@ -60,6 +61,13 @@ class TestProperties {
     val a = "Hi George!"
     assertEquals(a, s)
   }
+  
+  @Test
+  def parameterized_value {
+    val s = LatisProperties("test.parameterized.value")
+    assertTrue((new File(s)).exists)
+  }
+  
   
   @Test
   def latis_cofig_property {
