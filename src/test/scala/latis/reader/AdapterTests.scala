@@ -1,20 +1,18 @@
 package latis.reader
 
-import org.junit._
-import Assert._
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+import latis.ops.BinAverage
+import latis.ops.Operation
+import latis.ops.Projection
+import latis.ops.filter.FirstFilter
+import latis.ops.filter.LastFilter
+import latis.ops.filter.LimitFilter
+import latis.ops.filter.Selection
+import latis.ops.math.MathOperation
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
-import latis.ops.filter.Selection
-import latis.ops.Projection
-import scala.collection.mutable.ArrayBuffer
-import latis.ops.Operation
-import latis.dm.Dataset
-import latis.util.DataMap
-import latis.ops.filter._
-import latis.ops.RenameOperation
-import latis.ops.math.MathOperation
-import latis.ops.BinAverage2
-import latis.ops.BinAverage
 
 abstract class AdapterTests {
   
