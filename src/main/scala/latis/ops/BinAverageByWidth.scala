@@ -15,30 +15,24 @@ import latis.data.SampledData
  * If range is tuple, take first element, for now.
  * Nested Functions not yet supported.
  */
-class BinAverage2(binWidth: Double) extends Operation {
+class BinAverageByWidth(binWidth: Double) extends Operation {
   //TODO: accept ISO 8601 time duration
   //TODO: support start value
   //TODO: use SampledData with DomainSet?
   //TODO: deal with 'length' metadata
   //TODO: deal with missing values
+  //TODO: take domain var arg so we can bin nested functions, akin to integration
+  //TODO: start with min of time coverage instead of 1st sample
   
-  /*
-   * TODO: support 'number of bins' argument
-   * get time range from dataset metadata to compute binWidth?
-   * add hasDefiniteSize (like scala Seq) to Function and/or Dataset or any Variable?
-   * or should this use binWidth arg? 
-   *   or support both? diff name? int vs float?
-   *   2 ops, one extends other
-   * check if function hasDefiniteSize? or a DomainSet
-   * could we use the domain set without having to read all data?
-   *   make use of index to map domain set to range IterableData?
-   * 
+  /**
+   * Get bin width via getter so it can be overridden.
    */
+  def getBinWidth = binWidth
 
   override def applyToFunction(f: Function): Option[Variable] = {
     val fit = PeekIterator(f.iterator)
-    //If the function has no samples, return None for now.
-    if (fit.isEmpty) None
+    //If the function has no samples, make a new Function around this iterator (since we can't reuse the orig)
+    if (fit.isEmpty) Some(Function(f, fit))
     else {
       //get initial domain value so we know where to start
       //TODO: allow specification of initial value, e.g. so daily avg is midnight to midnight
@@ -51,7 +45,7 @@ class BinAverage2(binWidth: Double) extends Operation {
       //Make an iterator of new samples
       val sampleIterator = new PeekIterator[Sample] {
         def getNext = {
-          nextValue += binWidth
+          nextValue += getBinWidth
           if (fit.isEmpty) null
           else {
             //accumulate the samples for this bin
@@ -60,7 +54,7 @@ class BinAverage2(binWidth: Double) extends Operation {
             
             //create domain with bin center as its value, reuse original metadata
             //TODO: munge metadata
-            val domainValue = nextValue - 0.5 * binWidth //bin center
+            val domainValue = nextValue - 0.5 * getBinWidth //bin center
             val domain = Real(domainMetadata, domainValue)
             
             //compute statistics on range values
@@ -157,16 +151,16 @@ class BinAverage2(binWidth: Double) extends Operation {
 }
 
 
-object BinAverage2 extends OperationFactory {
+object BinAverageByWidth extends OperationFactory {
   
-  override def apply(args: Seq[String]): BinAverage2 = {
+  override def apply(args: Seq[String]): BinAverageByWidth = {
     if (args.length > 1) throw new UnsupportedOperationException("The BinAverage operation accepts only one argument")
     try {
-      BinAverage2(args.head.toDouble)
+      BinAverageByWidth(args.head.toDouble)
     } catch {
       case e: NumberFormatException => throw new UnsupportedOperationException("The BinAverage requires a single numeric argument")
     }
   }
     
-  def apply(binWidth: Double): BinAverage2 = new BinAverage2(binWidth)
+  def apply(binWidth: Double): BinAverageByWidth = new BinAverageByWidth(binWidth)
 }
