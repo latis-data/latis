@@ -24,6 +24,8 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
   //TODO: take domain var arg so we can bin nested functions, akin to integration
   //TODO: start with min of time coverage instead of 1st sample
   
+  if (binWidth <= 0) throw new Error("Bin average must have a positive bin width.")
+  
   /**
    * Get bin width via getter so it can be overridden.
    */
