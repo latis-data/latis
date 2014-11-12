@@ -55,6 +55,9 @@ object Function {
   def apply(domain: Variable, range: Variable, sampleIterator: Iterator[Sample]): SampledFunction = {
     SampledFunction(domain, range, sampleIterator, EmptyMetadata)
   }
+  def apply(template: Function, sampleIterator: Iterator[Sample]): SampledFunction = {
+    SampledFunction(template.getDomain, template.getRange, sampleIterator, template.getMetadata)
+  }
   
   /**
    * Construct from Seq of Variable which are assumed to contain their own data.
