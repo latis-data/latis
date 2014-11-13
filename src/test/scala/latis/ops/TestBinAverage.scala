@@ -79,25 +79,25 @@ class TestBinAverage {
     assertEquals(21.631854255497455, data("myReal").head, 0.0)
   }
 
-  @Test
-  def quikscat_telemetry_data_by_count {
-    //val op = DapConstraintParser.parseExpression("binave(60000)")
-    val ops = ArrayBuffer[Operation]()
-    //ops += MathOperation((d: Double) => d*2)
-    ops += Projection("time,myReal")
-    ops += Selection("time>=2014-10-16T00:01")
-    ops += Selection("time<2014-10-16T00:10")
-    //ops += new BinAverageByCount(9) //9 bins
-    val ds = TsmlReader("binave.tsml").getDataset(ops)
-    //add time range metadata
-    val props = ds.getMetadata.getProperties + ("time_min" -> "2014-10-16T00:01") + ("time_max" -> "2014-10-16T00:10")
-    val md = Metadata(props)
-    val ds2 = Dataset(ds.getVariables, md)
-    val ds3 = BinAverageByCount(9)(ds2)
-    //AsciiWriter.write(ds3)
-    val data = ds3.toDoubleMap
-    assertEquals(9, data("time").length)
-    assertEquals(1413417690033.0, data("time").head, 0.0)
-    assertEquals(21.631854255497455, data("myReal").head, 0.0)
-  }
+//  @Test
+//  def quikscat_telemetry_data_by_count {
+//    //val op = DapConstraintParser.parseExpression("binave(60000)")
+//    val ops = ArrayBuffer[Operation]()
+//    //ops += MathOperation((d: Double) => d*2)
+//    ops += Projection("time,myReal")
+//    ops += Selection("time>=2014-10-16T00:01")
+//    ops += Selection("time<2014-10-16T00:10")
+//    //ops += new BinAverageByCount(9) //9 bins
+//    val ds = TsmlReader("binave.tsml").getDataset(ops)
+//    //add time range metadata
+//    val props = ds.getMetadata.getProperties + ("time_min" -> "2014-10-16T00:01") + ("time_max" -> "2014-10-16T00:10")
+//    val md = Metadata(props)
+//    val ds2 = Dataset(ds.getVariables, md)
+//    val ds3 = BinAverageByCount(9)(ds2)
+//    //AsciiWriter.write(ds3)
+//    val data = ds3.toDoubleMap
+//    assertEquals(9, data("time").length)
+//    assertEquals(1413417690033.0, data("time").head, 0.0)
+//    assertEquals(21.631854255497455, data("myReal").head, 0.0)
+//  }
 }
