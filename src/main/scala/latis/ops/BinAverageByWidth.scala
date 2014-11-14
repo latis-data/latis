@@ -9,6 +9,7 @@ import latis.util.PeekIterator
 import latis.time.Time
 import latis.metadata.Metadata
 import latis.data.SampledData
+import latis.ops.filter.ExcludeMissing
 
 /**
  * Assume 1D domain.
@@ -144,11 +145,13 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
     case _: Function => throw new Error("Can't perform a bin average over a nested Function.")
   }
   
-  //TODO: move to DataUtils?
   private def samplesToDoubleMap(samples: Seq[Sample]): Map[String, Array[Double]] = {
     //make a dataset from these samples then op on it
     val ds = Dataset(Function(samples))
-    ds.toDoubleMap
+    //exclude samples with missing data
+    val ds2 = ExcludeMissing()(ds)
+    
+    ds2.toDoubleMap
   }
 }
 
