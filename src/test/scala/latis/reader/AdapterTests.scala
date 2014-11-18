@@ -2,7 +2,6 @@ package latis.reader
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-
 import latis.ops.BinAverage
 import latis.ops.Operation
 import latis.ops.Projection
@@ -13,6 +12,7 @@ import latis.ops.filter.Selection
 import latis.ops.math.MathOperation
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
+import latis.dm.Dataset
 
 abstract class AdapterTests {
   
@@ -24,7 +24,7 @@ abstract class AdapterTests {
   def datasetName: String
   
   def getDataset(ops: Seq[Operation]) = TsmlReader("datasets/test/" + datasetName + ".tsml").getDataset(ops)
-  def getDataset: Unit = getDataset(Seq[Operation]())
+  def getDataset: Dataset = getDataset(Seq[Operation]())
   
   def writeDataset(ops: Seq[Operation]) = AsciiWriter().write(getDataset(ops))
   def writeDataset: Unit = writeDataset(Seq[Operation]())
