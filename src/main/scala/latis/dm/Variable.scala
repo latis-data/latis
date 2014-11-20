@@ -24,6 +24,7 @@ trait Variable {
   def getSize: Int
   
   def findVariableByName(name: String): Option[Variable]
+  def findFunction: Option[Function]
   def hasName(name: String): Boolean
   
   def toSeq: Seq[Scalar]

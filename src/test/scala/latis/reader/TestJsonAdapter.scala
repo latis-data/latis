@@ -1,17 +1,16 @@
 package latis.reader
 
-import org.junit._
-import Assert._
-import latis.reader.tsml.TsmlReader
-import latis.writer.Writer
-import latis.ops._
-import latis.ops.filter._
-import scala.collection.mutable.ArrayBuffer
-import latis.writer.AsciiWriter
 import java.io.FileOutputStream
+
 import scala.io.Source
 
-class TestJsonAdapter extends {
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+import latis.reader.tsml.TsmlReader
+import latis.writer.Writer
+
+class TestJsonAdapter {
     
   var tmpFile = java.io.File.createTempFile("LaTiS", "TestJsonAdapter")
   tmpFile.deleteOnExit
