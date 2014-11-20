@@ -8,16 +8,24 @@ import latis.ops._
 import latis.ops.filter._
 import scala.collection.mutable.ArrayBuffer
 import latis.writer.AsciiWriter
+import java.io.FileOutputStream
+import scala.io.Source
 
-class TestJsonAdapter {
+class TestJsonAdapter extends {
+    
+  var tmpFile = java.io.File.createTempFile("LaTiS", "TestJsonAdapter")
+  tmpFile.deleteOnExit
   
   @Test
-  def test_catalog {
-    val ops = ArrayBuffer[Operation]()
-    val ds = TsmlReader("datasets/test/catalog.tsml").getDataset(ops)
-    
-    
-    
-    //AsciiWriter.write(ds)
+  def test_reader{
+    val fos = new FileOutputStream(tmpFile)
+    val ds = TsmlReader("datasets/test/json.tsml").getDataset
+    Writer(fos,"txt").write(ds)
+    fos.close()
+    val s = Source.fromFile(tmpFile).getLines
+    val t = Source.fromFile(s"src/test/resources/datasets/data/dap2/txt").getLines
+    while(t.hasNext) assertEquals(t.next, s.next) 
+    assert(s.isEmpty)
   }
+  
 }
