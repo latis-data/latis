@@ -19,6 +19,7 @@ trait Variable {
   def isNumeric: Boolean = getData.isInstanceOf[NumberData]
   def getNumberData: NumberData = getData.asInstanceOf[NumberData]
   //TODO: deal with TextData
+  //TODO: empty data, Option?
   
 //  def getLength: Int
   def getSize: Int
