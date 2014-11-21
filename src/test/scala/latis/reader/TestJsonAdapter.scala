@@ -28,4 +28,13 @@ class TestJsonAdapter extends {
     assert(s.isEmpty)
   }
   
+  @Test
+  def catalog {
+    val ds = TsmlReader("datasets/test/catalog.tsml").getDataset
+    val data = ds.toStringMap
+    val urls = data("accessURL")
+    //for (url <- urls) println(url)
+    assertEquals(6, urls.length)
+    assertEquals("my_url_a1", urls.head)
+  }
 }
