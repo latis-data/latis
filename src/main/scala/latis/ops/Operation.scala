@@ -74,7 +74,7 @@ abstract class Operation {
    */
   def applyToFunction(function: Function): Option[Variable] = {
     if (functionNestingLevel > 1) {
-      ??? //Let's fail, to see if we are depending on this.
+      ??? //not yet supported, not sure if needed
       Some(function) //hack to avoid wrapping nested functions
     } 
     else Some(WrappedFunction(function, this))
