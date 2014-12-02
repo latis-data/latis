@@ -19,6 +19,24 @@ import latis.dm.Tuple
 protected class Selection(val vname: String, val operation: String, val value: String) extends Filter with Logging {
   //TODO: if domain, delegate to DomainSet
 
+  /*
+   * TODO: support nearest value for domain vars (~)
+   * binary search of domain values would be best
+   *   better for other operators too
+   *   but what about iterating
+   *   start with a block
+   *   estimate how much farther to go
+   * for jdbc (which delegates query to db), use resolution to request window around value
+   * 
+   * Need special behavior for domain variables to support binary search instead of testing each sample
+   *   the latter is still needed for range variables
+   *   ~ won't be supported for range variables
+   *  
+   * See tsds SelectionConstraint
+   * 
+   * Should probably use a resample operation to do "~" as nearest neighbor
+   */
+  
   override def applyToScalar(scalar: Scalar): Option[Scalar] = {
     //If the filtering causes an exception, log a warning and return None.
     try {
@@ -69,8 +87,6 @@ protected class Selection(val vname: String, val operation: String, val value: S
     it.isEmpty match {
       case true => None
       case false => {
-        //TODO: is this used for only inner functions? outer with kids have data?
-        //  can we determine the new length? is this just used as a template?
         Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
       }
     }
