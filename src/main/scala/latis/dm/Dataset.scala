@@ -38,17 +38,17 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   /**
    * Return the first top level Function in this Dataset.
    */
-  def findFunction: Option[Function] = findFunction(this)
+  //def findFunction: Option[Function] = findFunction(this)
   
   //TODO: put in Variable?
-  private def findFunction(variable: Variable): Option[Function] = variable match {
-    case _: Scalar => None
-    case Tuple(vars) => {
-      val fs = vars.flatMap(findFunction(_))
-      if (fs.nonEmpty) Some(fs.head) else None
-    }
-    case f: Function => Some(f)
-  }
+//  private def findFunction(variable: Variable): Option[Function] = variable match {
+//    case _: Scalar => None
+//    case Tuple(vars) => {
+//      val fs = vars.flatMap(findFunction(_))
+//      if (fs.nonEmpty) Some(fs.head) else None
+//    }
+//    case f: Function => Some(f)
+//  }
   
   
   //convenience methods for transforming Dataset

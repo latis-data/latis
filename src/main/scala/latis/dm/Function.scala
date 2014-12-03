@@ -15,6 +15,7 @@ import scala.collection.Seq
 trait Function extends Variable {
   def getDomain: Variable
   def getRange: Variable
+  def getSample: Sample
   
   //TODO: only applies to SampledFunction
   def getLength: Int //TODO: long?
