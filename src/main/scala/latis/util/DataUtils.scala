@@ -21,6 +21,7 @@ import latis.data.SampledData
 import latis.data.seq.DataSeq
 import scala.collection.mutable.ArrayBuffer
 import latis.data.IterableData
+import latis.data.value.StringValue
 
 /*
  * Use Cases
@@ -368,8 +369,9 @@ object DataUtils {
   /**
    * Recursively accumulate Data (bytes) for a given Variable (that contains Data).
    */
-  private def buildDataFromVariable(variable: Variable, data: Data = EmptyData): Data = variable match {
+  def buildDataFromVariable(variable: Variable, data: Data = EmptyData): Data = variable match {
     case _: Index => ???
+    case t @ Text(s) => data concat StringValue(StringUtils.padOrTruncate(s, t.length)) //need consistent length for binary
     case s: Scalar => data concat s.getData
     case Tuple(vars) => vars.foldLeft(data)((d,v) => buildDataFromVariable(v,d))
     case f @ Function(it) => it.foldLeft(data)((d,v) => buildDataFromVariable(v,d))
