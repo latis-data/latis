@@ -48,4 +48,14 @@ class TestIterators {
     val pit2 = PeekIterator(pit)
     //TODO: test that pit and pit2 are the same object
   }
+  
+  @Test
+  def find {
+    //Note, 'find' in general invalidates an iterator but seems to work here
+    val it: Iterator[Int] = List(1, 2, 3, 4).iterator
+    val pit = PeekIterator(it)
+    val b = pit.find(_ == 3)
+    val a = pit.peek
+    assertEquals(4, a)
+  }
 }
