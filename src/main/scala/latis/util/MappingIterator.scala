@@ -32,8 +32,9 @@ class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) ext
         f(iterator.next)
       } catch {
         case e: Exception => {
-          logger.warn("MappingIterator got Exception trying to get next sample. It will be dropped. " + e)
-          None //TODO: log warning?
+          logger.warn("MappingIterator got Exception trying to get next sample. It will be dropped.", e)
+          //TODO: consider including stack trace for debug only
+          None
         }
       }
       
