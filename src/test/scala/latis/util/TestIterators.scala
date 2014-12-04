@@ -99,4 +99,13 @@ class TestIterators {
     assertEquals(4, a)
   }
   
+  @Test
+  def current_after_last {
+    val it: Iterator[Int] = List(1, 2, 3, 4).iterator
+    val pit = PeekIterator(it)
+    val b = pit.toList
+    val a = pit.current
+    assertEquals(4, a)
+  }
+  
 }
