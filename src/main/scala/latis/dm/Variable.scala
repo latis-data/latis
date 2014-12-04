@@ -58,6 +58,8 @@ trait Variable {
         case _: Integer => new Time(scale, md, data) with Integer
       }
     }
+    case _: Real    => Real(this.getMetadata, data)
+    case _: Integer => Integer(this.getMetadata, data)
   }
 }
 
