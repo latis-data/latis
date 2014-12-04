@@ -46,6 +46,30 @@ class TestMetadata {
     assertEquals(None, v)
   }
   
+  @Test
+  def add_property {
+    val md = metadata + ("boo" -> "zoo")
+    assertEquals("zoo", md("boo"))
+  }
+  
+  @Test
+  def new_property_doesnt_change_orig {
+    val md = metadata + ("boo" -> "zoo")
+    assert(metadata.get("boo").isEmpty)
+  }
+  
+  @Test
+  def replace_property {
+    val md = metadata + ("foo" -> "zoo")
+    assertEquals("zoo", md("foo"))
+  }
+  
+  @Test
+  def replace_property_doesnt_change_orig {
+    val md = metadata + ("foo" -> "zoo")
+    assertEquals("bar", metadata("foo"))
+  }
+  
 //  @Test
 //  def name {
 //    val v = metadata.name

@@ -13,6 +13,12 @@ trait Metadata {
     case None => null //TODO: error? default?
   }
   
+  /**
+   * Add a property returning a new Metadata object.
+   * Replace if it already exists.
+   */
+  def +(kv: (String,String)): Metadata = Metadata(getProperties + kv)
+  
   def has(key: String): Boolean
   
   def isEmpty = getProperties.isEmpty
