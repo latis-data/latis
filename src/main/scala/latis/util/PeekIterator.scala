@@ -10,11 +10,22 @@ package latis.util
 abstract class PeekIterator[T >: Null] extends Iterator[T] {
   //Note, the bound on Null allows us to return null for generic type T.
   //TODO: implement something like takeWhile that leave the rest of the Iterator usable.
+  //TODO: implement find that will start with current
   
   /**
    * Cached next value. Will be null if there is no more elements.
    */
   private var _next: T = null
+  
+  /**
+   * Cache the current value.
+   */
+  private var _current: T = null
+  
+  /**
+   * Accessor for the current value.
+   */
+  final def current: T = _current
 
   /**
    * Take a look at the next sample without advancing to it.
@@ -45,10 +56,11 @@ abstract class PeekIterator[T >: Null] extends Iterator[T] {
    * to effectively advance to the next sample.
    */
   final def next: T = {
+    //TODO: synchronize?
     _initialized //make sure we have cached the first value
-    val current = _next
+    _current = _next
     _next = getNext //TODO: get next value to cache asynchronously?
-    current
+    _current
   }
   
   /**

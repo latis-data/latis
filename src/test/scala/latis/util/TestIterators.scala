@@ -58,4 +58,45 @@ class TestIterators {
     val a = pit.peek
     assertEquals(4, a)
   }
+  
+  @Test
+  def find_twice {
+    //Note, 'find' in general invalidates an iterator but seems to work here
+    val it: Iterator[Int] = List(1, 2, 3, 4).iterator
+    val pit = PeekIterator(it)
+    val b = pit.find(_ == 2)
+    val c = pit.find(_ == 3)
+    val a = pit.peek
+    assertEquals(4, a)
+  }
+  
+  @Test
+  def find_twice_same_value {
+    //Note, can only find later values
+    val it: Iterator[Int] = List(1, 2, 3, 4).iterator
+    val pit = PeekIterator(it)
+    val b = pit.find(_ == 2)
+    val c = pit.find(_ == 2)
+    val a = pit.peek
+    assertEquals(null, a)
+  }
+  
+  
+  @Test
+  def current_first {
+    val it: Iterator[Int] = List(1, 2, 3, 4).iterator
+    val pit = PeekIterator(it)
+    val a = pit.current
+    assertEquals(null, a)
+  }
+  
+  @Test
+  def current_last {
+    val it: Iterator[Int] = List(1, 2, 3, 4).iterator
+    val pit = PeekIterator(it)
+    val b = pit.find(_ == 4)
+    val a = pit.current
+    assertEquals(4, a)
+  }
+  
 }
