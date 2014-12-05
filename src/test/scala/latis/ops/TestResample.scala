@@ -44,6 +44,72 @@ class TestResample {
   }
 
   @Test
+  def nearest_two_values_with_scalar_range {
+    val ds = TestDataset.function_of_named_scalar
+    val set = RealSampledSet(List(0.5,1.5))
+    val op = new NearestNeighbor("t", set)
+    val ds2 = op(ds)
+    //AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+    
+    assertEquals(2, data("t").length)
+    assertEquals(0.5, data("t").head, 0.0)
+    assertEquals(1.0, data("a").head, 0.0)
+    assertEquals(1.5, data("t")(1), 0.0)
+    assertEquals(2.0, data("a")(1), 0.0)
+  }
+
+  @Test
+  def nearest_two_values_same_sample_with_scalar_range {
+    val ds = TestDataset.function_of_named_scalar
+    val set = RealSampledSet(List(0.5,1.2))
+    val op = new NearestNeighbor("t", set)
+    val ds2 = op(ds)
+    //AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+    
+    assertEquals(2, data("t").length)
+    assertEquals(0.5, data("t").head, 0.0)
+    assertEquals(1.0, data("a").head, 0.0)
+    assertEquals(1.2, data("t")(1), 0.0)
+    assertEquals(1.0, data("a")(1), 0.0)
+  }
+
+  @Test
+  def nearest_3_values_invalid_after_with_scalar_range {
+    val ds = TestDataset.function_of_named_scalar
+    val set = RealSampledSet(List(0.5, 1.5, 2.3))
+    val op = new NearestNeighbor("t", set)
+    val ds2 = op(ds)
+    //AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+    
+    assertEquals(2, data("t").length)
+    assertEquals(0.5, data("t").head, 0.0)
+    assertEquals(1.0, data("a").head, 0.0)
+    assertEquals(1.5, data("t")(1), 0.0)
+    assertEquals(2.0, data("a")(1), 0.0)
+  }
+
+  @Test
+  def nearest_3_values_invalid_before_with_scalar_range {
+    val ds = TestDataset.function_of_named_scalar
+    val set = RealSampledSet(List(-1.1, 0.5, 1.5))
+    val op = new NearestNeighbor("t", set)
+    val ds2 = op(ds)
+    //AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+    
+    assertEquals(2, data("t").length)
+    assertEquals(0.5, data("t").head, 0.0)
+    assertEquals(1.0, data("a").head, 0.0)
+    assertEquals(1.5, data("t")(1), 0.0)
+    assertEquals(2.0, data("a")(1), 0.0)
+  }
+
+  //TODO: set out of order
+  
+  @Test
   def nearest_single_value_midpoint_with_int_domain_tuple_range {
     val ds = TestDataset.function_of_tuple
     //(myInteger -> (myReal, myText))
@@ -61,6 +127,52 @@ class TestResample {
     assertEquals("2.0", data("myReal").head)
     assertEquals("two", data("myText").head)
   }
+
+  @Test
+  def nearest_single_value_with_function_range {
+    val ds = TestDataset.function_of_functions2
+    val set = IntegerSampledSet(List(2))
+    val op = new NearestNeighbor("x", set)
+    val ds2 = op(ds)
+    //AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+    
+    assertEquals(1, data("x").length)
+    assertEquals(3, data("y").length)
+    assertEquals(2.0, data("x").head, 0.0)
+    assertEquals(20.0, data("z").head, 0.0)
+  }
+
+  @Test
+  def nearest_nested_function_sample {
+    val ds = TestDataset.function_of_functions2
+    //AsciiWriter.write(ds)
+    val set = IntegerSampledSet(List(11))
+    val op = new NearestNeighbor("y", set)
+    val ds2 = op(ds)
+    //AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+
+    assertEquals(4, data("x").length)
+    assertEquals(4, data("y").length) //1 for each outer sample
+    assertEquals(11.0, data("y").head, 0.0)
+    assertEquals(1.0, data("z").head, 0.0)
+  }
+ 
+//  function_of_functions: (x -> y -> z)
+//0 -> 10 -> 0.0
+//     11 -> 1.0
+//     12 -> 2.0
+//1 -> 10 -> 10.0
+//     11 -> 11.0
+//     12 -> 12.0
+//2 -> 10 -> 20.0
+//     11 -> 21.0
+//     12 -> 22.0
+//3 -> 10 -> 30.0
+//     11 -> 31.0
+//     12 -> 32.0
+  
   
   //TODO: error if no match for domain name
   

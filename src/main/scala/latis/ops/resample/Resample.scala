@@ -20,90 +20,81 @@ abstract class Resample(domainName: String, set: DomainSet) extends Operation {
   //TODO: sanity check that domain set is ordered? enforce in DomainSet constructor
   //TODO: preserve type or convert to Reals?
   //TODO: allow RealSampledSet with integer domain?
-  
-  /*
-   * TODO: apply to samples vs getting domain set of Dataset
-   * need 2 samples for strategies other than equality
-   *   consider using Iterator.sliding when we need more than 2 samples
-   * delegate to overridable function for diff strategies
-   * 
+
+  /**
+   * Override this abstract method to implement the resampling strategy
+   * given the bounding Samples and the desired domain sample.
    */
-  
-  protected def resample(sample1: Sample, sample2: Sample, domainValue: Double): Data
+  protected def resample(sample1: Sample, sample2: Sample, domain: Variable): Sample
   
   override def applyToFunction(function: Function): Option[Variable] = {
     //apply if this Function has the domain type we are interested in
     if (function.getDomain.hasName(domainName)) {
       //Make new function with new samples, one for each element of the domain set
-      //assume a 1D numeric domain for now
-      val domain = function.getDomain
-      
+
       val origSamples = PeekIterator(function.iterator)
-          
-      //Iterate over each datum in the new domain set.
-      //Build IterableData for the range of the new Function
-      val newData = set.iterator.map(data => {
-        //get value of new domain sample as double
-        val d = getDomainValue(domain, data)
-        getResampledData(origSamples, d)
-      })
-      val rangeSampleSize = function.getRange.getSize
-      val newRange = IterableData(newData, rangeSampleSize) //assumes same data types
       
-      val data = SampledData(set, newRange)
-      //TODO: munge metadata, especially length
-      val f = Function(function, data)
+      //get new sample for each domain value
+      val newSamples = set.iterator.flatMap(data => {
+        val domain = function.getDomain(data) //make variable of same type but with this Data
+        getNewSample(origSamples, domain)
+      })
+      
+      //set length in function's metadata
+      val length = set.length
+      val md = function.getMetadata + ("length" -> length.toString)
+      val f = Function(function.getDomain, function.getRange, newSamples, md)
       Some(f)
       
     } else {
-      //apply to range to catch nested Functions
-      applyToVariable(function.getRange)
+      //iterate over samples and apply to each
+      val newSamples = function.iterator.flatMap(applyToSample(_))
+      //TODO: munge metadata
+      val f = Function(function, newSamples)
+      Some(f)
     }
   }
   
-  
   /**
-   * 
-   * Iterate on samples (using peek) until we find the pair we need.
-   * Assumes samples are sorted.
-   * This expects the data values to be in the Scalars of the Samples.
+   * Iterate through the samples until we find the bounding pair then delegate to 
+   * the resampling strategy to create the new Sample.
    */
-  private def getResampledData(samples: PeekIterator[Sample], domainValue: Double): Data = {
-    //TODO: consider order
-    //TODO: consider using Iterator.sliding
-    //TODO: use binary search, use blocks from iterator, estimate based on cadence...
-    //TODO: deal with invalid samples, fill with missing values? empty data?
-    /*
-     * TODO: generalize
-     * needs to be up to strategy to decide what to do with out of bounds
-     * not all need 2 samples
-     * maybe this is what needs to be overridden?
-     * 
-     */
+  private def getNewSample(samples: PeekIterator[Sample], domain: Variable): Option[Sample] = {
+    //TODO: there's got to be a cleaner more FP way to do this
+    var newSample: Sample = null
     
-    var data: Data = Data.empty
+    //make sure we have started iterating
+    var sample1 = samples.current match {
+      case null => samples.next
+      case sample: Sample => sample
+    }
+    var sample2 = samples.peek //will be null if we go beyond the end
     
-    while (samples.hasNext && data.isEmpty) {
-      val sample1 = samples.next
-      val sample2 = samples.peek
-      //assume numeric scalar domain, for now
+    //assume numeric scalar domain, for now
+    val domainValue = getDomainValue(domain)
+    
+    //loop until we find the appropriate pair and make a sample or we run out
+    while (newSample == null && sample2 != null) {
       val d1 = getDomainValue(sample1.domain)
       val d2 = getDomainValue(sample2.domain)
       
-      //if domainValue is between (inclusive) these samples
-      if (domainValue.compare(d1) * domainValue.compare(d2) <= 0) data = resample(sample1, sample2, domainValue)
+      //test if val is before
+      //TODO: need to know order? assume ascending for now
+      if (domainValue.compare(d1) < 0) return None
+      //if domainValue is between (inclusive) these samples, independent of order
+      if (domainValue.compare(d1) * domainValue.compare(d2) <= 0) {
+        newSample = resample(sample1, sample2, domain)
+      } else {
+        //get next pair
+        sample1 = samples.next
+        sample2 = samples.peek
+      }
     }
     
-    //TODO: If no data found (e.g. domainValue outside of range) return missing value
-    //TODO: consider out of range, use endpoints for nearest?
-    if (data.isEmpty) ??? //Note, causes warning in MappingIterator and drops sample
-    
-    data
+    if (newSample != null) Some(newSample)
+    else None
   }
-  
-
-  
-  
+    
   /**
    * For domain Variables that contain the data.
    * E.g. from iterating on samples from a function.
@@ -112,18 +103,5 @@ abstract class Resample(domainName: String, set: DomainSet) extends Operation {
     case Number(d) => d
     case _ => throw new Error("The Resample Operation supports only numeric Scalar domains.")
   }
-  
-  /**
-   * From the data using the domain as a template.
-   */
-  //TODO: use DataUtils?
-  def getDomainValue(domain: Variable, data: Data): Double = {
-    val bb = data.getByteBuffer
-    domain match {
-      case _: Real => bb.getDouble
-      case _: Integer => bb.getLong.toDouble
-      //TODO: Index?
-      case _ => throw new Error("The Resample Operation supports only numeric Scalar domains.")
-    }
-  }
+
 }
