@@ -96,6 +96,16 @@ object Selection {
   def apply(vname: String, operation: String, value: String): Operation = {
     //delegate to NearestNeighbor resampling for '~' operator
     //TODO: this feels broken: is '~' really a selection? maybe in relational algebra but not as a filter as assumed here
+    /*
+     * what we want from '~' isn't really resampling
+     * we want the nearest domain value in the result, not the one we asked for, which is what resampling would do
+     * this also reconciles that '~' really is a selection/filter
+     * might help with construction from string value problem
+     * NearestSampleFilter?
+     *   could reuse most of logic
+     *   extend NearestNeighbor?
+     */
+    
     if (operation == "~") NearestNeighbor(vname, value)
     else new Selection(vname, operation, value)
   }
