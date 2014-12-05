@@ -97,6 +97,8 @@ class Projection(val names: Seq[String]) extends Operation {
      *   before: Make Data Iterator from existing Sample Iterator: t -> w -> (a, b)
      *   This would likely be the iterable once problem
      *   
+     * Resample had a similar problem when we tried to operate on the inner function without iterating over the outer samples
+     *   which populated the inner function with data
      */
     val sample2: Sample = applyToSample(sample1) match {
       case Some(s) => s
