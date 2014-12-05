@@ -11,6 +11,8 @@ import latis.dm.Sample
 import latis.dm.Variable
 import latis.dm.WrappedFunction
 import latis.dm.Tuple
+import latis.ops.Operation
+import latis.ops.resample.NearestNeighbor
 
 /**
  * Filter based on a basic boolean expression.
@@ -18,24 +20,6 @@ import latis.dm.Tuple
  */
 protected class Selection(val vname: String, val operation: String, val value: String) extends Filter with Logging {
   //TODO: if domain, delegate to DomainSet
-
-  /*
-   * TODO: support nearest value for domain vars (~)
-   * binary search of domain values would be best
-   *   better for other operators too
-   *   but what about iterating
-   *   start with a block
-   *   estimate how much farther to go
-   * for jdbc (which delegates query to db), use resolution to request window around value
-   * 
-   * Need special behavior for domain variables to support binary search instead of testing each sample
-   *   the latter is still needed for range variables
-   *   ~ won't be supported for range variables
-   *  
-   * See tsds SelectionConstraint
-   * 
-   * Should probably use a resample operation to do "~" as nearest neighbor
-   */
   
   override def applyToScalar(scalar: Scalar): Option[Scalar] = {
     //If the filtering causes an exception, log a warning and return None.
@@ -102,17 +86,20 @@ protected class Selection(val vname: String, val operation: String, val value: S
     }
   }
   
-  //TODO: almost equals (nearest neighbor) "~'
-  
   override def toString = vname + operation + value
 }
 
 
 object Selection {
   
-  def apply(vname: String, operation: String, value: String) = new Selection(vname, operation, value)
+  def apply(vname: String, operation: String, value: String): Operation = {
+    //delegate to NearestNeighbor resampling for '~' operator
+    //TODO: this feels broken: is '~' really a selection? maybe in relational algebra but not as a filter as assumed here
+    if (operation == "~") NearestNeighbor(vname, value)
+    else new Selection(vname, operation, value)
+  }
   
-  def apply(expression: String): Selection = expression.trim match {
+  def apply(expression: String): Operation = expression.trim match {
     case SELECTION.r(name, op, value) => Selection(name, op, value)
     case _ => throw new Error("Failed to make a Selection from the expression: " + expression)
   }
