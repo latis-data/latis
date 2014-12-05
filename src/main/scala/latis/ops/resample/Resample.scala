@@ -12,6 +12,7 @@ import latis.util.PeekIterator
 import latis.data.IterableData
 import latis.data.SampledData
 import latis.ops.Operation
+import latis.time.Time
 
 abstract class Resample(domainName: String, set: DomainSet) extends Operation {
   //TODO: support nD domain
@@ -100,6 +101,7 @@ abstract class Resample(domainName: String, set: DomainSet) extends Operation {
    * E.g. from iterating on samples from a function.
    */
   def getDomainValue(domain: Variable): Double = domain match {
+    case t: Time => t.getJavaTime.toDouble
     case Number(d) => d
     case _ => throw new Error("The Resample Operation supports only numeric Scalar domains.")
   }

@@ -8,6 +8,8 @@ import latis.data.set.DomainSet
 import latis.data.set.RealSampledSet
 import latis.ops.resample.NearestNeighbor
 import latis.data.set.IntegerSampledSet
+import latis.time.Time
+import latis.data.set.TextSampledSet
 
 class TestResample {
 
@@ -173,6 +175,42 @@ class TestResample {
 //     11 -> 31.0
 //     12 -> 32.0
   
+  
+  @Test
+  def nearest_single_value_equals_time_domain {
+    //TODO: Time as integer vs real
+    val ds = TestDataset.time_series
+    val format = ds.findVariableByName("time").get.getMetadata("units").get
+    val newTime = Time.fromIso("1970-01-02")
+    val t = newTime.format(format)
+    /*
+     * TODO: set type needs to match domain type, Time as Text in this case
+     * use TimeSet or TextSet?
+     * consider ordering: use TextSet only if lexically ordered
+     * need TimeSet here
+     * should TimeSet always use Doubles? convert as needed
+     * 
+     * e.g. domain = Time as Text
+     * converted to java time double for comparison
+     * Data in DomainSet is applied to orig Time variable (text type, formatted units)
+     *   time(data)
+     * TextSet might 'just work'
+     * must use native format
+     */
+    //val set = IntegerSampledSet(List(time.getJavaTime))
+    
+    //val set = TextSampledSet(List("1970-01-02"))
+    //val set = TextSampledSet(List("1970/01/02"))
+    val set = TextSampledSet(List(t))
+    val op = new NearestNeighbor("time", set)
+    val ds2 = op(ds)
+    //AsciiWriter.write(ds2)
+    val data = ds2.toStringMap
+    assertEquals(1, data("myTime").length)
+    assertEquals("1970/01/02", data("myTime").head)
+    assertEquals("2.2", data("myReal").head)
+    
+  }
   
   //TODO: error if no match for domain name
   
