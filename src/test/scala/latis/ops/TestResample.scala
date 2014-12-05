@@ -10,6 +10,7 @@ import latis.ops.resample.NearestNeighbor
 import latis.data.set.IntegerSampledSet
 import latis.time.Time
 import latis.data.set.TextSampledSet
+import latis.ops.filter.Selection
 
 class TestResample {
 
@@ -160,6 +161,21 @@ class TestResample {
     assertEquals(11.0, data("y").head, 0.0)
     assertEquals(1.0, data("z").head, 0.0)
   }
+
+  @Test
+  def nearest_nested_function_sample_from_expression {
+    val ds = TestDataset.function_of_functions2
+    val exp = "y~11"
+    val op = Selection(exp)
+    val ds2 = op(ds)
+    //AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+
+    assertEquals(4, data("x").length)
+    assertEquals(4, data("y").length) //1 for each outer sample
+    assertEquals(11.0, data("y").head, 0.0)
+    assertEquals(1.0, data("z").head, 0.0)
+  }
  
 //  function_of_functions: (x -> y -> z)
 //0 -> 10 -> 0.0
@@ -211,6 +227,21 @@ class TestResample {
     assertEquals("2.2", data("myReal").head)
     
   }
+  
+  @Test
+  def nearest_single_value_from_expression {
+    val ds = TestDataset.function_of_named_scalar
+    val exp = "t~1.5"
+    val op = Selection(exp)
+    val ds2 = op(ds)
+    //AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+    
+    assertEquals(1, data("t").length)
+    assertEquals(1.5, data("t").head, 0.0)
+    assertEquals(2.0, data("a").head, 0.0)
+  }
+  //TODO: test Time, Integer domain, not currently supported
   
   //TODO: error if no match for domain name
   

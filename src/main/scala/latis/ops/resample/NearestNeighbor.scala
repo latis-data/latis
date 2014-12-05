@@ -3,6 +3,9 @@ package latis.ops.resample
 import latis.data.set.DomainSet
 import latis.dm.Sample
 import latis.dm.Variable
+import latis.util.StringUtils
+import latis.data.set.RealSampledSet
+import latis.data.set.TextSampledSet
 
 class NearestNeighbor(domainName: String, set: DomainSet) extends Resample(domainName, set) {
   
@@ -24,6 +27,28 @@ class NearestNeighbor(domainName: String, set: DomainSet) extends Resample(domai
     val range = if (dd1 < dd2) sample1.range else sample2.range
     
     Sample(domain, range)
+  }
+  
+}
+
+object NearestNeighbor {
+  
+  def apply(vname: String, value: String): NearestNeighbor = {
+    /*
+     * TODO: need to construct domain set from value
+     * need dataset to get type
+     * should Resample not take a domain set arg?
+     * array of values? string, long, double
+     * could map those to domain set (Data) type
+     * but we want to be able to use string for all cases (e.g. constraint expression)
+     * need to convert time units from iso
+     * 
+     * hack it based on value, for now
+     */
+    val set = if(StringUtils.isNumeric(value)) RealSampledSet(List(value.toDouble))
+    else TextSampledSet(List(value))
+    
+    new NearestNeighbor(vname, set)
   }
   
 }
