@@ -20,6 +20,7 @@ import latis.ops.resample.NearestNeighbor
  */
 protected class Selection(val vname: String, val operation: String, val value: String) extends Filter with Logging {
   //TODO: if domain, delegate to DomainSet
+  //TODO: change operation to operator?
   
   override def applyToScalar(scalar: Scalar): Option[Scalar] = {
     //If the filtering causes an exception, log a warning and return None.
