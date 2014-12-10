@@ -7,6 +7,7 @@ import latis.dm.Binary
 import latis.dm.Function
 import latis.dm.Index
 import latis.dm.Integer
+import latis.dm.Number
 import latis.dm.Real
 import latis.dm.Sample
 import latis.dm.Scalar
@@ -476,5 +477,19 @@ object DataUtils {
       }
 
     }
+  }
+  
+  
+  def getDoubleValue(variable: Variable): Double = variable match {
+    case t: Time if (! t.isNumeric) => t.getJavaTime.toDouble  //use java time if Time is represented as Text
+    case Number(d) => d
+    case _ => Double.NaN
+  }
+  
+  def parseDoubleValue(template: Variable, value: String): Double = template match {
+    //if variable is a Text Time, assume value is ISO format
+    case t: Time if (! t.isNumeric) => Time.isoToJava(value).toDouble
+    case _: Number => value.toDouble
+    case _ => Double.NaN
   }
 }
