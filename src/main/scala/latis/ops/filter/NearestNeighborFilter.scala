@@ -12,6 +12,8 @@ import latis.util.PeekIterator
 
 class NearestNeighborFilter(domainName: String, value: String) extends Operation {
   //TODO: any nD domain
+  //TODO: if domain type is Integer but value is double
+  
   //Note, we do not extend Filter since it drops an outer sample if any innards don't pass
   /*
    * TODO: should this be a Filter?
@@ -56,7 +58,7 @@ class NearestNeighborFilter(domainName: String, value: String) extends Operation
       //compute the 'distance' from each sample
       //TODO: use scalar math (including max) instead of exposing data?
       //requested domain value, converted from string based on this Function's domain
-      val d = DataUtils.parseDoubleValue(domain, value) 
+      val d = DataUtils.parseDoubleValue(domain, value)
       val dd1 = Math.abs(DataUtils.getDoubleValue(fit.current.domain) - d)
       
       //note, if we equal the last sample, peek will be null
