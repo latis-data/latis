@@ -6,6 +6,7 @@ import latis.dm.Variable
 import latis.util.StringUtils
 import latis.data.set.RealSampledSet
 import latis.data.set.TextSampledSet
+import latis.util.DataUtils
 
 class NearestNeighbor(domainName: String, set: DomainSet) extends Resample(domainName, set) {
   
@@ -17,9 +18,9 @@ class NearestNeighbor(domainName: String, set: DomainSet) extends Resample(domai
   override protected def resample(sample1: Sample, sample2: Sample, domain: Variable): Sample = {
     //nearest neighbor
     //assume numeric scalar domain, for now
-    val domainValue = getDomainValue(domain)
-    val d1 = getDomainValue(sample1.domain)
-    val d2 = getDomainValue(sample2.domain)
+    val domainValue = DataUtils.getDoubleValue(domain)
+    val d1 = DataUtils.getDoubleValue(sample1.domain)
+    val d2 = DataUtils.getDoubleValue(sample2.domain)
     val dd1 = Math.abs(domainValue - d1)
     val dd2 = Math.abs(domainValue - d2)
     

@@ -13,6 +13,7 @@ import latis.data.IterableData
 import latis.data.SampledData
 import latis.ops.Operation
 import latis.time.Time
+import latis.util.DataUtils
 
 abstract class Resample(domainName: String, set: DomainSet) extends Operation {
   //TODO: support nD domain
@@ -21,6 +22,7 @@ abstract class Resample(domainName: String, set: DomainSet) extends Operation {
   //TODO: sanity check that domain set is ordered? enforce in DomainSet constructor
   //TODO: preserve type or convert to Reals?
   //TODO: allow RealSampledSet with integer domain?
+  //TODO: consider type akin to visad instead of matching var name
 
   /**
    * Override this abstract method to implement the resampling strategy
@@ -72,12 +74,12 @@ abstract class Resample(domainName: String, set: DomainSet) extends Operation {
     var sample2 = samples.peek //will be null if we go beyond the end
     
     //assume numeric scalar domain, for now
-    val domainValue = getDomainValue(domain)
+    val domainValue = DataUtils.getDoubleValue(domain)
     
     //loop until we find the appropriate pair and make a sample or we run out
     while (newSample == null && sample2 != null) {
-      val d1 = getDomainValue(sample1.domain)
-      val d2 = getDomainValue(sample2.domain)
+      val d1 = DataUtils.getDoubleValue(sample1.domain)
+      val d2 = DataUtils.getDoubleValue(sample2.domain)
       
       //test if val is before
       //TODO: need to know order? assume ascending for now
@@ -94,16 +96,6 @@ abstract class Resample(domainName: String, set: DomainSet) extends Operation {
     
     if (newSample != null) Some(newSample)
     else None
-  }
-    
-  /**
-   * For domain Variables that contain the data.
-   * E.g. from iterating on samples from a function.
-   */
-  def getDomainValue(domain: Variable): Double = domain match {
-    case t: Time => t.getJavaTime.toDouble
-    case Number(d) => d
-    case _ => throw new Error("The Resample Operation supports only numeric Scalar domains.")
   }
 
 }
