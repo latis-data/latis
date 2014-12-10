@@ -10,7 +10,7 @@ import latis.dm.TestDataset
 
 class TestBinaryAdapter {
   
-  var tmpFile = java.io.File.createTempFile("LaTiS", "WriterTest")
+  var tmpFile = java.io.File.createTempFile("LaTiS", "TestBinaryAdapter")
   tmpFile.deleteOnExit
   
   @Test

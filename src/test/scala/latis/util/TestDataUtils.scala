@@ -10,6 +10,7 @@ import latis.data.value.LongValue
 import latis.data.value.DoubleValue
 import latis.writer.Writer
 import latis.ops.filter.FirstFilter
+import latis.time.Time
 
 class TestDataUtils {
 
@@ -26,7 +27,32 @@ class TestDataUtils {
     assertEquals(10.0, data("a")(0), 0.0)
   }
 
+  @Test
+  def real_double_value {
+    val v = Real(3.14)
+    assertEquals(3.14, DataUtils.getDoubleValue(v), 0.0)
+  }
+
+  @Test
+  def integer_double_value {
+    val v = Integer(3)
+    assertEquals(3.0, DataUtils.getDoubleValue(v), 0.0)
+  }
+
+  @Test
+  def text_time_double_value {
+    val v = Time.fromIso("1970-01-01T00:00:01")
+    assertEquals(1000.0, DataUtils.getDoubleValue(v), 0.0)
+  }
+
+  @Test
+  def real_time_double_value {
+    val v = Time(1000.0)
+    assertEquals(1000.0, DataUtils.getDoubleValue(v), 0.0)
+  }
     
+  //-------------------------------------------------
+  
   def function_of_scalar_from_data_map = {
     val domain = Integer(Metadata("x"))
     val range = Real(Metadata("a"))

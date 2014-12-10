@@ -105,6 +105,14 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     }
   }
 
+  def findFunction: Option[Function] = this match {
+    case _: Scalar => None
+    case Tuple(vars) => {
+      val fs = vars.flatMap(_.findFunction)
+      if (fs.nonEmpty) Some(fs.head) else None
+    }
+    case f: Function => Some(f)
+  }
   
   /**
    * Does this Variable have the given name or alias.

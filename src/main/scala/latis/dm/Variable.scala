@@ -19,11 +19,13 @@ trait Variable {
   def isNumeric: Boolean = getData.isInstanceOf[NumberData]
   def getNumberData: NumberData = getData.asInstanceOf[NumberData]
   //TODO: deal with TextData
+  //TODO: empty data, Option?
   
 //  def getLength: Int
   def getSize: Int
   
   def findVariableByName(name: String): Option[Variable]
+  def findFunction: Option[Function]
   def hasName(name: String): Boolean
   
   def toSeq: Seq[Scalar]
@@ -56,6 +58,8 @@ trait Variable {
         case _: Integer => new Time(scale, md, data) with Integer
       }
     }
+    case _: Real    => Real(this.getMetadata, data)
+    case _: Integer => Integer(this.getMetadata, data)
   }
 }
 

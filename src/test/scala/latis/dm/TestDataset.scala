@@ -91,6 +91,8 @@ object TestDataset {
   
   def function_of_functions = Dataset(TestNestedFunction.function_of_functions_with_data_in_scalars, Metadata("function_of_functions"))
   
+  def function_of_functions2 = Dataset(TestNestedFunction.function_of_functions_with_sampled_data, Metadata("function_of_functions2"))
+  
   def mixed_function = {
     val samples = List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), (function_of_scalar+(0)).getVariables(0))),
                        Sample(Real(Metadata("myReal"), 1.1), Tuple(Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1)), (function_of_scalar+(1)).getVariables(0))),
@@ -107,11 +109,19 @@ object TestDataset {
   }
   
   def time_series = {
-    val md = Map("name" -> "myTime", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd")
+    val md = Map("name" -> "myTime", "type" -> "text", "length" -> "10", "units" -> "yyyy/MM/dd", "alias"->"time")
     val samples = List(Sample(Time(Metadata(md), "1970/01/01"), Real(Metadata("myReal"), 1.1)),
                        Sample(Time(Metadata(md), "1970/01/02"), Real(Metadata("myReal"), 2.2)),
                        Sample(Time(Metadata(md), "1970/01/03"), Real(Metadata("myReal"), 3.3)))
     Dataset(Function(samples), Metadata("time_series"))
+  }
+  
+  def numeric_time_series = {
+    val md = Map("name" -> "myTime", "type" -> "real", "units" -> "days since 2000-01-01", "alias"->"time")
+    val samples = List(Sample(Time(Metadata(md), 0.0), Real(Metadata("myReal"), 1.1)),
+                       Sample(Time(Metadata(md), 1.0), Real(Metadata("myReal"), 2.2)),
+                       Sample(Time(Metadata(md), 2.0), Real(Metadata("myReal"), 3.3)))
+    Dataset(Function(samples), Metadata("numeric_time_series"))
   }
   
   def empty_function = Dataset(Function(Real(Metadata("domain")), Real(Metadata("range")), Iterator.empty), Metadata("empty_function"))

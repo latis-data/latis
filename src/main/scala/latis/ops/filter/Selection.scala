@@ -11,6 +11,8 @@ import latis.dm.Sample
 import latis.dm.Variable
 import latis.dm.WrappedFunction
 import latis.dm.Tuple
+import latis.ops.Operation
+import latis.ops.resample.NearestNeighbor
 
 /**
  * Filter based on a basic boolean expression.
@@ -18,7 +20,8 @@ import latis.dm.Tuple
  */
 protected class Selection(val vname: String, val operation: String, val value: String) extends Filter with Logging {
   //TODO: if domain, delegate to DomainSet
-
+  //TODO: change operation to operator?
+  
   override def applyToScalar(scalar: Scalar): Option[Scalar] = {
     //If the filtering causes an exception, log a warning and return None.
     try {
@@ -69,8 +72,6 @@ protected class Selection(val vname: String, val operation: String, val value: S
     it.isEmpty match {
       case true => None
       case false => {
-        //TODO: is this used for only inner functions? outer with kids have data?
-        //  can we determine the new length? is this just used as a template?
         Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
       }
     }
@@ -86,17 +87,19 @@ protected class Selection(val vname: String, val operation: String, val value: S
     }
   }
   
-  //TODO: almost equals (nearest neighbor) "~'
-  
   override def toString = vname + operation + value
 }
 
 
 object Selection {
   
-  def apply(vname: String, operation: String, value: String) = new Selection(vname, operation, value)
+  def apply(vname: String, operation: String, value: String): Operation = {
+    //delegate to NearestNeighbor filter for '~' operator
+    if (operation == "~") NearestNeighborFilter(vname, value)
+    else new Selection(vname, operation, value)
+  }
   
-  def apply(expression: String): Selection = expression.trim match {
+  def apply(expression: String): Operation = expression.trim match {
     case SELECTION.r(name, op, value) => Selection(name, op, value)
     case _ => throw new Error("Failed to make a Selection from the expression: " + expression)
   }

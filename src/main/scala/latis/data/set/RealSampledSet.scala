@@ -5,6 +5,8 @@ import latis.data.value.DoubleValue
 import latis.data.Data
 
 class RealSampledSet(values: immutable.Seq[Double]) extends DomainSet {
+  
+  //TODO: assert that these are ordered
 
   def apply(index: Int): Data = DoubleValue(values(index))
   

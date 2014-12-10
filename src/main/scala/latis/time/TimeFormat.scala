@@ -3,6 +3,7 @@ package latis.time
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
+import java.text.ParseException
 
 /**
  * TimeFormat support that is thread safe and assumes GMT time zone.
@@ -20,7 +21,11 @@ class TimeFormat(format: String) {
   }
 
   def parse(string: String): Long = this.synchronized {
-    sdf.parse(string).getTime
+    try {
+      sdf.parse(string).getTime
+    } catch {
+      case e: ParseException => throw new Error("Unable to parse time string (" + string + ") with the format " + format)
+    }
   }
 
   override def toString = format

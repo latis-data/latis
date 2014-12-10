@@ -1,6 +1,9 @@
-package latis.reader.tsml
+package latis.reader
 
-import scala.annotation.migration
+import java.io.File
+import java.net.URI
+import java.net.URL
+
 import scala.io.Source
 
 import latis.dm.Dataset
@@ -11,7 +14,6 @@ import latis.dm.Tuple
 import latis.dm.Variable
 import latis.metadata.Metadata
 import latis.ops.Operation
-import latis.reader.tsml.ml.Tsml
 import play.api.libs.json.JsArray
 import play.api.libs.json.JsNumber
 import play.api.libs.json.JsObject
@@ -20,9 +22,7 @@ import play.api.libs.json.JsString
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
 
-class JsonAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
-
-  //---- Manage data source ---------------------------------------------------
+class JsonReader(path: String) extends DatasetAccessor {
   
   private var source: Source = null
   
@@ -34,12 +34,22 @@ class JsonAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     source
   }
   
-  override def close {
+  def getUrl: URL = {
+    val uri = new URI(path)
+    if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
+    else if (path.startsWith(File.separator)) new URL("file:" + path) //absolute path
+    else getClass.getResource("/"+path) match { //relative path: try looking in the classpath
+      case url: URL => url
+      case null => new URL("file:" + scala.util.Properties.userDir + File.separator + path) //relative to current working directory
+    }
+  }
+  
+  def close {
     if (source != null) source.close
   }
   
-  
-  override def getDataset(ops: Seq[Operation]): Dataset = {
+  def getDataset: Dataset = getDataset(Seq[Operation]())
+  def getDataset(ops: Seq[Operation]): Dataset = {
   
     //read entire source into string, join with new line
     val jsonString = getDataSource.getLines.mkString(sys.props("line.separator"))
@@ -99,4 +109,12 @@ class JsonAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
         
     Tuple(vars, Metadata(name))
   }
+}
+
+object JsonReader {
+  
+  def apply(url: URL) = if (url.getPath.endsWith(".json")) new JsonReader(url.getPath) else throw new Exception("JsonReader can only read .json files")
+
+  def apply(path: String) = if (path.endsWith(".json")) new JsonReader(path) else throw new Exception("JsonReader can only read .json files")
+  
 }

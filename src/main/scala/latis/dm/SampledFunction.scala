@@ -20,6 +20,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   //TODO: no longer the case? require operation to make new SampledFunction if it changes the type instead of a wrapped function
   def getDomain: Variable = domain
   def getRange: Variable = range
+  def getSample: Sample = Sample(domain, range)
   
   /**
    * Return the number of samples represented by this SampledFunction.

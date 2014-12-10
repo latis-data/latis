@@ -7,6 +7,7 @@ import latis.data.value.LongValue
 
 class IntegerSampledSet(values: immutable.Seq[Long]) extends DomainSet {
   //TODO: factor out SampledSet?
+  //TODO: assert that these are ordered
 
   def apply(index: Int): Data = LongValue(values(index))
   
