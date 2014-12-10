@@ -479,16 +479,39 @@ object DataUtils {
     }
   }
   
-  
+  /**
+   * Return the data value of the given Variable as a Double.
+   * This applies only to Numeric or Time Scalars. Any others with return NaN.
+   * If the Variable is Time of type Text, the value will be in milliseconds since 1970-01-01.
+   */
   def getDoubleValue(variable: Variable): Double = variable match {
     case t: Time if (! t.isNumeric) => t.getJavaTime.toDouble  //use java time if Time is represented as Text
     case Number(d) => d
+    //TODO: deal with empty data
     case _ => Double.NaN
   }
   
+  /**
+   * Return the given String value as a Double interpreting it as a data value
+   * from the given template variable. 
+   * This applies only to Numeric or Time Scalars. Any others with return NaN.
+   * This handles the case of different Time types:
+   *   If Time is Text, the value is interpreted as an ISO 8601 string.
+   *   If Time is Real or Integer and the value is NOT convertable to a double, 
+   *     it is assumed to be an ISO string and will be converted to the native units of the Time template.
+   */
   def parseDoubleValue(template: Variable, value: String): Double = template match {
-    //if variable is a Text Time, assume value is ISO format
-    case t: Time if (! t.isNumeric) => Time.isoToJava(value).toDouble
+    case t: Time => t match {
+      case _: Text => Time.isoToJava(value).toDouble  //if variable is a Text Time, assume value is ISO format
+      case _: Number => {
+        if (StringUtils.isNumeric(value)) value.toDouble  //if value is a number assume native units
+        else {  //assume value is an iso string
+          val timeScale = t.getUnits  //TODO: error if no units? assume default?
+          val t2 = Time.fromIso(value).convert(timeScale)
+          DataUtils.getDoubleValue(t2)
+        }
+      }
+    }
     case _: Number => value.toDouble
     case _ => Double.NaN
   }
