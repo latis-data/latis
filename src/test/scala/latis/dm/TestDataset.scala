@@ -116,6 +116,14 @@ object TestDataset {
     Dataset(Function(samples), Metadata("time_series"))
   }
   
+  def numeric_time_series = {
+    val md = Map("name" -> "myTime", "type" -> "real", "units" -> "days since 2000-01-01", "alias"->"time")
+    val samples = List(Sample(Time(Metadata(md), 0.0), Real(Metadata("myReal"), 1.1)),
+                       Sample(Time(Metadata(md), 1.0), Real(Metadata("myReal"), 2.2)),
+                       Sample(Time(Metadata(md), 2.0), Real(Metadata("myReal"), 3.3)))
+    Dataset(Function(samples), Metadata("numeric_time_series"))
+  }
+  
   def empty_function = Dataset(Function(Real(Metadata("domain")), Real(Metadata("range")), Iterator.empty), Metadata("empty_function"))
   
   def index_function = Dataset(Function(List(Integer(1), Integer(2))), Metadata("indexFunctionDS"))
