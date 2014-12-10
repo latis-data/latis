@@ -44,6 +44,8 @@ object NearestNeighbor {
      * need to convert time units from iso
      * 
      * hack it based on value, for now
+     * 
+     * See NearestNeighborFilter
      */
     val set = if(StringUtils.isNumeric(value)) RealSampledSet(List(value.toDouble))
     else TextSampledSet(List(value))
