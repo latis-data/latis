@@ -100,6 +100,7 @@ class TestSelection {
     assertEquals(3, n)
   }
   
+  //----------------------------------------------
   
   @Test
   def nearest_equals_with_scalar_range {
@@ -129,6 +130,19 @@ class TestSelection {
     assertEquals(1, data("t").length)
     assertEquals(2.0, data("t").head, 0.0)
     assertEquals(2.0, data("a").head, 0.0)
+  }
+
+  @Test
+  def nearest_round_down_with_scalar_range {
+    val ds = TestDataset.function_of_named_scalar
+    val op = NearestNeighborFilter("t", 1.4)
+    val ds2 = op(ds)
+    //AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+    
+    assertEquals(1, data("t").length)
+    assertEquals(1.0, data("t").head, 0.0)
+    assertEquals(1.0, data("a").head, 0.0)
   }
   
   @Test
@@ -245,6 +259,54 @@ class TestSelection {
     assertEquals(1, data("myTime").length)
     assertEquals("1970/01/02", data("myTime").head)
     assertEquals("2.2", data("myReal").head)
+  }
+  
+  @Test
+  def nearest_iso_equals_real_time_domain {
+    val ds = TestDataset.numeric_time_series
+    val op = NearestNeighborFilter("time", "2000-01-01")
+    val ds2 = op(ds)
+    // AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+    assertEquals(1, data("myTime").length)
+    assertEquals(0.0, data("myTime").head, 0.0)
+    assertEquals(1.1, data("myReal").head, 0.0)
+  }
+  
+  @Test
+  def nearest_iso_midpoint_real_time_domain {
+    val ds = TestDataset.numeric_time_series
+    val op = NearestNeighborFilter("time", "2000-01-01T12:00:00")
+    val ds2 = op(ds)
+    // AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+    assertEquals(1, data("myTime").length)
+    assertEquals(1.0, data("myTime").head, 0.0)
+    assertEquals(2.2, data("myReal").head, 0.0)
+  }
+  
+  @Test
+  def nearest_numeric_equals_real_time_domain {
+    val ds = TestDataset.numeric_time_series
+    val op = NearestNeighborFilter("time", "0")
+    val ds2 = op(ds)
+    // AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+    assertEquals(1, data("myTime").length)
+    assertEquals(0.0, data("myTime").head, 0.0)
+    assertEquals(1.1, data("myReal").head, 0.0)
+  }
+  
+  @Test
+  def nearest_numeric_midpoint_real_time_domain {
+    val ds = TestDataset.numeric_time_series
+    val op = NearestNeighborFilter("time", "1.5")
+    val ds2 = op(ds)
+    // AsciiWriter.write(ds2)
+    val data = ds2.toDoubleMap
+    assertEquals(1, data("myTime").length)
+    assertEquals(2.0, data("myTime").head, 0.0)
+    assertEquals(3.3, data("myReal").head, 0.0)
   }
   
   //TODO: error if no match for domain name
