@@ -146,9 +146,9 @@ object Time {
         //Assume length is not set, for now. TODO: obey tsml defined length?
         case Some(u) => {
           //TODO: make sure units are valid TimeFormat
-          new VariableMetadata(md.getProperties + ("length" -> u.length.toString)) //TODO: don't count "'"
+          md + ("length" -> u.length.toString) //TODO: don't count "'"
         }
-        case None => new VariableMetadata(md.getProperties + ("units" -> TimeFormat.ISO.toString) + ("length" -> "23"))
+        case None => md + ("units" -> TimeFormat.ISO.toString) + ("length" -> "23")
       }
       //Note, formatted times will use the default numerical time units as needed.
       new Time(TimeScale.DEFAULT, md2) with Text
@@ -158,7 +158,7 @@ object Time {
       val scale = md.get("units") match {
         case Some(u) => TimeScale(u)
         case None    => {
-          md2 = new VariableMetadata(md.getProperties + ("units" -> TimeScale.DEFAULT.toString))
+          md2 = md + ("units" -> TimeScale.DEFAULT.toString)
           TimeScale.DEFAULT
         }
       }
@@ -184,7 +184,7 @@ object Time {
       case Some(u) => TimeScale(u)
       case None => {
         //Use default time scale, add units to metadata
-        metadata = new VariableMetadata(md.getProperties + ("units" -> TimeScale.DEFAULT.toString))
+        metadata = md + ("units" -> TimeScale.DEFAULT.toString)
         TimeScale.DEFAULT
       }
     }
@@ -197,7 +197,7 @@ object Time {
       case Some(u) => TimeScale(u)
       case None => {
         //Use default time scale, add units to metadata
-        metadata = new VariableMetadata(md.getProperties + ("units" -> TimeScale.DEFAULT.toString))
+        metadata = md + ("units" -> TimeScale.DEFAULT.toString)
         TimeScale.DEFAULT
       }
     }   

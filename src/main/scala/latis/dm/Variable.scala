@@ -47,6 +47,7 @@ trait Variable {
   //experimental: build from template with data
   //TODO: consider scala's CanBuildFrom...
   //TODO: pattern match here or do in subclasses?
+  //TODO: don't confuse with function evaluation, call this "copy"...?
   def apply(data: Data): Variable = this match {
     //TODO: make sure Data is valid, length
     case t: Time => {
