@@ -8,6 +8,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 import latis.reader.tsml.TsmlReader
+import latis.writer.AsciiWriter
 import latis.writer.Writer
 
 class TestJsonAdapter {
@@ -16,7 +17,7 @@ class TestJsonAdapter {
   tmpFile.deleteOnExit
   
   @Test
-  def test_reader{
+  def test_adapter{
     val fos = new FileOutputStream(tmpFile)
     val ds = TsmlReader("datasets/test/json.tsml").getDataset
     Writer(fos,"txt").write(ds)
@@ -35,5 +36,11 @@ class TestJsonAdapter {
     //for (url <- urls) println(url)
     assertEquals(6, urls.length)
     assertEquals("my_url_a1", urls.head)
+  }
+  
+  //@Test
+  def reader {
+    val path = "datasets/test/catalog.json"
+    AsciiWriter.write(JsonReader(path).getDataset)
   }
 }

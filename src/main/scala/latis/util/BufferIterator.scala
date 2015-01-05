@@ -9,6 +9,10 @@ import latis.dm.Real
 import latis.dm.Text
 import latis.dm.Variable
 
+/**
+ * Makes a PeekIterator of Data from a ByteBuffer. 
+ * A template Variable is required to determine how to segment the buffer.
+ */
 class BufferIterator(buffer: ByteBuffer, v: Variable) extends PeekIterator[Data]{
   
   final protected def getNext: Data = {

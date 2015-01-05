@@ -10,10 +10,13 @@ import latis.time.Time
 
 /**
  * Integrates the innermost function of a dataset using a trapezoidal Riemann sum. 
- * Start and end poins of integral can be specified or left empty to integrate over the entire function. 
+ * Start and end points of integral can be specified or left empty to integrate over the entire function. 
  */
 class Integrate(start: Double = Double.NaN, end: Double = Double.NaN) extends Operation {
   
+  /**
+   * Integration is only applied to the innermost function
+   */
   override def applyToFunction(f: Function): Option[Variable] = {
     val fin = f.getSample.findFunction
     fin match {
@@ -22,6 +25,9 @@ class Integrate(start: Double = Double.NaN, end: Double = Double.NaN) extends Op
     }
   }
   
+  /**
+   * Get the Double value of a Number or Time, otherwise NaN.
+   */
   def varToDouble(v: Variable): Double = v match {
     case n: Number => n.doubleValue
     case t: Tuple => t.getVariables.map(varToDouble(_)).head
@@ -29,6 +35,9 @@ class Integrate(start: Double = Double.NaN, end: Double = Double.NaN) extends Op
     case _ => Double.NaN
   }
   
+  /**
+   * Performs a trapezoidal Riemann sum over a function
+   */
   def rSum(function: Function): Double = {
     val it = function.iterator
     var sum = 0.0
