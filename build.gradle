@@ -52,6 +52,9 @@ dependencies {
 	
 	//iCalendar support
 	compile 'net.sf.biweekly:biweekly:0.3.2'
+	
+	//apache math commons
+	compile 'org.apache.commons:commons-math:2.2'
 }
 
 
