@@ -28,7 +28,7 @@ class Tsml(val xml: Elem) {
    * Get all the processing instructions (ProcInstr) for the Dataset
    * as a Map from the type (target) to a Seq of values (proctext).
    */
-  lazy val processingInstructions: Map[String, Seq[String]] = {
+  lazy val processingInstructions: Map[String, Seq[String]] = { //TODO: currently only searches first level children of "dataset"
     val pis: Seq[ProcInstr] = (xml \ "dataset")(0).child.filter(_.isInstanceOf[ProcInstr]).map(_.asInstanceOf[ProcInstr])
     val pimap: Map[String, Seq[ProcInstr]] = pis.groupBy(_.target) //put into Map by target name
     pimap.map((pair) => (pair._1, pair._2.map(_.proctext))) //change Seq of PIs to Seq of their text values

@@ -1,5 +1,15 @@
 package latis.reader.tsml
 
+import java.io.File
+import java.net.URI
+import java.net.URL
+
+import scala.Option.option2Iterable
+import scala.collection.Map
+import scala.collection.Seq
+import scala.collection.immutable
+import scala.collection.mutable
+
 import latis.data.Data
 import latis.data.seq.DataSeq
 import latis.dm.Dataset
@@ -12,26 +22,18 @@ import latis.dm.Variable
 import latis.metadata.Metadata
 import latis.ops.Operation
 import latis.ops.Projection
+import latis.ops.RenameOperation
+import latis.ops.UnitConversion
+import latis.ops.VectorMagnitudeDerivation
 import latis.ops.filter.Selection
 import latis.reader.tsml.ml.FunctionMl
 import latis.reader.tsml.ml.ScalarMl
+import latis.reader.tsml.ml.TimeMl
 import latis.reader.tsml.ml.Tsml
 import latis.reader.tsml.ml.TupleMl
 import latis.reader.tsml.ml.VariableMl
-import java.io.File
-import java.net.URI
-import java.net.URL
-import scala.Option.option2Iterable
-import scala.collection.Map
-import scala.collection.Seq
-import scala.collection.immutable
-import scala.collection.mutable
-import scala.io.Source
-import latis.util.DataUtils
-import latis.reader.tsml.ml.TimeMl
 import latis.time.Time
-import latis.ops.UnitConversion
-import latis.ops.RenameOperation
+import latis.util.DataUtils
 
 
 /**
@@ -348,8 +350,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     })
     
     val renames = tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
+    val derivations = tsml.getProcessingInstructions("derived").map(VectorMagnitudeDerivation(_))
     
-    projections ++ selections ++ conversions ++ renames
+    projections ++ selections ++ conversions ++ renames ++ derivations
   }
   
   /**

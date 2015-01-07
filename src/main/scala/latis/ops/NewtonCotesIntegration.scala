@@ -1,8 +1,8 @@
 package latis.ops
 
-import latis.dm._
 import org.apache.commons.math.analysis.interpolation.SplineInterpolator
-import latis.dm.implicits
+
+import latis.dm.Function
 
 /**
  * 4th degree Newton-Cotes integration. Mimics IDL int_tabulate
@@ -11,8 +11,8 @@ class NewtonCotesIntegration(start: Double = Double.NaN, stop: Double = Double.N
   
   def integrate(f: Function): Double = {
     val (u,v) = f.iterator.duplicate
-    val x = u.map(sam => sam.domain.getNumberData.doubleValue).toArray 
-    val y = v.map(sam => sam.range.getNumberData.doubleValue).toArray
+    val x = u.map(sam => varToDouble(sam.domain)).toArray 
+    val y = v.map(sam => varToDouble(sam.range)).toArray
     val interp = new SplineInterpolator().interpolate(x,y) //use interpolation from apache commons math. 
     
     var segments = x.length - 1

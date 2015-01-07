@@ -1,6 +1,6 @@
 package latis.ops
 
-import latis.dm._
+import latis.dm.Function
 
 class RiemannTrapezoidIntegration(start: Double = Double.NaN, stop: Double = Double.NaN) extends Integration(start,stop) {
   

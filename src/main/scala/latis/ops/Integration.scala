@@ -29,7 +29,7 @@ abstract class Integration(a: Double = Double.NaN, b: Double = Double.NaN) exten
   
   /**
    * Takes the samples from the function for which the domain is between start and stop.
-   * NaN indicates that all values above/below the min/max point should be included.
+   * NaN indicates that no values should be filtered at that bound.
    */
   def subsection(f: Function, start: Double, stop: Double): Function = {
     Function(f.getDomain, f.getRange, f.iterator.dropWhile(!start.isNaN && _.domain.getNumberData.doubleValue < start)
