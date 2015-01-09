@@ -1,21 +1,13 @@
 package latis.ops
 
-import latis.dm.TestDataset
-import latis.dm.Integer
-import latis.dm.Function
+import org.junit.Assert.assertEquals
 import org.junit.Test
-import latis.dm.Dataset
-import latis.dm.Tuple
-import latis.metadata.Metadata
+
 import latis.dm.Real
 import latis.dm.Sample
-import org.junit.Assert._
-import latis.time.Time
-import latis.dm.Text
-import latis.dm.Index
-import latis.dm.implicits._
-import latis.dm.AbstractTuple
-import latis.writer.Writer
+import latis.dm.TestDataset
+import latis.dm.Tuple
+import latis.dm.implicits.doubleToDataset
 
 class TestSubtraction {
   

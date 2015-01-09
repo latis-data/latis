@@ -20,11 +20,11 @@ import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.metadata.Metadata
+import latis.ops.MathExpressionDerivation
 import latis.ops.Operation
 import latis.ops.Projection
 import latis.ops.RenameOperation
 import latis.ops.UnitConversion
-import latis.ops.VectorMagnitudeDerivation
 import latis.ops.filter.Selection
 import latis.reader.tsml.ml.FunctionMl
 import latis.reader.tsml.ml.ScalarMl
@@ -350,7 +350,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     })
     
     val renames = tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
-    val derivations = tsml.getProcessingInstructions("derived").map(VectorMagnitudeDerivation(_))
+    val derivations = tsml.getProcessingInstructions("derived").map(MathExpressionDerivation(_))
     
     projections ++ selections ++ conversions ++ renames ++ derivations
   }

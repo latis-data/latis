@@ -1,5 +1,7 @@
 package latis.ops
 
+import scala.Option.option2Iterable
+
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Sample
@@ -8,8 +10,6 @@ import latis.dm.Tuple
 import latis.dm.Variable
 import latis.dm.WrappedFunction
 import latis.util.LatisProperties
-
-import scala.Option.option2Iterable
 
 /**
  * Base type for operations that transform on Dataset into another.

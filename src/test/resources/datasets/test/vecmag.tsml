@@ -12,7 +12,7 @@
     <real name="a"/>
     <real name="b"/>
     <real name="c"/>
-    <?derived a b c X?>
+    <?derived X=sqrt(a*a+b*b+c*c)?>
       
 
   </dataset>
