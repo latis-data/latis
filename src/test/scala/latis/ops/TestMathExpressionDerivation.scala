@@ -6,7 +6,7 @@ import org.junit.Test
 import latis.dm.TestDataset
 import latis.reader.tsml.TsmlReader
 
-class TestVectorMagnitude {
+class TestMathExpressionDerivation {
   
   @Test
   def test_E {
