@@ -21,17 +21,20 @@ import latis.ops.math.MathOperation
  */
 class MathExpressionDerivation(str: String) extends Operation {
   
+  var ds: Dataset = Dataset(List())
+  
 /**
  *   If the Dataset contains a function, the derivation will be handled by applyToFunction.
  *   Otherwise, the derived variable is calculated here and added as a first level variable of the Dataset. 
  */  
-  override def apply(ds: Dataset): Dataset = {
-    val md = ds.getMetadata
-    val vars = ds.getVariables
+  override def apply(dataset: Dataset): Dataset = {
+    ds = dataset
+    val md = dataset.getMetadata
+    val vars = dataset.getVariables
     val fs = vars.filter(_.isInstanceOf[Function])
     fs.length match {
-      case 0 => Dataset(vars :+ Real(Metadata(str.takeWhile(_ != '=').trim), parseExpression(str.substring(str.indexOf('=')+1), ds).toSeq(0).getData), md)
-      case _ => Dataset(vars.flatMap(applyToVariable(_)), md)
+      case 0 => Dataset(vars :+ Real(Metadata(str.takeWhile(_ != '=').trim), parseExpression(str.substring(str.indexOf('=')+1)).toSeq(0).getData), md)
+      case _ => Dataset(vars.flatMap(applyToVariable(_)), md) //won't have access to Variables outside the function. 
     }
   }
   
@@ -48,8 +51,9 @@ class MathExpressionDerivation(str: String) extends Operation {
    * Adds the derived variable to the sample. 
    */
   override def applyToSample(sample: Sample): Option[Sample] = {
-    val name = str.substring(0,str.indexOf('=')).trim
-    val r = Real(Metadata(name), parseExpression(str.substring(str.indexOf('=')+1), sample).getVariables.head.getNumberData.doubleValue)
+    val name = str.substring(0,str.indexOf('='))
+    ds = sample
+    val r = Real(Metadata(name), parseExpression(str.substring(str.indexOf('=')+1)).getVariables.head.getData)
     Some(Sample(sample.domain, Tuple(sample.range.toSeq :+ r)))
   }
   
@@ -79,15 +83,15 @@ class MathExpressionDerivation(str: String) extends Operation {
   /**
    * Given a string and a Dataset containing the necessary Variables, evaluates the string as a math expression. 
    */
-  def parseExpression(str: String, ds: Dataset): Dataset = {
+  def parseExpression(str: String): Dataset = {
     if(str == "PI") Math.PI
     else if(str == "E") Math.E
-    else try str.trim.toDouble
+    else try str.toDouble
     catch {case e: NumberFormatException => 
-      val ov = ds.findVariableByName(str.trim)
+      val ov = ds.findVariableByName(str)
       ov match {
         case Some(v) => v
-        case None => findOp(str.trim, ds)
+        case None => findOp(str)
       }
     }
   }
@@ -95,93 +99,74 @@ class MathExpressionDerivation(str: String) extends Operation {
   var tempCount = 0
   
   /**
-   * Evaluates one math operation in the string. 
+   * Finds and evaluates one operation in the expression.
    */
-  def findOp(str: String, ds: Dataset): Dataset = { //cannot use ** for power
-    if(str.contains("sqrt")) { //operations followed by (...) must be evaluated first or else the () will be lost.
-      val i1 = str.indexOfSlice("sqrt")+4
-      val i2 = findCloseParen(str, i1)
-      val sub = str.substring(i1-4, i2+1)
-      val t = MathOperation(Math.sqrt(_))(parseExpression(sub.drop(4),ds))
+  def findOp(str: String): Dataset = {
+    //named operations followed by (...) must be evaluated first or else the () will be lost.
+    //names should be looked for in order from longest to shortest to prevent errors with substrings such as "cos" in "acos".
+    val names = Seq("deg_to_radians", "sqrt", "acos", "cos", "sin").filter(str.contains(_))
+    if(str.contains("atan2")) { //atan2 is special because it takes two args
+      val i1 = str.indexOf("atan2")
+      val i2 = findCloseParen(str, i1) + 1
+      val sub = str.substring(i1, i2)
+      val args = str.substring(i1+6,i2-1).split(",")
+      val t = MathOperation(Math.atan2(_,_), parseExpression(args(1)))(parseExpression(args(0)))
       tempCount += 1
-      parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount),
-                      CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount)))
+      ds = CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
+      parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount))
     }
-    else if(str.contains("acos")) {
-      val i1 = str.indexOfSlice("acos")+4
-      val i2 = findCloseParen(str, i1)
-      val sub = str.substring(i1-4, i2+1)
-      val t = MathOperation(Math.acos(_))(parseExpression(sub.drop(4),ds))
-      tempCount += 1
-      parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount), 
-                      CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount)))
-    }
-    else if(str.contains("atan2")) {
-      val i1 = str.indexOfSlice("atan2")+5
-      val i2 = findCloseParen(str, i1)
-      val sub = str.substring(i1-5, i2+1)
-      val ps = str.substring(i1+1,i2).split(",")
-      val t = MathOperation(Math.atan2(_,_), parseExpression(ps(1),ds))(parseExpression(ps(0),ds))
-      tempCount += 1
-      parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount), 
-                      CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount)))
-    }
-    else if(str.contains("sin")) {
-      val i1 = str.indexOfSlice("sin")+3
-      val i2 = findCloseParen(str, i1)
-      val sub = str.substring(i1-3, i2+1)
-      val t = MathOperation(Math.sin(_))(parseExpression(sub.drop(3),ds))
-      tempCount += 1
-      parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount), 
-                      CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount)))
-    }
-    else if(str.contains("cos")) {
-      val i1 = str.indexOfSlice("cos")+3
-      val i2 = findCloseParen(str, i1)
-      val sub = str.substring(i1-3, i2+1)
-      val t = MathOperation(Math.cos(_))(parseExpression(sub.drop(3),ds))
-      tempCount += 1
-      parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount), 
-                      CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount)))
-    }
-    else if(str.contains("deg_to_radians")) {
-      val i1 = str.indexOfSlice("deg_to_radians")+14
-      val i2 = findCloseParen(str, i1)
-      val sub = str.substring(i1-14, i2+1)
-      val t = MathOperation(Math.toRadians(_))(parseExpression(sub.drop(14),ds))
-      tempCount += 1
-      parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount), 
-                      CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount)))
-    }
-    
+    else if(names.nonEmpty) applyNamedOperation(str, names(0))
+ 
     //evaluates innermost set of (). Keeps result in appended temp Dataset so its value can be accessed later.
     else if(str.contains("(")) {
       val sub = inParen(str)
-      val t = parseExpression(sub,ds)
+      val t = parseExpression(sub)
       tempCount += 1
-      parseExpression(str.replaceAllLiterally("("+sub+")", "temp"+tempCount), 
-                      CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount) ))
+      ds = CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
+      parseExpression(str.replaceAllLiterally("("+sub+")", "temp"+tempCount))
     }
     
-    // binary operators are found in reverse order of operations because the first operator found is the last evaluated
-    else if(str.contains("+") || str.contains("-")) { 
-      val i = str.lastIndexOf("+") max str.lastIndexOf("-")
-      if(str.charAt(i) == '+') parseExpression(str.substring(0, i),ds) + parseExpression(str.substring(i+1), ds)
-      else parseExpression(str.substring(0, i), ds) - parseExpression(str.substring(i+1), ds)
-    } 
-    else if(str.contains("*") || str.contains("/") || str.contains("%")) {
-      val i = str.lastIndexOf("*") max str.lastIndexOf("/") max str.lastIndexOf("%")
-      if(str.charAt(i) == '*') parseExpression(str.substring(0, i), ds) * parseExpression(str.substring(i+1), ds)
-      else if(str.charAt(i) == '/') parseExpression(str.substring(0, i), ds) / parseExpression(str.substring(i+1), ds)
-      else parseExpression(str.substring(0, i), ds) % parseExpression(str.substring(i+1), ds)
-    } 
-    else if(str.contains("^")) {
-      val i = str.lastIndexOf("^")
-      parseExpression(str.substring(0,i),ds) ** parseExpression(str.substring(i+1),ds)
-    }
-    else throw new Exception("no operation found in string \"" + str + "\"")
+    // basic math operators are found in reverse order of operations because the first operator found is the last evaluated
+    else if(str.contains("+") || str.contains("-")) applyBasicMath(str, str.lastIndexOf("+") max str.lastIndexOf("-"))
+    else if(str.contains("*") || str.contains("/") || str.contains("%")) applyBasicMath(str, str.lastIndexOf("*") max str.lastIndexOf("/") max str.lastIndexOf("%"))
+    else if(str.contains("^")) applyBasicMath(str, str.lastIndexOf("^"))
+
+    else throw new Exception("no operation found in expression \"" + str + "\"")
     
   }
+  
+  def applyNamedOperation(str: String, name: String) = {
+    val i1 = str.indexOf(name)
+    val i2 = findCloseParen(str, i1) + 1
+    val sub = str.substring(i1, i2)
+    val op = name match {
+      case "cos" => MathOperation(Math.cos(_))
+      case "sin" => MathOperation(Math.sin(_))
+      case "acos" => MathOperation(Math.acos(_))
+      case "sqrt" => MathOperation(Math.sqrt(_))
+      case "deg_to_radians" => MathOperation(Math.toRadians(_))
+      case _ => throw new Exception("unknown operation: " + name)
+    }
+    val t = op(parseExpression(str.drop(name.length)))
+    tempCount += 1
+    ds = CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
+    parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount))
+  }
+  
+  def applyBasicMath(str: String, i: Int) = {
+    val op = str.substring(i, i+1)
+    val lhs = parseExpression(str.substring(0,i))
+    val rhs = parseExpression(str.substring(i+1))
+    op match {
+      case "+" => lhs + rhs
+      case "-" => lhs - rhs
+      case "*" => lhs * rhs
+      case "/" => lhs / rhs
+      case "%" => lhs % rhs
+      case "^" => lhs ** rhs
+      case _ => throw new Exception("unknown operation: " + op)
+    }
+  } 
   
   /**
    * Finds the innermost set of parentheses.
@@ -193,17 +178,16 @@ class MathExpressionDerivation(str: String) extends Operation {
   }
   
   /**
-   * Finds the close paren that matches the open paren at index. 
+   * Finds the close paren that matches the next open paren after index. 
    */
   def findCloseParen(str: String, index: Int): Int = {
     var cp = str.indexOf(")",index)
     while(str.take(cp+1).count(_ == '(') != str.take(cp+1).count(_ == ')')) cp = str.indexOf(")", cp+1)
     cp
   }
-  
 
 }
 
 object MathExpressionDerivation {
-  def apply(str: String): MathExpressionDerivation = new MathExpressionDerivation(str)
+  def apply(str: String): MathExpressionDerivation = new MathExpressionDerivation(str.filter(_ != ' '))
 }
