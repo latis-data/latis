@@ -22,6 +22,15 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   def getRange: Variable = range
   def getSample: Sample = Sample(domain, range)
   
+  
+  //evaluate, use resample Operation for SampledFunctions
+  def apply(arg: Variable): Option[Variable] = {
+    
+    
+    ???
+  }
+  
+  
   /**
    * Return the number of samples represented by this SampledFunction.
    */

@@ -24,8 +24,8 @@ trait Function extends Variable {
   def iterator: Iterator[Sample]
   def getDataIterator: Iterator[SampleData]
   
-  //TODO: evaluate, or on Dataset monad only? use resample Operation for SampledFunctions
-  //def apply(arg: Variable): Option[Variable]
+  //evaluate
+  def apply(arg: Variable): Option[Variable]
 }
   
   /*
