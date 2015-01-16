@@ -149,7 +149,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   //Handle the Projection and Selection Operation-s
   //keep seq of names instead  //private var projection = "*"
   private var projectedVariableNames = Seq[String]()
-  private def getProjectedVariableNames = if (projectedVariableNames.isEmpty) getOrigScalarNames else projectedVariableNames
+  protected def getProjectedVariableNames = if (projectedVariableNames.isEmpty) getOrigScalarNames else projectedVariableNames
 
   protected val selections = ArrayBuffer[String]()
 
@@ -180,8 +180,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   override def handleOperation(operation: Operation): Boolean = operation match {
     case p @ Projection(names) => {
       //make sure these match variable names or aliases
-      if (!names.forall(getOrigDataset.findVariableByName(_).nonEmpty))
-        throw new Error("Not all variables are available for the projection: " + p)
+//      if (!names.forall(getOrigDataset.findVariableByName(_).nonEmpty))
+//        throw new Error("Not all variables are available for the projection: " + p)
+println("WARNING: disabled projection check")
       projectedVariableNames = names
       true
     }
