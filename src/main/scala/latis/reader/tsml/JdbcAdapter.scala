@@ -149,7 +149,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   //Handle the Projection and Selection Operation-s
   //keep seq of names instead  //private var projection = "*"
   private var projectedVariableNames = Seq[String]()
-  private def getProjectedVariableNames = if (projectedVariableNames.isEmpty) getOrigScalarNames else projectedVariableNames
+  protected def getProjectedVariableNames = if (projectedVariableNames.isEmpty) getOrigScalarNames else projectedVariableNames
 
   protected val selections = ArrayBuffer[String]()
 
@@ -180,8 +180,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   override def handleOperation(operation: Operation): Boolean = operation match {
     case p @ Projection(names) => {
       //make sure these match variable names or aliases
-      if (!names.forall(getOrigDataset.findVariableByName(_).nonEmpty))
-        throw new Error("Not all variables are available for the projection: " + p)
+//      if (!names.forall(getOrigDataset.findVariableByName(_).nonEmpty))
+//        throw new Error("Not all variables are available for the projection: " + p)
+println("WARNING: disabled projection check")
       projectedVariableNames = names
       true
     }
@@ -348,7 +349,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * since the tsml might expose only some database columns.
    * Apply rename operations.
    */
-  private def makeProjectionClause: String = {
+  protected def makeProjectionClause: String = {
     getProjectedVariableNames.map(name => {
       //If renamed, replace 'name' with 'name as "name2"'.
       //Use quotes so we can use reserved words like "min" (needed by Sybase).
@@ -371,7 +372,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       sb append makeProjectionClause
       sb append " from " + getTable
 
-      val p = predicate
+      val p = makePredicate
       if (p.nonEmpty) sb append " where " + p
 
       //Sort by domain variable.
@@ -396,12 +397,17 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   /**
    * Build a list of constraints for the "where" clause.
    */
-  lazy val predicate: String = {
-    //start with selection clauses from requested operations
-    val buffer = selections
+  protected def makePredicate: String = predicate
+  private lazy val predicate: String = {
+    //Get selection clauses (e.g. from requested operations)
+    //Prepend any tsml defined predicate.
+    val clauses = getProperty("predicate") match {
+      case Some(s) => s +=: selections
+      case None => selections
+    }
 
-    //insert "AND" between the selection clauses
-    buffer.filter(_.nonEmpty).mkString(" AND ")
+    //insert "AND" between the clauses
+    clauses.filter(_.nonEmpty).mkString(" AND ")
   }
 
   //---------------------------------------------------------------------------
