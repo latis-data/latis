@@ -178,15 +178,10 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * or false if it won't.
    */
   override def handleOperation(operation: Operation): Boolean = operation match {
-    case p @ Projection(names) => {
-      //make sure these match variable names or aliases
-//      if (!names.forall(getOrigDataset.findVariableByName(_).nonEmpty))
-//        throw new Error("Not all variables are available for the projection: " + p)
-println("WARNING: disabled projection check")
-      projectedVariableNames = names
-      true
-    }
+    //TODO: should the handleFoo delegates be responsible for the true/false?
+    case p: Projection => handleProjection(p)
 
+    //TODO: factor out handleSelection?
     case sel @ Selection(name, op, value) => getOrigDataset.findVariableByName(name) match {
       //TODO: allow use of renamed variable? but sql where wants orig name
       case Some(v) if (v.isInstanceOf[Time]) => handleTimeSelection(name, op, value)
@@ -226,6 +221,19 @@ println("WARNING: disabled projection check")
     case _ => false //not an operation that we can handle
   }
 
+  /**
+   * Handle a Projection clause.
+   */
+  def handleProjection(projection: Projection): Boolean = projection match {
+    case p @ Projection(names) => {
+      //make sure these match variable names or aliases
+      if (!names.forall(getOrigDataset.findVariableByName(_).nonEmpty))
+        throw new Error("Not all variables are available for the projection: " + p)
+      projectedVariableNames = names
+      true
+    }
+  }
+  
   /**
    * Special handling for a time selection since there are various formatting issues.
    */
