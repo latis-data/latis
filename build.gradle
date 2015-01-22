@@ -55,6 +55,10 @@ dependencies {
 	
 	//apache math commons
 	compile 'org.apache.commons:commons-math:2.2'
+	
+	//ehcache
+	compile 'net.sf.ehcache:ehcache:2.9.0'
+	
 }
 
 

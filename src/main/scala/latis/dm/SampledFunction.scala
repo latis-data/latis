@@ -70,7 +70,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   def iterator: PeekIterator[Sample] = {
     //test if we have tried to iterate more than once on this function
     itcounter += 1
-    if (itcounter > 1) throw new Error("Iterating more than once on " + this)
+//    if (itcounter > 1) throw new Error("Iterating more than once on " + this)
     
     _iterator match {
     case null => {

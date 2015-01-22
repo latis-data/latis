@@ -5,6 +5,7 @@ import java.net.URI
 import java.net.URL
 
 import scala.Option.option2Iterable
+import scala.collection.JavaConverters.collectionAsScalaIterableConverter
 import scala.collection.Map
 import scala.collection.Seq
 import scala.collection.immutable
@@ -34,6 +35,9 @@ import latis.reader.tsml.ml.TupleMl
 import latis.reader.tsml.ml.VariableMl
 import latis.time.Time
 import latis.util.DataUtils
+import net.sf.ehcache.Cache
+import net.sf.ehcache.CacheManager
+import net.sf.ehcache.Element
 
 
 /**
@@ -288,12 +292,33 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   private val dataCache = mutable.Map[String, DataSeq]()
   
+//  private val dataCache: Cache = {
+//    val name = origDataset.getName
+//    val manager = CacheManager.getInstance //TODO:close manager?
+//    manager.getCacheNames.contains(name) match {
+//      case true => manager.getCache(name)
+//      case false => {
+//        manager.addCache(name)
+//        manager.getCache(name)
+//      }
+//    }
+//  }
+  
+//  def closeCache: Unit = {
+//    dataCache.dispose
+//    CacheManager.getInstance.shutdown
+//  }
+  
   def getCache: immutable.Map[String, DataSeq] = dataCache.toMap
+  
+//  def getCache: immutable.Map[String, DataSeq] = dataCache.getAll(dataCache.getKeys).values.asScala.map(e => e.getObjectKey -> e.getObjectValue).toMap.asInstanceOf[immutable.Map[String, DataSeq]]
   
   /**
    * Is the cache empty.
    */
   def cacheIsEmpty: Boolean = dataCache.isEmpty
+  
+//  def cacheIsEmpty: Boolean = dataCache.getKeys.isEmpty
   
   /**
    * Add Data to the cache.
@@ -301,16 +326,18 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   protected def cache(dataMap: Map[String, DataSeq]) = dataCache ++= dataMap
   
+//  protected def cache(dataMap: Map[String, DataSeq]) = dataMap.foreach(p => dataCache.put(new Element(p._1, p._2)))
+  
   /**
    * Replace data for given variable.
    */
-  protected def cache(variableName: String, data: Data) = {
+  protected def cache(variableName: String, data: Data): Unit = {
     //make sure data is Iterable
     val d: DataSeq = data match {
       case idata: DataSeq => idata
       case _ => DataSeq(data)
     }
-    dataCache += (variableName -> d)
+    cache(Map(variableName -> d))
   }
   
   /**
@@ -330,6 +357,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   def getCachedData(variableName: String): Option[DataSeq] = dataCache.get(variableName)
   //TODO: if None throw new Error("No data found in cache for Variable: " + variableName)? or return empty Data?
+  
+//  def getCachedData(variableName: String): Option[DataSeq] = {
+//    try Some(dataCache.get(variableName).getObjectValue.asInstanceOf[DataSeq])
+//    catch {case npe: NullPointerException => None}
+//  }
   
   //---------------------------------------------------------------------------
   

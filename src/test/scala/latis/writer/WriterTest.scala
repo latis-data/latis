@@ -1,17 +1,20 @@
 package latis.writer
 
-import org.junit._
-import Assert._
-import com.typesafe.scalalogging.slf4j.Logging
-import latis.dm.Dataset
-import java.io.FileOutputStream
-import scala.io.Source
-import latis.dm.TestNestedFunction
-import latis.reader.tsml.TsmlReader
-import latis.dm.Variable
-import latis.metadata.Metadata
 import java.io.DataOutputStream
 import java.io.File
+import java.io.FileOutputStream
+
+import scala.io.Source
+
+import org.junit.Assert.assertEquals
+
+import com.typesafe.scalalogging.slf4j.Logging
+
+import latis.dm.Dataset
+import latis.dm.TestNestedFunction
+import latis.dm.Variable
+import latis.metadata.Metadata
+import latis.reader.tsml.TsmlReader
 
 class WriterTest extends Logging {
     
@@ -38,7 +41,7 @@ class WriterTest extends Logging {
     case v: Variable => Dataset(v,Metadata(v.getName))
   }  
   
-  def print(name: Object, suffix: String) {
+  def printds(name: Object, suffix: String) {
     val ds = getDataset(name)
     Writer.fromSuffix(suffix).write(ds)
   }

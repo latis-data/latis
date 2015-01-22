@@ -15,7 +15,7 @@ class DatasetMl(xml: Node) extends TupleMl(xml) {
    */
   def getVariableMl: Seq[VariableMl] = {
     val es = Tsml.getVariableNodes(xml)
-    
+    if(es.isEmpty) return Seq[VariableMl]()
     //Handle implicit Functions. If the first variable definition is "index" or "time"
     // wrap in a function with those as a 1D domain.
     val label = es.head.label
