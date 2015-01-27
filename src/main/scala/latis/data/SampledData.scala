@@ -43,7 +43,7 @@ class SampledData extends IterableData with Logging {
   private var cacheEnabled = false
   
 //  private val dataCache = ArrayBuffer[SampleData]()
-  private val dataCache: Cache = { //cache using Ehcache
+  private lazy val dataCache: Cache = { //cache using Ehcache
     val manager = CacheManager.getInstance
     manager.addCacheIfAbsent("cache")
     manager.getCache("cache")
