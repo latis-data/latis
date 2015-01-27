@@ -3,7 +3,9 @@ package latis.ops.math
 import latis.dm.Dataset
 
 import BinOp.ADD
+import BinOp.AND
 import BinOp.DIVIDE
+import BinOp.LT
 import BinOp.MODULO
 import BinOp.MULTIPLY
 import BinOp.POWER
@@ -18,5 +20,7 @@ trait BasicMath { this: Dataset =>
   def / (that: Dataset): Dataset  = MathOperation(DIVIDE, that)(this)
   def % (that: Dataset): Dataset  = MathOperation(MODULO, that)(this)
   def ** (that: Dataset): Dataset = MathOperation(POWER, that)(this) //WARNING: has same operator precedence as multiplication
+  def < (that: Dataset): Dataset =  MathOperation(LT, that)(this)
+  def && (that: Dataset): Dataset = MathOperation(AND, that)(this)
   
 }

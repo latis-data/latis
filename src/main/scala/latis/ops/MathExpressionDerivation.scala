@@ -104,7 +104,7 @@ class MathExpressionDerivation(str: String) extends Operation {
   def findOp(str: String): Dataset = {
     //named operations followed by (...) must be evaluated first or else the () will be lost.
     //names should be looked for in order from longest to shortest to prevent errors with substrings such as "cos" in "acos".
-    val names = Seq("deg_to_radians", "sqrt", "acos", "cos", "sin").filter(str.contains(_))
+    val names = Seq("deg_to_radians", "sqrt", "fabs", "acos", "atan", "cos", "sin")
     if(str.contains("atan2")) { //atan2 is special because it takes two args
       val i1 = str.indexOf("atan2")
       val i2 = findCloseParen(str, i1) + 1
@@ -115,7 +115,7 @@ class MathExpressionDerivation(str: String) extends Operation {
       ds = CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
       parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount))
     }
-    else if(names.nonEmpty) applyNamedOperation(str, names(0))
+    else if(names.filter(str.contains(_)).nonEmpty) applyNamedOperation(str, names.filter(str.contains(_))(0))
  
     //evaluates innermost set of (). Keeps result in appended temp Dataset so its value can be accessed later.
     else if(str.contains("(")) {
@@ -127,6 +127,8 @@ class MathExpressionDerivation(str: String) extends Operation {
     }
     
     // basic math operators are found in reverse order of operations because the first operator found is the last evaluated
+    else if(str.contains("&")) applyBasicMath(str, str.lastIndexOf("&"))
+    else if(str.contains("<")) applyBasicMath(str, str.lastIndexOf("<"))
     else if(str.contains("+") || str.contains("-")) applyBasicMath(str, str.lastIndexOf("+") max str.lastIndexOf("-"))
     else if(str.contains("*") || str.contains("/") || str.contains("%")) applyBasicMath(str, str.lastIndexOf("*") max str.lastIndexOf("/") max str.lastIndexOf("%"))
     else if(str.contains("^")) applyBasicMath(str, str.lastIndexOf("^"))
@@ -142,7 +144,9 @@ class MathExpressionDerivation(str: String) extends Operation {
     val op = name match {
       case "cos" => MathOperation(Math.cos(_))
       case "sin" => MathOperation(Math.sin(_))
+      case "fabs" => MathOperation(Math.abs(_))
       case "acos" => MathOperation(Math.acos(_))
+      case "atan" => MathOperation(Math.atan(_))
       case "sqrt" => MathOperation(Math.sqrt(_))
       case "deg_to_radians" => MathOperation(Math.toRadians(_))
       case _ => throw new Exception("unknown operation: " + name)
@@ -164,6 +168,8 @@ class MathExpressionDerivation(str: String) extends Operation {
       case "/" => lhs / rhs
       case "%" => lhs % rhs
       case "^" => lhs ** rhs
+      case "<" => lhs < rhs
+      case "&" => lhs && rhs
       case _ => throw new Exception("unknown operation: " + op)
     }
   } 

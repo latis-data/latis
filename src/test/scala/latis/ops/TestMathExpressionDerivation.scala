@@ -2,9 +2,9 @@ package latis.ops
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-
 import latis.dm.TestDataset
 import latis.reader.tsml.TsmlReader
+import latis.writer.AsciiWriter
 
 class TestMathExpressionDerivation {
   
@@ -63,6 +63,22 @@ class TestMathExpressionDerivation {
   }
   
   @Test
+  def test_lt {
+    val ds1 = MathExpressionDerivation("A=0<1")(TestDataset.empty)
+    val ds2 = MathExpressionDerivation("A=1<0")(TestDataset.empty)
+    assertEquals(1, ds1.toSeq(0).getNumberData.doubleValue, 0.0)
+    assertEquals(0, ds2.toSeq(0).getNumberData.doubleValue, 0.0)
+  }
+  
+  @Test
+  def test_and {
+    val ds1 = MathExpressionDerivation("A=1&1")(TestDataset.empty)
+    val ds2 = MathExpressionDerivation("A=1&0")(TestDataset.empty)
+    assertEquals(1, ds1.toSeq(0).getNumberData.doubleValue, 0.0)
+    assertEquals(0, ds2.toSeq(0).getNumberData.doubleValue, 0.0)
+  }
+  
+  @Test
   def test_paren {
     val ds = MathExpressionDerivation("A=(1+1)*3")(TestDataset.empty)
     assertEquals(6, ds.toSeq(0).getNumberData.doubleValue, 0.0)
@@ -113,6 +129,7 @@ class TestMathExpressionDerivation {
   @Test
   def test_tsml {
     val ds = TsmlReader("datasets/test/vecmag.tsml").getDataset
+//    AsciiWriter.write(ds)
     val it = ds.findFunction.get.iterator
     it.next
     assertEquals(1.7320508075688772, it.next.findVariableByName("X").get.getNumberData.doubleValue, 0.0)
