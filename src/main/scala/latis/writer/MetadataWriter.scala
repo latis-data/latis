@@ -6,17 +6,38 @@ import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.time.Time
+import latis.dm.Dataset
 
 /**
  * Write a Dataset's Metadata as JSON.
  */
 class MetadataWriter extends JsonWriter {
   
+  override def makeHeader(dataset: Dataset) = {
+    //Hack in the dataset name. We lost this when treating dataset as a Tuple in JsonWriter
+    //"{\"" + dataset.getName + "\": "
+    
+    val sb = new StringBuffer()
+    
+    //add usual json header ({)
+    sb append super.makeHeader(dataset)
+
+    //assume single top level function
+    val function = dataset.findFunction.get
+    
+    //Create the metadata content
+    sb append "\"metadata\": {" //metadata object label
+    sb append varToString(Sample(function.getDomain, function.getRange)) //metadata
+    sb append "}\n"
+    
+    sb.toString
+  }
+  
   /**
    * Override to write only domain and range info, not all samples.
    */
   override def writeFunction(function: Function) {
-    printWriter.print(varToString(Sample(function.getDomain, function.getRange)))
+    //printWriter.print(varToString(Sample(function.getDomain, function.getRange)))
   }
   
   /**
@@ -53,6 +74,14 @@ class MetadataWriter extends JsonWriter {
       ss.mkString("{\n", ",\n", "\n}")
     }
     else ""
+  }
+  
+  /**
+   * Hack to allow encoding complex metadata as json in addition to escaping quotes within values.
+   */
+  private def format(value: String): String = {
+    if (value.startsWith("{") || value.startsWith("[")) value
+    else "\"" + escape(value) + "\"" //put in quotes and escape inner quotes so these will be value json values
   }
   
 }

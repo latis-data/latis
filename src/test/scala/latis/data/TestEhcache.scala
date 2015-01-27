@@ -37,7 +37,7 @@ class TestEhcache {
     assert(s2.isEmpty)
   }
   
-  @Test
+//  @Test
   def reuse_iterator {
     val ds = TsmlReader("datasets/test/scalar.tsml").getDataset
     val f = ds.findFunction.get

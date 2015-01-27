@@ -40,6 +40,8 @@ class SampledData extends IterableData with Logging {
    * +define length after caching
    */
   
+  private var cacheEnabled = false
+  
 //  private val dataCache = ArrayBuffer[SampleData]()
   private val dataCache: Cache = { //cache using Ehcache
     val manager = CacheManager.getInstance
@@ -51,13 +53,13 @@ class SampledData extends IterableData with Logging {
   
   private def pairToSample = (ddata: Data, rdata: Data) => {
     val sd = SampleData(ddata, rdata)
-    dataCache.put(new Element(index, sd)) 
-    index += 1
+//    if(cacheEnabled) dataCache.put(new Element(index, sd)) 
+//    index += 1
     sd
   }
   
   def iterator: Iterator[SampleData] = {
-    if (index == 0) { //first iteration, nothing in cache
+    if (!cacheEnabled || index == 0) { //first iteration, nothing in cache
       logger.debug("Make SampleData Iterator from domain and range Data")
       val dit = _domain.iterator
       val rit = _range.iterator
