@@ -5,6 +5,7 @@ import latis.dm.Sample
 import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
+import latis.time.Time
 
 /**
  * Write a Dataset's Metadata as JSON.
@@ -41,10 +42,14 @@ class MetadataWriter extends JsonWriter {
    * Build a String representation of the Metadata for a given Variable.
    */
   private def makeMetadata(variable: Variable): String = {
-    val props = variable.getMetadata.getProperties
+    var props = variable.getMetadata.getProperties
+    
+    //change time units in metadata since this Writer always converts time to Java time
+    if (variable.isInstanceOf[Time]) props = props + ("units" -> "milliseconds since 1970-01-01")
+    
     if (props.nonEmpty) {
       val ss = for ((name, value) <- props.filterNot(_._1 == "name")) //don't include name (redundant)
-        yield "\"" + name + "\": \"" + escape(value) + "\""
+        yield "\"" + name + "\": " + format(value)
       ss.mkString("{\n", ",\n", "\n}")
     }
     else ""
