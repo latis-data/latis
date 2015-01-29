@@ -27,33 +27,36 @@ class MetadataWriter extends JsonWriter {
     
     //Create the metadata content
     sb append "\"metadata\": {" //metadata object label
-    sb append varToString(Sample(function.getDomain, function.getRange)) //metadata
+    sb append mdvarToString(Sample(function.getDomain, function.getRange)) //metadata
     sb append "}\n"
     
     sb.toString
   }
   
   /**
-   * Override to write only domain and range info, not all samples.
+   * Write only the header and footer. No need to look at variables.
    */
-  override def writeFunction(function: Function) {
-    //printWriter.print(varToString(Sample(function.getDomain, function.getRange)))
+  override def write(dataset: Dataset) {
+    writeHeader(dataset)
+    //dataset.getVariables.map(writeVariable(_))     
+    writeFooter(dataset)
+    printWriter.flush()
   }
   
   /**
    * Recursively write metadata.
    * Assume only scalars have metadata, for now.
    */
-  override def varToString(variable: Variable): String = {
+  def mdvarToString(variable: Variable): String = {
     val sb = new StringBuilder()
     
     variable match {
       case s: Scalar => {
-        sb append makeLabel(variable)
+        sb append super.makeLabel(variable)
         sb append makeMetadata(variable)
       }
-      case Tuple(vars) => sb append vars.map(varToString(_)).mkString(",\n")
-      case f: Function => sb append varToString(Sample(f.getDomain, f.getRange))
+      case Tuple(vars) => sb append vars.map(mdvarToString(_)).mkString(",\n")
+      case f: Function => sb append mdvarToString(Sample(f.getDomain, f.getRange))
     }
     
     sb.toString
