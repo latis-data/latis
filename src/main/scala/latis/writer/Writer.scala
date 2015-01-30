@@ -120,9 +120,10 @@ object Writer {
         //add properties from the writer definition in latis.properties
         //writer.properties 
         val props = mutable.Map[String, String]()
-        val keys = LatisProperties.keys.filter(_.startsWith("writer." + suffix))
+        val keyPrefix = "writer." + suffix + "."
+        val keys = LatisProperties.keys.filter(_.startsWith(keyPrefix))
         for (key <- keys) {
-          val k = key.substring(suffix.length + 8) //skip "writer.sfx."
+          val k = key.substring(keyPrefix.length) //skip "writer.sfx."
           props += (k -> LatisProperties(key))
         }
         
