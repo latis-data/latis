@@ -130,7 +130,7 @@ class TestMathExpressionDerivation {
   @Test
   def test_tsml {
     val ds = TsmlReader("vecmag.tsml").getDataset
-//    AsciiWriter.write(ds)
+    //AsciiWriter.write(ds)
     val it = ds.findFunction.get.iterator
     it.next
     assertEquals(1.7320508075688772, it.next.findVariableByName("X").get.getNumberData.doubleValue, 0.0)
@@ -169,4 +169,28 @@ class TestMathExpressionDerivation {
     assert(!data.contains("a"))
   }
   
+  @Test
+  def derived_field_as_input {
+    val ds = TsmlReader("vecmag2.tsml").getDataset
+    //AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+    assertEquals(2.7320508075688772, data("Y")(1), 0.0)
+  }
+  
+  @Test
+  def non_projected_derived_field_as_input {
+    val ops = ArrayBuffer[Operation]()
+    ops += Projection("t,Y")
+    val ds = TsmlReader("vecmag2.tsml").getDataset(ops)
+    //AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+    assertEquals(2.7320508075688772, data("Y")(1), 0.0)
+  }
+  
+  //@Test
+  def nested_operation {
+    val ds = MathExpressionDerivation("A=sqrt(fabs(-81))")(TestDataset.empty)
+    AsciiWriter.write(ds)
+    //Fails. See http://mods-jira.lasp.colorado.edu:8080/browse/LATIS-213
+  }
 }
