@@ -5,6 +5,7 @@ import org.junit.Test
 import latis.dm.TestDataset
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
+import scala.collection.mutable.ArrayBuffer
 
 class TestMathExpressionDerivation {
   
@@ -128,11 +129,44 @@ class TestMathExpressionDerivation {
   
   @Test
   def test_tsml {
-    val ds = TsmlReader("datasets/test/vecmag.tsml").getDataset
+    val ds = TsmlReader("vecmag.tsml").getDataset
 //    AsciiWriter.write(ds)
     val it = ds.findFunction.get.iterator
     it.next
     assertEquals(1.7320508075688772, it.next.findVariableByName("X").get.getNumberData.doubleValue, 0.0)
+  }
+  
+  @Test
+  def with_projection {
+    val ops = ArrayBuffer[Operation]()
+    ops += Projection("t,a,b,c,X")
+    val ds = TsmlReader("vecmag.tsml").getDataset(ops)
+    //AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+    assertEquals(1.7320508075688772, data("X")(1), 0.0)
+    assertEquals(3.0, data("X")(2), 0.0)
+  }
+  
+  @Test
+  def dont_project_derived_param {
+    val ops = ArrayBuffer[Operation]()
+    ops += Projection("t,a,b,c")
+    val ds = TsmlReader("vecmag.tsml").getDataset(ops)
+    //AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+    assert(!data.contains("X"))
+  }
+  
+  @Test
+  def dont_project_input_params {
+    val ops = ArrayBuffer[Operation]()
+    ops += Projection("t,X")
+    val ds = TsmlReader("vecmag.tsml").getDataset(ops)
+    //AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+    assertEquals(1.7320508075688772, data("X")(1), 0.0)
+    assertEquals(3.0, data("X")(2), 0.0)
+    assert(!data.contains("a"))
   }
   
 }
