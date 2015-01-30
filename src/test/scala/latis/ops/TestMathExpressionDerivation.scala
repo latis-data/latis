@@ -188,6 +188,14 @@ class TestMathExpressionDerivation {
   }
   
   //@Test
+  def constant_in_tsml {
+    val ds = TsmlReader("vecmag2.tsml").getDataset
+    //AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+    assertEquals(123.4, data("Z").head, 0.0)
+  }
+  
+  //@Test
   def nested_operation {
     val ds = MathExpressionDerivation("A=sqrt(fabs(-81))")(TestDataset.empty)
     AsciiWriter.write(ds)

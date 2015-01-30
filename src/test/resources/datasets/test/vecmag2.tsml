@@ -14,6 +14,7 @@
     <real name="c"/>
     <?derived X = sqrt(a*a+b*b+c*c)?>
     <?derived Y = X + a?>
+    <?derived Z = 123.4?>
       
 
   </dataset>
