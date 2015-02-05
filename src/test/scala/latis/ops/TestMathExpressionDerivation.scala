@@ -201,4 +201,11 @@ class TestMathExpressionDerivation {
 //    AsciiWriter.write(ds)
     assertEquals(9.0, ds.toSeq(0).getNumberData.doubleValue, 0.0)
   }
+  
+  @Test
+  def mag {
+    val ds = TsmlReader("vecmag2.tsml").getDataset
+    val data = ds.toDoubleMap
+    assertEquals(data("X")(2), data("X2")(2), 0.0001)
+  }
 }

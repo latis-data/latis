@@ -13,6 +13,7 @@
     <real name="b"/>
     <real name="c"/>
     <?derived X = sqrt(a*a+b*b+c*c)?>
+    <?derived X2 = mag(a,b,c)?>
     <?derived Y = X + a?>
     <?derived Z = 123.4?>
       
