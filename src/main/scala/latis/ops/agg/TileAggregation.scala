@@ -10,6 +10,15 @@ import latis.dm.Sample
  */
 class TileAggregation extends Aggregation {
   
+  /*
+   * TODO: enforce that all datasets have the same set of vars
+   * auto intersect? keep only common vars?
+   * or union, fill with NaN?
+   * 
+   * make sure domain units are the same
+   * convert to units of the first
+   */
+  
   def aggregate(dataset: Dataset): Dataset = {
     //assume one-dimension (e.g. time), for now
     //assume each dataset contains only one top level variable, the Function
