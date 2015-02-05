@@ -195,10 +195,10 @@ class TestMathExpressionDerivation {
     assertEquals(123.4, data("Z").head, 0.0)
   }
   
-  //@Test
+  @Test
   def nested_operation {
     val ds = MathExpressionDerivation("A=sqrt(fabs(-81))")(TestDataset.empty)
-    AsciiWriter.write(ds)
-    //Fails. See http://mods-jira.lasp.colorado.edu:8080/browse/LATIS-213
+//    AsciiWriter.write(ds)
+    assertEquals(9.0, ds.toSeq(0).getNumberData.doubleValue, 0.0)
   }
 }
