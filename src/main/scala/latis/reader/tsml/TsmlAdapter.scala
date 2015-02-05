@@ -199,9 +199,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     val otherOps = ops.filterNot(handleOperation(_))
     
     //Apply operations that the adapter didn't handle.
-    //Reverse because foldRight applies them in reverse order.
     //This should be the first use of the lazy 'dataset' so it may trigger its final construction.
-    otherOps.reverse.foldRight(getDataset)(_(_))
+    otherOps.foldLeft(getDataset)((dataset, op) => op(dataset))
   }
   
   /**

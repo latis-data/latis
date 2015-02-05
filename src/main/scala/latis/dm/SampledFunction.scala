@@ -13,6 +13,11 @@ import latis.util.MappingIterator
 import latis.data.EmptyData
 import com.typesafe.scalalogging.slf4j.Logging
 
+/**
+ * A SampledFunction represents a discrete Function whose values are defined
+ * by Sample objects. Each Sample object represents a single mapping of a
+ * domain value to a range value.
+ */
 class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = EmptyMetadata, data: SampledData = EmptyData) 
     extends AbstractVariable(metadata, data) with Function with Logging {
 

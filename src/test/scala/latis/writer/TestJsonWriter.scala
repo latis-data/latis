@@ -89,4 +89,13 @@ class TestJsonWriter extends WriterTest {
     val ds = getDataset(fof) //TestDataset.canonical
     Writer.fromSuffix("json").write(ds)
   }
+  
+  @Test
+  def bugfix_improper_property_filter {
+    val writer = Writer.fromSuffix("json")
+    writer.getProperty(".class") match {
+      case Some(_) => fail("improper properties filter; '.class' should not have been created")
+      case None => { /* do nothing: pass */ }
+    }
+  }
 }
