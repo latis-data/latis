@@ -70,14 +70,11 @@ class MathExpressionDerivation(str: String) extends Operation {
   }
   
   /**
-   * Tests whether a Function contains any Variables used to derive the new Variable. 
+   * Determines whether a Function contains any Variables used to derive the new Variable.
    */
   def testSample(sample: Sample): Option[Sample] = {
-    val seq = str.split(Array('+','-','*','/','%','(',')'))
-    for(n <- seq) 
-      if(sample.findVariableByName(n)!=None) 
-        return Some(Sample(sample.domain, Tuple(sample.range.toSeq :+ Real(Metadata(str.substring(0,str.indexOf('=')))))))
-    None
+    if(sample.toSeq.forall(s => !str.contains(s.getName))) None
+    else Some(Sample(sample.domain, Tuple(sample.range.toSeq :+ Real(Metadata(str.substring(0,str.indexOf('=')))))))
   }
   
   /**
@@ -151,7 +148,7 @@ class MathExpressionDerivation(str: String) extends Operation {
       case "deg_to_radians" => MathOperation(Math.toRadians(_))
       case _ => throw new Exception("unknown operation: " + name)
     }
-    val t = op(parseExpression(str.drop(name.length)))
+    val t = op(parseExpression(sub.drop(name.length)))
     tempCount += 1
     ds = CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
     parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount))
@@ -188,7 +185,8 @@ class MathExpressionDerivation(str: String) extends Operation {
    */
   def findCloseParen(str: String, index: Int): Int = {
     var cp = str.indexOf(")",index)
-    while(str.take(cp+1).count(_ == '(') != str.take(cp+1).count(_ == ')')) cp = str.indexOf(")", cp+1)
+    while(str.take(cp+1).drop(index).count(_ == '(') != str.take(cp+1).drop(index).count(_ == ')')) 
+      cp = str.indexOf(")", cp+1)
     cp
   }
 
