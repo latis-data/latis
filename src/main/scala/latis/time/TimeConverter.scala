@@ -11,7 +11,7 @@ abstract class TimeConverter(scale1: TimeScale, scale2: TimeScale) extends UnitC
 object TimeConverter {
   
   def apply(scale1: TimeScale, scale2: TimeScale): TimeConverter = {
-    if (scale1 == scale2) new NoOpTimeConverter(scale1, scale2)
+    if (scale1 == scale2) NoOpTimeConverter(scale1, scale2)
     else (scale1.tsType, scale2.tsType) match {
       //TODO: use time scale type to deal with leap seconds
       //case (TAI, UTC) => new TaiToUtcConverter(scale1, scale2)
