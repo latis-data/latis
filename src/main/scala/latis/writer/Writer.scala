@@ -32,11 +32,15 @@ abstract class Writer {
 
   /**
    * Return Some property value or None if property does not exist.
+   * 
+   * Properties are read from the XML attributes for this Adapter
    */
   def getProperty(name: String): Option[String] = properties.get(name)
   
   /**
    * Return property value or default if property does not exist.
+   * 
+   * Properties are read from the XML attributes for this Adapter
    */
   def getProperty(name: String, default: String): String = getProperty(name) match {
     case Some(v) => v
