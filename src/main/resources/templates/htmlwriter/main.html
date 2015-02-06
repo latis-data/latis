@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-us">
     <head>
+        <!-- test comment -->
         <title>{{long-name}}</title>
         <style>
             /* mostly copied from: http://lasp.colorado.edu/lisird/tss/resources/tss.css */
@@ -54,7 +55,7 @@
                 var queryForm = document.getElementById("query-form");
                 var formItems = queryForm.getElementsByClassName("form-item");
                 formItems = Array.prototype.slice.call(formItems); // hack to turn formItems into actual array, not "HTMLCollection" or w/e
-                var query = formItems.map(serializeFormItem).filter(function(item) { return !!item; }).join("&");
+                var query = formItems.map(serializeFormItem).filter(function(item) { return !!item; }).join("");
                 if (query != "") {
                     newUrl += "?" + query;
                 }
@@ -82,12 +83,12 @@
 
                 var results = [];
                 if (min != "") {
-                    results.push("name>=min");
+                    results.push("&name>=min");
                 }
                 if (max != "") {
-                    results.push("name<max");
+                    results.push("&name<max");
                 }
-                return results.join("&").replace("name", name).replace("min", min).replace("max", max);
+                return results.join("").replace("name", name).replace("min", min).replace("max", max);
             }
         </script>
     </head>
