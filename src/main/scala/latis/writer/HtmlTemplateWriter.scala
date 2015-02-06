@@ -20,17 +20,23 @@ class HtmlTemplateWriter extends TextWriter {
   
   override def write(dataset: Dataset) {
     
-    val function = dataset.findFunction.get
+    val function = dataset.findFunction
+    val (domainName: String, rangeVars: Seq[String]) = function match {
+      case Some(f) => (f.getDomain.getName, f.getRange.toSeq.view.flatMap(_.getMetadata("name")))
+      case None => ("", Seq())
+    }
+    val defaultRangeName = rangeVars.headOption.getOrElse("")
     
-    val values = Map(
+    val values: Map[String, String] = Map(
         "long-name" -> dataset.getMetadata("long_name").getOrElse(dataset.getName),
         "name" -> dataset.getName,
-        "domain" -> function.getDomain.getName,
-        "range" -> function.getRange.getName,
+        "domain" -> domainName,
+        "defaultRange" -> defaultRangeName,
         "dds" -> makeDds(dataset),
         "das" -> makeDas(dataset),
         "form-items" -> makeFormItems(dataset),
-        "select-option-elements" -> selectOptions
+        "output-select-option-elements" -> selectOptions,
+        "range-select-option-elements" -> rangeVars.map(name => s"""<option value="$name">$name</option>""").mkString
     )
     
     printWriter.print(mainTmpl.applyValues(values))
