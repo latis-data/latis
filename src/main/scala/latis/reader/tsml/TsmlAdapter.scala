@@ -370,6 +370,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   def piOps: Seq[Operation] = {
     //TODO: consider order
     //TODO: add other PI types? rename,...
+    /*
+     * TODO: unify handling/parsing of service constraints and PIs
+     * foo(bar) = <?foo bar?> ?
+     */
+    
     val projections = tsml.getProcessingInstructions("project").map(Projection(_)) 
     val selections  = tsml.getProcessingInstructions("select").map(Selection(_))
     //Unit conversions: "convert vname units"
