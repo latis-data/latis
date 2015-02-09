@@ -9,6 +9,9 @@ import latis.time.TimeConverter
 import latis.time.Time
 import latis.dm.Sample
 
+/**
+ * Currently works only for time unit conversion.
+ */
 class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operation {
   //TODO: specific variable by name vs all variables with a given unit
   //TODO: wrap UnitConverter logic into this
@@ -28,7 +31,7 @@ class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operatio
             val origUnit = TimeScale(u)
             /*
              * TODO: this constructor creates a default time scale with java units (ms since 1970)
-             * Since both formatted time have the same TimeScale, we get a NoOp converter.
+             * Since both formatted times have the same TimeScale, we get a NoOp converter.
              * Can TimeScale deal with diff formats?
              */
             TimeConverter(origUnit, unit.asInstanceOf[TimeScale])
@@ -63,12 +66,12 @@ object UnitConversion extends OperationFactory {
   
   /**
    * Constructor used by OperationFactory.
-   * Assumes this is for time conversion.
    */
   override def apply(args: Seq[String]): UnitConversion = {
     //TODO: error handling
-    val uom = TimeScale(args.head)
-    new UnitConversion("time", uom)
+    val vname = args.head
+    val uom = TimeScale(args(1))
+    new UnitConversion(vname, uom)
   }
   
   def apply(vname: String, unit: String) = {
