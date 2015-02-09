@@ -1,6 +1,8 @@
 package latis.time
 
 import latis.metadata.Metadata
+import latis.dm.Number
+import latis.dm.Text
 
 class BasicTimeConverter(scale1: TimeScale, scale2: TimeScale) extends TimeConverter(scale1, scale2) {
 
@@ -24,9 +26,16 @@ class BasicTimeConverter(scale1: TimeScale, scale2: TimeScale) extends TimeConve
   
   def convert(time: Time): Time = {
     //TODO: assert time.scale == scale1
-    //TODO: if LongValue preserve long
-    //TODO: if StringValue...
-    val t = convert(time.getNumberData.doubleValue)
+    //TODO: if Integer preserve long
+    
+    //Time as Text will have a java TimeScale so use getJavaTime
+    val t1 = time match {
+      case _: Text => time.getJavaTime.toDouble
+      case Number(d) => d
+    }
+    //val t = convert(time.getNumberData.doubleValue)
+    val t = convert(t1)
+    
     //redefine units in metadata
     val md = Metadata(time.getMetadata.getProperties + ("units" -> scale2.toString)) //TODO: make sure TimeScale(scale.toString) works
     //Time(scale2, t)
