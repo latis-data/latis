@@ -10,4 +10,6 @@ object MathOperation {
   def apply(op: (Double,Double) => Double, ds: Dataset) = new BinaryMathOperation(op, ds)  
   
   def apply(op: => (Double) => Double) = new UnaryMathOperation(op)
+  
+  def apply(op: (Double,Double) => Double) = new ReductionMathOperation(op)
 }

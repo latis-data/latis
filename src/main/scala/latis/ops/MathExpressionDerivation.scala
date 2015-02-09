@@ -1,5 +1,6 @@
 package latis.ops
 
+import scala.Array.canBuildFrom
 import scala.Option.option2Iterable
 
 import latis.dm.Dataset
@@ -13,7 +14,10 @@ import latis.dm.implicits.doubleToDataset
 import latis.dm.implicits.variableToDataset
 import latis.metadata.Metadata
 import latis.ops.agg.CollectionAggregation
+import latis.ops.math.BinaryMathOperation
 import latis.ops.math.MathOperation
+import latis.ops.math.ReductionMathOperation
+import latis.ops.math.UnaryMathOperation
 
 /**
  * Adds a new Variable to a Dataset according to the inputed math expression.
@@ -101,18 +105,8 @@ class MathExpressionDerivation(str: String) extends Operation {
   def findOp(str: String): Dataset = {
     //named operations followed by (...) must be evaluated first or else the () will be lost.
     //names should be looked for in order from longest to shortest to prevent errors with substrings such as "cos" in "acos".
-    val names = Seq("deg_to_radians", "sqrt", "fabs", "acos", "atan", "cos", "sin")
-    if(str.contains("atan2")) { //atan2 is special because it takes two args
-      val i1 = str.indexOf("atan2")
-      val i2 = findCloseParen(str, i1) + 1
-      val sub = str.substring(i1, i2)
-      val args = str.substring(i1+6,i2-1).split(",")
-      val t = MathOperation(Math.atan2(_,_), parseExpression(args(1)))(parseExpression(args(0)))
-      tempCount += 1
-      ds = CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
-      parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount))
-    }
-    else if(names.filter(str.contains(_)).nonEmpty) applyNamedOperation(str, names.filter(str.contains(_))(0))
+    val names = Seq("deg_to_radians", "atan2", "sqrt", "fabs", "acos", "atan", "mag", "cos", "sin").filter(str.contains(_))
+    if(names.nonEmpty) applyNamedFunction(str, names(0))
  
     //evaluates innermost set of (). Keeps result in appended temp Dataset so its value can be accessed later.
     else if(str.contains("(")) {
@@ -134,11 +128,14 @@ class MathExpressionDerivation(str: String) extends Operation {
     
   }
   
-  def applyNamedOperation(str: String, name: String) = {
+  def applyNamedFunction(str: String, name: String) = {
     val i1 = str.indexOf(name)
     val i2 = findCloseParen(str, i1) + 1
     val sub = str.substring(i1, i2)
+    val args = str.substring(i1+name.length+1,i2-1).split(",")
     val op = name match {
+      case "atan2" => MathOperation(Math.atan2(_,_))
+      case "mag" => MathOperation((d1,d2) => Math.sqrt(Math.pow(d1,2) + Math.pow(d2,2)))
       case "cos" => MathOperation(Math.cos(_))
       case "sin" => MathOperation(Math.sin(_))
       case "fabs" => MathOperation(Math.abs(_))
@@ -146,14 +143,17 @@ class MathExpressionDerivation(str: String) extends Operation {
       case "atan" => MathOperation(Math.atan(_))
       case "sqrt" => MathOperation(Math.sqrt(_))
       case "deg_to_radians" => MathOperation(Math.toRadians(_))
-      case _ => throw new Exception("unknown operation: " + name)
     }
-    val t = op(parseExpression(sub.drop(name.length)))
+    val t = op match {
+      case u: UnaryMathOperation => u(parseExpression(args(0)))
+      case b: BinaryMathOperation => ???
+      case r: ReductionMathOperation => r(args.map(parseExpression(_)))
+    }
     tempCount += 1
     ds = CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
     parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount))
   }
-  
+    
   def applyBasicMath(str: String, i: Int) = {
     val op = str.substring(i, i+1)
     val lhs = parseExpression(str.substring(0,i))
@@ -172,7 +172,7 @@ class MathExpressionDerivation(str: String) extends Operation {
   } 
   
   /**
-   * Finds the innermost set of parentheses.
+   * Return the contents of the innermost set of parentheses.
    */
   def inParen(str: String): String = {
     val i1 = str.lastIndexOf("(")
