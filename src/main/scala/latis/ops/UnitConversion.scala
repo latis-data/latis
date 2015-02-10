@@ -7,7 +7,11 @@ import latis.units.UnitConverter
 import latis.time.TimeScale
 import latis.time.TimeConverter
 import latis.time.Time
+import latis.dm.Sample
 
+/**
+ * Currently works only for time unit conversion.
+ */
 class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operation {
   //TODO: specific variable by name vs all variables with a given unit
   //TODO: wrap UnitConverter logic into this
@@ -25,6 +29,11 @@ class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operatio
           case Some(u) => {
             //TODO: assuming Time, for now
             val origUnit = TimeScale(u)
+            /*
+             * TODO: this constructor creates a default time scale with java units (ms since 1970)
+             * Since both formatted times have the same TimeScale, we get a NoOp converter.
+             * Can TimeScale deal with diff formats?
+             */
             TimeConverter(origUnit, unit.asInstanceOf[TimeScale])
           }
           case None => throw new Error("UnitConversion: Variable has no units: " + variableName)
@@ -37,16 +46,33 @@ class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operatio
     super.apply(dataset)
   }
 
+//TODO: not being applied to domain?
   override def applyToScalar(scalar: Scalar): Option[Scalar] = {
-    if (variableName == scalar.getName) {
+    if (scalar.hasName(variableName)) {
       Some(converter.convert(scalar.asInstanceOf[Time])) //TODO: lost name, presumably all metedata
       //TODO: change units in metadata, responsibility of converter? should converter be an Operation? move it inside here?
     } else Some(scalar) //no-op
   }
-  
+   
+  /**
+   * Override to apply to both domain and range variables.
+   */
+  override def applyToSample(sample: Sample): Option[Sample] = {
+    for (d <- applyToVariable(sample.domain); r <- applyToVariable(sample.range)) yield Sample(d,r)
+  }
 }
 
-object UnitConversion {
+object UnitConversion extends OperationFactory {
+  
+  /**
+   * Constructor used by OperationFactory.
+   */
+  override def apply(args: Seq[String]): UnitConversion = {
+    //TODO: error handling
+    val vname = args.head
+    val uom = TimeScale(args(1))
+    new UnitConversion(vname, uom)
+  }
   
   def apply(vname: String, unit: String) = {
     //TODO: assuming Time for now

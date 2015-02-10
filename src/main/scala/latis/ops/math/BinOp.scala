@@ -10,6 +10,8 @@ class Multiply extends BinOp {def apply(a: Double, b: Double): Double = a * b}
 class Divide   extends BinOp {def apply(a: Double, b: Double): Double = a / b}
 class Modulo   extends BinOp {def apply(a: Double, b: Double): Double = a % b}
 class Power    extends BinOp {def apply(a: Double, b: Double): Double = Math.pow(a, b)}
+class Lt       extends BinOp {def apply(a: Double, b: Double): Double = (a < b) match {case true => 1; case false => 0}}
+class And      extends BinOp {def apply(a: Double, b: Double): Double = (a > 0 && b > 0) match {case true => 1; case false => 0}}
 
 object BinOp {
   val ADD      = new Add()
@@ -18,4 +20,6 @@ object BinOp {
   val DIVIDE   = new Divide()
   val MODULO   = new Modulo()
   val POWER    = new Power()
+  val LT       = new Lt()
+  val AND      = new And()
 }

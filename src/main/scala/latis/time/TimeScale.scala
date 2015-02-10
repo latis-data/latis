@@ -8,6 +8,10 @@ import java.util.Date
 import java.util.GregorianCalendar
 import java.util.TimeZone
 
+/**
+ * Model a time scale as the number of TimeUnit-s from an epoch (start date, i.e. time zero).
+ * The TimeScaleType will determine how leap seconds are dealt with (or other calendar differences?).
+ */
 class TimeScale(val epoch: Date, val unit: TimeUnit, val tsType: TimeScaleType) extends UnitOfMeasure("TODO") {
   //TODO: consider using millis for epoch instead of Date
   

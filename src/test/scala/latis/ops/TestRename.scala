@@ -18,6 +18,28 @@ class TestRename {
     assertEquals("bar", ds2.getName)
   }
 
+  @Test
+  def rename_domain {
+    val ds = TestDataset.time_series
+    val op = Operation("rename", List("myTime","yourTime"))
+    val ds2 = op(ds)
+    val data = ds2.toStringMap
+    assert(data.contains("yourTime"))
+    assert(!data.contains("myTime"))
+    assertEquals("1970/01/01", data("yourTime").head)
+  }
+
+  @Test
+  def rename_range {
+    val ds = TestDataset.time_series
+    val op = Operation("rename", List("myReal","yourReal"))
+    val ds2 = op(ds)
+    val data = ds2.toStringMap
+    assert(data.contains("yourReal"))
+    assert(!data.contains("myReal"))
+    assertEquals("1.1", data("yourReal").head)
+  }
+
 }
 
 

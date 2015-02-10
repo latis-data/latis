@@ -1,13 +1,17 @@
 package latis.data
 
+import scala.collection.JavaConversions.mapAsScalaMap
+
+import com.typesafe.scalalogging.slf4j.Logging
+
 import latis.data.seq.DataSeq
 import latis.data.set.DomainSet
 import latis.data.set.RealSampledSet
 import latis.data.value.DoubleValue
 import latis.dm.Sample
-import scala.collection.mutable.ArrayBuffer
-import com.typesafe.scalalogging.slf4j.Logging
-import latis.util.PeekIterator
+import net.sf.ehcache.Cache
+import net.sf.ehcache.CacheManager
+import net.sf.ehcache.Element
 
 class SampledData extends IterableData with Logging {
   
@@ -36,23 +40,34 @@ class SampledData extends IterableData with Logging {
    * +define length after caching
    */
   
-  private val dataCache = ArrayBuffer[SampleData]()
+  private var cacheEnabled = false
+  
+//  private val dataCache = ArrayBuffer[SampleData]()
+  private lazy val dataCache: Cache = { //cache using Ehcache
+    val manager = CacheManager.getInstance
+    manager.addCacheIfAbsent("cache")
+    manager.getCache("cache")
+  }
+  
+  var index = 0 //use indexes so that samples can be accessed from cache in order
   
   private def pairToSample = (ddata: Data, rdata: Data) => {
     val sd = SampleData(ddata, rdata)
-    //TODO: enable cache    dataCache += sd
+//    if(cacheEnabled) dataCache.put(new Element(index, sd)) 
+//    index += 1
     sd
   }
   
   def iterator: Iterator[SampleData] = {
-    if (dataCache.isEmpty) {
+    if (!cacheEnabled || index == 0) { //first iteration, nothing in cache
       logger.debug("Make SampleData Iterator from domain and range Data")
       val dit = _domain.iterator
       val rit = _range.iterator
       (dit zip rit).map(p => pairToSample(p._1, p._2))
-    } else {
+    } else { //access data from cache
       logger.debug("Make SampleData Iterator from cache.")
-      dataCache.iterator
+      val elems = dataCache.getAll(dataCache.getKeys) //unordered
+      (0 until dataCache.getKeys.size).map(i => elems(i.asInstanceOf[java.lang.Integer]).getObjectValue.asInstanceOf[SampleData]).iterator
     }
   }
   

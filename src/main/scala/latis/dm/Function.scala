@@ -23,6 +23,9 @@ trait Function extends Variable {
   //TODO: only applicable to SampledFunction, need to replace lots of pattern matches...
   def iterator: Iterator[Sample]
   def getDataIterator: Iterator[SampleData]
+  
+  //evaluate
+  def apply(arg: Variable): Option[Variable]
 }
   
   /*

@@ -13,9 +13,13 @@ class ErrorWriter(response: HttpServletResponse) {
     response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     response.setContentType("text/plain")
   
+    val errorType = e.getClass.getSimpleName
+    val rawMsg = e.getMessage
+    val errorMsg = if (rawMsg == null) "" else rawMsg
+    
     val writer = new PrintWriter(response.getOutputStream)
     writer.println("LaTiS Error: {")
-    writer.println("  " + e.getMessage)
+    writer.println(s"""  $errorType: "$errorMsg"""") // hello world    
     writer.println("}")
     writer.flush()
     response.flushBuffer()

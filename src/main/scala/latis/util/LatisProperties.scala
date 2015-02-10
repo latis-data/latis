@@ -82,7 +82,12 @@ class LatisProperties extends Properties with Logging {
   }
 }
   
-
+/**
+ * Singleton for access to properties with the following precedence:
+ * 1) System properties (e.g. so "-Dprop=value" at command line can override)
+ * 2) LaTiS properties file
+ * 3) Environment variable
+ */
 object LatisProperties {
   
   //---- Manage singleton instance ------------------------------------------//

@@ -139,7 +139,7 @@ object Time {
    * 
    * other cases where we want to specify type? base on data type only?
    */
-  def apply(vtype: String, md: Metadata): Time = {
+  def apply(vtype: String, md: Metadata, data: Data = EmptyData): Time = {
     //this is for tsml orig dataset template, no data
     if (vtype == "text") {
       val md2 = md.get("units") match {
@@ -151,7 +151,7 @@ object Time {
         case None => md + ("units" -> TimeFormat.ISO.toString) + ("length" -> "23")
       }
       //Note, formatted times will use the default numerical time units as needed.
-      new Time(TimeScale.DEFAULT, md2) with Text
+      new Time(TimeScale.DEFAULT, md2, data) with Text
       
     } else { //Numeric time
       var md2 = md
@@ -163,8 +163,8 @@ object Time {
         }
       }
       vtype match {
-        case "real"    => new Time(scale, md2) with Real
-        case "integer" => new Time(scale, md2) with Integer
+        case "real"    => new Time(scale, md2, data) with Real
+        case "integer" => new Time(scale, md2, data) with Integer
       }
     }
   }

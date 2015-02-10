@@ -48,18 +48,20 @@ class TestAggregation {
     
     val agg = TileAggregation()
     val ds = agg(ds1,ds2)
-        
+    //AsciiWriter.write(ds)       
     val dss = ds.getVariables
     assertEquals(1, dss.length) //successfully aggregated into one Function
     assertEquals("(T -> A)", ds.toString)
     assertEquals(20, ds.getLength) //20 samples
-    //AsciiWriter.write(ds)
   }
     
-  //@Test
+  @Test
   def test_tsml_append {
     val ds = TsmlReader("datasets/test/agg/agg_append.tsml").getDataset
-    AsciiWriter.write(ds)
+    //AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+    assertEquals(20, data("T").length)
+    assertEquals(2, data.keySet.size)
   }
   
 //  @Test

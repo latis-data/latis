@@ -12,3 +12,11 @@ class NoOpTimeConverter(from: TimeScale, to: TimeScale) extends TimeConverter(fr
   def convert(value: Double): Double = value
 
 }
+
+object NoOpTimeConverter {
+  
+  def apply(from: TimeScale, to: TimeScale) = {
+    //TODO: allow construction without args?
+    new NoOpTimeConverter(from, to)
+  }
+}

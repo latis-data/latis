@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="vecmag">
+
+    <adapter class="latis.reader.tsml.AsciiAdapter"
+    		 delimiter="\s+"
+             location="datasets/test/vecmag.txt" />
+             
+    <time name="t"/>
+    
+    <real name="a"/>
+    <real name="b"/>
+    <real name="c"/>
+    <?derived X = sqrt(a*a+b*b+c*c)?>
+      
+
+  </dataset>
+
+</tsml>

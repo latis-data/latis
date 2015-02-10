@@ -85,6 +85,14 @@ class TestJdbcAdapter extends AdapterTests {
     val data = ds.toStringMap
     assertEquals(2, data("myInt").length)
   }
+  
+  @Test
+  def predicate_in_tsml {
+    val ops = List(Selection("myInt>1"))
+    val ds = TsmlReader("db_with_predicate.tsml").getDataset(ops)
+    val data = ds.toStringMap
+    assertEquals(1, data("myInt").length)
+  }
 }
 
 object TestJdbcAdapter {

@@ -31,6 +31,24 @@ trait Scalar extends Variable {
   def getMissingValue: Any
   
   def isMissing: Boolean
+  
+  /**
+   * Get a copy of this Scalar with the given metadata property added/replaced.
+   */
+  def updatedMetadata(kv: (String,String)) = {
+    //"updated" like scala.Map, immutable, "update" implies mutable
+    //make new Scalar with metadata with new name
+    val md = getMetadata + kv //new metadata
+    val vtype = getType
+    val data = getData
+    
+    this match {
+      case _: Time => Time(vtype, md, data)
+      case _ => Scalar(vtype, md, data)
+    }
+  }
+  //TODO: updatedMetadata(md: Metadata)
+  
 }
 
 object Scalar {

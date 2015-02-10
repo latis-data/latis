@@ -22,6 +22,9 @@ import play.api.libs.json.JsString
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
 
+/**
+ * Creates a Dataset from a json file. Objects are interpreted as Tuples, Arrays are interpreted as Functions.
+ */
 class JsonReader(path: String) extends DatasetAccessor {
   
   private var source: Source = null
@@ -48,8 +51,7 @@ class JsonReader(path: String) extends DatasetAccessor {
     if (source != null) source.close
   }
   
-  def getDataset: Dataset = getDataset(Seq[Operation]())
-  def getDataset(ops: Seq[Operation]): Dataset = {
+  def getDataset: Dataset = {
   
     //read entire source into string, join with new line
     val jsonString = getDataSource.getLines.mkString(sys.props("line.separator"))
@@ -60,10 +62,9 @@ class JsonReader(path: String) extends DatasetAccessor {
     Dataset(vars, Metadata(name))
   }
   
-  def parseValueMap(map: scala.collection.Map[String, JsValue]): Seq[Variable] = {
-    map.keys.toSeq.map(k => makeValue(map(k), k))
-  }
-  
+  /**
+   * make a JsValue into a Latis Variable. First tries the value as an array, then an object, and then a scalar
+   */
   def makeValue(value: JsValue, name: String): Variable = {
     try {
       val array = value.as[JsArray]
@@ -78,6 +79,9 @@ class JsonReader(path: String) extends DatasetAccessor {
     }
   }
   
+  /**
+   * make a Latis Scalar from a JsValue
+   */
   def makeScalar(s: JsValue, name: String): Scalar = {
     try {
       val num = s.as[JsNumber].value
@@ -91,6 +95,9 @@ class JsonReader(path: String) extends DatasetAccessor {
     }
   }
   
+  /**
+   * make a Latis Function from a JsArray
+   */
   def makeArray(arr: JsArray, name: String): Function = {
     val it = arr.value
     Function(it.map(makeSample(_)), Metadata(name))
@@ -104,6 +111,9 @@ class JsonReader(path: String) extends DatasetAccessor {
     } catch { case jre: JsResultException => ??? }//this would indicate an index
   }
   
+  /**
+   * make Latis Tuple from a JsObject
+   */
   def makeObject(obj: JsObject, name: String): Tuple = {
     val vars = obj.fields.map(a => makeValue(a._2, a._1))
         

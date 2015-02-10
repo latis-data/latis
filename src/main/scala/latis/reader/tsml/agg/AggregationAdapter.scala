@@ -22,10 +22,12 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
       adapter.getDataset
     }
     
-    val ds = collect(dss)
-    aggregate(ds)
+    collect(dss)
   }  
   
+  override protected def makeDataset(ds: Dataset): Dataset = aggregate(ds)
+    
+    
   /**
    * Make a single Dataset that contains the Datasets to be aggregated.
    */

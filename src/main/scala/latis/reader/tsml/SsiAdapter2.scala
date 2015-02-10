@@ -1,19 +1,25 @@
 package latis.reader.tsml
 
 import java.io.FileNotFoundException
-import latis.dm._
 import java.io.RandomAccessFile
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel.MapMode
+
 import scala.Option.option2Iterable
+
 import latis.data.EmptyData
 import latis.data.IterableData
 import latis.data.SampleData
 import latis.data.SampledData
 import latis.data.seq.DataSeq
+import latis.data.set.IndexSet
 import latis.dm.Function
+import latis.dm.Index
+import latis.dm.Integer
+import latis.dm.Real
 import latis.dm.Sample
 import latis.dm.Scalar
+import latis.dm.Text
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.reader.tsml.ml.Tsml
@@ -21,9 +27,10 @@ import latis.util.BufferIterator
 import latis.util.DataUtils
 import latis.util.MappingIterator
 import latis.util.PeekIterator
-import latis.dm.Real
-import latis.data.set.IndexSet
 
+/**
+ * Combines multiple binary files representing individual Variables into a single Dataset.
+ */
 class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
   
   override def makeScalar(s: Scalar): Option[Scalar] = {
@@ -51,6 +58,10 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     case function: Function => findFunctionData(function)
   }
   
+  /**
+   * Searches for a binary file with a name matching this Scalar's name. 
+   * Reads the file in an iterative ByteBuffer and wraps in IterableData.
+   */
   protected def findScalarData(s: Scalar): Option[IterableData] = try {
     val name = s.getName
     val location = getUrl.getPath + name + ".bin"
@@ -70,6 +81,9 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     }
   }
     
+  /**
+   * Combines data from each Variable into data for a Tuple
+   */
   private def findTupleData(tuple: Tuple): Option[IterableData] = {
     val data = tuple.getVariables.flatMap(findData(_)) 
     data.length match {
@@ -78,16 +92,19 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     }
   }
   
+  /**
+   * Combines data for each Variable in a Function to make SampledData. 
+   */
   private def findFunctionData(f: Function): Option[SampledData] = {
     val ddata = findData(f.getDomain).get
     val rdata = f.getRange match {
-      case nf: Function => {
-        val len = nf.getMetadata("length").get.toInt
-        val sdata = findFunctionData(nf).getOrElse(EmptyData)
+      case nf: Function => { //the domain of the inner function must be cached in order to be repeated in each sample of the outer function
+        val len = nf.getMetadata("length").get.toInt //nested functions always have defined length
+        val idata = findFunctionData(nf).getOrElse(EmptyData)
         
-        val loopData = IterableData(new LoopIterator(sdata.domainSet.iterator), sdata.domainSet.recordSize)
+        val loopData = IterableData(new LoopIterator(idata.domainSet.iterator), idata.domainSet.recordSize)//makes an iterator that repeats the inner domain indefinitely.
         
-        IterableData(SampledData(loopData,sdata.rangeData).iterator.grouped(len).map(s => DataSeq(s)), sdata.recordSize * len)
+        IterableData(SampledData(loopData,idata.rangeData).iterator.grouped(len).map(s => DataSeq(s)), idata.recordSize * len)
       }
       case e => findData(e).getOrElse(EmptyData)
     }
@@ -97,6 +114,9 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
   
   def close = {}
 
+  /**
+   * Helper class to repeat the Domain of nested Functions
+   */
   class LoopIterator[T >: Null](iterator: Iterator[T]) extends PeekIterator[T] {
     
     private var it = iterator.duplicate

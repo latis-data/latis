@@ -105,11 +105,14 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     }
   }
 
+  /**
+   * Return the first Function found in this variable, or
+   * None if no functions are contained
+   */
   def findFunction: Option[Function] = this match {
     case _: Scalar => None
     case Tuple(vars) => {
-      val fs = vars.flatMap(_.findFunction)
-      if (fs.nonEmpty) Some(fs.head) else None
+      vars.view.flatMap(_.findFunction).headOption
     }
     case f: Function => Some(f)
   }

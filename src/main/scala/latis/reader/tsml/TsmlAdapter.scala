@@ -1,5 +1,16 @@
 package latis.reader.tsml
 
+import java.io.File
+import java.net.URI
+import java.net.URL
+
+import scala.Option.option2Iterable
+import scala.collection.JavaConverters.collectionAsScalaIterableConverter
+import scala.collection.Map
+import scala.collection.Seq
+import scala.collection.immutable
+import scala.collection.mutable
+
 import latis.data.Data
 import latis.data.seq.DataSeq
 import latis.dm.Dataset
@@ -10,28 +21,23 @@ import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.metadata.Metadata
+import latis.ops.MathExpressionDerivation
 import latis.ops.Operation
 import latis.ops.Projection
+import latis.ops.RenameOperation
+import latis.ops.UnitConversion
 import latis.ops.filter.Selection
 import latis.reader.tsml.ml.FunctionMl
 import latis.reader.tsml.ml.ScalarMl
+import latis.reader.tsml.ml.TimeMl
 import latis.reader.tsml.ml.Tsml
 import latis.reader.tsml.ml.TupleMl
 import latis.reader.tsml.ml.VariableMl
-import java.io.File
-import java.net.URI
-import java.net.URL
-import scala.Option.option2Iterable
-import scala.collection.Map
-import scala.collection.Seq
-import scala.collection.immutable
-import scala.collection.mutable
-import scala.io.Source
-import latis.util.DataUtils
-import latis.reader.tsml.ml.TimeMl
 import latis.time.Time
-import latis.ops.UnitConversion
-import latis.ops.RenameOperation
+import latis.util.DataUtils
+import net.sf.ehcache.Cache
+import net.sf.ehcache.CacheManager
+import net.sf.ehcache.Element
 
 
 /**
@@ -193,9 +199,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     val otherOps = ops.filterNot(handleOperation(_))
     
     //Apply operations that the adapter didn't handle.
-    //Reverse because foldRight applies them in reverse order.
     //This should be the first use of the lazy 'dataset' so it may trigger its final construction.
-    otherOps.reverse.foldRight(getDataset)(_(_))
+    otherOps.foldLeft(getDataset)((dataset, op) => op(dataset))
   }
   
   /**
@@ -286,12 +291,33 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   private val dataCache = mutable.Map[String, DataSeq]()
   
+//  private val dataCache: Cache = {
+//    val name = origDataset.getName
+//    val manager = CacheManager.getInstance //TODO:close manager?
+//    manager.getCacheNames.contains(name) match {
+//      case true => manager.getCache(name)
+//      case false => {
+//        manager.addCache(name)
+//        manager.getCache(name)
+//      }
+//    }
+//  }
+  
+//  def closeCache: Unit = {
+//    dataCache.dispose
+//    CacheManager.getInstance.shutdown
+//  }
+  
   def getCache: immutable.Map[String, DataSeq] = dataCache.toMap
+  
+//  def getCache: immutable.Map[String, DataSeq] = dataCache.getAll(dataCache.getKeys).values.asScala.map(e => e.getObjectKey -> e.getObjectValue).toMap.asInstanceOf[immutable.Map[String, DataSeq]]
   
   /**
    * Is the cache empty.
    */
   def cacheIsEmpty: Boolean = dataCache.isEmpty
+  
+//  def cacheIsEmpty: Boolean = dataCache.getKeys.isEmpty
   
   /**
    * Add Data to the cache.
@@ -299,16 +325,18 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   protected def cache(dataMap: Map[String, DataSeq]) = dataCache ++= dataMap
   
+//  protected def cache(dataMap: Map[String, DataSeq]) = dataMap.foreach(p => dataCache.put(new Element(p._1, p._2)))
+  
   /**
    * Replace data for given variable.
    */
-  protected def cache(variableName: String, data: Data) = {
+  protected def cache(variableName: String, data: Data): Unit = {
     //make sure data is Iterable
     val d: DataSeq = data match {
       case idata: DataSeq => idata
       case _ => DataSeq(data)
     }
-    dataCache += (variableName -> d)
+    cache(Map(variableName -> d))
   }
   
   /**
@@ -329,6 +357,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   def getCachedData(variableName: String): Option[DataSeq] = dataCache.get(variableName)
   //TODO: if None throw new Error("No data found in cache for Variable: " + variableName)? or return empty Data?
   
+//  def getCachedData(variableName: String): Option[DataSeq] = {
+//    try Some(dataCache.get(variableName).getObjectValue.asInstanceOf[DataSeq])
+//    catch {case npe: NullPointerException => None}
+//  }
+  
   //---------------------------------------------------------------------------
   
   /**
@@ -337,6 +370,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   def piOps: Seq[Operation] = {
     //TODO: consider order
     //TODO: add other PI types? rename,...
+    /*
+     * TODO: unify handling/parsing of service constraints and PIs
+     * foo(bar) = <?foo bar?> ?
+     */
+    
     val projections = tsml.getProcessingInstructions("project").map(Projection(_)) 
     val selections  = tsml.getProcessingInstructions("select").map(Selection(_))
     //Unit conversions: "convert vname units"
@@ -348,8 +386,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     })
     
     val renames = tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
+    val derivations = tsml.getProcessingInstructions("derived").map(MathExpressionDerivation(_))
     
-    projections ++ selections ++ conversions ++ renames
+    projections ++ selections ++ conversions ++ renames ++ derivations
   }
   
   /**

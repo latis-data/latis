@@ -13,6 +13,11 @@ import latis.util.MappingIterator
 import latis.data.EmptyData
 import com.typesafe.scalalogging.slf4j.Logging
 
+/**
+ * A SampledFunction represents a discrete Function whose values are defined
+ * by Sample objects. Each Sample object represents a single mapping of a
+ * domain value to a range value.
+ */
 class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = EmptyMetadata, data: SampledData = EmptyData) 
     extends AbstractVariable(metadata, data) with Function with Logging {
 
@@ -21,6 +26,15 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   def getDomain: Variable = domain
   def getRange: Variable = range
   def getSample: Sample = Sample(domain, range)
+  
+  
+  //evaluate, use resample Operation for SampledFunctions
+  def apply(arg: Variable): Option[Variable] = {
+    
+    
+    ???
+  }
+  
   
   /**
    * Return the number of samples represented by this SampledFunction.
@@ -61,7 +75,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   def iterator: PeekIterator[Sample] = {
     //test if we have tried to iterate more than once on this function
     itcounter += 1
-    if (itcounter > 1) throw new Error("Iterating more than once on " + this)
+//    if (itcounter > 1) throw new Error("Iterating more than once on " + this)
     
     _iterator match {
     case null => {
