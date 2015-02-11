@@ -442,22 +442,13 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     val con = (getProperty("location"), getProperty("jndi")) match {
       
       // if 'location' exists and starts with "java:", use jndi
-      case (Some(javaUrlRegex(location)), _) => {
-        println("jndi via location")
-        getConnectionViaJndi(location)
-      }
+      case (Some(javaUrlRegex(location)), _) => getConnectionViaJndi(location)
       
       // if 'jndi' exists, use jndi
-      case (_, Some(jndiStr)) => {
-        println("jndi via jndi")
-        getConnectionViaJndi(jndiStr)
-      }
+      case (_, Some(jndiStr)) => getConnectionViaJndi(jndiStr)
       
       // else, default to jdbc (relies on several other attributes that will be read later)
-      case _ => {
-        println("jdbc via location et al")
-        getConnectionViaJdbc
-      }
+      case _ => getConnectionViaJdbc
     }
 
     hasConnection = true //will still be false if getting connection fails
