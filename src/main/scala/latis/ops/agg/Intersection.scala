@@ -47,8 +47,9 @@ class Intersection extends Aggregation {
       }
     }
     
-    //TODO: metadata
-    Dataset(Function(dtype, rtype, samples))
+    //keep original metadata
+    val md = dataset.getMetadata
+    Dataset(Function(dtype, rtype, samples), md)
   }
 
   
