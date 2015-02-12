@@ -2,6 +2,7 @@ package latis.dm
 
 import latis.data.value.IndexValue
 import latis.metadata.Metadata
+import latis.data.Data
 
 /**
  * Scalar Variable that represents an index.
@@ -17,6 +18,8 @@ object Index {
   def apply(): Index = new AbstractScalar(metadata = Metadata("index")) with Index
 
   def apply(value: Int): Index = new AbstractScalar(metadata = Metadata("index"), data = IndexValue(value)) with Index
+  
+  def apply(data: Data): Index = new AbstractScalar(metadata = Metadata("index"), data = data) with Index
 
   /**
    * Expose the index value represented by this Variable.
