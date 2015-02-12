@@ -19,8 +19,9 @@ class StrideFilter(val stride: Int) extends Filter {
       case Some("0") => function.getMetadata
       case Some(n) => Metadata(function.getMetadata.getProperties + ("length" -> (((n.toInt - 1) / stride) + 1).toString))
     }
-
-    Some(Function(function.getDomain, function.getRange, it, md))
+    
+    if(it.isEmpty) Some(Function(function.getDomain, function.getRange, Iterator.empty, md))
+    else Some(Function(function.getDomain, function.getRange, resetIndices(it), md))
   }
   
 }

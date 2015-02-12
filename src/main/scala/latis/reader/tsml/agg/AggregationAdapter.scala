@@ -3,11 +3,17 @@ package latis.reader.tsml.agg
 import latis.dm.Dataset
 import latis.reader.tsml.TsmlAdapter
 import latis.reader.tsml.ml.Tsml
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Base class for Adapters that aggregate (combine) Datasets.
  */
 abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
+  
+  /**
+   * Keep a list of adapters so we can close them.
+   */
+  private val adapters = ArrayBuffer[TsmlAdapter]()
   
   /**
    * Given a Dataset that contains other Datasets
@@ -27,6 +33,7 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     val dss = for (node <- dsnodes) yield {
       val tsml = Tsml(node)
       val adapter = TsmlAdapter(tsml)
+      adapters += adapter
       adapter.getDataset
     }
     
@@ -50,6 +57,8 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     Dataset(datasets, md) 
   }
 
-  //TODO: close all contributing adapters
-  def close = {}
+  /**
+   * Close all contributing adapters.
+   */
+  def close = adapters.foreach(_.close)
 }

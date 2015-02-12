@@ -1,9 +1,10 @@
 package latis.ops.filter
 
 import latis.dm.Function
-import latis.ops.OperationFactory
 import latis.dm.Sample
 import latis.metadata.Metadata
+import latis.ops.OperationFactory
+import latis.util.PeekIterator
 
 /**
  * Keep only the last sample of any outer Function in the Dataset.
@@ -23,7 +24,7 @@ class LastFilter extends Filter {
     //make the new function with the updated metadata
     samples.length match {
       case 0 => Some(Function(function.getDomain, function.getRange, Iterator.empty, md)) //empty Function with type of original
-      case 1 => Some(Function(samples, md))
+      case 1 => Some(Function(function.getDomain, function.getRange, resetIndices(PeekIterator(samples.iterator)), md))
     }
   }
 }

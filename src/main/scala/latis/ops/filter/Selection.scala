@@ -1,18 +1,17 @@
 package latis.ops.filter
 
+import com.typesafe.scalalogging.slf4j.Logging
+
 import latis.dm.Function
+import latis.dm.Index
+import latis.dm.Sample
 import latis.dm.Scalar
 import latis.dm.Text
+import latis.dm.Tuple
+import latis.dm.WrappedFunction
+import latis.ops.Operation
 import latis.time.Time
 import latis.util.RegEx.SELECTION
-import com.typesafe.scalalogging.slf4j.Logging
-import latis.util.MappingIterator
-import latis.dm.Sample
-import latis.dm.Variable
-import latis.dm.WrappedFunction
-import latis.dm.Tuple
-import latis.ops.Operation
-import latis.ops.resample.NearestNeighbor
 
 /**
  * Filter based on a basic boolean expression.
@@ -64,16 +63,6 @@ protected class Selection(val vname: String, val operation: String, val value: S
     x.find(_.isEmpty) match{
       case Some(_) => None //found an invalid variable, exclude the entire tuple
       case None => Some(Tuple(x.map(_.get), tuple.getMetadata))
-    }
-  }
-  
-  override def applyToFunction(function: Function): Option[Function] = {
-    val it = WrappedFunction(function, this).iterator
-    it.isEmpty match {
-      case true => None
-      case false => {
-        Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
-      }
     }
   }
   

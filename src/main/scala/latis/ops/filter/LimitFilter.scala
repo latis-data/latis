@@ -1,11 +1,9 @@
 package latis.ops.filter
 
 import latis.dm.Function
-import latis.ops.OperationFactory
-import latis.dm.Sample
 import latis.metadata.Metadata
-import latis.dm.WrappedFunction
-import latis.util.MappingIterator
+import latis.ops.OperationFactory
+import latis.util.PeekIterator
 
 /**
  * Keep only the first 'limit' samples of any outer Function in the Dataset.
@@ -24,7 +22,7 @@ class LimitFilter(val limit: Int) extends Filter {
     //make the new function with the updated metadata
     samples.length match {
       case 0 => Some(Function(function.getDomain, function.getRange, Iterator.empty, md)) //empty Function with type of original
-      case _ => Some(Function(samples, md))
+      case _ => Some(Function(function.getDomain, function.getRange, resetIndices(PeekIterator(samples.iterator)), md))
     }
   }
 }
