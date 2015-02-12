@@ -9,8 +9,16 @@ import latis.reader.tsml.ml.Tsml
  */
 abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   
+  /**
+   * Given a Dataset that contains other Datasets
+   * apply the aggregation logic to make a single Dataset.
+   */
   def aggregate(dataset: Dataset): Dataset
   
+  /**
+   * Combine each aggregate Dataset into a single Dataset.
+   * These are simply grouped together, no merging logic applied.
+   */
   override protected def makeOrigDataset: Dataset = {
     //TODO: consider deeper nesting of dataset nodes
     //Get child dataset nodes
