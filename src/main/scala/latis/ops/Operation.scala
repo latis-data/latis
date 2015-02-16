@@ -89,6 +89,7 @@ object Operation {
    * Construct an Operation subclass based on the given name.
    */
   def apply(opName: String): Operation = apply(opName, Seq[String]())
+  //TODO: accept the string form of the expression, without the args separated out
 
   /**
    * Construct an Operation subclass based on the given name and arguments.
