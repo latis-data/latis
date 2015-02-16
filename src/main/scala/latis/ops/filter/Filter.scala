@@ -43,6 +43,8 @@ class Filter extends Operation {
     val it = WrappedFunction(function, this).iterator
     it.isEmpty match {
       case true => None
+      //TODO: return empty Function, not in case of inner Function, we want to drop outer sample
+      //case true => Some(Function(function.getDomain, function.getRange, function.getMetadata))  //empty data, TODO: do we need to make sure domain and range are empty?
       case false => Some(Function(function.getDomain, function.getRange, resetIndices(it), function.getMetadata))
     }
   }
