@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{mission}} LaTiS Server</title>
+        <style>
+            html, body {
+                margin: 0 auto;
+                padding: 0;
+                max-width: 800px;
+            }
+            
+            .bold { font-weight: bold; }
+            .italic { font-style: italic; }
+            
+            .hanging-indent {
+                text-indent: -22px;
+                padding-left: 22px;
+            }
+            .hanging-indent > p {
+                margin: 5px 0;
+            }
+            
+            .section-content {
+                margin: 0 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>{{mission}} LaTiS Server</h1>
+        <div class="section-content hanging-indent">
+            <p>
+                <span class="bold italic">Usage:</span>
+                {{context-root}}/<span class="italic">dataset</span>.<span class="italic">suffix</span>?<span class="italic">projection</span>&amp;<span class="italic">selection</span>&amp;<span class="italic">filter</span>
+            </p>
+            <br/>
+            <p>
+                <span class="bold italic">dataset:</span>
+                Name of dataset (see <a href="#datasets">Available Datasets</a>)
+            </p>
+            <p>
+                <span class="bold italic">suffix:</span>
+                Type of output (see <a href="#suffixes">Output Options</a>)
+            </p>
+            <p>
+                <span class="bold italic">projection:</span>
+                List of variables to return with optional <span class="italic">hyperslab</span> (index subset) definitions.
+                Defaults to all. The Dataset Descriptor Structure (DDS) will describe the variables for each dataset. Use the
+                <span class="italic">dds</span> suffix to get a dataset's DDS.
+            </p>
+            <p>
+                <span class="bold italic">selection:</span>
+                Zero or more relative constraints on a variable (e.g. time&gt;=2010-01-01). Each must be preceded by a
+                '&amp;'.
+            </p>
+            <p>
+                <span class="bold italic">filter:</span>
+                Zero or more filters to be applied to the data (see <a href="#filters">Filter Options</a>). Each must be
+                preceded by a '&amp;'.
+            </p>
+        </div>
+        
+        <h2 id="datasets">Available Datasets</h2>
+        <div class="section-content">{{catalog-html}}</div>
+        
+        <h2 id="suffixes">Output Options</h2>
+        <div class="section-content">{{output-options-html}}</div>
+        
+        <h2 id="filters">Filter Options</h2>
+        <div class="section-content">{{filter-options-html}}</div>
+    </body>
+</html>

@@ -10,6 +10,7 @@ import java.net.URLDecoder
 import latis.metadata.Catalog
 import latis.dm.Dataset
 import java.io.IOException
+import latis.writer.OverviewWriter
 
 class LatisServer extends HttpServlet with Logging {
 
@@ -32,6 +33,18 @@ class LatisServer extends HttpServlet with Logging {
       val query = request.getQueryString match {
         case s: String => URLDecoder.decode(s, "UTF-8")
         case _ => ""
+      }
+      
+      // Quick short-circuit for the case when someone requests
+      // http://[base]/latis/
+      // In this case we want to return a short HTML overview
+      // of the current LaTiS install
+      val isPathEmpty = path == null || path.equals("")
+      val isQueryEmpty = query.equals("")
+      if (isPathEmpty && isQueryEmpty) {
+        logger.info("Processing OverviewWriter request (no path or query)")
+        OverviewWriter(getServletConfig).write(request, response)
+        return;
       }
       
       logger.info("Processing request: " + path + "?" + query)
