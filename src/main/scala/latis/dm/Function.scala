@@ -24,6 +24,18 @@ trait Function extends Variable {
   def iterator: Iterator[Sample]
   def getDataIterator: Iterator[SampleData]
   
+//  /**
+//   * Datasets from IterableAdapters tend to be "iterable once" in which case this
+//   * will return false. If the Data has been realized (memoized) within the dataset
+//   * structure, this will return true. This will be the case when the Function is
+//   * constructed from a Seq of Samples (as opposed to an Iterator), or the Memoization
+//   * operation has been applied to the Dataset (via 'force').
+//   */
+//  def isTraversableAgain: Boolean = _traversableAgain
+//  private var _traversableAgain = false
+////TODO: test how this works with SampledData
+//  //TODO: add this method to Dataset?
+  
   //evaluate
   def apply(arg: Variable): Option[Variable]
 }
@@ -67,6 +79,11 @@ object Function {
    * Construct from Seq of Variable which are assumed to contain their own data.
    */
   def apply(vs: Seq[Variable], md: Metadata): SampledFunction = vs.head match {
+/*
+ * TODO: do we have to turn these into iterators?
+ * want to be able to avoid iterable once problem
+ * 
+ */
     case sample: Sample => Function(sample.domain, sample.range, vs.asInstanceOf[Seq[Sample]].iterator, md)
     case _ => {
       //make Seq of samples where domain is index

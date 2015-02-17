@@ -104,7 +104,8 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
       //Data is presumably already dispersed throughout model, in Scalars
       //TODO: try to avoid this, not efficient
       logger.debug("Make Data Iterator from existing Sample Iterator: " + this)
-      new MappingIterator(_iterator, (s: Sample) => Some(DataUtils.sampleToData(s)))
+      if (_iterator == null || _iterator.isEmpty) Iterator.empty
+      else new MappingIterator(_iterator, (s: Sample) => Some(DataUtils.sampleToData(s)))
     } else {
       logger.debug("Make Data Iterator from SampledData: " + this)
       domain match {
