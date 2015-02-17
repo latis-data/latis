@@ -47,7 +47,7 @@ object Function {
    * Construct a Function from the given template (e.g. model from tsml) and data.
    */
   def apply(template: Function, data: SampledData): SampledFunction = {
-    new SampledFunction(template.getDomain, template.getRange, template.getMetadata, data)
+    Function(template.getDomain, template.getRange, template.getMetadata, data)
   }
   
   /**
@@ -57,10 +57,10 @@ object Function {
     SampledFunction(domain, range, sampleIterator, md)
   }
   def apply(domain: Variable, range: Variable, sampleIterator: Iterator[Sample]): SampledFunction = {
-    SampledFunction(domain, range, sampleIterator, EmptyMetadata)
+    Function(domain, range, sampleIterator, EmptyMetadata)
   }
   def apply(template: Function, sampleIterator: Iterator[Sample]): SampledFunction = {
-    SampledFunction(template.getDomain, template.getRange, sampleIterator, template.getMetadata)
+    Function(template.getDomain, template.getRange, sampleIterator, template.getMetadata)
   }
   
   /**
