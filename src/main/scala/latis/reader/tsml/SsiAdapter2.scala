@@ -122,7 +122,7 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     private var it = iterator.duplicate
     
     def getNext = {
-      if(it._1 hasNext) it._1.next
+      if(it._1.hasNext) it._1.next
       else {
         it = it._2.duplicate
         getNext
