@@ -13,6 +13,7 @@ import latis.metadata.Metadata
 import latis.ops.filter.NearestNeighborFilter
 import latis.ops.filter.Selection
 import latis.reader.tsml.TsmlReader
+import latis.writer.AsciiWriter
 
 class TestSelection {
   
@@ -99,7 +100,15 @@ class TestSelection {
     val n = ds3.getLength
     assertEquals(3, n)
   }
-  
+    
+  @Test
+  def outside_range {
+    val ds = Dataset(scalarFunction)
+    val ds2 = ds.filter("time > 5")
+    val f = ds2.findFunction.get
+    assertEquals(0, f.getLength)
+  }
+    
   //----------------------------------------------
   
   @Test

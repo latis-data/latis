@@ -22,7 +22,6 @@ class ExcludeMissing extends Filter {
     else None
   }
   
-  //TODO: Nested Function, exclude entire outer sample
 }
 
 object ExcludeMissing extends OperationFactory {

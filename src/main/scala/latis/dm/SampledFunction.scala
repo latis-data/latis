@@ -7,6 +7,7 @@ import latis.data.Data
 import latis.util.DataUtils
 import latis.data.IterableData
 import latis.data.SampledData
+import latis.data.set.IndexSet
 import latis.data.SampleData
 import latis.util.PeekIterator
 import latis.util.MappingIterator
@@ -107,7 +108,10 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
       else new MappingIterator(_iterator, (s: Sample) => Some(DataUtils.sampleToData(s)))
     } else {
       logger.debug("Make Data Iterator from SampledData: " + this)
-      d.asInstanceOf[SampledData].iterator
+      domain match {
+        case i: Index => SampledData(IndexSet(), d.asInstanceOf[SampledData].rangeData).iterator
+        case _ => d.asInstanceOf[SampledData].iterator
+      }
     }
   }
 }
@@ -117,7 +121,11 @@ object SampledFunction {
   def apply(domain: Variable, range: Variable, samples: Iterator[Sample], metadata: Metadata = EmptyMetadata) = {
     val sf = new SampledFunction(domain, range, metadata=metadata)
     if (samples == null) throw new Error("Can't construct a SampledFunction with a null Sample Iterator.")
-    sf._iterator = samples
+    val sit = domain match {
+      case i: Index => IndexSet().iterator.zip(samples).map(p => Sample(Index(p._1), p._2.range))
+      case _ => samples
+    }
+    sf._iterator = sit
     //TODO: should we make SampledData instead? resolve iterable once problem by caching in SampledData
     sf
   }
