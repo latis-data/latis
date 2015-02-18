@@ -1,17 +1,18 @@
 package latis.ops.filter
 
-import com.typesafe.scalalogging.slf4j.Logging
-
 import latis.dm.Function
-import latis.dm.Index
-import latis.dm.Sample
 import latis.dm.Scalar
 import latis.dm.Text
-import latis.dm.Tuple
-import latis.dm.WrappedFunction
-import latis.ops.Operation
 import latis.time.Time
 import latis.util.RegEx.SELECTION
+import com.typesafe.scalalogging.slf4j.Logging
+import latis.util.MappingIterator
+import latis.dm.Sample
+import latis.dm.Variable
+import latis.dm.WrappedFunction
+import latis.dm.Tuple
+import latis.ops.Operation
+import latis.ops.resample.NearestNeighbor
 
 /**
  * Filter based on a basic boolean expression.

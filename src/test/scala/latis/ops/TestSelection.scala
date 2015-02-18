@@ -13,6 +13,7 @@ import latis.metadata.Metadata
 import latis.ops.filter.NearestNeighborFilter
 import latis.ops.filter.Selection
 import latis.reader.tsml.TsmlReader
+import latis.writer.AsciiWriter
 
 class TestSelection {
   
