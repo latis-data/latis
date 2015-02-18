@@ -99,7 +99,15 @@ class TestSelection {
     val n = ds3.getLength
     assertEquals(3, n)
   }
-  
+    
+  @Test
+  def outside_range {
+    val ds = Dataset(scalarFunction)
+    val ds2 = ds.filter("time > 5")
+    val f = ds2.findFunction.get
+    assertEquals(0, f.getLength)
+  }
+    
   //----------------------------------------------
   
   @Test
