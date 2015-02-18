@@ -53,7 +53,7 @@ class LatisServer extends HttpServlet with Logging {
       //Adapters should remove Operations from this if they handle them
       //  passing the rest for others to handle.
       val args = query.split("&")
-      val operations = DapConstraintParser.parseArgs(args)
+      val operations = (new DapConstraintParser).parseArgs(args)
       
       //Get the Dataset from the Reader. 
       dataset = reader.getDataset(operations)
