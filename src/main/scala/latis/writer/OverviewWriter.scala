@@ -7,10 +7,13 @@ import java.io.OutputStream
 import java.io.PrintWriter
 import javax.servlet.ServletConfig
 import javax.servlet.http.HttpServletRequest
+import latis.metadata.ServerMetadata
+import latis.metadata.WriterDescription
 
 class OverviewWriter(servletConfig: ServletConfig) {
   
   private val mainTmpl = StringTemplate.fromResource("templates/overviewwriter/main.html")
+  private val suffixTmpl = StringTemplate.fromResource("templates/overviewwriter/suffix.html")
   
   def write(httpRequest: HttpServletRequest, httpResponse: HttpServletResponse): Unit = {
     
@@ -44,7 +47,10 @@ class OverviewWriter(servletConfig: ServletConfig) {
   }
   
   def outputOptionsHtml(): String = {
-    "TODO: output-options-html"
+    ServerMetadata.availableSuffixes.
+      sortBy(suffixInfo => suffixInfo.suffix). // put in alphabetical order
+      map(x => suffixTmpl.applyValues(x.toMap())). // apply each description object to the template
+      mkString("") // simple string join and return
   }
   
   def filterOptionsHtml(): String = {

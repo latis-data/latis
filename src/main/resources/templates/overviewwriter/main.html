@@ -23,6 +23,10 @@
             .section-content {
                 margin: 0 10px;
             }
+            
+            dt {
+		        font-weight: bold;    
+            }
         </style>
     </head>
     <body>
@@ -62,8 +66,14 @@
         <h2 id="datasets">Available Datasets</h2>
         <div class="section-content">{{catalog-html}}</div>
         
-        <h2 id="suffixes">Output Options</h2>
-        <div class="section-content">{{output-options-html}}</div>
+        <h2 id="suffixes">Output Options (suffix)</h2>
+        <div class="section-content">
+        	<p>
+        		These suffixes can be appended to the dataset name (as in dataset.json)
+        		to specify the output format for the data.
+       		</p>
+        	<dl>{{output-options-html}}</dl>
+       	</div>
         
         <h2 id="filters">Filter Options</h2>
         <div class="section-content">{{filter-options-html}}</div>
