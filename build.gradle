@@ -61,7 +61,12 @@ dependencies {
 	
 }
 
-compileScala {
+// Affects several tasks: compileScala, compileTestScala, compileSourceSetScala
+// see section "Tasks" in http://gradle.org/docs/current/userguide/scala_plugin.html
+tasks.withType(ScalaCompile) {
+	
+	// build optimization: disabling Ant enables Zinc-based compiler with support for incremental compilation
+	// see section "Incremental Compilation" in http://gradle.org/docs/current/userguide/scala_plugin.html
 	scalaCompileOptions.useAnt = false
 }
 
