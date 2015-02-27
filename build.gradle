@@ -61,6 +61,10 @@ dependencies {
 	
 }
 
+compileScala {
+	scalaCompileOptions.useAnt = false
+}
+
 
 //Define the Ivy repository for publishing build artifacts.
 group = 'lasp'
