@@ -9,6 +9,7 @@ import javax.servlet.ServletConfig
 import javax.servlet.http.HttpServletRequest
 import latis.metadata.ServerMetadata
 import latis.metadata.WriterDescription
+import latis.metadata.Catalog
 
 class OverviewWriter(servletConfig: ServletConfig) {
   
@@ -43,7 +44,7 @@ class OverviewWriter(servletConfig: ServletConfig) {
   }
   
   def catalogHtml(): String = {
-    "TODO: catalog-html"
+    Catalog.listTsmlFiles().map(filename => s"<p>$filename</p>").mkString
   }
   
   def outputOptionsHtml(): String = {
