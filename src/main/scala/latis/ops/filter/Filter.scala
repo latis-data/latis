@@ -1,11 +1,13 @@
 package latis.ops.filter
 
-import latis.data.set.IndexSet
-import latis.dm._
+import latis.dm.Dataset
+import latis.dm.Function
 import latis.dm.Sample
+import latis.dm.Scalar
 import latis.dm.Tuple
+import latis.dm.Variable
 import latis.ops.Operation
-import latis.util.PeekIterator
+import latis.dm.WrappedFunction
 
 /**
  * Subtype of Operation that may drop samples.
@@ -39,21 +41,19 @@ class Filter extends Operation {
     Some(tuple)
   }
   
+  /**
+   * Override so we get an empty Function if no samples match instead of None.
+   */
   override def applyToFunction(function: Function): Option[Function] = {
     val it = WrappedFunction(function, this).iterator
     it.isEmpty match {
-      case true => None
-      case false => Some(Function(function.getDomain, function.getRange, resetIndices(it), function.getMetadata))
+      //return empty Function if empty
+      //TODO: do we need to make sure domain and range are empty?
+      case true  => Some(Function(function.getDomain, function.getRange, function.getMetadata))  //empty data
+      case false => Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
     }
   }
-  
-  /**
-   * Replaces the Domain in the Iterator of a Function with a new IndexSet.
-   */
-  def resetIndices(it: PeekIterator[Sample]): Iterator[Sample] = {
-    if(it.peek.domain.isInstanceOf[Index]) IndexSet().iterator.zip(it).map(p => Sample(Index(p._1),p._2.range))
-    else it
-  }
+
 
 }
 

@@ -10,6 +10,8 @@ import latis.writer.AsciiWriter
 import latis.dm.Real
 import latis.metadata.Metadata
 import latis.data.SampledData
+import latis.dm.TestFunction
+import latis.writer.Writer
 
 class TestExcludeMissing {
 
@@ -60,6 +62,16 @@ class TestExcludeMissing {
     val ds = Dataset(Function(domain, range, data = data))
     val ds2 = ExcludeMissing()(ds)
     assertEquals(2, ds2.getLength)
+  }
+  
+  @Test
+  def exclude_missing_from_empty_dataset {
+    val op = Operation("exclude_missing")
+    val ds = TestFunction.empty_function
+    val ds2 = op(ds)
+    //Writer.fromSuffix("jsond").write(ds2)
+    val data = ds2.toStringMap
+    assert(data.isEmpty)
   }
   
   def missing_in_nested_function = ???

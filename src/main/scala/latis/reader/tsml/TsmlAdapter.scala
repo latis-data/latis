@@ -105,6 +105,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     Dataset(vars, md) 
   } 
   
+  var timeUnused = true //variable used to prevent multiple time aliases
+  
   /**
    * Create Metadata from "metadata" elements or Variable element's attributes
    * in the given Variable XML.
@@ -127,10 +129,12 @@ abstract class TsmlAdapter(val tsml: Tsml) {
       else atts = atts + ("name" -> name) //no 'name' attribute, so use it
     }
  
+    if(atts.values.toList.contains("time")) timeUnused = false
     //Add implicit metadata for "time" and "index" variables.
     //TODO: consider uniqueness
-    if (vml.label == "time") addImplicitName("time")
+    if (timeUnused && vml.label == "time") {addImplicitName("time"); timeUnused = false} //don't add alias if we already have a 'time'
     if (vml.label == "index") addImplicitName("index")
+    
 
     Metadata(atts)
   }
