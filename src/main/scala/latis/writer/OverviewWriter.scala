@@ -10,11 +10,13 @@ import javax.servlet.http.HttpServletRequest
 import latis.metadata.ServerMetadata
 import latis.metadata.WriterDescription
 import latis.metadata.Catalog
+import scala.collection.immutable.DefaultMap
 
 class OverviewWriter(servletConfig: ServletConfig) {
   
   private val mainTmpl = StringTemplate.fromResource("templates/overviewwriter/main.html")
   private val suffixTmpl = StringTemplate.fromResource("templates/overviewwriter/suffix.html")
+  private val operationTmpl = StringTemplate.fromResource("templates/overviewwriter/operation.html")
   
   def write(httpRequest: HttpServletRequest, httpResponse: HttpServletResponse): Unit = {
     
@@ -47,15 +49,40 @@ class OverviewWriter(servletConfig: ServletConfig) {
     Catalog.listTsmlFiles().map(filename => s"<p>$filename</p>").mkString
   }
   
+  private def defaultStr(msg: String, defaultMsg: String): String = {
+    if (msg != null) msg
+    else defaultMsg
+  }
+  
   def outputOptionsHtml(): String = {
     ServerMetadata.availableSuffixes.
       sortBy(suffixInfo => suffixInfo.suffix). // put in alphabetical order
-      map(x => suffixTmpl.applyValues(x.toMap())). // apply each description object to the template
-      mkString("") // simple string join and return
+      map(suffixInfo => // turn each info obj into Map and apply template 
+        suffixTmpl.applyValues(Map(
+          "suffix" -> suffixInfo.suffix,
+          "className" -> suffixInfo.className,
+          "description" -> defaultStr(
+            suffixInfo.description,
+            s"<span class='aside'>No Description: add <em>writer.${suffixInfo.suffix}.description</em> to latis.properties</span>"
+          )
+        ))
+      ).
+      mkString // simple string join and return
   }
   
   def filterOptionsHtml(): String = {
-    "TODO: filter-options-html"
+    ServerMetadata.availableOperations.
+      sortBy(opInfo => opInfo.name). // put in alphabetical order
+      map(opInfo => operationTmpl.applyValues(Map( // turn each info obj into Map and apply template
+          "name" -> opInfo.name,
+          "className" -> opInfo.className,
+          "description" -> defaultStr(
+            opInfo.description,
+            s"<span class='aside'>No Description: add <em>operation.${opInfo.name}.description</em> to latis.properties</span>"
+          )
+        ))
+      ).
+      mkString // simple
   }
 }
 

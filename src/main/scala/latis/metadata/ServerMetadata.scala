@@ -24,7 +24,23 @@ object ServerMetadata {
           Some(WriterDescription(
             suffix,
             LatisProperties.getOrElse(key, "[Unknown Class]").split("\\.").last,
-            LatisProperties.getOrElse(key.replace(".class", ".description"), s"[No Description: add writer.$suffix.description to latis.properties]")
+            LatisProperties.getOrElse(key.replace(".class", ".description"), null)
+          ))
+        }
+        case _ => None
+      }).
+      toSeq
+  }
+  
+  lazy val availableOperations: Seq[OperationDescription] = {
+    val operationClassRegex = """operation\.(\w+)\.class""".r
+    LatisProperties.keys.
+      flatMap(key => key match {
+        case operationClassRegex(name) => {
+          Some(OperationDescription(
+              name,
+              LatisProperties(key).split('.').last,
+              LatisProperties.getOrElse(key.replace(".class", ".description"), null)
           ))
         }
         case _ => None

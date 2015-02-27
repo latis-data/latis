@@ -21,11 +21,25 @@
             }
             
             .section-content {
-                margin: 0 10px;
+                margin-left: 20px;
+            }
+            
+            .aside {
+            	color: #bbbbbb;
+            	font-style: italic;
             }
             
             dt {
-		        font-weight: bold;    
+		        font-weight: bold;
+		        margin-bottom: 3px;
+            }
+            
+            dd {
+            	margin-bottom: 8px;
+            }
+            
+            em {
+            	font-weight: bold;
             }
         </style>
     </head>
@@ -78,7 +92,13 @@
         	<dl>{{output-options-html}}</dl>
        	</div>
         
-        <h2 id="filters">Filter Options</h2>
-        <div class="section-content">{{filter-options-html}}</div>
+        <h2 id="filters">Filter Options (Operations)</h2>
+        <div class="section-content">
+        	<p>
+        		These filter options (operations) can be added to the query string
+        		to affect what data is returned
+       		</p>
+        	<dl>{{filter-options-html}}</dl>
+        </div>
     </body>
 </html>
