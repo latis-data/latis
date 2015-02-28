@@ -18,7 +18,7 @@ class TestBinAverage {
   @Test 
   def test_bin1 {
     val expected = Sample(Real(0.0),Tuple(Real(0),Real(Metadata("min"),0),Real(Metadata("max"),0),Real(Metadata("stddev"),Double.NaN),Integer(Metadata("count"),1)))
-    assertEquals(expected, BinAverage(1.0)(TestDataset.function_of_scalar).findFunction.get.iterator.next)
+    assertEquals(expected, BinAverage(1.0)(TestDataset.function_of_scalar).unwrap.asInstanceOf[Function].iterator.next)
   }
   @Test 
   def test_bin1_length {
@@ -28,7 +28,7 @@ class TestBinAverage {
   @Test 
   def test_bin2 {
     val expected = Sample(Real(0.5),Tuple(Real(0.5),Real(Metadata("min"),0),Real(Metadata("max"),1),Real(Metadata("stddev"),Math.sqrt(2)/2.0),Integer(Metadata("count"),2)))
-    assertEquals(expected, BinAverage(2.0)(TestDataset.function_of_scalar).findFunction.get.iterator.next)
+    assertEquals(expected, BinAverage(2.0)(TestDataset.function_of_scalar).unwrap.asInstanceOf[Function].iterator.next)
   }
   @Test
   def test_bin2_length{
@@ -38,7 +38,7 @@ class TestBinAverage {
   @Test 
   def test_bin3 {
     val expected = Sample(Real(1),Tuple(Real(1),Real(Metadata("min"),0),Real(Metadata("max"),2),Real(Metadata("stddev"),1),Integer(Metadata("count"),3)))
-    assertEquals(expected, BinAverage(3.0)(TestDataset.function_of_scalar).findFunction.get.iterator.next)
+    assertEquals(expected, BinAverage(3.0)(TestDataset.function_of_scalar).unwrap.asInstanceOf[Function].iterator.next)
   }
   @Test
   def test_bin3_length {

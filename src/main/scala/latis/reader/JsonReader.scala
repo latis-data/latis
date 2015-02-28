@@ -59,7 +59,13 @@ class JsonReader(path: String) extends DatasetAccessor {
     val name = value(0)._1
     val vars = value(0)._2.as[JsObject].fields.map(a => makeValue(a._2, a._1))
     
-    Dataset(vars, Metadata(name))
+    val v = vars.length match {
+      case 0 => ???
+      case 1 => vars.head
+      case _ => Tuple(vars) //wrap multiplevars in a Tuple
+    }
+    
+    Dataset(v, Metadata(name))
   }
   
   /**

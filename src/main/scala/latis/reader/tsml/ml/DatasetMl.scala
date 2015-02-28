@@ -8,19 +8,28 @@ import latis.util.StringUtils
  */
 class DatasetMl(xml: Node) extends TupleMl(xml) {
   
+//TODO: Dataset is no longer a Tuple
+//TODO: deal with aggregation tsml
+  
   /**
    * Get a list of top level (i.e. direct children) variable definitions for this dataset node.
    * Handle implicit Functions. If the first variable definition is "index" or "time"
    * wrap in a function with those as a 1D domain.
+   * If there are multiple top level variables, wrap in a Tuple.
    */
-  def getVariableMl: Seq[VariableMl] = {
+  def getVariableMl: VariableMl = {
     val es = Tsml.getVariableNodes(xml)
-    if(es.isEmpty) return Seq[VariableMl]()
+    if (es.isEmpty) throw new Error("TSML does not defien any variables.")
+    
+//TODO: wrap multiple vars in tuple
+    //if (es.length > 1) ???
+
     //Handle implicit Functions. If the first variable definition is "index" or "time"
     // wrap in a function with those as a 1D domain.
-    val label = es.head.label
-    if (label == "index" || label == "time") Seq(wrapWithImplicitFunction(es.head, es.tail))
-    else es.map(VariableMl(_))
+    val label = es.head.label //first variable def
+    if (label == "index" || label == "time") wrapWithImplicitFunction(es.head, es.tail)
+    else VariableMl(es.head)
+
   }
   
   /**

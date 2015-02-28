@@ -46,8 +46,14 @@ class JsonAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     val value = Json.parse(jsonString).as[JsObject].value.toSeq
     val name = value(0)._1
     val vars = value(0)._2.as[JsObject].fields.map(a => makeValue(a._2, a._1))
+        
+    val v = vars.length match {
+      case 0 => ???
+      case 1 => vars.head
+      case _ => Tuple(vars) //wrap multiplevars in a Tuple
+    }
     
-    Dataset(vars, Metadata(name))
+    Dataset(v, Metadata(name))
   }
   
   def parseValueMap(map: scala.collection.Map[String, JsValue]): Seq[Variable] = {

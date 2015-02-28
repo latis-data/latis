@@ -21,7 +21,7 @@ import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.metadata.Metadata
-import latis.ops.MathExpressionDerivation
+//import latis.ops.MathExpressionDerivation
 import latis.ops.Operation
 import latis.ops.Projection
 import latis.ops.RenameOperation
@@ -87,7 +87,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * Don't include "index" which is just a placeholder for an otherwise undefined domain.
    * The index value does not appear in the original data source. Otherwise, model it as an Integer.
    */
-  private lazy val origScalars = origDataset.toSeq.filterNot(_.isInstanceOf[Index])
+  private lazy val origScalars = getOrigDataset.unwrap.toSeq.filterNot(_.isInstanceOf[Index])
   def getOrigScalars = origScalars
   
   /**
@@ -101,8 +101,10 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   protected def makeOrigDataset: Dataset = {
     val md = makeMetadata(tsml.dataset)
-    val vars = tsml.dataset.getVariableMl.flatMap(makeOrigVariable(_))
-    Dataset(vars, md) 
+    makeOrigVariable(tsml.dataset.getVariableMl) match {
+      case Some(v) => Dataset(v, md)
+      case None => throw new Error("No variables made for original dataset.")
+    }
   } 
   
   /**
@@ -208,8 +210,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * This will be triggered the the client requests the Dataset.
    */
   protected def makeDataset(ds: Dataset): Dataset = {
-    val vars = ds.getVariables.flatMap(makeVariable(_))
-    Dataset(vars, ds.getMetadata) 
+    makeVariable(ds.unwrap) match {
+      case Some(v) => Dataset(v, ds.getMetadata)
+      case None => throw new Error("No variables created for dataset")
+    }
+    
   } 
   
   /**
@@ -386,9 +391,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     })
     
     val renames = tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
-    val derivations = tsml.getProcessingInstructions("derived").map(MathExpressionDerivation(_))
+//    val derivations = tsml.getProcessingInstructions("derived").map(MathExpressionDerivation(_))
     
-    projections ++ selections ++ conversions ++ renames ++ derivations
+    projections ++ selections ++ conversions ++ renames //++ derivations
   }
   
   /**

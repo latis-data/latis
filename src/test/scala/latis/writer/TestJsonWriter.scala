@@ -45,18 +45,18 @@ class TestJsonWriter extends WriterTest {
   def testj = Writer.fromSuffix("json").write(TestDataset.index_function)
   
   //@Test 
-  def empty_dataset = Writer.fromSuffix("json").write(TestDataset.empty)
+  def empty_dataset = Writer.fromSuffix("json").write(Dataset.empty)
   
   //@Test
   def empty_function = Writer.fromSuffix("json").write(TestDataset.empty_function)
   
   //TODO: need delimiters for top level vars
-  @Test @Ignore
+  @Test
   def multple_top_level_variables {
     val r = Real(Metadata("myReal"), 3.14)
     val t = Text(Metadata("myText"), "Hi")
     val i = Integer(Metadata("myInt"), 3)
-    val ds = Dataset(List(r,t,i), Metadata("three_scalars"))
+    val ds = Dataset(Tuple(List(r,t,i)), Metadata("three_scalars"))
     
     //write to string then split on "," to make sure we got 3 components
     val out = new ByteArrayOutputStream()

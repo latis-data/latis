@@ -22,7 +22,7 @@ class BinaryWriter extends Writer {
   private lazy val writer = new DataOutputStream(getOutputStream)
   
   def write(dataset: Dataset) {
-    dataset.getVariables.map(writeVariable(_))
+    writeVariable(dataset.unwrap)
     writer.flush()
   }
   
