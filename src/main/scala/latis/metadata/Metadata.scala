@@ -20,6 +20,7 @@ trait Metadata {
    * Replace if it already exists.
    */
   def +(kv: (String,String)): Metadata = Metadata(getProperties + kv)
+  //TODO: MetadataBuilder so we can keep adding properties without making a new object each time.
   
   def has(key: String): Boolean
   
