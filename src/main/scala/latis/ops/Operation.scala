@@ -28,8 +28,15 @@ abstract class Operation {
     val md = dataset.getMetadata
     //TODO: delegate to subclass to munge metadata
     //TODO: add provenance metadata, getProvMsg, append to "history"
-    val vars = dataset.getVariables.flatMap(applyToVariable(_))
-    Dataset(vars, md)
+    val v: Variable = dataset.unwrap match {
+      case v: Variable => applyToVariable(v) match {
+        case Some(v) => v
+        case None => null
+      }
+      case null => null
+    }
+    
+    Dataset(v, md)
   }
   
   /**

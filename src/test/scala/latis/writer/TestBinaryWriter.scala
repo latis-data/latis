@@ -39,9 +39,9 @@ class TestBinaryWriter extends WriterTest{
   def print_bytes {
     val w = new BinaryWriter
     val ds = getDataset(fof)
-    for(v <- ds.getVariables) {
-      for(b <- w.varToBytes(v)) println(b.toInt.toHexString.replace("ffffff", ""))
-    }
+    val v = ds.unwrap
+    for(b <- w.varToBytes(v)) println(b.toInt.toHexString.replace("ffffff", ""))
+    
     AsciiWriter.write(getDataset("dap2"))
   }
   
@@ -70,7 +70,7 @@ class TestBinaryWriter extends WriterTest{
   def testb = Writer(fos, "bin").write(TestDataset.index_function)
   
   //@Test 
-  def empty_dataset = Writer(fos, "bin").write(TestDataset.empty)
+  def empty_dataset = Writer(fos, "bin").write(Dataset.empty)
   
   //@Test
   def empty_function = Writer(fos, "bin").write(TestDataset.empty_function)

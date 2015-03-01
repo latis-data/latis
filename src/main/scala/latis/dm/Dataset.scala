@@ -24,16 +24,60 @@ import latis.ops.Memoization
  * that encapsulates everything about the dataset. Most operations
  * are performed on Datasets and return new Datasets.
  */
-class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
-  extends AbstractTuple(variables, metadata, data) with BasicMath {
+//class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
+//  extends AbstractTuple(variables, metadata, data) with BasicMath {
+class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends BasicMath {
+  /*
+   * TODO: Dataset that is not a Tuple
+   * Mixed concerns.
+   * Variable must live in context of a Dataset, monadic
+   * Dataset as "special kind of" Variable leads to exceptions to the rule
+   * 
+   * what about metadata?
+   * should it belong to the top variable?
+   * global attributes: history,...
+   * seems like we need something at the Dataset level
+   * nc distinguishes between global and variable attributes
+   * duplicate metadata logic?
+   * Metadata as mixin?
+   * We do have a VariableMetadata class, why not DatasetMetadata?
+   * consider how this maps to the dataset ontology
+   * 
+   * What about metadata modeled as a Variable?
+   *   instead of special kind of data
+   * 
+   * Is there a use case for a Dataset with multiple vars?
+   * could always wrap in a Tuple
+   * 
+   * idiomatic operation on Function
+   * no need to iterate over multiple vars, only one
+   * 
+   * Aggregation currently makes a Dataset containing multiple Datasets
+   * should we just make this a Tuple and have aggregate combine the tuple elements?
+   * or should agg be a binary+ operation with arg for each dataset?
+   * Operations impl apply(dataset):Dataset
+   * should agg be something other than operation?
+   * construct agg with other datasets?
+   * 
+   * +consider how best to deal with empty dataset
+   * variable is null
+   * should we pattern match on Dataset(v) vs empty?
+   */
+  
+  val getMetadata = metadata
+  
+  //TODO: consider if dataset must have name
+  def getName = metadata.getOrElse("name", "")
+  
+  def isEmpty = variable == null
   
   //convenient method, get number of samples in top level Function
   //TODO: what if we have multiple Functions...?
   //TODO: better name: getSampleCount?
   //TODO: should we account for length of nested Functions?
-  def getLength = findFunction match {
-    case Some(f: Function) => f.getLength
-    case None => ??? 
+  def getLength = variable match {
+    case f: Function => f.getLength
+    case _ => ??? 
   }
   
   /**
@@ -66,7 +110,11 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   
   def reduce = Reduction.reduce(this)
   
-  def intersect(that: Dataset): Dataset = Intersection()(this, that)
+  def intersect(that: Dataset): Dataset = {
+    //tmp hack until we refactor agg
+    val dataset = Dataset(Tuple(this.unwrap, that.unwrap))
+    Intersection()(dataset)
+  }
   
   //Convenient data dumping methods.
   def toDoubleMap = DataMap.toDoubleMap(this)
@@ -75,8 +123,8 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   def toStrings   = DataMap.toStrings(this)
   
   def groupBy(name: String): Dataset = {
-    val vs = variables.map(v => Factorization.groupVariableBy(v, name))
-    Dataset(vs) //TODO: metadata
+    val v = Factorization.groupVariableBy(variable, name)
+    Dataset(v) //TODO: metadata
   }
   
   /**
@@ -87,26 +135,46 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
   def force: Dataset = Memoization()(this)
   
   /**
-   * Expose the top level Variables in this Dataset as a Single Variable.
-   * If it contains a single Variable, return it.
-   * If multiple Variables, return them packaged in a Tuple.
+   * Expose the top level Variable in this Dataset.
    */
-  def unwrap: Variable = {
-    variables.length match {
-      case 1 => variables.head //only one, drop the Tuple wrapper
-      case _ => Tuple(variables, metadata, data) //plain Tuple, TODO: metadata
+  def unwrap: Variable = variable
+  //TODO: better name? getVariable? head? other monadic ways? use unapply? expose variable?
+  
+  
+  override def equals(that: Any): Boolean = that match {
+    case thatds: Dataset => (this.getMetadata == thatds.getMetadata) && (this.unwrap == thatds.unwrap)
+    case _ => false
+  }
+  
+  override def toString() = {
+    val pre = getMetadata.get("name") match {
+      case Some(s) => s + ": "
+      case None => ""
     }
+    pre + "(" + variable.toString + ")"
   }
 }
 
 
 object Dataset {
   
-  def apply(vars: Seq[Variable]): Dataset = new Dataset(vars.toIndexedSeq)
+  def apply(v: Variable, md: Metadata): Dataset = new Dataset(v, metadata = md)
+  def apply(v: Variable): Dataset = new Dataset(v)
+  def apply(): Dataset = new Dataset(null)
   
-  def apply(vars: Seq[Variable], md: Metadata): Dataset = new Dataset(vars.toIndexedSeq, metadata = md)
-  def apply(v: Variable, md: Metadata): Dataset = new Dataset(List(v), metadata = md)
+  val empty = Dataset()
   
-  def apply(v: Variable, vars: Variable*): Dataset = Dataset(v +: vars)
+  //def apply(vars: Seq[Variable]): Dataset = new Dataset(vars.toIndexedSeq)
+  
+  //def apply(vars: Seq[Variable], md: Metadata): Dataset = new Dataset(vars.toIndexedSeq, metadata = md)
+  
+  //def apply(v: Variable, vars: Variable*): Dataset = Dataset(v +: vars)
+  
+  //extract the contained Variable
+  def unapply(dataset: Dataset): Option[Variable] = {
+    val v = dataset.unwrap
+    if (v == null) None
+    else Some(v)
+  }
   
 }

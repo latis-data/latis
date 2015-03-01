@@ -25,18 +25,18 @@ class JsonMetadataAndDataWriter extends JsonWriter {
     //add usual json header ({)
     sb append super.makeHeader(dataset)
 
-    //assume single top level function
-    val function = dataset.findFunction match {
-      case Some(f) => {
+    //TODO: assumes Dataset contains a Function
+    dataset.unwrap match {
+      case function: Function => {
         //Create the metadata content
         sb append "\"metadata\": {" //metadata object label
-        sb append mdvarToString(Sample(f.getDomain, f.getRange)) //metadata
+        sb append mdvarToString(Sample(function.getDomain, function.getRange)) //metadata
         sb append "},\n"
     
-        //start data object
-        sb append "\"data\": " 
+        sb append "\"data\": " //start data object
       }
-      case None => //empty dataset
+    
+      case _ => ??? //TODO: deal with Dataset that does not have a top level Function
     }
     
     sb.toString

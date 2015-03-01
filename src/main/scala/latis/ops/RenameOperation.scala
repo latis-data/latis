@@ -15,12 +15,20 @@ class RenameOperation(val origName: String, val newName: String) extends Operati
   override def apply(dataset: Dataset): Dataset = {
     val dsmd = dataset.getMetadata
     
-    if (dataset.hasName(origName)) {
+    //assume dataset can not have alias
+    val name = dataset.getName
+    
+    if (name == origName) {
       val md = dsmd + ("name" -> newName)
-      Dataset(dataset.getVariables, md) 
+      Dataset(dataset.unwrap, md) 
     } else { //try the kids
-      val vars = dataset.getVariables.flatMap(applyToVariable(_))
-      Dataset(vars, dsmd)
+      val v = applyToVariable(dataset.unwrap) match {
+        case Some(v) => v
+        case None => throw new Error("No variable found with name: " + origName)
+        //TODO: error or no-op?
+      }
+    
+      Dataset(v, dsmd)
     }
   }
   

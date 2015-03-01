@@ -23,7 +23,7 @@ class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operatio
    * to apply the operation to the variables in the dataset.
    */
   override def apply(dataset: Dataset) = {
-    converter = dataset.findVariableByName(variableName) match {
+    converter = dataset.unwrap.findVariableByName(variableName) match {
       case Some(v) => v match {
         case s: Scalar => s.getMetadata("units") match {
           case Some(u) => {

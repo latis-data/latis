@@ -22,13 +22,19 @@ class MetadataWriter extends JsonWriter {
     //add usual json header ({)
     sb append super.makeHeader(dataset)
 
-    //assume single top level function
-    val function = dataset.findFunction.get
+    //TODO: assumes Dataset contains a Function
+    dataset.unwrap match {
+      case function: Function => {
+        //Create the metadata content
+        sb append "\"metadata\": {" //metadata object label
+        sb append mdvarToString(Sample(function.getDomain, function.getRange)) //metadata
+        sb append "},\n"
     
-    //Create the metadata content
-    sb append "\"metadata\": {" //metadata object label
-    sb append mdvarToString(Sample(function.getDomain, function.getRange)) //metadata
-    sb append "}\n"
+        sb append "\"data\": " //start data object
+      }
+    
+      case _ => ???
+    }
     
     sb.toString
   }

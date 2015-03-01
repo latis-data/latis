@@ -15,13 +15,8 @@ import latis.data.seq.DataSeq
 
 class Test2D {
   
-  //TODO: consider superclass for things like this
-  def write(v: Variable) {
-    AsciiWriter.write(Dataset(v))
-  }
-  
   //@Test
-  def write_scalar_function_3x3 = write(Test2D.scalar_function_3x3)
+  def write_scalar_function_3x3 = AsciiWriter.write(Test2D.scalar_function_3x3)
   
   @Test
   def scalar_function_3x3 {

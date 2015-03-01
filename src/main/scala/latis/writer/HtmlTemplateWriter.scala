@@ -20,15 +20,15 @@ class HtmlTemplateWriter extends TextWriter {
   
   override def write(dataset: Dataset) {
     
-    val function = dataset.findFunction
-    val (domainName: String, rangeVars: Seq[String]) = function match {
-      case Some(f) => (f.getDomain.getName, f.getRange.toSeq.view.flatMap(_.getMetadata("name")))
-      case None => ("", Seq())
+    //val function = dataset.findFunction
+    val (domainName: String, rangeVars: Seq[String]) = dataset match {
+      case Dataset(f: Function) => (f.getDomain.getName, f.getRange.toSeq.view.flatMap(_.getMetadata("name")))
+      case _ => ("", Seq())
     }
     val defaultRangeName = rangeVars.headOption.getOrElse("")
     
     val values: Map[String, String] = Map(
-        "long-name" -> dataset.getMetadata("long_name").getOrElse(dataset.getName),
+        "long-name" -> dataset.getMetadata.getOrElse("long_name",dataset.getName),
         "name" -> dataset.getName,
         "domain" -> domainName,
         "defaultRange" -> defaultRangeName,
@@ -45,16 +45,16 @@ class HtmlTemplateWriter extends TextWriter {
   
   private def makeDds(dataset: Dataset): String = {
     val w = new DdsWriter
-    w.makeHeader(dataset)+dataset.getVariables.map(w.varToString(_)).mkString("")+w.makeFooter(dataset)
+    w.makeHeader(dataset) + w.varToString(dataset.unwrap) + w.makeFooter(dataset)
   }
   
   private def makeDas(dataset: Dataset): String = {
     val w = new DasWriter
-    w.makeHeader(dataset)+dataset.getVariables.map(w.varToString(_)).mkString("")+w.makeFooter(dataset)
+    w.makeHeader(dataset) + w.varToString(dataset.unwrap) + w.makeFooter(dataset)
   }
   
   private def makeFormItems(dataset: Dataset): String = {
-    dataset.getVariables.map(makeFormItem(_)).mkString
+    makeFormItem(dataset.unwrap)
   }
   
   private def makeFormItem(v: Variable): String = v match {
