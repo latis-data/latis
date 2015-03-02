@@ -8,7 +8,7 @@ trait Metadata {
   
   def get(key: String): Option[String]
   
-  def getOrElse(key: String, default: ⇒ String): String
+  def getOrElse(key: String, default: => String): String
   
   def apply(key: String): String = get(key) match {
     case Some(s) => s
