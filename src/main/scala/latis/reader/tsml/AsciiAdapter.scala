@@ -84,7 +84,12 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
   def getRecordIterator: Iterator[String] = {
     val lpr = getLinesPerRecord
     val dlm = getDelimiter
-    getLineIterator.grouped(lpr).map(_.mkString(dlm))
+    val records = getLineIterator.grouped(lpr).map(_.mkString(dlm))
+    
+    getProperty("limit") match {
+      case Some(s) => records.take(s.toInt) //TODO: deal with bad value
+      case None    => records
+    }
   }
   
   /**
