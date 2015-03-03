@@ -11,6 +11,8 @@ import latis.metadata.ServerMetadata
 import latis.metadata.WriterDescription
 import latis.metadata.Catalog
 import scala.collection.immutable.DefaultMap
+import latis.reader.tsml.TsmlReader
+import java.io.ByteArrayOutputStream
 
 class OverviewWriter(servletConfig: ServletConfig) {
   
@@ -46,7 +48,16 @@ class OverviewWriter(servletConfig: ServletConfig) {
   }
   
   def catalogHtml(): String = {
-    Catalog.listTsmlFiles().map(filename => s"<p>$filename</p>").mkString
+    val tsmlUrl = Catalog.getTsmlUrl("catalog")
+    val reader = TsmlReader(tsmlUrl)
+    val dataset = reader.getDataset()
+    
+    val writer = new CatalogOverviewWriter
+    val outputStream = new ByteArrayOutputStream
+    writer.setOutputStream(outputStream)
+    writer.write(dataset)
+    
+    outputStream.toString()
   }
   
   private def defaultStr(msg: String, defaultMsg: String): String = {

@@ -32,10 +32,4 @@ object Catalog {
     val tsml = dsdir + File.separator + dataset + ".tsml"
     toUrl(tsml)
   }
-  
-  def listTsmlFiles(): Seq[String] = {
-    val folder = new File(LatisProperties.resolvePath(dsdir))
-    val tsmlFiles = folder.listFiles().filter(f => getExtension(f).equals("tsml"))
-    tsmlFiles.map(file => file.getName)
-  }
 }
