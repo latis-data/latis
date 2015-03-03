@@ -194,6 +194,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
             selections append name + " like '%" + value + "%'"; true
           case "~" => false //almost equal (e.g. nearest sample) not supported by sql
           case _ => selections append sel.toString; true
+          //TODO: if v is Text, put quotes around value
         }
       }
       case _ => {
