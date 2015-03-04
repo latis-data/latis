@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="two_time">
+
+    <adapter class="latis.reader.tsml.AsciiAdapter"
+    		 delimiter="\s+"
+             location="datasets/tsi.txt" />
+             
+    <time name="year" 
+          units="years since 0000-01-01" 
+          long_name="Year"/>
+    
+    <time name="tsi"
+          units="W/m^2"
+          long_name="Total Solar Irradiance"/>
+
+  </dataset>
+
+</tsml>
