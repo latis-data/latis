@@ -3,14 +3,12 @@ package latis.reader.tsml
 import java.io.File
 import java.net.URI
 import java.net.URL
-
 import scala.Option.option2Iterable
 import scala.collection.JavaConverters.collectionAsScalaIterableConverter
 import scala.collection.Map
 import scala.collection.Seq
 import scala.collection.immutable
 import scala.collection.mutable
-
 import latis.data.Data
 import latis.data.seq.DataSeq
 import latis.dm.Dataset
@@ -21,7 +19,6 @@ import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.metadata.Metadata
-//import latis.ops.MathExpressionDerivation
 import latis.ops.Operation
 import latis.ops.Projection
 import latis.ops.RenameOperation
@@ -38,6 +35,7 @@ import latis.util.DataUtils
 import net.sf.ehcache.Cache
 import net.sf.ehcache.CacheManager
 import net.sf.ehcache.Element
+import latis.ops.MathExpressionDerivation
 
 
 /**
@@ -395,9 +393,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     })
     
     val renames = tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
-//    val derivations = tsml.getProcessingInstructions("derived").map(MathExpressionDerivation(_))
+    val derivations = tsml.getProcessingInstructions("derived").map(MathExpressionDerivation(_))
     
-    projections ++ selections ++ conversions ++ renames //++ derivations
+    projections ++ selections ++ conversions ++ renames ++ derivations
   }
   
   /**
