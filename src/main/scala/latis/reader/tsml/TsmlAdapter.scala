@@ -426,6 +426,27 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     }
   }
   
+  /**
+   * Get the "location" attribute of the tsml file as a java.io.File
+   * 
+   * This is a relatively simple wrapper around getUrl. It's a pretty
+   * common operation to get "location" as a java.net.URL and then
+   * try to open that url as a file ("file:/foo/bar"). Unfortunately,
+   * that's also a pretty buggy process. For example, a path containing spaces
+   * like "/opt/my stuff/data" will be transformed to
+   * "/opt/my%20stuff/data" because spaces aren't valid inside a
+   * URL. However, spaces are valid as a path name, so this
+   * transformation causes File creation to fail (FileNotFoundException)
+   * in rare (usually system-dependent) scenarios. Therefore, this
+   * wrapper method is intended to contain that workaround and
+   * any other workarounds needed to convert URLs to Files that
+   * we may find in the future.
+   */
+  def getUrlFile: File = {
+    val url = getUrl
+    new File(url.getPath.replace("%20", " "))
+  }
+  
   
 }
 
