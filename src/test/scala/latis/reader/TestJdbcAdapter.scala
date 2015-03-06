@@ -93,6 +93,27 @@ class TestJdbcAdapter extends AdapterTests {
     val data = ds.toStringMap
     assertEquals(1, data("myInt").length)
   }
+  
+  @Test //TODO: deprecate use of quotes?
+  def select_by_text_value_with_single_quotes {
+    val ops = List(Selection("myText='B'"))
+    val data = getDataset(ops).toStringMap
+    assertEquals(2, data("myInt").head.toInt)
+  }
+  
+  //@Test //double quotes not supported so don't encourage anyone
+  def select_by_text_value_with_double_quotes {
+    val ops = List(Selection("""myText="B""""))
+    val data = getDataset(ops).toStringMap
+    assertEquals(2, data("myInt").head.toInt)
+  }
+  
+  @Test
+  def select_by_text_value_without_quotes {
+    val ops = List(Selection("myText=B"))
+    val data = getDataset(ops).toStringMap
+    assertEquals(2, data("myInt").head.toInt)
+  }
 }
 
 object TestJdbcAdapter {
