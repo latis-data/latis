@@ -11,7 +11,7 @@ import scala.io.Source
  * StringTemplates are intended to be instantiated once and
  * then reused multiple times. They are thread-safe (immutable
  * after creation) and can be stored statically for use by
- * multiple threads (e.g. http request handles) at once.
+ * multiple threads (e.g. http request handlers) at once.
  */
 class StringTemplate(tmplStr: String) {
   
