@@ -429,6 +429,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     //TODO: use 'location' uri for jndi with 'java' (e.g. java:comp/env/jdbc/sorce_l1a) scheme, but glassfish doesn't use that form
     
     val javaUrlRegex = "(java:.+)".r
+    val startsWithJdbcRegex = "^jdbc:(.+)".r
     
     // Some history: typically we use location="..." in the tsml file to
     // indicate where the data is. The one exception used to be JNDI
@@ -445,10 +446,19 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       case (Some(javaUrlRegex(location)), _) => getConnectionViaJndi(location)
       
       // if 'jndi' exists, use jndi
-      case (_, Some(jndiStr)) => getConnectionViaJndi(jndiStr)
+      case (_, Some(jndiStr)) => {
+        logger.warn("Use location='java:/comp/env...' instead of jndi='java:/comp/env...'")
+        getConnectionViaJndi(jndiStr)
+      }
       
-      // else, default to jdbc (relies on several other attributes that will be read later)
-      case _ => getConnectionViaJdbc
+      // if 'location' exists and starts with 'jdbc:' (at this point, this should be a catch-all)
+      case (Some(startsWithJdbcRegex(_)), _) => getConnectionViaJdbc
+      
+      // If we get here, we probably have a malformed tsml file. No conforming location attr was
+      // found, and no jndi attr was found at all.
+      case _ => throw new RuntimeException(
+        "Unable to find or parse tsml location attribute: location must exist and start with 'java:' (for JNDI) or 'jdbc:' (for JDBC)"
+      )
     }
 
     hasConnection = true //will still be false if getting connection fails
