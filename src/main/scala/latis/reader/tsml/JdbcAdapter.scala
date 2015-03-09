@@ -231,7 +231,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    */
   private def quoteStringValue(s: String): String = {
     //don't add if it is already quoted
-    "'" + s.replaceAll("""^['"]""","").replaceAll("""['"]$""","") + "'"
+    "'" + s.replaceAll("^['\"]","").replaceAll("['\"]$","") + "'"
   }
   
   /**
@@ -365,7 +365,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       //If renamed, replace 'name' with 'name as "name2"'.
       //Use quotes so we can use reserved words like "min" (needed by Sybase).
       renameMap.get(name) match {
-        case Some(name2) => name + """ as """" + name2 + """""""
+        case Some(name2) => name + " as \"" + name2 + "\""
         case None => name
       }
     }).mkString(",")
