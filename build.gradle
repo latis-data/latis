@@ -6,7 +6,7 @@ apply plugin: 'ivy-publish'
 
 //Define the release version. Used for published jar.
 //TODO: get from latis.properties?
-version = '2.7-SNAPSHOT'
+version = '2.8-SNAPSHOT'
 
 //Define Java version for generated class files.
 targetCompatibility = 1.6

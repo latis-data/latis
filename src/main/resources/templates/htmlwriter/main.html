@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <!-- test comment -->
+        <title>{{long-name}}</title>
+        <style>
+            /* mostly copied from: http://lasp.colorado.edu/lisird/tss/resources/tss.css */
+            .das {
+                white-space:pre; 
+                font-family:monospace;
+                /*background-color:#b0c4de;*/
+            } 
+            .dds {
+                white-space:pre;
+                font-family:monospace;
+                /*background-color:#b0a4de;*/
+            } 
+            .info {
+                white-space:pre;
+                font-family:monospace;
+                /*background-color:#b0a43e;*/
+            }
+            .form-item {
+                margin: 15px 0;
+            }
+            #graphdiv {
+                margin: 15px 0;
+            }
+            #graph-range-selector {
+                margin: 15px;
+                display: block;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.0/dygraph-combined.js"></script>
+        <script type="text/javascript">
+
+            // polyfill of ES6 proposed String.endsWith function
+            // info and code source at:
+            // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/endsWith
+            if (!String.prototype.endsWith) {
+                Object.defineProperty(String.prototype, 'endsWith', {
+                    value: function(searchString, position) {
+                        var subjectString = this.toString();
+                        if (position === undefined || position > subjectString.length) {
+                            position = subjectString.length;
+                        }
+                        position -= searchString.length;
+                        var lastIndex = subjectString.indexOf(searchString, position);
+                        return lastIndex !== -1 && lastIndex === position;
+                    }
+                });
+            }
+
+            function submitForm(e) {
+
+                // Create submission url from current url. Create or modify suffix to .csv
+                var newUrl = window.location.origin + window.location.pathname;
+                newUrl = trimSuffix(newUrl, ".html");
+                newUrl += "." + (document.getElementById("output").value || "csv");
+
+                var queryForm = document.getElementById("query-form");
+                var formItems = queryForm.getElementsByClassName("form-item");
+                formItems = Array.prototype.slice.call(formItems); // hack to turn formItems into actual array, not "HTMLCollection" or w/e
+                var query = formItems.map(serializeFormItem).filter(function(item) { return !!item; }).join("");
+                if (query != "") {
+                    newUrl += "?" + query;
+                }
+
+                window.location.href = newUrl;
+
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            function trimSuffix(str, suffix) {
+                if (str.endsWith(suffix)) {
+                    return str.substring(0, str.length - suffix.length);
+                }
+                else {
+                    return str;
+                }
+            }
+
+            function serializeFormItem(formItem) {
+                var name = formItem.getAttribute("data-name");
+                var min = formItem.querySelector("input[name='min']").value;
+                var max = formItem.querySelector("input[name='max']").value;
+
+                var results = [];
+                if (min != "") {
+                    results.push("&name>=min");
+                }
+                if (max != "") {
+                    results.push("&name<max");
+                }
+                return results.join("").replace("name", name).replace("min", min).replace("max", max);
+            }
+
+            var globalGraphReference;
+            function updateGraph(range) {
+                globalGraphReference = new Dygraph(
+                    document.getElementById("graphdiv"),
+                    "{{name}}.csv?{{domain}}," + range + "&exclude_missing()",
+                    {
+                        delimiter: ",",
+                        xlabel: "{{domain}}",
+                        ylabel: range
+                    }
+                )
+            }
+
+
+        </script>
+    </head>
+
+    <body>
+        <h1>{{long-name}}</h1>
+        <select id="graph-range-selector" onchange="javascript:return updateGraph(event.target.value);">
+            {{range-select-option-elements}}
+        </select>
+        <div id="graphdiv"></div>
+        <script type="text/javascript">
+            updateGraph("{{defaultRange}}");
+        </script>
+        <div class="dds"><h2>Dataset Descriptor Structure</h2><blockquote>{{dds}}</blockquote></div>
+        <div class="das"><h2>Dataset Attribute Structure</h2><blockquote>{{das}}</blockquote></div>
+        <h2>Data Set Query Form</h2>
+        <form id="query-form" onsubmit="javascript:return submitForm(event)">
+            {{form-items}}
+            Select Output Type:
+            <select id="output">
+                {{output-select-option-elements}}
+            </select><br />
+            <button type="submit">Submit</button>
+        </form>
+    </body>
+</html>

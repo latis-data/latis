@@ -17,6 +17,7 @@ import latis.ops.ReplaceValueOperation
 import scala.math.ScalaNumericAnyConversions
 import latis.ops.agg.Intersection
 import latis.ops.Reduction
+import latis.ops.Memoization
 
 /**
  * The main container for a dataset. It is a special type of Tuple
@@ -78,6 +79,12 @@ class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMeta
     Dataset(vs) //TODO: metadata
   }
   
+  /**
+   * Realize the Data for this Dataset so we can close the Reader.
+   * Inspired by Scala's Stream.force.
+   * This will return a new Dataset that is logicall equivalent.
+   */
+  def force: Dataset = Memoization()(this)
   
   /**
    * Expose the top level Variables in this Dataset as a Single Variable.

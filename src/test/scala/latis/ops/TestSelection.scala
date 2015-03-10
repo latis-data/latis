@@ -1,18 +1,19 @@
 package latis.ops
 
-import latis.dm._
-import latis.dm.implicits._
-import latis.writer._
-import org.junit._
-import Assert._
-import latis.reader.tsml.TsmlReader
-import latis.metadata.Metadata
-import latis.ops.filter.Selection
-import latis.data.seq.DataSeq
-import latis.data.Data
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
 import latis.data.SampledData
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Real
+import latis.dm.TestDataset
+import latis.dm.implicits.variableToDataset
+import latis.metadata.Metadata
 import latis.ops.filter.NearestNeighborFilter
-import latis.time.Time
+import latis.ops.filter.Selection
+import latis.reader.tsml.TsmlReader
+import latis.writer.AsciiWriter
 
 class TestSelection {
   
@@ -99,7 +100,15 @@ class TestSelection {
     val n = ds3.getLength
     assertEquals(3, n)
   }
-  
+    
+  @Test
+  def outside_range {
+    val ds = Dataset(scalarFunction)
+    val ds2 = ds.filter("time > 5")
+    val f = ds2.findFunction.get
+    assertEquals(0, f.getLength)
+  }
+    
   //----------------------------------------------
   
   @Test
@@ -329,6 +338,18 @@ class TestSelection {
     val ds2 = op(ds)
     val data = ds2.toDoubleMap
     assert(data.isEmpty)
+  }
+  
+  @Test
+  def index_reset {
+    val tr = TsmlReader("datasets/test/index.tsml")
+    val ops = Seq(Selection("time>1970-01-01"))
+    val ds = tr.getDataset(ops)
+//    AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+    assertEquals(data("index")(1), 1.0, 0.0)
+    
+    
   }
 }
 

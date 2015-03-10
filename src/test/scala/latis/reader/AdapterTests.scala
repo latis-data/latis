@@ -212,7 +212,7 @@ abstract class AdapterTests {
     val data = ds.toDoubleMap
     assertEquals(2, data.keySet.size)  //index and myReal
     assertEquals(1, data("index").length)
-    assertEquals(2, data("index").head, 0.0)
+    assertEquals(0, data("index").head, 0.0)
     assertEquals(3.3, data("myReal").head, 0.0)
   }
   
@@ -222,7 +222,7 @@ abstract class AdapterTests {
     val data = getDataset(ops).toStringMap
     assertEquals(2, data.keySet.size)  //index and time
     assertEquals(1, data("index").length)
-    assertEquals(1, data("index").head.toInt)
+    assertEquals(0, data("index").head.toInt)
   }
   
   @Test

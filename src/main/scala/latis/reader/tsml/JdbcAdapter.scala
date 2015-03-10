@@ -182,12 +182,17 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       case Some(v) if (getOrigScalarNames.contains(name)) => {
         //add a selection to the sql, may need to change operation
         op match {
-          case "==" =>
-            selections append name + "=" + value; true
+          case "==" => v match {
+            case _: Text => selections append name + "=" + quoteStringValue(value); true
+            case _       => selections append name + "=" + value; true
+          }
           case "=~" =>
             selections append name + " like '%" + value + "%'"; true
           case "~" => false //almost equal (e.g. nearest sample) not supported by sql
-          case _ => selections append sel.toString; true
+          case _ => v match {
+            case _: Text => selections append name + op + quoteStringValue(value); true
+            case _       => selections append name + op + value; true
+          }
         }
       }
       case _ => {
@@ -215,6 +220,14 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     case _ => false //not an operation that we can handle
   }
 
+  /**
+   * Make sure the given string is surrounded in quotes.
+   */
+  private def quoteStringValue(s: String): String = {
+    //don't add if it is already quoted
+    "'" + s.replaceAll("^['\"]","").replaceAll("['\"]$","") + "'"
+  }
+  
   /**
    * Handle a Projection clause.
    */
@@ -346,7 +359,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       //If renamed, replace 'name' with 'name as "name2"'.
       //Use quotes so we can use reserved words like "min" (needed by Sybase).
       renameMap.get(name) match {
-        case Some(name2) => name + """ as """" + name2 + """""""
+        case Some(name2) => name + " as \"" + name2 + "\""
         case None => name
       }
     }).mkString(",")

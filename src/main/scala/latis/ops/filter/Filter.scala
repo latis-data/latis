@@ -7,6 +7,7 @@ import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.ops.Operation
+import latis.dm.WrappedFunction
 
 /**
  * Subtype of Operation that may drop samples.
@@ -39,6 +40,20 @@ class Filter extends Operation {
   override def applyToTuple(tuple: Tuple): Option[Tuple] = {
     Some(tuple)
   }
+  
+  /**
+   * Override so we get an empty Function if no samples match instead of None.
+   */
+  override def applyToFunction(function: Function): Option[Function] = {
+    val it = WrappedFunction(function, this).iterator
+    it.isEmpty match {
+      //return empty Function if empty
+      //TODO: do we need to make sure domain and range are empty?
+      case true  => Some(Function(function.getDomain, function.getRange, function.getMetadata))  //empty data
+      case false => Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
+    }
+  }
+
 
 }
 

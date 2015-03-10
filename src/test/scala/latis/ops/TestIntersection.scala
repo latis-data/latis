@@ -27,8 +27,8 @@ class TestIntersection {
   
   //@Test
   def tuple_functions {
-    val ds1 = TsmlReader("/home/lindholm/git/web-tcad/src/test/resources/datasets/test/mms/Schemas.tsml").getDataset
-    val ds2 = TsmlReader("/home/lindholm/git/web-tcad/src/test/resources/datasets/test/mms/SchemasTimeRange.tsml").getDataset
+    val ds1 = TsmlReader("/home/lindholm/git/webtcad-mms/src/test/resources/datasets/Schemas.tsml").getDataset
+    val ds2 = TsmlReader("/home/lindholm/git/webtcad-mms/src/test/resources/datasets/SchemasTimeRange.tsml").getDataset
     
  //   AsciiWriter.write(ds1)
  //   AsciiWriter.write(ds2)
@@ -38,7 +38,7 @@ class TestIntersection {
   
   //@Test
   def intersection_adapter {
-    val ds = TsmlReader("/home/lindholm/git/web-tcad/src/test/resources/datasets/test/mms/Schemas2.tsml").getDataset
+    val ds = TsmlReader("/home/lindholm/git/webtcad-mms/src/test/resources/datasets/Schemas2.tsml").getDataset
     AsciiWriter.write(ds)
   }
 }

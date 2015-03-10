@@ -10,7 +10,7 @@ import scala.collection.Seq
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-object DapConstraintParser {
+class DapConstraintParser {
   //TODO: consider a parser combinator
 
   /**

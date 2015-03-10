@@ -87,37 +87,37 @@ class TestMathExpressionDerivation {
   
   @Test
   def test_sqrt {
-    val ds = MathExpressionDerivation("A=sqrt(81)")(TestDataset.empty)
+    val ds = MathExpressionDerivation("A=SQRT(81)")(TestDataset.empty)
     assertEquals(9, ds.toSeq(0).getNumberData.doubleValue, 0.0)
   }
   
   @Test
   def test_sin {
-    val ds = MathExpressionDerivation("A=sin(PI/2)")(TestDataset.empty)
+    val ds = MathExpressionDerivation("A=SIN(PI/2)")(TestDataset.empty)
     assertEquals(1, ds.toSeq(0).getNumberData.doubleValue, 0.0)
   }
   
   @Test
   def test_cos {
-    val ds = MathExpressionDerivation("A=cos(PI/2)")(TestDataset.empty)
+    val ds = MathExpressionDerivation("A=COS(PI/2)")(TestDataset.empty)
     assertEquals(0, ds.toSeq(0).getNumberData.doubleValue, 0.000000001)
   }
   
   @Test
   def test_acos {
-    val ds = MathExpressionDerivation("A=acos(.5)")(TestDataset.empty)
+    val ds = MathExpressionDerivation("A=ACOS(.5)")(TestDataset.empty)
     assertEquals(Math.PI/3, ds.toSeq(0).getNumberData.doubleValue, 0.000001)
   }
   
   @Test
   def test_atan2 {
-    val ds = MathExpressionDerivation("A=atan2(0,5)")(TestDataset.empty)
+    val ds = MathExpressionDerivation("A=ATAN2(0,5)")(TestDataset.empty)
     assertEquals(0, ds.toSeq(0).getNumberData.doubleValue, 0.0)
   }
   
   @Test
   def test_deg_to_radians {
-    val ds = MathExpressionDerivation("A=deg_to_radians(180)")(TestDataset.empty)
+    val ds = MathExpressionDerivation("A=DEG_TO_RAD(180)")(TestDataset.empty)
     assertEquals(Math.PI, ds.toSeq(0).getNumberData.doubleValue, 0.0)
   }
   
@@ -197,7 +197,7 @@ class TestMathExpressionDerivation {
   
   @Test
   def nested_operation {
-    val ds = MathExpressionDerivation("A=sqrt(fabs(-81))")(TestDataset.empty)
+    val ds = MathExpressionDerivation("A=SQRT(FABS(-81))")(TestDataset.empty)
 //    AsciiWriter.write(ds)
     assertEquals(9.0, ds.toSeq(0).getNumberData.doubleValue, 0.0)
   }

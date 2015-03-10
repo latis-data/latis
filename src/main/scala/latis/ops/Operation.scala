@@ -89,11 +89,12 @@ object Operation {
    * Construct an Operation subclass based on the given name.
    */
   def apply(opName: String): Operation = apply(opName, Seq[String]())
+  //TODO: accept the string form of the expression, without the args separated out
 
   /**
    * Construct an Operation subclass based on the given name and arguments.
    */
-  def apply(opName: String, args: Seq[String]): Operation = {
+  def apply(opName: String, args: Seq[String]): Operation = this.synchronized {
     try { 
       val compObj = getCompanionObject(opName)
       if (args.length == 0 || args.head.length == 0) compObj.apply() //no args or empty first arg

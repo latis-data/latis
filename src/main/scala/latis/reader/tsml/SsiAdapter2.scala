@@ -1,5 +1,6 @@
 package latis.reader.tsml
 
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.RandomAccessFile
 import java.nio.ByteOrder
@@ -64,7 +65,7 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
    */
   protected def findScalarData(s: Scalar): Option[IterableData] = try {
     val name = s.getName
-    val location = getUrl.getPath + name + ".bin"
+    val location = new File(getUrlFile, name + ".bin")
     val file = new RandomAccessFile(location, "r")
     val order = this.getProperty("byteOrder", "big-endian") match {
       case "big-endian" => ByteOrder.BIG_ENDIAN
@@ -122,7 +123,7 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     private var it = iterator.duplicate
     
     def getNext = {
-      if(it._1 hasNext) it._1.next
+      if(it._1.hasNext) it._1.next
       else {
         it = it._2.duplicate
         getNext

@@ -47,7 +47,10 @@ protected class Selection(val vname: String, val operation: String, val value: S
         if (text.getValue.asInstanceOf[String].matches(value)) Some(text) //TODO: getStringValue on Variable?
         else None //regex
       }
-      case _ => if (isValid(text.compare(value))) Some(text) else None //like any other scalar
+      case _ => {
+        val cmp = text.compare(value)
+        if (isValid(cmp)) Some(text) else None //like any other scalar
+      }
     } else Some(text) //operation doesn't apply to this Scalar Variable, no-op
   }
   
@@ -64,16 +67,6 @@ protected class Selection(val vname: String, val operation: String, val value: S
     x.find(_.isEmpty) match{
       case Some(_) => None //found an invalid variable, exclude the entire tuple
       case None => Some(Tuple(x.map(_.get), tuple.getMetadata))
-    }
-  }
-  
-  override def applyToFunction(function: Function): Option[Function] = {
-    val it = WrappedFunction(function, this).iterator
-    it.isEmpty match {
-      case true => None
-      case false => {
-        Some(Function(function.getDomain, function.getRange, it, function.getMetadata))
-      }
     }
   }
   
