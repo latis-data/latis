@@ -426,9 +426,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * Database connection from JNDI or JDBC properties.
    */
   private lazy val connection: Connection = {
-    //TODO: use 'location' uri for jndi with 'java' (e.g. java:comp/env/jdbc/sorce_l1a) scheme, but glassfish doesn't use that form
     
-    val javaUrlRegex = "(java:.+)".r
+    val javaUrlRegex = "^(java:.+)".r
     val startsWithJdbcRegex = "^jdbc:(.+)".r
     
     // Some history: typically we use location="..." in the tsml file to
