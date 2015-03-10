@@ -37,7 +37,7 @@ class OverviewWriter(servletConfig: ServletConfig) {
     
     val values: Map[String, String] = Map(
         "context-root" -> s"$scheme://$host$contextRoot/latis",
-        "mission" -> LatisProperties.getOrElse("overview.mission", "MISSING: overview.mission (latis.properties)"),
+        "dataset-name" -> catalog.getName,
         "catalog-html" -> catalogHtml(),
         "output-options-html" -> outputOptionsHtml(),
         "filter-options-html" -> filterOptionsHtml()
@@ -47,15 +47,17 @@ class OverviewWriter(servletConfig: ServletConfig) {
     printWriter.flush()
   }
   
-  def catalogHtml(): String = {
+  private lazy val catalog: Dataset = {
     val tsmlUrl = Catalog.getTsmlUrl("catalog")
     val reader = TsmlReader(tsmlUrl)
-    val dataset = reader.getDataset()
-    
+    reader.getDataset()
+  }
+  
+  def catalogHtml(): String = {
     val writer = new CatalogOverviewWriter
     val outputStream = new ByteArrayOutputStream
     writer.setOutputStream(outputStream)
-    writer.write(dataset)
+    writer.write(catalog)
     
     outputStream.toString()
   }
