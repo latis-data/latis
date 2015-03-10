@@ -53,7 +53,7 @@ class OverviewWriter(servletConfig: ServletConfig) {
     reader.getDataset()
   }
   
-  def catalogHtml(): String = {
+  private def catalogHtml(): String = {
     val writer = new CatalogOverviewWriter
     val outputStream = new ByteArrayOutputStream
     writer.setOutputStream(outputStream)
@@ -67,7 +67,7 @@ class OverviewWriter(servletConfig: ServletConfig) {
     else defaultMsg
   }
   
-  def outputOptionsHtml(): String = {
+  private def outputOptionsHtml(): String = {
     ServerMetadata.availableSuffixes.
       sortBy(suffixInfo => suffixInfo.suffix). // put in alphabetical order
       map(suffixInfo => // turn each info obj into Map and apply template 
@@ -83,7 +83,7 @@ class OverviewWriter(servletConfig: ServletConfig) {
       mkString // simple string join and return
   }
   
-  def filterOptionsHtml(): String = {
+  private def filterOptionsHtml(): String = {
     ServerMetadata.availableOperations.
       sortBy(opInfo => opInfo.name). // put in alphabetical order
       map(opInfo => operationTmpl.applyValues(Map( // turn each info obj into Map and apply template
