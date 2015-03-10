@@ -78,7 +78,7 @@ class MathExpressionDerivation(str: String) extends Operation {
    * Determines whether a Function contains any Variables used to derive the new Variable.
    */
   def testSample(sample: Sample): Option[Sample] = {
-    if(sample.toSeq.forall(s => !str.contains(s.getName))) None
+    if(sample.toSeq.forall(s => !str.contains(s.getName))) throw new Exception("Function does not contain all Variables needed to derive new Variable:" + str.substring(0,str.indexOf('='))) //None
     else Some(Sample(sample.domain, Tuple(sample.range.toSeq :+ Real(Metadata(str.substring(0,str.indexOf('=')))))))
   }
   

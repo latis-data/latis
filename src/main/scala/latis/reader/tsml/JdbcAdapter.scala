@@ -1,18 +1,35 @@
 package latis.reader.tsml
 
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.Statement
+import java.sql.ResultSet
+import java.util.Calendar
+import java.util.TimeZone
+
+import scala.Option.option2Iterable
+import scala.collection.Map
+import scala.collection.Seq
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
+
+import com.typesafe.scalalogging.slf4j.Logging
+
+import javax.naming.InitialContext
+import javax.naming.NameNotFoundException
+import javax.sql.DataSource
 import latis.data.Data
-import latis.data.IterableData
 import latis.dm.Binary
 import latis.dm.Function
 import latis.dm.Index
 import latis.dm.Integer
 import latis.dm.Real
-import latis.dm.Sample
 import latis.dm.Scalar
 import latis.dm.Text
 import latis.dm.Variable
 import latis.ops.Operation
 import latis.ops.Projection
+import latis.ops.RenameOperation
 import latis.ops.filter.FirstFilter
 import latis.ops.filter.LastFilter
 import latis.ops.filter.Selection
@@ -20,29 +37,7 @@ import latis.reader.tsml.ml.Tsml
 import latis.time.Time
 import latis.time.TimeFormat
 import latis.time.TimeScale
-import latis.util.PeekIterator
-import latis.util.RegEx
-import latis.util.RegEx.SELECTION
 import latis.util.StringUtils
-import java.nio.ByteBuffer
-import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.ResultSet
-import java.util.Calendar
-import java.util.TimeZone
-import scala.Array.fallbackCanBuildFrom
-import scala.Option.option2Iterable
-import scala.collection.Map
-import scala.collection.Seq
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
-import com.typesafe.scalalogging.slf4j.Logging
-import javax.naming.InitialContext
-import javax.sql.DataSource
-import java.sql.Statement
-import latis.ops.RenameOperation
-import latis.metadata.Metadata
-import javax.naming.NameNotFoundException
 
 /* 
  * TODO: release connection as soon as possible?
@@ -227,11 +222,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    */
   def handleProjection(projection: Projection): Boolean = projection match {
     case p @ Projection(names) => {
-      //make sure these match variable names or aliases
-      if (!names.forall(getOrigDataset.unwrap.findVariableByName(_).nonEmpty))
-        throw new Error("Not all variables are available for the projection: " + p)
-      projectedVariableNames = names
-      true
+      //only names that are found in the original dataset are included in the search query
+      projectedVariableNames = names.filterNot(getOrigDataset.findVariableByName(_) == None) 
+      false //this way the default Projection Operation will also be applied after derived fields are created.
     }
   }
   
@@ -295,7 +288,10 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     getProjectedVariableNames.find(s.hasName(_)) match { //account for aliases
       case Some(_) => { //projected, see if it needs to be renamed
         val tmpScalar = renameMap.get(s.getName) match {
-          case Some(newName) => s.updatedMetadata("name" -> newName)
+          case Some(newName) => s.getMetadata("alias") match { //keep the old name as an alias to allow later projection. 
+            case Some(a) => s.updatedMetadata("alias" -> (a + "," + s.getName)).updatedMetadata("name" -> newName)
+            case None => s.updatedMetadata("alias" -> s.getName).updatedMetadata("name" -> newName)
+          }
           case None => s
         }
         super.makeScalar(tmpScalar)
