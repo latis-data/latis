@@ -63,6 +63,8 @@ object StringTemplate {
   def readResource(resourcePath: String): String = {
     val rsrc = getClass.getResource(if (resourcePath.startsWith("/")) resourcePath else "/" + resourcePath)
     val chunks = Source.fromURL(rsrc)
-    chunks.mkString
+    val result = chunks.mkString
+    chunks.close
+    result
   }
 }
