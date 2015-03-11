@@ -1,6 +1,7 @@
 package latis.writer
 
-import org.junit.Test
+import org.junit._
+import Assert._
 import org.apache.derby.iapi.services.io.ArrayUtil
 import scala.reflect.internal.util.StringOps
 
@@ -11,7 +12,7 @@ class TestStringTemplate extends WriterTest {
     val tmpl = new StringTemplate("{{foo}} {{bar}}")
     val values = Map("foo" -> "foo", "bar" -> "bar")
     val transformed = tmpl.applyValues(values)
-    assert(transformed == "foo bar")
+    assertEquals("foo bar", transformed)
   }
   
   @Test
@@ -32,7 +33,7 @@ class TestStringTemplate extends WriterTest {
     val tmpl = new StringTemplate("{{foo}} {{bar}}")
     val values = Map("foo" -> "{{bar}}", "bar" -> "{{foo}}")
     val transformed = tmpl.applyValues(values)
-    assert(transformed == "{{bar}} {{foo}}") 
+    assertEquals("{{bar}} {{foo}}", transformed)
   }
   
   @Test
@@ -40,7 +41,7 @@ class TestStringTemplate extends WriterTest {
     val tmpl = new StringTemplate("{{foo-foo}} {{bar-bar}}")
     val values = Map("foo-foo" -> "foo", "bar-bar" -> "bar")
     val transformed = tmpl.applyValues(values)
-    assert(transformed == "foo bar")
+    assertEquals("foo bar", transformed)
   }
   
   @Test
@@ -49,6 +50,6 @@ class TestStringTemplate extends WriterTest {
     val tmpl = new StringTemplate(s"{{$longName}} {{bar}}")
     val values = Map(longName -> "foo", "bar" -> "bar")
     val transformed = tmpl.applyValues(values)
-    assert(transformed == "foo bar")
+    assertEquals("foo bar", transformed)
   }
 }

@@ -127,9 +127,11 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
     val vars = getOrigScalars
     val values = extractValues(record)
     
+    //If we don't parse as many values as expected, assume we have an invalid record and skip it.
     if (vars.length != values.length) {
-      logger.warn("Invalid record: " + values.length + " values found for " + vars.length + " variables")
-      //TODO: should we throw exception and use the same warning mechanism in the Mapping Iterator?
+      //Note, There are many cases where datasets have invalid records "by design" 
+      //(e.g. future timestamps without data values) so we don't want to log warnings.
+      logger.debug("Invalid record: " + values.length + " values found for " + vars.length + " variables")
       None
     } else {
       val vnames: Seq[String] = vars.map(_.getName)
