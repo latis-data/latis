@@ -440,31 +440,25 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    */
   private lazy val connection: Connection = {
     
-    val javaUrlRegex = "^(java:.+)".r
+    val startsWithJavaRegex = "^(java:.+)".r
     val startsWithJdbcRegex = "^jdbc:(.+)".r
     
-    // Some history: typically we use location="..." in the tsml file to
-    // indicate where the data is. The one exception used to be JNDI
-    // resources, which used the attribute jndi="java:/comp/env/...".
-    // We decided to unify these two and update it so that JNDI
-    // resources worked more like everything else, and used
-    // location="java:/comp/env/...". That being said, we also kept
-    // the jndi="..." for backwards compatibility although it is
-    // expected (hoped) that no one is using that anymore. The ticket
-    // for this change is LATIS-30.
+    // location is the current standard for both jndi and jdbc connections,
+    // but we still support the jndi attribute for historical reasons.
+    // See LATIS-30 for more details
     val con = (getProperty("location"), getProperty("jndi")) match {
       
       // if 'location' exists and starts with "java:", use jndi
-      case (Some(javaUrlRegex(location)), _) => getConnectionViaJndi(location)
+      case (Some(startsWithJavaRegex(location)), _) => getConnectionViaJndi(location)
+      
+      // if 'location' exists and starts with 'jdbc:'
+      case (Some(startsWithJdbcRegex(_)), _) => getConnectionViaJdbc
       
       // if 'jndi' exists, use jndi
       case (_, Some(jndiStr)) => {
         logger.warn("Use location='java:/comp/env...' instead of jndi='java:/comp/env...'")
         getConnectionViaJndi(jndiStr)
       }
-      
-      // if 'location' exists and starts with 'jdbc:' (at this point, this should be a catch-all)
-      case (Some(startsWithJdbcRegex(_)), _) => getConnectionViaJdbc
       
       // If we get here, we probably have a malformed tsml file. No conforming location attr was
       // found, and no jndi attr was found at all.
