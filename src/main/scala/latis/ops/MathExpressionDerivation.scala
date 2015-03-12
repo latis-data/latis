@@ -1,7 +1,8 @@
 package latis.ops
 
 import scala.Array.canBuildFrom
-import scala.Option.option2Iterable
+
+import com.typesafe.scalalogging.slf4j.Logging
 
 import latis.dm.Dataset
 import latis.dm.Function
@@ -13,7 +14,6 @@ import latis.dm.Variable
 import latis.dm.implicits.doubleToDataset
 import latis.dm.implicits.variableToDataset
 import latis.metadata.Metadata
-import latis.ops.agg.CollectionAggregation
 import latis.ops.math.BinaryMathOperation
 import latis.ops.math.MathOperation
 import latis.ops.math.ReductionMathOperation
@@ -23,7 +23,7 @@ import latis.ops.math.UnaryMathOperation
  * Adds a new Variable to a Dataset according to the inputed math expression.
  * The str parameter must include the name of the new Variable followed by '=' and the expression.
  */
-class MathExpressionDerivation(str: String) extends Operation {
+class MathExpressionDerivation(str: String) extends Operation with Logging {
   
   var ds: Dataset = Dataset()
   //TODO: consider defining value in an empty dataset
@@ -69,7 +69,10 @@ class MathExpressionDerivation(str: String) extends Operation {
   override def applyToFunction(f: Function): Option[Variable] = {
     val s = testSample(f.getSample)
     s match {
-      case None => Some(f)
+      case None => {
+        logger.warn("Derived field " + str.substring(0, str.indexOf('=')) + " was not added to the Dataset")
+        Some(f)
+      }
       case Some(sample) => Some(Function(sample.domain, sample.range, f.iterator.map(applyToSample(_).get), f.getMetadata))
     }
   }
@@ -78,7 +81,7 @@ class MathExpressionDerivation(str: String) extends Operation {
    * Determines whether a Function contains any Variables used to derive the new Variable.
    */
   def testSample(sample: Sample): Option[Sample] = {
-    if(sample.toSeq.forall(s => !str.contains(s.getName))) throw new Exception("Function does not contain all Variables needed to derive new Variable:" + str.substring(0,str.indexOf('='))) //None
+    if(sample.toSeq.forall(s => !str.contains(s.getName))) None
     else Some(Sample(sample.domain, Tuple(sample.range.toSeq :+ Real(Metadata(str.substring(0,str.indexOf('=')))))))
   }
   
