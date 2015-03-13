@@ -164,10 +164,6 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     case None => v.getName
   }
 
-  //Handle first, last ops
-  private var first = false
-  private var last = false
-
   //Define sorting order.
   private var order = "ASC"
 
@@ -209,10 +205,24 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       }
     }
 
-    case _: FirstFilter =>
-      first = true; true
-    case _: LastFilter =>
-      last = true; order = "DESC"; true
+    case _: FirstFilter => {
+      //make sure we are using ascending order
+      order = "ASC"; 
+      //add a limit property of one so we only get the first record
+      setProperty("limit", "1")
+      //let the caller know that we handled this operation
+      true
+    }
+      
+    case _: LastFilter => {
+      //get results in descending order so the first record is the "last" one
+      order = "DESC"; 
+      //add a limit property of one so we only get the first (now last) record
+      setProperty("limit", "1")
+      //let the caller know that we handled this operation
+      true 
+    }
+      
 
     //Rename operation: apply in projection clause of sql: 'select origName as newName'
     //These will be combined with the projected variables in the select clause with "old as new".
@@ -337,11 +347,6 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       case Some(fetchSize) => statement.setFetchSize(fetchSize.toInt)
       case _ =>
     }
-
-    //Apply FirstFilter or LastFilter. 
-    //Set max rows to 1. "last" will set order to descending.
-    //TODO: error if both set, unless there was only one
-    if (first || last) statement.setMaxRows(1)
 
     statement.executeQuery(sql)
   }

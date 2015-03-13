@@ -56,7 +56,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   /**
    * Store XML attributes for this Adapter definition as a properties Map.
    */
-  private val properties: Map[String,String] = tsml.dataset.getAdapterAttributes()
+  private var properties: Map[String,String] = tsml.dataset.getAdapterAttributes()
 
   /**
    * Return Some property value or None if property does not exist.
@@ -69,6 +69,13 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   def getProperty(name: String, default: String): String = getProperty(name) match {
     case Some(v) => v
     case None => default
+  }
+  
+  /**
+   * Allow adapters to manipulate their properties.
+   */
+  protected def setProperty(name: String, value: String): Unit = {
+    properties = properties + (name -> value)
   }
   
   //---- Original Dataset Construction ----------------------------------------
