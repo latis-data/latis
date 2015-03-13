@@ -190,7 +190,12 @@
         </select>
         <div id="graphdiv"></div>
         <script type="text/javascript">
-            updateGraph("{{defaultRange}}");
+        	if ({{graph-enabled}}) {
+        		updateGraph("{{defaultRange}}");
+        	}
+        	else {
+        		$("#graphdiv, #graph-range-selector").remove();
+        	}
         </script>
         <div class="dds"><h2>Dataset Descriptor Structure</h2><blockquote>{{dds}}</blockquote></div>
         <div class="das"><h2>Dataset Attribute Structure</h2><blockquote>{{das}}</blockquote></div>
