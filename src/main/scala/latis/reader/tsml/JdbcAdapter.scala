@@ -206,6 +206,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     }
 
     case _: FirstFilter => {
+      //make sure we are using ascending order
+      order = "ASC"; 
       //add a limit property of one so we only get the first record
       setProperty("limit", "1")
       //let the caller know that we handled this operation
