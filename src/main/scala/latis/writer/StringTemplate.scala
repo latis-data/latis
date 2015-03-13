@@ -52,7 +52,10 @@ class StringTemplate(tmplStr: String) {
    */
   def applyValues(values: Map[String, String]): String = {
     parsedTemplate.
-      map(chunk => if (chunk.isLiteral) chunk.str else values.getOrElse(chunk.str, throw new Exception(s"""template context missing value: "$chunk.str""""))).
+      map(chunk => 
+        if (chunk.isLiteral) chunk.str
+        else values.getOrElse(chunk.str, throw new Exception(s"template context missing value: '${chunk.str}'"))
+      ).
       mkString
   }
 }
