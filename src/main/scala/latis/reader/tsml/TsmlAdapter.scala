@@ -286,7 +286,12 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * to the Dataset by the TsmlAdapter class.
    * The default behavior is for the Adapter subclass to handle no operations.
    */
-  def handleOperation(op: Operation): Boolean = false 
+  def handleOperation(op: Operation): Boolean = op match {
+    case p @ Projection(names) => projectedVariableNames ++= names; false 
+    case _ => false
+  }
+  
+  private var projectedVariableNames = Seq[String]()
   
   //---- Caching --------------------------------------------------------------
   //TODO: consider mutability issues
@@ -382,7 +387,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
      * foo(bar) = <?foo bar?> ?
      */
     
-    val projections = tsml.getProcessingInstructions("project").map(Projection(_)) 
+    val projectedNames = tsml.getProcessingInstructions("project")
+    val projections = projectedNames.map(Projection(_)) 
     val selections  = tsml.getProcessingInstructions("select").map(Selection(_))
     //Unit conversions: "convert vname units"
     val conversions = tsml.getProcessingInstructions("convert").map(s => {
@@ -393,7 +399,9 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     })
     
     val renames = tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
-    val derivations = tsml.getProcessingInstructions("derived").map(MathExpressionDerivation(_))
+    val derivedFields = tsml.getProcessingInstructions("derived")
+    val derivations = if(projections.isEmpty) derivedFields.map(MathExpressionDerivation(_)) 
+      else derivedFields.filter(f => (projectedVariableNames ++ projectedNames.flatMap(_.split(','))).contains(f.substring(0, f.indexOf('=')))).map(MathExpressionDerivation(_))//derivedFields.map(s=> s.substring(0, s.indexOf('='))).intersect(projectedNames.flatMap(_.split(','))).map(MathExpressionDerivation(_))
     
     projections ++ selections ++ conversions ++ renames ++ derivations
   }
