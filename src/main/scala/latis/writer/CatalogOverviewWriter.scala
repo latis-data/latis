@@ -76,7 +76,7 @@ class CatalogOverviewWriter extends Writer {
       companion.leafTmpl.applyValues(Map(
           "name" -> name.stringValue,
           "description" -> description.stringValue,
-          "accessUrl" -> ("latis/" + accessUrl.stringValue)
+          "accessUrl" -> accessUrl.stringValue
       ))
     }
     case Tuple(vars) => vars.map(varToString(_)).mkString
