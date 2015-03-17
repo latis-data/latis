@@ -14,7 +14,11 @@
                 white-space:pre;
                 font-family:monospace;
                 /*background-color:#b0a4de;*/
-            } 
+            }
+            .inconspicuous {
+            	color: #aaaaaa;
+            	font-style: italic;
+            }
             .info {
                 white-space:pre;
                 font-family:monospace;
@@ -206,7 +210,10 @@
         		updateGraph("{{defaultRange}}");
         	}
         	else {
-        		$("#graphdiv, #graph-range-selector").remove();
+        		$("#graph-range-selector").remove();
+        		$("#graphdiv").empty().append(
+     				$("<span>").addClass("inconspicuous").text("Chart unavailable - unable to plot data")
+        		)
         	}
         </script>
         <div class="dds"><h2>Dataset Descriptor Structure</h2><blockquote>{{dds}}</blockquote></div>
