@@ -105,7 +105,7 @@ class MathExpressionDerivation(str: String) extends Operation {
   def findOp(str: String): Dataset = {
     //named operations followed by (...) must be evaluated first or else the () will be lost.
     //names should be looked for in order from longest to shortest to prevent errors with substrings such as "cos" in "acos".
-    val names = Seq("deg_to_radians", "atan2", "sqrt", "fabs", "acos", "atan", "mag", "cos", "sin").filter(str.contains(_))
+    val names = Seq("DEG_TO_RAD", "ATAN2", "SQRT", "FABS", "ACOS", "ATAN", "MAG", "COS", "SIN").filter(str.contains(_))
     if(names.nonEmpty) applyNamedFunction(str, names(0))
  
     //evaluates innermost set of (). Keeps result in appended temp Dataset so its value can be accessed later.
@@ -132,22 +132,22 @@ class MathExpressionDerivation(str: String) extends Operation {
     val i1 = str.indexOf(name)
     val i2 = findCloseParen(str, i1) + 1
     val sub = str.substring(i1, i2)
-    val args = str.substring(i1+name.length+1,i2-1).split(",")
+    val args = str.substring(i1+name.length+1,i2-1)
     val op = name match {
-      case "atan2" => MathOperation(Math.atan2(_,_))
-      case "mag" => MathOperation((d1,d2) => Math.sqrt(Math.pow(d1,2) + Math.pow(d2,2)))
-      case "cos" => MathOperation(Math.cos(_))
-      case "sin" => MathOperation(Math.sin(_))
-      case "fabs" => MathOperation(Math.abs(_))
-      case "acos" => MathOperation(Math.acos(_))
-      case "atan" => MathOperation(Math.atan(_))
-      case "sqrt" => MathOperation(Math.sqrt(_))
-      case "deg_to_radians" => MathOperation(Math.toRadians(_))
+      case "ATAN2" => MathOperation(Math.atan2(_,_))
+      case "MAG" => MathOperation((d1,d2) => Math.sqrt(Math.pow(d1,2) + Math.pow(d2,2)))
+      case "COS" => MathOperation(Math.cos(_))
+      case "SIN" => MathOperation(Math.sin(_))
+      case "FABS" => MathOperation(Math.abs(_))
+      case "ACOS" => MathOperation(Math.acos(_))
+      case "SQRT" => MathOperation(Math.sqrt(_))
+      case "DEG_TO_RAD" => MathOperation(Math.toRadians(_))
+      case "ATAN" => MathOperation(Math.atan(_))
     }
     val t = op match {
-      case u: UnaryMathOperation => u(parseExpression(args(0)))
+      case u: UnaryMathOperation => u(parseExpression(args))
       case b: BinaryMathOperation => ???
-      case r: ReductionMathOperation => r(args.map(parseExpression(_)))
+      case r: ReductionMathOperation => r(args.split(',').map(parseExpression(_)))
     }
     tempCount += 1
     ds = CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))

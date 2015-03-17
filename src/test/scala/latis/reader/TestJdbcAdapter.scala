@@ -10,6 +10,8 @@ import latis.ops._
 import latis.ops.filter._
 import latis.dm._
 import latis.writer.Writer
+import javax.naming.NameNotFoundException
+import javax.naming.NoInitialContextException
 
 class TestJdbcAdapter extends AdapterTests {
   def datasetName = "db"
@@ -92,6 +94,104 @@ class TestJdbcAdapter extends AdapterTests {
     val ds = TsmlReader("db_with_predicate.tsml").getDataset(ops)
     val data = ds.toStringMap
     assertEquals(1, data("myInt").length)
+  }
+  
+  @Test //TODO: deprecate use of quotes?
+  def select_by_text_value_with_single_quotes {
+    val ops = List(Selection("myText='B'"))
+    val data = getDataset(ops).toStringMap
+    assertEquals(2, data("myInt").head.toInt)
+  }
+  
+  //@Test //double quotes not supported so don't encourage anyone
+  def select_by_text_value_with_double_quotes {
+    val ops = List(Selection("""myText="B""""))
+    val data = getDataset(ops).toStringMap
+    assertEquals(2, data("myInt").head.toInt)
+  }
+  
+  @Test
+  def select_by_text_value_without_quotes {
+    val ops = List(Selection("myText=B"))
+    val data = getDataset(ops).toStringMap
+    assertEquals(2, data("myInt").head.toInt)
+  }
+  
+  @Test
+  def location_java_prefixed {
+    // Finding a "java:" prefix in the location="..." attribute means we should
+    // load the connection via jndi. We don't expect jndi to work outside of
+    // a JavaEE container (web server) so the best we can do is check that
+    // the correct exceptions are thrown.
+    var wasCaught = false
+    val ops = List(Selection("foo>1"))
+    try {
+      val ds = TsmlReader("db_with_bad_java_location.tsml").getDataset(ops)
+    }
+    catch {
+      case e1: NoInitialContextException => {
+        // this means we attempted to find something via JNDI but failed because there
+        // was no initial context (prob b/c we're in unit tests). This means we hit
+        // the right branch so, even though this is ugly, pass!
+        wasCaught = true
+        assert(true) // pass
+      }
+      case e2: Error => {
+        // this is the error re-thrown by JdbcAdapter.getConnectionViaJndi when it gets a
+        // NameNotFoundException. This means we hit the right branch, so pass!
+        wasCaught = true
+        assertEquals("JdbcAdapter failed to locate JNDI resource: bad_java_location", e2.getMessage)
+      }
+    }
+    assertTrue("An Error should have been thrown", wasCaught)
+  }
+  
+  @Test
+  def location_is_nonsensical {
+    var wasCaught = false
+    val ops = List(Selection("foo>1"))
+    try {
+      val ds = TsmlReader("db_with_completely_wonky_location.tsml").getDataset(ops)
+    }
+    catch {
+      case e1: RuntimeException => {
+        wasCaught = true
+        assertEquals(
+          "Unable to find or parse tsml location attribute: location must exist and start with 'java:' (for JNDI) or 'jdbc:' (for JDBC)",
+          e1.getMessage
+        )
+      }
+    }
+    assertTrue("An Error should have been thrown", wasCaught)
+  }
+  
+  @Test
+  def jndi_attr {
+    // Finding a jndi="..." attribute means we should
+    // load the connection via jndi. We don't expect jndi to work outside of
+    // a JavaEE container (web server) so the best we can do is check that
+    // the correct exceptions are thrown.
+    var wasCaught = false
+    val ops = List(Selection("foo>1"))
+    try {
+      val ds = TsmlReader("db_with_jndi_attr.tsml").getDataset(ops)
+    }
+    catch {
+      case e1: NoInitialContextException => {
+        // this means we attempted to find something via JNDI but failed because there
+        // was no initial context (prob b/c we're in unit tests). This means we hit
+        // the right branch so, even though this is ugly, pass!
+        wasCaught = true
+        assert(true) // pass
+      }
+      case e2: Error => {
+        // this is the error re-thrown by JdbcAdapter.getConnectionViaJndi when it gets a
+        // NameNotFoundException. This means we hit the right branch, so pass!
+        wasCaught = true
+        assertEquals("JdbcAdapter failed to locate JNDI resource: bad_java_location", e2.getMessage)
+      }
+    }
+    assertTrue("An Error should have been thrown", wasCaught)
   }
 }
 

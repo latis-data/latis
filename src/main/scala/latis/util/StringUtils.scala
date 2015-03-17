@@ -44,7 +44,9 @@ object StringUtils {
     case _ => s
   }
   
-  
+  /**
+   * Can this string be converted to a Double.
+   */
   def isNumeric(s: String): Boolean = {
     try {
       s.toDouble
