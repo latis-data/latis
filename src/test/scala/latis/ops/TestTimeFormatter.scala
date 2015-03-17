@@ -21,6 +21,7 @@ class TestTimeFormatter {
     /*
      * this is finding the orig time
      * ds2 has a WrappedFunction
+     * possibly related to LATIS-128
      */
 //    val tv = ds2.findVariableByName("time").get
 //    val units = tv.getMetadata("units").get
