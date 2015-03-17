@@ -77,5 +77,26 @@ publishing {
     }
 }
 
+// Helper function - only run the passed configClosure
+// if the task is actually going to be executed. Allows
+// for easier conditional configuration.
+def ifTask(task, configClosure) {
+	gradle.taskGraph.whenReady { graph ->
+		if (graph.hasTask(task)) {
+			project.configure(task, configClosure)
+		}
+	}
+}
+
 task wrapper(type: Wrapper) { gradleVersion = '2.3' }
+
+task compileWarnings (dependsOn: compileScala) { self ->
+	description "Run the compileScala task, but configure it to show more warnings ('-feature' flag)"
+	ifTask(self) {
+		// configure the compileScala task to run scalac with the "-feature" option
+		compileScala {
+			scalaCompileOptions.additionalParameters = ["-feature"]
+		}
+	}
+}
 
