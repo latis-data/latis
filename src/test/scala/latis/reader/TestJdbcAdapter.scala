@@ -68,6 +68,7 @@ class TestJdbcAdapter extends AdapterTests {
     val data = getDataset(ops).toStringMap
     assertEquals(3, data.keySet.size)
     assertEquals(3, data("myTime").length)
+    assertEquals(9.0, data("i2")(2).toDouble, 0.0)
   }
   
   @Test
@@ -76,6 +77,7 @@ class TestJdbcAdapter extends AdapterTests {
     val data = getDataset(ops).toStringMap
     assertEquals(3, data.keySet.size)
     assertEquals(3, data("i2").length)
+    assertEquals(4.0, data("i2")(1).toDouble, 0.0)
   }
   
   @Test
