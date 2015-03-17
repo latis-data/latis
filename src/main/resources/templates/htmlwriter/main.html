@@ -26,6 +26,12 @@
             #graphdiv {
                 margin: 15px 0;
             }
+            #graphdiv .loading {
+            	display: block;
+            	height: 320px;
+            	line-height: 320px;
+            	margin-left: 50px;
+            }
             #graph-range-selector {
                 margin: 15px;
                 display: block;
@@ -168,15 +174,21 @@
             	// recombine with modified query (added projection at front)
             	csvUrl = beforeQuery + "?" + query;
             	
-                globalGraphReference = new Dygraph(
-                    document.getElementById("graphdiv"),
-                    csvUrl,
-                    {
-                        delimiter: ",",
-                        xlabel: "{{domain}}",
-                        ylabel: range
-                    }
-                )
+            	$.ajax({
+            		url: csvUrl
+            	}).done(function (data, textStatus, jqXhr) {
+            		var $graphdiv = $("#graphdiv");
+            		$graphdiv.empty();
+            		globalGraphReference = new Dygraph(
+            			$graphdiv[0],
+            			data,
+            			{
+                            delimiter: ",",
+                            xlabel: "{{domain}}",
+                            ylabel: range
+                        }
+            		)
+            	});
             }
 
 
@@ -188,7 +200,7 @@
         <select id="graph-range-selector" onchange="javascript:return updateGraph(event.target.value);">
             {{range-select-option-elements}}
         </select>
-        <div id="graphdiv"></div>
+        <div id="graphdiv"><em class="loading">Loading...</em></div>
         <script type="text/javascript">
         	if ({{graph-enabled}}) {
         		updateGraph("{{defaultRange}}");
