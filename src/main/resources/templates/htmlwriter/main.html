@@ -65,7 +65,7 @@
 
                 var queryForm = document.getElementById("query-form");
                 var formItems = queryForm.getElementsByClassName("form-item");
-                formItems = [].concat(formItems); // hack to turn formItems into actual array, not "HTMLCollection" or w/e
+                formItems = Array.prototype.slice.call(formItems); // hack to turn formItems into actual array, not "HTMLCollection" or w/e
                 var query = formItems.map(serializeFormItem).filter(function(item) { return !!item; }).join("");
                 if (query != "") {
                     newUrl += "?" + query;
@@ -103,12 +103,12 @@
 
                 var results = [];
                 if (min != "") {
-                    results.push("&name>=min");
+                    results.push("&" + name + ">=" + min);
                 }
                 if (max != "") {
-                    results.push("&name<max");
+                    results.push("&" + name + "<" + max);
                 }
-                return results.join("").replace("name", name).replace("min", min).replace("max", max);
+                return results.join("");
             }
             
             // Return a modified version of window.location.href where
