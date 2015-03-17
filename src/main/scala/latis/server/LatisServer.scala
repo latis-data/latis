@@ -35,11 +35,18 @@ class LatisServer extends HttpServlet with Logging {
         case _ => ""
       }
       
+      // If someone requests "/latis" redirect them to
+      // "/latis/" (the Catalog page)
+      if (path == null || path.equals("")) {
+        response.sendRedirect(request.getRequestURI() + "/")
+        return
+      }
+      
       // Quick short-circuit for the case when someone requests
       // http://[base]/latis/
       // In this case we want to return a short HTML overview
       // of the current LaTiS install
-      val isPathEmpty = path == null || path.equals("") || path.equals("/")
+      val isPathEmpty = path.equals("/")
       val isQueryEmpty = query.equals("")
       if (isPathEmpty && isQueryEmpty) {
         logger.info("Processing OverviewWriter request (no path or query)")
