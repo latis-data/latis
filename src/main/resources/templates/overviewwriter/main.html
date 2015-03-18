@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Overview of: {{dataset-name}}</title>
+        <style>
+            html, body {
+                margin: 0 auto;
+                padding: 0;
+                max-width: 800px;
+            }
+            
+            dt {
+		        font-weight: bold;
+		        margin-bottom: 3px;
+            }
+            
+            dd {
+            	margin-bottom: 8px;
+            }
+            
+            em {
+            	font-weight: bold;
+            }
+            
+            .bold { font-weight: bold; }
+            .italic { font-style: italic; }
+            
+            .hanging-indent {
+                text-indent: -22px;
+                padding-left: 22px;
+            }
+            .hanging-indent > p {
+                margin: 5px 0;
+            }
+            
+            .section-content {
+                margin-left: 20px;
+            }
+            
+            .aside {
+            	color: #bbbbbb;
+            	font-style: italic;
+            }
+            
+            .collapsible {
+                cursor: pointer;
+            }
+            .collapsible::before {
+            	content: "-";
+            	border: 1px solid black;
+            	height: 10px; width: 10px; line-height: 10px;
+            	display: inline-block;
+            	text-align: center;
+                margin-right: 5px;
+            }
+            .collapsible.collapsed::before {
+            	content: "+"
+            }
+            .collapsible.collapsed + dd {
+            	display: none;
+            }
+        </style>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $("dl").on("click", "dt.collapsible", function(e) {
+                    $(this).toggleClass("collapsed")
+                })
+            })
+        </script>
+    </head>
+    <body>
+        <h1>Overview of: {{dataset-name}}</h1>
+        <div class="section-content hanging-indent">
+            <p>
+                <span class="bold italic">Usage:</span>
+                {{context-root}}/<span class="italic">dataset</span>.<span class="italic">suffix</span>?<span class="italic">projection</span>&amp;<span class="italic">selection</span>&amp;<span class="italic">filter</span>
+            </p>
+            <br/>
+            <p>
+                <span class="bold italic">dataset:</span>
+                Name of dataset (see <a href="#datasets">Available Datasets</a>)
+            </p>
+            <p>
+                <span class="bold italic">suffix:</span>
+                Type of output (see <a href="#suffixes">Output Options</a>)
+            </p>
+            <p>
+                <span class="bold italic">projection:</span>
+                List of variables to return with optional <span class="italic">hyperslab</span> (index subset) definitions.
+                Defaults to all. The Dataset Descriptor Structure (DDS) will describe the variables for each dataset. Use the
+                <span class="italic">dds</span> suffix to get a dataset's DDS.
+            </p>
+            <p>
+                <span class="bold italic">selection:</span>
+                Zero or more relative constraints on a variable (e.g. time&gt;=2010-01-01). Each must be preceded by a
+                '&amp;'.
+            </p>
+            <p>
+                <span class="bold italic">filter:</span>
+                Zero or more filters to be applied to the data (see <a href="#filters">Filter Options</a>). Each must be
+                preceded by a '&amp;'.
+            </p>
+        </div>
+        
+        <h2 id="datasets">Available Datasets</h2>
+        <div class="section-content">
+            <p>Click to Expand</p>
+        	<dl>{{catalog-html}}</dl>
+        </div>
+        
+        <h2 id="suffixes">Output Options (suffix)</h2>
+        <div class="section-content">
+        	<p>
+        		These suffixes can be appended to the dataset name (as in dataset.json)
+        		to specify the output format for the data.
+       		</p>
+        	<dl>{{output-options-html}}</dl>
+       	</div>
+        
+        <h2 id="filters">Filter Options (Operations)</h2>
+        <div class="section-content">
+        	<p>
+        		These filter options (operations) can be added to the query string
+        		to affect what data is returned
+       		</p>
+        	<dl>{{filter-options-html}}</dl>
+        </div>
+    </body>
+</html>
