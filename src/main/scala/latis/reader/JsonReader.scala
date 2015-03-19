@@ -68,6 +68,8 @@ class JsonReader(path: String) extends DatasetAccessor {
     Dataset(v, Metadata(name))
   }
   
+  def getDataset(ops: Seq[Operation]): Dataset = ops.reverse.foldRight(getDataset)(_(_))
+  
   /**
    * make a JsValue into a Latis Variable. First tries the value as an array, then an object, and then a scalar
    */
@@ -129,8 +131,8 @@ class JsonReader(path: String) extends DatasetAccessor {
 
 object JsonReader {
   
-  def apply(url: URL) = if (url.getPath.endsWith(".json")) new JsonReader(url.getPath) else throw new Exception("JsonReader can only read .json files")
+  def apply(url: URL) = if (url.getPath.contains(".json")) new JsonReader(url.getPath) else throw new Exception("JsonReader can only read .json files")
 
-  def apply(path: String) = if (path.endsWith(".json")) new JsonReader(path) else throw new Exception("JsonReader can only read .json files")
+  def apply(path: String) = if (path.contains(".json")) new JsonReader(path) else throw new Exception("JsonReader can only read .json files")
   
 }
