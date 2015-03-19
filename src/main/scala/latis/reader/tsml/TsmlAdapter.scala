@@ -400,8 +400,10 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     
     val renames = tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
     val derivedFields = tsml.getProcessingInstructions("derived")
-    val derivations = if(projections.isEmpty) derivedFields.map(MathExpressionDerivation(_)) 
-      else derivedFields.filter(f => (projectedVariableNames ++ projectedNames.flatMap(_.split(','))).contains(f.substring(0, f.indexOf('=')))).map(MathExpressionDerivation(_))//derivedFields.map(s=> s.substring(0, s.indexOf('='))).intersect(projectedNames.flatMap(_.split(','))).map(MathExpressionDerivation(_))
+    val derivations = if((projectedVariableNames ++ projections).isEmpty) derivedFields.map(MathExpressionDerivation(_)) 
+      else derivedFields.filter(f => 
+        (projectedVariableNames ++ projectedNames.flatMap(_.split(','))).contains(f.substring(0, f.indexOf('='))))
+        .map(MathExpressionDerivation(_))
     
     projections ++ selections ++ conversions ++ renames ++ derivations
   }
