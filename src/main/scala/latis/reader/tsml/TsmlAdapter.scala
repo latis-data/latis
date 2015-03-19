@@ -402,7 +402,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     val derivedFields = tsml.getProcessingInstructions("derived")
     val derivations = if((projectedVariableNames ++ projections).isEmpty) derivedFields.map(MathExpressionDerivation(_)) 
       else derivedFields.filter(f => 
-        (projectedVariableNames ++ projectedNames.flatMap(_.split(','))).contains(f.substring(0, f.indexOf('='))))
+        (projectedVariableNames ++ projectedNames.flatMap(_.split(','))).contains(f.substring(0, f.indexOf('=')).trim))
         .map(MathExpressionDerivation(_))
     
     projections ++ selections ++ conversions ++ renames ++ derivations
