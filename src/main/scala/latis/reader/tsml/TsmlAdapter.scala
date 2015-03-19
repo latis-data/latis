@@ -401,10 +401,14 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     val renames = tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
     val derivedFields = tsml.getProcessingInstructions("derived")
     val derivations = if((projectedVariableNames ++ projections).isEmpty) derivedFields.map(MathExpressionDerivation(_)) 
-      else derivedFields.filter(f => 
-        (projectedVariableNames ++ projectedNames.flatMap(_.split(','))).contains(f.substring(0, f.indexOf('=')).trim))
-        .map(MathExpressionDerivation(_))
-    
+      else {
+        val allProjected = projectedVariableNames ++ projectedNames.flatMap(_.split(','))
+        val filteredDerivedFields = derivedFields.filter(f => {
+          val searchString = f.substring(0, f.indexOf('=')).trim
+          allProjected.contains(searchString)
+        })
+        filteredDerivedFields.map(MathExpressionDerivation(_))
+      }
     projections ++ selections ++ conversions ++ renames ++ derivations
   }
   
