@@ -114,7 +114,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   protected val parseBinary: PartialFunction[(Variable, Int), (String, Data)] = {
     case (v: Binary, _) => {
       val name = getVariableName(v)
-      (name, Data(resultSet.getBytes(name)))
+      val bytes = resultSet.getBytes(name)
+      if (bytes.length != v.getSize) logger.warn("JdbcAdapter found " + bytes.length + " bytes but expected " + v.getSize)
+      (name, Data(bytes.take(v.getSize))) //truncate so we don't get buffer overflow
     }
   }
 
