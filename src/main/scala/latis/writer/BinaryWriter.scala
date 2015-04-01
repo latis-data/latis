@@ -47,8 +47,9 @@ class BinaryWriter extends Writer {
       //set the byte order
       bb.order(order)
       buildVariable(variable, bb)
-      val bytes = new Array[Byte](bb.position())
-      bb.rewind.asInstanceOf[ByteBuffer].get(bytes)
+      bb.flip //set limit to current position then rewind position to start
+      val bytes = new Array[Byte](bb.limit) //allocate array to hold bytes
+      bb.get(bytes)
       bytes
     }
   }
