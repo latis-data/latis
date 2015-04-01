@@ -146,7 +146,8 @@ object Time {
         //Assume length is not set, for now. TODO: obey tsml defined length?
         case Some(u) => {
           //TODO: make sure units are valid TimeFormat
-          md + ("length" -> u.length.toString) //TODO: don't count "'"
+          val length = u.filter(_ != ''').length  //don't count "'" chars
+          md + ("length" -> length.toString)
         }
         case None => md + ("units" -> TimeFormat.ISO.toString) + ("length" -> "23")
       }
