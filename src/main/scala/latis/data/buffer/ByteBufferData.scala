@@ -9,7 +9,12 @@ import java.nio.ByteBuffer
  */
 class ByteBufferData(val buffer: ByteBuffer) extends Data {
   
-  def size = buffer.limit //TODO: or limit-position since that is all it currently has to offer? and how ByteBuffer.equals works
+  /**
+   * Define the size as the capacity of the buffer even though the "limit" (actual end of the data)
+   * may be smaller. This is akin to a Text variable that may be padded or truncated to a max length.
+   */
+  def size = buffer.capacity
+  
   
   /**
    * Return a duplicate that is backed by the same data but has independent position.
