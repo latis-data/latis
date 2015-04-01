@@ -383,7 +383,7 @@ object DataUtils {
    */
   def dataToSample(data: Data, template: Sample): Sample = {
     val bb = data.getByteBuffer
-    val domain = buildVarFromBuffer(bb, template.domain)
+    val domain = buildVarFromBuffer(bb, template.domain)  //time var data has limit=46 and cap=50
     val range = buildVarFromBuffer(bb, template.range)
     bb.rewind //reset to the beginning in case we want to reuse it
     Sample(domain, range)
@@ -424,8 +424,7 @@ object DataUtils {
       case t: Text => {
         val sb = new StringBuilder
         for (i <- 0 until t.length) sb append bb.getChar
-        //Time(template.getMetadata, sb.toString)
-        template(Data(sb.toString))
+        v(Data(sb.toString)) //make copy of this Time variable but with new Data
       }
     }
 
@@ -434,9 +433,10 @@ object DataUtils {
     case v: Integer => Integer(template.getMetadata, bb.getLong)
 
     case v: Text => {
-      val cs = new Array[Char](v.length)
+      val n = v.length
+      val cs = new Array[Char](n)
       bb.asCharBuffer.get(cs)
-      bb.position(bb.position + v.length * 2) //advance position in underlying buffer
+      bb.position(bb.position + n * 2) //advance position in underlying buffer
       //val s = (0 until v.length).map(bb.getChar).mkString
       //TODO: why can't we just get chars from the bb?
       val s = new String(cs)
