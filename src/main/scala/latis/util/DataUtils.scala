@@ -383,7 +383,7 @@ object DataUtils {
    */
   def dataToSample(data: Data, template: Sample): Sample = {
     val bb = data.getByteBuffer
-    val domain = buildVarFromBuffer(bb, template.domain)  //time var data has limit=46 and cap=50
+    val domain = buildVarFromBuffer(bb, template.domain)
     val range = buildVarFromBuffer(bb, template.range)
     bb.rewind //reset to the beginning in case we want to reuse it
     Sample(domain, range)
