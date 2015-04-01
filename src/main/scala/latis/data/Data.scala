@@ -31,8 +31,17 @@ trait Data extends Any {
   
   /**
    * Return the data as an array of bytes.
+   * This will get data only up the the limit of the buffer
+   * so it might be smaller than the allocated size (capacity).
+   * This also assumes that the position of the buffer has been
+   * set appropriately, presumably to 0 via rewind or flip.
    */
-  def getBytes: Array[Byte] = getByteBuffer.array
+  def getBytes: Array[Byte] = {
+    val bb = getByteBuffer
+    val bytes = new Array[Byte](bb.limit) //allocate array to hold bytes
+    bb.get(bytes)
+    bytes
+  }
   
   /**
    * Is the Data empty.
