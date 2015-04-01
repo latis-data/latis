@@ -61,7 +61,10 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     case t: Text => t.length * 2 //2 bytes per char  //TODO: avoid confusing t.length with getLength
     case _: Binary => getMetadata("size") match {
       case Some(l) => l.toInt
-      case None => throw new Error("Must declare length of Binary Variable.")
+      case None => getMetadata("length") match {
+        case Some(l) => l.toInt
+        case None => throw new Error("Must declare length of Binary Variable.")
+      }
     } 
     
     case Tuple(vars) => vars.foldLeft(0)(_ + _.getSize)
