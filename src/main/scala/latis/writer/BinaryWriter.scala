@@ -7,6 +7,7 @@ import java.nio.ByteOrder
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import latis.util.StringUtils
+import latis.util.DataUtils
 
 /**
  * 
@@ -69,16 +70,9 @@ class BinaryWriter extends Writer {
       for(c <- StringUtils.padOrTruncate(s, scalar.getSize/2)) bb.putChar(c) //TODO: enforce charset? Is this using default charset?
       bb//.put(charset.encode(StringUtils.padOrTruncate(s, scalar.getSize/2)).rewind.asInstanceOf[ByteBuffer]) //??? //TODO: see JdbcAdapter
     }
-    case Binary(b)  => bb.put(trimBytes(b)) //truncate trailing 0 bytes (akin to trimming a String for TextWriters)
+    case Binary(b)  => bb.put(DataUtils.trimBytes(b)) //truncate trailing 0 bytes (akin to trimming a String for TextWriters)
   }
-  
-  /**
-   * Remove trailing 0s from array of bytes.
-   */
-  private def trimBytes(bytes: Array[Byte]): Array[Byte] = {
-    val zero: Byte = 0
-    bytes.reverse.dropWhile(_ == zero).reverse
-  }
+
   
   def buildSample(sample: Sample, bb: ByteBuffer): ByteBuffer = {
     buildTuple(sample, bb)

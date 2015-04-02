@@ -515,4 +515,13 @@ object DataUtils {
     case _: Number => value.toDouble
     case _ => Double.NaN
   }
+  
+  /**
+   * Remove trailing 0s from array of bytes.
+   */
+  def trimBytes(bytes: Array[Byte]): Array[Byte] = {
+    val zero: Byte = 0
+    bytes.reverse.dropWhile(_ == zero).reverse
+  }
+  
 }
