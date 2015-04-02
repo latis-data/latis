@@ -7,6 +7,8 @@ import latis.writer.AsciiWriter
 import latis.ops.filter.Selection
 import java.io.File
 import latis.util.FileUtils
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class TestFileListAdapter extends AdapterTests {
 
@@ -14,6 +16,14 @@ class TestFileListAdapter extends AdapterTests {
   
   //@Test
   def test = writeDataset
+  
+  @Test
+  def size {
+    val ds = getDataset
+    val data = ds.toDoubleMap
+    assertEquals(4, data("fileSize")(0), 0)
+    assertEquals(0, data("fileSize")(1), 0)
+  }
 }
 
 object TestFileListAdapter {
@@ -31,10 +41,13 @@ object TestFileListAdapter {
   def makeTmpFiles {
     //make sure this remains consistent with shared AdapterTests
     (new File(tmpDir, "Foo1970001bar1v1.1A.dat")).createNewFile
+    Files.write(Paths.get(tmpDir.getPath,"Foo1970001bar1v1.1A.dat"),List(1,2,3,4).map(_.toByte).toArray)
     (new File(tmpDir, "Foo1970002bar2v2.2B.dat")).createNewFile
     (new File(tmpDir, "Foo1970003bar3v3.3C.dat")).createNewFile
     //test with non-matching file
     (new File(tmpDir, "junk")).createNewFile
+    //(new File(tmpDir, "subDir")).mkdir
+    //(new File("/tmp/latis_file_test/subDir/Foo1970004bar4v4.4D.dat")).createNewFile
   }
   
   @AfterClass
