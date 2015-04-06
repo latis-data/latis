@@ -525,10 +525,8 @@ object DataUtils {
    * to serve as a marker.
    */
   def trimBytes(bytes: Array[Byte]): Array[Byte] = {
-    //Use an 8 byte sliding window to find the nullMark termination.
-    //Keep the head of each 8 byte window so we end up with the original values
-    //without the overlap duplication.
-    bytes.sliding(8).takeWhile(! Arrays.equals(_, nullMark)).map(_.head).toArray
+    val index = bytes.indexOfSlice(nullMark)
+    bytes.take(index)
   }
   
   /**
