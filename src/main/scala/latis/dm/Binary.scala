@@ -15,7 +15,7 @@ object Binary {
   def apply(buffer: ByteBuffer) = {
     //TODO: see if it needs to be flipped?
     val size = buffer.capacity
-    val md = Metadata(Map("size" -> size.toString))
+    val md = Metadata(Map("length" -> size.toString))
     new AbstractScalar(md, Data(buffer)) with Binary
   }
   
@@ -24,10 +24,10 @@ object Binary {
   def apply(md: Metadata, data: Data): Binary = new AbstractScalar(md, data) with Binary
   
   def apply(md: Metadata, buffer: ByteBuffer): Binary = {
-    //add size if not already defined
-    val md2 = md.get("size") match {
+    //add length if not already defined
+    val md2 = md.get("length") match {
       case Some(_) => md
-      case None => Metadata(md.getProperties ++ Map("size" -> buffer.capacity.toString))
+      case None => Metadata(md.getProperties ++ Map("length" -> buffer.capacity.toString))
     }
     new AbstractScalar(md2, Data(buffer)) with Binary
   }
