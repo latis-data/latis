@@ -60,7 +60,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     case _: Integer => 8 //long
     case t: Text => t.length * 2 //2 bytes per char  //TODO: avoid confusing t.length with getLength
     case _: Binary => getMetadata("length") match {
-      case Some(l) => l.toInt + 8 //make room for "null" terminator
+      case Some(l) => l.toInt
       case None => throw new Error("Must declare length of Binary Variable.")
     } 
     
