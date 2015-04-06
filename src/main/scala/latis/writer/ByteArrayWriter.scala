@@ -19,7 +19,6 @@ class ByteArrayWriter extends BinaryWriter {
    */
   override def getOutputStream = _out
   private val _out = new ByteArrayOutputStream()
-  //TODO: do we need to close this?
   
   /**
    * Provide access to the array of Bytes (after writing the Dataset).
