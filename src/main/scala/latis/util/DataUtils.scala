@@ -23,6 +23,7 @@ import latis.data.seq.DataSeq
 import scala.collection.mutable.ArrayBuffer
 import latis.data.IterableData
 import latis.data.value.StringValue
+import java.util.Arrays
 
 /*
  * Use Cases
@@ -517,11 +518,23 @@ object DataUtils {
   }
   
   /**
-   * Remove trailing 0s from array of bytes.
+   * Since Binary Variables can have variable lengths but we currently expect
+   * fixed length Data (akin to Text), we need to be able to mark the 
+   * end of the useful bytes and drop the padding. We can't simply use 0b since
+   * it may occur in valid data. Instead, we use a special sequence of 8 bytes
+   * to serve as a marker.
    */
   def trimBytes(bytes: Array[Byte]): Array[Byte] = {
-    val zero: Byte = 0
-    bytes.reverse.dropWhile(_ == zero).reverse
+    //Use an 8 byte sliding window to find the nullMark termination.
+    //Keep the head of each 8 byte window so we end up with the original values
+    //without the overlap duplication.
+    bytes.sliding(8).takeWhile(! Arrays.equals(_, nullMark)).map(_.head).toArray
   }
+  
+  /**
+   * Sequence of 8 bytes to use to end a section of useful bytes in a byte array.
+   */
+  val nullMark: Array[Byte] = "nullMark".getBytes
+  //110, 117, 108, 108, 77, 97, 114, 107
   
 }
