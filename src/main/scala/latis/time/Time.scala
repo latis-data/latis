@@ -146,7 +146,10 @@ object Time {
         //Assume length is not set, for now. TODO: obey tsml defined length?
         case Some(u) => {
           //TODO: make sure units are valid TimeFormat
-          val length = u.filter(_ != ''').length  //don't count "'" chars
+          //Get the length of a String representation using these time units (i.e. format).
+          //Don't count the single quotes used around the literals (such as the "T" time marker) 
+          //  as required by Java's SimpleDataFormat.
+          val length = u.filter(_ != ''').length
           md + ("length" -> length.toString)
         }
         case None => md + ("units" -> TimeFormat.ISO.toString) + ("length" -> "23")
