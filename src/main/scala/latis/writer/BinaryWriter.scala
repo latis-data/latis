@@ -45,8 +45,7 @@ class BinaryWriter extends Writer {
     case t: Tuple => (for(v <- t.getVariables) yield varToBytes(v)).foldLeft(Array[Byte]())(_ ++ _)
     case _ => {
       val bb = ByteBuffer.allocate(variable.getSize) //potentially bigger than what we write (e.g. Index)
-      //set the byte order
-      bb.order(order)
+      bb.order(order) //set the byte order
       buildVariable(variable, bb)
       bb.flip //set limit to current position then rewind position to start
       val bytes = new Array[Byte](bb.limit) //allocate array to hold bytes
@@ -70,7 +69,9 @@ class BinaryWriter extends Writer {
       for(c <- StringUtils.padOrTruncate(s, scalar.getSize/2)) bb.putChar(c) //TODO: enforce charset? Is this using default charset?
       bb//.put(charset.encode(StringUtils.padOrTruncate(s, scalar.getSize/2)).rewind.asInstanceOf[ByteBuffer]) //??? //TODO: see JdbcAdapter
     }
-    case Binary(b)  => bb.put(DataUtils.trimBytes(b)) //truncate trailing 0 bytes (akin to trimming a String for TextWriters)
+    case Binary(b)  => {
+      bb.put(DataUtils.trimBytes(b)) //keep only useful bytes
+    }
   }
 
   
