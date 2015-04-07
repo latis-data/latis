@@ -37,6 +37,7 @@ import latis.time.TimeScale
 import latis.util.StringUtils
 import scala.collection.immutable.StringOps
 import java.nio.ByteBuffer
+import latis.util.DataUtils
 
 /* 
  * TODO: release connection as soon as possible?
@@ -116,7 +117,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     case (v: Binary, _) => {
       val name = getVariableName(v)
       var bytes = resultSet.getBytes(name)
-      val max_length = v.getSize //will look for "size" or "length" in metadata, error if not defined
+      val max_length = v.getSize //will look for "length" in metadata, error if not defined
       if (bytes.length > max_length) {
         val msg = s"JdbcAdapter found ${bytes.length} bytes which is longer than the max size: ${max_length}. The data will be truncated."
         logger.warn(msg)
@@ -127,6 +128,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       val bb = ByteBuffer.allocate(max_length)
       //add the data
       bb.put(bytes)
+      //add termination mark
+      bb.put(DataUtils.nullMark)
+      
       //Set the "limit" to the end of the data and rewind the position to the start.
       //Note, the capacity will remain at the max length.
       bb.flip
