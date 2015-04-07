@@ -208,4 +208,11 @@ class TestMathExpressionDerivation {
     val data = ds.toDoubleMap
     assertEquals(data("X")(2), data("X2")(2), 0.0001)
   }
+  
+  @Test 
+  def magmag {
+    val ds = MathExpressionDerivation("A=MAG(MAG(3,4)-2,4)")(TestDataset.empty)
+    assertEquals(5.0, ds.toSeq(0).getNumberData.doubleValue, 0.0)
+  }
+  
 }
