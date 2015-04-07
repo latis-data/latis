@@ -29,7 +29,7 @@ object FileUtils {
     //TODO: consider new file io in Java7
     
     def accumulateFiles(file: File, buffer: ArrayBuffer[String]) {
-      if (file.isDirectory()) file.listFiles().map(accumulateFiles(_, buffer))
+      if (file.isDirectory()) file.listFiles().foreach(accumulateFiles(_, buffer))
       else buffer += file.getPath.drop(dir.length+1)+","+file.length
     }
     
