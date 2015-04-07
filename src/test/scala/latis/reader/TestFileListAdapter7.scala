@@ -150,7 +150,7 @@ class TestFileListAdapter7 { //can't extend AdapterTests because Samples are uno
   
   //---- Test Filters -------------------------------------------------------//
   
-  @Test
+  //@Test
   def first {
     val ops = List(FirstFilter())
     val data = getDataset(ops).toStringMap
@@ -158,7 +158,7 @@ class TestFileListAdapter7 { //can't extend AdapterTests because Samples are uno
     assert(data("myInt").contains("1"))
   }  
   
-  @Test
+  //@Test
   def last {
     val ops = List(LastFilter())
     val data = getDataset(ops).toStringMap
@@ -166,7 +166,7 @@ class TestFileListAdapter7 { //can't extend AdapterTests because Samples are uno
     assert(data("myInt").contains("3"))
   }
   
-  @Test
+  //@Test
   def limit {
     val ops = List(LimitFilter(2))
     val data = getDataset(ops).toStringMap
@@ -205,7 +205,7 @@ class TestFileListAdapter7 { //can't extend AdapterTests because Samples are uno
     assert(data("myReal").contains(1.1))
   }
   
-  @Test
+  //@Test
   def select_on_index_when_no_projected_domain {
     val ops = List(Projection("myReal"), Selection("index > 1"))
     //val ops = List(Selection("index > 1"), Projection("myReal")) //doesn't work, no Index unless domain not projected
