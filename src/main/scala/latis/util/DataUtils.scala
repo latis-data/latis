@@ -523,10 +523,13 @@ object DataUtils {
    * end of the useful bytes and drop the padding. We can't simply use 0b since
    * it may occur in valid data. Instead, we use a special sequence of 8 bytes
    * to serve as a marker.
+   * If the marker does not exist, return the entire array.
    */
   def trimBytes(bytes: Array[Byte]): Array[Byte] = {
-    val index = bytes.indexOfSlice(nullMark)
-    bytes.take(index)
+    bytes.indexOfSlice(nullMark) match {
+      case -1 => bytes
+      case index: Int => bytes.take(index)
+    }
   }
   
   /**
