@@ -535,4 +535,36 @@ object DataUtils {
   val nullMark: Array[Byte] = "nullMark".getBytes
   //110, 117, 108, 108, 77, 97, 114, 107
   
+  /**
+   * Make sure the bytes contained in the given ByteBuffer have a termination mark.
+   * The mark will be added after the 'limit' position. The size of the array might
+   * grow to accommodate the 8 byte mark, so don't do this to data that is already
+   * part of a Binary variable without updating the 'length' metadata.
+   */
+  def terminateBytes(buffer: ByteBuffer): ByteBuffer = {
+    val limit = buffer.limit
+    val capacity = buffer.capacity
+    
+    val bytes = buffer.array //actual backing array, mutable
+    
+    if (bytes.indexOfSlice(nullMark) >= 0) {
+      //already has mark, no need to do anything
+      buffer
+    } else {
+      //need to add mark
+      if (capacity - limit < 8) {
+        //need to increase size of array to accommodate 8 byte mark
+        val bb = ByteBuffer.allocate(limit + 8)
+        bb.put(bytes, 0, limit) //add original valid bytes
+        bb.put(nullMark) //add termination mark
+        bb.flip.asInstanceOf[ByteBuffer]  //set limit and rewind
+      } else {
+        //we have enough room to add the mark
+        buffer.position(limit) //set the position to the end of the valid data
+        buffer.put(nullMark) //add termination mark
+        buffer.flip.asInstanceOf[ByteBuffer]  //set limit and rewind
+      }
+    } 
+  }
+  
 }
