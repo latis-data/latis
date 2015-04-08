@@ -36,7 +36,7 @@ class BinaryWriter extends Writer {
   }
   
   /**
-   * Recursively build up a ByteBuffer
+   * Recursively build up an array of Bytes.
    */
   def varToBytes(variable: Variable): Array[Byte] = variable match {
     case function: Function => {
