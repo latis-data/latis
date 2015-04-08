@@ -9,6 +9,7 @@ import java.nio.DoubleBuffer
 import java.nio.ByteBuffer
 import latis.data.value.StringValue
 import latis.util.DataUtils
+import latis.metadata.Metadata
 
 class TestBinary {
 
@@ -41,16 +42,32 @@ class TestBinary {
   }
   
   @Test
-  def no_termination_mark {
+  def no_termination_mark_with_length_metadata {
     val bb = ByteBuffer.allocate(8)
     bb.putDouble(3.14)
-    val bv = Binary(bb)
+    val md = Metadata(Map("length" -> "8"))
+    val bv = Binary(md, bb)
     val ds = Dataset(bv)
     val bytes = ByteArrayWriter.getBytes(ds)
     assertEquals(8, bytes.length) //write only to the end of the data
-    assertEquals(8, bv.getSize) //variable size is still full buffer capacity = limit + 8 byte marker
+    assertEquals(16, bv.getSize) //variable size is still full buffer capacity = limit + 8 byte marker
     val d = ByteBuffer.wrap(bytes).getDouble
     assertEquals(3.14, d, 0.0) //data value is preserved
+  }
+  
+  @Test
+  def no_termination_mark {
+    val bb = ByteBuffer.allocate(12)
+    bb.putDouble(3.14)
+    bb.putInt(42)
+    val bv = Binary(bb)
+    val ds = Dataset(bv)
+    val bytes = ByteArrayWriter.getBytes(ds)
+    assertEquals(12, bytes.length) //write only to the end of the data
+    assertEquals(12, bv.getSize) //variable size is still full buffer capacity = limit + 8 byte marker
+    val bb2 = ByteBuffer.wrap(bytes)
+    assertEquals(3.14, bb2.getDouble, 0.0) //data value is preserved
+    assertEquals(42, bb2.getInt, 0.0) //data value is preserved
   }
   
   
