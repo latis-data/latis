@@ -15,6 +15,7 @@ class TestFileListAdapterNio extends AdapterTests {
   def datasetName = "files_nio"
   
   @Test
+  @Ignore // ignore this test by default, because it takes a lot of time & system resources to run
   def large_nested_dir {
     try {
       // Note: this test intentionally uses the same dir methods as TestStreamingFileListAdapter
@@ -33,6 +34,7 @@ class TestFileListAdapterNio extends AdapterTests {
   }
   
   @Test
+  @Ignore // ignore this test by default, because it takes a lot of time & system resources to run
   def large_flat_dir {
     try {
       // Note: this test intentionally uses the same dir methods as TestStreamingFileListAdapter

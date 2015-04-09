@@ -18,6 +18,7 @@ import latis.ops.filter.Selection
 import latis.ops.math.MathOperation
 import latis.reader.tsml.TsmlReader
 import latis.util.FileUtils
+import org.junit.Ignore
 
 class TestStreamingFileListAdapter { //can't extend AdapterTests because Samples are unordered
   
@@ -33,6 +34,7 @@ class TestStreamingFileListAdapter { //can't extend AdapterTests because Samples
   }
   
   @Test
+  @Ignore // ignore this test by default, because it takes a lot of time & system resources to run
   def large_nested_dir {
     try {
       val numFiles = TestStreamingFileListAdapter.populateLargeNestedTmpDir()
@@ -49,6 +51,7 @@ class TestStreamingFileListAdapter { //can't extend AdapterTests because Samples
   }
   
   @Test
+  @Ignore // ignore this test by default, because it takes a lot of time & system resources to run
   def large_flat_dir {
     try {
       val numFiles = TestStreamingFileListAdapter.populateLargeFlatTmpDir()
