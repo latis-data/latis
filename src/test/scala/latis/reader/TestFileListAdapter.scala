@@ -14,6 +14,42 @@ class TestFileListAdapter extends AdapterTests {
 
   def datasetName = "files"
   
+  @Test
+  def large_nested_dir {
+    try {
+      // Note: this test intentionally uses the same dir methods as TestStreamingFileListAdapter
+      // (that one was written first and then the test was ported here)
+      val numFiles = TestStreamingFileListAdapter.populateLargeNestedTmpDir()
+      val ds = TsmlReader("datasets/test/files_large_nested.tsml").getDataset()
+      val data = ds.toStringMap
+      assertEquals(numFiles, data("index").length)
+    }
+    finally {
+      val dir = TestStreamingFileListAdapter.largeNestedTmpDir
+      if (dir.exists()) {
+        FileUtils.delete(dir)
+      }
+    }
+  }
+  
+  @Test
+  def large_flat_dir {
+    try {
+      // Note: this test intentionally uses the same dir methods as TestStreamingFileListAdapter
+      // (that one was written first and then the test was ported here)
+      val numFiles = TestStreamingFileListAdapter.populateLargeFlatTmpDir()
+      val ds = TsmlReader("datasets/test/files_large_flat.tsml").getDataset()
+      val data = ds.toStringMap
+      assertEquals(numFiles, data("index").length)
+    }
+    finally {
+      val dir = TestStreamingFileListAdapter.largeFlatTmpDir
+      if (dir.exists()) {
+        FileUtils.delete(dir)
+      }
+    }
+  }
+  
   //@Test
   def test = writeDataset
   

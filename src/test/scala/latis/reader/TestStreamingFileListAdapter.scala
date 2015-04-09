@@ -3,12 +3,10 @@ package latis.reader
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
-
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
 import org.junit.Test
-
 import latis.dm.Dataset
 import latis.ops.BinAverage
 import latis.ops.Operation
@@ -21,11 +19,11 @@ import latis.ops.math.MathOperation
 import latis.reader.tsml.TsmlReader
 import latis.util.FileUtils
 
-class TestFileListAdapter7 { //can't extend AdapterTests because Samples are unordered
+class TestStreamingFileListAdapter { //can't extend AdapterTests because Samples are unordered
   
   @Test
   def test {
-    val ds = TsmlReader("datasets/test/files7.tsml").getDataset
+    val ds = TsmlReader("datasets/test/files_streaming.tsml").getDataset
     val data = ds.toStringMap
     assertEquals(6, data.size)
     assertEquals(3, data("myTime").length)
@@ -34,8 +32,40 @@ class TestFileListAdapter7 { //can't extend AdapterTests because Samples are uno
     assert(data("file").contains("Foo1970003bar3v3.3C.dat"))
   }
   
-//The rest of the tests are copied from AdapterTests with specific value checks changed to containment checks
-  def datasetName: String = "files7"
+  @Test
+  def large_nested_dir {
+    try {
+      val numFiles = TestStreamingFileListAdapter.populateLargeNestedTmpDir()
+      val ds = TsmlReader("datasets/test/files_streaming_large_nested.tsml").getDataset()
+      val data = ds.toStringMap
+      assertEquals(numFiles, data("index").length)
+    }
+    finally {
+      val dir = TestStreamingFileListAdapter.largeNestedTmpDir
+      if (dir.exists()) {
+        FileUtils.delete(dir)
+      }
+    }
+  }
+  
+  @Test
+  def large_flat_dir {
+    try {
+      val numFiles = TestStreamingFileListAdapter.populateLargeFlatTmpDir()
+      val ds = TsmlReader("datasets/test/files_streaming_large_flat.tsml").getDataset()
+      val data = ds.toStringMap
+      assertEquals(numFiles, data("index").length)
+    }
+    finally {
+      val dir = TestStreamingFileListAdapter.largeFlatTmpDir
+      if (dir.exists()) {
+        FileUtils.delete(dir)
+      }
+    }
+  }
+  
+  //The rest of the tests are copied from AdapterTests with specific value checks changed to containment checks
+  def datasetName: String = "files_streaming"
   
   def getDataset(ops: Seq[Operation]) = TsmlReader("datasets/test/" + datasetName + ".tsml").getDataset(ops)
   def getDataset: Dataset = getDataset(Seq[Operation]())
@@ -238,19 +268,124 @@ class TestFileListAdapter7 { //can't extend AdapterTests because Samples are uno
 
 }
 
-object TestFileListAdapter7 {
+object TestStreamingFileListAdapter {
   
-  val tmpDir: File = {
-    //val dir = new File(System.getProperty("java.io.tmpdir") + File.separator + "latis_file_test")
-    //TODO: java.io.tmpdir ends with "/" on Mac, off by one when removing dir in FileUtils.list
-    //  /var/folders/Jl/JlPXu2FoEs0GXqwaPMPc2++++TY/-Tmp-//latis_file_test
-    val dir = new File("/tmp/latis_file_test")
-    dir.mkdir
-    dir
+  private var _tmpDir: File = null
+  
+  def getTmpDir(): File = {
+    if (_tmpDir == null) {
+      _tmpDir = new File("/tmp/latis_file_test")
+    }
+    if (!_tmpDir.exists()) {
+      _tmpDir.mkdirs()
+    }
+    return _tmpDir
+  }
+  
+  val largeNestedTmpDir: File = new File("/tmp/latis_file_test_large_nested")
+  val largeFlatTmpDir: File = new File("/tmp/latis_file_test_large_flat")
+  
+  // Super hacky: check if the JVM is running in debug mode. If we are, it's going
+  // to take waaay to long to create these files, so we should trim our numbers a
+  // bit.
+  val isJvmDebug: Boolean = java.lang.management.ManagementFactory.getRuntimeMXBean().
+    getInputArguments().toString().indexOf("jdwp") >= 0;
+  
+  def populateLargeNestedTmpDir(): Int = {
+    
+    if (isJvmDebug) {
+      println("ALERT: Jvm Debug Mode detected - making many fewer files so that this actually finishes")
+    }
+    
+    // This is a *very* rough approximation of the MMS mission. The numbers
+    // have been fiddled with a bit to get us roughly a few hundred-thousand 
+    // files. This is in no way real data.
+    val numSpacecraft = if (isJvmDebug) 2 else 4 
+    val numInstruments = if (isJvmDebug) 5 else  22
+    val numModes = if (isJvmDebug) 2 else 5
+    val numDays = if (isJvmDebug) 10 else { 365 * 2 }
+    
+    if (largeNestedTmpDir.exists()) {
+      FileUtils.delete(largeNestedTmpDir)
+    }
+    largeNestedTmpDir.mkdirs()
+    
+    var spacecraft: Int = -1
+    var instrument: Int = -1
+    var mode: Int = -1
+    var day: Int = -1
+    
+    var filesCreated = 0
+    
+    for (spacecraft <- 1 to numSpacecraft) {
+      val spacecraftDir = new File(largeNestedTmpDir, s"spacecraft${spacecraft}")
+      spacecraftDir.mkdir()
+      
+      for (instrument <- 1 to numInstruments) {
+        val instrumentDir = new File(spacecraftDir, s"instrument${instrument}")
+        instrumentDir.mkdir()
+        
+        for (mode <- 1 to numModes) {
+          val modeDir = new File(instrumentDir, s"mode${mode}")
+          modeDir.mkdir()
+          
+          for (day <- 1 to numDays) {
+            val file = new File(modeDir, s"day${"%05d".format(day)}.txt")
+            file.createNewFile()
+            filesCreated += 1
+          }
+        }
+      }
+    }
+    
+    filesCreated
+  }
+  
+  def populateLargeFlatTmpDir(): Int = {
+    
+    if (isJvmDebug) {
+      println("ALERT: Jvm Debug Mode detected - making many fewer files so that this actually finishes")
+    }
+    
+    // This is a *very* rough approximation of the MMS mission. The numbers
+    // have been fiddled with a bit to get us roughly a few hundred-thousand 
+    // files. This is in no way real data.
+    val numSpacecraft = if (isJvmDebug) 2 else 4 
+    val numInstruments = if (isJvmDebug) 5 else  22
+    val numModes = if (isJvmDebug) 2 else 5
+    val numDays = if (isJvmDebug) 10 else { 365 * 2 }
+    
+    if (largeFlatTmpDir.exists()) {
+      FileUtils.delete(largeFlatTmpDir)
+    }
+    largeFlatTmpDir.mkdirs()
+    
+    var spacecraft: Int = -1
+    var instrument: Int = -1
+    var mode: Int = -1
+    var day: Int = -1
+    
+    var filesCreated = 0
+    
+    for (
+        spacecraft <- 1 to numSpacecraft;
+        instrument <- 1 to numInstruments;
+        mode <- 1 to numModes;
+        day <- 1 to numDays
+    ) {
+      val filename = s"spacecraft${spacecraft}_instrument${instrument}_mode${mode}_day${day}.txt"
+      val file = new File(largeFlatTmpDir, filename)
+      file.createNewFile()
+      filesCreated += 1
+    }
+    
+    filesCreated
   }
   
   @BeforeClass
   def makeTmpFiles {
+    val tmpDir = getTmpDir()
+    
     //make sure this remains consistent with shared AdapterTests
     (new File(tmpDir, "Foo1970001bar1v1.1A.dat")).createNewFile
     Files.write(Paths.get(tmpDir.getPath,"Foo1970001bar1v1.1A.dat"),List(1,2,3,4).map(_.toByte).toArray)
@@ -264,6 +399,8 @@ object TestFileListAdapter7 {
   
   @AfterClass
   def removeTmpFiles {
-    FileUtils.delete(tmpDir)
+    if (_tmpDir != null && _tmpDir.exists()) {
+      FileUtils.delete(_tmpDir)
+    }
   }
 }

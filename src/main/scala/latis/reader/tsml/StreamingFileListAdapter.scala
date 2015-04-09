@@ -15,7 +15,7 @@ import scala.collection.mutable.Stack
  * Use a regular expression (defined in the tsml as 'pattern')
  * with groups to extract data values from the file names.
  */
-class FileListAdapter7(tsml: Tsml) extends RegexAdapter(tsml){
+class StreamingFileListAdapter(tsml: Tsml) extends RegexAdapter(tsml){
   //TODO: add the file variable without defining it in the tsml? but opportunity to define max length
   //Note: Using the RegexAdapter with "()" around the file name pattern almost works.
   //      The matcher returns it first but we want the file variable to be last.
@@ -45,7 +45,7 @@ class FileListAdapter7(tsml: Tsml) extends RegexAdapter(tsml){
     val chunks = record.split(',')
     if (chunks.length != 2) throw new Exception("\"" + record + "\" does not fit expected record pattern \"file name, file size\"")
     val fileName = chunks(0)
-	val size = chunks(1)
+    val size = chunks(1)
     regex.findFirstMatchIn(fileName) match {
       case Some(m) => (m.subgroups :+ fileName) :+ size //add the file name and size
       case None => List[String]()
@@ -70,6 +70,8 @@ class FileListAdapter7(tsml: Tsml) extends RegexAdapter(tsml){
    */
   class FlatPathIterator(dir: Path) extends Iterator[Path] with Closeable {
     
+    private class StackItem (val stream: DirectoryStream[Path], val iter: Iterator[Path]) { }
+    
     /**
      * Private data structure to store DirectoryStreams and their iterators.
      * The 'top' of the stack is the deepest folder that we currently have
@@ -77,7 +79,7 @@ class FileListAdapter7(tsml: Tsml) extends RegexAdapter(tsml){
      * 
      * (We're performing a depth-first traversal of the folders)
      */
-    private val dirStack: Stack[Pair[DirectoryStream[Path], Iterator[Path]]] = new Stack()
+    private val dirStack: Stack[StackItem] = new Stack()
     pushAndInit(dir)
     
     /**
@@ -89,7 +91,7 @@ class FileListAdapter7(tsml: Tsml) extends RegexAdapter(tsml){
     private def getNextPath(): Option[Path] = {
       do {
         val top = dirStack.top
-        val iter = top._2
+        val iter = top.iter
         if (iter.hasNext) {
           return Some(iter.next)
         }
@@ -141,9 +143,10 @@ class FileListAdapter7(tsml: Tsml) extends RegexAdapter(tsml){
      * and its iterator onto dirStack
      */
     private def pushAndInit(path: Path) = {
-      val dirStream = Files.newDirectoryStream(dir)
+      val dirStream = Files.newDirectoryStream(path)
       val iter = dirStream.iterator()
-      dirStack.push((dirStream, iter))
+      
+      dirStack.push(new StackItem(dirStream, iter))
     }
     
     /**
@@ -152,11 +155,10 @@ class FileListAdapter7(tsml: Tsml) extends RegexAdapter(tsml){
      * Pop the top DirectoryStream/Iterator pair from dirStack and call
      * close() on the DirectoryStream. Return the popped pair.
      */
-    private def popAndClose(): Pair[DirectoryStream[Path], Iterator[Path]] = {
-      val pair = dirStack.pop()
-      val dirStream = pair._1
-      dirStream.close()
-      pair
+    private def popAndClose(): StackItem = {
+      val item = dirStack.pop()
+      item.stream.close()
+      item
     }
     
     /**
