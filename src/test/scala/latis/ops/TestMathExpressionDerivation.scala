@@ -215,4 +215,69 @@ class TestMathExpressionDerivation {
     assertEquals(5.0, ds.toSeq(0).getNumberData.doubleValue, 0.0)
   }
   
+  def assertEqualContents[T](s1: Seq[T], s2: Seq[T]) {
+    if (s1.length != s2.length) {
+      throw new AssertionError("Sequences did not have the same length")
+    }
+    
+    var i: Int = -1
+    for (i <- 0 until s1.length) {
+      if (s1(i) != s2(i)) {
+        throw new AssertionError(s"Sequences differed at index ${i}: expected ${s1(i)} but found ${s2(i)}")
+      }
+    }
+  }
+  
+  @Test
+  def split1 {
+    val inst = MathExpressionDerivation("")
+    val chunks = inst.split("(hello, world)")
+    assertEqualContents(List("(hello, world)"), chunks)
+  }
+  
+  @Test
+  def split2 {
+    val inst = MathExpressionDerivation("")
+    val chunks = inst.split("(hello, world),hello,world")
+    assertEqualContents(List("(hello, world)", "hello", "world"), chunks)
+  }
+  
+  @Test
+  def split3 {
+    val inst = MathExpressionDerivation("")
+    val chunks = inst.split("(hello, world),hello,world,")
+    assertEqualContents(List("(hello, world)", "hello", "world", ""), chunks)
+  }
+  
+  @Test
+  def split4 {
+    val inst = MathExpressionDerivation("")
+    val chunks = inst.split("(hello, world),(hello, world),(hello, world),hello,world,")
+    val expected = List(
+        "(hello, world)",
+        "(hello, world)",
+        "(hello, world)",
+        "hello",
+        "world",
+        ""
+    )
+    assertEqualContents(expected, chunks)
+  }
+  
+  @Test
+  def split5 {
+    val inst = MathExpressionDerivation("")
+    val chunks = inst.split(",(hello, world),(hello, world),(hello, world),hello,world,")
+    val expected = List(
+        "",
+        "(hello, world)",
+        "(hello, world)",
+        "(hello, world)",
+        "hello",
+        "world",
+        ""
+    )
+    assertEqualContents(expected, chunks)
+  }
+  
 }
