@@ -39,7 +39,7 @@ class StreamingFileListAdapter(tsml: Tsml) extends RegexAdapter(tsml){
   
   /**
    * Override to add the file name (i.e. the data "record") itself as a data value.
-   * Note, this assumes that the TSML has the file variable defined last.
+   * Note, this assumes that the TSML has the file and file size variables defined last.
    */
   override def extractValues(record: String) = {
     val chunks = record.split(',')
