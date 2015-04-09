@@ -21,3 +21,10 @@ class ByteBufferData(val buffer: ByteBuffer) extends Data {
    */
   def getByteBuffer = buffer.duplicate
 }
+
+object ByteBufferData {
+  
+  def apply(buffer: ByteBuffer): ByteBufferData = new ByteBufferData(buffer)
+  
+  def apply(bytes: Array[Byte]): ByteBufferData = new ByteBufferData(ByteBuffer.wrap(bytes))
+}
