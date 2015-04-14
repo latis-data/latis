@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="files">
+    
+    <adapter class="latis.reader.tsml.FileListAdapterNio"
+             pattern="spacecraft(\d+)/instrument(\d+)/mode(\d+)/day(\d+).txt"
+             location="/tmp/latis_file_test_large_nested" />
+             
+    <index/>
+    <integer name="spacecraftNum"/>
+    <integer name="instrumentNum"/>
+    <integer name="modeNum"/>
+    <integer name="dayNum"/>
+    
+    <text name="file" length="256"/>
+    <integer name="fileSize"/>
+  
+  </dataset>
+
+</tsml>

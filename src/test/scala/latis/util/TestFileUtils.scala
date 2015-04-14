@@ -21,7 +21,7 @@ class TestFileUtils {
     (new File(d2, "c")).createNewFile
     
     assertTrue(dir.exists)
-    assertEquals(3, FileUtils.listAllFiles(dir.getPath).length)
+    assertEquals(3, FileUtils.listAllFilesWithSize(dir.getPath).length)
     
     FileUtils.delete(dir)
     assertFalse(dir.exists)

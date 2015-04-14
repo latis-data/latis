@@ -1,18 +1,18 @@
 package latis.reader
 
-import org.junit._
-import Assert._
-import latis.reader.tsml.TsmlReader
-import latis.writer.AsciiWriter
-import latis.ops.filter.Selection
 import java.io.File
-import latis.util.FileUtils
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class TestFileListAdapter extends AdapterTests {
+import org.junit._
+import Assert._
 
-  def datasetName = "files"
+import latis.reader.tsml.TsmlReader
+import latis.util.FileUtils
+
+class TestFileListAdapterNio extends AdapterTests {
+  
+  def datasetName = "files_nio"
   
   @Test
   @Ignore // ignore this test by default, because it takes a lot of time & system resources to run
@@ -21,7 +21,7 @@ class TestFileListAdapter extends AdapterTests {
       // Note: this test intentionally uses the same dir methods as TestStreamingFileListAdapter
       // (that one was written first and then the test was ported here)
       val numFiles = TestStreamingFileListAdapter.populateLargeNestedTmpDir()
-      val ds = TsmlReader("datasets/test/files_large_nested.tsml").getDataset()
+      val ds = TsmlReader("datasets/test/files_nio_large_nested.tsml").getDataset()
       val data = ds.toStringMap
       assertEquals(numFiles, data("index").length)
     }
@@ -40,7 +40,7 @@ class TestFileListAdapter extends AdapterTests {
       // Note: this test intentionally uses the same dir methods as TestStreamingFileListAdapter
       // (that one was written first and then the test was ported here)
       val numFiles = TestStreamingFileListAdapter.populateLargeFlatTmpDir()
-      val ds = TsmlReader("datasets/test/files_large_flat.tsml").getDataset()
+      val ds = TsmlReader("datasets/test/files_nio_large_flat.tsml").getDataset()
       val data = ds.toStringMap
       assertEquals(numFiles, data("index").length)
     }
@@ -62,10 +62,10 @@ class TestFileListAdapter extends AdapterTests {
     assertEquals(4, data("fileSize")(0), 0)
     assertEquals(0, data("fileSize")(1), 0)
   }
+
 }
 
-object TestFileListAdapter {
-  
+object TestFileListAdapterNio {
   val tmpDir: File = {
     //val dir = new File(System.getProperty("java.io.tmpdir") + File.separator + "latis_file_test")
     //TODO: java.io.tmpdir ends with "/" on Mac, off by one when removing dir in FileUtils.list
