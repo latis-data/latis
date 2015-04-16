@@ -3,7 +3,7 @@
 
   <dataset name="files">
     
-    <adapter class="latis.reader.tsml.FileListAdapter"
+    <adapter class="latis.reader.tsml.StreamingFileListAdapter"
              pattern="Foo(\d{7})bar(\d)v(\d.\d)(\w).dat"
              location="/tmp/latis_file_test"
              todo_location="${java.io.tmpdir}/latis_file_test" />

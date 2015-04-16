@@ -2,13 +2,30 @@ package latis.reader.tsml
 
 import latis.reader.tsml.ml.Tsml
 import latis.util.FileUtils
+import latis.util.FileUtilsNio
 
 /**
  * Return a list of files as a Dataset.
  * Use a regular expression (defined in the tsml as 'pattern')
  * with groups to extract data values from the file names.
+ * 
+ * This class is almost identical to FileListAdapter. The only
+ * difference is that it uses FileUtilsNio instead of FileUtils
+ * (i.e. it uses the nio package from Java7). Since we're still
+ * on Java6 for the time-being, this class is experimental and
+ * should be kept separate from the normal FileListAdapter.
+ * At some point in the future when Java7 becomes standard
+ * enough that we can use it in prod, we should merge these
+ * two classes.
+ * 
+ * In my best tests, it appears that these methods are about
+ * 10% faster than the old FileListAdapter.
+ * 
+ * NOTE: This adapter loads all filenames into memory. Therefore,
+ * for file systems larger than about 1m files, you should use
+ * StreamingFileListAdapter instead.
  */
-class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
+class FileListAdapterNio(tsml: Tsml) extends RegexAdapter(tsml) {
   //TODO: add the file variable without defining it in the tsml? but opportunity to define max length
   //Note: Using the RegexAdapter with "()" around the file name pattern almost works.
   //      The matcher returns it first but we want the file variable to be last.
@@ -22,7 +39,7 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
     //  FileSystems.getDefault().getPathMatcher("regex:.*").matches(path)
     //TODO: support ftp...?
     val dir = getUrl.getPath //assumes a file URL 
-    FileUtils.listAllFilesWithSize(dir).iterator
+    FileUtilsNio.listAllFilesWithSize(dir).iterator
   }
   
   /**
