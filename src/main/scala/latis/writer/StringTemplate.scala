@@ -52,7 +52,10 @@ class StringTemplate(tmplStr: String) {
    */
   def applyValues(values: Map[String, String]): String = {
     parsedTemplate.
-      map(chunk => if (chunk.isLiteral) chunk.str else values.getOrElse(chunk.str, throw new Exception(s"""template context missing value: "$chunk.str""""))).
+      map(chunk => 
+        if (chunk.isLiteral) chunk.str
+        else values.getOrElse(chunk.str, throw new Exception(s"template context missing value: '${chunk.str}'"))
+      ).
       mkString
   }
 }
@@ -66,9 +69,11 @@ object StringTemplate {
   
   def fromResource(resourcePath: String): StringTemplate = StringTemplate(readResource(resourcePath))
   
-  def readResource(resourcePath: String): String = {
+  private def readResource(resourcePath: String): String = {
     val rsrc = getClass.getResource(if (resourcePath.startsWith("/")) resourcePath else "/" + resourcePath)
     val chunks = Source.fromURL(rsrc)
-    chunks.mkString
+    val result = chunks.mkString
+    chunks.close
+    result
   }
 }

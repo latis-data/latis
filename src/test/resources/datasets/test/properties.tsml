@@ -4,11 +4,13 @@
   <dataset name="properties">
     
     <adapter class="latis.reader.tsml.PropertiesAdapter"/>
-            
-    <text name="version" length="8"/>
-    <text name="user.dir" length="8"/>
-    <text name="log.file" length="64"/>
-  
+         
+    <tuple>   
+      <text name="version" length="8"/>
+      <text name="user.dir" length="8"/>
+      <text name="log.file" length="64"/>
+    </tuple>
+    
   </dataset>
   
 </tsml>

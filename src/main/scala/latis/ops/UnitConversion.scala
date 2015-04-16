@@ -46,7 +46,9 @@ class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operatio
     super.apply(dataset)
   }
 
-//TODO: not being applied to domain?
+  /**
+   * Override to apply the UnitConversion to the Scalars with the matching name.
+   */
   override def applyToScalar(scalar: Scalar): Option[Scalar] = {
     if (scalar.hasName(variableName)) {
       Some(converter.convert(scalar.asInstanceOf[Time])) //TODO: lost name, presumably all metedata

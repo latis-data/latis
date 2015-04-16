@@ -2,7 +2,6 @@ package latis.ops
 
 import scala.Array.canBuildFrom
 import scala.Option.option2Iterable
-
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Real
@@ -18,6 +17,7 @@ import latis.ops.math.BinaryMathOperation
 import latis.ops.math.MathOperation
 import latis.ops.math.ReductionMathOperation
 import latis.ops.math.UnaryMathOperation
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Adds a new Variable to a Dataset according to the inputed math expression.
@@ -147,13 +147,33 @@ class MathExpressionDerivation(str: String) extends Operation {
     val t = op match {
       case u: UnaryMathOperation => u(parseExpression(args))
       case b: BinaryMathOperation => ???
-      case r: ReductionMathOperation => r(args.split(',').map(parseExpression(_)))
+      case r: ReductionMathOperation => r(split(args).map(parseExpression(_)))
     }
     tempCount += 1
     ds = CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
     parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount))
   }
-    
+   
+  /**
+   * Split only on commas that are not within parentheses. 
+   */
+  def split(args: String): Seq[String] = {
+    val buffer = ArrayBuffer[String]()
+    var c1 = -1
+    var c2 = args.indexOf(',')
+    while(c2 != -1){
+      val sub = args.substring(c1+1, c2)
+      if(sub.count(_=='(')>sub.count(_==')')) c2 = args.indexOf(',',c2+1)
+      else {
+        buffer += sub
+        c1 = c2
+        c2 = args.indexOf(',',c2+1)
+      }
+    }
+    buffer += args.substring(c1+1)
+    buffer.toSeq
+  }
+  
   def applyBasicMath(str: String, i: Int) = {
     val op = str.substring(i, i+1)
     val lhs = parseExpression(str.substring(0,i))

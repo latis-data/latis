@@ -16,6 +16,7 @@ abstract class IterableData extends Data { //TODO: with Iterable[Data]? problem 
      val datas = iterator.toList
      val bb = ByteBuffer.allocate(datas.length * recordSize)
      for (d <- datas) bb.put(d.getByteBuffer)
+     bb.flip //set limit and return position to 0
      bb
   }
   

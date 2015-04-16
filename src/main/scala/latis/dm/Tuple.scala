@@ -43,3 +43,26 @@ object Tuple {
    */
   def unapply(tup: Tuple): Option[Seq[Variable]] = Some(tup.getVariables)
 }
+
+/**
+ * Utility object for use with pattern matching. You can pull
+ * individual elements out of a Tuple like this:
+ * 
+ * x match {
+ *   TupleMatch(t: Text, f: Function) => ???
+ *   _ => ???
+ * }
+ * 
+ * Note: You will have to "import latis.dm.TupleMatch" to be
+ * able to see this.
+ */
+object TupleMatch {
+  /*
+   * This TupleMatch.unapplySeq has exactly the same definition and
+   * return type as Tuple.unapply. The language lets you
+   * do different things with unapplySeq vs unapply, but gets
+   * confused when they use the same return types, so I had to
+   * pull this one out.
+   */
+  def unapplySeq(tup: Tuple): Option[Seq[Variable]] = Some(tup.getVariables)
+}

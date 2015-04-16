@@ -24,18 +24,13 @@ object FileUtils {
   def getTmpFile: File = File.createTempFile("latis", null, getTmpDir)
   //TODO: use deleteOnExit?
 
-  
-  /**
-   * Get a list of all the files in the given directory and nested directories.
-   * Paths with be relative to the given directory.
-   */
-  def listAllFiles(dir: String): Seq[String] = {  
+  def listAllFilesWithSize(dir: String): Seq[String] = {  
     //TODO: performance concern, especially since we are sorting
     //TODO: consider new file io in Java7
     
     def accumulateFiles(file: File, buffer: ArrayBuffer[String]) {
-      if (file.isDirectory()) file.listFiles().map(accumulateFiles(_, buffer))
-      else buffer += file.getPath.drop(dir.length+1)
+      if (file.isDirectory()) file.listFiles().foreach(accumulateFiles(_, buffer))
+      else buffer += file.getPath.drop(dir.length+1)+","+file.length
     }
     
     val buffer = ArrayBuffer[String]()

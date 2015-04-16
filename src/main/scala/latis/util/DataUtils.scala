@@ -23,6 +23,7 @@ import latis.data.seq.DataSeq
 import scala.collection.mutable.ArrayBuffer
 import latis.data.IterableData
 import latis.data.value.StringValue
+import java.util.Arrays
 
 /*
  * Use Cases
@@ -424,8 +425,7 @@ object DataUtils {
       case t: Text => {
         val sb = new StringBuilder
         for (i <- 0 until t.length) sb append bb.getChar
-        //Time(template.getMetadata, sb.toString)
-        template(Data(sb.toString))
+        v(Data(sb.toString)) //make copy of this Time variable but with new Data
       }
     }
 
@@ -434,9 +434,10 @@ object DataUtils {
     case v: Integer => Integer(template.getMetadata, bb.getLong)
 
     case v: Text => {
-      val cs = new Array[Char](v.length)
+      val n = v.length
+      val cs = new Array[Char](n)
       bb.asCharBuffer.get(cs)
-      bb.position(bb.position + v.length * 2) //advance position in underlying buffer
+      bb.position(bb.position + n * 2) //advance position in underlying buffer
       //val s = (0 until v.length).map(bb.getChar).mkString
       //TODO: why can't we just get chars from the bb?
       val s = new String(cs)
@@ -515,4 +516,58 @@ object DataUtils {
     case _: Number => value.toDouble
     case _ => Double.NaN
   }
+  
+  /**
+   * Since Binary Variables can have variable lengths but we currently expect
+   * fixed length Data (akin to Text), we need to be able to mark the 
+   * end of the useful bytes and drop the padding. We can't simply use 0b since
+   * it may occur in valid data. Instead, we use a special sequence of 8 bytes
+   * to serve as a marker.
+   * If the marker does not exist, return the entire array.
+   */
+  def trimBytes(bytes: Array[Byte]): Array[Byte] = {
+    bytes.indexOfSlice(nullMark) match {
+      case -1 => bytes
+      case index: Int => bytes.take(index)
+    }
+  }
+  
+  /**
+   * Sequence of 8 bytes to use to end a section of useful bytes in a byte array.
+   */
+  val nullMark: Array[Byte] = "nullMark".getBytes
+  //110, 117, 108, 108, 77, 97, 114, 107
+  
+  /**
+   * Make sure the bytes contained in the given ByteBuffer have a termination mark.
+   * The mark will be added after the 'limit' position. The size of the array might
+   * grow to accommodate the 8 byte mark, so don't do this to data that is already
+   * part of a Binary variable without updating the 'length' metadata.
+   */
+  def terminateBytes(buffer: ByteBuffer): ByteBuffer = {
+    val limit = buffer.limit
+    val capacity = buffer.capacity
+
+    val bytes = buffer.array //actual backing array, mutable
+    
+    if (bytes.lastIndexOfSlice(nullMark) >= 0) {
+      //already has mark, no need to do anything
+      buffer
+    } else {
+      //need to add mark
+      if (capacity - limit < 8) {
+        //need to increase size of array to accommodate 8 byte mark
+        val bb = ByteBuffer.allocate(limit + 8)
+        bb.put(bytes, 0, limit) //add original valid bytes
+        bb.put(nullMark) //add termination mark
+        bb.flip.asInstanceOf[ByteBuffer]  //set limit and rewind
+      } else {
+        //we have enough room to add the mark
+        buffer.position(limit) //set the position to the end of the valid data
+        buffer.put(nullMark) //add termination mark
+        buffer.flip.asInstanceOf[ByteBuffer]  //set limit and rewind
+      }
+    } 
+  }
+  
 }

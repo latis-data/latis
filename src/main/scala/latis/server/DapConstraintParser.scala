@@ -1,14 +1,15 @@
 package latis.server
 
+import scala.collection.Seq
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
+
+import javax.xml.ws.http.HTTPException
 import latis.ops.Operation
 import latis.ops.Projection
 import latis.ops.filter.Selection
 import latis.util.RegEx.OPERATION
 import latis.util.RegEx.SELECTION
-
-import scala.collection.Seq
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 class DapConstraintParser {
   //TODO: consider a parser combinator
@@ -42,10 +43,13 @@ class DapConstraintParser {
     //TODO: Option? error handling
     expression match {
       case SELECTION.r(name, op, value) => Selection(name, op, value)
-      case OPERATION.r(name, args) => args match {
+      case OPERATION.r(name, args) => (name,args) match {
+        //for testing handling of http errors
+        case ("httpError", s: String) => throw new HTTPException(s.toInt) 
+        
+        case (_, s: String) => Operation(name, s.split(","))
         //args will be null if there are none, e.g. first()
-        case s: String => Operation(name, s.split(","))
-        case null => Operation(name)
+        case (_, null) => Operation(name)
       }
       case _ => throw new UnsupportedOperationException("Failed to parse expression: " + expression)
       //TODO: log and return None? probably should return error

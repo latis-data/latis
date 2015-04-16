@@ -1,35 +1,11 @@
 package latis.reader.tsml
 
-import latis.data.Data
-import latis.data.IterableData
-import latis.dm.Binary
-import latis.dm.Index
-import latis.dm.Integer
-import latis.dm.Real
-import latis.dm.Sample
-import latis.dm.Scalar
-import latis.dm.Text
-import latis.dm.Variable
-import latis.ops.Operation
-import latis.ops.Projection
-import latis.ops.filter.FirstFilter
-import latis.ops.filter.LastFilter
-import latis.ops.filter.Selection
-import latis.reader.tsml.ml.Tsml
-import latis.time.Time
-import latis.time.TimeFormat
-import latis.time.TimeScale
-import latis.util.PeekIterator
-import latis.util.RegEx
-import latis.util.RegEx.SELECTION
-import latis.util.StringUtils
-import java.nio.ByteBuffer
 import java.sql.Connection
+import java.sql.Statement
 import java.sql.DriverManager
 import java.sql.ResultSet
 import java.util.Calendar
 import java.util.TimeZone
-import scala.Array.fallbackCanBuildFrom
 import scala.Option.option2Iterable
 import scala.collection.Map
 import scala.collection.Seq
@@ -37,11 +13,31 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import com.typesafe.scalalogging.slf4j.Logging
 import javax.naming.InitialContext
-import javax.sql.DataSource
-import java.sql.Statement
-import latis.ops.RenameOperation
-import latis.metadata.Metadata
 import javax.naming.NameNotFoundException
+import javax.sql.DataSource
+import latis.data.Data
+import latis.dm.Binary
+import latis.dm.Index
+import latis.dm.Integer
+import latis.dm.Real
+import latis.dm.Scalar
+import latis.dm.Text
+import latis.dm.Variable
+import latis.metadata.Metadata
+import latis.ops.Operation
+import latis.ops.Projection
+import latis.ops.RenameOperation
+import latis.ops.filter.FirstFilter
+import latis.ops.filter.LastFilter
+import latis.ops.filter.Selection
+import latis.reader.tsml.ml.Tsml
+import latis.time.Time
+import latis.time.TimeFormat
+import latis.time.TimeScale
+import latis.util.StringUtils
+import scala.collection.immutable.StringOps
+import java.nio.ByteBuffer
+import latis.util.DataUtils
 
 /* 
  * TODO: release connection as soon as possible?
@@ -120,7 +116,26 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   protected val parseBinary: PartialFunction[(Variable, Int), (String, Data)] = {
     case (v: Binary, _) => {
       val name = getVariableName(v)
-      (name, Data(resultSet.getBytes(name)))
+      var bytes = resultSet.getBytes(name)
+      val max_length = v.getSize //will look for "length" in metadata, error if not defined
+      if (bytes.length > max_length) {
+        val msg = s"JdbcAdapter found ${bytes.length} bytes which is longer than the max size: ${max_length}. The data will be truncated."
+        logger.warn(msg)
+        bytes = bytes.take(max_length) //truncate so we don't get buffer overflow
+      }
+      
+      //allocate a ByteBuffer for the max length
+      val bb = ByteBuffer.allocate(max_length)
+      //add the data
+      bb.put(bytes)
+      //add termination mark
+      bb.put(DataUtils.nullMark)
+      
+      //Set the "limit" to the end of the data and rewind the position to the start.
+      //Note, the capacity will remain at the max length.
+      bb.flip
+      
+      (name, Data(bb))
     }
   }
 
@@ -450,10 +465,32 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * Database connection from JNDI or JDBC properties.
    */
   private lazy val connection: Connection = {
-    //TODO: use 'location' uri for jndi with 'java' (e.g. java:comp/env/jdbc/sorce_l1a) scheme, but glassfish doesn't use that form
-    val con = getProperty("jndi") match {
-      case Some(jndi) => getConnectionViaJndi(jndi)
-      case None => getConnectionViaJdbc
+    
+    val startsWithJavaRegex = "^(java:.+)".r
+    val startsWithJdbcRegex = "^jdbc:(.+)".r
+    
+    // location is the current standard for both jndi and jdbc connections,
+    // but we still support the jndi attribute for historical reasons.
+    // See LATIS-30 for more details
+    val con = (getProperty("location"), getProperty("jndi")) match {
+      
+      // if 'location' exists and starts with "java:", use jndi
+      case (Some(startsWithJavaRegex(location)), _) => getConnectionViaJndi(location)
+      
+      // if 'location' exists and starts with 'jdbc:'
+      case (Some(startsWithJdbcRegex(_)), _) => getConnectionViaJdbc
+      
+      // if 'jndi' exists, use jndi
+      case (_, Some(jndiStr)) => {
+        logger.warn("Use location='java:/comp/env...' instead of jndi='java:/comp/env...'")
+        getConnectionViaJndi(jndiStr)
+      }
+      
+      // If we get here, we probably have a malformed tsml file. No conforming location attr was
+      // found, and no jndi attr was found at all.
+      case _ => throw new RuntimeException(
+        "Unable to find or parse tsml location attribute: location must exist and start with 'java:' (for JNDI) or 'jdbc:' (for JDBC)"
+      )
     }
 
     hasConnection = true //will still be false if getting connection fails

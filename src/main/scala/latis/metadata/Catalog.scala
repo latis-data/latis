@@ -10,15 +10,26 @@ import java.io.File
  */
 object Catalog {
   
+  private lazy val dsdir: String = LatisProperties.getOrElse("dataset.dir", "datasets")
+  
+  private def toUrl(path: String): URL = {
+    if (path.contains(":")) new URL(path)
+    else if(path.startsWith(File.separator)) new URL(s"file:$path")
+    else new URL("file:" + LatisProperties.resolvePath(path))
+  }
+  
+  private def getExtension(f: File): String = {
+    val nameChunks = f.getName().split('.')
+    if (nameChunks.length > 1) {
+      nameChunks.last
+    }
+    else {
+      ""
+    }
+  }
+  
   def getTsmlUrl(dataset: String): URL = {
-    val dsdir = LatisProperties.getOrElse("dataset.dir", "datasets")
     val tsml = dsdir + File.separator + dataset + ".tsml"
-    
-    //If tsml path has URL scheme, assume we have a valid url  //TODO: use URI api?
-    if (tsml.contains(":")) new URL(tsml)
-    //or absolute file path, prepend 'file' scheme
-    else if (tsml.startsWith(File.separator)) new URL("file:" + tsml)
-    //otherwise try to resolve relative path
-    else new URL("file:" + LatisProperties.resolvePath(tsml))
+    toUrl(tsml)
   }
 }
