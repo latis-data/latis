@@ -547,10 +547,10 @@ object DataUtils {
   def terminateBytes(buffer: ByteBuffer): ByteBuffer = {
     val limit = buffer.limit
     val capacity = buffer.capacity
-    
+
     val bytes = buffer.array //actual backing array, mutable
     
-    if (bytes.indexOfSlice(nullMark) >= 0) {
+    if (bytes.lastIndexOfSlice(nullMark) >= 0) {
       //already has mark, no need to do anything
       buffer
     } else {
