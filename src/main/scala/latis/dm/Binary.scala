@@ -26,7 +26,7 @@ object Binary {
     //define length in metadata
     //Note: assume bytes already have termination marker
     //TODO: check before assuming, but further slow down
-    val length = buffer.capacity - 8 //length is the maximum number of valid bytes (not counting the termination marker)
+    val length = buffer.capacity - DataUtils.nullMark.length //length is the maximum number of valid bytes (not counting the termination marker)
     val md = Metadata(Map("length" -> length.toString))
     
     new AbstractScalar(md, Data(buffer)) with Binary
