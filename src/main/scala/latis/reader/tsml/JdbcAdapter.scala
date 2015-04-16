@@ -36,6 +36,8 @@ import latis.time.TimeFormat
 import latis.time.TimeScale
 import latis.util.StringUtils
 import scala.collection.immutable.StringOps
+import java.nio.ByteBuffer
+import latis.util.DataUtils
 
 /* 
  * TODO: release connection as soon as possible?
@@ -114,9 +116,26 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   protected val parseBinary: PartialFunction[(Variable, Int), (String, Data)] = {
     case (v: Binary, _) => {
       val name = getVariableName(v)
-      val bytes = resultSet.getBytes(name)
-      if (bytes.length != v.getSize) logger.warn("JdbcAdapter found " + bytes.length + " bytes but expected " + v.getSize)
-      (name, Data(bytes.take(v.getSize))) //truncate so we don't get buffer overflow
+      var bytes = resultSet.getBytes(name)
+      val max_length = v.getSize //will look for "length" in metadata, error if not defined
+      if (bytes.length > max_length) {
+        val msg = s"JdbcAdapter found ${bytes.length} bytes which is longer than the max size: ${max_length}. The data will be truncated."
+        logger.warn(msg)
+        bytes = bytes.take(max_length) //truncate so we don't get buffer overflow
+      }
+      
+      //allocate a ByteBuffer for the max length
+      val bb = ByteBuffer.allocate(max_length)
+      //add the data
+      bb.put(bytes)
+      //add termination mark
+      bb.put(DataUtils.nullMark)
+      
+      //Set the "limit" to the end of the data and rewind the position to the start.
+      //Note, the capacity will remain at the max length.
+      bb.flip
+      
+      (name, Data(bb))
     }
   }
 

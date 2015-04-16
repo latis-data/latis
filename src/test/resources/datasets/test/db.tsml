@@ -8,7 +8,7 @@
              user="" password=""
              table="test"/>
     
-    <time name="myTime" type="text" length="23"/>
+    <time name="myTime" type="text"/>
     <integer name="myInt"/>
     <real name="myReal"/>
     <text name="myText"/>
