@@ -1,5 +1,8 @@
 package latis.util
 
+import latis.dm.Text
+import latis.dm.Variable
+
 /**
  * Utility methods for manipulating Strings.
  */
@@ -41,6 +44,14 @@ object StringUtils {
     case l: Int if (l < length) => s.padTo(length, ' ')
     case l: Int if (l > length) => s.substring(0, length)
     //otherwise, the size is just right
+    case _ => s
+  }
+  /**
+   * Return the given string padded or truncated to the length of the given Variable.
+   * If the Variable is not Text, return the original string.
+   */
+  def padOrTruncate(s: String, template: Variable): String = template match {
+    case t: Text => padOrTruncate(s, t.length)
     case _ => s
   }
   
