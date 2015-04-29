@@ -20,53 +20,15 @@ import latis.ops.Reduction
 import latis.ops.Memoization
 
 /**
- * The main container for a dataset. It is a special type of Tuple
- * that encapsulates everything about the dataset. Most operations
- * are performed on Datasets and return new Datasets.
+ * The main abstraction for a dataset that encapsulates everything about the dataset. 
+ * A Dataset should (must?) contain a single top level Variable and optionally Metadata.
  */
-//class Dataset(variables: immutable.Seq[Variable], metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
-//  extends AbstractTuple(variables, metadata, data) with BasicMath {
 class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends BasicMath {
-  /*
-   * TODO: Dataset that is not a Tuple
-   * Mixed concerns.
-   * Variable must live in context of a Dataset, monadic
-   * Dataset as "special kind of" Variable leads to exceptions to the rule
-   * 
-   * what about metadata?
-   * should it belong to the top variable?
-   * global attributes: history,...
-   * seems like we need something at the Dataset level
-   * nc distinguishes between global and variable attributes
-   * duplicate metadata logic?
-   * Metadata as mixin?
-   * We do have a VariableMetadata class, why not DatasetMetadata?
-   * consider how this maps to the dataset ontology
-   * 
-   * What about metadata modeled as a Variable?
-   *   instead of special kind of data
-   * 
-   * Is there a use case for a Dataset with multiple vars?
-   * could always wrap in a Tuple
-   * 
-   * idiomatic operation on Function
-   * no need to iterate over multiple vars, only one
-   * 
-   * Aggregation currently makes a Dataset containing multiple Datasets
-   * should we just make this a Tuple and have aggregate combine the tuple elements?
-   * or should agg be a binary+ operation with arg for each dataset?
-   * Operations impl apply(dataset):Dataset
-   * should agg be something other than operation?
-   * construct agg with other datasets?
-   * 
-   * +consider how best to deal with empty dataset
-   * variable is null
-   * should we pattern match on Dataset(v) vs empty?
-   */
+  //TODO: should we have a special class of DatasetMetadata? akin to NetCDF global attributes
   
   val getMetadata = metadata
   
-  //TODO: consider if dataset must have name
+  //TODO: consider if dataset must have name, generate a unique identifier?
   def getName = metadata.getOrElse("name", "")
   
   def isEmpty = variable == null
@@ -81,21 +43,6 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   }
   
   def findVariableByName(name: String): Option[Variable] = if(isEmpty) None else variable.findVariableByName(name)
-  
-  /**
-   * Return the first top level Function in this Dataset.
-   */
-  //def findFunction: Option[Function] = findFunction(this)
-  
-  //TODO: put in Variable?
-//  private def findFunction(variable: Variable): Option[Function] = variable match {
-//    case _: Scalar => None
-//    case Tuple(vars) => {
-//      val fs = vars.flatMap(findFunction(_))
-//      if (fs.nonEmpty) Some(fs.head) else None
-//    }
-//    case f: Function => Some(f)
-//  }
   
   
   //convenience methods for transforming Dataset
@@ -141,7 +88,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
    */
   def unwrap: Variable = variable
   //TODO: better name? getVariable? head? other monadic ways? use unapply? expose variable?
-  
+  //See how far we can get with pattern matching: Dataset(v)
   
   override def equals(that: Any): Boolean = that match {
     case thatds: Dataset => (this.getMetadata == thatds.getMetadata) && (this.unwrap == thatds.unwrap)
@@ -166,11 +113,6 @@ object Dataset {
   
   val empty = Dataset()
   
-  //def apply(vars: Seq[Variable]): Dataset = new Dataset(vars.toIndexedSeq)
-  
-  //def apply(vars: Seq[Variable], md: Metadata): Dataset = new Dataset(vars.toIndexedSeq, metadata = md)
-  
-  //def apply(v: Variable, vars: Variable*): Dataset = Dataset(v +: vars)
   
   //extract the contained Variable
   def unapply(dataset: Dataset): Option[Variable] = {
