@@ -3,14 +3,12 @@ package latis.reader.tsml
 import java.io.File
 import java.net.URI
 import java.net.URL
-
 import scala.Option.option2Iterable
 import scala.collection.JavaConverters.collectionAsScalaIterableConverter
 import scala.collection.Map
 import scala.collection.Seq
 import scala.collection.immutable
 import scala.collection.mutable
-
 import latis.data.Data
 import latis.data.seq.DataSeq
 import latis.dm.Dataset
@@ -21,7 +19,6 @@ import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.metadata.Metadata
-import latis.ops.MathExpressionDerivation
 import latis.ops.Operation
 import latis.ops.Projection
 import latis.ops.RenameOperation
@@ -38,6 +35,7 @@ import latis.util.DataUtils
 import net.sf.ehcache.Cache
 import net.sf.ehcache.CacheManager
 import net.sf.ehcache.Element
+import latis.ops.MathExpressionDerivation
 
 
 /**
@@ -94,7 +92,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * Don't include "index" which is just a placeholder for an otherwise undefined domain.
    * The index value does not appear in the original data source. Otherwise, model it as an Integer.
    */
-  private lazy val origScalars = origDataset.toSeq.filterNot(_.isInstanceOf[Index])
+  private lazy val origScalars = getOrigDataset.unwrap.toSeq.filterNot(_.isInstanceOf[Index])
   def getOrigScalars = origScalars
   
   /**
@@ -108,8 +106,10 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   protected def makeOrigDataset: Dataset = {
     val md = makeMetadata(tsml.dataset)
-    val vars = tsml.dataset.getVariableMl.flatMap(makeOrigVariable(_))
-    Dataset(vars, md) 
+    makeOrigVariable(tsml.dataset.getVariableMl) match {
+      case Some(v) => Dataset(v, md)
+      case None => throw new Error("No variables made for original dataset.")
+    }
   } 
   
   var timeUnused = true //variable used to prevent multiple time aliases
@@ -219,8 +219,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * This will be triggered the the client requests the Dataset.
    */
   protected def makeDataset(ds: Dataset): Dataset = {
-    val vars = ds.getVariables.flatMap(makeVariable(_))
-    Dataset(vars, ds.getMetadata) 
+    makeVariable(ds.unwrap) match {
+      case Some(v) => Dataset(v, ds.getMetadata)
+      case None => throw new Error("No variables created for dataset")
+    }
+    
   } 
   
   /**
@@ -290,7 +293,12 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * to the Dataset by the TsmlAdapter class.
    * The default behavior is for the Adapter subclass to handle no operations.
    */
-  def handleOperation(op: Operation): Boolean = false 
+  def handleOperation(op: Operation): Boolean = op match {
+    case p @ Projection(names) => projectedVariableNames ++= names; false 
+    case _ => false
+  }
+  
+  private var projectedVariableNames = Seq[String]()
   
   //---- Caching --------------------------------------------------------------
   //TODO: consider mutability issues
@@ -386,7 +394,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
      * foo(bar) = <?foo bar?> ?
      */
     
-    val projections = tsml.getProcessingInstructions("project").map(Projection(_)) 
+    val projectedNames = tsml.getProcessingInstructions("project")
+    val projections = projectedNames.map(Projection(_)) 
     val selections  = tsml.getProcessingInstructions("select").map(Selection(_))
     //Unit conversions: "convert vname units"
     val conversions = tsml.getProcessingInstructions("convert").map(s => {
@@ -397,8 +406,16 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     })
     
     val renames = tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
-    val derivations = tsml.getProcessingInstructions("derived").map(MathExpressionDerivation(_))
-    
+    val derivedFields = tsml.getProcessingInstructions("derived")
+    val derivations = if((projectedVariableNames ++ projections).isEmpty) derivedFields.map(MathExpressionDerivation(_)) 
+      else {
+        val allProjected = projectedVariableNames ++ projectedNames.flatMap(_.split(','))
+        val filteredDerivedFields = derivedFields.filter(f => {
+          val searchString = f.substring(0, f.indexOf('=')).trim
+          allProjected.contains(searchString)
+        })
+        filteredDerivedFields.map(MathExpressionDerivation(_))
+      }
     projections ++ selections ++ conversions ++ renames ++ derivations
   }
   

@@ -3,6 +3,7 @@ package latis.ops.agg
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Sample
+import latis.dm.Tuple
 
 /**
  * Assumes aggregates have the same type and domain sets
@@ -23,8 +24,7 @@ class TileAggregation extends Aggregation {
     //assume one-dimension (e.g. time), for now
     //assume each dataset contains only one top level variable, the Function
     
-    val datasets = dataset.getVariables
-    val functions = datasets.map(_.asInstanceOf[Dataset].getVariables.head.asInstanceOf[Function])
+    val functions = getFunctions(dataset)
     val iterator = functions.foldLeft(Iterator[Sample]())(_ ++ _.iterator)
     
     //assume same type for each Function
@@ -34,7 +34,7 @@ class TileAggregation extends Aggregation {
     
     //TODO: munge metadata
     
-    Dataset(f, dataset.metadata)
+    Dataset(f, dataset.getMetadata)
   }
   
 }

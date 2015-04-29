@@ -18,7 +18,7 @@ class HtmlWriter extends TextWriter {
    */
   override def makeHeader(dataset: Dataset): String = {
     val sb = new StringBuilder
-    val name = dataset.getMetadata("long_name").getOrElse(dataset.getName)
+    val name = dataset.getMetadata.getOrElse("long_name", dataset.getName)
     sb append "<!DOCTYPE html>"
     sb append "\n<html lang=\"en-us\">"
     sb append "\n<head>"
@@ -42,7 +42,7 @@ class HtmlWriter extends TextWriter {
    * and a query form for selection of each variable.
    */
   def makeBody(dataset: Dataset): String = {
-    val name = dataset.getMetadata("long_name").getOrElse(dataset.getName)
+    val name = dataset.getMetadata.getOrElse("long_name", dataset.getName)
     val sb = new StringBuilder
     sb append "\n<body>"
     sb append s"\n<h1>$name</h1>"
@@ -56,37 +56,41 @@ class HtmlWriter extends TextWriter {
     sb append "\n</html>"
     sb.toString
   }
-  
-//  /**
-//   * Uses the InfoWriter to get a dataset description.
-//   */
-//  def makeInfo(dataset: Dataset): String = {
-//    val sb = new StringBuilder
-//    val w = new InfoWriter
-//    val info = w.getInfo(dataset).toStringMap
-//    sb append "\n<blockquote>"
-//    sb append "\n<div class=\"info\">\n"
-//    sb append w.makeDesc(info)
-//    sb append "\n</div>"
-//    sb append "\n</blockquote>"
-//    sb.toString
-//  }
-  
+
+  //  /**
+  //   * Uses the InfoWriter to get a dataset description.
+  //   */
+  //  def makeInfo(dataset: Dataset): String = {
+  //    val sb = new StringBuilder
+  //    val w = new InfoWriter
+  //    val info = w.getInfo(dataset).toStringMap
+  //    sb append "\n<blockquote>"
+  //    sb append "\n<div class=\"info\">\n"
+  //    sb append w.makeDesc(info)
+  //    sb append "\n</div>"
+  //    sb append "\n</blockquote>"
+  //    sb.toString
+  //  }
+
   def makeDygraph(dataset: Dataset): String = {
-    val name = dataset.getName
-    val function = dataset.findFunction.get
     val sb = new StringBuilder
-    sb append "\n<div id=\"graphdiv\"></div>"
-    sb append "\n<script type=\"text/javascript\">"
-    sb append "\ng = new Dygraph("
-    sb append "\ndocument.getElementById(\"graphdiv\"),"
-    sb append "\n\"" + name + ".csv\","
-    sb append "\n{"
-    sb append "\ndelimiter: ',',"
-    sb append "\nxlabel: '" + function.getDomain.getName + "',"
-    sb append "\nylabel: '" + function.getRange.getName + "',"
-    sb append "\n});"
-    sb append "\n</script>"
+    val name = dataset.getName
+    dataset.unwrap match {
+      case f: Function => {
+        sb append "\n<div id=\"graphdiv\"></div>"
+        sb append "\n<script type=\"text/javascript\">"
+        sb append "\ng = new Dygraph("
+        sb append "\ndocument.getElementById(\"graphdiv\"),"
+        sb append "\n\"" + name + ".csv\","
+        sb append "\n{"
+        sb append "\ndelimiter: ',',"
+        sb append "\nxlabel: '" + f.getDomain.getName + "',"
+        sb append "\nylabel: '" + f.getRange.getName + "',"
+        sb append "\n});"
+        sb append "\n</script>"
+      }
+      case _ => //no plot if no function
+    }
     sb.result
   }
   
@@ -99,7 +103,7 @@ class HtmlWriter extends TextWriter {
     sb append "\n<div class=\"dds\">"
     sb append "\n<h2>Dataset Descriptor Structure</h2>"
     sb append "<blockquote>"
-    sb append w.makeHeader(dataset)+dataset.getVariables.map(w.varToString(_)).mkString("")+w.makeFooter(dataset)
+    sb append w.makeHeader(dataset) + w.varToString(dataset.unwrap).mkString("")+w.makeFooter(dataset)
     sb append "\n</blockquote>"
     sb append "\n</div>"
     sb.toString
@@ -114,7 +118,7 @@ class HtmlWriter extends TextWriter {
     sb append "\n<div class=\"das\">"
     sb append "\n<h2>Dataset Attribute Structure</h2>"
     sb append "<blockquote>"
-    sb append w.makeHeader(dataset)+dataset.getVariables.map(w.varToString(_)).mkString("")+w.makeFooter(dataset)
+    sb append w.makeHeader(dataset) + w.varToString(dataset.unwrap).mkString("")+w.makeFooter(dataset)
     sb append "\n</blockquote>"
     sb append "\n</div>"
     sb.toString
@@ -126,7 +130,7 @@ class HtmlWriter extends TextWriter {
   def queryForms(dataset: Dataset) = {
     val sb = new StringBuilder
     sb append "\n<h2>Data Set Query Form</h2>"
-    for(v <- dataset.getVariables) sb append makeForm(v)
+    sb append makeForm(dataset.unwrap)
     sb append "\nSelect Output Type: <select id=\"output\">"
     val suffix = List("asc", "bin", "csv", "das", "dds", "dods", "html", "info", "json", "jsond", "meta", "png", "txt")
     for(suf <- suffix) sb append "<option value=\"" + suf + "\">" + suf + "</option><br/>"

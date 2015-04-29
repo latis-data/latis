@@ -105,7 +105,7 @@ class TestStreamingFileListAdapter { //can't extend AdapterTests because Samples
   def project_diff_order {
     val ops = List(Projection("myTime, myReal, myInt"))
     val ds = getDataset(ops)
-    assertEquals("myInt", ds.toSeq(2).getName)
+    assertEquals("myInt", ds.unwrap.toSeq(2).getName)
   }
   
   @Test

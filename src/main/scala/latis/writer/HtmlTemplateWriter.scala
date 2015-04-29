@@ -19,14 +19,13 @@ class HtmlTemplateWriter extends TextWriter {
   override def mimeType: String = getProperty("mimeType", "text/html")
   
   override def write(dataset: Dataset) {
-
     // Figure out some basic info about the structure of the function in this dataset (if
     // there is one). For now, we really only want to graph functions of a very simple
     // format: a single scalar domain variable, and one or more scalar range variables.
     // Functions inside functions and other complicated things are not supported (we'll
     // just hide the chart).
-    val (domainName: String, rangeVars: Seq[String], graphEnabled: Boolean) = dataset.findFunction match {
-      case Some(function) => {
+    val (domainName: String, rangeVars: Seq[String], graphEnabled: Boolean) = dataset match {
+      case Dataset(function: Function) => {
         
         // Attempt to get name of single scalar domain variable
         val domainName: String = function.getDomain match {
@@ -54,16 +53,17 @@ class HtmlTemplateWriter extends TextWriter {
         (domainName, rangeNames, graphEnabled)
       }
       
-      // If we didn't even find a function, return some boring default values
-      case None => ("", Seq[String](), false)
+      // top level Variable is not a function, return some boring default values
+      case _ => ("", Seq[String](), false)
     }
+
     val defaultRangeName = rangeVars.headOption.getOrElse("")
     
     val values: Map[String, String] = Map(
-        "long-name" -> dataset.getMetadata("long_name").getOrElse(dataset.getName),
+        "long-name" -> dataset.getMetadata.getOrElse("long_name",dataset.getName),
+        "name" -> dataset.getName,
         "domain" -> domainName,
         "defaultRange" -> defaultRangeName,
-        "graph-enabled" -> (if (graphEnabled) "true" else "false"),
         "dds" -> makeDds(dataset),
         "das" -> makeDas(dataset),
         "form-items" -> makeFormItems(dataset),
@@ -77,16 +77,16 @@ class HtmlTemplateWriter extends TextWriter {
   
   private def makeDds(dataset: Dataset): String = {
     val w = new DdsWriter
-    w.makeHeader(dataset)+dataset.getVariables.map(w.varToString(_)).mkString("")+w.makeFooter(dataset)
+    w.makeHeader(dataset) + w.varToString(dataset.unwrap) + w.makeFooter(dataset)
   }
   
   private def makeDas(dataset: Dataset): String = {
     val w = new DasWriter
-    w.makeHeader(dataset)+dataset.getVariables.map(w.varToString(_)).mkString("")+w.makeFooter(dataset)
+    w.makeHeader(dataset) + w.varToString(dataset.unwrap) + w.makeFooter(dataset)
   }
   
   private def makeFormItems(dataset: Dataset): String = {
-    dataset.getVariables.map(makeFormItem(_)).mkString
+    makeFormItem(dataset.unwrap)
   }
   
   private def makeFormItem(v: Variable): String = v match {

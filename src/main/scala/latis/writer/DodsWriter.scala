@@ -24,7 +24,7 @@ class DodsWriter extends BinaryWriter {
 
   override def write(dataset: Dataset) {
     writeHeader(dataset)
-    dataset.getVariables.map(writeVariable(_))
+    writeVariable(dataset.unwrap)
     writer.flush()
   }
   
@@ -33,7 +33,7 @@ class DodsWriter extends BinaryWriter {
    */
   def writeHeader(dataset: Dataset) = {
     val w = new DdsWriter()
-    val s = w.makeHeader(dataset) + dataset.getVariables.map(w.varToString(_)).mkString("") + w.makeFooter(dataset) + "\nData:\n"
+    val s = w.makeHeader(dataset) + w.varToString(dataset.unwrap).mkString("") + w.makeFooter(dataset) + "\nData:\n"
     writer.write(s.getBytes)    
   }
 

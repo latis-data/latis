@@ -15,6 +15,7 @@ import latis.dm.Text
 import latis.dm.Index
 import latis.writer.Writer
 import latis.dm.Variable
+import latis.writer.AsciiWriter
 
 class TestFirstFilter {
   
@@ -27,18 +28,20 @@ class TestFirstFilter {
   
   @Test
   def test_empty = {
-    assertEquals(TestDataset.empty, Operation("first")(TestDataset.empty))
+    assertEquals(Dataset.empty, Operation("first")(Dataset.empty))
   }
   
   @Test
   def test_scalar = {
-    assertEquals(TestDataset.text, Operation("first")(TestDataset.text))
+    val ds1 = TestDataset.text
+    val ds2 = Operation("first")(TestDataset.text)
+    assertEquals(ds1, ds2)
   } 
   
-  @Test
-  def test_scalars = {
-    assertEquals(TestDataset.scalars, Operation("first")(TestDataset.scalars))
-  }
+//  @Test
+//  def test_scalars = {
+//    assertEquals(TestDataset.scalars, Operation("first")(TestDataset.scalars))
+//  }
   
   @Test
   def test_tuple_of_functions = {
@@ -49,14 +52,14 @@ class TestFirstFilter {
   def test_function_of_scalars = {
     val ds = TestDataset.function_of_scalar
     val expected = Sample(Real(0), Real(0))
-    assertEquals(expected, Operation("first")(ds).findFunction.get.iterator.next)
+    assertEquals(expected, Operation("first")(ds).unwrap.asInstanceOf[Function].iterator.next)
   }
   
   @Test
   def test_function_of_functions = {
     val ds = TestDataset.function_of_functions
     val expected = Sample(Integer(Metadata("x"), 0), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * 0 + j)))))
-    assertEquals(expected, Operation("first")(ds).findFunction.get.iterator.next)
+    assertEquals(expected, Operation("first")(ds).unwrap.asInstanceOf[Function].iterator.next)
   }
   
   @Test
@@ -67,6 +70,6 @@ class TestFirstFilter {
   
   @Test
   def test_metadata {
-    assertEquals(Some("1"), Operation("first")(TestDataset.canonical).findFunction.get.getMetadata("length"))
+    assertEquals(Some("1"), Operation("first")(TestDataset.canonical).unwrap.getMetadata("length"))
   }
 }

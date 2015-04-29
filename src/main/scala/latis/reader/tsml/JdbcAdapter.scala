@@ -17,9 +17,11 @@ import javax.naming.NameNotFoundException
 import javax.sql.DataSource
 import latis.data.Data
 import latis.dm.Binary
+import latis.dm.Dataset
 import latis.dm.Index
 import latis.dm.Integer
 import latis.dm.Real
+import latis.dm.Function
 import latis.dm.Scalar
 import latis.dm.Text
 import latis.dm.Variable
@@ -38,6 +40,9 @@ import latis.util.StringUtils
 import scala.collection.immutable.StringOps
 import java.nio.ByteBuffer
 import latis.util.DataUtils
+import latis.metadata.Metadata
+
+import scala.collection.immutable.StringOps
 
 /* 
  * TODO: release connection as soon as possible?
@@ -148,7 +153,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     //Saves us having to get the type for every sample.
     //Note, uses original variable names which are replaced for a rename operation as needed.
     val vars: Seq[Variable] = if (projectedVariableNames.isEmpty) getOrigScalars
-    else projectedVariableNames.flatMap(getOrigDataset.findVariableByName(_)) //TODO: error if not found? redundant with other (earlier?) test
+    else projectedVariableNames.flatMap(getOrigDataset.unwrap.findVariableByName(_)) //TODO: error if not found? redundant with other (earlier?) test
 
     //TODO: Consider case where PI does rename. User should never see orig names so should be able to use new name.
 
@@ -193,7 +198,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     case p: Projection => handleProjection(p)
 
     //TODO: factor out handleSelection?
-    case sel @ Selection(name, op, value) => getOrigDataset.findVariableByName(name) match {
+    case sel @ Selection(name, op, value) => getOrigDataset.unwrap.findVariableByName(name) match {
       //TODO: allow use of renamed variable? but sql where wants orig name
       case Some(v) if (v.isInstanceOf[Time]) => handleTimeSelection(name, op, value)
       case Some(v) if (getOrigScalarNames.contains(name)) => {
@@ -264,11 +269,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    */
   def handleProjection(projection: Projection): Boolean = projection match {
     case p @ Projection(names) => {
-      //make sure these match variable names or aliases
-      if (!names.forall(getOrigDataset.findVariableByName(_).nonEmpty))
-        throw new Error("Not all variables are available for the projection: " + p)
-      projectedVariableNames = names
-      true
+      //only names that are found in the original dataset are included in the search query
+      projectedVariableNames = names.filterNot(getOrigDataset.findVariableByName(_) == None) 
+      false //this way the default Projection Operation will also be applied after derived fields are created.
     }
   }
   
@@ -279,7 +282,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     //support ISO time string as value
 
     //Get the Time variable with the given name
-    val tvar = getOrigDataset.findVariableByName(vname) match {
+    val tvar = getOrigDataset.unwrap.findVariableByName(vname) match {
       case Some(t: Time) => t
       case _ => throw new Error("Time variable not found in dataset.")
     }
@@ -332,7 +335,10 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     getProjectedVariableNames.find(s.hasName(_)) match { //account for aliases
       case Some(_) => { //projected, see if it needs to be renamed
         val tmpScalar = renameMap.get(s.getName) match {
-          case Some(newName) => s.updatedMetadata("name" -> newName)
+          case Some(newName) => s.getMetadata("alias") match { //keep the old name as an alias to allow later projection. 
+            case Some(a) => s.updatedMetadata("alias" -> (a + "," + s.getName)).updatedMetadata("name" -> newName)
+            case None => s.updatedMetadata("alias" -> s.getName).updatedMetadata("name" -> newName)
+          }
           case None => s
         }
         super.makeScalar(tmpScalar)
@@ -409,8 +415,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       //Sort by domain variable.
       //assume domain is scalar, for now
       //Note 'dataset' should be the original before ops
-      getOrigDataset.findFunction match {
-        case Some(f) => f.getDomain match {
+      getOrigDataset match {
+        case Dataset(f: Function) => f.getDomain match {
           case i: Index => //implicit placeholder, use natural order
           case v: Variable => v match {
             //Note, shouldn't matter if we sort on original name
@@ -418,7 +424,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
             case _ => ??? //TODO: generalize for n-D domains
           }
         }
-        case None => //no function so no domain variable to sort by
+        case _ => //no function so no domain variable to sort by
       }
 
       sb.toString
