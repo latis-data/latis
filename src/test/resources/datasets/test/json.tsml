@@ -3,7 +3,7 @@
 
   <dataset name="json">
     <adapter class="latis.reader.tsml.JsonAdapter"
-             location="datasets/data/dap2/json" />
+             location="datasets/test/mixed.json" />
     
     
     

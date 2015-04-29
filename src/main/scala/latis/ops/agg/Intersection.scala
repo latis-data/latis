@@ -13,14 +13,10 @@ class Intersection extends Aggregation {
   //use case: x -> (a,b) intersect x -> (c,d) => x -> (a,b,c,d) 
   //  where only samples with x in both are kept
 
-  //assumes dataset is the parent of the datasets to aggregate
-  def aggregate(dataset: Dataset): Dataset = {
-    //child datasets to aggregate
-    val datasets = dataset.getVariables.map(_.asInstanceOf[Dataset])
-    
-    //assume just 2 for now //TODO: fold
-    //get functions from each, assuming each ds has only one
-    val fs = datasets.flatMap(_.findFunction)
+  //assumes dataset is the parent of a tuple that has the variables of the datasets to aggregate
+  def aggregate(dataset: Dataset): Dataset = {    
+    val fs = getFunctions(dataset)
+    //assume just 2 functions for now //TODO: fold
     val it1 = fs(0).iterator
     val it2 = fs(1).iterator
     

@@ -27,20 +27,21 @@ class TestExcludeMissing {
     assertEquals(2, ds.getLength)
   }
   
-  @Test
-  def missing_scalar {
-    val ds = ExcludeMissing()(TestDataset.nan)
-    val vars = ds.getVariables
-    assertEquals(0, vars.length)
-    //AsciiWriter.write(ds)
-  }
-  
-  @Test
-  def missing_in_tuple {
-    val ds = ExcludeMissing()(TestDataset.tuple_with_nan)
-    val vars = ds.getVariables
-    assertEquals(0, vars.length)
-  }
+  //no empty datasets?
+//  @Test
+//  def missing_scalar {
+//    val ds = ExcludeMissing()(TestDataset.nan)
+//    val vars = ds.getVariables
+//    assertEquals(0, vars.length)
+//    //AsciiWriter.write(ds)
+//  }
+//  
+//  @Test
+//  def missing_in_tuple {
+//    val ds = ExcludeMissing()(TestDataset.tuple_with_nan)
+//    val vars = ds.getVariables
+//    assertEquals(0, vars.length)
+//  }
   
   @Test
   def missing_tuple_in_function = {

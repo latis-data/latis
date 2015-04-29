@@ -26,7 +26,7 @@ class CatalogOverviewWriter extends Writer {
   }
   
   def write(dataset: Dataset) {
-    dataset.getVariables.foreach(v => writeVariable(v))
+    writeVariable(dataset.unwrap)
     printer.flush()
   }
   
