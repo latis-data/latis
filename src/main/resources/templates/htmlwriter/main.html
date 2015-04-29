@@ -14,7 +14,11 @@
                 white-space:pre;
                 font-family:monospace;
                 /*background-color:#b0a4de;*/
-            } 
+            }
+            .inconspicuous {
+            	color: #aaaaaa;
+            	font-style: italic;
+            }
             .info {
                 white-space:pre;
                 font-family:monospace;
@@ -25,6 +29,12 @@
             }
             #graphdiv {
                 margin: 15px 0;
+            }
+            #graphdiv .loading {
+            	display: block;
+            	height: 320px;
+            	line-height: 320px;
+            	margin-left: 50px;
             }
             #graph-range-selector {
                 margin: 15px;
@@ -52,6 +62,10 @@
                 });
             }
 
+            // handle the 'submit' event from our "Data Set Query Form" at the bottom
+            // of the page. These parameters need to be serialized in a slightly different
+            // format than your average "key=val&key2=val2" format, so we have to do this
+            // manually
             function submitForm(e) {
 
                 // Create submission url from current url. Create or modify suffix to .csv
@@ -74,6 +88,13 @@
                 return false;
             }
 
+            // Given a string and a suffix, return a version of the
+            // string with the suffix removed from the end. If the
+            // string does not end with suffix, it is returned
+            // unmodified.
+            // 
+            // Instances of the suffix occuring not at the end of
+            // the string will be ignored.
             function trimSuffix(str, suffix) {
                 if (str.endsWith(suffix)) {
                     return str.substring(0, str.length - suffix.length);
@@ -83,6 +104,8 @@
                 }
             }
 
+            // Used by submitForm. Helper method to serialize a single
+            // input.form-item.
             function serializeFormItem(formItem) {
                 var name = formItem.getAttribute("data-name");
                 var min = formItem.querySelector("input[name='min']").value;
@@ -90,25 +113,86 @@
 
                 var results = [];
                 if (min != "") {
-                    results.push("&name>=min");
+                    results.push("&" + name + ">=" + min);
                 }
                 if (max != "") {
-                    results.push("&name<max");
+                    results.push("&" + name + "<" + max);
                 }
-                return results.join("").replace("name", name).replace("min", min).replace("max", max);
+                return results.join("");
+            }
+            
+            // Return a modified version of window.location.href where
+            // the path ends with ".csv". The url will usually already
+            // end with ".html" and have a query string, but be sure
+            // to account for situations where either is missing
+            function getCsvUrl() {
+            	var path = window.location.pathname;
+            	var pathChunks = path.split("/");
+            	var lastChunk = pathChunks[pathChunks.length - 1];
+            	var dotIndex = lastChunk.indexOf("."); 
+            	var suffixLength = dotIndex > -1
+            		? lastChunk.length - dotIndex
+            		: 0;
+            	var unsuffixedPath = path.substring(0, path.length - suffixLength);
+            	
+            	var csvPath = unsuffixedPath + ".csv";
+            	var csvUrl = csvPath + window.location.search;
+            	return csvUrl;
             }
 
+            // Some constants used by updateGraph
             var globalGraphReference;
+            var BASE_CSV_URL = getCsvUrl();
+            
+            // Given a string "range", reset #graphdiv to contain
+            // a new chart with range as the range variable (y-axis)
+            // Note: the domain variable (x-axis) will be hardcoded
+            // into the function when this page is generated on the
+            // server-side (it should never change)
             function updateGraph(range) {
-                globalGraphReference = new Dygraph(
-                    document.getElementById("graphdiv"),
-                    "{{name}}.csv?{{domain}}," + range + "&exclude_missing()",
-                    {
-                        delimiter: ",",
-                        xlabel: "{{domain}}",
-                        ylabel: range
-                    }
-                )
+            	var csvUrl = BASE_CSV_URL;
+            	var urlChunks = csvUrl.split("?");
+            	
+            	// Make sure there are exactly 2 elements in urlChunks
+            	switch (urlChunks.length) {
+            		case 0:
+            			throw "This should be impossible";
+            			break;
+            		case 1:
+            			urlChunks.push(""); //empty query string
+            			break;
+            		case 2:
+            			// do nothing
+            			break;
+            		default:
+            			// > 2 chunks
+            			throw "Too many '?' in url (" + csvUrl + ")";
+            			break;
+            	}
+            	var beforeQuery = urlChunks[0];
+            	var query = urlChunks[1];
+            	
+            	var projection = "{{domain}}," + range;
+            	query = projection + query + "&exclude_missing()&limit(10000)";
+            	
+            	// recombine with modified query (added projection at front)
+            	csvUrl = beforeQuery + "?" + query;
+            	
+            	$.ajax({
+            		url: csvUrl
+            	}).done(function (data, textStatus, jqXhr) {
+            		var $graphdiv = $("#graphdiv");
+            		$graphdiv.empty();
+            		globalGraphReference = new Dygraph(
+            			$graphdiv[0],
+            			data,
+            			{
+                            delimiter: ",",
+                            xlabel: "{{domain}}",
+                            ylabel: range
+                        }
+            		)
+            	});
             }
 
 
@@ -120,9 +204,17 @@
         <select id="graph-range-selector" onchange="javascript:return updateGraph(event.target.value);">
             {{range-select-option-elements}}
         </select>
-        <div id="graphdiv"></div>
+        <div id="graphdiv"><em class="loading">Loading...</em></div>
         <script type="text/javascript">
-            updateGraph("{{defaultRange}}");
+        	if ({{graph-enabled}}) {
+        		updateGraph("{{defaultRange}}");
+        	}
+        	else {
+        		$("#graph-range-selector").remove();
+        		$("#graphdiv").empty().append(
+     				$("<span>").addClass("inconspicuous").text("Chart unavailable - unable to plot data")
+        		)
+        	}
         </script>
         <div class="dds"><h2>Dataset Descriptor Structure</h2><blockquote>{{dds}}</blockquote></div>
         <div class="das"><h2>Dataset Attribute Structure</h2><blockquote>{{das}}</blockquote></div>

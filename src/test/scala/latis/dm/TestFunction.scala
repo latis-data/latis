@@ -8,6 +8,10 @@ import latis.dm._
 import latis.metadata.Metadata
 import latis.time.Time
 import latis.writer.AsciiWriter
+import latis.reader.tsml.TsmlReader
+import latis.ops.filter.Selection
+import latis.ops.filter.LastFilter
+import latis.ops.filter.StrideFilter
 
 class TestFunction {
   
@@ -24,6 +28,36 @@ class TestFunction {
   //def function_of_tuple_with_data_from_kids = AsciiWriter.write(TestFunction.function_of_tuple_with_data_from_kids)
   //def function_of_tuple_with_iterable_data = AsciiWriter.write(TestFunction.function_of_tuple_with_iterable_data)
   //def function_of_tuple_with_mixed_types = AsciiWriter.write(TestFunction.function_of_tuple_with_mixed_types)
+  @Test
+  def reset_index_after_selection {
+    val tr = TsmlReader("datasets/test/index.tsml")
+    val ops = Seq(Selection("time>1970-01-01"))
+    val ds = tr.getDataset(ops)
+//    AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+    assertEquals(data("index")(1), 1.0, 0.0)
+  }
+  
+  @Test
+  def reset_index_after_lastfilter {
+    val tr = TsmlReader("datasets/test/index.tsml")
+    val ops = Seq(LastFilter())
+    val ds = tr.getDataset(ops)
+//    AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+    assertEquals(data("index")(0), 0.0, 0.0)
+  }
+  
+  @Test
+  def reset_index_after_stridefilter {
+    val tr = TsmlReader("datasets/test/index.tsml")
+    val ops = Seq(StrideFilter(2))
+    val ds = tr.getDataset(ops)
+//    AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+    assertEquals(data("index")(1), 1.0, 0.0)
+  }
+  
   
   
 //  @Test(expected = classOf[Error])

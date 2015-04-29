@@ -100,8 +100,8 @@ object Data {
    */
   def fromBuffer(buffer: Buffer): Data = {
     //If it looks like this buffer isn't set to the beginning, do so.
-    //Note, 'flip' will set the limit to the current position and the position to 0. 
-    //This supports clients that just add to a buffer without sizing it correctly.
+    //Note, 'flip' will set the limit to the current position and the position to 0
+    //and leave the capacity unchanged. 
     val b = if (buffer.limit > 0 && buffer.position != 0) buffer.flip else buffer
     b match {
       case bb: ByteBuffer => new ByteBufferData(bb)

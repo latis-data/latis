@@ -14,7 +14,7 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
   //      The matcher returns it first but we want the file variable to be last.
   
   /**
-   * Override to treat every file name as a data record.
+   * A record consists of a file name, file size.
    */
   override def getRecordIterator = {
     //TODO: can we do this without reading all file names into memory?
@@ -22,16 +22,18 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
     //  FileSystems.getDefault().getPathMatcher("regex:.*").matches(path)
     //TODO: support ftp...?
     val dir = getUrl.getPath //assumes a file URL 
-    FileUtils.listAllFiles(dir).iterator
+    FileUtils.listAllFilesWithSize(dir).iterator
   }
   
   /**
    * Override to add the file name (i.e. the data "record") itself as a data value.
-   * Note, this assumes that the TSML has the file variable defined last.
+   * Note, this assumes that the TSML has the file and file size variables defined last.
    */
-  override def extractValues(fileName: String) = {
+  override def extractValues(record: String) = {
+    val fileName = record.split(',')(0)
+    val size = record.split(',')(1)
     regex.findFirstMatchIn(fileName) match {
-      case Some(m) => m.subgroups :+ fileName //add the file name
+      case Some(m) => (m.subgroups :+ fileName) :+ size //add the file name
       case None => List[String]()
     }
   }

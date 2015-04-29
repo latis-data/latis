@@ -5,7 +5,13 @@ import scala.io.Source
 /**
  * Represents a parsed template. Parsing simply involves
  * reading the template and constructing a data structure
- * that 
+ * that can be used to quickly produce a result when given
+ * a Map of values.
+ * 
+ * StringTemplates are intended to be instantiated once and
+ * then reused multiple times. They are thread-safe (immutable
+ * after creation) and can be stored statically for use by
+ * multiple threads (e.g. http request handlers) at once.
  */
 class StringTemplate(tmplStr: String) {
   
@@ -46,7 +52,10 @@ class StringTemplate(tmplStr: String) {
    */
   def applyValues(values: Map[String, String]): String = {
     parsedTemplate.
-      map(chunk => if (chunk.isLiteral) chunk.str else values.getOrElse(chunk.str, throw new Exception(s"""template context missing value: "$chunk.str""""))).
+      map(chunk => 
+        if (chunk.isLiteral) chunk.str
+        else values.getOrElse(chunk.str, throw new Exception(s"template context missing value: '${chunk.str}'"))
+      ).
       mkString
   }
 }
@@ -60,9 +69,11 @@ object StringTemplate {
   
   def fromResource(resourcePath: String): StringTemplate = StringTemplate(readResource(resourcePath))
   
-  def readResource(resourcePath: String): String = {
+  private def readResource(resourcePath: String): String = {
     val rsrc = getClass.getResource(if (resourcePath.startsWith("/")) resourcePath else "/" + resourcePath)
     val chunks = Source.fromURL(rsrc)
-    chunks.mkString
+    val result = chunks.mkString
+    chunks.close
+    result
   }
 }

@@ -1,32 +1,30 @@
 package latis.reader.tsml
 
 import java.sql.Connection
-import java.sql.DriverManager
 import java.sql.Statement
+import java.sql.DriverManager
 import java.sql.ResultSet
 import java.util.Calendar
 import java.util.TimeZone
-
 import scala.Option.option2Iterable
 import scala.collection.Map
 import scala.collection.Seq
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-
 import com.typesafe.scalalogging.slf4j.Logging
-
 import javax.naming.InitialContext
 import javax.naming.NameNotFoundException
 import javax.sql.DataSource
 import latis.data.Data
 import latis.dm.Binary
-import latis.dm.Function
 import latis.dm.Index
 import latis.dm.Integer
 import latis.dm.Real
+import latis.dm.Function
 import latis.dm.Scalar
 import latis.dm.Text
 import latis.dm.Variable
+import latis.metadata.Metadata
 import latis.ops.Operation
 import latis.ops.Projection
 import latis.ops.RenameOperation
@@ -38,6 +36,12 @@ import latis.time.Time
 import latis.time.TimeFormat
 import latis.time.TimeScale
 import latis.util.StringUtils
+import scala.collection.immutable.StringOps
+import java.nio.ByteBuffer
+import latis.util.DataUtils
+import latis.metadata.Metadata
+
+import scala.collection.immutable.StringOps
 
 /* 
  * TODO: release connection as soon as possible?
@@ -116,7 +120,26 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   protected val parseBinary: PartialFunction[(Variable, Int), (String, Data)] = {
     case (v: Binary, _) => {
       val name = getVariableName(v)
-      (name, Data(resultSet.getBytes(name)))
+      var bytes = resultSet.getBytes(name)
+      val max_length = v.getSize //will look for "length" in metadata, error if not defined
+      if (bytes.length > max_length) {
+        val msg = s"JdbcAdapter found ${bytes.length} bytes which is longer than the max size: ${max_length}. The data will be truncated."
+        logger.warn(msg)
+        bytes = bytes.take(max_length) //truncate so we don't get buffer overflow
+      }
+      
+      //allocate a ByteBuffer for the max length
+      val bb = ByteBuffer.allocate(max_length)
+      //add the data
+      bb.put(bytes)
+      //add termination mark
+      bb.put(DataUtils.nullMark)
+      
+      //Set the "limit" to the end of the data and rewind the position to the start.
+      //Note, the capacity will remain at the max length.
+      bb.flip
+      
+      (name, Data(bb))
     }
   }
 
@@ -160,10 +183,6 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     case None => v.getName
   }
 
-  //Handle first, last ops
-  private var first = false
-  private var last = false
-
   //Define sorting order.
   private var order = "ASC"
 
@@ -184,12 +203,17 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       case Some(v) if (getOrigScalarNames.contains(name)) => {
         //add a selection to the sql, may need to change operation
         op match {
-          case "==" =>
-            selections append name + "=" + value; true
+          case "==" => v match {
+            case _: Text => selections append name + "=" + quoteStringValue(value); true
+            case _       => selections append name + "=" + value; true
+          }
           case "=~" =>
             selections append name + " like '%" + value + "%'"; true
           case "~" => false //almost equal (e.g. nearest sample) not supported by sql
-          case _ => selections append sel.toString; true
+          case _ => v match {
+            case _: Text => selections append name + op + quoteStringValue(value); true
+            case _       => selections append name + op + value; true
+          }
         }
       }
       case _ => {
@@ -200,10 +224,24 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       }
     }
 
-    case _: FirstFilter =>
-      first = true; true
-    case _: LastFilter =>
-      last = true; order = "DESC"; true
+    case _: FirstFilter => {
+      //make sure we are using ascending order
+      order = "ASC"; 
+      //add a limit property of one so we only get the first record
+      setProperty("limit", "1")
+      //let the caller know that we handled this operation
+      true
+    }
+      
+    case _: LastFilter => {
+      //get results in descending order so the first record is the "last" one
+      order = "DESC"; 
+      //add a limit property of one so we only get the first (now last) record
+      setProperty("limit", "1")
+      //let the caller know that we handled this operation
+      true 
+    }
+      
 
     //Rename operation: apply in projection clause of sql: 'select origName as newName'
     //These will be combined with the projected variables in the select clause with "old as new".
@@ -217,6 +255,14 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     case _ => false //not an operation that we can handle
   }
 
+  /**
+   * Make sure the given string is surrounded in quotes.
+   */
+  private def quoteStringValue(s: String): String = {
+    //don't add if it is already quoted
+    "'" + s.replaceAll("^['\"]","").replaceAll("['\"]$","") + "'"
+  }
+  
   /**
    * Handle a Projection clause.
    */
@@ -322,11 +368,6 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       case _ =>
     }
 
-    //Apply FirstFilter or LastFilter. 
-    //Set max rows to 1. "last" will set order to descending.
-    //TODO: error if both set, unless there was only one
-    if (first || last) statement.setMaxRows(1)
-
     statement.executeQuery(sql)
   }
 
@@ -349,7 +390,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       //If renamed, replace 'name' with 'name as "name2"'.
       //Use quotes so we can use reserved words like "min" (needed by Sybase).
       renameMap.get(name) match {
-        case Some(name2) => name + """ as """" + name2 + """""""
+        case Some(name2) => name + " as \"" + name2 + "\""
         case None => name
       }
     }).mkString(",")
@@ -429,10 +470,32 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * Database connection from JNDI or JDBC properties.
    */
   private lazy val connection: Connection = {
-    //TODO: use 'location' uri for jndi with 'java' (e.g. java:comp/env/jdbc/sorce_l1a) scheme, but glassfish doesn't use that form
-    val con = getProperty("jndi") match {
-      case Some(jndi) => getConnectionViaJndi(jndi)
-      case None => getConnectionViaJdbc
+    
+    val startsWithJavaRegex = "^(java:.+)".r
+    val startsWithJdbcRegex = "^jdbc:(.+)".r
+    
+    // location is the current standard for both jndi and jdbc connections,
+    // but we still support the jndi attribute for historical reasons.
+    // See LATIS-30 for more details
+    val con = (getProperty("location"), getProperty("jndi")) match {
+      
+      // if 'location' exists and starts with "java:", use jndi
+      case (Some(startsWithJavaRegex(location)), _) => getConnectionViaJndi(location)
+      
+      // if 'location' exists and starts with 'jdbc:'
+      case (Some(startsWithJdbcRegex(_)), _) => getConnectionViaJdbc
+      
+      // if 'jndi' exists, use jndi
+      case (_, Some(jndiStr)) => {
+        logger.warn("Use location='java:/comp/env...' instead of jndi='java:/comp/env...'")
+        getConnectionViaJndi(jndiStr)
+      }
+      
+      // If we get here, we probably have a malformed tsml file. No conforming location attr was
+      // found, and no jndi attr was found at all.
+      case _ => throw new RuntimeException(
+        "Unable to find or parse tsml location attribute: location must exist and start with 'java:' (for JNDI) or 'jdbc:' (for JDBC)"
+      )
     }
 
     hasConnection = true //will still be false if getting connection fails

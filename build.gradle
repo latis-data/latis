@@ -61,6 +61,15 @@ dependencies {
 	
 }
 
+// Affects several tasks: compileScala, compileTestScala, compileSourceSetScala
+// see section "Tasks" in http://gradle.org/docs/current/userguide/scala_plugin.html
+tasks.withType(ScalaCompile) {
+	
+	// build optimization: disabling Ant enables Zinc-based compiler with support for incremental compilation
+	// see section "Incremental Compilation" in http://gradle.org/docs/current/userguide/scala_plugin.html
+	scalaCompileOptions.useAnt = false
+}
+
 
 //Define the Ivy repository for publishing build artifacts.
 group = 'lasp'
@@ -77,5 +86,26 @@ publishing {
     }
 }
 
-task wrapper(type: Wrapper) { gradleVersion = '2.1' }
+// Helper function - only run the passed configClosure
+// if the task is actually going to be executed. Allows
+// for easier conditional configuration.
+def ifTask(task, configClosure) {
+	gradle.taskGraph.whenReady { graph ->
+		if (graph.hasTask(task)) {
+			project.configure(task, configClosure)
+		}
+	}
+}
+
+task wrapper(type: Wrapper) { gradleVersion = '2.3' }
+
+task compileWarnings (dependsOn: compileScala) { self ->
+	description "Run the compileScala task, but configure it to show more warnings ('-feature' flag)"
+	ifTask(self) {
+		// configure the compileScala task to run scalac with the "-feature" option
+		compileScala {
+			scalaCompileOptions.additionalParameters = ["-feature"]
+		}
+	}
+}
 

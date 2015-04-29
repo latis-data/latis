@@ -1,7 +1,6 @@
 package latis.ops
 
 import scala.Array.canBuildFrom
-
 import com.typesafe.scalalogging.slf4j.Logging
 
 import latis.dm.Dataset
@@ -18,6 +17,7 @@ import latis.ops.math.BinaryMathOperation
 import latis.ops.math.MathOperation
 import latis.ops.math.ReductionMathOperation
 import latis.ops.math.UnaryMathOperation
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Adds a new Variable to a Dataset according to the inputed math expression.
@@ -109,7 +109,7 @@ class MathExpressionDerivation(str: String) extends Operation with Logging {
   def findOp(str: String): Dataset = {
     //named operations followed by (...) must be evaluated first or else the () will be lost.
     //names should be looked for in order from longest to shortest to prevent errors with substrings such as "cos" in "acos".
-    val names = Seq("deg_to_radians", "atan2", "sqrt", "fabs", "acos", "atan", "mag", "cos", "sin").filter(str.contains(_))
+    val names = Seq("DEG_TO_RAD", "ATAN2", "SQRT", "FABS", "ACOS", "ATAN", "MAG", "COS", "SIN").filter(str.contains(_))
     if(names.nonEmpty) applyNamedFunction(str, names(0))
  
     //evaluates innermost set of (). Keeps result in appended temp Dataset so its value can be accessed later.
@@ -139,23 +139,24 @@ class MathExpressionDerivation(str: String) extends Operation with Logging {
     val i1 = str.indexOf(name)
     val i2 = findCloseParen(str, i1) + 1
     val sub = str.substring(i1, i2)
-    val args = str.substring(i1+name.length+1,i2-1).split(",")
+    val args = str.substring(i1+name.length+1,i2-1)
     val op = name match {
-      case "atan2" => MathOperation(Math.atan2(_,_))
-      case "mag" => MathOperation((d1,d2) => Math.sqrt(Math.pow(d1,2) + Math.pow(d2,2)))
-      case "cos" => MathOperation(Math.cos(_))
-      case "sin" => MathOperation(Math.sin(_))
-      case "fabs" => MathOperation(Math.abs(_))
-      case "acos" => MathOperation(Math.acos(_))
-      case "atan" => MathOperation(Math.atan(_))
-      case "sqrt" => MathOperation(Math.sqrt(_))
-      case "deg_to_radians" => MathOperation(Math.toRadians(_))
+      case "ATAN2" => MathOperation(Math.atan2(_,_))
+      case "MAG" => MathOperation((d1,d2) => Math.sqrt(Math.pow(d1,2) + Math.pow(d2,2)))
+      case "COS" => MathOperation(Math.cos(_))
+      case "SIN" => MathOperation(Math.sin(_))
+      case "FABS" => MathOperation(Math.abs(_))
+      case "ACOS" => MathOperation(Math.acos(_))
+      case "SQRT" => MathOperation(Math.sqrt(_))
+      case "DEG_TO_RAD" => MathOperation(Math.toRadians(_))
+      case "ATAN" => MathOperation(Math.atan(_))
     }
     val t: Variable = op match {
-      case u: UnaryMathOperation => u(parseExpression(args(0))).unwrap
+      case u: UnaryMathOperation => u(parseExpression(args)).unwrap
       case b: BinaryMathOperation => ???
-      case r: ReductionMathOperation => r(args.map(parseExpression(_))).unwrap
+      case r: ReductionMathOperation => r(split(args).map(parseExpression(_))).unwrap
     }
+
     tempCount += 1
     ds = ds.unwrap match {
       case null => Dataset(t.rename(t.getName, "temp"+tempCount).unwrap)//CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
@@ -163,7 +164,27 @@ class MathExpressionDerivation(str: String) extends Operation with Logging {
     }
     parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount))
   }
-    
+   
+  /**
+   * Split only on commas that are not within parentheses. 
+   */
+  def split(args: String): Seq[String] = {
+    val buffer = ArrayBuffer[String]()
+    var c1 = -1
+    var c2 = args.indexOf(',')
+    while(c2 != -1){
+      val sub = args.substring(c1+1, c2)
+      if(sub.count(_=='(')>sub.count(_==')')) c2 = args.indexOf(',',c2+1)
+      else {
+        buffer += sub
+        c1 = c2
+        c2 = args.indexOf(',',c2+1)
+      }
+    }
+    buffer += args.substring(c1+1)
+    buffer.toSeq
+  }
+  
   def applyBasicMath(str: String, i: Int) = {
     val op = str.substring(i, i+1)
     val lhs = parseExpression(str.substring(0,i))

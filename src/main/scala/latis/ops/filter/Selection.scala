@@ -47,7 +47,10 @@ protected class Selection(val vname: String, val operation: String, val value: S
         if (text.getValue.asInstanceOf[String].matches(value)) Some(text) //TODO: getStringValue on Variable?
         else None //regex
       }
-      case _ => if (isValid(text.compare(value))) Some(text) else None //like any other scalar
+      case _ => {
+        val cmp = text.compare(value)
+        if (isValid(cmp)) Some(text) else None //like any other scalar
+      }
     } else Some(text) //operation doesn't apply to this Scalar Variable, no-op
   }
   

@@ -7,11 +7,11 @@ import latis.dm.Text
 import latis.dm.Variable
 import latis.reader.tsml.ml.Tsml
 import latis.util.StringUtils
-
 import scala.io.Source
+import com.typesafe.scalalogging.slf4j.Logging
 
 
-class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) {
+class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Logging {
 
   //---- Manage data source ---------------------------------------------------
   
@@ -84,7 +84,12 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) {
   def getRecordIterator: Iterator[String] = {
     val lpr = getLinesPerRecord
     val dlm = getDelimiter
-    getLineIterator.grouped(lpr).map(_.mkString(dlm))
+    val records = getLineIterator.grouped(lpr).map(_.mkString(dlm))
+    
+    getProperty("limit") match {
+      case Some(s) => records.take(s.toInt) //TODO: deal with bad value
+      case None    => records
+    }
   }
   
   /**
@@ -122,8 +127,13 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) {
     val vars = getOrigScalars
     val values = extractValues(record)
     
-    if (vars.length != values.length) None
-    else {
+    //If we don't parse as many values as expected, assume we have an invalid record and skip it.
+    if (vars.length != values.length) {
+      //Note, There are many cases where datasets have invalid records "by design" 
+      //(e.g. future timestamps without data values) so we don't want to log warnings.
+      logger.debug("Invalid record: " + values.length + " values found for " + vars.length + " variables")
+      None
+    } else {
       val vnames: Seq[String] = vars.map(_.getName)
       val datas: Seq[Data] = (values zip vars).map(p => parseStringValue(p._1, p._2))
       Some((vnames zip datas).toMap)

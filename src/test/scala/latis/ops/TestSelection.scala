@@ -340,17 +340,6 @@ class TestSelection {
     assert(data.isEmpty)
   }
   
-  @Test
-  def index_reset {
-    val tr = TsmlReader("datasets/test/index.tsml")
-    val ops = Seq(Selection("time>1970-01-01"))
-    val ds = tr.getDataset(ops)
-//    AsciiWriter.write(ds)
-    val data = ds.toDoubleMap
-    assertEquals(data("index")(1), 1.0, 0.0)
-    
-    
-  }
 }
 
 

@@ -22,7 +22,10 @@ trait Scalar extends Variable {
   //TODO: unit conversions...
   def compare(that: Scalar): Int = (this,that) match {
     case (Number(d1), Number(d2)) => d1 compare d2
-    case (Text(s1), Text(s2)) => s1 compare s2
+    case (Text(s1), Text(s2)) => {
+      //TODO: is it same to trim each string when comparing or should it happen upstream?
+      s1.trim compare s2.trim 
+    }
     case _ => throw new Error("Can't compare " + this + " with " + that)
   }
 

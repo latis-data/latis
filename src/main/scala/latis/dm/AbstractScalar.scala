@@ -12,7 +12,9 @@ abstract class AbstractScalar(metadata: Metadata = EmptyMetadata, data: Data = E
     case DoubleValue(d) => d compare that.toDouble
     case LongValue(l) => l compare that.toLong
     case IndexValue(i) => i compare that.toInt
-    case StringValue(s) => s compare that
+    //TODO: is it same to trim each string when comparing or should it happen upstream?
+    case StringValue(s) => s.trim compare that.trim
+    
     //TODO: what about Buffer, SeqData?
     //TODO: handle format errors
   }
