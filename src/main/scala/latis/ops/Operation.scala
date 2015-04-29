@@ -24,19 +24,17 @@ abstract class Operation {
   /**
    * Apply this Operation to the given Dataset.
    */
-  def apply(dataset: Dataset): Dataset = {
-    val md = dataset.getMetadata
-    //TODO: delegate to subclass to munge metadata
-    //TODO: add provenance metadata, getProvMsg, append to "history"
-    val v: Variable = dataset.unwrap match {
-      case v: Variable => applyToVariable(v) match {
-        case Some(v) => v
-        case None => null
+  def apply(dataset: Dataset): Dataset = dataset match {
+    case Dataset(variable) => {
+      val md = dataset.getMetadata
+      //TODO: delegate to subclass to munge metadata
+      //TODO: add provenance metadata, getProvMsg, append to "history"
+      applyToVariable(variable) match {
+        case Some(v) => Dataset(v, md)
+        case None => Dataset.empty
       }
-      case null => null
     }
-    
-    Dataset(v, md)
+    case _ => Dataset.empty
   }
   
   /**
