@@ -41,24 +41,23 @@ class ImageWriter extends FileWriter{
     ChartUtilities.writeBufferedImageAsPNG(new FileOutputStream(file), chart.createBufferedImage(500, 300))
   }
 
-  def plotDataset(dataset: Dataset) {
-    dataset.unwrap match {
-      case function: Function => {
-        val x = function.getDomain
-        if (x.isInstanceOf[latis.time.Time] && x.getMetadata("type").get == "text") {
-          val axis = new DateAxis(x.getName)
-          plot.setDomainAxis(axis)
-        } else {
-          val axis = new NumberAxis(x.getName)
-          axis.setAutoRangeIncludesZero(false)
-          plot.setDomainAxis(axis)
-        }
-        val y = function.getRange
-        plotVariable(x, y, dataset.toDoubleMap)
+  def plotDataset(dataset: Dataset) = dataset match {
+    case Dataset(function: Function) => {
+      val x = function.getDomain
+      if (x.isInstanceOf[latis.time.Time] && x.getMetadata("type").get == "text") {
+        val axis = new DateAxis(x.getName)
+        plot.setDomainAxis(axis)
+      } else {
+        val axis = new NumberAxis(x.getName)
+        axis.setAutoRangeIncludesZero(false)
+        plot.setDomainAxis(axis)
       }
-      
-      case _ => throw new Error("Dataset has no Function to plot.")
+      val y = function.getRange
+      plotVariable(x, y, dataset.toDoubleMap)
     }
+
+    case _ => throw new Error("Dataset has no Function to plot.")
+
   }
 
   def plotVariable(x: Variable, y: Variable, data: scala.collection.Map[String,Array[Double]]) {

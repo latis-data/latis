@@ -22,9 +22,11 @@ class BinaryWriter extends Writer {
 
   private lazy val writer = new DataOutputStream(getOutputStream)
   
-  def write(dataset: Dataset) {
-    writeVariable(dataset.unwrap)
-    writer.flush()
+  def write(dataset: Dataset) = dataset match {
+    case Dataset(v) => {
+      writeVariable(v)
+      writer.flush()
+    }
   }
   
   /**

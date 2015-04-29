@@ -26,8 +26,8 @@ class JsonMetadataAndDataWriter extends JsonWriter {
     sb append super.makeHeader(dataset)
 
     //TODO: assumes Dataset contains a Function
-    dataset.unwrap match {
-      case function: Function => {
+    dataset match {
+      case Dataset(function: Function) => {
         //Create the metadata content
         sb append "\"metadata\": {" //metadata object label
         sb append mdvarToString(Sample(function.getDomain, function.getRange)) //metadata
