@@ -17,6 +17,7 @@ import javax.naming.NameNotFoundException
 import javax.sql.DataSource
 import latis.data.Data
 import latis.dm.Binary
+import latis.dm.Dataset
 import latis.dm.Index
 import latis.dm.Integer
 import latis.dm.Real
@@ -414,8 +415,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       //Sort by domain variable.
       //assume domain is scalar, for now
       //Note 'dataset' should be the original before ops
-      getOrigDataset.unwrap match {
-        case f: Function => f.getDomain match {
+      getOrigDataset match {
+        case Dataset(f: Function) => f.getDomain match {
           case i: Index => //implicit placeholder, use natural order
           case v: Variable => v match {
             //Note, shouldn't matter if we sort on original name
