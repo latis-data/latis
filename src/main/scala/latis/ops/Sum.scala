@@ -11,6 +11,12 @@ import latis.dm.Variable
 import latis.dm.implicits.variableToDataset
 import latis.time.Time
 
+/**
+ * Reduces a Function to a single Sample. The value of Number Variables
+ * will be the sum of the value of that Variable in all Samples of the original Function.
+ * The value of the domain and Text Variables will be their last values from the original Function.
+ * Not supported for nested Functions. 
+ */
 class Sum extends Operation {
   
   override def applyToFunction(f: Function): Option[Variable] = {
