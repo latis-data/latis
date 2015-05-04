@@ -23,39 +23,26 @@ targetCompatibility = 1.6
 
 //Repositories for dependencies.
 repositories {
-    ivy {
-      url "http://dsweb:8080/ivy"
-    }
-    mavenCentral()
+	ivy {
+		url "http://dsweb:8080/ivy"
+	}
+	mavenCentral()
 }
 
-//configurations {
-//    scalaCompiler
-//    scalaLibrary
-//}
-
 dependencies {
-    //providedCompile "javax.servlet:servlet-api:2.5" //not deployed
-    compile "javax.servlet:servlet-api:2.5"
-    
-    compile 'org.scala-lang:scala-library:2.10.4'
-    //compile 'org.scala-lang:scala-xml:2.11.+ //+ not working
-    //compile 'org.scala-lang:scala-library:2.11.2'
-    //scalaCompiler "org.scala-lang:scala-compiler:2.10"
-    //scalaLibrary "org.scala-lang:scala-library:2.10"
-    
-    //Support for logging
-    compile 'com.typesafe:scalalogging-slf4j_2.10:1.1.0'
-    compile 'ch.qos.logback:logback-classic:1.0.13'
-    
-    //JSON from Play
-    compile 'com.typesafe.play:play-json_2.10:2.4.0-M1'
-    
-    testCompile 'junit:junit:4.+'
-    testCompile 'org.apache.derby:derby:10.10.1.1'
-    //testRuntime 'postgres:postgresql:9.2-1002'
-    //testRuntime 'sybase:jconn3:6.0'
-    //testRuntime 'oracle:ojdbc6:11.2'
+	compile "javax.servlet:servlet-api:2.5"
+	
+	compile 'org.scala-lang:scala-library:2.10.4'
+	
+	//Support for logging
+	compile 'com.typesafe:scalalogging-slf4j_2.10:1.1.0'
+	compile 'ch.qos.logback:logback-classic:1.0.13'
+	
+	//JSON from Play
+	compile 'com.typesafe.play:play-json_2.10:2.4.0-M1'
+	
+	testCompile 'junit:junit:4.+'
+	testCompile 'org.apache.derby:derby:10.10.1.1'
 	
 	//Support for writing png images
 	compile 'jfree:jfreechart:1.0.12'
