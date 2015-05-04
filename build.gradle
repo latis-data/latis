@@ -1,5 +1,16 @@
 //Gradle build for core LaTiS code.
 
+buildscript {
+	repositories {
+		ivy {
+			url 'http://dsweb:8080/ivy'
+		}
+	}
+	dependencies {
+		classpath 'lasp:gitflow-plugin:1.2.0' // http://stash.lasp.colorado.edu/projects/WEBAPPS/repos/gradle-gitflow-plugin/browse
+	}
+}
+apply plugin: 'lasp.gitflow'
 apply plugin: 'scala'
 apply plugin: 'eclipse'
 apply plugin: 'ivy-publish'
