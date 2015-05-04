@@ -9,17 +9,14 @@ buildscript {
 	dependencies {
 		classpath 'lasp:gitflow-plugin:1.2.0' // http://stash.lasp.colorado.edu/projects/WEBAPPS/repos/gradle-gitflow-plugin/browse
 		classpath 'lasp:utils-plugin:1.0.1' // http://stash.lasp.colorado.edu/projects/WEBAPPS/repos/gradle-utils-plugin/browse
+		classpath 'lasp:publishing-plugin:1.0.3' // http://stash.lasp.colorado.edu/projects/WEBAPPS/repos/gradle-publishing-plugin/browse
 	}
 }
 apply plugin: 'lasp.gitflow'
 apply plugin: 'lasp.utils'
+apply plugin: 'lasp.publishing'
 apply plugin: 'scala'
 apply plugin: 'eclipse'
-apply plugin: 'ivy-publish'
-
-//Define the release version. Used for published jar.
-//TODO: get from latis.properties?
-version = gitflow.getVersion(project).toString()
 
 //Define Java version for generated class files.
 targetCompatibility = 1.6
@@ -77,18 +74,16 @@ dependencies {
 lasp.utils.enableIncrementalCompilation(project)
 
 //Define the Ivy repository for publishing build artifacts.
-group = 'lasp'
 publishing {
-    publications {
-        ivyJava(IvyPublication) {
-            from components.java
-        }
-    }
-    repositories {
-        ivy {
-            url "/data_systems/ivy"
-        }
-    }
+	publications {
+		main(IvyPublication) {
+			organisation 'lasp'
+			module 'latis'
+			revision gitflow.getVersion(project).toString()
+			
+			from components.java
+		}
+	}
 }
 
 task wrapper(type: Wrapper) { gradleVersion = '2.3' }
