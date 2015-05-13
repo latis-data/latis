@@ -12,7 +12,12 @@ import latis.util.StringUtils
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import javax.mail.Multipart
+import latis.time.Time
 
+/**
+ * Reads a folder of emails, returning the sent date, from address, subject and content
+ * of each message.
+ */
 class EmailAdapter(tsml: Tsml) extends IterativeAdapter[Message](tsml) {
   
   var store: Store = null
@@ -50,7 +55,7 @@ class EmailAdapter(tsml: Tsml) extends IterativeAdapter[Message](tsml) {
   }
   
   def extractValues(msg: Message): Seq[String] = {
-    val format = getOrigDataset.findVariableByName("time").get.getMetadata("units").getOrElse("yyyy/MM/dd")
+    val format = getOrigDataset.findVariableByName("time").get.asInstanceOf[Time].getUnits.toString
     val date = (new SimpleDateFormat(format)).format(msg.getSentDate)
     val from = msg.getFrom()(0).toString
     val subject = msg.getSubject
