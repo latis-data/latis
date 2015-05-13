@@ -5,9 +5,7 @@ import java.io.FileNotFoundException
 import java.io.RandomAccessFile
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel.MapMode
-
 import scala.Option.option2Iterable
-
 import latis.data.EmptyData
 import latis.data.IterableData
 import latis.data.SampleData
@@ -28,6 +26,7 @@ import latis.util.BufferIterator
 import latis.util.DataUtils
 import latis.util.MappingIterator
 import latis.util.PeekIterator
+import latis.data.Data
 
 /**
  * Combines multiple binary files representing individual Variables into a single Dataset.
@@ -74,7 +73,7 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     val bb = file.getChannel.map(MapMode.READ_ONLY, 0, file.length)
     bb.order(order)
     
-    if(file.length == 0) None else Some(IterableData(new BufferIterator(bb, s), s.getSize))
+    if(file.length == 0) None else Some(IterableData(BufferIterator(bb, s).map(Data(_)), s.getSize))
   } catch {
     case fnfe: FileNotFoundException => s match {
       case _: Index => Some(IndexSet())

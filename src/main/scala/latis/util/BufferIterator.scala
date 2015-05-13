@@ -10,27 +10,23 @@ import latis.dm.Text
 import latis.dm.Variable
 
 /**
- * Makes a PeekIterator of Data from a ByteBuffer. 
- * A template Variable is required to determine how to segment the buffer.
+ * Makes a PeekIterator of Array[Byte] from a ByteBuffer. 
+ * The buffer will be broken into Arrays of length 'size'.
  */
-class BufferIterator(buffer: ByteBuffer, v: Variable) extends PeekIterator[Data]{
+class BufferIterator(buffer: ByteBuffer, size: Int) extends PeekIterator[Array[Byte]]{
   
-  final protected def getNext: Data = {
+  final protected def getNext: Array[Byte] = {
     if (! buffer.hasRemaining) null
     else {
-      try v match {
-        case i: Integer => Data(buffer.getLong)
-        case r: Real => Data(buffer.getDouble)
-        case t: Text => {
-          val arr = Array.ofDim[Byte](t.getSize)
-          buffer.get(arr)
-          val s = StringUtils.padOrTruncate(new String(arr.filter(_!=0), Charset.forName("ISO_8859_1")), t.length)
-          Data(s)
-        }
-//      } catch {
-//        case e: Exception => getNext
-      }
+      val arr = Array.ofDim[Byte](size)
+      buffer.get(arr)
+      arr
     }
   }
 
+}
+
+object BufferIterator {
+  def apply(buffer: ByteBuffer, size: Int) = new BufferIterator(buffer, size)
+  def apply(buffer: ByteBuffer, v: Variable) = new BufferIterator(buffer, v.getSize)
 }
