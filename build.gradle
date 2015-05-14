@@ -32,6 +32,9 @@ repositories {
 dependencies {
 	compile "javax.servlet:servlet-api:2.5"
 	
+	//JavaMail
+	compile 'javax.mail:mail:1.4.7'
+	
 	compile 'org.scala-lang:scala-library:2.10.4'
 	
 	//Support for logging
