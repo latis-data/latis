@@ -28,5 +28,5 @@ object Integer {
   /**
    * Expose the long value represented by this Variable.
    */
-  def unapply(int: Integer): Option[Long] = Some(int.getNumberData.longValue)
+  def unapply(int: Integer): Option[Long] = Some(int.longValue)
 }

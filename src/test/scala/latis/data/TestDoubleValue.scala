@@ -28,6 +28,12 @@ class TestDoubleValue {
   @Test
   def not_is_empty = assertTrue(!data.isEmpty)
   
+  @Test
+  def rounding {
+    val data = TestDataset.function_of_scalar_with_rounding.toDoubles
+    assertEquals(2.0, data(0)(2), 0.0)
+    assertEquals(120, data(1)(1), 0.0)
+  }
 //  @Test
 //  def length = assertEquals(1, data.length)
 //  
