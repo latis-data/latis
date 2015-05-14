@@ -26,15 +26,21 @@ object DataMap {
    * Convert the Scalars within the given Dataset to a Map from name to Double array.
    */
   def toDoubleMap(dataset: Dataset): Map[String,Array[Double]] = {
+    //TODO: Make the Map immutable? but Array is mutable
+    val amap = mutable.LinkedHashMap[String, Array[Double]]()
+    
     //construct a mutable data structure to build results
     val abmap = mutable.LinkedHashMap[String, mutable.ArrayBuffer[Double]]() //maintain order
   
-    //Iterate through Dataset similar to Writer
-    for (v <- dataset.getVariables) putDoublesInMap(v, abmap)
+    dataset match {
+      case Dataset(v) => {
+        //Iterate through Dataset similar to Writer
+        putDoublesInMap(v, abmap)
+        for ((name, value) <- abmap) amap += ((name, value.toArray))
+      }
+      case _ => //empty Dataset will result in empty map
+    }
     
-    //TODO: Make the Map immutable? but Array is mutable
-    val amap = mutable.LinkedHashMap[String, Array[Double]]()
-    for ((name, value) <- abmap) amap += ((name, value.toArray))
     amap
   }
   
@@ -85,15 +91,21 @@ object DataMap {
    * Convert the Scalars within the given Dataset to a Map from name to String array.
    */
   def toStringMap(dataset: Dataset): Map[String,Array[String]] = {
+    //TODO: Make the Map immutable? but Array is mutable
+    val amap = mutable.LinkedHashMap[String, Array[String]]()
+    
     //construct a mutable data structure to build results
     val abmap = mutable.LinkedHashMap[String, mutable.ArrayBuffer[String]]() //maintain order
   
-    //Iterate through Dataset similar to Writer
-    for (v <- dataset.getVariables) putStringsInMap(v, abmap)
+    dataset match {
+      case Dataset(v) => {
+        //Iterate through Dataset similar to Writer
+        putStringsInMap(v, abmap)
+        for ((name, value) <- abmap) amap += ((name, value.toArray))
+      }
+      case _ => //empty Dataset, empty map
+    }
     
-    //TODO: Make the Map immutable? but Array is mutable
-    val amap = mutable.LinkedHashMap[String, Array[String]]()
-    for ((name, value) <- abmap) amap += ((name, value.toArray))
     amap
   }
     

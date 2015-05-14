@@ -25,8 +25,8 @@ class TestTsml  {
   @Test
   def two_time {
     val ds = TsmlReader("datasets/test/two_time.tsml").getDataset
-    assert(ds.toSeq(0).getMetadata("alias").isDefined)
-    assert(!ds.toSeq(1).getMetadata("alias").isDefined)
+    assert(ds.unwrap.toSeq(0).getMetadata("alias").isDefined)
+    assert(!ds.unwrap.toSeq(1).getMetadata("alias").isDefined)
 //    Writer.fromSuffix("meta").write(ds)
   }
 }

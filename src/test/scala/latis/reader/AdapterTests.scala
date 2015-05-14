@@ -58,11 +58,11 @@ abstract class AdapterTests {
   
   //@Test
   //TODO: projection order not yet supported
-  def project_diff_order {
-    val ops = List(Projection("myTime, myReal, myInt"))
-    val ds = getDataset(ops)
-    assertEquals("myInt", ds.toSeq(2).getName)
-  }
+//  def project_diff_order {
+//    val ops = List(Projection("myTime, myReal, myInt"))
+//    val ds = getDataset(ops)
+//    assertEquals("myInt", ds.toSeq(2).getName)
+//  }
   
   @Test
   def project_without_domain {

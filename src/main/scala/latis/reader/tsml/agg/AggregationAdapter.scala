@@ -4,6 +4,7 @@ import latis.dm.Dataset
 import latis.reader.tsml.TsmlAdapter
 import latis.reader.tsml.ml.Tsml
 import scala.collection.mutable.ArrayBuffer
+import latis.dm.Tuple
 
 /**
  * Base class for Adapters that aggregate (combine) Datasets.
@@ -16,7 +17,7 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   private val adapters = ArrayBuffer[TsmlAdapter]()
   
   /**
-   * Given a Dataset that contains other Datasets
+   * Given a Dataset that contains other Datasets (now as a tuple)
    * apply the aggregation logic to make a single Dataset.
    */
   def aggregate(dataset: Dataset): Dataset
@@ -54,7 +55,12 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     val md = makeMetadata(tsml.dataset) //TODO: provo
     
     //Make aggregated dataset
-    Dataset(datasets, md) 
+    //TODO: do we need a Collection type?
+    //TODO: use a fold with a binary agg op?
+    //for now, replace datasets with a tuple
+    val vars = datasets.map(_.unwrap)
+    val tup = Tuple(vars)
+    Dataset(tup, md) 
   }
 
   /**

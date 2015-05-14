@@ -181,7 +181,7 @@ class TestResample {
   def nearest_single_value_equals_time_domain {
     //TODO: Time as integer vs real
     val ds = TestDataset.time_series
-    val format = ds.findVariableByName("time").get.getMetadata("units").get
+    val format = ds.unwrap.findVariableByName("time").get.getMetadata("units").get
     val newTime = Time.fromIso("1970-01-02")
     val t = newTime.format(format)
     /*

@@ -31,7 +31,7 @@ class TestSelection {
     val ds = filter(f)
     //AsciiWriter().write(expected)
     //AsciiWriter().write(ds)
-    assert(expected equals ds.getVariables(0))
+    assert(expected equals ds.unwrap)
   }
 
   
@@ -105,7 +105,7 @@ class TestSelection {
   def outside_range {
     val ds = Dataset(scalarFunction)
     val ds2 = ds.filter("time > 5")
-    val f = ds2.findFunction.get
+    val f = ds2.unwrap.asInstanceOf[Function]
     assertEquals(0, f.getLength)
   }
     

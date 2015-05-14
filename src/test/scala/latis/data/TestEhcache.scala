@@ -9,6 +9,7 @@ import scala.io.Source
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
+import latis.dm.Function
 import latis.dm.TestDataset
 import latis.reader.tsml.TsmlReader
 import latis.writer.Writer
@@ -40,7 +41,7 @@ class TestEhcache {
 //  @Test
   def reuse_iterator {
     val ds = TsmlReader("datasets/test/scalar.tsml").getDataset
-    val f = ds.findFunction.get
+    val f = ds.unwrap.asInstanceOf[Function]
     assertEquals(10, f.iterator.length)
     assertEquals(10, f.iterator.length)
     assertEquals(10, f.iterator.length)
@@ -51,8 +52,8 @@ class TestEhcache {
   def two_functions { //caching doesn't work when alternating functions
     val ds1 = TestDataset.function_of_scalar
     val ds2 = TestDataset.function_of_tuple
-    val f1 = ds1.findFunction.get
-    val f2 = ds2.findFunction.get
+    val f1 = ds1.unwrap.asInstanceOf[Function]
+    val f2 = ds2.unwrap.asInstanceOf[Function]
     assertEquals(3, f1.iterator.length)
     assertEquals(3, f2.iterator.length)
     assertEquals(0, f1.iterator.length)
@@ -61,7 +62,7 @@ class TestEhcache {
   @Test
   def nested_function { //caching doesn't work with nested functions
     val ds = TestDataset.function_of_functions
-    val f = ds.findFunction.get
+    val f = ds.unwrap.asInstanceOf[Function]
     assertEquals(4, f.iterator.length)
     assertEquals(0, f.iterator.length)
   }

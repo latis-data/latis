@@ -16,21 +16,21 @@ class TestReduction {
   def scalar {
     val ds = Dataset(TestReal.pi)
     val ds2 = reduce(ds)
-    assertTrue(ds2.getVariables.head.isInstanceOf[Real])
+    assertTrue(ds2.unwrap.isInstanceOf[Real])
   }
 
   @Test
   def tuple_of_one {
     val ds = Dataset(TestTuple.tuple_of_real)
     val ds2 = reduce(ds)
-    assertTrue(ds2.getVariables.head.isInstanceOf[Real])
+    assertTrue(ds2.unwrap.isInstanceOf[Real])
   }
 
   @Test
   def tuple_of_two {
     val ds = Dataset(TestTuple.tuple_of_reals)
     val ds2 = reduce(ds)
-    val v = ds2.getVariables.head
+    val v = ds2.unwrap
     assertTrue(v.isInstanceOf[Tuple])
     assertEquals(2, v.asInstanceOf[Tuple].getVariables.length)
   }
@@ -39,8 +39,8 @@ class TestReduction {
   def nested_tuples = {
     val ds = TestDataset.tuple_of_tuples
     val ds2 = ds.reduce
-    assertEquals(2, ds.getVariables.head.asInstanceOf[Tuple].getElementCount)
-    assertEquals(4, ds2.getVariables.head.asInstanceOf[Tuple].getElementCount)
+    assertEquals(2, ds.unwrap.asInstanceOf[Tuple].getElementCount)
+    assertEquals(4, ds2.unwrap.asInstanceOf[Tuple].getElementCount)
   }
 
 //  @Test
@@ -63,7 +63,7 @@ class TestReduction {
   def iterable_function_of_one {
     val ds = Dataset(TestFunction.function_with_one_sample_of_scalar_with_iterable_data)
     val ds2 = reduce(ds)
-    val v = ds2.getVariables.head
+    val v = ds2.unwrap
     assertTrue(v.isInstanceOf[Sample])
   }
   
@@ -71,7 +71,7 @@ class TestReduction {
   def iterable_function_of_many {
     val ds = Dataset(TestFunction.function_of_scalar_with_iterable_data)
     val ds2 = reduce(ds)
-    val v = ds2.getVariables.head
+    val v = ds2.unwrap
     assertTrue(v.isInstanceOf[Function])
   }
   

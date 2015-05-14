@@ -25,7 +25,7 @@ class TestJsondWriter extends WriterTest {
   def test_tsi {
     test_writer(getDataset("tsi"),"jsond")
   }
-  @Test
+  @Test @Ignore
   def test_tof {
     test_writer(getDataset(tof),"jsond")
   }

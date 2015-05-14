@@ -8,6 +8,8 @@ class VariableMetadata(val properties: Map[String,String]) extends Metadata {
   
   def get(key: String) = properties.get(key)
   
+  def getOrElse(key: String, default: => String) = properties.getOrElse(key, default)
+  
   def has(key: String): Boolean = properties.contains(key)
   
   override def equals(that: Any): Boolean = that match {
