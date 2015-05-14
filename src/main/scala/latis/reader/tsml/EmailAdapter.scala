@@ -15,7 +15,7 @@ import javax.mail.Multipart
 import latis.time.Time
 
 /**
- * Reads a folder of emails, returning the sent date, from address, subject and content
+ * Reads a folder of emails, returning the sent date, from address, subject, and content
  * of each message.
  */
 class EmailAdapter(tsml: Tsml) extends IterativeAdapter[Message](tsml) {
@@ -41,19 +41,23 @@ class EmailAdapter(tsml: Tsml) extends IterativeAdapter[Message](tsml) {
   }
   
   def parseRecord(msg: Message): Option[Map[String, Data]] = {
-    val vars = getOrigScalars
+    val vars = getOrigScalars //list of scalars from tsml
     val values = extractValues(msg)
     
+    //there should be one value per scalar
     if (vars.length != values.length) {
-      None
+      None //drop sample if some component of message is missing
     } else {
       val vnames: Seq[String] = vars.map(_.getName)
-      val datas: Seq[Data] = (values zip vars).map(p => Data(StringUtils.padOrTruncate(p._1, p._2)))
+      val datas: Seq[Data] = (values zip vars).map(p => Data(StringUtils.padOrTruncate(p._1, p._2))) //enforce Text length
       Some((vnames zip datas).toMap)
     }
     
   }
   
+  /**
+   * Expects Dataset to look like: sendDate -> (sender, subject, content)
+   */
   def extractValues(msg: Message): Seq[String] = {
     val format = getOrigDataset.findVariableByName("time").get.asInstanceOf[Time].getUnits.toString
     val date = (new SimpleDateFormat(format)).format(msg.getSentDate)
