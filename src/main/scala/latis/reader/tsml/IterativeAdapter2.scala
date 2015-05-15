@@ -42,7 +42,8 @@ abstract class IterativeAdapter2[R](tsml: Tsml) extends TsmlAdapter(tsml) {
     }
   }
    /**
-    * Returns the product of the lengths of the Functions nested in the given Sample
+    * Returns the product of the lengths of the Functions nested in the given Sample.
+    * This is how many records are needed to make one Sample.
     */
   def innerLength(s: Sample): Int = s.range.findFunction match {
     case None => 1

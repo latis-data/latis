@@ -75,7 +75,7 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
     val its = buffers.zip(vars).map(p => BufferIterator(p._1, p._2))
     val rits = its.zip(vars).map(p => new RepeatIterator(p._1, reps.withDefaultValue(1)(p._2)))//apply repetitions
     val lrits = rits.zip(vars).map(p => if(loops.contains(p._2)) new LoopIterator(p._1) else p._1)//apply loops
-    new HelperIterator(lrits)//HelperIterator changes Seq[Iterator[Array[Byte]]] => Iterator[Seq[Array[Byte]]]
+    new ZipIterator(lrits)//ZipIterator changes Seq[Iterator[Array[Byte]]] => Iterator[Seq[Array[Byte]]]
   }
   
   def parseRecord(rec: Seq[Array[Byte]]): Option[Map[String,Data]] = {
@@ -89,7 +89,12 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
   def makeData(bytes: Array[Byte], vTemplate: Variable): Data = vTemplate match {
     case _: Integer => LongValue(ByteBuffer.wrap(bytes).getLong)
     case _: Real => DoubleValue(ByteBuffer.wrap(bytes).getDouble)
-    case t: Text => StringValue(StringUtils.padOrTruncate(new String(bytes.filter(_!=0).map(_.toChar)),t.length))
+    case t: Text => {
+      val buffer = ByteBuffer.wrap(bytes).asCharBuffer
+      val chars = Array.ofDim[Char](t.length)
+      buffer.get(chars)
+      StringValue(StringUtils.padOrTruncate(new String(chars),t.length))
+    }
   }
   
   def close = {}
@@ -97,7 +102,7 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
   /**
    * Synchronizes a Seq[Iterator] into an Iterator[Seq]
    */
-  class HelperIterator(its: Seq[Iterator[Array[Byte]]]) extends PeekIterator[Seq[Array[Byte]]] {
+  class ZipIterator(its: Seq[Iterator[Array[Byte]]]) extends PeekIterator[Seq[Array[Byte]]] {
     def getNext = {
       val nexts = its.map(it => if(it.hasNext) it.next else null)
       if(nexts.forall(_!=null)) nexts else null
