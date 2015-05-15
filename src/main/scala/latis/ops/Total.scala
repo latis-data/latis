@@ -9,8 +9,8 @@ import latis.metadata.Metadata
 /**
  * Reduces a Function to a single Sample. The value of Number Variables
  * will be the sum of the value of that Variable in all Samples of the original Function.
- * The value of the domain and Text Variables will be their last values from the original Function.
- * Not supported for nested Functions. 
+ * The value of the domain will be its last value from the original Function.
+ * If any Text Variables appear in the range, an UnsupportedOperationException will be thrown. 
  */
 class Total extends Operation {
   
