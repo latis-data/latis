@@ -8,7 +8,7 @@ import latis.dm.Scalar
 import latis.dm.Variable
 import latis.ops.Operation
 import latis.util.DataUtils
-import latis.util.PeekIterator
+import latis.util.iterator.PeekIterator
 
 class NearestNeighborFilter(domainName: String, value: String) extends Operation {
   //TODO: any nD domain

@@ -3,8 +3,8 @@ package latis.dm
 import latis.data.SampleData
 import latis.ops.Operation
 import latis.util.DataUtils
-import latis.util.MappingIterator
-import latis.util.PeekIterator
+import latis.util.iterator.MappingIterator
+import latis.util.iterator.PeekIterator
 import com.typesafe.scalalogging.slf4j.Logging
 
 //TODO: SampleMappedFunction?

@@ -1,12 +1,6 @@
-package latis.util
+package latis.util.iterator
 
 import java.nio.ByteBuffer
-import java.nio.charset.Charset
-
-import latis.data.Data
-import latis.dm.Integer
-import latis.dm.Real
-import latis.dm.Text
 import latis.dm.Variable
 
 /**

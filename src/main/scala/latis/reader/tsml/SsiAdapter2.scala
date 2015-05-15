@@ -22,10 +22,11 @@ import latis.dm.Text
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.reader.tsml.ml.Tsml
-import latis.util.BufferIterator
+import latis.util.iterator.BufferIterator
 import latis.util.DataUtils
-import latis.util.MappingIterator
-import latis.util.PeekIterator
+import latis.util.iterator.LoopIterator
+import latis.util.iterator.MappingIterator
+import latis.util.iterator.PeekIterator
 import latis.data.Data
 
 /**
@@ -113,21 +114,5 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
   }
   
   def close = {}
-
-  /**
-   * Helper class to repeat the Domain of nested Functions
-   */
-  class LoopIterator[T >: Null](iterator: Iterator[T]) extends PeekIterator[T] {
-    
-    private var it = iterator.duplicate
-    
-    def getNext = {
-      if(it._1.hasNext) it._1.next
-      else {
-        it = it._2.duplicate
-        getNext
-      }
-    }
-  }
   
 }

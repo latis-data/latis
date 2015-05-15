@@ -3,8 +3,8 @@ package latis.reader
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-import latis.reader.tsml.LoopIterator
-import latis.reader.tsml.RepeatIterator
+import latis.util.iterator.LoopIterator
+import latis.util.iterator.RepeatIterator
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
 

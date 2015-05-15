@@ -18,9 +18,12 @@ import latis.dm.Real
 import latis.dm.Text
 import latis.dm.Variable
 import latis.reader.tsml.ml.Tsml
-import latis.util.BufferIterator
-import latis.util.PeekIterator
+import latis.util.iterator.BufferIterator
+import latis.util.iterator.PeekIterator
 import latis.util.StringUtils
+import latis.util.iterator.LoopIterator
+import latis.util.iterator.RepeatIterator
+import latis.util.iterator.ZipIterator
 
 /**
  * Combines separate binary files representing individual Variables into a single Dataset.
@@ -99,39 +102,4 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
   
   def close = {}
   
-  /**
-   * Synchronizes a Seq[Iterator] into an Iterator[Seq]
-   */
-  class ZipIterator(its: Seq[Iterator[Array[Byte]]]) extends PeekIterator[Seq[Array[Byte]]] {
-    def getNext = {
-      val nexts = its.map(it => if(it.hasNext) it.next else null)
-      if(nexts.forall(_!=null)) nexts else null
-    }
-  }
-}
-
-/**
- * Returns each value in the Iterator rep times when getNext is called before moving to the next value. 
- */
-class RepeatIterator[T >: Null](it: Iterator[T], rep: Int) extends PeekIterator[T] {
-  var count = rep
-  def getNext = {
-    count += 1
-    if(count < rep) current
-    else {count = 0; if(it.hasNext) it.next else null }
-  }
-}
-/**
- * Loops an Iterator such that it returns to its beginning when its end is reached. 
- * Should be zipped with a non-looped Iterator in order to prevent an infinite loop.
- */
-class LoopIterator[T >: Null](iterator: Iterator[T]) extends PeekIterator[T] {
-  private var it = iterator.duplicate
-  def getNext = {
-    if(it._1.hasNext) it._1.next
-    else {
-      it = it._2.duplicate
-      getNext
-    }
-  }
 }

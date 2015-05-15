@@ -1,4 +1,4 @@
-package latis.util
+package latis.util.iterator
 
 import scala.annotation.tailrec
 import com.typesafe.scalalogging.slf4j.Logging
