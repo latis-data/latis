@@ -7,6 +7,7 @@ import latis.writer._
 import org.junit._
 import Assert._
 import latis.data.value.DoubleValue
+import latis.metadata.Metadata
 
 class TestDoubleValue {
 
@@ -30,10 +31,25 @@ class TestDoubleValue {
   
   @Test
   def rounding {
+    //AsciiWriter.write(TestDataset.function_of_scalar_with_rounding)
     val data = TestDataset.function_of_scalar_with_rounding.toDoubles
     assertEquals(2.0, data(0)(2), 0.0)
     assertEquals(120, data(1)(1), 0.0)
   }
+  
+  @Test @Ignore //we are not getting the expected behavior in text output
+  def rounding2 {
+    val ds = Dataset(Tuple(Real(Metadata(Map("precision"->"0", "name"->"a")),-0.004),
+                           Real(Metadata(Map("precision"->"2", "name"->"b")),1.001111),
+                           Real(Metadata(Map("sigfigs"->"3", "name"->"c")),1.995)
+                     ))
+    //AsciiWriter.write(ds)
+    val data = ds.toStringMap
+    assertEquals("-0", data("a").head)    //d=-0.004;   println(f"$d%.0f") => -0  //TODO: drop "-"?
+    assertEquals("1.00", data("b").head)  //d=1.001111; println(f"$d%.2f") => 1.00
+    assertEquals("2.00", data("c").head)  //d=1.995;    println(f"$d%.3g") => 2.00
+  }
+  
 //  @Test
 //  def length = assertEquals(1, data.length)
 //  
