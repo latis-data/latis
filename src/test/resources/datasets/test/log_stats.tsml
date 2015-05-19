@@ -3,13 +3,13 @@
 
   <dataset name="log_stats">
     <adapter class="latis.reader.tsml.LogStatsAdapter"
-             location="datasets/test_log.json" />
+             location="http://sdc-web1:8080/ops/mms/webtcad/latis/log.json" />
     
-    <time name="myTime" units="yyyy/MM/dd" type="text" length="10"/>
+    <time name="time" units="yyyy-MM-ddTHH:mm:ss.SSS" type="text" length="23"/>
    
-    <real name="myInt"/>
-    <text name="myReal" length="3"/>
-    <text name="myText" length="1"/>
+    <real name="duration"/>
+    <text name="request" length="50"/>
+    <text name="result" length="100"/>
     
   </dataset>
 

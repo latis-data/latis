@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="log_stats">
+    <adapter class="latis.reader.tsml.LogStatsAdapter"
+             location="datasets/test_log.json" />
+    
+    <time name="myTime" units="yyyy-MM-dd" type="text" length="10"/>
+   
+    <real name="myInt"/>
+    <text name="myReal" length="3"/>
+    <text name="myText" length="1"/>
+    
+  </dataset>
+
+</tsml>

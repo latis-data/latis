@@ -9,7 +9,7 @@ class TestLogStatsAdapter {
   
   @Test
   def test {
-    val ds = TsmlReader("datasets/test/log_stats.tsml").getDataset
+    val ds = TsmlReader("datasets/test/log_stats_test.tsml").getDataset
     val data = ds.toStrings
     assertEquals(4, data.length)
     assertEquals(3, data(1).length)
