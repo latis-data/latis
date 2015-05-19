@@ -135,7 +135,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
       None
     } else {
       val vnames: Seq[String] = vars.map(_.getName)
-      val datas: Seq[Data] = (values zip vars).map(p => parseStringValue(p._1, p._2))
+      val datas: Seq[Data] = (values zip vars).map(p => StringUtils.parseStringValue(p._1, p._2))
       Some((vnames zip datas).toMap)
     }
   }
@@ -145,24 +145,6 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    */
   def extractValues(record: String): Seq[String] = record.trim.split(getDelimiter)
 
-  //TODO: reuse, dataUtils?
-  //TODO: support regex property for each variable
-  def parseStringValue(value: String, variableTemplate: Variable): Data = variableTemplate match {
-    case _: Integer => try {
-      //If value looks like a float, take everything up to the decimal point.
-      val s = if (value.contains(".")) value.substring(0, value.indexOf("."))
-      else value
-      Data(s.trim.toLong)
-    } catch {
-      case e: NumberFormatException => Data(variableTemplate.asInstanceOf[Integer].getFillValue.asInstanceOf[Long])
-    }
-    case _: Real => try {
-      Data(value.trim.toDouble)
-    } catch {
-      case e: NumberFormatException => Data(variableTemplate.asInstanceOf[Real].getFillValue.asInstanceOf[Double])
-    }
-    case t: Text    => Data(StringUtils.padOrTruncate(value, t.length)) //enforce length
-  }
 }
 
 

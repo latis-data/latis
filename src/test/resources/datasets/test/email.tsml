@@ -3,12 +3,9 @@
 
   <dataset name="email">
     <adapter class="latis.reader.tsml.EmailAdapter"
-             host=""
-             user=""
-             password=""
-             folder="" />
+             location="imap://user:password@host/folder" />
     
-    <time name="sentDate" type="text" length="10" units="yyyy/MM/dd"/>
+    <time name="sentDate" type="integer" units="ms since 1970"/>
     <text name="sender" length="256"/>
     <text name="subject" length="256"/>
     <text name="content" length="256"/>
