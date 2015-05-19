@@ -24,7 +24,7 @@ class TimeFormat(format: String) {
     try {
       sdf.parse(string).getTime
     } catch {
-      case e: ParseException => throw new Error("Unable to parse time string (" + string + ") with the format " + format)
+      case e: ParseException => throw new Exception("Unable to parse time string (" + string + ") with the format " + format)
     }
   }
 
