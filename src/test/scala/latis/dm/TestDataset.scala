@@ -91,6 +91,13 @@ object TestDataset {
     Dataset(Function(samples, Metadata(Map("length"->"3"))), Metadata("function_of_scalar"))
   }
   
+  def function_of_scalar_with_rounding = {
+    val samples = List(Sample(Real(Metadata(Map("precision"->"2", "name"->"a")),-0.004), Integer(Metadata(Map("sigfigs"->"1", "name"->"b")),123)),
+    				   Sample(Real(Metadata(Map("precision"->"2", "name"->"a")),1.001111), Integer(Metadata(Map("sigfigs"->"2", "name"->"b")),123)),
+    				   Sample(Real(Metadata(Map("precision"->"2", "name"->"a")),1.995), Integer(Metadata(Map("sigfigs"->"3", "name"->"b")),123)))
+    Dataset(Function(samples), Metadata("function_of_scalar_with_rounding"))
+  }
+  
   def function_of_tuple = {
     val samples = List(Sample(Integer(Metadata("myInteger"), 0), Tuple(Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero"))), 
                        Sample(Integer(Metadata("myInteger"), 1), Tuple(Real(Metadata("myReal"), 1), Text(Metadata("myText"), "one"))), 

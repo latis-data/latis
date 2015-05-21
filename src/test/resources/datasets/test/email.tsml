@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="email">
+    <adapter class="latis.reader.tsml.EmailAdapter"
+             location="imap://user:password@host/folder" />
+    
+    <time name="sentDate" type="integer" units="ms since 1970"/>
+    <text name="sender" length="256"/>
+    <text name="subject" length="256"/>
+    <text name="content" length="256"/>
+    
+    
+  </dataset>
+
+</tsml>

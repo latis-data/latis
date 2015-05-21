@@ -41,7 +41,8 @@ class BinaryMathOperation(op: (Double, Double) => Double, other: Dataset) extend
     case (t: Text, n: Number) => Real(Double.NaN)
     case (n: Number, t: Text) => Real(Double.NaN)
     
-    case (Number(d1), Number(d2)) => Real(op(d1, d2))
+    case (n1 @ Number(d1), n2 @ Number(d2)) => if(n1.getMetadata != n2.getMetadata) Real(op(d1, d2))
+                                               else Real(n1.getMetadata, op(d1, d2)) 
     
     //--- Sample Math ---------------------------------------------------------
     

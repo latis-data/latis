@@ -29,6 +29,6 @@ object Real {
   /**
    * Expose the double value represented by this Variable.
    */
-  def unapply(real: Real): Option[Double] = Some(real.getNumberData.doubleValue)
+  def unapply(real: Real): Option[Double] = Some(real.doubleValue)
   
 }
