@@ -116,7 +116,10 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
       
       //get data as a Map: name -> array of values
       val data = samplesToDoubleMap(samples)
-      val values = data(rangeTemplate.getName)
+      val values = data.get(rangeTemplate.getName) match {
+        case Some(vs) => vs
+        case None => return None
+      }
       
       val meanValue = values.sum / values.length
       val mean = Real(rangeTemplate.getMetadata, meanValue)
@@ -150,6 +153,7 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
     val ds = Dataset(Function(samples))
     //exclude samples with missing data
     val ds2 = ExcludeMissing()(ds)
+    
     
     ds2.toDoubleMap
   }
