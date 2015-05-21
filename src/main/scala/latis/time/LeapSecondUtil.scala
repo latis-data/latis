@@ -3,6 +3,8 @@ package latis.time
 import java.util.Date
 import java.util.TreeMap
 import scala.io.Source
+import latis.reader.tsml.TsmlReader
+import latis.dm.Dataset
 
 object LeapSecondUtil {
   
@@ -17,22 +19,16 @@ object LeapSecondUtil {
     val epoch: Date = new Date(Time.isoToJava("1900-01-01"))
     val etime: Long = epoch.getTime
 
-    val src = getSource
+    val lsds = readLeapSecondData
     
-    try {
-      val lines = src.getLines.filterNot(_.startsWith("#"))
+    val it = lsds.findFunction.get.iterator
 
-      lines.foreach(line => {
-        val ss = line.takeWhile(_!='#').trim.split("\\s+") //cut comments after data
-        val t = ss(0).toLong * 1000 + etime //convert to ms since 1970
-        val date = new Date(t)
-        val ls = ss(1).toDouble
-        map.put(date, ls)
-      })
-        
-    } finally {
-      src.close
-    }
+    it.foreach(sample => {
+      val t = sample.domain.asInstanceOf[Time].getJavaTime//ms since 1970
+      val date = new Date(t)
+      val ls = sample.range.getNumberData.doubleValue
+      map.put(date, ls)
+    })
     
     map
   }
@@ -42,10 +38,14 @@ object LeapSecondUtil {
    * It also has last update and expiration dates in it.
    * It's scale is seconds since 1900.
    */
-  private def getSource: Source = {
-    //TODO: check expiration date?
-    //Source.fromURL("ftp://utcnist.colorado.edu/pub/leap-seconds.list") //unreliable
-    Source.fromFile("src/main/scala/latis/time/leap-seconds.list")
+  private def readLeapSecondData: Dataset = {
+    var reader: TsmlReader = null
+     try {
+       reader = TsmlReader("src/test/resources/datasets/test/leap_seconds.tsml")
+       reader.getDataset.force
+     } finally {
+       if(reader != null) reader.close
+     }
   }
   
   /**
