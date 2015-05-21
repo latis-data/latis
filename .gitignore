@@ -10,3 +10,5 @@
 /bin
 /.externalToolBuilders
 .DS_Store
+.nfs*
+
