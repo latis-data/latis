@@ -46,9 +46,11 @@ object TimeScale {
   }
   
   def apply(epoch: String, unit: TimeUnit, tsType: TimeScaleType): TimeScale = {
-    new TimeScale(new Date(TimeFormat.DATE.parse(epoch)), unit, tsType)
-    //TODO: assumes yyyy-MM-dd, add support for any ISO time
-    //see javax.xml.bind.DatatypeConverter.parseDateTime("2010-01-01T12:00:00Z") or Joda time
+    new TimeScale(new Date(TimeFormat.fromIsoValue(epoch).parse(epoch)), unit, tsType)
+  }
+  
+  def apply(ts: TimeScale, tsType: TimeScaleType): TimeScale = {
+    new TimeScale(ts.epoch, ts.unit, tsType)
   }
   
   /**
