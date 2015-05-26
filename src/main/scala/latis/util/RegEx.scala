@@ -59,7 +59,7 @@ object RegEx {
      *   =~  Matches pattern
      *   ~   Almost equals, match nearest value
      */
-    lazy val SELECTION_OPERATOR = ">=|<=|>|<|=~|==|!=|=|~"
+    lazy val SELECTION_OPERATOR = ">=|<=|>|<|=~|==|!=|=|~|!=~"
       
       
     /**
