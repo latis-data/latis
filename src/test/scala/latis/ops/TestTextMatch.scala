@@ -17,12 +17,20 @@ import latis.writer.AsciiWriter
 
 class TestTextMatch {
 
+  /*
+   * TestDataset.function_of_tuple:
+   * myInteger -> (myReal, myText)
+   * 0 -> (0.0, zero)
+   * 1 -> (1.0, one)
+   * 2 -> (2.0, two)
+   */
+  
   @Test
   def equals {
     val ds = TestDataset.function_of_tuple
+    AsciiWriter.write(ds)
     val op = Selection("myText=one")
     val ds2 = op(ds)
-    //AsciiWriter.write(ds2)
     val data = ds2.toStringMap
     assertEquals(1, data("myText").length)
     assertEquals("1", data("myInteger").head)
