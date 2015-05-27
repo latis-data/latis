@@ -7,6 +7,7 @@ import java.nio.ByteOrder
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import latis.util.StringUtils
+import latis.util.DataUtils
 
 /**
  * 
@@ -21,9 +22,11 @@ class BinaryWriter extends Writer {
 
   private lazy val writer = new DataOutputStream(getOutputStream)
   
-  def write(dataset: Dataset) {
-    dataset.getVariables.map(writeVariable(_))
-    writer.flush()
+  def write(dataset: Dataset) = dataset match {
+    case Dataset(v) => {
+      writeVariable(v)
+      writer.flush()
+    }
   }
   
   /**
@@ -35,7 +38,7 @@ class BinaryWriter extends Writer {
   }
   
   /**
-   * Recursively build up a ByteBuffer
+   * Recursively build up an array of Bytes.
    */
   def varToBytes(variable: Variable): Array[Byte] = variable match {
     case function: Function => {
@@ -44,11 +47,11 @@ class BinaryWriter extends Writer {
     case t: Tuple => (for(v <- t.getVariables) yield varToBytes(v)).foldLeft(Array[Byte]())(_ ++ _)
     case _ => {
       val bb = ByteBuffer.allocate(variable.getSize) //potentially bigger than what we write (e.g. Index)
-      //set the byte order
-      bb.order(order)
+      bb.order(order) //set the byte order
       buildVariable(variable, bb)
-      val bytes = new Array[Byte](bb.position())
-      bb.rewind.asInstanceOf[ByteBuffer].get(bytes)
+      bb.flip //set limit to current position then rewind position to start
+      val bytes = new Array[Byte](bb.limit) //allocate array to hold bytes
+      bb.get(bytes)
       bytes
     }
   }
@@ -68,8 +71,11 @@ class BinaryWriter extends Writer {
       for(c <- StringUtils.padOrTruncate(s, scalar.getSize/2)) bb.putChar(c) //TODO: enforce charset? Is this using default charset?
       bb//.put(charset.encode(StringUtils.padOrTruncate(s, scalar.getSize/2)).rewind.asInstanceOf[ByteBuffer]) //??? //TODO: see JdbcAdapter
     }
-    case Binary(b)  => bb.put(b)
+    case Binary(b)  => {
+      bb.put(DataUtils.trimBytes(b)) //keep only useful bytes
+    }
   }
+
   
   def buildSample(sample: Sample, bb: ByteBuffer): ByteBuffer = {
     buildTuple(sample, bb)

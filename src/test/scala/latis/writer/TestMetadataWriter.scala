@@ -12,23 +12,23 @@ import latis.metadata.Metadata
 
 class TestMetadataWriter extends WriterTest{
   
-  @Test
+  @Test @Ignore
   def test_dap2 {
     test_writer(getDataset("dap2"),"meta")
   }
-  @Test
+  @Test @Ignore
   def test_fof {
     test_writer(getDataset(fof),"meta")
   }
-  @Test
+  @Test @Ignore
   def test_scalar {
     test_writer(getDataset("scalar"),"meta")
   }
-  @Test
+  @Test @Ignore
   def test_tsi {
     test_writer(getDataset("tsi"),"meta")
   }
-  @Test
+  @Test @Ignore
   def test_tof {
     test_writer(getDataset(tof),"meta")
   }

@@ -17,7 +17,7 @@ class TestUnitConversion {
     val data = ds2.toDoubleMap
     assertEquals(data("myTime").head, -24.0, 0)
         
-    val tv = ds2.findVariableByName("time").get
+    val tv = ds2.unwrap.findVariableByName("time").get
     //TODO: assertEquals("hours since 2000-01-02", tv.getMetadata("units").get)
   }
   

@@ -4,9 +4,9 @@ import latis.data.Data
 import latis.data.EmptyData
 import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
-
 import scala.Option.option2Iterable
 import scala.collection.Seq
+import latis.util.DataUtils
 
 /**
  * Implementation for much of what Variables need to do.
@@ -59,8 +59,10 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
     case _: Real => 8 //double
     case _: Integer => 8 //long
     case t: Text => t.length * 2 //2 bytes per char  //TODO: avoid confusing t.length with getLength
-    case _: Binary => getMetadata("size") match {
-      case Some(l) => l.toInt
+    case _: Binary => getMetadata("length") match {
+      case Some(l) => l.toInt + DataUtils.nullMark.length //account for the termination mark
+      //NOTE: potential for trouble: termination marker not required,
+      //and number of bytes written by BinaryWriter won't match size since it doesn't write the marker
       case None => throw new Error("Must declare length of Binary Variable.")
     } 
     

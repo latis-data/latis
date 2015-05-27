@@ -8,6 +8,8 @@ trait Metadata {
   
   def get(key: String): Option[String]
   
+  def getOrElse(key: String, default: => String): String
+  
   def apply(key: String): String = get(key) match {
     case Some(s) => s
     case None => null //TODO: error? default?
@@ -18,6 +20,7 @@ trait Metadata {
    * Replace if it already exists.
    */
   def +(kv: (String,String)): Metadata = Metadata(getProperties + kv)
+  //TODO: MetadataBuilder so we can keep adding properties without making a new object each time.
   
   def has(key: String): Boolean
   
@@ -44,9 +47,17 @@ object Metadata {
     new VariableMetadata(props)
   }
   
+  /**
+   * Construct Metadata from a Map of properties.
+   */
   def apply(properties: Map[String,String]): Metadata = properties match {
     case null => EmptyMetadata
     case _ => if (properties.isEmpty) EmptyMetadata else new VariableMetadata(properties.toMap)
   }
+  
+  /**
+   * Construct Metadata from a single property.
+   */
+  def apply(property: (String,String)): Metadata = new VariableMetadata(immutable.Map(property))
 
 }

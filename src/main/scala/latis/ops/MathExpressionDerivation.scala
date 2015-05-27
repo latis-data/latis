@@ -1,7 +1,7 @@
 package latis.ops
 
 import scala.Array.canBuildFrom
-import scala.Option.option2Iterable
+import com.typesafe.scalalogging.slf4j.Logging
 
 import latis.dm.Dataset
 import latis.dm.Function
@@ -13,41 +13,42 @@ import latis.dm.Variable
 import latis.dm.implicits.doubleToDataset
 import latis.dm.implicits.variableToDataset
 import latis.metadata.Metadata
-import latis.ops.agg.CollectionAggregation
 import latis.ops.math.BinaryMathOperation
 import latis.ops.math.MathOperation
 import latis.ops.math.ReductionMathOperation
 import latis.ops.math.UnaryMathOperation
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Adds a new Variable to a Dataset according to the inputed math expression.
  * The str parameter must include the name of the new Variable followed by '=' and the expression.
  */
-class MathExpressionDerivation(str: String) extends Operation {
+class MathExpressionDerivation(str: String) extends Operation with Logging {
   
-  var ds: Dataset = Dataset(List())
+  var ds: Dataset = Dataset()
+  //TODO: consider defining value in an empty dataset
   
-/**
- *   If the Dataset contains a function, the derivation will be handled by applyToFunction.
- *   Otherwise, the derived variable is calculated here and added as a first level variable of the Dataset. 
- */  
   override def apply(dataset: Dataset): Dataset = {
-    ds = dataset
     val md = dataset.getMetadata
-    val vars = dataset.getVariables
-    val fs = vars.filter(_.isInstanceOf[Function])
-    fs.length match {
-      case 0 => Dataset(vars :+ Real(Metadata(str.takeWhile(_ != '=').trim), parseExpression(str.substring(str.indexOf('=')+1)).toSeq(0).getData), md)
-      case _ => Dataset(vars.flatMap(applyToVariable(_)), md) //won't have access to Variables outside the function. 
+    //TODO: delegate to subclass to munge metadata
+    //TODO: add provenance metadata, getProvMsg, append to "history"
+    val v: Variable = dataset.unwrap match {
+      case v: Variable => applyToVariable(v) match {
+        case Some(v) => v
+        case None => null
+      }
+      case null => Real(Metadata(str.substring(0,str.indexOf('='))), parseExpression(str.substring(str.indexOf('=')+1)).unwrap.getData)
     }
+    
+    Dataset(v, md)
   }
   
   /**
    * Only apply to functions.
    */
   override def applyToVariable(v: Variable): Option[Variable] = v match {
-    case s: Scalar => Some(s)
-    case t: Tuple => Some(t)
+    case s: Scalar => Some(Tuple(Seq(s) :+ Real(Metadata(str.substring(0,str.indexOf('='))), parseExpression(str.substring(str.indexOf('=')+1)).unwrap.getData)))
+    case t: Tuple => Some(t)//Some(Tuple(t.getVariables :+ Real(Metadata(str.substring(0,str.indexOf('='))), parseExpression(str.substring(str.indexOf('=')+1)).unwrap.getData)))
     case f: Function => applyToFunction(f)
   }
   
@@ -57,7 +58,7 @@ class MathExpressionDerivation(str: String) extends Operation {
   override def applyToSample(sample: Sample): Option[Sample] = {
     val name = str.substring(0,str.indexOf('='))
     ds = sample
-    val r = Real(Metadata(name), parseExpression(str.substring(str.indexOf('=')+1)).getVariables.head.getData)
+    val r = Real(Metadata(name), parseExpression(str.substring(str.indexOf('=')+1)).unwrap.getData)
     Some(Sample(sample.domain, Tuple(sample.range.toSeq :+ r)))
   }
   
@@ -68,7 +69,10 @@ class MathExpressionDerivation(str: String) extends Operation {
   override def applyToFunction(f: Function): Option[Variable] = {
     val s = testSample(f.getSample)
     s match {
-      case None => Some(f)
+      case None => {
+        logger.warn("Derived field " + str.substring(0, str.indexOf('=')) + " was not added to the Dataset")
+        Some(f)
+      }
       case Some(sample) => Some(Function(sample.domain, sample.range, f.iterator.map(applyToSample(_).get), f.getMetadata))
     }
   }
@@ -111,9 +115,12 @@ class MathExpressionDerivation(str: String) extends Operation {
     //evaluates innermost set of (). Keeps result in appended temp Dataset so its value can be accessed later.
     else if(str.contains("(")) {
       val sub = inParen(str)
-      val t = parseExpression(sub)
+      val t: Variable = parseExpression(sub).unwrap
       tempCount += 1
-      ds = CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
+      ds = ds.unwrap match {
+        case null => Dataset(t.rename(t.getName, "temp"+tempCount).unwrap)//CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
+        case _ => Dataset(Tuple(ds.unwrap, t.rename(t.getName, "temp"+tempCount).unwrap))//CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
+      }
       parseExpression(str.replaceAllLiterally("("+sub+")", "temp"+tempCount))
     }
     
@@ -144,16 +151,40 @@ class MathExpressionDerivation(str: String) extends Operation {
       case "DEG_TO_RAD" => MathOperation(Math.toRadians(_))
       case "ATAN" => MathOperation(Math.atan(_))
     }
-    val t = op match {
-      case u: UnaryMathOperation => u(parseExpression(args))
+    val t: Variable = op match {
+      case u: UnaryMathOperation => u(parseExpression(args)).unwrap
       case b: BinaryMathOperation => ???
-      case r: ReductionMathOperation => r(args.split(',').map(parseExpression(_)))
+      case r: ReductionMathOperation => r(split(args).map(parseExpression(_))).unwrap
     }
+
     tempCount += 1
-    ds = CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
+    ds = ds.unwrap match {
+      case null => Dataset(t.rename(t.getName, "temp"+tempCount).unwrap)//CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
+      case _ => Dataset(Tuple(ds.unwrap, t.rename(t.getName, "temp"+tempCount).unwrap))//CollectionAggregation()(ds, t.rename(t.getName, "temp"+tempCount))
+    }
     parseExpression(str.replaceAllLiterally(sub, "temp"+tempCount))
   }
-    
+   
+  /**
+   * Split only on commas that are not within parentheses. 
+   */
+  def split(args: String): Seq[String] = {
+    val buffer = ArrayBuffer[String]()
+    var c1 = -1
+    var c2 = args.indexOf(',')
+    while(c2 != -1){
+      val sub = args.substring(c1+1, c2)
+      if(sub.count(_=='(')>sub.count(_==')')) c2 = args.indexOf(',',c2+1)
+      else {
+        buffer += sub
+        c1 = c2
+        c2 = args.indexOf(',',c2+1)
+      }
+    }
+    buffer += args.substring(c1+1)
+    buffer.toSeq
+  }
+  
   def applyBasicMath(str: String, i: Int) = {
     val op = str.substring(i, i+1)
     val lhs = parseExpression(str.substring(0,i))

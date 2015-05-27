@@ -7,8 +7,7 @@ import latis.dm.Dataset
  * No attempt at joining is made.
  */
 class CollectionAggregation extends Aggregation {
-
-  //TODO: replace child Datasets with instances of Tuple
+//TODO: is there a need for this now that a Dataset can't contain other Datasets?
   def aggregate(dataset: Dataset): Dataset = dataset
   
 }

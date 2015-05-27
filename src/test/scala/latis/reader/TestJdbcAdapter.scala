@@ -65,6 +65,24 @@ class TestJdbcAdapter extends AdapterTests {
   }
   
   @Test
+  def derive_then_project {
+    val ops = List(MathExpressionDerivation("i2=myInt^2"), Projection("myTime,myInt,i2"))
+    val data = getDataset(ops).toStringMap
+    assertEquals(3, data.keySet.size)
+    assertEquals(3, data("myTime").length)
+    assertEquals(9.0, data("i2")(2).toDouble, 0.0)
+  }
+  
+  @Test
+  def project_then_derive {
+    val ops = List(Projection("myTime,myInt,i2"),MathExpressionDerivation("i2=myInt^2"))
+    val data = getDataset(ops).toStringMap
+    assertEquals(3, data.keySet.size)
+    assertEquals(3, data("i2").length)
+    assertEquals(4.0, data("i2")(1).toDouble, 0.0)
+  }
+  
+  @Test
   def select_with_orig_name_then_rename {
     val ops = List(Selection("myInt>1"), RenameOperation("myInt", "theInt"))
     val data = getDataset(ops).toStringMap

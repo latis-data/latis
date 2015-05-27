@@ -6,12 +6,6 @@ class Factorization extends Operation {
 
   //TODO: constructor arg?
   private var factor: String = null
-
-  //TODO: impl in terms of applyToVariable...
-  override def apply(dataset: Dataset): Dataset = {
-    //TODO: metadata, add provo
-    Dataset(dataset.getVariables.map(op(_)))
-  }
   
   private def op(variable: Variable): Variable = variable match {
     case f: Function => {

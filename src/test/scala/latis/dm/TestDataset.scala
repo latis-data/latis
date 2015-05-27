@@ -13,6 +13,21 @@ import latis.data.value.DoubleValue
 
 class TestDataset {
 
+  @Test
+  def extract_variable {
+    TestDataset.real match {
+      case Dataset(v) => //pass
+      case _ => fail
+    }
+  }
+  
+  @Test
+  def extract_variable_from_empty_dataset {
+    Dataset.empty match {
+      case Dataset(v) => fail
+      case _ => //pass
+    }
+  }
 }
 
 /**
@@ -20,7 +35,8 @@ class TestDataset {
  */
 object TestDataset {
   
-  def empty = Dataset(List(), Metadata("emptyDS"))
+  //TODO: should we allow an empty Dataset, maybe from the monadic perspective
+  //def empty = Dataset(List(), Metadata("emptyDS"))
   
   def real = Dataset(Real(Metadata("myReal"), 3.14), Metadata("realDS"))
   def integer = Dataset(Integer(Metadata("myInteger"), 42), Metadata("intDS"))
@@ -28,7 +44,7 @@ object TestDataset {
   def real_time = Dataset(Time(Metadata("myRealTime"), 1000.0), Metadata("timeDS"))
   def text_time = Dataset(Time(Metadata(Map("name" -> "myTextTime", "type" -> "text", "length" -> "10", "units" -> "yyyy-MM-dd")), "1970/01/01"), Metadata("text_timeDS"))
   def int_time = Dataset(Time(Metadata(Map("name" -> "myIntegerTime", "type" -> "integer")), 1000.toLong), Metadata("integer_timeDS"))
-  def scalars = Dataset(List(Real(Metadata("myReal"), 3.14), Integer(Metadata("myInteger"), 42), Text(Metadata("myText"), "Hi"), Time(Metadata("myRealTime"), 1000.0)), Metadata("scalarDS"))
+  //def scalars = Dataset(List(Real(Metadata("myReal"), 3.14), Integer(Metadata("myInteger"), 42), Text(Metadata("myText"), "Hi"), Time(Metadata("myRealTime"), 1000.0)), Metadata("scalarDS"))
   def binary = Dataset(Binary(Metadata("myBinary"), DoubleValue(1.1).getByteBuffer), Metadata("binaryDS"))
   def nan = Dataset(Real(Metadata("myReal"), Double.NaN), Metadata("nanDS"))
   
@@ -36,7 +52,7 @@ object TestDataset {
   def tuple_of_tuples = Dataset(Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1.1))), Metadata("tuple_of_tuplesDS"))
   def tuple_of_functions = Dataset(TestNestedFunction.tuple_of_functions, Metadata("tuple_of_functions"))
   def scalar_tuple = Dataset(Tuple(Integer(Metadata("myInteger"), 1)), Metadata("scalar_tuple"))
-  def mixed_tuple = Dataset(Tuple(Real(Metadata("myReal"), 0.0), Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), function_of_scalar.getVariables(0)), Metadata("mixed_tuple"))
+  def mixed_tuple = Dataset(Tuple(Real(Metadata("myReal"), 0.0), Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), function_of_scalar.unwrap), Metadata("mixed_tuple"))
   def tuple_with_nan = Dataset(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), Double.NaN), Text(Metadata("myText"), "zero")), Metadata("tuple_with_nan"))
   
   def function_of_scalar = {
@@ -75,6 +91,13 @@ object TestDataset {
     Dataset(Function(samples, Metadata(Map("length"->"3"))), Metadata("function_of_scalar"))
   }
   
+  def function_of_scalar_with_rounding = {
+    val samples = List(Sample(Real(Metadata(Map("precision"->"2", "name"->"a")),-0.004), Integer(Metadata(Map("sigfigs"->"1", "name"->"b")),123)),
+    				   Sample(Real(Metadata(Map("precision"->"2", "name"->"a")),1.001111), Integer(Metadata(Map("sigfigs"->"2", "name"->"b")),123)),
+    				   Sample(Real(Metadata(Map("precision"->"2", "name"->"a")),1.995), Integer(Metadata(Map("sigfigs"->"3", "name"->"b")),123)))
+    Dataset(Function(samples), Metadata("function_of_scalar_with_rounding"))
+  }
+  
   def function_of_tuple = {
     val samples = List(Sample(Integer(Metadata("myInteger"), 0), Tuple(Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero"))), 
                        Sample(Integer(Metadata("myInteger"), 1), Tuple(Real(Metadata("myReal"), 1), Text(Metadata("myText"), "one"))), 
@@ -94,9 +117,9 @@ object TestDataset {
   def function_of_functions2 = Dataset(TestNestedFunction.function_of_functions_with_sampled_data, Metadata("function_of_functions2"))
   
   def mixed_function = {
-    val samples = List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), (function_of_scalar+(0)).getVariables(0))),
-                       Sample(Real(Metadata("myReal"), 1.1), Tuple(Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1)), (function_of_scalar+(1)).getVariables(0))),
-                       Sample(Real(Metadata("myReal"), 2.2), Tuple(Tuple(Integer(Metadata("myInteger"), 2), Real(Metadata("myReal"), 2)), (function_of_scalar+(2)).getVariables(0))))
+    val samples = List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), (function_of_scalar+(0)).unwrap)),
+                       Sample(Real(Metadata("myReal"), 1.1), Tuple(Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1)), (function_of_scalar+(1)).unwrap)),
+                       Sample(Real(Metadata("myReal"), 2.2), Tuple(Tuple(Integer(Metadata("myInteger"), 2), Real(Metadata("myReal"), 2)), (function_of_scalar+(2)).unwrap)))
     Dataset(Function(samples), Metadata("mixed_function"))
   }
   
@@ -128,9 +151,9 @@ object TestDataset {
   
   def index_function = Dataset(Function(List(Integer(1), Integer(2))), Metadata("indexFunctionDS"))
   
-  def combo = Dataset(List(function_of_tuple.getVariables(0), tuple_of_tuples.getVariables(0), text.getVariables(0)), Metadata("combo"))
+  def combo = Dataset(Tuple(function_of_tuple.unwrap, tuple_of_tuples.unwrap, text.unwrap), Metadata("combo"))
   
-  def datasets = Seq(empty, real, integer, text, real_time, text_time, int_time, scalars, binary, tuple_of_scalars,
-                     tuple_of_tuples, tuple_of_functions, scalar_tuple, mixed_tuple, function_of_scalar,
-                     function_of_tuple, function_of_functions, mixed_function, empty_function, index_function, combo)
+//  def datasets = Seq(empty, real, integer, text, real_time, text_time, int_time, scalars, binary, tuple_of_scalars,
+//                     tuple_of_tuples, tuple_of_functions, scalar_tuple, mixed_tuple, function_of_scalar,
+//                     function_of_tuple, function_of_functions, mixed_function, empty_function, index_function, combo)
 }

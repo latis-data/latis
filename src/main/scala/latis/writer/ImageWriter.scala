@@ -2,6 +2,7 @@ package latis.writer
 
 import latis.dm.Dataset
 import latis.dm.Scalar
+import latis.dm.Function
 import latis.dm.Tuple
 import latis.dm.Variable
 
@@ -36,24 +37,27 @@ class ImageWriter extends FileWriter{
   def writeFile(dataset: Dataset, file: File) {
     plotDataset(dataset)
     if(plotIndex>3) plot.setFixedRangeAxisSpace(new AxisSpace)
-    chart = new JFreeChart(dataset.getMetadata("long_name").getOrElse(dataset.getName), plot)
+    chart = new JFreeChart(dataset.getMetadata.getOrElse("long_name", dataset.getName), plot)
     ChartUtilities.writeBufferedImageAsPNG(new FileOutputStream(file), chart.createBufferedImage(500, 300))
   }
 
-  def plotDataset(dataset: Dataset) {
-    val function = dataset.findFunction.get
-    val x = function.getDomain
-    if(x.isInstanceOf[latis.time.Time] && x.getMetadata("type").get == "text"){
-      val axis = new DateAxis(x.getName)
-      plot.setDomainAxis(axis)
+  def plotDataset(dataset: Dataset) = dataset match {
+    case Dataset(function: Function) => {
+      val x = function.getDomain
+      if (x.isInstanceOf[latis.time.Time] && x.getMetadata("type").get == "text") {
+        val axis = new DateAxis(x.getName)
+        plot.setDomainAxis(axis)
+      } else {
+        val axis = new NumberAxis(x.getName)
+        axis.setAutoRangeIncludesZero(false)
+        plot.setDomainAxis(axis)
+      }
+      val y = function.getRange
+      plotVariable(x, y, dataset.toDoubleMap)
     }
-    else {
-      val axis = new NumberAxis(x.getName)
-      axis.setAutoRangeIncludesZero(false)
-      plot.setDomainAxis(axis)
-    }
-    val y = function.getRange
-    plotVariable(x, y, dataset.toDoubleMap)
+
+    case _ => throw new Error("Dataset has no Function to plot.")
+
   }
 
   def plotVariable(x: Variable, y: Variable, data: scala.collection.Map[String,Array[Double]]) {

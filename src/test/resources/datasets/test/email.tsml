@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="email">
+    <adapter class="latis.reader.tsml.EmailAdapter"
+             location="imap://lindholm:xxx@mailhub.lasp.colorado.edu/tech" />
+    
+    <index/>
+    <time/>
+    <text name="sender" length="64"/>
+    <text name="subject" length="128"/>
+    <text name="content" length="256"/>
+    
+  </dataset>
+
+</tsml>

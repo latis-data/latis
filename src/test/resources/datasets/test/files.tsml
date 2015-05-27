@@ -15,6 +15,7 @@
     <text    name="myText"/>
     
     <text name="file" length="256"/>
+    <integer name="fileSize"/>
   
   </dataset>
 

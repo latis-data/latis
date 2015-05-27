@@ -46,9 +46,9 @@ class TestProtoBufWriter extends WriterTest{
   def print_bytes {
     val w = new ProtoBufWriter
     val ds = getDataset(fof)
-    for(v <- ds.getVariables) {
-      for(b <- w.varToBytes(v)) println(b.toInt.toHexString.replaceAll("ffffff",""))
-    }
+    val v = ds.unwrap
+    for(b <- w.varToBytes(v)) println(b.toInt.toHexString.replaceAll("ffffff",""))
+    
     AsciiWriter.write(getDataset(fof))
   }
 
