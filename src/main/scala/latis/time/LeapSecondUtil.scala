@@ -2,9 +2,11 @@ package latis.time
 
 import java.util.Date
 import java.util.TreeMap
-
 import latis.dm.Dataset
+import latis.dm.Function
 import latis.reader.tsml.TsmlReader
+import latis.dm.Sample
+import latis.dm.Number
 
 object LeapSecondUtil {
   
@@ -18,14 +20,9 @@ object LeapSecondUtil {
 
     val lsds = readLeapSecondData
     
-    val it = lsds.findFunction.get.iterator
+    val it = lsds match {case Dataset(f: Function) => f.iterator}
 
-    it.foreach(sample => {
-      val t = sample.domain.asInstanceOf[Time].getJavaTime//ms since 1970
-      val date = new Date(t)
-      val ls = sample.range.getNumberData.doubleValue
-      map.put(date, ls)
-    })
+    it.foreach(_ match {case Sample(t: Time, Number(ls)) => map.put(new Date(t.getJavaTime), ls)})
     
     map
   }
