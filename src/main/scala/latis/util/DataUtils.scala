@@ -372,7 +372,7 @@ object DataUtils {
    * Recursively accumulate Data (bytes) for a given Variable (that contains Data).
    */
   def buildDataFromVariable(variable: Variable, data: Data = EmptyData): Data = variable match {
-    case _: Index => ???
+    case i: Index => data concat i.getData
     case t @ Text(s) => data concat StringValue(StringUtils.padOrTruncate(s, t.length)) //need consistent length for binary
     case s: Scalar => data concat s.getData
     case Tuple(vars) => vars.foldLeft(data)((d,v) => buildDataFromVariable(v,d))

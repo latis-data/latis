@@ -6,7 +6,7 @@ import latis.dm.Text
 import latis.time.Time
 import latis.util.RegEx.SELECTION
 import com.typesafe.scalalogging.slf4j.Logging
-import latis.util.MappingIterator
+import latis.util.iterator.MappingIterator
 import latis.dm.Sample
 import latis.dm.Variable
 import latis.dm.WrappedFunction

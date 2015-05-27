@@ -9,8 +9,8 @@ import latis.data.IterableData
 import latis.data.SampledData
 import latis.data.set.IndexSet
 import latis.data.SampleData
-import latis.util.PeekIterator
-import latis.util.MappingIterator
+import latis.util.iterator.PeekIterator
+import latis.util.iterator.MappingIterator
 import latis.data.EmptyData
 import com.typesafe.scalalogging.slf4j.Logging
 
