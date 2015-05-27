@@ -43,9 +43,13 @@ protected class Selection(val vname: String, val operation: String, val value: S
     
   def applyToText(text: Text): Option[Text] = {
     if (text.hasName(vname)) operation match {
-      case "=~" => {
-        if (text.getValue.asInstanceOf[String].matches(value)) Some(text) //TODO: getStringValue on Variable?
-        else None //regex
+      case "=~" => text match {
+        case Text(text_value) if (text_value.matches(value)) => Some(text) //keep match
+        case _ => None
+      }
+      case "!=~" => text match {
+        case Text(text_value) if (text_value.matches(value)) => None //exclude match
+        case _ => Some(text)
       }
       case _ => {
         val cmp = text.compare(value)
