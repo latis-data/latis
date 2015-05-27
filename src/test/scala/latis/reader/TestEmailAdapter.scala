@@ -14,7 +14,9 @@ import latis.ops.TimeFormatter
 
 class TestEmailAdapter {
 
-  //@Test //need to include password in tsml
+  //need to include password in tsml
+  
+  //@Test 
   def gmail_folder {
     val ops = List(Selection("sender=~.*James.*"))
     val ds = TsmlReader("datasets/test/agu_email.tsml").getDataset(ops)

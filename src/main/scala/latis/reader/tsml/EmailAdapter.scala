@@ -64,10 +64,14 @@ class EmailAdapter(tsml: Tsml) extends IterativeAdapter[Message](tsml) {
     val date = Time(msg.getSentDate).getValue.toString
     val from = msg.getFrom()(0).toString
     val subject = msg.getSubject
-    val content = msg.getContentType.split(";").head.split("/").head.toLowerCase match {
-      case "text" => msg.getContent.toString
-      case "multipart" => msg.getContent.asInstanceOf[Multipart].getBodyPart(0).getContent.toString
+    
+    //recursive function to find text content
+    def findStringContent(p: Part): String = p.getContentType.split(";").head.split("/").head.toLowerCase match {
+      case "text" => p.getContent.toString
+      case "multipart" => findStringContent(p.getContent.asInstanceOf[Multipart].getBodyPart(0))
     }
+    
+    val content = findStringContent(msg)
     Seq(date, from, subject, content)
   }
   
