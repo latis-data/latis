@@ -3,6 +3,7 @@
 {"time": "1970-01-02T00:00:00.000", "level": "INFO", "class": "latis.server.LatisServer", "thread": "http-thread-pool-8080(51)", "message": "Processing request: 2.2"},
 {"time": "1970-01-01T00:00:01.000", "level": "INFO", "class": "latis.server.LatisServer", "thread": "http-thread-pool-8080(3)", "message": "A"},
 {"time": "1970-01-03T00:00:00.000", "level": "INFO", "class": "latis.server.LatisServer", "thread": "http-thread-pool-8080(20)", "message": "Processing request: 3.3"},
+{"time": "1970-01-03T00:00:01.000", "level": "INFO", "class": "latis.server.LatisServer", "thread": "http-thread-pool-8080(22)", "message": "Processing request: no response"},
 {"time": "1970-01-02T00:00:02.000", "level": "INFO", "class": "latis.server.LatisServer", "thread": "http-thread-pool-8080(51)", "message": "B"},
 {"time": "1970-01-03T00:00:03.000", "level": "INFO", "class": "latis.server.LatisServer", "thread": "http-thread-pool-8080(20)", "message": "C"}]
 }}

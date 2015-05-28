@@ -5,7 +5,7 @@
     <adapter class="latis.reader.tsml.LogStatsAdapter"
              location="http://sdc-web1:8080/ops/mms/webtcad/latis/log.json" />
     
-    <time name="time" units="yyyy-MM-ddTHH:mm:ss.SSS" type="text" length="23"/>
+    <time name="time" units="yyyy-MM-ddTHH:mm:ss.SSS" type="text"/>
    
     <real name="duration"/>
     <text name="request" length="50"/>
