@@ -233,8 +233,7 @@ object DataUtils {
     }
 
     val domain = sampleTemplate.domain
-    val domainData = dataMap(domain.getName)
-    //TODO: assumes 1D domain, toSeq? what about nD domain set?
+    val domainData = domain.toSeq.map(s => dataMap(s.getName)).reduceLeft(_ zip _)//dataMap(domain.getName)
 
     val range = sampleTemplate.range
 
