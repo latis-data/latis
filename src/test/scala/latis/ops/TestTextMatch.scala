@@ -28,7 +28,7 @@ class TestTextMatch {
   @Test
   def equals {
     val ds = TestDataset.function_of_tuple
-    AsciiWriter.write(ds)
+    //AsciiWriter.write(ds)
     val op = Selection("myText=one")
     val ds2 = op(ds)
     val data = ds2.toStringMap
