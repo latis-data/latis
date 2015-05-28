@@ -5,6 +5,7 @@ import org.junit.Test
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
 import latis.ops.filter.Selection
+import latis.ops.Projection
 
 class TestLogStatsAdapter {
   
@@ -38,6 +39,14 @@ class TestLogStatsAdapter {
     //AsciiWriter.write(ds)
     val data = ds.toStrings
     assertEquals(1, data(0).length)
+  }
+  
+  @Test
+  def projection {
+    val ops = List(Projection("time,myInt"))
+    val ds = TsmlReader("datasets/test/log_stats_test.tsml").getDataset(ops)
+    val data = ds.toStrings
+    assertEquals(2, data.length)
   }
 
   //@Test //stack overflow
