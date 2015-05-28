@@ -56,10 +56,11 @@ object RegEx {
      *   =    Equals
      *   ==   Equals
      *   !=  Not equals
-     *   =~  Matches pattern
+     *   =~  Matches regex pattern
+     *   !=~ Does not match regex pattern
      *   ~   Almost equals, match nearest value
      */
-    lazy val SELECTION_OPERATOR = ">=|<=|>|<|=~|==|!=|=|~"
+    lazy val SELECTION_OPERATOR = ">=|<=|>|<|=~|==|!=|=|~|!=~"
       
       
     /**
