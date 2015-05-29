@@ -29,14 +29,10 @@ class TestLogStatsAdapter {
     assertEquals(1, data(0).length)
   }
   
-  /*
-   * This currently fails because it filters after the stats are generated.
-   */
   @Test
   def time_selection_split_off_response {
     val ops = List(Selection("time<=1970-01-02"))
     val ds = TsmlReader("datasets/test/log_stats_test.tsml").getDataset(ops)
-    //AsciiWriter.write(ds)
     val data = ds.toStrings
     assertEquals(1, data(0).length)
   }
@@ -49,7 +45,7 @@ class TestLogStatsAdapter {
     assertEquals(2, data.length)
   }
 
-  //@Test //stack overflow
+  //@Test 
   def live {
     val ops = List(Selection("time>2015-05-28"))
     val ds = TsmlReader("datasets/test/log_stats.tsml").getDataset(ops)

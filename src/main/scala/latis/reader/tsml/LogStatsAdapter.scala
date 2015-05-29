@@ -1,11 +1,14 @@
 package latis.reader.tsml
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.ArrayBuffer
 
 import latis.data.value.DoubleValue
 import latis.data.value.StringValue
+import latis.dm.Dataset
+import latis.dm.Function
 import latis.dm.Sample
 import latis.dm.Text
+import latis.ops.Operation
 import latis.ops.filter.Selection
 import latis.reader.JsonReader
 import latis.reader.tsml.ml.Tsml
@@ -17,11 +20,21 @@ class LogStatsAdapter(tsml: Tsml) extends IterativeAdapter[(Sample, Sample)](tsm
   
   def close = {}
   
-  val log = JsonReader(getUrl).getDataset(Seq(Selection("level!=WARN")))//warnings never start or end a request
-  var buf = ListBuffer[Sample]() //keep a buffer of log entries that have been read but not paired
-  var lit = log.unwrap.findFunction.get.iterator
+  val ops = ArrayBuffer[Operation](Selection("level!=WARN"))//warnings never start or end a request
+  lazy val log = JsonReader(getUrl).getDataset(ops)
+  var buf = ArrayBuffer[Sample]() //keep a buffer of log entries that have been read but not paired
+  var lit: Iterator[Sample] = null
+  
+  override def handleOperation(op: Operation): Boolean = op match {
+    case s: Selection => getOrigScalarNames.contains(s.vname) match {
+      case true => {ops += s; true}
+      case false => false
+    }
+    case _ => super.handleOperation(op)
+  }
   
   def getRecordIterator = {
+    lit = log match {case Dataset(f: Function) => f.iterator}
     new PeekIterator[(Sample, Sample)] {
       def getNext = {
         nextRequest match {
@@ -52,16 +65,24 @@ class LogStatsAdapter(tsml: Tsml) extends IterativeAdapter[(Sample, Sample)](tsm
   }
   
   /**
+   * Determine if the given Sample has a Text Variable named 'name' with a value that matches pattern.
+   */
+  def hasStringMatch(s: Sample)(name: String, pattern: String) = s.findVariableByName(name) match {
+    case Some(Text(s)) => s.contains(pattern)
+    case _ => false
+  }
+  
+  /**
    * Gets the next log entry that indicates the start of a request.
    */
   def nextRequest: Option[Sample] = {
-    buf.find(_.findVariableByName("message").get.asInstanceOf[Text].stringValue.startsWith("Processing request: ")) match {
+    buf.find(hasStringMatch(_)("message","Processing request: ")) match {
       case Some(s) => {
         buf -= s
         Some(s)
       }
       case None => {
-        val (pre, suf) = lit.span(! _.findVariableByName("message").get.asInstanceOf[Text].stringValue.startsWith("Processing request: "))
+        val (pre, suf) = lit.span(! hasStringMatch(_)("message","Processing request: "))
         buf ++= pre
         lit = suf
         if(lit.hasNext) Some(lit.next) else None
@@ -76,13 +97,13 @@ class LogStatsAdapter(tsml: Tsml) extends IterativeAdapter[(Sample, Sample)](tsm
    */
   def findEnd(sample: Sample): Option[Sample] = {
     val thread = sample.findVariableByName("thread").get.asInstanceOf[Text].stringValue
-    buf.find(_.findVariableByName("thread").get.asInstanceOf[Text].stringValue.equals(thread)) match {
+    buf.find(hasStringMatch(_)("thread",thread)) match {
       case Some(s) => {
         buf -= s
         Some(s)
       }
       case None => {
-        val (pre, suf) = lit.span(! _.findVariableByName("thread").get.asInstanceOf[Text].stringValue.equals(thread))
+        val (pre, suf) = lit.span(! hasStringMatch(_)("thread",thread))
         buf ++= pre
         lit = suf
         if(lit.hasNext) Some(lit.next) else None
