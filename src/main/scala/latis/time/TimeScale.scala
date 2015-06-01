@@ -27,7 +27,7 @@ class TimeScale(val epoch: Date, val unit: TimeUnit, val tsType: TimeScaleType) 
 }
 
 object TimeScale {
-  lazy val JAVA = new TimeScale(new Date(0), TimeUnit.MILLISECOND, TimeScaleType.NATIVE)
+  lazy val JAVA = new TimeScale(new Date(0), TimeUnit.MILLISECOND, TimeScaleType.default)
   lazy val DEFAULT = JAVA
   
   /**
@@ -38,7 +38,7 @@ object TimeScale {
   lazy val JULIAN_DATE = {
     val cal = new GregorianCalendar(-4712, 0, 1, 12, 0);
     cal.setTimeZone(TimeZone.getTimeZone("GMT"));
-    TimeScale(cal.getTime, TimeUnit.DAY, TimeScaleType.NATIVE)
+    TimeScale(cal.getTime, TimeUnit.DAY, TimeScaleType.default)
   }
   
   def apply(epoch: Date, unit: TimeUnit, tstype: TimeScaleType): TimeScale = {
@@ -60,7 +60,7 @@ object TimeScale {
   def apply(scale: String): TimeScale = {
     val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """(-?[0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
     scale.trim match {
-      case regex(unit, epoch) => TimeScale(epoch, TimeUnit.withName(unit), TimeScaleType.NATIVE)
+      case regex(unit, epoch) => TimeScale(epoch, TimeUnit.withName(unit), TimeScaleType.default)
       case s: String if (s.startsWith("Julian")) => JULIAN_DATE
       case _ => {
         //assume formatted time (http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html)
