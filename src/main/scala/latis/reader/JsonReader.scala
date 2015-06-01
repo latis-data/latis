@@ -41,7 +41,7 @@ class JsonReader(path: String) extends DatasetAccessor {
   }
   
   def getUrl: URL = {
-    val uri = new URI(path)
+    val uri = new URI(path.replace(" ", "%20"))
     if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
     else if (path.startsWith(File.separator)) new URL("file:" + path) //absolute path
     else getClass.getResource("/"+path) match { //relative path: try looking in the classpath
