@@ -21,8 +21,10 @@ object LeapSecondUtil {
     val lsds = readLeapSecondData
     
     val it = lsds match {case Dataset(f: Function) => f.iterator}
+    
+    val etime = TimeScale("seconds since 1900-01-01").epoch.getTime
 
-    it.foreach(_ match {case Sample(t: Time, Number(ls)) => map.put(new Date(t.getJavaTime), ls)})
+    it.foreach(_ match {case Sample(t: Time, Number(ls)) => map.put(new Date(t.getNumberData.longValue * 1000 + etime), ls)})
     
     map
   }

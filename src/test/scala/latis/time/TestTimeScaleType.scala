@@ -25,15 +25,14 @@ class TestTimeScaleType {
     assertEquals(data("myTime").head, -24.0, 0)
   }
   
-  @Test @Ignore //stack overflow
+  @Test 
   def convert_time_with_default_tai_time_scale {
     System.setProperty("time.scale.type", "TAI")
     val op = Operation("convert", List("time", "hours since 2000-01-02"))
     val ds = TestDataset.numeric_time_series //days since 2000-01-01
     val ds2 = op(ds)
-    AsciiWriter.write(ds2)
-    //val data = ds2.toDoubleMap
-    //assertEquals(data("myTime").head, -24.0, 0)
+    val data = ds2.toDoubleMap
+    assertEquals(data("myTime").head, -24.0, 0)
   }
   
 }
