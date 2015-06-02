@@ -45,10 +45,12 @@ class TestLogStatsAdapter {
     assertEquals(2, data.length)
   }
 
-  //@Test 
+  //@Test  //a bit slow for routine unit tests (8s)
   def live {
-    val ops = List(Selection("time>2015-05-28"))
+    val ops = List(Selection("time>2015-05-28"),Selection("time<2015-05-29"))
     val ds = TsmlReader("datasets/test/log_stats.tsml").getDataset(ops)
-    AsciiWriter.write(ds)
+    //AsciiWriter.write(ds)
+    val data = ds.toStrings
+    assertEquals(61, data(0).length)
   }
 }
