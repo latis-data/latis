@@ -2,6 +2,6 @@ package latis.reader
 
 class TestSsiAdapter extends AdapterTests {
   
-  def datasetName = "ssi"
+  def datasetName = "binary_columns"
 
 }

@@ -3,7 +3,10 @@ package latis.reader
 import java.io.File
 import java.net.URI
 import java.net.URL
+import java.net.URLEncoder
+
 import scala.io.Source
+
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Index
@@ -13,6 +16,7 @@ import latis.dm.Tuple
 import latis.dm.Variable
 import latis.metadata.Metadata
 import latis.ops.Operation
+import latis.time.Time
 import play.api.libs.json.JsArray
 import play.api.libs.json.JsBoolean
 import play.api.libs.json.JsNull
@@ -22,8 +26,6 @@ import play.api.libs.json.JsResultException
 import play.api.libs.json.JsString
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
-import latis.time.Time
-import play.api.libs.json.JsNull
 
 /**
  * Creates a Dataset from a json file. Objects are interpreted as Tuples, Arrays are interpreted as Functions.
@@ -41,7 +43,7 @@ class JsonReader(path: String) extends DatasetAccessor {
   }
   
   def getUrl: URL = {
-    val uri = new URI(path)
+    val uri = new URI(URLEncoder.encode(path, "UTF-8"))
     if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
     else if (path.startsWith(File.separator)) new URL("file:" + path) //absolute path
     else getClass.getResource("/"+path) match { //relative path: try looking in the classpath

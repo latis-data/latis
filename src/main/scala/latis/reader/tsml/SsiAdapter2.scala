@@ -5,9 +5,7 @@ import java.io.FileNotFoundException
 import java.io.RandomAccessFile
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel.MapMode
-
 import scala.Option.option2Iterable
-
 import latis.data.EmptyData
 import latis.data.IterableData
 import latis.data.SampleData
@@ -24,10 +22,12 @@ import latis.dm.Text
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.reader.tsml.ml.Tsml
-import latis.util.BufferIterator
+import latis.util.iterator.BufferIterator
 import latis.util.DataUtils
-import latis.util.MappingIterator
-import latis.util.PeekIterator
+import latis.util.iterator.LoopIterator
+import latis.util.iterator.MappingIterator
+import latis.util.iterator.PeekIterator
+import latis.data.Data
 
 /**
  * Combines multiple binary files representing individual Variables into a single Dataset.
@@ -74,7 +74,7 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     val bb = file.getChannel.map(MapMode.READ_ONLY, 0, file.length)
     bb.order(order)
     
-    if(file.length == 0) None else Some(IterableData(new BufferIterator(bb, s), s.getSize))
+    if(file.length == 0) None else Some(IterableData(BufferIterator(bb, s).map(Data(_)), s.getSize))
   } catch {
     case fnfe: FileNotFoundException => s match {
       case _: Index => Some(IndexSet())
@@ -114,21 +114,5 @@ class SsiAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
   }
   
   def close = {}
-
-  /**
-   * Helper class to repeat the Domain of nested Functions
-   */
-  class LoopIterator[T >: Null](iterator: Iterator[T]) extends PeekIterator[T] {
-    
-    private var it = iterator.duplicate
-    
-    def getNext = {
-      if(it._1.hasNext) it._1.next
-      else {
-        it = it._2.duplicate
-        getNext
-      }
-    }
-  }
   
 }

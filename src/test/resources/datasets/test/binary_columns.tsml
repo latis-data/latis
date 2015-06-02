@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tsml>
 
-  <dataset name="ssi" long_name="SSI Test">
-    <adapter class="latis.reader.tsml.SsiAdapter2"
+  <dataset name="binary_columns">
+    <adapter class="latis.reader.tsml.ColumnarBinaryAdapter"
              location="datasets/test/ssi/" />
     
     <time name="myTime" type="text" length="10" units="yyyy/MM/dd"/> 

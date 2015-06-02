@@ -153,6 +153,13 @@ object TestDataset {
   
   def combo = Dataset(Tuple(function_of_tuple.unwrap, tuple_of_tuples.unwrap, text.unwrap), Metadata("combo"))
   
+  def tuple_domain = {
+    val samples = List(Sample(Tuple(Real(Metadata("lon"),0.0), Real(Metadata("lat"), 90.0)), Real(Metadata("x"), 0)),
+                       Sample(Tuple(Real(Metadata("lon"),90.0), Real(Metadata("lat"), 0.0)), Real(Metadata("x"), 1)),
+                       Sample(Tuple(Real(Metadata("lon"),180.0), Real(Metadata("lat"), -90.0)), Real(Metadata("x"), 2)))
+    Dataset(Function(samples), Metadata("tuple_domain"))
+  }
+  
 //  def datasets = Seq(empty, real, integer, text, real_time, text_time, int_time, scalars, binary, tuple_of_scalars,
 //                     tuple_of_tuples, tuple_of_functions, scalar_tuple, mixed_tuple, function_of_scalar,
 //                     function_of_tuple, function_of_functions, mixed_function, empty_function, index_function, combo)

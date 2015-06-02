@@ -13,7 +13,7 @@ import latis.ops.filter.Selection
 import latis.reader.JsonReader
 import latis.reader.tsml.ml.Tsml
 import latis.time.Time
-import latis.util.PeekIterator
+import latis.util.iterator.PeekIterator
 import latis.util.StringUtils
 
 class LogStatsAdapter(tsml: Tsml) extends IterativeAdapter[(Sample, Sample)](tsml) {

@@ -6,6 +6,8 @@ import org.junit.Test
 import latis.dm.TestDataset
 import latis.writer.AsciiWriter
 import latis.dm.Dataset
+import scala.collection.mutable.ArrayBuffer
+import latis.ops.filter.Selection
 
 class TestTotal {
   
@@ -28,6 +30,20 @@ class TestTotal {
     assertEquals("6.6", data(2)(0))
     assertEquals("6.0", data(1)(0))
     assertEquals("1970/01/03", data(0)(0))
+  }
+  
+  @Test
+  def project_with_selection_without_domain {
+    val ops = ArrayBuffer[Operation]()
+    ops += Projection("myInt,myReal")
+    ops += Selection("myInt>1")
+    ops += Total()
+    val ds = TestDataset.canonical
+    val ds2 = ops.foldLeft(ds)((dataset, op) => op(dataset))
+    val data = ds2.toDoubleMap
+    assertEquals(1, data("myInt").length)
+    assertEquals(5.0, data("myInt")(0), 0.0)
+    assertEquals(5.5, data("myReal")(0), 0.0)
   }
   
   @Test

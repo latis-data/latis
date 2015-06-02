@@ -233,8 +233,7 @@ object DataUtils {
     }
 
     val domain = sampleTemplate.domain
-    val domainData = dataMap(domain.getName)
-    //TODO: assumes 1D domain, toSeq? what about nD domain set?
+    val domainData = domain.toSeq.map(s => dataMap(s.getName)).reduceLeft(_ zip _)//dataMap(domain.getName)
 
     val range = sampleTemplate.range
 
@@ -372,7 +371,7 @@ object DataUtils {
    * Recursively accumulate Data (bytes) for a given Variable (that contains Data).
    */
   def buildDataFromVariable(variable: Variable, data: Data = EmptyData): Data = variable match {
-    case _: Index => ???
+    case i: Index => data concat i.getData
     case t @ Text(s) => data concat StringValue(StringUtils.padOrTruncate(s, t.length)) //need consistent length for binary
     case s: Scalar => data concat s.getData
     case Tuple(vars) => vars.foldLeft(data)((d,v) => buildDataFromVariable(v,d))
