@@ -1,5 +1,5 @@
 # LaTiS
- 
+
 LaTiS is a
 [data model](http://en.wikipedia.org/wiki/Data_model),
 [domain specific language](http://en.wikipedia.org/wiki/Domain-specific_language), and
