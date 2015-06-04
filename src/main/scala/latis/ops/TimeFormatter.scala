@@ -25,7 +25,7 @@ class TimeFormatter(format: String) extends Operation {
     case t: Time => {
       val formatted_time = t.format(format)
       val md = t.getMetadata + ("units" -> format) + ("type" -> "text") + ("length" -> format.length.toString)
-      val time = Time(md, formatted_time)//TODO: this constructor doesn't add 'length' Metadata 
+      val time = Time(md, formatted_time)
       Some(time)
     }
     case _ => Some(scalar) //no-op
