@@ -11,6 +11,7 @@ import latis.data.value.DoubleValue
 import latis.writer.Writer
 import latis.ops.filter.FirstFilter
 import latis.time.Time
+import latis.data.value.StringValue
 
 class TestDataUtils {
 
@@ -46,11 +47,19 @@ class TestDataUtils {
   }
 
   @Test
-  def real_time_double_value {
+  def real_time_double_value = {
     val v = Time(1000.0)
     assertEquals(1000.0, DataUtils.getDoubleValue(v), 0.0)
   }
     
+  @Test
+  def buffer_to_string = {
+    val s = "Hello"
+    val bb = StringValue(s).getByteBuffer
+    val s2 = DataUtils.bufferToString(bb, s.length)
+    assertEquals(s, s2)
+  }
+  
   //-------------------------------------------------
   
   def function_of_scalar_from_data_map = {
@@ -108,4 +117,5 @@ class TestDataUtils {
         
     Function(domain, range, Metadata("function_of_functions_of_tuple_from_data_map"), data)
   }
+  
 }

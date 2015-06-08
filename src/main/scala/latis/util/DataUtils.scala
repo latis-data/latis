@@ -413,6 +413,17 @@ object DataUtils {
       case _ => buildVarFromBuffer(data.getByteBuffer, f) //stitch it together from bytes
     }
   }
+  
+  /**
+   * Convert the first nchar * 2 bytes from the given ByteBuffer into a String
+   * of nchar characters. The factor of 2 is needed because a char is 2 bytes in Java.
+   */
+  def bufferToString(bb: ByteBuffer, nchar: Int): String = {
+    val cs = new Array[Char](nchar)      //allocate an array of chars just big enough for our String
+    bb.asCharBuffer.get(cs)              //load the array (cs) with nchar*2 bytes
+    bb.position(bb.position + nchar * 2) //advance position in underlying buffer
+    new String(cs)                       //make a String out of our array
+  }
 
   /**
    * Recursively construct Variables with the given template and ByteBuffer data.
@@ -422,9 +433,9 @@ object DataUtils {
       case _: Real => Time(template.getMetadata, bb.getDouble)
       case _: Integer => Time(template.getMetadata, bb.getLong)
       case t: Text => {
-        val sb = new StringBuilder
-        for (i <- 0 until t.length) sb append bb.getChar
-        v(Data(sb.toString)) //make copy of this Time variable but with new Data
+        val n = t.length
+        val s = bufferToString(bb, n)
+        v(Data(s)) //make copy of this Time variable but with new Data
       }
     }
 
@@ -434,12 +445,7 @@ object DataUtils {
 
     case v: Text => {
       val n = v.length
-      val cs = new Array[Char](n)
-      bb.asCharBuffer.get(cs)
-      bb.position(bb.position + n * 2) //advance position in underlying buffer
-      //val s = (0 until v.length).map(bb.getChar).mkString
-      //TODO: why can't we just get chars from the bb?
-      val s = new String(cs)
+      val s = bufferToString(bb, n)
       Text(template.getMetadata, s)
     }
 
