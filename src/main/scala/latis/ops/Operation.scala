@@ -9,6 +9,7 @@ import latis.dm.Tuple
 import latis.dm.Variable
 import latis.util.LatisProperties
 import latis.util.iterator.PeekIterator
+import latis.util.iterator.MappingIterator
 
 /**
  * Base type for operations that transform on Dataset into another.
@@ -82,12 +83,12 @@ abstract class Operation {
       Some(function) //hack to avoid wrapping nested functions
     } 
     else {
-      val pit = PeekIterator(function.iterator)
-      val template = this.applyToSample(pit.peek) match {
-        case Some(s) => s
-        case None => ???
+      val mit = new MappingIterator(function.iterator, (s: Sample) => this.applyToSample(s))
+      val template = mit.peek match {
+        case null => function.getSample //empty iterator so no-op
+        case s => s
       }
-      Some(Function(template.domain, template.range, pit.map(s => this.applyToSample(s)).flatten, function.getMetadata))
+      Some(Function(template.domain, template.range, mit, function.getMetadata))
     }
   }
   
