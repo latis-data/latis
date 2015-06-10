@@ -1,4 +1,4 @@
-package latis.util
+package latis.util.iterator
 
 /**
  * An Iterator that looks ahead and caches the next sample.

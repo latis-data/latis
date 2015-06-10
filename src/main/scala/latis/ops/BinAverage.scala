@@ -1,10 +1,10 @@
 package latis.ops
 
 import latis.dm._
-import latis.util.MappingIterator
+import latis.util.iterator.MappingIterator
 import scala.collection.mutable.ListBuffer
 import scala.math._
-import latis.util.PeekIterator
+import latis.util.iterator.PeekIterator
 import latis.time.Time
 import latis.metadata.Metadata
 

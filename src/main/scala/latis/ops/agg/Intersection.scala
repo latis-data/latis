@@ -2,7 +2,7 @@ package latis.ops.agg
 
 import latis.dm.Dataset
 import latis.dm.Sample
-import latis.util.PeekIterator
+import latis.util.iterator.PeekIterator
 import latis.dm.Scalar
 import scala.collection.mutable.ArrayBuffer
 import latis.dm.Tuple

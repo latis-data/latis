@@ -3,6 +3,7 @@ package latis.reader
 import java.io.File
 import java.net.URI
 import java.net.URL
+import java.net.URLEncoder
 
 import scala.io.Source
 
@@ -15,6 +16,7 @@ import latis.dm.Tuple
 import latis.dm.Variable
 import latis.metadata.Metadata
 import latis.ops.Operation
+import latis.time.Time
 import play.api.libs.json.JsArray
 import play.api.libs.json.JsBoolean
 import play.api.libs.json.JsNull
@@ -41,7 +43,7 @@ class JsonReader(path: String) extends DatasetAccessor {
   }
   
   def getUrl: URL = {
-    val uri = new URI(path)
+    val uri = new URI(path.replace(" ", "%20"))
     if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
     else if (path.startsWith(File.separator)) new URL("file:" + path) //absolute path
     else getClass.getResource("/"+path) match { //relative path: try looking in the classpath
@@ -98,25 +100,20 @@ class JsonReader(path: String) extends DatasetAccessor {
   /**
    * make a Latis Scalar from a JsValue
    */
-  def makeScalar(s: JsValue, name: String): Scalar = {
-    try {
-      val num = s.as[JsNumber].value
-      if(num.isValidLong) Scalar(Metadata(name), num.longValue) 
+  def makeScalar(s: JsValue, name: String): Scalar = s match {
+    case n: JsNumber => {
+      val num = n.value
+      if(num.isValidLong) Scalar(Metadata(name), num.longValue)
       else Scalar(Metadata(name), num.doubleValue)
-    } catch {
-      case jre: JsResultException => try {
-        Scalar(Metadata(name), s.as[JsString].value)
-      } catch {
-        case jre: JsResultException => try {
-          Scalar(Metadata(name), s.as[JsBoolean].toString)
-        } catch {
-          case jre: JsResultException => try {
-            if(s.equals(JsNull)) Scalar(Metadata(name),"null")
-            else ??? //what else could it be???
-          }
-        }
-      }
     }
+    case t: JsString => try {
+      Time.fromIso(t.value)
+    } catch {
+      case e: Exception => Scalar(Metadata(name), t.value)
+    }
+    case b: JsBoolean => Scalar(Metadata(name), b.toString)
+    case JsNull => Scalar(Metadata(name), "null")
+    case _ => ???//JsArray and JsObject should not make it here
   }
   
   /**
@@ -146,7 +143,7 @@ class JsonReader(path: String) extends DatasetAccessor {
 
 object JsonReader {
   
-  def apply(url: URL) = if (url.getPath.contains(".json")) new JsonReader(url.getPath) else throw new Exception("JsonReader can only read .json files")
+  def apply(url: URL) = if (url.getPath.contains(".json")) new JsonReader(url.toString) else throw new Exception("JsonReader can only read .json files")
 
   def apply(path: String) = if (path.contains(".json")) new JsonReader(path) else throw new Exception("JsonReader can only read .json files")
   

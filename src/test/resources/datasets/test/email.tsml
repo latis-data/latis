@@ -3,13 +3,13 @@
 
   <dataset name="email">
     <adapter class="latis.reader.tsml.EmailAdapter"
-             location="imap://user:password@host/folder" />
+             location="imap://lindholm:xxx@mailhub.lasp.colorado.edu/tech" />
     
-    <time name="sentDate" type="integer" units="ms since 1970"/>
-    <text name="sender" length="256"/>
-    <text name="subject" length="256"/>
+    <index/>
+    <time/>
+    <text name="sender" length="64"/>
+    <text name="subject" length="128"/>
     <text name="content" length="256"/>
-    
     
   </dataset>
 

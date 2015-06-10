@@ -61,6 +61,7 @@ trait Variable {
     }
     case _: Real    => Real(this.getMetadata, data)
     case _: Integer => Integer(this.getMetadata, data)
+    case _: Text    => Text(this.getMetadata, data)
   }
 }
 

@@ -8,7 +8,7 @@ import latis.dm.Sample
 import latis.dm.Variable
 import latis.dm.Real
 import latis.data.Data
-import latis.util.PeekIterator
+import latis.util.iterator.PeekIterator
 import latis.data.IterableData
 import latis.data.SampledData
 import latis.ops.Operation

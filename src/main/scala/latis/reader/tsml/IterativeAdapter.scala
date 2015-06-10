@@ -11,7 +11,7 @@ import latis.dm.Sample
 import latis.dm.Variable
 import latis.reader.tsml.ml.Tsml
 import latis.util.DataUtils
-import latis.util.MappingIterator
+import latis.util.iterator.MappingIterator
 
 import scala.collection.Map
 

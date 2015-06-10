@@ -26,7 +26,7 @@ class EmailAdapter(tsml: Tsml) extends IterativeAdapter[Message](tsml) {
   override def close = {if(store != null) store.close}
     
   def getRecordIterator: Iterator[Message] = {
-    val regex = """imap:\/\/([\w\d.]+):([^@]+)@([\w\d.]+)\/([\w\d.]+)""".r //only covers basic addresses and passwords without '@'
+    val regex = """imap:\/\/([\w\d.]+):([^@]+)@([\w\d.]+)\/([\w\d\/.]+)""".r //only covers basic addresses and passwords without '@'
     val (user, password, host, folder) = getProperty("location") match {
       case Some(regex(u,p,h,f)) => (u, p, h, f)
       case None => throw new Exception("location must be formatted as 'imap://user:password@host/folder")
@@ -58,16 +58,19 @@ class EmailAdapter(tsml: Tsml) extends IterativeAdapter[Message](tsml) {
   }
   
   /**
-   * Expects Dataset to look like: sendDate -> (sender, subject, content)
+   * Expects Dataset to look like: index -> (time, sender, subject, content)
    */
   def extractValues(msg: Message): Seq[String] = {
     val date = Time(msg.getSentDate).getValue.toString
     val from = msg.getFrom()(0).toString
     val subject = msg.getSubject
-    def findStringContent(p: Part): String = p.getContentType.split(";").head match {
-      case "text/plain" => p.getContent.toString
-      case "multipart" => findStringContent(msg.getContent.asInstanceOf[Multipart].getBodyPart(0))
+    
+    //recursive function to find text content
+    def findStringContent(p: Part): String = p.getContentType.split(";").head.split("/").head.toLowerCase match {
+      case "text" => p.getContent.toString
+      case "multipart" => findStringContent(p.getContent.asInstanceOf[Multipart].getBodyPart(0))
     }
+    
     val content = findStringContent(msg)
     Seq(date, from, subject, content)
   }
