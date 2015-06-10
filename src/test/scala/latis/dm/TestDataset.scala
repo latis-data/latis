@@ -116,6 +116,8 @@ object TestDataset {
   
   def function_of_functions2 = Dataset(TestNestedFunction.function_of_functions_with_sampled_data, Metadata("function_of_functions2"))
   
+  def function_of_functions_text = Dataset(TestNestedFunction.function_of_functions_with_text_data, Metadata("function_of_functions_text"))
+  
   def mixed_function = {
     val samples = List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), (function_of_scalar+(0)).unwrap)),
                        Sample(Real(Metadata("myReal"), 1.1), Tuple(Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1)), (function_of_scalar+(1)).unwrap)),
