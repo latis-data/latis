@@ -17,15 +17,10 @@ class TestTimeFormatter {
     val data = ds2.toStringMap
     assertEquals(data("myTime").length, 3) //didn't change number of samples
     assertEquals(data("myTime").head, "2000-01-01")
-        
-    /*
-     * this is finding the orig time
-     * ds2 has a WrappedFunction
-     * possibly related to LATIS-128
-     */
-//    val tv = ds2.findVariableByName("time").get
-//    val units = tv.getMetadata("units").get
-//    assertEquals("yyyy-MM-dd", units)
+    
+    val tv = ds2.findVariableByName("time").get
+    val units = tv.getMetadata("units").get
+    assertEquals("yyyy-MM-dd", units)
   }
   
   @Test
@@ -38,8 +33,8 @@ class TestTimeFormatter {
     assertEquals(data("myTime").length, 3) //didn't change number of samples
     assertEquals(data("myTime")(1), "1970-01-02")
         
-//    val units = ds2.findVariableByName("time").get.getMetadata("units").get
-//    assertEquals("yyyy-MM-dd", units)
+    val units = ds2.findVariableByName("time").get.getMetadata("units").get
+    assertEquals("yyyy-MM-dd", units)
   }
   
   @Test
