@@ -59,11 +59,14 @@ class JsonMetadataAndDataWriter extends JsonWriter {
     val sb = new StringBuilder()
     
     variable match {
-      case s: Scalar => {
-        sb append super.makeLabel(variable)
-        sb append makeMetadata(variable)
+      case s: Scalar => s match {
+        case i: Index => 
+        case _ => {
+          sb append super.makeLabel(variable)
+          sb append makeMetadata(variable)
+        }
       }
-      case Tuple(vars) => sb append vars.map(mdvarToString(_)).mkString(",\n")
+      case Tuple(vars) => sb append vars.filterNot(_.isInstanceOf[Index]).map(mdvarToString(_)).mkString(",\n")
       case f: Function => sb append mdvarToString(Sample(f.getDomain, f.getRange))
     }
     
@@ -112,37 +115,39 @@ class JsonMetadataAndDataWriter extends JsonWriter {
     }
   }
   
-  override def makeSample(sample: Sample) = makeSample(sample, List[String]()) //invoke with no prefix
   
-  //use optional pre to duplicate leading values when we have a nested function
-  //One element for each preceding variable as a String      
-  def makeSample(sample: Sample, pre: Seq[String]): String = {
+  override def makeSample(sample: Sample): String = {
     //break sample into domain and range components
     val Sample(d, r) = sample
     
-    d match {
-      case _: Index => varToString(r) //drop Index domain
-      
-      //handle case with nested function but no other range vars  
-      //TODO: handle more general cases with scalars and tuples in the range with the function
-      //TODO: handle 'flattened' option - one row per outer sample without inner domain values
-      case _ => r match {
-        case f: Function => {
-          val pre = List(varToString(d)) //only the domain values are repeated, for now
-          val lines = f.iterator.map(makeSample(_, pre))
-          //lines.mkString("[", sys.props("line.separator"), "]") 
-          val delim = "," + sys.props("line.separator")
-          lines.mkString("", delim , "") 
+    //TODO: handle more general cases with scalars and tuples in the range with the function
+    //TODO: handle 'flattened' option - one row per outer sample without inner domain values
+    r match {
+      case f: Function => {
+        d match {
+          case i: Index => 
+          case _ => prepend :+= varToString(d) //only the domain values are repeated, for now
         }
-        case _ => {
-          //varToString(Tuple(d.toSeq ++ r.toSeq)) //combine domain and range vars into one Tuple, just a way to get the "[]"?
-          val vars = d.toSeq ++ r.toSeq
-          val vs = vars.map(varToString(_))
-          (pre ++ vs).mkString("[", ",", "]") 
-        }
+        val lines = f.iterator.map(makeSample(_))
+        //lines.mkString("[", sys.props("line.separator"), "]") 
+        val delim = "," + newLine
+        val str = lines.mkString(delim) 
+        prepend = prepend.dropRight(d.toSeq.length)
+        str
+      }
+      case _ => {
+        val vars = (d.toSeq ++ r.toSeq).filterNot(_.isInstanceOf[Index])
+        val vs = vars.map(varToString(_))
+        (prepend ++ vs).mkString("[", ",", "]") 
       }
     }
   }
+  
+  /**
+   * keep track of the outer domain of nested functions
+   */
+  private var prepend = List[String]()
+
     
   /**
    * Represent a tuple as an array with each element being an array of values.
