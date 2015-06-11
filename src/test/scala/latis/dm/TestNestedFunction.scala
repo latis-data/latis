@@ -103,6 +103,14 @@ object TestNestedFunction {
     Function(domain, range, Metadata("function_of_functions_with_data_in_scalar"))
   }  
   
+  def function_of_functions_with_text_data = {
+    val n = 4
+    val domain  = (0 until n).map(i => Text(Metadata("x"), i.toString))
+    val range = for (i <- 0 until n) yield Function((0 until 3).map(j => 
+      Sample(Text(Metadata("y"), (10 + j).toString), Text(Metadata("z"), (10 * i + j).toString))))
+    Function(domain, range, Metadata("function_of_functions_with_text_data"))
+  }  
+  
   def function_of_functions_with_tuple_range = {
     val n = 4
     val m = 3
