@@ -68,9 +68,9 @@ class Projection(val names: Seq[String]) extends Operation {
    */
   override def applyToFunction(function: Function): Option[Variable] = {
     val mit = new MappingIterator(function.iterator, (s: Sample) => this.applyToSample(s))
-    val template = mit.peek match {
-      case null => return None //no matches in function
-      case s => s
+    val template = applyToSample(function.getSample) match {
+      case None => return None //no matches in function
+      case Some(s) => s
     }
     Some(Function(template.domain, template.range, mit, function.getMetadata))
   }
