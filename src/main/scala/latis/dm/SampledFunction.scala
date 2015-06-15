@@ -95,6 +95,35 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   }
   
   /**
+   * Returns true if iterator.isEmpty returns true,
+   * else false
+   * 
+   * The advantage of calling this method over
+   * iterator.isEmpty (aside from being shorter) is
+   * that since iterator returns a new PeekIterator wrapping
+   * our private _iterator, calling PeekIterator
+   * will consume an element of _iterator. This
+   * method will not consume any elements from
+   * _iterator (it calls _iterator.hasNext directly)
+   * 
+   * This problem manifests itself if you run code like this:
+   * val isEmpty = myFunction.iterator.isEmpty
+   * This causes a sample to be lost from myFunction._iterator
+   * because the returned PeekIterator must read from
+   * _iterator to verify that _iterator is not empty.
+   * The value still exists inside the returned PeekIterator,
+   * but since this code doesn't save a reference to that
+   * object, both the PeekIterator and its cached value are
+   * lost.
+   */
+  def isEmpty: Boolean = if (_iterator != null) {
+    _iterator.isEmpty
+  }
+  else {
+    getData.isEmpty
+  }
+  
+  /**
    * If this SampledFunction was constructed with SampledData, iterate on it.
    * Otherwise, try to use the sample iterator and map back to the data.
    */

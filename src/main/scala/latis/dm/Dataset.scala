@@ -42,8 +42,10 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
     case _ => ??? 
   }
   
-  def findVariableByName(name: String): Option[Variable] = if(isEmpty) None else variable.findVariableByName(name)
-  
+  def findVariableByName(name: String): Option[Variable] = variable match {
+    case null => None
+    case _ => variable.findVariableByName(name)
+  }
   
   //convenience methods for transforming Dataset
   def filter(selection: Selection): Dataset = selection(this)
