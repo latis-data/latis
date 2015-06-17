@@ -13,6 +13,24 @@ import org.junit.Ignore
 class TestMathExpressionDerivation {
   
   @Test
+  def test_plusplus {
+    val ds = MathExpressionDerivation("A=1+2*3+4/5")(Dataset.empty)
+    assertEquals(7.8, ds.toDoubles(0)(0), 0.0)
+  }
+  
+  @Test
+  def test_divdivdiv {
+    val ds = MathExpressionDerivation("A=1/2/3")(Dataset.empty)
+    assertEquals(0.16666666666, ds.toDoubles(0)(0), 0.0000001)
+  }
+  
+  @Test
+  def test_powpowpow {
+    val ds = MathExpressionDerivation("A=2^3^4")(Dataset.empty)
+    assertEquals(Math.pow(2, Math.pow(3, 4)), ds.toDoubles(0)(0), 0.0)
+  }
+  
+  @Test
   def test_E {
     val ds = MathExpressionDerivation("A=E")(Dataset.empty)
     assertEquals(2.718281828459045, ds.toDoubles(0)(0), 0.0)
@@ -98,6 +116,12 @@ class TestMathExpressionDerivation {
   def test_sin {
     val ds = MathExpressionDerivation("A=SIN(PI/2)")(Dataset.empty)
     assertEquals(1, ds.toDoubles(0)(0), 0.0)
+  }
+  
+  @Test
+  def test_sin_and_plus {
+    val ds = MathExpressionDerivation("A=SIN(PI/2)+10")(Dataset.empty)
+    assertEquals(11, ds.toDoubles(0)(0), 0.0)
   }
   
   @Test

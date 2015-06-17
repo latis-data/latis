@@ -125,11 +125,12 @@ class MathExpressionDerivation(str: String) extends Operation with Logging {
     }
     
     // basic math operators are found in reverse order of operations because the first operator found is the last evaluated
+    // except for ^ (exponentiation) which is the other way around because it's right-associative
     else if(str.contains("&")) applyBasicMath(str, str.lastIndexOf("&"))
     else if(str.contains("<")) applyBasicMath(str, str.lastIndexOf("<"))
     else if(str.contains("+") || str.contains("-")) applyBasicMath(str, str.lastIndexOf("+") max str.lastIndexOf("-"))
     else if(str.contains("*") || str.contains("/") || str.contains("%")) applyBasicMath(str, str.lastIndexOf("*") max str.lastIndexOf("/") max str.lastIndexOf("%"))
-    else if(str.contains("^")) applyBasicMath(str, str.lastIndexOf("^"))
+    else if(str.contains("^")) applyBasicMath(str, str.indexOf("^"))
 
     else throw new Exception("no operation found in expression \"" + str + "\"")
     
