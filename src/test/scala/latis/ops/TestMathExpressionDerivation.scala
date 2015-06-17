@@ -257,7 +257,6 @@ class TestMathExpressionDerivation {
   }
   
   @Test
-  @Ignore // enable after LATIS-163 is resolved
   def constant_in_tsml {
     val ds = TsmlReader("vecmag2.tsml").getDataset
     //AsciiWriter.write(ds)
