@@ -9,149 +9,182 @@ import scala.collection.mutable.ArrayBuffer
 import latis.dm.Dataset
 import latis.dm.Function
 import org.junit.Ignore
+import latis.dm.Sample
+import latis.metadata.Metadata
 
 class TestMathExpressionDerivation {
   
+  private def trivialDataset: Dataset = {
+    Dataset(
+      Function(
+        Seq(
+          latis.dm.Integer(
+            Metadata(Map("name" -> "one")),
+            latis.data.Data(1)
+          )
+        )
+      )
+    )
+  }
+  
+  @Test
+  def test_math_on_empty_dataset {
+    val ds = MathExpressionDerivation("A=PI+E")(Dataset.empty)
+    assert(ds.isEmpty)
+  }
+  
+  @Test
+  def test_dependentVars1 {
+    val ds = MathExpressionDerivation("A=X+1")
+    assertEquals(List("X"), ds.dependentVars)
+  }
+  
+  @Test
+  def test_dependentVars2 {
+    val ds = MathExpressionDerivation("A=SIN(X)+Y/Z+E")
+    assertEquals(List("X", "Y", "Z"), ds.dependentVars)
+  }
+  
   @Test
   def test_plusplus {
-    val ds = MathExpressionDerivation("A=1+2*3+4/5")(Dataset.empty)
-    assertEquals(7.8, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=1+2*3+4/5")(trivialDataset)
+    assertEquals(7.8, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_divdivdiv {
-    val ds = MathExpressionDerivation("A=1/2/3")(Dataset.empty)
-    assertEquals(0.16666666666, ds.toDoubles(0)(0), 0.0000001)
+    val ds = MathExpressionDerivation("A=1/2/3")(trivialDataset)
+    assertEquals(0.16666666666, ds.toDoubleMap("A")(0), 0.0000001)
   }
   
   @Test
   def test_powpowpow {
-    val ds = MathExpressionDerivation("A=2^3^4")(Dataset.empty)
-    assertEquals(Math.pow(2, Math.pow(3, 4)), ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=2^3^4")(trivialDataset)
+    assertEquals(Math.pow(2, Math.pow(3, 4)), ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_E {
-    val ds = MathExpressionDerivation("A=E")(Dataset.empty)
-    assertEquals(2.718281828459045, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=E")(trivialDataset)
+    assertEquals(2.718281828459045, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_PI {
-    val ds = MathExpressionDerivation("A=PI")(Dataset.empty)
-    assertEquals(3.141592653589793, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=PI")(trivialDataset)
+    assertEquals(3.141592653589793, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_constant {
-    val ds = MathExpressionDerivation("A=42")(Dataset.empty)
-    assertEquals(42, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=42")(trivialDataset)
+    assertEquals(42, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_add {
-    val ds = MathExpressionDerivation("A=1+1")(Dataset.empty)
-    assertEquals(2, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=1+1")(trivialDataset)
+    assertEquals(2, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_subtract {
-    val ds = MathExpressionDerivation("A=1-1")(Dataset.empty)
-    assertEquals(0, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=1-1")(trivialDataset)
+    assertEquals(0, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_times {
-    val ds = MathExpressionDerivation("A=3*2")(Dataset.empty)
-    assertEquals(6, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=3*2")(trivialDataset)
+    assertEquals(6, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_divide {
-    val ds = MathExpressionDerivation("A=4/2")(Dataset.empty)
-    assertEquals(2, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=4/2")(trivialDataset)
+    assertEquals(2, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_mod {
-    val ds = MathExpressionDerivation("A=8%3")(Dataset.empty)
-    assertEquals(2, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=8%3")(trivialDataset)
+    assertEquals(2, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_pow {
-    val ds = MathExpressionDerivation("A=3^3")(Dataset.empty)
-    assertEquals(27, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=3^3")(trivialDataset)
+    assertEquals(27, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_lt {
-    val ds1 = MathExpressionDerivation("A=0<1")(Dataset.empty)
-    val ds2 = MathExpressionDerivation("A=1<0")(Dataset.empty)
-    assertEquals(1, ds1.toDoubles(0)(0), 0.0)
-    assertEquals(0, ds2.toDoubles(0)(0), 0.0)
+    val ds1 = MathExpressionDerivation("A=0<1")(trivialDataset)
+    val ds2 = MathExpressionDerivation("A=1<0")(trivialDataset)
+    assertEquals(1, ds1.toDoubleMap("A")(0), 0.0)
+    assertEquals(0, ds2.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_and {
-    val ds1 = MathExpressionDerivation("A=1&1")(Dataset.empty)
-    val ds2 = MathExpressionDerivation("A=1&0")(Dataset.empty)
-    assertEquals(1, ds1.toDoubles(0)(0), 0.0)
-    assertEquals(0, ds2.toDoubles(0)(0), 0.0)
+    val ds1 = MathExpressionDerivation("A=1&1")(trivialDataset)
+    val ds2 = MathExpressionDerivation("A=1&0")(trivialDataset)
+    assertEquals(1, ds1.toDoubleMap("A")(0), 0.0)
+    assertEquals(0, ds2.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_paren {
-    val ds = MathExpressionDerivation("A=(1+1)*3")(Dataset.empty)
-    assertEquals(6, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=(1+1)*3")(trivialDataset)
+    assertEquals(6, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_sqrt {
-    val ds = MathExpressionDerivation("A=SQRT(81)")(Dataset.empty)
-    assertEquals(9, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=SQRT(81)")(trivialDataset)
+    assertEquals(9, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_sin {
-    val ds = MathExpressionDerivation("A=SIN(PI/2)")(Dataset.empty)
-    assertEquals(1, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=SIN(PI/2)")(trivialDataset)
+    assertEquals(1, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_sin_and_plus {
-    val ds = MathExpressionDerivation("A=SIN(PI/2)+10")(Dataset.empty)
-    assertEquals(11, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=SIN(PI/2)+10")(trivialDataset)
+    assertEquals(11, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_cos {
-    val ds = MathExpressionDerivation("A=COS(PI/2)")(Dataset.empty)
-    assertEquals(0, ds.toDoubles(0)(0), 0.000000001)
+    val ds = MathExpressionDerivation("A=COS(PI/2)")(trivialDataset)
+    assertEquals(0, ds.toDoubleMap("A")(0), 0.000000001)
   }
   
   @Test
   def test_acos {
-    val ds = MathExpressionDerivation("A=ACOS(.5)")(Dataset.empty)
-    assertEquals(Math.PI/3, ds.toDoubles(0)(0), 0.000001)
+    val ds = MathExpressionDerivation("A=ACOS(.5)")(trivialDataset)
+    assertEquals(Math.PI/3, ds.toDoubleMap("A")(0), 0.000001)
   }
   
   @Test
   def test_atan2 {
-    val ds = MathExpressionDerivation("A=ATAN2(0,5)")(Dataset.empty)
-    assertEquals(0, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=ATAN2(0,5)")(trivialDataset)
+    assertEquals(0, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_deg_to_radians {
-    val ds = MathExpressionDerivation("A=DEG_TO_RAD(180)")(Dataset.empty)
-    assertEquals(Math.PI, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=DEG_TO_RAD(180)")(trivialDataset)
+    assertEquals(Math.PI, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
   def test_with_spaces {
-    val ds = MathExpressionDerivation("A =(8* 3 ) +5% 2")(Dataset.empty)
-    assertEquals(25, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A =(8* 3 ) +5% 2")(trivialDataset)
+    assertEquals(25, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
@@ -214,7 +247,8 @@ class TestMathExpressionDerivation {
     assert(data.isEmpty)
   }
   
-  //@Test
+  @Test
+  @Ignore // enable after LATIS-163 is resolved
   def constant_in_tsml {
     val ds = TsmlReader("vecmag2.tsml").getDataset
     //AsciiWriter.write(ds)
@@ -224,9 +258,9 @@ class TestMathExpressionDerivation {
   
   @Test
   def nested_operation {
-    val ds = MathExpressionDerivation("A=SQRT(FABS(-81))")(Dataset.empty)
+    val ds = MathExpressionDerivation("A=SQRT(FABS(-81))")(trivialDataset)
     //AsciiWriter.write(ds)
-    assertEquals(9.0, ds.toDoubles(0)(0), 0.0)
+    assertEquals(9.0, ds.toDoubleMap("A")(0), 0.0)
   }
   
   @Test
@@ -238,8 +272,8 @@ class TestMathExpressionDerivation {
   
   @Test 
   def magmag {
-    val ds = MathExpressionDerivation("A=MAG(MAG(3,4)-2,4)")(Dataset.empty)
-    assertEquals(5.0, ds.toDoubles(0)(0), 0.0)
+    val ds = MathExpressionDerivation("A=MAG(MAG(3,4)-2,4)")(trivialDataset)
+    assertEquals(5.0, ds.toDoubleMap("A")(0), 0.0)
   }
   
   def assertEqualContents[T](s1: Seq[T], s2: Seq[T]) {
