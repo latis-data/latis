@@ -108,7 +108,9 @@ class MathExpressionDerivation(private val str: String) extends Operation with L
    */
   def testSample(sample: Sample): Option[Sample] = {
     
-    if (dependentVars.forall(depVar => str.contains(depVar))) {
+    val availableVarNames = sample.toSeq.map(v => v.getName).toList
+    
+    if (dependentVars.forall(depVar => availableVarNames.contains(depVar))) {
       Some(
         Sample(
           sample.domain,

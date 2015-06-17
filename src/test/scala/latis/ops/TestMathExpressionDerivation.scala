@@ -28,6 +28,15 @@ class TestMathExpressionDerivation {
   }
   
   @Test
+  def test_missing_field {
+    // If the passed dataset does not have all of the variables
+    // required by the math expression, the derived field
+    // should not be created. No exception should be thrown.
+    val ds = MathExpressionDerivation("A=FOO*2")(trivialDataset)
+    assertEquals(false, ds.toDoubleMap.contains("A"))
+  }
+  
+  @Test
   def test_math_on_empty_dataset {
     val ds = MathExpressionDerivation("A=PI+E")(Dataset.empty)
     assert(ds.isEmpty)
