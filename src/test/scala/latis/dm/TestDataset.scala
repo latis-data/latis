@@ -10,6 +10,7 @@ import latis.time.Time
 import latis.writer.AsciiWriter
 import java.nio.ByteBuffer
 import latis.data.value.DoubleValue
+import latis.reader.tsml.TsmlReader
 
 class TestDataset {
 
@@ -27,6 +28,51 @@ class TestDataset {
       case Dataset(v) => fail
       case _ => //pass
     }
+  }
+  
+  @Test
+  def empty_dataset_equals_empty_dataset {
+    assertEquals(Dataset.empty, Dataset.empty)
+  }
+  
+  @Test
+  def isEmpty_doesnt_consume_item {
+    
+    // This test is based off a bug that was first noticed
+    // in TestMathExpressionDerivation.test_tsml()
+    // 
+    // For this dataset, calling isEmpty appears to consume
+    // the first row of the iterator. To test: create 2
+    // identical datasets from vecmag.tsml. Call isEmpty
+    // on one of them, and then assert that they both
+    // have the same data. If the test passes, the bug is
+    // fixed.
+    
+    val ds1 = TsmlReader("vecmag.tsml").getDataset
+    val ds2 = TsmlReader("vecmag.tsml").getDataset
+    
+    val fn1 = ds1.unwrap.asInstanceOf[Function]
+    val fn2 = ds2.unwrap.asInstanceOf[Function]
+    
+    assertEquals(false, ds1.isEmpty)
+    
+    val it1 = fn1.iterator
+    val it2 = fn2.iterator
+    val zippedIts = it1.zip(it2)
+    val columns = List("t", "a", "b", "c", "X")
+    
+    zippedIts.foreach(rowPair => {
+      val row1 = rowPair._1
+      val row2 = rowPair._2
+      
+      columns.foreach(col => {
+        assertEquals(
+          row1.findVariableByName(col).get.getNumberData.doubleValue,
+          row2.findVariableByName(col).get.getNumberData.doubleValue,
+          0.0
+        )
+      })
+    })
   }
 }
 
