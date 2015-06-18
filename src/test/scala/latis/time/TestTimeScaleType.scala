@@ -79,4 +79,23 @@ class TestTimeScaleType {
     val dt = gps2 - gps1
     assertEquals(1.72800e11, dt, 0.0)
   }
+  
+  /*
+   * TODO: 
+   * 
+   * does it ever make sense to has a formatted time have a TAI scale?
+   * or should default time.scale.type always be UTC or native?
+   * what about user request with num time?
+   *   no new Time object made
+   *   just compares value with known Time var which could have it's tstype specified
+   * 
+   * formatted time backed with ms since 1970 but relies on java formatter to convert that to/from formatted time
+   * this must be treated as native, ls are not counted
+   * but what if we want the time to be treated as UTC?
+   *   when converting to tai ???
+   *   do we need to convert native to UTC?
+   * 
+   * TimeFormatter
+   * does it need to care?
+   */
 }
