@@ -15,7 +15,7 @@
     <?derived X = SQRT(a*a+b*b+c*c)?>
     <?derived X2 = MAG(a,b,c)?>
     <?derived Y = X + a?>
-    <!--?derived Z = 123.4?--><!--enable after LATIS-163 is resolved-->
+    <?derived Z = 123.4?>
       
 
   </dataset>
