@@ -99,16 +99,10 @@ object Function {
    * Construct from Seq of Variable which are assumed to contain their own data.
    */
   def apply(vs: Seq[Variable], md: Metadata): SampledFunction = vs.headOption match {
-/*
- * TODO: do we have to turn these into iterators?
- * want to be able to avoid iterable once problem
- * 
- */
-    case Some(sample: Sample) => Function(sample.domain, sample.range, vs.asInstanceOf[Seq[Sample]].iterator, md)
+    case Some(sample: Sample) => SampledFunction(vs.asInstanceOf[Seq[Sample]], md)
     case Some(_) => {
       //make Seq of samples where domain is index
       //TODO: make sure every Variable in the Seq has the same type
-      //TODO: make from SampledData with IndexSet
       val samples = vs.zipWithIndex.map(s => Sample(Index(s._2), s._1))
       val sample = samples.head
       Function(sample.domain, sample.range, samples.iterator, md)

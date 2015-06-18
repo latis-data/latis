@@ -8,7 +8,7 @@ import latis.writer.AsciiWriter
 
 class TestMemoization {
   
-  @Test @Ignore //the orig dataset is left unusable (LATIS-306)
+  @Test
   def immutability = {
     val op = TimeFormatter("yyyy-MM-dd")
     val ds = TestDataset.numeric_time_series.force
