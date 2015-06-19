@@ -28,7 +28,7 @@ class TestLeapSecondUtil {
     assertEquals(10, d, 0)
   }
 
-  @Test @Ignore //won't work until July when upcoming ls hits
+  @Test
   def test_future {
     //We shouldn't know any more than the next leap second (usually 6 months out)
     val now = new Date()
