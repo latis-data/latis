@@ -30,12 +30,13 @@ class TestLeapSecondUtil {
 
   @Test
   def test_future {
+    //We shouldn't know any more than the next leap second (usually 6 months out)
     val now = new Date()
-    val time = now.getTime() + 1000000000
-    val date = new Date(time)
+    val next_year = new Date(now.getTime() + 31536000000l)
     val lsnow = LeapSecondUtil.getLeapSeconds(now)
-    val ls = LeapSecondUtil.getLeapSeconds(date)
-    assertEquals(ls, lsnow, 0)
+    val ls = LeapSecondUtil.getLeapSeconds(next_year)
+    val dls = ls - lsnow
+    assert(dls == 0 || dls == 1)
   }
 
 }
