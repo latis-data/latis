@@ -39,7 +39,8 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   //TODO: should we account for length of nested Functions?
   def getLength = variable match {
     case f: Function => f.getLength
-    case _ => ??? 
+    case _ if (variable != null) => 1
+    case _ => 0
   }
   
   def findVariableByName(name: String): Option[Variable] = variable match {
