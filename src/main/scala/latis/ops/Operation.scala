@@ -79,7 +79,7 @@ abstract class Operation {
    */
   def applyToFunction(function: Function): Option[Variable] = {
     if (functionNestingLevel > 1) {
-      ??? //not yet supported, not sure if needed
+      ??? //breaks TimeFormatter on nested functions
       Some(function) //hack to avoid wrapping nested functions
     } 
     else {
