@@ -9,7 +9,7 @@ import latis.dm.Tuple
  * Assumes aggregates have the same type and domain sets
  * don't overlap and are ordered.
  */
-class TileAggregation extends Aggregation {
+class TileAggregation extends Aggregation { 
   
   /*
    * TODO: enforce that all datasets have the same set of vars
@@ -20,11 +20,8 @@ class TileAggregation extends Aggregation {
    * convert to units of the first
    */
   
-  def aggregate(dataset: Dataset): Dataset = {
-    //assume one-dimension (e.g. time), for now
-    //assume each dataset contains only one top level variable, the Function
-    
-    val functions = getFunctions(dataset)
+  def aggregate(ds1: Dataset, ds2: Dataset) = {
+    val functions = List(ds1, ds2).flatMap(_.unwrap.findFunction)
     val iterator = functions.foldLeft(Iterator[Sample]())(_ ++ _.iterator)
     
     //assume same type for each Function
@@ -34,11 +31,11 @@ class TileAggregation extends Aggregation {
     
     //TODO: munge metadata
     
-    Dataset(f, dataset.getMetadata)
+    Dataset(f)
   }
   
 }
 
 object TileAggregation {
-  def apply() = new TileAggregation
+  def apply() = new TileAggregation()
 }

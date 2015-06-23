@@ -9,14 +9,12 @@ import latis.dm.Tuple
 import latis.dm.Function
 import latis.ops.Reduction
 
-class Intersection extends Aggregation {
+class Intersection extends Aggregation { 
   //use case: x -> (a,b) intersect x -> (c,d) => x -> (a,b,c,d) 
   //  where only samples with x in both are kept
 
-  //assumes dataset is the parent of a tuple that has the variables of the datasets to aggregate
-  def aggregate(dataset: Dataset): Dataset = {    
-    val fs = getFunctions(dataset)
-    //assume just 2 functions for now //TODO: fold
+  def aggregate(ds1: Dataset, ds2: Dataset) = {    
+    val fs = List(ds1, ds2).flatMap(_.unwrap.findFunction)
     val it1 = fs(0).iterator
     val it2 = fs(1).iterator
     
@@ -43,12 +41,8 @@ class Intersection extends Aggregation {
       }
     }
     
-    //keep original metadata
-    val md = dataset.getMetadata
-    Dataset(Function(dtype, rtype, samples), md)
+    Dataset(Function(dtype, rtype, samples))
   }
-
-  
   
   private def getNextMatchingSamplePair(it1: Iterator[Sample], it2: Iterator[Sample]): Option[(Sample,Sample)] = {
     if (! it1.hasNext || ! it2.hasNext) None
@@ -70,10 +64,10 @@ class Intersection extends Aggregation {
       findMatchingSample(sample1, sample2)
     }
   }
-  
 }
 
 object Intersection {
   
   def apply() = new Intersection()
+  def apply(ds1: Dataset, ds2: Dataset) = new Intersection()(ds1, ds2)
 }

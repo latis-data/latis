@@ -50,7 +50,7 @@ class TestAggregation {
     val ds2 = TsmlReader("datasets/test/agg/scalar_ts_2col_10to19.tsml").getDataset
     
     val agg = TileAggregation()
-    val ds = agg(Dataset(Tuple(ds1.unwrap, ds2.unwrap)))
+    val ds = agg(ds1, ds2)
     //AsciiWriter.write(ds)       
     val v = ds.unwrap
     assert(v.isInstanceOf[Function]) //successfully aggregated into one Function

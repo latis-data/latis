@@ -12,9 +12,9 @@ import latis.ops.agg.Intersection
  */
 class IntersectionAdapter(tsml: Tsml) extends AggregationAdapter(tsml) {
 
-  def aggregate(dataset: Dataset): Dataset = {
+  def aggregate(left: Dataset, right: Dataset): Dataset = {
     val agg = Intersection()
-    agg(dataset)
+    agg(left, right)
   }
 
 }

@@ -1,6 +1,7 @@
 package latis.reader.tsml.agg
 
 import latis.dm.Dataset
+import latis.dm.implicits._
 import latis.reader.tsml.TsmlAdapter
 import latis.reader.tsml.ml.Tsml
 import scala.collection.mutable.ArrayBuffer
@@ -20,7 +21,7 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    * Given a Dataset that contains other Datasets (now as a tuple)
    * apply the aggregation logic to make a single Dataset.
    */
-  def aggregate(dataset: Dataset): Dataset
+  def aggregate(left: Dataset, right: Dataset): Dataset
   
   /**
    * Combine each aggregate Dataset into a single Dataset.
@@ -41,7 +42,9 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     collect(dss)
   }  
   
-  override protected def makeDataset(ds: Dataset): Dataset = aggregate(ds)
+  override protected def makeDataset(ds: Dataset): Dataset = ds match {
+    case Dataset(Tuple(vars)) => Dataset(vars.reduceLeft(aggregate(_,_).unwrap))
+  }
     
     
   /**
