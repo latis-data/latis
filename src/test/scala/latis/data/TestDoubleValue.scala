@@ -82,4 +82,11 @@ class TestDoubleValue {
 //    }
 //  }
   //def iterate_twice
+  
+  @Test
+  def nan_equality = {
+    val n1 = Data(Double.NaN)
+    val n2 = Data(Double.NaN)
+    assertNotEquals(n1, n2)
+  }
 }
