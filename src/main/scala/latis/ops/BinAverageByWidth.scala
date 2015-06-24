@@ -128,9 +128,6 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
       val meanValue = values.sum / values.length
       val mean = Real(rangeTemplate.getMetadata, meanValue)
       
-      val countValue = values.length
-      val count = Real(Metadata("count"), countValue)
-
       //if the original data was already binned (i.e. has min and max value) then use them.
       val minValue = data.get("min") match {
         case Some(ms) => ms.min
@@ -143,6 +140,12 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
         case None => values.max
       }
       val max = Real(Metadata("max"), maxValue)
+      
+      val countValue = data.get("count") match {
+        case Some(cs) => cs.sum
+        case None => values.length
+      }
+      val count = Real(Metadata("count"), countValue)
       
       Some(Tuple(mean, min, max, count))
     }
