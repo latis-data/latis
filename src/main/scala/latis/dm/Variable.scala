@@ -1,6 +1,7 @@
 package latis.dm
 
 import latis.data.Data
+import latis.data.value.DoubleValue
 import latis.data.NumberData
 import latis.metadata.Metadata
 import scala.collection.Seq
@@ -59,7 +60,10 @@ trait Variable {
         case _: Integer => new Time(scale, md, data) with Integer
       }
     }
-    case _: Real    => Real(this.getMetadata, data)
+    case _: Real    => data match {
+      case dv: DoubleValue => Real(this.getMetadata, dv)
+      case _ => throw new UnsupportedOperationException("Real must be constructed with a DoubleValue.")
+    }
     case _: Integer => Integer(this.getMetadata, data)
     case _: Text    => Text(this.getMetadata, data)
   }
