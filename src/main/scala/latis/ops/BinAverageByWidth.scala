@@ -72,7 +72,7 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
                 val mean = Real(rangeMetadata, Double.NaN)
                 val min  = Real(Metadata("min"), Double.NaN)
                 val max  = Real(Metadata("max"), Double.NaN)
-                val count = Real(Metadata("count"), Double.NaN)
+                val count = Real(Metadata("count"), 0)
                 Tuple(mean, min, max, count) //TODO: add metadata, consider model for bins
               }
             }
