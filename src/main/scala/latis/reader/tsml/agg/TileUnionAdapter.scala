@@ -10,8 +10,6 @@ import latis.reader.tsml.ml.Tsml
  */
 class TileUnionAdapter(tsml: Tsml) extends AggregationAdapter(tsml) {
 
-  def aggregate(left: Dataset, right: Dataset): Dataset = {
-    val agg = TileAggregation()
-    agg(left, right)
-  }
+  def aggregate(left: Dataset, right: Dataset): Dataset = TileAggregation(left, right)
+  
 }

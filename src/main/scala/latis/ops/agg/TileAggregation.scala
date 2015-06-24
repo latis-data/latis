@@ -38,4 +38,5 @@ class TileAggregation extends Aggregation {
 
 object TileAggregation {
   def apply() = new TileAggregation()
+  def apply(ds1: Dataset, ds2: Dataset) = new TileAggregation()(ds1, ds2)
 }

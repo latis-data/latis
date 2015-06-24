@@ -10,8 +10,6 @@ import latis.reader.tsml.ml.Tsml
  */
 class CollectionAdapter(tsml: Tsml) extends AggregationAdapter(tsml) {
 
-  def aggregate(left: Dataset, right: Dataset): Dataset = {
-    val agg = CollectionAggregation()
-    agg(left, right)
-  }
+  def aggregate(left: Dataset, right: Dataset): Dataset = CollectionAggregation(left, right)
+  
 }

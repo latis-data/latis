@@ -17,5 +17,5 @@ class CollectionAggregation extends Aggregation {
 
 object CollectionAggregation {
   def apply() = new CollectionAggregation()
-   
+  def apply(ds1: Dataset, ds2: Dataset) = new CollectionAggregation()(ds1, ds2)
 }
