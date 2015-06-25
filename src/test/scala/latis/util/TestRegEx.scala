@@ -177,6 +177,7 @@ class TestRegEx {
   @Test def dont_match_operation_with_bad_args = assertFalse("foo(b@r)" matches RegEx.OPERATION)
   @Test def dont_match_operation_without_parens = assertFalse("foo" matches RegEx.OPERATION)
   @Test def dont_match_empty_operation = assertFalse("" matches RegEx.OPERATION)
+  @Test def match_time_format = assertTrue("format_time(yyyy-MM-dd'T'HH:mm)" matches RegEx.OPERATION)
   
   //Extract Operation
   @Test def extract_operation_with_no_args = {
