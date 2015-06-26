@@ -150,4 +150,11 @@ class TestTime {
     
   }
   
+  @Test
+  def second_sixty_as_leap_second_ignored = {
+    val ms1 = Time.isoToJava("2015-06-30T23:59:60")
+    val ms2 = Time.isoToJava("2015-07-01T00:00:00")
+    assertEquals(ms1, ms2)
+  }
+  
 }
