@@ -21,12 +21,15 @@ class TileAggregation extends Aggregation {
    */
   
   def aggregate(ds1: Dataset, ds2: Dataset) = {
-    val functions = List(ds1, ds2).flatMap(_.unwrap.findFunction)
-    val iterator = functions.foldLeft(Iterator[Sample]())(_ ++ _.iterator)
+    val (f1, f2) = (ds1, ds2) match {
+      case(Dataset(f1: Function), Dataset(f2: Function)) => (f1, f2)
+    }
+    val (it1, it2) = (f1.iterator, f2.iterator)
+    val iterator = it1 ++ it2
     
     //assume same type for each Function
-    val domain = functions.head.getDomain
-    val range = functions.head.getRange
+    val domain = f1.getDomain
+    val range = f2.getRange
     val f = Function(domain, range, iterator)
     
     //TODO: munge metadata

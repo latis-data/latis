@@ -14,15 +14,16 @@ class Intersection extends Aggregation {
   //  where only samples with x in both are kept
 
   def aggregate(ds1: Dataset, ds2: Dataset) = {    
-    val fs = List(ds1, ds2).flatMap(_.unwrap.findFunction)
-    val it1 = fs(0).iterator
-    val it2 = fs(1).iterator
+    val (f1, f2) = (ds1, ds2) match {
+      case(Dataset(f1: Function), Dataset(f2: Function)) => (f1, f2)
+    }
+    val (it1, it2) = (f1.iterator, f2.iterator)
     
     val reduction = new Reduction
     
     //need domain and range types for new Function
-    val dtype = fs(0).getDomain
-    val rtype = reduction.applyToTuple(Tuple(fs(0).getRange, fs(1).getRange)).get //flatten, consistent with below
+    val dtype = f1.getDomain
+    val rtype = reduction.applyToTuple(Tuple(f1.getRange, f2.getRange)).get //flatten, consistent with below
     
     //make sample iterator
     val samples = new PeekIterator[Sample]() {
