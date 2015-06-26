@@ -6,6 +6,8 @@ import latis.ops.filter.Selection
 import latis.ops.Projection
 import latis.ops.filter.FirstFilter
 import latis.ops.filter.LastFilter
+import java.net.URLEncoder
+import java.net.URLDecoder
 
 class TestDapConstraintParser {
 
@@ -80,5 +82,37 @@ class TestDapConstraintParser {
   def bad_filter {
     val args = "time&time<10&last".split("&")
     val ops = (new DapConstraintParser).parseArgs(args)
+  }
+  
+  @Test
+  def single_quote_encoding_with_default_encoding = {
+    val s = "yyyy-MM-dd'T'HH:mm"
+    val encoded = URLEncoder.encode(s) //yyyy-MM-dd%27T%27HH%3Amm
+    val decoded = URLDecoder.decode(encoded)
+    assertEquals(s, decoded)
+  }
+  
+  @Test
+  def single_quote_encoding_with_utf8 = {
+    val s = "yyyy-MM-dd'T'HH:mm"
+    val encoded = URLEncoder.encode(s, "UTF-8")
+    val decoded = URLDecoder.decode(encoded)
+    assertEquals(s, decoded)
+  }
+  
+  @Test
+  def single_quote_decode_default_with_utf8 = {
+    val s = "yyyy-MM-dd'T'HH:mm"
+    val encoded = URLEncoder.encode(s)
+    val decoded = URLDecoder.decode(encoded, "UTF-8")
+    assertEquals(s, decoded)
+  }
+  
+  @Test
+  def single_quote_encode_with_iso_decode_with_utf8 = {
+    val s = "yyyy-MM-dd'T'HH:mm"
+    val encoded = URLEncoder.encode(s, "ISO-8859-1")
+    val decoded = URLDecoder.decode(encoded, "UTF-8")
+    assertEquals(s, decoded)
   }
 }

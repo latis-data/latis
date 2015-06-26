@@ -70,7 +70,7 @@ abstract class Operation {
   def applyToTuple(tuple: Tuple): Option[Variable] = {
     val vars = tuple.getVariables.flatMap(applyToVariable(_))
     if (vars.length == 0) None
-    else Some(Tuple(vars))
+    else Some(Tuple(vars, tuple.getMetadata))
   }
   
   /**
@@ -79,7 +79,7 @@ abstract class Operation {
    */
   def applyToFunction(function: Function): Option[Variable] = {
     if (functionNestingLevel > 1) {
-      ??? //not yet supported, not sure if needed
+      ??? //breaks TimeFormatter on nested functions
       Some(function) //hack to avoid wrapping nested functions
     } 
     else {
