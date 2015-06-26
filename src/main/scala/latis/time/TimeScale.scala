@@ -27,8 +27,9 @@ class TimeScale(val epoch: Date, val unit: TimeUnit, val tsType: TimeScaleType) 
 }
 
 object TimeScale {
-  lazy val JAVA = new TimeScale(new Date(0), TimeUnit.MILLISECOND, TimeScaleType.default)
-  lazy val DEFAULT = JAVA
+  //Note, using def instead of lazy val to support tests.
+  def JAVA = new TimeScale(new Date(0), TimeUnit.MILLISECOND, TimeScaleType.default)
+  def DEFAULT = JAVA
   
   /**
    * Define a special case for Julian date: days since noon Jan 1, 4713 BC.
