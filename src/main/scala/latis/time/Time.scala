@@ -60,7 +60,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
     //TODO: look for units and see if 'that' matches...
     RegEx.TIME.r findFirstIn that match {
       //If the string matches the ISO format
-      case Some(s) => compare(Time.fromIso(s)) //Make Time from ISO formatted time string, convert to our time scale
+//      case Some(s) => compare(Time.fromIso(s)) //Make Time from ISO formatted time string, convert to our time scale
       //Otherwise assume we have a numeric value in our time scale
       case _ => getData match {
         case LongValue(l) => l compare that.toLong
@@ -77,66 +77,26 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
 
 //=============================================================================
 
-/*
- * ways to make time from data (e.g. in adapters, operations)
- * - 
- * - 
- * 
- */
-
 object Time {
   import scala.collection.mutable.HashMap
   
+//TODO: need to get appropriate default time scale type
   def fromIso(s: String): Time = Time(isoToJava(s))
-  //TODO: make sure format is valid
+  //TODO: make sure format is valid, use Try?
   
   def isoToJava(s: String): Long = TimeFormat.fromIsoValue(s).parse(s)
   
 
-  
-  //may have no data, used as a template in adapters
-//  def apply(md: Metadata, data: Data = EmptyData): Time = {
-//  //def apply(md: Metadata): Time = {
-//    var metadata = md
-//    val scale = md.get("units") match {
-//      case Some(u) => TimeScale(u)
-//      case None => {
-//        //Use default time scale, add units to metadata
-//        //TODO: if type is text, set units to ISO
-//        
-//        metadata = new VariableMetadata(md.getProperties + ("units" -> TimeScale.DEFAULT.toString))
-//        TimeScale.DEFAULT
-//      }
-//    }
-//    //Mixin the appropriate type
-//    md.get("type") match {
-//      case Some(s) => s.toLowerCase match {
-//        case "real" => new Time(scale, metadata, EmptyData) with Real
-//        case "integer" => new Time(scale, metadata, EmptyData) with Integer
-//        case "text" => {
-//          //TODO: Use the units length to define the text length, but units from above not ISO
-//          //TODO: what if the metadata already defines the text length?
-//          //val length = metadata("units").length
-//          //val md2 = new VariableMetadata(md.getProperties + ("length" -> length.toString))
-//          new Time(scale, metadata, EmptyData) with Text
-//        }
-//        case _ => throw new RuntimeException("Unsupported Time type: " + s)
-//      }
-//      //default to Real
-//      case None => new Time(scale, md, EmptyData) with Real
-//    }
-//  }
-  
-  /*
-   * TODO: clean up time const
-   * should 'type' be  part of metadata? 
-   *   or should type be handled within the adapter?
-   * that may also be the only case where we need Time without data - orig ds
-   * 
-   * other cases where we want to specify type? base on data type only?
+
+  /**
+   * Only used by TsmlAdapter (and tests) as a Variable template in orig Dataset (no Data).
+   * Since the Time applies to a Dataset, look for the time_scale_type definition in the Metadata.
+   * Default to a NATIVE TimeScaleType as opposed to using the app's default time.scale.type.
    */
-  def apply(vtype: String, md: Metadata, data: Data = EmptyData): Time = {
-    //this is for tsml orig dataset template, no data
+  def apply(vtype: String, md: Metadata): Time = {
+    //data defaults to native time scale type
+    val tsType = TimeScaleType.withName(md.getOrElse("time_scale_type", "NATIVE")) 
+    
     if (vtype == "text") {
       val md2 = md.get("units") match {
         //Assume length is not set, for now. TODO: obey tsml defined length?
@@ -148,35 +108,32 @@ object Time {
           val length = u.filter(_ != ''').length
           md + ("length" -> length.toString)
         }
-        case None => md + ("units" -> TimeFormat.ISO.toString) + ("length" -> "23")
+        case None => {
+          val format = TimeFormat.ISO.toString
+          md + ("units" -> format) + ("length" -> format.length.toString)
+        }
       }
       //Note, formatted times will use the default numerical time units as needed.
-      new Time(TimeScale.JAVA, md2, data) with Text
+      new Time(TimeScale.JAVA, md2, EmptyData) with Text
       
     } else { //Numeric time
       var md2 = md
       val scale = md.get("units") match {
+ //       case Some(u) => TimeScale(u, tsType)
         case Some(u) => TimeScale(u)
-        case None    => {
-          md2 = md + ("units" -> TimeScale.JAVA.toString)
-          TimeScale.JAVA
-        }
+        case None    => throw new UnsupportedOperationException("A numeric time must have units.")
+//        {
+//          md2 = md + ("units" -> TimeScale.JAVA.toString)
+//          TimeScale.JAVA
+//        }
       }
       vtype match {
-        case "real"    => new Time(scale, md2, data) with Real
-        case "integer" => new Time(scale, md2, data) with Integer
+        case "real"    => new Time(scale, md2, EmptyData) with Real
+        case "integer" => new Time(scale, md2, EmptyData) with Integer
       }
     }
   }
-  
-  
-  //TODO: builder called on template instead of constructing from template's metadata
-  //not like scala builder
-  // template.buildWithData(data)?
-  //  apply(data): template(data)? too spooky? kinda like it
-  // Builder.buildFromTemplate(template, data)?
-  // 
-  
+
   
   def apply(md: Metadata): Time = {
     var metadata = md
@@ -227,7 +184,43 @@ object Time {
   
   def apply(date: Date): Time = Time(date.getTime())
 
+//============= old stuff =================
 
+  
+  //may have no data, used as a template in adapters
+//  def apply(md: Metadata, data: Data = EmptyData): Time = {
+//  //def apply(md: Metadata): Time = {
+//    var metadata = md
+//    val scale = md.get("units") match {
+//      case Some(u) => TimeScale(u)
+//      case None => {
+//        //Use default time scale, add units to metadata
+//        //TODO: if type is text, set units to ISO
+//        
+//        metadata = new VariableMetadata(md.getProperties + ("units" -> TimeScale.DEFAULT.toString))
+//        TimeScale.DEFAULT
+//      }
+//    }
+//    //Mixin the appropriate type
+//    md.get("type") match {
+//      case Some(s) => s.toLowerCase match {
+//        case "real" => new Time(scale, metadata, EmptyData) with Real
+//        case "integer" => new Time(scale, metadata, EmptyData) with Integer
+//        case "text" => {
+//          //TODO: Use the units length to define the text length, but units from above not ISO
+//          //TODO: what if the metadata already defines the text length?
+//          //val length = metadata("units").length
+//          //val md2 = new VariableMetadata(md.getProperties + ("length" -> length.toString))
+//          new Time(scale, metadata, EmptyData) with Text
+//        }
+//        case _ => throw new RuntimeException("Unsupported Time type: " + s)
+//      }
+//      //default to Real
+//      case None => new Time(scale, md, EmptyData) with Real
+//    }
+//  }
+  
+  
 //  def apply(md: Metadata, value: String): Time = {
 //    md.get("units") match {
 //      case Some(u) => {

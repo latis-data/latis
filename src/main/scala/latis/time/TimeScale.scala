@@ -58,14 +58,16 @@ object TimeScale {
    * Assume Native TimeScaleType (no leap second consideration), for now.
    */
   def apply(scale: String): TimeScale = {
+    val tsType = TimeScaleType.default //TODO: default depends on context (data vs selection)
     val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """(-?[0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
     scale.trim match {
-      case regex(unit, epoch) => TimeScale(epoch, TimeUnit.withName(unit), TimeScaleType.default)
-      case s: String if (s.startsWith("Julian")) => JULIAN_DATE
+      case regex(unit, epoch) => TimeScale(epoch, TimeUnit.withName(unit), tsType)
+      case s: String if (s.startsWith("Julian")) => JULIAN_DATE //TODO: can we interpret JD as UTC?
       case _ => {
-        //assume formatted time (http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html)
+        //assume formatted time
         //TODO: test for valid TimeFormat
         TimeScale.JAVA
+ //TODO: can't rely on default time scale type!!!
       }
     }
   }

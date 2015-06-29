@@ -192,5 +192,12 @@ class TestTimeScaleType {
    *   could be used for conversion?
    *   but would require converting all times to this form
    * 
+   * 
+   * ++should we add optional type to time units definition:
+   * "TAI seconds since ..."
+   * as opposed to a separate time_scale_type
+   * but what about formatted time?
+   *   should we not use "units" for formatting
+   *   
    */
 }

@@ -65,20 +65,21 @@ class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operatio
 }
 
 object UnitConversion extends OperationFactory {
-  
+
+//TODO: need to get appropriate default time scale type  
   /**
    * Constructor used by OperationFactory.
    */
   override def apply(args: Seq[String]): UnitConversion = {
     //TODO: error handling
     val vname = args.head
-    val uom = TimeScale(args(1))
+    val uom = TimeScale(args(1)) //TODO: need to specify TimeScaleType
     new UnitConversion(vname, uom)
   }
   
   def apply(vname: String, unit: String) = {
     //TODO: assuming Time for now
-    val uom = TimeScale(unit)
+    val uom = TimeScale(unit) //TODO: need to specify TimeScaleType
     new UnitConversion(vname, uom)
   }
 }
