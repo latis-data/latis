@@ -74,7 +74,14 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    * the adapter may apply.
    */
   def getVariableNames: Seq[String] = getOrigScalarNames
-
+  
+  /**
+   * Get the String used to separate header lines from the data.
+   */
+  def getDataMarker: String = getProperty("marker") match {
+    case Some(s) => s
+    case None    => null
+  }
     
   //---- Parse operations -----------------------------------------------------
   
@@ -98,7 +105,16 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
   def getLineIterator: Iterator[String] = {
     //TODO: does using 'drop' cause premature reading of data?
     val skip = getLinesToSkip
+    getDataMarkerIndex
     getDataSource.getLines.drop(skip).filterNot(shouldSkipLine(_))
+  }
+  
+  /**
+   * Gets the index of the data marker keyword
+   */
+  def getDataMarkerIndex: Int = {
+    System.out.println("index of data marker " + getDataSource.indexOf(getDataMarker))
+    getDataSource.indexOf(getDataMarker)
   }
   
   /**
