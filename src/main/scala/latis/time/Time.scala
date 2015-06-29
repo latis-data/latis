@@ -202,6 +202,7 @@ object Time {
         TimeScale.DEFAULT
       }
     }   
+    //TODO: need to interpret value in context of units, also check for 'type'?
     value match {
       case _: Float => new Time(scale, metadata, Data(value)) with Real
       case _: Double => new Time(scale, metadata, Data(value)) with Real
@@ -226,28 +227,7 @@ object Time {
   def apply(value: AnyVal): Time = Time(TimeScale.DEFAULT, value)
   
   def apply(date: Date): Time = Time(date.getTime())
-  
-  /*
-   * TODO: Time as Tuple. 
-   * But Time extends Scalar.
-   * Always convert to scalar?
-   * How to use as type without data, then apply data? 
-   *   have been avoiding letting tuple contain data
-   * use case: timed see netcdf, DATE (yyyyDDD) and TIME (seconds)
-   *   data end up in column oriented cache
-   *   can't make a scalar type for the template that can pull in multiple values
-   * 
-   * can tuple still play as a scalar?
-   *   compare to magnetic field magnitude
-   *   compare to value and uncertainty tuple
-   *   compare to bin average with min, max...
-   *   always use 1st element of tuple in scalar context?
-   * Derived field?
-   *   operation
-   * 
-   * Combine all text components delimited with comma.
-   * Add numeric component, converted to ms
-   */
+
 
 //  def apply(md: Metadata, value: String): Time = {
 //    md.get("units") match {
@@ -281,24 +261,4 @@ object Time {
 //    }
 //  }
   
-    
-  //TODO: move to util?
-//  def stringsToNumbers(ss: Seq[String]): Seq[AnyVal] = ss.map(stringToNumber(_))
-//  def stringToNumber(s: String): AnyVal = {
-//    try {s.toLong}  //try converting to Long
-//    catch {
-//      case e: Exception => {
-//        try {s.toDouble}  //try converting to Double
-//        catch {
-//          case e: Exception => throw new RuntimeException("Can't convert String into number: " + s)
-//        }
-//      }
-//    }
-//  }
-  
-  
-//TODO: 
-//  val NOW = new Time() {
-//    override def getTime() = (new Date()).getTime().toDouble
-//  }
 }
