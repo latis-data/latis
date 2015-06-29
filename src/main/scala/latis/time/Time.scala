@@ -91,21 +91,7 @@ object Time {
   def fromIso(s: String): Time = Time(isoToJava(s))
   //TODO: make sure format is valid
   
-  def isoToJava(s: String): Long = {
-    /*
-     * javax.xml.bind.DatatypeConverter supported formats include:
-     * yyyy
-     * yyyy-MM
-     * yyyy-MM-dd
-     * yyyy-MM-ddTHH:mm:ss
-     * yyyy-MM-ddTHH:mm:ss.S (unlimited decimal places)
-     */
-//    val cal = javax.xml.bind.DatatypeConverter.parseDateTime(s)
-//    cal.setTimeZone(TimeZone.getTimeZone("GMT")) //Assume UTC. //TODO: support other time zones?
-//    cal.getTimeInMillis()
-    
-    TimeFormat.fromIsoValue(s).parse(s)
-  }
+  def isoToJava(s: String): Long = TimeFormat.fromIsoValue(s).parse(s)
   
 
   
