@@ -108,6 +108,8 @@ class TestTimeScaleType {
    * ++TimeFormatter
    * convert to java t.s. as UTC or native based on default t.s.t
    * JAVA TimeScale is defined in terms of the default TimeScaleType
+   * present l.s. as 60th sec? can't be represented unambiguously in numeric UTC (repeats same value)
+   *   only if default time is UTC
    * 
    * ++consider use of things like Time.isoToJava
    * 
@@ -133,9 +135,62 @@ class TestTimeScaleType {
    * 
    *   
    * * js client will always interp java time natively
-   * need to add leap seconds to native time values
+   * conversion from gps needs to be tai2utc
+   * need to add leap seconds to native time values?
    * 
    * ++define t.s.t in tsml
+   * 
+   * 
+   * When does type distinction matter?
+   * do we really need 3 types or just "leap seconds yes or no"?
+   * Given the constraint that formatted times will be represented as unix numeric time (naive)
+   * Formatted times:
+   *   only makes sense to interpret as UTC or naive
+   *   converting to and from formatted and java time works no matter what - isomorphic?
+   *   * define an isomorphic mapping between formatted times and a numeric scale 
+   *   java does this for us, at least up to "day" units which is all we can really count on to count real time with a standard unit - invariant (e.g. years may be with or without leap days)
+   *   * scale needs to be defined with *invariant* units
+   *   interpret that scale as UTC (need to apply leap seconds for durations) or just ignore them (naive) which java does
+   *   Doesn't make sense to interpret formatted times as TAI.
+   *   we could define ms since 1970 as TAI but it would not map to the correct formatted times
+   * Numeric times:
+   *   we do need all 3
+   *   TAI: all real times are represented, it has counted the leap seconds
+   *   UTC: doesn't count leap seconds but we do want to apply them for duration...
+   *   NAIVE: doesn't count leap seconds and doesn't care, nor that others do
+   *   note, UTC and NAIVE can have the same numerical values (e.g. unix), it's just a matter of how to deal with l.s. in duration
+   * 
+   * Should we default to UTC
+   * adds l.s. dependency - probably enough right there not to, impl as a plugin?
+   * affects duration - makes it right but may be inconsistent with other tools, expectations, data...
+   * 
+   * If type is specified for a dataset, should interpretation of time selection do the same type?
+   * probably not, should be uniform for that server instance
+   * if ds is naive and format is UCT, conversion will still be naive
+   * note, naive latis instance will ignore dataset type
+   * 
+   * Default type for datasets?
+   *   use latis instance default? NO
+   *   dangerous to get diff data from diff servers
+   *   but UTC vs naive won't change the time values
+   *   the time range request offset is a latis impl detail, not a property of the dataset
+   *   if the ds is naive, the latis setting won't matter
+   *   consider daily dataset: days since xxx
+   *     if UTC, then we would have to consider l.s. in duration
+   *       problems if user expects ~day precision
+   *     if request is UTC: 2015-01-01 ???
+   *   * dataset should default to naive
+   * 
+   * * even if data was labeled with unix time stamps, the scale is naive
+   *   unix "accounts for" l.s. while it happens by counting the same second twice, effectively pausing
+   *   there is no way to know later that it paused 
+   * 
+   * Model time as a complex number:
+   *   real = unix time
+   *   im = number of leap seconds accumulated 
+   *   could distinguish a leap second among unix times
+   *   could be used for conversion?
+   *   but would require converting all times to this form
    * 
    */
 }

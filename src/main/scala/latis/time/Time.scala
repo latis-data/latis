@@ -15,6 +15,10 @@ import scala.collection.immutable.StringOps
 class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
   extends AbstractScalar(metadata, data) { 
 
+  //Note: there is a one-to-one mapping between java time (ms since 1970) and formatted time.
+  //Leap second considerations do not apply.
+  //Whether TimeScale.JAVA considers leap seconds is another matter.
+  
   def getUnits = timeScale
   
   def convert(scale: TimeScale): Time = TimeConverter(this.timeScale, scale).convert(this)
@@ -72,6 +76,13 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
 }
 
 //=============================================================================
+
+/*
+ * ways to make time from data (e.g. in adapters, operations)
+ * - 
+ * - 
+ * 
+ */
 
 object Time {
   import scala.collection.mutable.HashMap
