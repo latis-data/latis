@@ -12,7 +12,7 @@ import latis.data.value.LongValue
 import scala.collection.immutable.StringOps
 
 
-class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
+class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
   extends AbstractScalar(metadata, data) { 
 
   //Note: there is a one-to-one mapping between java time (ms since 1970) and formatted time.
@@ -86,7 +86,6 @@ class Time(timeScale: TimeScale = TimeScale.DEFAULT, metadata: Metadata = EmptyM
 
 object Time {
   import scala.collection.mutable.HashMap
-  //TODO: DEFAULT vs JAVA time scale
   
   def fromIso(s: String): Time = Time(isoToJava(s))
   //TODO: make sure format is valid
@@ -152,15 +151,15 @@ object Time {
         case None => md + ("units" -> TimeFormat.ISO.toString) + ("length" -> "23")
       }
       //Note, formatted times will use the default numerical time units as needed.
-      new Time(TimeScale.DEFAULT, md2, data) with Text
+      new Time(TimeScale.JAVA, md2, data) with Text
       
     } else { //Numeric time
       var md2 = md
       val scale = md.get("units") match {
         case Some(u) => TimeScale(u)
         case None    => {
-          md2 = md + ("units" -> TimeScale.DEFAULT.toString)
-          TimeScale.DEFAULT
+          md2 = md + ("units" -> TimeScale.JAVA.toString)
+          TimeScale.JAVA
         }
       }
       vtype match {
@@ -185,8 +184,8 @@ object Time {
       case Some(u) => TimeScale(u)
       case None => {
         //Use default time scale, add units to metadata
-        metadata = md + ("units" -> TimeScale.DEFAULT.toString)
-        TimeScale.DEFAULT
+        metadata = md + ("units" -> TimeScale.JAVA.toString)
+        TimeScale.JAVA
       }
     }
     new Time(scale, metadata)
@@ -198,8 +197,8 @@ object Time {
       case Some(u) => TimeScale(u)
       case None => {
         //Use default time scale, add units to metadata
-        metadata = md + ("units" -> TimeScale.DEFAULT.toString)
-        TimeScale.DEFAULT
+        metadata = md + ("units" -> TimeScale.JAVA.toString)
+        TimeScale.JAVA
       }
     }   
     //TODO: need to interpret value in context of units, also check for 'type'?
@@ -224,7 +223,7 @@ object Time {
     }
   }
 
-  def apply(value: AnyVal): Time = Time(TimeScale.DEFAULT, value)
+  def apply(value: AnyVal): Time = Time(TimeScale.JAVA, value)
   
   def apply(date: Date): Time = Time(date.getTime())
 

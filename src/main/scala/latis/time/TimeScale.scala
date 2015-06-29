@@ -29,7 +29,6 @@ class TimeScale(val epoch: Date, val unit: TimeUnit, val tsType: TimeScaleType) 
 object TimeScale {
   //Note, using def instead of lazy val to support tests.
   def JAVA = new TimeScale(new Date(0), TimeUnit.MILLISECOND, TimeScaleType.default)
-  def DEFAULT = JAVA
   
   /**
    * Define a special case for Julian date: days since noon Jan 1, 4713 BC.
@@ -66,7 +65,7 @@ object TimeScale {
       case _ => {
         //assume formatted time (http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html)
         //TODO: test for valid TimeFormat
-        TimeScale.DEFAULT
+        TimeScale.JAVA
       }
     }
   }
