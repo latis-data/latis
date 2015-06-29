@@ -121,10 +121,14 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   protected def makeMetadata(vml: VariableMl): Metadata = {
     //Note, not recursive, each Variable's metadata is independent
     
-    //Add tsml attributes for the variable element to attributes from the metadata element.
-    //TODO: deprecate, reserve vml attributes for config options for the adapter?
-    //      if there is a metadata element, add only name from attributes 
-    var atts = vml.getAttributes ++ vml.getMetadataAttributes
+    //attributes from the metadata element
+    var atts = vml.getMetadataAttributes
+    
+    //add name metadata from variable attributes if it exists
+    vml.getAttribute("name") match {
+      case Some(n) => addImplicitName(n)
+      case None => 
+    }
     
     //internal helper method to add default name for special variable types
     def addImplicitName(name: String) = {
