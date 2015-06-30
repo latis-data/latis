@@ -147,8 +147,13 @@ class TestTime {
   
   @Test
   def second_sixty_as_leap_second_ignored = {
+    //Note, this is not ideal. The 60th second more appropriately belongs to the previous day.
+    //See http://www.ietf.org/timezones/data/leap-seconds.list
+    //Unix seems to do it this way.
+    val ms0 = Time.isoToJava("2015-06-30T23:59:59")
     val ms1 = Time.isoToJava("2015-06-30T23:59:60")
     val ms2 = Time.isoToJava("2015-07-01T00:00:00")
+    assertEquals(ms1, ms0+1000)
     assertEquals(ms1, ms2)
   }
   
