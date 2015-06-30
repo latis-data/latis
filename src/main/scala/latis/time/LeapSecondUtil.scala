@@ -22,7 +22,7 @@ object LeapSecondUtil {
     
     val it = lsds match {case Dataset(f: Function) => f.iterator}
     
-    val etime = TimeScale("seconds since 1900-01-01").epoch.getTime
+    val etime = TimeScale("seconds since 1900-01-01").epoch.getTime //TODO: should these be UTC seconds...
 
     it.foreach(_ match {case Sample(t: Time, Number(ls)) => map.put(new Date(t.getNumberData.longValue * 1000 + etime), ls)})
     
@@ -35,7 +35,7 @@ object LeapSecondUtil {
   private def readLeapSecondData: Dataset = {
     var reader: TsmlReader = null
      try {
-       reader = TsmlReader("src/test/resources/datasets/test/leap_seconds.tsml")
+       reader = TsmlReader("leap_seconds.tsml")
        reader.getDataset.force
      } finally {
        if(reader != null) reader.close
