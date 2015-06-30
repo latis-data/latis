@@ -77,7 +77,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
 
   def getDataMarker: String = getProperty("marker") match {
     case Some(s) => s
-    case None    => null
+    case None    => ""
   }
     
   //---- Parse operations -----------------------------------------------------
@@ -112,20 +112,22 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    * iterator from Source.getLines.
    */
   var foundDataMarker = false
-  def shouldSkipLine(line: String): Boolean = {
+	def shouldSkipLine(line: String): Boolean = {
     //TODO: what if nothing but whitespace? trim?
-
-    val m = getDataMarker
-    val c = getCommentCharacter
-
-    if (foundDataMarker) {
-      line.isEmpty() || (c != null && line.startsWith(c))
-    } else {
-      if (line.startsWith(getDataMarker)) {
-        foundDataMarker = true
-      }
-      true
-   } 
+    val d = getDataMarker
+	  val c = getCommentCharacter
+	  val defaultExcludes = line.isEmpty() || (c != null && line.startsWith(c))
+    
+    // logic to handle data marker set in tsml file 
+	  if (foundDataMarker) { 
+		  defaultExcludes
+	  } else if (d != "") {  // marker must be set in tsml 
+		    if ( line.startsWith(d) )
+						  foundDataMarker = true
+				true
+		} else {  // return this if marker is never found or if marker is not set in tmsl file
+		  defaultExcludes
+	  }
   }
   
   /**

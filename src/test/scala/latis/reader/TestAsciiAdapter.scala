@@ -8,14 +8,18 @@ import latis.writer.AsciiWriter
 
 class TestAsciiAdapter  {
   
-  val data2 = TsmlReader("datasets/test/data_with_marker.tsml")
   
   @Test
-  def test_read_data_file = {
+  def test_data_file_is_readable = {
     val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset.toStringMap
-    AsciiWriter.write(data2.getDataset)
-    assertEquals("1610.5", data("year")(0))
+    assertEquals("1619.5", data("year")(0))
   }
   
+  @Test
+  def test_only_data_after_marker_is_returned = {
+    val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset.toStringMap
+    assertEquals("1619.5", data("year")(0)) // check the fist value
+    assertEquals("1628.5", data("year")(9)) // check the last value
+  }
 
 }
