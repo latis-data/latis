@@ -16,8 +16,8 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
   extends AbstractScalar(metadata, data) { 
 
   //Note: there is a one-to-one mapping between java time (ms since 1970) and formatted time.
-  //Leap second considerations do not apply.
-  //Whether TimeScale.JAVA considers leap seconds is another matter.
+  //Leap second considerations do not apply when going between the numeric and formatted form.
+  //Whether TimeScale.JAVA considers leap seconds is based on the time.scale.type property.
   
   def getUnits = timeScale
   
@@ -30,7 +30,11 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
   def format(format: TimeFormat): String = format.format(getJavaTime)
   
   def getJavaTime: Long = getData match {
+    //Note, converts from the data's time scale (with it's own type) to JAVA time which uses the time.scale.type property.
     case num: NumberData => convert(TimeScale.JAVA).getNumberData.longValue
+    
+    //Note, time scale type doesn't matter. If either is "NATIVE", leap seconds will not be applied.
+    //  If both are UTC, they are not different. TAI is not supported for Text Times.
     case text: TextData => {
       val format = getMetadata.get("units") match {  //note: using units for format 
         case Some(f) => f
@@ -60,7 +64,8 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
     //TODO: look for units and see if 'that' matches...
     RegEx.TIME.r findFirstIn that match {
       //If the string matches the ISO format
-//      case Some(s) => compare(Time.fromIso(s)) //Make Time from ISO formatted time string, convert to our time scale
+      //Make Time from ISO formatted time string (based on time.scale.type), convert to our time scale
+      case Some(s) => compare(Time.fromIso(s)) 
       //Otherwise assume we have a numeric value in our time scale
       case _ => getData match {
         case LongValue(l) => l compare that.toLong
@@ -78,15 +83,22 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
 //=============================================================================
 
 object Time {
-  import scala.collection.mutable.HashMap
   
-//TODO: need to get appropriate default time scale type
+  /**
+   * Create a Time instance from the given ISO8601 formatted string.
+   * Use the time.scale.type property to determine if this should be
+   * interpreted as a UTC time or the default NATIVE time.
+   */
   def fromIso(s: String): Time = Time(isoToJava(s))
   //TODO: make sure format is valid, use Try?
   
+  /**
+   * Given an ISO8601 formatted time string, return the number of milliseconds since 1970-01-01.
+   * This is independent of time scale type (e.g. leap seconds) since, by our definition,
+   * formated times are backed by (and isomorphic with) the java time scale.
+   */
   def isoToJava(s: String): Long = TimeFormat.fromIsoValue(s).parse(s)
   
-
 
   /**
    * Only used by TsmlAdapter (and tests) as a Variable template in orig Dataset (no Data).
@@ -119,13 +131,8 @@ object Time {
     } else { //Numeric time
       var md2 = md
       val scale = md.get("units") match {
- //       case Some(u) => TimeScale(u, tsType)
         case Some(u) => TimeScale(u)
         case None    => throw new UnsupportedOperationException("A numeric time must have units.")
-//        {
-//          md2 = md + ("units" -> TimeScale.JAVA.toString)
-//          TimeScale.JAVA
-//        }
       }
       vtype match {
         case "real"    => new Time(scale, md2, EmptyData) with Real
@@ -158,7 +165,7 @@ object Time {
         TimeScale.JAVA
       }
     }   
-    //TODO: need to interpret value in context of units, also check for 'type'?
+//TODO: need to interpret value in context of units, also check for 'type'?
     value match {
       case _: Float => new Time(scale, metadata, Data(value)) with Real
       case _: Double => new Time(scale, metadata, Data(value)) with Real
