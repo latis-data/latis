@@ -75,6 +75,9 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    */
   def getVariableNames: Seq[String] = getOrigScalarNames
 
+  /**
+   * Get the String used as the data marker from tsml file.
+   */
   def getDataMarker: String = getProperty("marker") match {
     case Some(s) => s
     case None    => ""
