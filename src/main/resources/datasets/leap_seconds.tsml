@@ -2,13 +2,13 @@
 <tsml>
 
   <dataset name="leap_seconds">
-    <adapter class="latis.reader.tsml.AsciiAdapter"
+    <adapter class="latis.reader.tsml.ColumnarAdapter"
              commentCharacter="#"
              delimiter="\s+"
-             location="datasets/test/leap-seconds.list" />
-             <!--TODO: remote URL-->
+             columns="0;1"
+             location="http://www.ietf.org/timezones/data/leap-seconds.list" />
              
-    <time type="integer" units="seconds since 1900-01-01"/>
+    <time type="integer" units="UTC seconds since 1900-01-01"/>
     <integer name="leap_seconds"/>
 
   </dataset>
