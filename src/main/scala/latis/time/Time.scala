@@ -105,11 +105,12 @@ object Time {
    * Since the Time applies to a Dataset, look for the time_scale_type definition in the Metadata.
    * Default to a NATIVE TimeScaleType as opposed to using the app's default time.scale.type.
    */
-  def apply(vtype: String, md: Metadata): Time = {
+  def apply(vtype: String, md: Metadata, data: Data = EmptyData): Time = {
     //data defaults to native time scale type
     val tsType = TimeScaleType.withName(md.getOrElse("time_scale_type", "NATIVE")) 
     
     if (vtype == "text") {
+      var format = ""
       val md2 = md.get("units") match {
         //Assume length is not set, for now. TODO: obey tsml defined length?
         case Some(u) => {
@@ -117,16 +118,18 @@ object Time {
           //Get the length of a String representation using these time units (i.e. format).
           //Don't count the single quotes used around the literals (such as the "T" time marker) 
           //  as required by Java's SimpleDataFormat.
+          format = u
           val length = u.filter(_ != ''').length
           md + ("length" -> length.toString)
         }
         case None => {
-          val format = TimeFormat.ISO.toString
+          format = TimeFormat.ISO.toString
           md + ("units" -> format) + ("length" -> format.filter(_ != ''').length.toString)
         }
       }
       //Note, formatted times will use the default numerical time units as needed.
-      new Time(TimeScale.JAVA, md2, EmptyData) with Text
+      val ts = TimeScale(format) //built from format so we can preserve it in toString
+      new Time(ts, md2, data) with Text
       
     } else { //Numeric time
       var md2 = md
@@ -135,8 +138,8 @@ object Time {
         case None    => throw new UnsupportedOperationException("A numeric time must have units.")
       }
       vtype match {
-        case "real"    => new Time(scale, md2, EmptyData) with Real
-        case "integer" => new Time(scale, md2, EmptyData) with Integer
+        case "real"    => new Time(scale, md2, data) with Real
+        case "integer" => new Time(scale, md2, data) with Integer
       }
     }
   }

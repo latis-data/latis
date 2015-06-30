@@ -80,7 +80,7 @@ class TestTime {
     val t = Time("text", Metadata(Map("units" -> "yyyy-MM-dd")))
     assertTrue(t.isInstanceOf[Text])
     assertEquals("10", t.getMetadata("length").get)
-    assertEquals("milliseconds since 1970-01-01", t.getUnits.toString) //default numeric units
+    assertEquals("yyyy-MM-dd", t.getUnits.toString) //default numeric units
   }
   
   @Test def text_type_without_units = {
@@ -88,7 +88,7 @@ class TestTime {
     assertTrue(t.isInstanceOf[Text])
     assertEquals("23", t.getMetadata("length").get)
     assertEquals("yyyy-MM-dd'T'HH:mm:ss.SSS", t.getMetadata("units").get)
-    assertEquals("milliseconds since 1970-01-01", t.getUnits.toString) //default numeric units
+    assertEquals("yyyy-MM-dd'T'HH:mm:ss.SSS", t.getUnits.toString) //default numeric units
   }
 
   //@Test def text_type_with_units_and_length = ???
