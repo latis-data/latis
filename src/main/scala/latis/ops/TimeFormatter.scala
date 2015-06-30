@@ -24,7 +24,7 @@ class TimeFormatter(format: String) extends Operation {
   override def applyToScalar(scalar: Scalar): Option[Scalar] = scalar match {
     case t: Time => {
       val formatted_time = t.format(format)
-      val md = t.getMetadata + ("units" -> format) + ("type" -> "text") + ("length" -> format.length.toString)
+      val md = t.getMetadata + ("units" -> format) + ("type" -> "text") + ("length" -> format.filter(_ != ''').length.toString)
       val time = Time(md, formatted_time)
       Some(time)
     }
