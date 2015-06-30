@@ -7,7 +7,7 @@
     		 delimiter="\s+"
              location="datasets/test/vecmag.txt" />
              
-    <time name="t"/>
+    <time name="t" units="milliseconds since 1970-01-01" />
     
     <real name="a"/>
     <real name="b"/>
