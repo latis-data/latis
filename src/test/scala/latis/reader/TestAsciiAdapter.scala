@@ -7,12 +7,13 @@ import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
 
 class TestAsciiAdapter  {
-    
-  val data2 = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
+  
+  val data2 = TsmlReader("datasets/test/data_with_marker.tsml")
   
   @Test
   def test_read_data_file = {
     val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset.toStringMap
+    AsciiWriter.write(data2.getDataset)
     assertEquals("1610.5", data("year")(0))
   }
   

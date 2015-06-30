@@ -74,10 +74,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    * the adapter may apply.
    */
   def getVariableNames: Seq[String] = getOrigScalarNames
-  
-  /**
-   * Get the String used to separate header lines from the data.
-   */
+
   def getDataMarker: String = getProperty("marker") match {
     case Some(s) => s
     case None    => null
@@ -105,16 +102,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
   def getLineIterator: Iterator[String] = {
     //TODO: does using 'drop' cause premature reading of data?
     val skip = getLinesToSkip
-    getDataMarkerIndex
     getDataSource.getLines.drop(skip).filterNot(shouldSkipLine(_))
-  }
-  
-  /**
-   * Gets the index of the data marker keyword
-   */
-  def getDataMarkerIndex: Int = {
-    System.out.println("index of data marker " + getDataSource.indexOf(getDataMarker))
-    getDataSource.indexOf(getDataMarker)
   }
   
   /**
@@ -123,10 +111,21 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    * Note that the "isEmpty" test bypasses an end of file problem iterating over the 
    * iterator from Source.getLines.
    */
+  var foundDataMarker = false
   def shouldSkipLine(line: String): Boolean = {
     //TODO: what if nothing but whitespace? trim?
+
+    val m = getDataMarker
     val c = getCommentCharacter
-    line.isEmpty() || (c != null && line.startsWith(c))
+
+    if (foundDataMarker) {
+      line.isEmpty() || (c != null && line.startsWith(c))
+    } else {
+      if (line.startsWith(getDataMarker)) {
+        foundDataMarker = true
+      }
+      true
+   } 
   }
   
   /**
