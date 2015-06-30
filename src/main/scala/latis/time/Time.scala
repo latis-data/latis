@@ -122,7 +122,7 @@ object Time {
         }
         case None => {
           val format = TimeFormat.ISO.toString
-          md + ("units" -> format) + ("length" -> format.length.toString)
+          md + ("units" -> format) + ("length" -> format.filter(_ != ''').length.toString)
         }
       }
       //Note, formatted times will use the default numerical time units as needed.

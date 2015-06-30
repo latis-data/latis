@@ -102,11 +102,6 @@ class TestTime {
     assertEquals("years since 2000-01-01", t.getUnits.toString)
   }
   
-  @Test def real_type_without_units = {
-    val t = Time("real", Metadata.empty)
-    assertTrue(t.isInstanceOf[Real])
-    assertEquals("milliseconds since 1970-01-01", t.getUnits.toString)
-  }
   //@Test def real_type_with_invalid_units = ???
   //@Test def int_type_with_units = ???
   //@Test def int_type_without_units = ???
