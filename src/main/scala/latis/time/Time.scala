@@ -155,6 +155,11 @@ object Time {
     new Time(scale, metadata)
   }
   
+  /**
+   * Generally used when making a new Time from an old one. Copy metadata, add new value.
+   * TODO: use or remove 'type' in metadata (e.g. real, integer, text)
+   * TODO: interpret value in context of units
+   */
   def apply(md: Metadata, value: AnyVal): Time = {
     var metadata = md
     val scale = md.get("units") match {
@@ -164,8 +169,7 @@ object Time {
         metadata = md + ("units" -> TimeScale.JAVA.toString)
         TimeScale.JAVA
       }
-    }   
-//TODO: need to interpret value in context of units, also check for 'type'?
+    }
     value match {
       case _: Float => new Time(scale, metadata, Data(value)) with Real
       case _: Double => new Time(scale, metadata, Data(value)) with Real
