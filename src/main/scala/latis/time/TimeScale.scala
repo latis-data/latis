@@ -82,7 +82,7 @@ object TimeScale {
       case Array(s, epoch) => s.split("""\s""") match {
         case Array(tstype, unit) => TimeScale(epoch, TimeUnit.withName(unit.toLowerCase), TimeScaleType.withName(tstype.toUpperCase))
         case Array(unit) => TimeScale(epoch, TimeUnit.withName(unit.toLowerCase), TimeScaleType.NATIVE)
-        case _ => ??? //multiple sections of white space
+        case _ => throw new UnsupportedOperationException("Time unit has more than 2 components before the 'since': " + scale)
       }
       case Array(s) => s match {
         case s: String if (s.toLowerCase.startsWith("julian")) => JULIAN_DATE //TODO: can we interpret JD as UTC?
@@ -94,7 +94,7 @@ object TimeScale {
           ts
         }
       }
-      case _ => ??? //" scale " exists more than once in the units
+      case _ => throw new UnsupportedOperationException("Time unit contains 'since' more than once: " + scale)
     }
   }
 }
