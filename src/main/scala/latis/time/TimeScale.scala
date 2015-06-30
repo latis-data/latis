@@ -27,7 +27,7 @@ class TimeScale(val epoch: Date, val unit: TimeUnit, val tsType: TimeScaleType) 
 }
 
 object TimeScale {
-  //Note, using def instead of lazy val to support tests.
+  //Note, using def instead of lazy val to support tests with varying default TimeScaleType.
   def JAVA = new TimeScale(new Date(0), TimeUnit.MILLISECOND, TimeScaleType.default)
   
   /**
@@ -54,21 +54,41 @@ object TimeScale {
   }
   
   /**
-   * Make TimeScale from "unit since epoch" or time format String.
-   * Assume Native TimeScaleType (no leap second consideration), for now.
+   * Make TimeScale from "(tsType) unit since epoch", special name, or time format String adhering to java.util.SimleDateFormat.
+   * "(tsType)" is the optional (case-insensitive) TimeScaleType: "UTC", "TAI" or "NATIVE".
+   * If tsType is not specified, the time.scale.type property (defaulting to NATIVE) will be used.
+   * Special names supported include:
+   *   Julian Date
+   * Note: It may not be appropriate for Datasets to default to UTC when time.scale.type is used
+   * to have ISO8601 time selections interpreted as UTC. When both are UTC, conversions will apply
+   * leap seconds which may lead to unexpected results for datasets using a "naive" time scale.
    */
   def apply(scale: String): TimeScale = {
-    val tsType = TimeScaleType.default //TODO: default depends on context (data vs selection)
-    val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """(-?[0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
-    scale.trim match {
-      case regex(unit, epoch) => TimeScale(epoch, TimeUnit.withName(unit), tsType)
-      case s: String if (s.startsWith("Julian")) => JULIAN_DATE //TODO: can we interpret JD as UTC?
-      case _ => {
-        //assume formatted time
-        //TODO: test for valid TimeFormat
-        TimeScale.JAVA
- //TODO: can't rely on default time scale type!!!
+    scale.split(" since ") match {
+      case Array(s, epoch) => s.split("""\s""") match {
+        case Array(tstype, unit) => TimeScale(epoch, TimeUnit.withName(unit.toLowerCase), TimeScaleType.withName(tstype.toLowerCase))
+        case Array(unit) => TimeScale(epoch, TimeUnit.withName(unit.toLowerCase), TimeScaleType.default)
+        case _ => ??? //multiple sections of white space
       }
+      case Array(s) => s match {
+        case s: String if (s.toLowerCase.startsWith("julian")) => JULIAN_DATE //TODO: can we interpret JD as UTC?
+        case _ => TimeScale.JAVA //formatted, will get tsType from time.scale.type property
+      }
+      case _ => ??? //" scale " exists more than once in the units
     }
+    
+    
+//    val tsType = TimeScaleType.default //TODO: default depends on context (data vs selection)
+//    val regex = ("("+RegEx.WORD+")" + """\s+since\s+""" + """(-?[0-9]{4}-[0-9]{2}-[0-9]{2}\S*)""").r
+//    scale.trim match {
+//      case regex(unit, epoch) => TimeScale(epoch, TimeUnit.withName(unit), tsType)
+//      case s: String if (s.startsWith("Julian")) => JULIAN_DATE //TODO: can we interpret JD as UTC?
+//      case _ => {
+//        //assume formatted time
+//        //TODO: test for valid TimeFormat
+//        TimeScale.JAVA
+// //TODO: can't rely on default time scale type!!!
+//      }
+//    }
   }
 }
