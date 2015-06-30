@@ -65,21 +65,24 @@ class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operatio
 }
 
 object UnitConversion extends OperationFactory {
-
-//TODO: need to get appropriate default time scale type  
+  //Note, TimeScales constructed from formatted time units (e.g. yyyy-MM-dd)
+  //will use the time.scale.type property and default to NATIVE. For now. (LATIS-322)
+  //Numerical units (units since epoch) will use the NATIVE type unless prepended by "UTC " or "TAI ".
+  //Since unit conversion is a "behavior" of LaTiS, it makes sense to use time.scale.type here.
+ 
   /**
    * Constructor used by OperationFactory.
    */
   override def apply(args: Seq[String]): UnitConversion = {
     //TODO: error handling
     val vname = args.head
-    val uom = TimeScale(args(1)) //TODO: need to specify TimeScaleType
+    val uom = TimeScale(args(1))
     new UnitConversion(vname, uom)
   }
   
   def apply(vname: String, unit: String) = {
     //TODO: assuming Time for now
-    val uom = TimeScale(unit) //TODO: need to specify TimeScaleType
+    val uom = TimeScale(unit)
     new UnitConversion(vname, uom)
   }
 }
