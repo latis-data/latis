@@ -135,7 +135,13 @@ object Time {
       var md2 = md
       val scale = md.get("units") match {
         case Some(u) => TimeScale(u)
-        case None    => throw new UnsupportedOperationException("A numeric time must have units.")
+        case None    => {
+          //default to java time with native time scale type
+          //TODO: not likely useful in the wild, but simplifies tests. 
+          val units = "milliseconds since 1970-01-01" 
+          md2 = md + ("units" -> units)
+          TimeScale(units)
+        }
       }
       vtype match {
         case "real"    => new Time(scale, md2, data) with Real
