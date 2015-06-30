@@ -90,15 +90,5 @@ class TestTimeScaleType {
   
   //TODO: do we need "years without leap days" type? consider diff java calendars/chronologies?
   //TODO: need to be able to label formatted text time as UTC in tsml
-  /*
-   * 
-   * * Use case: MMS WebTCAD
-   * - db in gps (TAI), specify tai type in tsml
-   * - request in ISO (need default time.scale.type to interp this as UTC)
-   * - converting iso as java interpreted as UTC to gps should just work
-   * - conversion will happen in JdbcAdapter.handleTimeSelection
-   *   uses Time.fromIso then converts to dataset time scale based on units
-   *   encode tai in units for TimeScale constructor
-   *   fromIso needs to be in UTC, based on time.scale.type
-   */
+  
 }
