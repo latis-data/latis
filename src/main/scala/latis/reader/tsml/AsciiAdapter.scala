@@ -78,10 +78,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
   /**
    * Get the String used as the data marker from tsml file.
    */
-  lazy val getDataMarker: String = getProperty("marker") match {
-    case Some(s) => s
-    case None    => ""
-  }
+  lazy val getDataMarker: Option[String] = getProperty("marker")
     
   //---- Parse operations -----------------------------------------------------
   
@@ -128,7 +125,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
       // therefore we should ignore everything until we
       // find it. We should also exclude the data marker itself
       // when we find it. 
-      if (line.startsWith(d)) foundDataMarker = true;
+      if (line.startsWith(d.get)) foundDataMarker = true;
       true
     }
   }
