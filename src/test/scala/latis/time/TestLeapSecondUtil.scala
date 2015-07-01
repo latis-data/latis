@@ -33,10 +33,20 @@ class TestLeapSecondUtil {
     val utcts = TimeScale("1970-01-01", TimeUnit.MILLISECOND, TimeScaleType.UTC)
     val taits = TimeScale("1980-01-06", TimeUnit.MICROSECOND, TimeScaleType.TAI)
     val utc = Time(utcts, 0)
+    //val utc = Time(utcts, 315964800000l) //this works
     val tai = utc.convert(taits)
     val utc2 = tai.convert(utcts)
     val s = utc2.format("yyyy-MM-dd HH:mm:ss").toString
-    assertEquals(0, tai.getNumberData.longValue)
+    /*
+     * 10 years, 5 days
+     * 2 leap days
+     * 19 leap seconds
+     * ((10 * 365) + 7) * 86400 + 19 = 315964819s
+     * we get 315964800s
+     * problem with negative values
+     * leap seconds added for epoch offset then removed for the rest
+     */
+    assertEquals(315964819000000l, tai.getNumberData.longValue) //IDL datetime reports -315964812814318
     assertEquals("1970-01-01 00:00:00", s)
   }
   
@@ -48,7 +58,13 @@ class TestLeapSecondUtil {
     val tai = utc.convert(taits)
     val utc2 = tai.convert(utcts)
     val s = utc2.format("yyyy-MM-dd HH:mm:ss").toString
-    assertEquals(0, tai.getNumberData.longValue)
+    /*
+     * 12 years
+     * 3 leap days
+     * 0 leap seconds
+     * ((12 * 365) + 3) * 86400 = 378691200
+     */
+    assertEquals(378691200, tai.getNumberData.longValue)
     assertEquals("1970-01-01 00:00:00", s)
   }
   
