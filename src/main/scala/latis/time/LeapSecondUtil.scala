@@ -46,7 +46,7 @@ object LeapSecondUtil {
    * Return the number of leap seconds that have accumulated as of the given date.
    */
   def getLeapSeconds(date: Date): Double = _origLeapSecondMap.floorKey(date) match {
-    case null => 10 //everything before 1972 has 10 leap seconds
+    case null => 0 //10 //everything before 1972 has 10 leap seconds
     case key: Date => _origLeapSecondMap.get(key)
   }
 

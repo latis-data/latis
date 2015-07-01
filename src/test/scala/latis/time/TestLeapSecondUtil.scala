@@ -25,9 +25,33 @@ class TestLeapSecondUtil {
   def test_before_leap_seconds_existed {
     val date = new Date(TimeFormat.DATE.parse("1950-01-01"))
     val d = LeapSecondUtil.getLeapSeconds(date)
-    assertEquals(10, d, 0)
+    assertEquals(0, d, 0)
   }
-
+  
+  @Test
+  def utc_to_future_tai_to_utc_at_java_epoch = {
+    val utcts = TimeScale("1970-01-01", TimeUnit.MILLISECOND, TimeScaleType.UTC)
+    val taits = TimeScale("1980-01-06", TimeUnit.MICROSECOND, TimeScaleType.TAI)
+    val utc = Time(utcts, 0)
+    val tai = utc.convert(taits)
+    val utc2 = tai.convert(utcts)
+    val s = utc2.format("yyyy-MM-dd HH:mm:ss").toString
+    assertEquals(0, tai.getNumberData.longValue)
+    assertEquals("1970-01-01 00:00:00", s)
+  }
+  
+  @Test
+  def utc_to_past_tai_to_utc_at_java_epoch = {
+    val utcts = TimeScale("1970-01-01", TimeUnit.MILLISECOND, TimeScaleType.UTC)
+    val taits = TimeScale("1958-01-01", TimeUnit.SECOND, TimeScaleType.TAI)
+    val utc = Time(utcts, 0)
+    val tai = utc.convert(taits)
+    val utc2 = tai.convert(utcts)
+    val s = utc2.format("yyyy-MM-dd HH:mm:ss").toString
+    assertEquals(0, tai.getNumberData.longValue)
+    assertEquals("1970-01-01 00:00:00", s)
+  }
+  
   @Test
   def test_future {
     //We shouldn't know any more than the next leap second (usually 6 months out)

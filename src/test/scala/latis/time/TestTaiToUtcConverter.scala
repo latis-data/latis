@@ -210,13 +210,12 @@ class TestTaiToUtcConverter {
     assertEquals(expected, t2, 0)
   }
 
-  @Test @Ignore
+  @Test
   def pre_utc_epoch = {
     val ts = TimeScale("TAI seconds since 1958-01-01")
-    val t = Time(ts, 1798761635) //should be 2015-01-01T00:00:00
-    
+    val t = Time(ts, 1798761635)
     val ts2 = TimeScale("UTC milliseconds since 1970-01-01")
-    val t2 = t.convert(ts2) //1420070410  should be 1420070400
+    val t2 = t.convert(ts2) 
     val s = t2.format("yyyy-MM-dd HH:mm:ss")
     assertEquals("2015-01-01 00:00:00", s)
   }
