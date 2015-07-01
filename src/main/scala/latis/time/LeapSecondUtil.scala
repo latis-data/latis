@@ -44,9 +44,13 @@ object LeapSecondUtil {
   
   /**
    * Return the number of leap seconds that have accumulated as of the given date.
+   * By our definition, everything before the UTC epoch (1972-01-01) has 0 leap seconds.
+   * Note, some APIs model historical leap seconds (with varying length seconds) from 1961-1972.
+   * This API is self-consistent but comparisons to others during this time range (or with epochs
+   * in this time range) may vary by as much as 10 seconds.
    */
   def getLeapSeconds(date: Date): Double = _origLeapSecondMap.floorKey(date) match {
-    case null => 0 //10 //everything before 1972 has 10 leap seconds
+    case null => 0
     case key: Date => _origLeapSecondMap.get(key)
   }
 
