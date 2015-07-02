@@ -123,9 +123,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //attributes from the metadata element
     var atts = vml.getMetadataAttributes
     
-    //add name metadata from variable attributes if it exists
-    vml.getAttribute("name") match {
-      case Some(n) => atts += "name" -> n
+    if (!atts.contains("name")) vml.getAttribute("id") match {
+      case Some(id) => atts += "name" -> id
       case None => 
     }
     
@@ -133,7 +132,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
       case Some(l) => atts += "length" -> l
       case None => 
     }
-    
+        
     //internal helper method to add default name for special variable types
     def addImplicitName(name: String) = {
       //If the Variable already has a name, add the given name as an alias

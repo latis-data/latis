@@ -287,9 +287,12 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     val tvname = getVariableName(tvar)
     
     //get time type from tsml
-    val vtype = (tsml.xml \\ "time").find(_.attributes.asAttrMap("name") == tvname) match {
-      case Some(n) => (n \\ "@type").head.text
-      case None => throw new Exception(s"Could not find time variable with name $tvname in tsml.")
+    val vtype = tsml.dataset.findVariableMl(tvname) match {
+      case Some(ml) => ml.getAttribute("type") match {
+        case Some(t) => t
+        case None => throw new Exception(s"Could not find 'type' attribute in variable $tvname")
+      }
+      case None => throw new Exception(s"Could not find variable with name $tvname in tsml.")
     }
     
     vtype match {
