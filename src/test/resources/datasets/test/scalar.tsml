@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset>
-    <metadata name="scalar"/>
-    <adapter class="latis.reader.tsml.AsciiAdapter"
-             delimiter="\s+"
-             location="datasets/scalar.txt" />
-             
-    <time name="foo" />
-    
-    <real name="ssn"/>
+<dataset>
+  <metadata name="scalar"/>
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           delimiter="\s+"
+           location="datasets/scalar.txt" />
+           
+  <time id="foo" />
+  
+  <real id="ssn"/>
 
-  </dataset>
-
-</tsml>
+</dataset>

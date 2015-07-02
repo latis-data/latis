@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="log_stats">
-    <adapter class="latis.reader.tsml.LogStatsAdapter"
-             location="http://sdc-web1:8080/ops/mms/webtcad/latis/log.json" />
-    
-    <time name="time" units="yyyy-MM-ddTHH:mm:ss.SSS" type="text"/>
-   
-    <real name="duration"/>
-    <text name="request" length="50"/>
-    <text name="result" length="100"/>
-    
-  </dataset>
-
-</tsml>
+<dataset id="log_stats">
+  <adapter class="latis.reader.tsml.LogStatsAdapter"
+           location="http://sdc-web1:8080/ops/mms/webtcad/latis/log.json" />
+  
+  <time type="text">
+    <metadata units="yyyy-MM-ddTHH:mm:ss.SSS"/>
+  </time>
+ 
+  <real id="duration"/>
+  <text id="request" length="50"/>
+  <text id="result" length="100"/>
+  
+</dataset>

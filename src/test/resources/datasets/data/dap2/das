@@ -1,10 +1,9 @@
 attributes {
     samples{
         myTime{
-            string alias "time";
             string units "yyyy/MM/dd";
+            string alias "time";
             string length "10";
-            string type "text";
         }
         unknown{
             myInt{

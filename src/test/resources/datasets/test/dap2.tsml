@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="dap2">
-    <adapter class="latis.reader.tsml.AsciiAdapter"
-             delimiter="\s+"
-             commentCharacter="#"
-             location="datasets/test/mixed.txt" />
-    
-    <time name="myTime" units="yyyy/MM/dd" type="text" length="10"/>
-   
-    <integer name="myInt" units="N" long_name="myInteger" missing_value="3" />
-    <real    name="myReal" long_name="myReal" units="m/s^2"/>
-    <text    name="myText" long_name="text" missing_value="D" units="letters"/>
-    
-  </dataset>
-
-</tsml>
+<dataset id="dap2">
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           delimiter="\s+"
+           commentCharacter="#"
+           location="datasets/test/mixed.txt" />
+  
+  <time type="text">
+    <metadata name="myTime" units="yyyy/MM/dd"/>
+  </time>
+ 
+  <integer>
+    <metadata name="myInt" units="N" long_name="myInteger" missing_value="3"/>
+  </integer>
+  
+  <real>
+    <metadata name="myReal" long_name="myReal" units="m/s^2"/>
+  </real>
+  
+  <text>
+    <metadata name="myText" long_name="text" missing_value="D" units="letters"/>
+  </text>
+  
+</dataset>

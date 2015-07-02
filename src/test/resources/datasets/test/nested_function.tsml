@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="nested_function">
-    <adapter class="latis.reader.tsml.AsciiAdapter"
-             delimiter="\s+"
-             location="datasets/test/nested_function.txt" />
-    
-    <time name="myTime" units="yyyy/MM/dd" type="text" length="10"/>
-   
-    <function length="3">
-      <integer name="myInt"/>
-      <real    name="myReal"/>
-      <text    name="myText"/>
-    </function>
-    
-  </dataset>
-
-</tsml>
+<dataset id="nested_function">
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           delimiter="\s+"
+           location="datasets/test/nested_function.txt" />
+  
+  <time type="text">
+    <metadata name="myTime" units="yyyy/MM/dd"/>
+  </time>
+ 
+  <function length="3">
+    <integer id="myInt"/>
+    <real    id="myReal"/>
+    <text    id="myText"/>
+  </function>
+  
+</dataset>
