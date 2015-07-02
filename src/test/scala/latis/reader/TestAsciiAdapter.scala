@@ -19,7 +19,7 @@ class TestAsciiAdapter  {
   @Test
   def test_only_data_after_marker_is_returned = {
     val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset.toStringMap
-    assertEquals("1619.5", data("year")(0)) // check the fist value
+    assertEquals("1619.5", data("year")(0)) // check the first value
     assertEquals("1628.5", data("year")(9)) // check the last value
   }
 
