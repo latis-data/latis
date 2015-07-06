@@ -65,6 +65,7 @@ class TestAggregation {
     val data = ds.toDoubleMap
     assertEquals(20, data("T").length)
     assertEquals(2, data.keySet.size)
+    assertEquals("agg_test", ds.getName)
   }
   
 //  @Test
