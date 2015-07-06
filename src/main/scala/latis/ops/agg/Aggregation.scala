@@ -9,12 +9,7 @@ import latis.dm.Tuple
  * Base type for Operations that aggregate (combine) datasets.
  */
 trait Aggregation extends Operation {
-  /*
-   * TODO: rename to join?
-   * aggregate in the sense of combining a seq of datasets into one is consistent with sum, mean,... aggregations
-   * try to be consistent with relational algebra and FP
-   * 
-   */
+  //See LATIS-325 about using relational algebra "join" terminology.
   
   def aggregate(ds1: Dataset, ds2: Dataset): Dataset
       
