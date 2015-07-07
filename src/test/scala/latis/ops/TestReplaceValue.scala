@@ -69,8 +69,8 @@ class TestReplaceValue {
       val ds2 = ds1.replaceValue("3", "6.28")
       fail
     } catch {
-      case e: NumberFormatException => assert(true)
-      case _ => fail
+      case nfe: NumberFormatException => assert(true)
+      case e: Exception => fail //fail if we get any other kind of Exception
     }
   }
 
