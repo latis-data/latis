@@ -8,8 +8,6 @@ import latis.writer.AsciiWriter
 
 class TestAsciiAdapter  {
   
-  val data2 = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
-  
   @Test
   def test_data_file_is_readable = {
     val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset.toStringMap
