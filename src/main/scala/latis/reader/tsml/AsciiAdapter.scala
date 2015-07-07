@@ -36,8 +36,9 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    * line to indicate that it should not be read as data. 
    * Defaults to null, meaning that no line should be ignored (except empty lines).
    * Return null if there are no comments to skip.
+   * Use a lazy val since this will be used for every line.
    */
-  def getCommentCharacter: String = getProperty("commentCharacter") match {
+  lazy val getCommentCharacter: String = getProperty("commentCharacter") match {
     case Some(s) => s
     case None    => null
   }
@@ -77,9 +78,19 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
 
   /**
    * Get the String used as the data marker from tsml file.
+   * Use a lazy val since this will be used for every line.
    */
-  lazy val getDataMarker: Option[String] = getProperty("marker")
-    
+  lazy val getDataMarker: String = getProperty("marker") match {
+    case Some(s) => s
+    case None => null
+  }
+  
+  /**
+   * Keep track of whether we have encountered a data marker.
+   */
+  private var foundDataMarker = false
+
+
   //---- Parse operations -----------------------------------------------------
   
   /**
@@ -111,13 +122,11 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    * Note that the "isEmpty" test bypasses an end of file problem iterating over the 
    * iterator from Source.getLines.
    */
-  var foundDataMarker = false
   def shouldSkipLine(line: String): Boolean = {
-    //TODO: what if nothing but whitespace? trim?
     val d = getDataMarker
     val c = getCommentCharacter
 
-    if (d.isEmpty || foundDataMarker) {
+    if (d == null || foundDataMarker) {
       // default behavior: ignore empty lines and lines that start with comment characters
       line.isEmpty() || (c != null && line.startsWith(c))
     } else {
@@ -125,7 +134,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
       // therefore we should ignore everything until we
       // find it. We should also exclude the data marker itself
       // when we find it. 
-      if (line.startsWith(d.get)) foundDataMarker = true;
+      if (line.startsWith(d)) foundDataMarker = true;
       true
     }
   }
