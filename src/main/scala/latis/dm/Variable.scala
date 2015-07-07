@@ -6,6 +6,8 @@ import latis.data.NumberData
 import latis.metadata.Metadata
 import scala.collection.Seq
 import latis.time.Time
+import latis.data.value.StringValue
+import latis.data.value.LongValue
 
 /**
  * Base type for all Variables in the LaTiS data model.
@@ -55,17 +57,32 @@ trait Variable {
       val scale = t.getUnits
       val md = t.getMetadata
       t match {
-        case _: Text => new Time(scale, md, data) with Text
-        case _: Real => new Time(scale, md, data) with Real
-        case _: Integer => new Time(scale, md, data) with Integer
+        case _: Text => data match {
+          case sv: StringValue => new Time(scale, md, data) with Text
+          case _ => throw new UnsupportedOperationException("Text must be constructed with a StringValue.")
+        }
+        case _: Real => data match {
+          case dv: DoubleValue => new Time(scale, md, data) with Real
+          case _ => throw new UnsupportedOperationException("Real must be constructed with a DoubleValue.")
+        }
+        case _: Integer => data match {
+          case lv: LongValue => new Time(scale, md, data) with Integer
+          case _ => throw new UnsupportedOperationException("Integer must be constructed with a LongValue.")
+        }
       }
     }
     case _: Real    => data match {
       case dv: DoubleValue => Real(this.getMetadata, dv)
       case _ => throw new UnsupportedOperationException("Real must be constructed with a DoubleValue.")
     }
-    case _: Integer => Integer(this.getMetadata, data)
-    case _: Text    => Text(this.getMetadata, data)
+    case _: Integer => data match {
+      case lv: LongValue => Integer(this.getMetadata, data)
+      case _ => throw new UnsupportedOperationException("Integer must be constructed with a LongValue.")
+    }
+    case _: Text    => data match {
+      case sv: StringValue => Text(this.getMetadata, data)
+      case _ => throw new UnsupportedOperationException("Text must be constructed with a StringValue.")
+    }
   }
 }
 
