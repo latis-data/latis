@@ -1,7 +1,7 @@
 package latis.ops
 
 import latis.dm._
-import latis.util.PeekIterator
+import latis.util.iterator.PeekIterator
 import latis.time.Time
 import scala.collection.mutable.ListBuffer
 import latis.dm.implicits._
