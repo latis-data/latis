@@ -21,10 +21,10 @@ class TileAggregation extends Aggregation {
    */
   
   def aggregate(ds1: Dataset, ds2: Dataset) = {
-    val (f1, f2) = (ds1, ds2) match {
-      case(Dataset(f1: Function), Dataset(f2: Function)) => (f1, f2)
+    val (f1, f2, it1, it2) = (ds1, ds2) match {
+      case(Dataset(f1 @ Function(it1)), Dataset(f2 @ Function(it2))) => (f1, f2, it1, it2)
+      case _ => throw new UnsupportedOperationException("TileAggregation expects a Function in each of the Datasets it aggregates.")
     }
-    val (it1, it2) = (f1.iterator, f2.iterator)
     val iterator = it1 ++ it2
     
     //assume same type for each Function
