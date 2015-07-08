@@ -64,7 +64,7 @@ object TimeScale {
       case s: String if (s.startsWith("Julian")) => JULIAN_DATE
       case _ => {
         //assume formatted time (http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html)
-        //TODO: test for valid TimeFormat
+        //TODO: test for valid TimeFormat (LATIS-329)
         TimeScale.DEFAULT
       }
     }
