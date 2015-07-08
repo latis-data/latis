@@ -62,11 +62,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   
   def reduce = Reduction.reduce(this)
   
-  def intersect(that: Dataset): Dataset = {
-    //tmp hack until we refactor agg - See jira issue LATIS-273
-    val dataset = Dataset(Tuple(this.unwrap, that.unwrap))
-    Intersection()(dataset)
-  }
+  def intersect(that: Dataset): Dataset = Intersection(this, that)
   
   //Convenient data dumping methods.
   def toDoubleMap = DataMap.toDoubleMap(this)
