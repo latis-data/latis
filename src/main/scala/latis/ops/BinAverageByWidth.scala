@@ -1,11 +1,11 @@
 package latis.ops
 
 import latis.dm._
-import latis.util.MappingIterator
+import latis.util.iterator.MappingIterator
 import scala.collection.Map
 import scala.collection.mutable.ListBuffer
 import scala.math._
-import latis.util.PeekIterator
+import latis.util.iterator.PeekIterator
 import latis.time.Time
 import latis.metadata.Metadata
 import latis.data.SampledData
@@ -58,7 +58,10 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
             //create domain with bin center as its value, reuse original metadata
             //TODO: munge metadata
             val domainValue = nextValue - 0.5 * getBinWidth //bin center
-            val domain = Real(domainMetadata, domainValue)
+            val domain = fit.current.domain match {
+              case _: Time => Time(domainMetadata, domainValue)
+              case _ => Real(domainMetadata, domainValue)
+            } 
             
             //compute statistics on range values
             val range = computeStatistics(binnedSamples) match {
@@ -69,7 +72,8 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
                 val mean = Real(rangeMetadata, Double.NaN)
                 val min  = Real(Metadata("min"), Double.NaN)
                 val max  = Real(Metadata("max"), Double.NaN)
-                Tuple(mean, min, max) //TODO: add metadata, consider model for bins
+                val count = Real(Metadata("count"), 0)
+                Tuple(mean, min, max, count) //TODO: add metadata, consider model for bins
               }
             }
             
@@ -116,11 +120,14 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
       
       //get data as a Map: name -> array of values
       val data = samplesToDoubleMap(samples)
-      val values = data(rangeTemplate.getName)
+      val values = data.get(rangeTemplate.getName) match {
+        case Some(vs) => vs
+        case None => return None
+      }
       
       val meanValue = values.sum / values.length
       val mean = Real(rangeTemplate.getMetadata, meanValue)
-
+      
       //if the original data was already binned (i.e. has min and max value) then use them.
       val minValue = data.get("min") match {
         case Some(ms) => ms.min
@@ -134,7 +141,13 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
       }
       val max = Real(Metadata("max"), maxValue)
       
-      Some(Tuple(mean, min, max))
+      val countValue = data.get("count") match {
+        case Some(cs) => cs.sum
+        case None => values.length
+      }
+      val count = Real(Metadata("count"), countValue)
+      
+      Some(Tuple(mean, min, max, count))
     }
   }
   
@@ -150,6 +163,7 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
     val ds = Dataset(Function(samples))
     //exclude samples with missing data
     val ds2 = ExcludeMissing()(ds)
+    
     
     ds2.toDoubleMap
   }

@@ -10,6 +10,7 @@ import latis.time.Time
 import latis.writer.AsciiWriter
 import java.nio.ByteBuffer
 import latis.data.value.DoubleValue
+import latis.reader.tsml.TsmlReader
 
 class TestDataset {
 
@@ -27,6 +28,51 @@ class TestDataset {
       case Dataset(v) => fail
       case _ => //pass
     }
+  }
+  
+  @Test
+  def empty_dataset_equals_empty_dataset {
+    assertEquals(Dataset.empty, Dataset.empty)
+  }
+  
+  @Test
+  def isEmpty_doesnt_consume_item {
+    
+    // This test is based off a bug that was first noticed
+    // in TestMathExpressionDerivation.test_tsml()
+    // 
+    // For this dataset, calling isEmpty appears to consume
+    // the first row of the iterator. To test: create 2
+    // identical datasets from vecmag.tsml. Call isEmpty
+    // on one of them, and then assert that they both
+    // have the same data. If the test passes, the bug is
+    // fixed.
+    
+    val ds1 = TsmlReader("vecmag.tsml").getDataset
+    val ds2 = TsmlReader("vecmag.tsml").getDataset
+    
+    val fn1 = ds1.unwrap.asInstanceOf[Function]
+    val fn2 = ds2.unwrap.asInstanceOf[Function]
+    
+    assertEquals(false, ds1.isEmpty)
+    
+    val it1 = fn1.iterator
+    val it2 = fn2.iterator
+    val zippedIts = it1.zip(it2)
+    val columns = List("t", "a", "b", "c", "X")
+    
+    zippedIts.foreach(rowPair => {
+      val row1 = rowPair._1
+      val row2 = rowPair._2
+      
+      columns.foreach(col => {
+        assertEquals(
+          row1.findVariableByName(col).get.getNumberData.doubleValue,
+          row2.findVariableByName(col).get.getNumberData.doubleValue,
+          0.0
+        )
+      })
+    })
   }
 }
 
@@ -91,6 +137,13 @@ object TestDataset {
     Dataset(Function(samples, Metadata(Map("length"->"3"))), Metadata("function_of_scalar"))
   }
   
+  def function_of_scalar_with_rounding = {
+    val samples = List(Sample(Real(Metadata(Map("precision"->"2", "name"->"a")),-0.004), Integer(Metadata(Map("sigfigs"->"1", "name"->"b")),123)),
+    				   Sample(Real(Metadata(Map("precision"->"2", "name"->"a")),1.001111), Integer(Metadata(Map("sigfigs"->"2", "name"->"b")),123)),
+    				   Sample(Real(Metadata(Map("precision"->"2", "name"->"a")),1.995), Integer(Metadata(Map("sigfigs"->"3", "name"->"b")),123)))
+    Dataset(Function(samples), Metadata("function_of_scalar_with_rounding"))
+  }
+  
   def function_of_tuple = {
     val samples = List(Sample(Integer(Metadata("myInteger"), 0), Tuple(Real(Metadata("myReal"), 0), Text(Metadata("myText"), "zero"))), 
                        Sample(Integer(Metadata("myInteger"), 1), Tuple(Real(Metadata("myReal"), 1), Text(Metadata("myText"), "one"))), 
@@ -108,6 +161,8 @@ object TestDataset {
   def function_of_functions = Dataset(TestNestedFunction.function_of_functions_with_data_in_scalars, Metadata("function_of_functions"))
   
   def function_of_functions2 = Dataset(TestNestedFunction.function_of_functions_with_sampled_data, Metadata("function_of_functions2"))
+  
+  def function_of_functions_text = Dataset(TestNestedFunction.function_of_functions_with_text_data, Metadata("function_of_functions_text"))
   
   def mixed_function = {
     val samples = List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), (function_of_scalar+(0)).unwrap)),
@@ -145,6 +200,13 @@ object TestDataset {
   def index_function = Dataset(Function(List(Integer(1), Integer(2))), Metadata("indexFunctionDS"))
   
   def combo = Dataset(Tuple(function_of_tuple.unwrap, tuple_of_tuples.unwrap, text.unwrap), Metadata("combo"))
+  
+  def tuple_domain = {
+    val samples = List(Sample(Tuple(Real(Metadata("lon"),0.0), Real(Metadata("lat"), 90.0)), Real(Metadata("x"), 0)),
+                       Sample(Tuple(Real(Metadata("lon"),90.0), Real(Metadata("lat"), 0.0)), Real(Metadata("x"), 1)),
+                       Sample(Tuple(Real(Metadata("lon"),180.0), Real(Metadata("lat"), -90.0)), Real(Metadata("x"), 2)))
+    Dataset(Function(samples), Metadata("tuple_domain"))
+  }
   
 //  def datasets = Seq(empty, real, integer, text, real_time, text_time, int_time, scalars, binary, tuple_of_scalars,
 //                     tuple_of_tuples, tuple_of_functions, scalar_tuple, mixed_tuple, function_of_scalar,

@@ -36,8 +36,9 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    * line to indicate that it should not be read as data. 
    * Defaults to null, meaning that no line should be ignored (except empty lines).
    * Return null if there are no comments to skip.
+   * Use a lazy val since this will be used for every line.
    */
-  def getCommentCharacter: String = getProperty("commentCharacter") match {
+  lazy val getCommentCharacter: String = getProperty("commentCharacter") match {
     case Some(s) => s
     case None    => null
   }
@@ -75,7 +76,21 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    */
   def getVariableNames: Seq[String] = getOrigScalarNames
 
-    
+  /**
+   * Get the String used as the data marker from tsml file.
+   * Use a lazy val since this will be used for every line.
+   */
+  lazy val getDataMarker: String = getProperty("marker") match {
+    case Some(s) => s
+    case None => null
+  }
+  
+  /**
+   * Keep track of whether we have encountered a data marker.
+   */
+  private var foundDataMarker = false
+
+
   //---- Parse operations -----------------------------------------------------
   
   /**
@@ -108,9 +123,20 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    * iterator from Source.getLines.
    */
   def shouldSkipLine(line: String): Boolean = {
-    //TODO: what if nothing but whitespace? trim?
+    val d = getDataMarker
     val c = getCommentCharacter
-    line.isEmpty() || (c != null && line.startsWith(c))
+
+    if (d == null || foundDataMarker) {
+      // default behavior: ignore empty lines and lines that start with comment characters
+      line.isEmpty() || (c != null && line.startsWith(c))
+    } else {
+      // We have a data marker and we haven't found it yet,
+      // therefore we should ignore everything until we
+      // find it. We should also exclude the data marker itself
+      // when we find it. 
+      if (line.startsWith(d)) foundDataMarker = true;
+      true
+    }
   }
   
   /**
@@ -135,7 +161,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
       None
     } else {
       val vnames: Seq[String] = vars.map(_.getName)
-      val datas: Seq[Data] = (values zip vars).map(p => parseStringValue(p._1, p._2))
+      val datas: Seq[Data] = (values zip vars).map(p => StringUtils.parseStringValue(p._1, p._2))
       Some((vnames zip datas).toMap)
     }
   }
@@ -145,24 +171,6 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    */
   def extractValues(record: String): Seq[String] = record.trim.split(getDelimiter)
 
-  //TODO: reuse, dataUtils?
-  //TODO: support regex property for each variable
-  def parseStringValue(value: String, variableTemplate: Variable): Data = variableTemplate match {
-    case _: Integer => try {
-      //If value looks like a float, take everything up to the decimal point.
-      val s = if (value.contains(".")) value.substring(0, value.indexOf("."))
-      else value
-      Data(s.trim.toLong)
-    } catch {
-      case e: NumberFormatException => Data(variableTemplate.asInstanceOf[Integer].getFillValue.asInstanceOf[Long])
-    }
-    case _: Real => try {
-      Data(value.trim.toDouble)
-    } catch {
-      case e: NumberFormatException => Data(variableTemplate.asInstanceOf[Real].getFillValue.asInstanceOf[Double])
-    }
-    case t: Text    => Data(StringUtils.padOrTruncate(value, t.length)) //enforce length
-  }
 }
 
 

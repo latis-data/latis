@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsml>
+
+  <dataset name="nested_binary_columns">
+    <adapter class="latis.reader.tsml.ColumnarBinaryAdapter"
+             location="datasets/test/ssi/" />
+    
+    <function>
+      <real name="a"/>
+      <function length="3">
+        <integer name="b2"/>
+        <integer name="c"/>
+      </function>
+    </function>
+    
+  </dataset>
+
+</tsml>

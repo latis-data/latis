@@ -1,15 +1,15 @@
 package latis.ops
 
 import scala.Option.option2Iterable
-
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Sample
 import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
-import latis.dm.WrappedFunction
 import latis.util.LatisProperties
+import latis.util.iterator.PeekIterator
+import latis.util.iterator.MappingIterator
 
 /**
  * Base type for operations that transform on Dataset into another.
@@ -70,7 +70,7 @@ abstract class Operation {
   def applyToTuple(tuple: Tuple): Option[Variable] = {
     val vars = tuple.getVariables.flatMap(applyToVariable(_))
     if (vars.length == 0) None
-    else Some(Tuple(vars))
+    else Some(Tuple(vars, tuple.getMetadata))
   }
   
   /**
@@ -79,10 +79,17 @@ abstract class Operation {
    */
   def applyToFunction(function: Function): Option[Variable] = {
     if (functionNestingLevel > 1) {
-      ??? //not yet supported, not sure if needed
+      ??? //breaks TimeFormatter on nested functions
       Some(function) //hack to avoid wrapping nested functions
     } 
-    else Some(WrappedFunction(function, this))
+    else {
+      val mit = new MappingIterator(function.iterator, (s: Sample) => this.applyToSample(s))
+      val template = mit.peek match {
+        case null => function.getSample //empty iterator so no-op
+        case s => s
+      }
+      Some(Function(template.domain, template.range, mit, function.getMetadata))
+    }
   }
   
 }

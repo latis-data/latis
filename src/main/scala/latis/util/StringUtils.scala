@@ -1,5 +1,8 @@
 package latis.util
 
+import latis.data.Data
+import latis.dm.Integer
+import latis.dm.Real
 import latis.dm.Text
 import latis.dm.Variable
 
@@ -65,5 +68,26 @@ object StringUtils {
     } catch {
       case e: NumberFormatException => false
     }
+  }
+  
+  /**
+   * construct Data from a String by matching a Variable template
+   */
+  //TODO: support regex property for each variable
+  def parseStringValue(value: String, variableTemplate: Variable): Data = variableTemplate match {
+    case _: Integer => try {
+      //If value looks like a float, take everything up to the decimal point.
+      val s = if (value.contains(".")) value.substring(0, value.indexOf("."))
+      else value
+      Data(s.trim.toLong)
+    } catch {
+      case e: NumberFormatException => Data(variableTemplate.asInstanceOf[Integer].getFillValue.asInstanceOf[Long])
+    }
+    case _: Real => try {
+      Data(value.trim.toDouble)
+    } catch {
+      case e: NumberFormatException => Data(variableTemplate.asInstanceOf[Real].getFillValue.asInstanceOf[Double])
+    }
+    case t: Text    => Data(StringUtils.padOrTruncate(value, t.length)) //enforce length
   }
 }

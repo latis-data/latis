@@ -13,6 +13,7 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import javax.mail.Multipart
 import latis.time.Time
+import javax.mail.Part
 
 /**
  * Reads a folder of emails, returning the sent date, from address, subject, and content
@@ -23,13 +24,14 @@ class EmailAdapter(tsml: Tsml) extends IterativeAdapter[Message](tsml) {
   var store: Store = null
   
   override def close = {if(store != null) store.close}
-  
-  val host = getProperty("host").getOrElse(throw new Exception("EmailAdapter requires 'host' property defined in tsml"))
-  val user = getProperty("user").getOrElse(throw new Exception("EmailAdapter requires 'user' property defined in tsml"))
-  val password = getProperty("password").getOrElse(throw new Exception("EmailAdapter requires 'password' property defined in tsml"))
-  val folder = getProperty("folder").getOrElse(throw new Exception("EmailAdapter requires 'folder' property defined in tsml"))
-  
+    
   def getRecordIterator: Iterator[Message] = {
+    val regex = """imap:\/\/([\w\d.]+):([^@]+)@([\w\d.]+)\/([\w\d\/.]+)""".r //only covers basic addresses and passwords without '@'
+    val (user, password, host, folder) = getProperty("location") match {
+      case Some(regex(u,p,h,f)) => (u, p, h, f)
+      case None => throw new Exception("location must be formatted as 'imap://user:password@host/folder")
+    }
+    
     val props = new Properties
     props.setProperty("mail.store.protocol", "imaps")
     val session: Session = Session.getInstance(props, null)
@@ -49,21 +51,27 @@ class EmailAdapter(tsml: Tsml) extends IterativeAdapter[Message](tsml) {
       None //drop sample if some component of message is missing
     } else {
       val vnames: Seq[String] = vars.map(_.getName)
-      val datas: Seq[Data] = (values zip vars).map(p => Data(StringUtils.padOrTruncate(p._1, p._2))) //enforce Text length
+      val datas: Seq[Data] = (values zip vars).map(p => StringUtils.parseStringValue(p._1, p._2))
       Some((vnames zip datas).toMap)
     }
     
   }
   
   /**
-   * Expects Dataset to look like: sendDate -> (sender, subject, content)
+   * Expects Dataset to look like: index -> (time, sender, subject, content)
    */
   def extractValues(msg: Message): Seq[String] = {
-    val format = getOrigDataset.findVariableByName("time").get.asInstanceOf[Time].getUnits.toString
-    val date = (new SimpleDateFormat(format)).format(msg.getSentDate)
+    val date = Time(msg.getSentDate).getValue.toString
     val from = msg.getFrom()(0).toString
     val subject = msg.getSubject
-    val content = msg.getContent.asInstanceOf[Multipart].getBodyPart(0).getContent.toString
+    
+    //recursive function to find text content
+    def findStringContent(p: Part): String = p.getContentType.split(";").head.split("/").head.toLowerCase match {
+      case "text" => p.getContent.toString
+      case "multipart" => findStringContent(p.getContent.asInstanceOf[Multipart].getBodyPart(0))
+    }
+    
+    val content = findStringContent(msg)
     Seq(date, from, subject, content)
   }
   

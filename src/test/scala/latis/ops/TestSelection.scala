@@ -340,6 +340,17 @@ class TestSelection {
     assert(data.isEmpty)
   }
   
+  @Test
+  def tuple_domain {
+    val ds = TestDataset.tuple_domain
+    val op = Selection("lat<=0")
+    val ds2 = op(ds)
+    val data = ds2.toDoubleMap
+    assertEquals(2, data("lat").length)
+    assertEquals(90, data("lon")(0), 0)
+    assertEquals(2, data("x")(1), 0)
+  }
+  
 }
 
 

@@ -1,12 +1,18 @@
 package latis.ops
 
-import latis.dm._
-import latis.dm.implicits._
-import latis.writer._
-import org.junit._
-import Assert._
-import latis.reader.tsml.TsmlReader
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Real
+import latis.dm.TestDataset
+import latis.dm.TestNestedFunction
+import latis.dm.Tuple
+import latis.dm.implicits.variableToDataset
 import latis.metadata.Metadata
+import latis.ops.filter.FirstFilter
+import latis.ops.filter.Selection
 
 class TestProjection {
   //TODO: use TestDataset-s
@@ -109,7 +115,6 @@ class TestProjection {
     val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
     val proj = new Projection(List("w","a","b")) 
     val ds2 = proj(ds1)
-    //TODO: ds1 appears empty, iterable once problem? need to rewind byte buffers?  AsciiWriter.write(ds1)
     val f = ds2.unwrap.asInstanceOf[Function]
     val domain = f.getDomain
     assertEquals("index", domain.getName)
@@ -118,14 +123,17 @@ class TestProjection {
     assertEquals(4, n)
   }
   
-  //@Test
+  @Test
   def project_all_but_inner_domain_in_function_function {
     val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
     val proj = new Projection(List("t","a","b")) 
-    //AsciiWriter.write(ds1)
     val ds2 = proj(ds1)
-//TODO: range of first sample disappears from ds1 after projection!? due to transforming type of inner function
-    AsciiWriter.write(ds2)
+    val f = ds2.unwrap.asInstanceOf[Function]
+    val domain = f.getDomain
+    val range  = f.getRange.asInstanceOf[Function]
+    assertEquals("t", domain.getName)
+    assertEquals(4, ds2.getLength)
+    assertEquals(3, range.getLength)
   }
   
   @Test
@@ -138,6 +146,43 @@ class TestProjection {
     val range  = f.getRange
     assertEquals("index", domain.getName)
     assertEquals("t", range.getName)
+  }
+  
+  @Test
+  def project_inner_domain_only_in_function_function {
+    val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
+    val proj = new Projection(List("w")) 
+    val ds2 = proj(ds1)
+    val f = ds2.unwrap.asInstanceOf[Function]
+    val domain = f.getDomain
+    val range  = f.getRange.asInstanceOf[Function]
+    assertEquals("index", domain.getName)
+    assertEquals("w", range.getRange.getName)
+    assertEquals(3, range.getLength)
+  }
+  
+  @Test
+  def get_first_wavelength_set_in_function_function {
+    val ds1 = FirstFilter()(Dataset(TestNestedFunction.function_of_functions_with_tuple_range))
+    val proj = new Projection(List("w")) 
+    val ds2 = proj(ds1)
+    val f = ds2.unwrap.asInstanceOf[Function]
+    val range  = f.getRange.asInstanceOf[Function]
+    assertEquals(1, f.getLength)
+    assertEquals(3, range.getLength)
+  }
+  
+  @Test
+  def select_on_w_then_project_others {
+    val ds1 = Selection("w=12")(Dataset(TestNestedFunction.function_of_functions_with_tuple_range))
+    val proj = new Projection(List("t","b")) 
+    val ds2 = proj(ds1)
+    val f = ds2.unwrap.asInstanceOf[Function]
+    val range  = f.getRange.asInstanceOf[Function]
+    assertEquals(4, f.getLength)
+    //assertEquals(1, range.getLength) //Selection does not update Metadata
+    //the data is right when I use a writer, but I can't access it here correctly
+    //assertEquals(2, range.getRange.toSeq(0).getNumberData.longValue) 
   }
   
   //TODO: project nothing

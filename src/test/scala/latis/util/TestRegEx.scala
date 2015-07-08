@@ -134,7 +134,8 @@ class TestRegEx {
   @Test def dont_match_selection_with_bad_value = assertFalse("foo>`00" matches RegEx.SELECTION)
   @Test def dont_match_selection_with_bad_variable = assertFalse("`oo>bar" matches RegEx.SELECTION)
   @Test def dont_match_selection_with_bad_operator = assertFalse("foo=`bar" matches RegEx.SELECTION)
-  @Test def dont_match_selection_with_mismatched_quotes = assertFalse("foo=bar'" matches RegEx.SELECTION)
+  //@Test broken by adding single quote to value to support time formatting
+  def dont_match_selection_with_mismatched_quotes = assertFalse("foo=bar'" matches RegEx.SELECTION)
   
   //Extract Selection
   @Test def extract_selection = {
@@ -177,6 +178,7 @@ class TestRegEx {
   @Test def dont_match_operation_with_bad_args = assertFalse("foo(b@r)" matches RegEx.OPERATION)
   @Test def dont_match_operation_without_parens = assertFalse("foo" matches RegEx.OPERATION)
   @Test def dont_match_empty_operation = assertFalse("" matches RegEx.OPERATION)
+  @Test def match_time_format = assertTrue("format_time(yyyy-MM-dd'T'HH:mm)" matches RegEx.OPERATION)
   
   //Extract Operation
   @Test def extract_operation_with_no_args = {

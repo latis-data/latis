@@ -9,8 +9,8 @@ import latis.data.IterableData
 import latis.data.SampledData
 import latis.data.set.IndexSet
 import latis.data.SampleData
-import latis.util.PeekIterator
-import latis.util.MappingIterator
+import latis.util.iterator.PeekIterator
+import latis.util.iterator.MappingIterator
 import latis.data.EmptyData
 import com.typesafe.scalalogging.slf4j.Logging
 
@@ -47,8 +47,9 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
     getMetadata.get("length") match {
       case Some(l) => l.toInt
       case None => {
+        if(_iterable != null) _iterable.size 
         //try looking at data
-        if (data.notEmpty) {
+        else if (data.notEmpty) {
           data.domainSet.length //may be undefined/unlimited = -1
         } else {
           //get length from iterator
@@ -61,9 +62,9 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   }
   
   /**
-   * Internal Iterator so we can construct a SampledFunction from an Iterator of Samples.
+   * Internal Iterable so we can construct a SampledFunction from an Iterator of Samples.
    */
-  private var _iterator: Iterator[Sample] = null
+  private var _iterable: Iterable[Sample] = null
   
   //counter for testing iterable once problems
   private var itcounter = 0
@@ -78,7 +79,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
     itcounter += 1
 //    if (itcounter > 1) throw new Error("Iterating more than once on " + this)
     
-    _iterator match {
+    _iterable match {
     case null => {
       logger.debug("Make Iterator from DataIterator: " + this)
       new MappingIterator(getDataIterator, (d: Data) => Some(DataUtils.dataToSample(d, Sample(domain, range))))
@@ -89,9 +90,38 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
     }
     case _ => {
       logger.debug("Wrap existing Iterator: " + this)
-      PeekIterator(_iterator)
+      PeekIterator(_iterable.iterator)
     }
     }
+  }
+  
+  /**
+   * Returns true if iterator.isEmpty returns true,
+   * else false
+   * 
+   * The advantage of calling this method over
+   * iterator.isEmpty (aside from being shorter) is
+   * that since iterator returns a new PeekIterator wrapping
+   * our private _iterator, calling PeekIterator
+   * will consume an element of _iterator. This
+   * method will not consume any elements from
+   * _iterator (it calls _iterator.hasNext directly)
+   * 
+   * This problem manifests itself if you run code like this:
+   * val isEmpty = myFunction.iterator.isEmpty
+   * This causes a sample to be lost from myFunction._iterator
+   * because the returned PeekIterator must read from
+   * _iterator to verify that _iterator is not empty.
+   * The value still exists inside the returned PeekIterator,
+   * but since this code doesn't save a reference to that
+   * object, both the PeekIterator and its cached value are
+   * lost.
+   */
+  def isEmpty: Boolean = if (_iterable != null) {
+    _iterable.isEmpty
+  }
+  else {
+    getData.isEmpty
   }
   
   /**
@@ -104,8 +134,8 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
       //Data is presumably already dispersed throughout model, in Scalars
       //TODO: try to avoid this, not efficient
       logger.debug("Make Data Iterator from existing Sample Iterator: " + this)
-      if (_iterator == null || _iterator.isEmpty) Iterator.empty
-      else new MappingIterator(_iterator, (s: Sample) => Some(DataUtils.sampleToData(s)))
+      if (_iterable == null || _iterable.isEmpty) Iterator.empty
+      else new MappingIterator(_iterable.iterator, (s: Sample) => Some(DataUtils.sampleToData(s)))
     } else {
       logger.debug("Make Data Iterator from SampledData: " + this)
       domain match {
@@ -119,14 +149,26 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
 object SampledFunction {
   //TODO: redundant with Function constructors?
   def apply(domain: Variable, range: Variable, samples: Iterator[Sample], metadata: Metadata = EmptyMetadata) = {
-    val sf = new SampledFunction(domain, range, metadata=metadata)
     if (samples == null) throw new Error("Can't construct a SampledFunction with a null Sample Iterator.")
     val sit = domain match {
       case i: Index => IndexSet().iterator.zip(samples).map(p => Sample(Index(p._1), p._2.range))
       case _ => samples
     }
-    sf._iterator = sit
-    //TODO: should we make SampledData instead? resolve iterable once problem by caching in SampledData
+    val sf = new SampledFunction(domain, range, metadata=metadata){
+      override def iterator = PeekIterator(sit)
+    }
+    sf
+  }
+  
+  def apply(samples: Iterable[Sample], metadata: Metadata) = {
+    if (samples == null) throw new Error("Can't construct a SampledFunction with a null Sample Iterable.")
+    val template = samples.head
+    val sit = template.domain match {
+      case i: Index => Iterable.range(0,samples.size).zip(samples).map(p => Sample(Index(p._1), p._2.range))
+      case _ => samples
+    }
+    val sf = new SampledFunction(template.domain, template.range, metadata=metadata)
+    sf._iterable = sit
     sf
   }
 }

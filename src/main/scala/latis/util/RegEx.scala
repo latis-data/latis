@@ -28,7 +28,7 @@ object RegEx {
      * Regular expression matching any reasonable value (e.g. on the right hand side on an expression.
      * This is designed to keep out escape characters and other nasties.
      */
-    lazy val VALUE = """[\w\.\+\-eE\:\*\?\{\}\<\>#\s/]+"""
+    lazy val VALUE = """[\w\.\+\-eE\:\*\?\{\}\<\>#\s/']+"""
     //Note, needed to match regex for "=~" op: "*?"
     //  SPARQL: "{}<>#?/" and space
     //TODO: find alternative to being so liberal:
@@ -56,10 +56,11 @@ object RegEx {
      *   =    Equals
      *   ==   Equals
      *   !=  Not equals
-     *   =~  Matches pattern
+     *   =~  Matches regex pattern
+     *   !=~ Does not match regex pattern
      *   ~   Almost equals, match nearest value
      */
-    lazy val SELECTION_OPERATOR = ">=|<=|>|<|=~|==|!=|=|~"
+    lazy val SELECTION_OPERATOR = ">=|<=|>|<|=~|==|!=|=|~|!=~"
       
       
     /**

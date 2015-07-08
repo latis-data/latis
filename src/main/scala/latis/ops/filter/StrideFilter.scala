@@ -4,7 +4,7 @@ import latis.dm.Function
 import latis.dm.Sample
 import latis.metadata.Metadata
 import latis.ops.OperationFactory
-import latis.util.MappingIterator
+import latis.util.iterator.MappingIterator
 
 
 /**

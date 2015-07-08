@@ -42,8 +42,17 @@ class TestIntegrate {
   @Test
   def test_tuple_of_functions = {
     val ds = TestDataset.tuple_of_functions
-    val expected = Tuple(Real(2), Real(22), Real(42), Real(62))
-    assertEquals(expected, RiemannTrapezoidIntegration()(ds).unwrap)
+    val ds2 = RiemannTrapezoidIntegration()(ds)
+    
+    ds2 match {
+      case Dataset(tup: Tuple) => {
+        assertEquals(2, tup.getVariables(0).getNumberData.doubleValue, 0.0)
+        assertEquals(22, tup.getVariables(1).getNumberData.doubleValue, 0.0)
+        assertEquals(42, tup.getVariables(2).getNumberData.doubleValue, 0.0)
+        assertEquals(62, tup.getVariables(3).getNumberData.doubleValue, 0.0)
+      }
+      case _ => fail
+    }
   }
   
   @Test

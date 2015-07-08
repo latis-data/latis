@@ -39,11 +39,14 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   //TODO: should we account for length of nested Functions?
   def getLength = variable match {
     case f: Function => f.getLength
-    case _ => ??? 
+    case _ if (variable != null) => 1
+    case _ => 0
   }
   
-  def findVariableByName(name: String): Option[Variable] = if(isEmpty) None else variable.findVariableByName(name)
-  
+  def findVariableByName(name: String): Option[Variable] = variable match {
+    case null => None
+    case _ => variable.findVariableByName(name)
+  }
   
   //convenience methods for transforming Dataset
   def filter(selection: Selection): Dataset = selection(this)
@@ -55,7 +58,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   
   def rename(origName: String, newName: String): Dataset = RenameOperation(origName, newName)(this)
   
-  def replaceValue(v1: ScalaNumericAnyConversions, v2: ScalaNumericAnyConversions): Dataset = ReplaceValueOperation(v1,v2)(this)
+  def replaceValue(v1: AnyVal, v2: AnyVal): Dataset = ReplaceValueOperation(v1,v2)(this)
   
   def reduce = Reduction.reduce(this)
   

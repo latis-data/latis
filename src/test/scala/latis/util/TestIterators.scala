@@ -2,6 +2,8 @@ package latis.util
 
 import org.junit._
 import Assert._
+import latis.util.iterator.MappingIterator
+import latis.util.iterator.PeekIterator
 
 class TestIterators {
 
