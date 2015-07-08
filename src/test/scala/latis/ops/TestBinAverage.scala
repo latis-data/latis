@@ -79,6 +79,19 @@ class TestBinAverage {
     assertEquals(21.631854255497455, data("myReal").head, 0.0)
   }
 
+  @Test
+  def quikscat_telemetry_count {
+    val ops = ArrayBuffer[Operation]()
+    ops += Projection("time,myReal,count")
+    ops += Selection("time>=2014-10-16T00:01")
+    ops += Selection("time<2014-10-16T00:10")
+    ops += new BinAverageByWidth(60000.0) //1 minute
+    val ds = TsmlReader("binave.tsml").getDataset(ops)
+    val data = ds.toDoubleMap
+    assertEquals(9, data("time").length)
+    assertEquals(60, data("count").head, 0.0)
+  }
+
 //  @Test
 //  def quikscat_telemetry_data_by_count {
 //    //val op = DapConstraintParser.parseExpression("binave(60000)")
