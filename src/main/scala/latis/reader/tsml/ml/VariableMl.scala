@@ -63,7 +63,7 @@ abstract class VariableMl(xml: Node) {
   
   def hasName(name: String): Boolean = {
     val names = ((xml \ "@id").map(_.text)) ++ //id attribute
-      (((xml \ "metadata").flatMap(_ \ "name")).map(_.text)) :+ //metadata element name
+      (((xml \ "metadata").flatMap(_ \ "@name")).map(_.text)) :+ //metadata element name
       label //implicit names
     names.contains(name)
   }
@@ -73,10 +73,8 @@ abstract class VariableMl(xml: Node) {
    */
   def findVariableMl(name: String): Option[VariableMl] = {
     if (hasName(name)) Some(this)
-    (xml \\ "_").find(VariableMl(_).hasName(name)) match {
-      case Some(n) => Some(VariableMl(n))
-      case None => None
-    }
+    else if(this.isInstanceOf[ScalarMl]) None
+    else (xml \ "_").flatMap(VariableMl(_).findVariableMl(name)).headOption
   }
 
   override def toString = xml.toString
