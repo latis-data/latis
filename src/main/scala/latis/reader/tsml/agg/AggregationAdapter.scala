@@ -43,7 +43,7 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   }  
   
   override protected def makeDataset(ds: Dataset): Dataset = ds match {
-    case Dataset(Tuple(vars)) => Dataset(vars.reduceLeft(aggregate(_,_).unwrap))
+    case Dataset(Tuple(vars)) => Dataset(vars.reduceLeft(aggregate(_,_).unwrap), ds.getMetadata)
   }
     
     
