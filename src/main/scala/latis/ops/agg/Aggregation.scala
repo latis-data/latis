@@ -4,34 +4,28 @@ import latis.dm.Dataset
 import latis.dm.Function
 import latis.ops.Operation
 import latis.dm.Tuple
+import latis.metadata.Metadata
+import latis.metadata.EmptyMetadata
+import latis.dm.Variable
 
 /**
  * Base type for Operations that aggregate (combine) datasets.
  */
 trait Aggregation extends Operation {
-  /*
-   * TODO: Datasets no longer can contain datasets
-   * probably should make this a binary operation to fit best with the paradigm
-   * 
-   * rename to join?
-   * aggregate in the sense of combining a seq of datasets into one is consistent with sum, mean,... aggregations
-   * try to be consistent with relational algebra and FP
-   * 
-   */
+  //See LATIS-325 about using relational algebra "join" terminology.
   
-  //tmp hack
-  //dataset is expected to contain a tuple with the top level variables from each dataset to be aggregated
-  def getFunctions(dataset: Dataset) = {
-    val tup = dataset.unwrap.asInstanceOf[Tuple]
-    tup.getVariables.map(_.asInstanceOf[Function])
+  def aggregate(ds1: Dataset, ds2: Dataset): Dataset
+      
+  override def apply(dataset: Dataset) = dataset match {
+    //support for old usage
+    case Dataset(Tuple(Seq(f1: Function, f2: Function))) => 
+      Dataset(aggregate(Dataset(f1), Dataset(f2)).unwrap, dataset.getMetadata)
+    case _ => throw new UnsupportedOperationException("An Aggregation can only be applied to two or more Datasets.")
   }
-    
-  def aggregate(dataset: Dataset): Dataset
   
-  override def apply(dataset: Dataset) = aggregate(dataset)
-//  def apply(datasets: Seq[Dataset]) = aggregate(datasets)
-//  def apply(dataset1: Dataset, dataset2: Dataset) = aggregate(dataset1, dataset2)
-//  
-//  def aggregate(datasets: Seq[Dataset]): Dataset = aggregate(Dataset(datasets))
-//  def aggregate(dataset1: Dataset, dataset2: Dataset): Dataset = aggregate(List(dataset1, dataset2))
+  def apply(datasets: Seq[Dataset]) = datasets.reduceLeft(aggregate(_,_))
+  def apply(dataset1: Dataset, dataset2: Dataset, md: Metadata = EmptyMetadata) = aggregate(dataset1, dataset2) match {
+    case Dataset(v: Variable) => Dataset(v, md)
+    case _ => throw new UnsupportedOperationException(s"Failed to aggregate datasets '$dataset1' and '$dataset2'")
+  }
 }
