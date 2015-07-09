@@ -1,11 +1,14 @@
 package latis.reader.tsml.ml
 
 import java.io.File
+import java.io.FileNotFoundException
 import java.net.URL
+
 import scala.xml.Elem
 import scala.xml.Node
 import scala.xml.ProcInstr
 import scala.xml.XML
+
 import latis.util.LatisProperties
 
 
@@ -78,39 +81,13 @@ object Tsml {
    */
   def apply(path: String): Tsml = {
     //Try using the given path.
-    findDatasetTSML(path) match {
-      case Some(tsml) => tsml
-      case None => {
+    try TsmlResolver.fromPath(path) catch {
+      case e: FileNotFoundException => {
         //Try prepending the dataset.dir property
         val dspath = LatisProperties.getOrElse("dataset.dir", "datasets") + File.separator + path
-        findDatasetTSML(dspath) match {
-          case Some(tsml) => tsml
-          case None => throw new Error("Unable to locate the dataset descriptor for " + path)
-        }
+        TsmlResolver.fromPath(dspath)
       }
     }
-  }
-  
-  /**
-   * Helper method to find the tsml descriptor given a path.
-   */
-  private def findDatasetTSML(path: String): Option[Tsml] = {
-    //TODO: make sure path resolves?
-    val url = if (path.contains(":")) path //already absolute with a scheme
-    else if (path.startsWith(File.separator)) "file:" + path //absolute file path
-    else getClass.getResource("/"+path) match { //try in the classpath (e.g. "resources")
-      case url: URL => url.toString
-      case null => {
-        //Try looking in the working directory.
-        //Make sure it exists, otherwise this would become a catch-all
-        val file = scala.util.Properties.userDir + File.separator + path
-        if (new File(file).exists) "file:" + file  //TODO: use java7 Files
-        else null
-      }
-    }
-    
-    if (url != null) Some(Tsml(new URL(url)))
-    else None
   }
   
   /**
