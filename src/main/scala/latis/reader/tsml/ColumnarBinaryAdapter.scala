@@ -42,7 +42,14 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
       case "big-endian" => ByteOrder.BIG_ENDIAN
       case "little-endian" => ByteOrder.LITTLE_ENDIAN
     }
-    val bbs = files.map(file => file.getChannel.map(MapMode.READ_ONLY, 0, file.length))
+    val channels = files.map(_.getChannel)
+    val bbs = channels.map(channel => channel.map(MapMode.READ_ONLY, 0, channel.size))
+    
+    //bbs will remain valid even after closing resources
+    channels.foreach(_.close)
+    files.foreach(_.close)
+    
+    
     bbs.foreach(_.order(order))
     bbs
   }

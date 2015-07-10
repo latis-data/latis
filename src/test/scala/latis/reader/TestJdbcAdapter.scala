@@ -195,18 +195,12 @@ class TestJdbcAdapter extends AdapterTests {
       val ds = TsmlReader("db_with_jndi_attr.tsml").getDataset(ops)
     }
     catch {
-      case e1: NoInitialContextException => {
-        // this means we attempted to find something via JNDI but failed because there
-        // was no initial context (prob b/c we're in unit tests). This means we hit
-        // the right branch so, even though this is ugly, pass!
+      case e: RuntimeException => {
+        //We no longer support jndi 
         wasCaught = true
-        assert(true) // pass
-      }
-      case e2: Error => {
-        // this is the error re-thrown by JdbcAdapter.getConnectionViaJndi when it gets a
-        // NameNotFoundException. This means we hit the right branch, so pass!
-        wasCaught = true
-        assertEquals("JdbcAdapter failed to locate JNDI resource: bad_java_location", e2.getMessage)
+        assertEquals(
+          "Unable to find or parse tsml location attribute: location must exist and start with 'java:' (for JNDI) or 'jdbc:' (for JDBC)"
+          , e.getMessage)
       }
     }
     assertTrue("An Error should have been thrown", wasCaught)

@@ -24,6 +24,24 @@ trait Function extends Variable {
   def iterator: Iterator[Sample]
   def getDataIterator: Iterator[SampleData]
   
+    /**
+   * Returns true if iterator.isEmpty returns true,
+   * else false. This method is preferred over the
+   * other because implementations may be able to
+   * make certain optimizations on this method that
+   * would not be possible on the other.
+   * 
+   * For example:
+   * - calling Function.isEmpty instead of
+   * calling Function.iterator.isEmpty may save
+   * the function from creating an Iterator
+   * instance
+   * - sometimes calling Function.iterator.isEmpty
+   * may consume an item from the internal iterator.
+   * This may be avoidable by calling Function.isEmpty
+   */
+  def isEmpty: Boolean
+  
 //  /**
 //   * Datasets from IterableAdapters tend to be "iterable once" in which case this
 //   * will return false. If the Data has been realized (memoized) within the dataset
@@ -50,6 +68,8 @@ trait Function extends Variable {
 
 object Function {
   //TODO: make sure samples are sorted!
+  
+  def empty = Function(Naught(), Naught(), Iterator.empty)
   
   def apply(domain: Variable, range: Variable, md: Metadata = EmptyMetadata, data: SampledData = EmptyData): SampledFunction = {
     new SampledFunction(domain, range, md, data)
@@ -78,21 +98,16 @@ object Function {
   /**
    * Construct from Seq of Variable which are assumed to contain their own data.
    */
-  def apply(vs: Seq[Variable], md: Metadata): SampledFunction = vs.head match {
-/*
- * TODO: do we have to turn these into iterators?
- * want to be able to avoid iterable once problem
- * 
- */
-    case sample: Sample => Function(sample.domain, sample.range, vs.asInstanceOf[Seq[Sample]].iterator, md)
-    case _ => {
+  def apply(vs: Seq[Variable], md: Metadata): SampledFunction = vs.headOption match {
+    case Some(sample: Sample) => SampledFunction(vs.asInstanceOf[Seq[Sample]], md)
+    case Some(_) => {
       //make Seq of samples where domain is index
       //TODO: make sure every Variable in the Seq has the same type
-      //TODO: make from SampledData with IndexSet
       val samples = vs.zipWithIndex.map(s => Sample(Index(s._2), s._1))
       val sample = samples.head
       Function(sample.domain, sample.range, samples.iterator, md)
     }
+    case None => Function.empty
   }
 
   def apply(vs: Seq[Variable]): SampledFunction = Function(vs, EmptyMetadata)

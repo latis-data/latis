@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="work_cal">
-    <adapter class="latis.reader.tsml.ICalendarAdapter"
-             location="/Users/lindholm/Desktop/Work.ics" />
-    
-    <index/>
-    <time name="dtstart" type="integer"/>
-    <time name="dtend" type="integer"/>
-    <text name="summary" length="64"/>
-    
-  </dataset>
-
-</tsml>
+<dataset id="work_cal">
+  <adapter class="latis.reader.tsml.ICalendarAdapter"
+           location="/Users/lindholm/Desktop/Work.ics" />
+  
+  <index/>
+  <time id="dtstart" type="integer"/>
+  <time id="dtend" type="integer"/>
+  <text id="summary" length="64"/>
+  
+</dataset>

@@ -1,16 +1,15 @@
 package latis.ops
 
-import latis.dm._
-import latis.util.DataUtils
-import latis.util.RegEx._
-import latis.data.SampledData
-import latis.data.set.IndexSet
+import scala.Option.option2Iterable
+
+import latis.dm.Function
+import latis.dm.Index
+import latis.dm.Sample
+import latis.dm.Scalar
+import latis.dm.Tuple
+import latis.dm.Variable
+import latis.util.RegEx.PROJECTION
 import latis.util.iterator.MappingIterator
-import latis.data.Data
-import latis.data.SampleData
-import latis.data.IterableData
-import latis.data.seq.DataSeq
-import latis.metadata.Metadata
 
 /**
  * Exclude variables not named in the given list.
@@ -37,7 +36,7 @@ class Projection(val names: Seq[String]) extends Operation {
   }
   
   /**
-   * Used to get the new data types, not to process each sample.
+   * Used to process each sample.
    */
   override def applyToSample(sample: Sample): Option[Sample] = {
     val pd = applyToVariable(sample.domain)
@@ -65,74 +64,15 @@ class Projection(val names: Seq[String]) extends Operation {
   }
   
   /**
-   * Since we may be excluding some Data, make a new SampledFunction with new SampledData
-   * that corresponds to the projected Variables. 
-   * Note, applying a projection one sample at a time via a WrappedFunction is problematic
-   * since the model of the dataset may change (not to mention getting the right index values
-   * when the domain is not projected).
+   * Override to eliminate special nesting logic.
    */
   override def applyToFunction(function: Function): Option[Variable] = {
-    /*
-     * TODO:
-     * called for inner Function then again for outer, make sure we aren't doing unneeded processing
-     * 
-     * inner Function must have fixed length, potential problem running Projection after a Filter
-     */
-    
-    //original sample type
-    val sample1 = Sample(function.getDomain, function.getRange)
-        
-    //new sample type
-    //TODO: this is only needed for type, make sure it's not wasting time munging data
-    /*
-     * Looks like this is causing the range of the first sample to have empty data when not projecting inner function domain
-     * in the original dataset!
-     * iterable once problem? 
-     *   resolve by caching data? 
-     *   in SmapledData
-     *   should be ok for internal function
-     *   not working for test because it has all values in scalars? but then is iterable once a problem?
-     * special handling when doing only type?
-     * *Note, using applyToSample, we get an extra log message: Make Data Iterator from existing Sample Iterator: w -> (a, b)
-     *   before: Make Data Iterator from existing Sample Iterator: t -> w -> (a, b)
-     *   This would likely be the iterable once problem
-     *   
-     * Resample had a similar problem when we tried to operate on the inner function without iterating over the outer samples
-     *   which populated the inner function with data
-     */
-    val sample2: Sample = applyToSample(sample1) match {
+    val mit = new MappingIterator(function.iterator, (s: Sample) => this.applyToSample(s))
+    val template = applyToSample(function.getSample) match {
+      case None => return None //no matches in function
       case Some(s) => s
-      case None => return None //Note, this could be un-projected inner Function
-      //throw new Error("Failed to project the sample: " + sample1)
     }
-//    val sample2 = {
-//      val d = function.getDomain
-//      val r0 = function.getRange.asInstanceOf[Function]
-//      val r = Function(Index(0), r0.getRange, r0.getMetadata)
-//      Sample(d,r)
-//    }
-    
-    //expose the domain and range types of the new dataset
-    val Sample(d,r) = sample2
-  
-    //Deal with case where domain type is Index.
-    val sampledData = if (d.isInstanceOf[Index]) {
-      //Only need to process range, use IndexSet for domain.
-      val f = (data: SampleData) => Some(DataUtils.reshapeData(data, sample1, r))
-      val dataIt = new MappingIterator(function.getDataIterator, f)
-      //SampledData(IndexSet(), IterableData(dataIt, r.getSize)) //TODO: bug trying to build on iterator
-      val idata = DataSeq(dataIt.toList)
-      SampledData(IndexSet(), idata)
-    } else {
-      //process all data
-      //TODO: try to preserve original DomainSet
-      val f = (data: SampleData) => Some(DataUtils.reshapeSampleData(data, sample1, sample2))
-      val fit = function.getDataIterator  //uses MappingIterator to convert samples to data
-      val dataIt = new MappingIterator(fit, f)
-      SampledData(dataIt, sample2)
-    }
-    
-    Some(Function(d, r, function.getMetadata, sampledData))
+    Some(Function(template.domain, template.range, mit, function.getMetadata))
   }
 
 

@@ -140,7 +140,12 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
   
   //probably not a good idea to test equality for large variables
   override def equals(that: Any): Boolean = (this, that) match {
-    case(r1: Real, r2: Real) => ((r1.doubleValue.isNaN && r2.doubleValue.isNaN) || r1.getData == r2.getData) && r1.getMetadata == r2.getMetadata 
+    case(r1: Real, r2: Real) => (r1.getData == r2.getData) match {
+      case true => r1.getMetadata == r2.getMetadata
+      case false => (!r1.getData.isEmpty && !r2.getData.isEmpty) && 
+                    (r1.doubleValue.isNaN && r2.doubleValue.isNaN) && 
+                    r1.getMetadata == r2.getMetadata
+    }
   
     case (v1: Scalar, v2: Scalar) => v1.getMetadata == v2.getMetadata && v1.getData == v2.getData
     

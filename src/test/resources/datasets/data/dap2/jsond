@@ -1,9 +1,8 @@
 {"dap2": {
 "metadata": {"myTime": {
-"alias": "time",
 "units": "milliseconds since 1970-01-01",
-"length": "10",
-"type": "text"
+"alias": "time",
+"length": "10"
 },
 "myInt": {
 "missing_value": "3",

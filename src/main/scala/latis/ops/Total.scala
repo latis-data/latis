@@ -17,7 +17,10 @@ class Total extends Operation {
   override def applyToFunction(f: Function): Option[Variable] = {
     val addSamples = (s1: Sample, s2: Sample) => Sample(s2.domain, (s1.range + s2.range).unwrap)
     
-    val sample = f.iterator.reduceLeft(addSamples)
+    val sample = f.iterator match {
+      case e if(e.isEmpty) => null
+      case o => o.reduceLeft(addSamples)
+    }
     val md = Metadata(f.getMetadata.getProperties + ("length"->"1"))
     Some(Function(f.getDomain, f.getRange, Iterator(sample), md))
   }

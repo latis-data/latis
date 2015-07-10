@@ -23,23 +23,48 @@ import scala.collection.mutable.ArrayBuffer
  * Adds a new Variable to a Dataset according to the inputed math expression.
  * The str parameter must include the name of the new Variable followed by '=' and the expression.
  */
-class MathExpressionDerivation(str: String) extends Operation with Logging {
+class MathExpressionDerivation(private val str: String) extends Operation with Logging {
   
   var ds: Dataset = Dataset()
   //TODO: consider defining value in an empty dataset
   
+  // Each of these has to be manually implemented in applyNamedFunction
+  private val supportedFunctions = Seq("DEG_TO_RAD", "ATAN2", "SQRT", "FABS", "ACOS", "ATAN", "MAG", "COS", "SIN")
+  
+  private val supportedConstants = Map(
+      "PI" -> Math.PI,
+      "E" -> Math.E
+  )
+  
+  private lazy val varName = str.substring(0,str.indexOf('='))
+  private lazy val varExpr = str.substring(str.indexOf('=')+1)
+  
+  private val identifierRegex = """([a-zA-Z_][a-zA-Z_0-9]*)""".r
+  
+  /**
+   * A list of the variables that this derived field
+   * depends on for its computation
+   */
+  lazy val dependentVars: List[String] = {
+    val allIdentifiers = for (m <- identifierRegex.findAllMatchIn(varExpr)) yield m.group(1)
+    allIdentifiers.
+      filter(id => !supportedFunctions.contains(id)).
+      filter(id => !supportedConstants.contains(id)).
+      toList
+  }
+
   override def apply(dataset: Dataset): Dataset = {
     val md = dataset.getMetadata
     //TODO: delegate to subclass to munge metadata
     //TODO: add provenance metadata, getProvMsg, append to "history"
-    val v: Variable = dataset.unwrap match {
-      case v: Variable => applyToVariable(v) match {
+    val v: Variable = dataset match {
+      case Dataset(v) => applyToVariable(v) match {
         case Some(v) => v
         case None => null
       }
-      case null => Real(Metadata(str.substring(0,str.indexOf('='))), parseExpression(str.substring(str.indexOf('=')+1)).unwrap.getData)
+      case _ => null
     }
-    
+
     Dataset(v, md)
   }
   
@@ -47,8 +72,8 @@ class MathExpressionDerivation(str: String) extends Operation with Logging {
    * Only apply to functions.
    */
   override def applyToVariable(v: Variable): Option[Variable] = v match {
-    case s: Scalar => Some(Tuple(Seq(s) :+ Real(Metadata(str.substring(0,str.indexOf('='))), parseExpression(str.substring(str.indexOf('=')+1)).unwrap.getData)))
-    case t: Tuple => Some(t)//Some(Tuple(t.getVariables :+ Real(Metadata(str.substring(0,str.indexOf('='))), parseExpression(str.substring(str.indexOf('=')+1)).unwrap.getData)))
+    case s: Scalar => Some(Tuple(Seq(s) :+ Real(Metadata(varName), parseExpression(varExpr).unwrap.getData)))
+    case t: Tuple => Some(t)//Some(Tuple(t.getVariables :+ Real(Metadata(varName), parseExpression(varExpr).unwrap.getData)))
     case f: Function => applyToFunction(f)
   }
   
@@ -56,9 +81,9 @@ class MathExpressionDerivation(str: String) extends Operation with Logging {
    * Adds the derived variable to the sample. 
    */
   override def applyToSample(sample: Sample): Option[Sample] = {
-    val name = str.substring(0,str.indexOf('='))
+    val name = varName
     ds = sample
-    val r = Real(Metadata(name), parseExpression(str.substring(str.indexOf('=')+1)).unwrap.getData)
+    val r = Real(Metadata(name), parseExpression(varExpr).unwrap.getData)
     Some(Sample(sample.domain, Tuple(sample.range.toSeq :+ r)))
   }
   
@@ -78,25 +103,43 @@ class MathExpressionDerivation(str: String) extends Operation with Logging {
   }
   
   /**
-   * Determines whether a Function contains any Variables used to derive the new Variable.
+   * Determines whether a Function contains all of the variables needed
+   * to derive the new variable
    */
   def testSample(sample: Sample): Option[Sample] = {
-    if(sample.toSeq.forall(s => !str.contains(s.getName))) None
-    else Some(Sample(sample.domain, Tuple(sample.range.toSeq :+ Real(Metadata(str.substring(0,str.indexOf('=')))))))
+    
+    val availableVarNames = sample.toSeq.map(v => v.getName).toList
+    
+    if (dependentVars.forall(depVar => availableVarNames.contains(depVar))) {
+      Some(
+        Sample(
+          sample.domain,
+          Tuple(
+            sample.range.toSeq :+ Real(Metadata(varName))
+          )
+        )
+      )
+    }
+    else {
+      None
+    }
   }
   
   /**
    * Given a string and a Dataset containing the necessary Variables, evaluates the string as a math expression. 
    */
   def parseExpression(str: String): Dataset = {
-    if(str == "PI") Math.PI
-    else if(str == "E") Math.E
-    else try str.toDouble
-    catch {case e: NumberFormatException => 
-      val ov = ds.findVariableByName(str)
-      ov match {
-        case Some(v) => v
-        case None => findOp(str)
+    if (supportedConstants.contains(str)) {
+      supportedConstants(str)
+    }
+    else {
+      try str.toDouble
+      catch { case e: NumberFormatException =>
+        val ov = ds.findVariableByName(str)
+        ov match {
+          case Some(v) => v
+          case None => findOp(str)
+        }
       }
     }
   }
@@ -109,7 +152,7 @@ class MathExpressionDerivation(str: String) extends Operation with Logging {
   def findOp(str: String): Dataset = {
     //named operations followed by (...) must be evaluated first or else the () will be lost.
     //names should be looked for in order from longest to shortest to prevent errors with substrings such as "cos" in "acos".
-    val names = Seq("DEG_TO_RAD", "ATAN2", "SQRT", "FABS", "ACOS", "ATAN", "MAG", "COS", "SIN").filter(str.contains(_))
+    val names = supportedFunctions.filter(str.contains(_))
     if(names.nonEmpty) applyNamedFunction(str, names(0))
  
     //evaluates innermost set of (). Keeps result in appended temp Dataset so its value can be accessed later.
@@ -125,11 +168,12 @@ class MathExpressionDerivation(str: String) extends Operation with Logging {
     }
     
     // basic math operators are found in reverse order of operations because the first operator found is the last evaluated
+    // except for ^ (exponentiation) which is the other way around because it's right-associative
     else if(str.contains("&")) applyBasicMath(str, str.lastIndexOf("&"))
     else if(str.contains("<")) applyBasicMath(str, str.lastIndexOf("<"))
     else if(str.contains("+") || str.contains("-")) applyBasicMath(str, str.lastIndexOf("+") max str.lastIndexOf("-"))
     else if(str.contains("*") || str.contains("/") || str.contains("%")) applyBasicMath(str, str.lastIndexOf("*") max str.lastIndexOf("/") max str.lastIndexOf("%"))
-    else if(str.contains("^")) applyBasicMath(str, str.lastIndexOf("^"))
+    else if(str.contains("^")) applyBasicMath(str, str.indexOf("^"))
 
     else throw new Exception("no operation found in expression \"" + str + "\"")
     

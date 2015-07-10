@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="ascii_iterative">
-    <adapter class="latis.reader.tsml.AsciiAdapter"
-             delimiter=", "
-             commentCharacter="#"
-             location="datasets/test/binave.txt" />
-    
-    <time type="text" length="23"/>
-   
-    <tuple>
-    <real name="myReal"/>
-    </tuple>
-    
-  </dataset>
-
-</tsml>
+<dataset id="ascii_iterative">
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           delimiter=", "
+           commentCharacter="#"
+           location="datasets/test/binave.txt" />
+  
+  <time type="text" length="23"/>
+ 
+  <tuple>
+    <real id="myReal"/>
+  </tuple>
+  
+</dataset>

@@ -55,5 +55,12 @@ class TestTotal {
     assertEquals("2.0", data(0)(0))
     assertEquals("3.0", data(1)(0))
   }
+  
+  @Test
+  def empty {
+    val ds = Total()(TestDataset.empty_function)
+    val data = ds.toStrings
+    assert(data.isEmpty)
+  }
 
 }
