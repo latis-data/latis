@@ -38,21 +38,21 @@ class TestTsml  {
   def resolve_url {
     val url = Catalog.getTsmlUrl("properties")    
     val tsml = TsmlResolver.fromUrl(url)
-    assert(tsml.toString.contains("""name="properties""""))
+    assert(tsml.toString.contains("""id="properties""""))
   }
   
   @Test
   def resolve_path {
     val path = "datasets/test/properties.tsml"
     val tsml = TsmlResolver.fromPath(path)
-    assert(tsml.toString.contains("""name="properties""""))
+    assert(tsml.toString.contains("""id="properties""""))
   }
   
   @Test
   def resolve_name {
     val name = "properties"
     val tsml = TsmlResolver.fromName(name)
-    assert(tsml.toString.contains("""name="properties""""))
+    assert(tsml.toString.contains("""id="properties""""))
   }
   
   @Test
