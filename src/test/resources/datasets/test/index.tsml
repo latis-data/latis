@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="index">
-    <adapter class="latis.reader.tsml.AsciiAdapter"
-             cache="none"
-             delimiter="\s+"
-             commentCharacter="#"
-             location="datasets/test/mixed.txt" />
-    
-    <index/>
-    <time name="myTime" units="yyyy/MM/dd" type="text" length="10"/>
-    <integer name="myInt"/>
-    <real    name="myReal"/>
-    <text    name="myText"/>
-    
-  </dataset>
-
-</tsml>
+<dataset id="index">
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           cache="none"
+           delimiter="\s+"
+           commentCharacter="#"
+           location="datasets/test/mixed.txt" />
+  
+  <index/>
+  <time type="text" length="10">
+    <metadata name="myTime" units="yyyy/MM/dd"/>
+  </time>
+  <integer id="myInt"/>
+  <real    id="myReal"/>
+  <text    id="myText"/>
+  
+</dataset>

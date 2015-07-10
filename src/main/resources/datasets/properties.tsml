@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="properties">
-    
-    <adapter class="latis.reader.tsml.PropertiesAdapter"/>
-    
-    <text name="version" length="8"/>
+<dataset id="properties">
   
-  </dataset>
+  <adapter class="latis.reader.tsml.PropertiesAdapter"/>
   
-</tsml>
+  <text id="version" length="8"/>
+
+</dataset>

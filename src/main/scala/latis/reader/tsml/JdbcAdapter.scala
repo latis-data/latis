@@ -1,31 +1,34 @@
 package latis.reader.tsml
 
+import java.nio.ByteBuffer
 import java.sql.Connection
-import java.sql.Statement
 import java.sql.DriverManager
 import java.sql.ResultSet
+import java.sql.Statement
 import java.util.Calendar
 import java.util.TimeZone
+
 import scala.Option.option2Iterable
 import scala.collection.Map
 import scala.collection.Seq
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+
 import com.typesafe.scalalogging.slf4j.Logging
+
 import javax.naming.InitialContext
 import javax.naming.NameNotFoundException
 import javax.sql.DataSource
 import latis.data.Data
 import latis.dm.Binary
 import latis.dm.Dataset
+import latis.dm.Function
 import latis.dm.Index
 import latis.dm.Integer
 import latis.dm.Real
-import latis.dm.Function
 import latis.dm.Scalar
 import latis.dm.Text
 import latis.dm.Variable
-import latis.metadata.Metadata
 import latis.ops.Operation
 import latis.ops.Projection
 import latis.ops.RenameOperation
@@ -36,13 +39,8 @@ import latis.reader.tsml.ml.Tsml
 import latis.time.Time
 import latis.time.TimeFormat
 import latis.time.TimeScale
-import latis.util.StringUtils
-import scala.collection.immutable.StringOps
-import java.nio.ByteBuffer
 import latis.util.DataUtils
-import latis.metadata.Metadata
-
-import scala.collection.immutable.StringOps
+import latis.util.StringUtils
 
 /* 
  * TODO: release connection as soon as possible?
@@ -287,9 +285,18 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       case _ => throw new Error("Time variable not found in dataset.")
     }
     val tvname = getVariableName(tvar)
-
-    tvar.getMetadata("type") match {
-      case Some("text") => {
+    
+    //get time type from tsml
+    val vtype = tsml.dataset.findVariableMl(tvname) match {
+      case Some(ml) => ml.getAttribute("type") match {
+        case Some(t) => t
+        case None => "real"
+      }
+      case None => throw new Exception(s"Could not find variable with name $tvname in tsml.")
+    }
+    
+    vtype match {
+      case "text" => {
         //A JDBC dataset with time defined as text implies the times are represented as a Timestamp.
         //JDBC doesn't generally like the 'T' in the iso time. (e.g. Derby)
         //Parse value into a Time then format consistent with java.sql.Timestamp.toString: yyyy-mm-dd hh:mm:ss.fffffffff
@@ -478,22 +485,15 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     // location is the current standard for both jndi and jdbc connections,
     // but we still support the jndi attribute for historical reasons.
     // See LATIS-30 for more details
-    val con = (getProperty("location"), getProperty("jndi")) match {
+    val con = getProperty("location") match {
       
       // if 'location' exists and starts with "java:", use jndi
-      case (Some(startsWithJavaRegex(location)), _) => getConnectionViaJndi(location)
+      case Some(startsWithJavaRegex(location)) => getConnectionViaJndi(location)
       
       // if 'location' exists and starts with 'jdbc:'
-      case (Some(startsWithJdbcRegex(_)), _) => getConnectionViaJdbc
+      case Some(startsWithJdbcRegex(_)) => getConnectionViaJdbc
       
-      // if 'jndi' exists, use jndi
-      case (_, Some(jndiStr)) => {
-        logger.warn("Use location='java:/comp/env...' instead of jndi='java:/comp/env...'")
-        getConnectionViaJndi(jndiStr)
-      }
-      
-      // If we get here, we probably have a malformed tsml file. No conforming location attr was
-      // found, and no jndi attr was found at all.
+      // If we get here, we probably have a malformed tsml file. No conforming location attr was found.
       case _ => throw new RuntimeException(
         "Unable to find or parse tsml location attribute: location must exist and start with 'java:' (for JNDI) or 'jdbc:' (for JDBC)"
       )

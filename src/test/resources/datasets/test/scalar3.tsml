@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="Scalar Test">
-    <!--metadata name="Scalar Test"/-->
-    <adapter class="latis.reader.tsml.AsciiAdapter"
-             location="datasets/test/scalar_3col.txt" />
-    
-    <time name="time" units="years since 2000-01-01"/>
-    
-    <real name="a" long_name="My A Variable" units="km"/>
-    <real name="b" long_name="My B Variable" units="C"/>
-    
-  </dataset>
-
-</tsml>
+<dataset id="Scalar Test">
+  <!--metadata name="Scalar Test"/-->
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           location="datasets/test/scalar_3col.txt" />
+  
+  <time>
+    <metadata units="years since 2000-01-01"/>
+  </time>
+  
+  <real>
+    <metadata name="a" long_name="My A Variable" units="km"/>
+  </real>
+  <real>
+    <metadata name="b" long_name="My B Variable" units="C"/>
+  </real>
+  
+</dataset>

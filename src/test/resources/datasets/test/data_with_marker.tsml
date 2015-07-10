@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="data_with_marker">
+<dataset>
+  <metadata name="data_with_marker"/>
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           delimiter="\s+"
+           marker="DATA"
+           location="datasets/test/data_with_marker.txt" />
+           
+  <time>
+    <metadata name="year" 
+              units="years since 0000-01-01" 
+              long_name="Year"/>
+  </time>
+  
+  <real>
+    <metadata name="tsi"
+              units="W/m^2"
+              long_name="Total Solar Irradiance"/>
+  </real>
 
-    <adapter class="latis.reader.tsml.AsciiAdapter"
-             delimiter="\s+"
-             marker="DATA"
-             location="datasets/test/data_with_marker.txt" />
-             
-    <time name="year" 
-          units="years since 0000-01-01" 
-          long_name="Year"/>
-    
-    <real name="tsi"
-          units="W/m^2"
-          long_name="Total Solar Irradiance"/>
-
-  </dataset>
-
-</tsml>
+</dataset>

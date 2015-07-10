@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="binary_columns">
-    <adapter class="latis.reader.tsml.ColumnarBinaryAdapter"
-             location="datasets/test/ssi/" />
-    
-    <time name="myTime" type="text" length="10" units="yyyy/MM/dd"/> 
-   
-    <integer name="myInt"/>
-    <real    name="myReal"/>
-    <text    name="myText"/>
-    
-  </dataset>
-
-</tsml>
+<dataset id="binary_columns">
+  <adapter class="latis.reader.tsml.ColumnarBinaryAdapter"
+           location="datasets/test/ssi/" />
+  
+  <time type="text" length="10">
+    <metadata name="myTime" units="yyyy/MM/dd"/>
+  </time> 
+ 
+  <integer id="myInt"/>
+  <real    id="myReal"/>
+  <text    id="myText"/>
+  
+</dataset>
