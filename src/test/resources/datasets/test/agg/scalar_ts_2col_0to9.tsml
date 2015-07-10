@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
+<dataset id="scalar_ts_2col_0to9">
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           delimiter="\s+"
+           location="datasets/test/agg/scalar_ts_2col_0-9.txt" />
+           
+  <time id="T"/>
+  <integer id="A"/>
 
-  <dataset name="scalar_ts_2col_0to9">
-    <adapter class="latis.reader.tsml.AsciiAdapter"
-             delimiter="\s+"
-             location="datasets/test/agg/scalar_ts_2col_0-9.txt" />
-             
-    <time name="T"/>
-    <integer name="A"/>
-
-  </dataset>
-
-</tsml>
+</dataset>

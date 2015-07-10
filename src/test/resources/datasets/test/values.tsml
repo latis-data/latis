@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="values">
-    <adapter class="latis.reader.tsml.AsciiAdapter"
-             delimiter="\s+"
-             commentCharacter="#"
-             location="datasets/test/mixed.txt" />
-    
-    <time name="myTime" units="yyyy/MM/dd" type="text" length="10"/>
-   
-    <integer name="myInt">
-      
-    </integer>
-    
-    <real    name="myReal"/>
-    <text    name="myText"/>
-    
-  </dataset>
+<dataset id="values">
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           delimiter="\s+"
+           commentCharacter="#"
+           location="datasets/test/mixed.txt" />
+  
+  <time type="text" length="10">
+    <metadata name="myTime" units="yyyy/MM/dd"/>
+  </time>
+ 
+  <integer>
+    <metadata name="myInt"/>
+  </integer>
+  
+  <real    id="myReal"/>
+  <text    id="myText"/>
+  
+</dataset>
 
-</tsml>
 
 <!--
 how do we add values to the model

@@ -30,7 +30,7 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   override protected def makeOrigDataset: Dataset = {
     //TODO: consider deeper nesting of dataset nodes
     //Get child dataset nodes
-    val dsnodes = (tsml.xml \ "dataset" \ "dataset")
+    val dsnodes = (tsml.xml \ "dataset")
     //Make a dataset for each
     val dss = for (node <- dsnodes) yield {
       val tsml = Tsml(node)
