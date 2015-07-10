@@ -11,7 +11,7 @@ import scala.io.Source
 import com.typesafe.scalalogging.slf4j.Logging
 
 
-class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Logging {
+class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Logging {
 
   //---- Manage data source ---------------------------------------------------
   

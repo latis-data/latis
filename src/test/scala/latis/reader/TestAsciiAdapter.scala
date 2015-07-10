@@ -20,5 +20,15 @@ class TestAsciiAdapter  {
     assertEquals("1619.5", data("year")(0)) // check the first value
     assertEquals("1628.5", data("year")(9)) // check the last value
   }
+  
+  @Test
+  def nested {
+    val ds = TsmlReader("nested_function.tsml").getDataset
+    val data = ds.toDoubleMap
+    assertEquals(1.1, data("myReal")(0), 0.0)
+    assertEquals(3, data("myTime").length)
+    assertEquals(9, data("myText").length)   
+    assertEquals(23.3, data("myReal").last, 0.0)
+  }
 
 }
