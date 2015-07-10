@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="properties">
-    
-    <adapter class="latis.reader.tsml.PropertiesAdapter"/>
-         
-    <tuple>   
-      <text name="version" length="8"/>
-      <text name="user.dir" length="8"/>
-      <text name="log.file" length="64"/>
-    </tuple>
-    
-  </dataset>
+<dataset id="properties">
   
-</tsml>
+  <adapter class="latis.reader.tsml.PropertiesAdapter"/>
+       
+  <tuple>   
+    <text id="version" length="8"/>
+    <text id="user.dir" length="8"/>
+    <text id="log.file" length="64"/>
+  </tuple>
+  
+</dataset>

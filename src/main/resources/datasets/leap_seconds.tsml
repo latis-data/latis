@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="leap_seconds">
-    <adapter class="latis.reader.tsml.AsciiAdapter"
-             commentCharacter="#"
-             delimiter="\s+"
-             location="datasets/test/leap-seconds.list" />
-             <!--TODO: remote URL-->
-             
-    <time type="integer" units="seconds since 1900-01-01"/>
-    <integer name="leap_seconds"/>
+<dataset id="leap_seconds">
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           commentCharacter="#"
+           delimiter="\s+"
+           location="datasets/test/leap-seconds.list" />
+           <!--TODO: remote URL-->
+           
+  <time type="integer">
+    <metadata units="seconds since 1900-01-01"/>
+  </time>
+  <integer id="leap_seconds"/>
 
-  </dataset>
-
-</tsml>
+</dataset>

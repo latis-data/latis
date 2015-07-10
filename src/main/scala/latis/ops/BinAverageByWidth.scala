@@ -19,11 +19,10 @@ import latis.ops.filter.ExcludeMissing
 class BinAverageByWidth(binWidth: Double) extends Operation {
   //TODO: accept ISO 8601 time duration
   //TODO: support start value
-  //TODO: use SampledData with DomainSet?
+  //TODO: start with min of time coverage instead of 1st sample
   //TODO: deal with 'length' metadata
   //TODO: deal with missing values
   //TODO: take domain var arg so we can bin nested functions, akin to integration
-  //TODO: start with min of time coverage instead of 1st sample
   
   if (binWidth <= 0) throw new Error("Bin average must have a positive bin width.")
   
@@ -92,8 +91,8 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
    * Error if not a 1D numeric Scalar. Time will be treated as unix ms.
    */
   private def getDomainValue(sample: Sample): Double = sample.domain match {
-    case t: Time => t.getJavaTime.toDouble //TODO: only if type Text? user would need to know/use native units
     case Number(d) => d
+    case t: Time => t.getJavaTime.toDouble
     case _ => throw new Error("BinAverage supports only one dimensional numeric domains.")
   }
   

@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="files">
-    
-    <adapter class="latis.reader.tsml.FileListAdapterNio"
-             pattern="Foo(\d{7})bar(\d)v(\d.\d)(\w).dat"
-             location="/tmp/latis_file_test"
-             todo_location="${java.io.tmpdir}/latis_file_test" />
-             
-    <time name="myTime" units="yyyyDDD" type="text" length="7"/>
-   
-    <integer name="myInt"/>
-    <real    name="myReal"/>
-    <text    name="myText"/>
-    
-    <text name="file" length="256"/>
-    <integer name="fileSize"/>
+<dataset id="files">
   
-  </dataset>
+  <adapter class="latis.reader.tsml.FileListAdapterNio"
+           pattern="Foo(\d{7})bar(\d)v(\d.\d)(\w).dat"
+           location="/tmp/latis_file_test"
+           todo_location="${java.io.tmpdir}/latis_file_test" />
+           
+  <time type="text" length="7">
+    <metadata name="myTime" units="yyyyDDD"/>
+  </time>
+ 
+  <integer id="myInt"/>
+  <real    id="myReal"/>
+  <text    id="myText"/>
+  
+  <text id="file" length="256"/>
+  <integer id="fileSize"/>
 
-</tsml>
+</dataset>

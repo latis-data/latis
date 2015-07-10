@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="catalog">
-    <adapter class="latis.reader.tsml.JsonAdapter"
-             location="datasets/test/catalog.json" />
+<dataset id="catalog">
+  <adapter class="latis.reader.tsml.JsonAdapter"
+           location="datasets/test/catalog.json" />
     
-    
-    
-  </dataset>
-
-</tsml>
+</dataset>

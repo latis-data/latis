@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
+<dataset id="agu_email"> 
+  <adapter class="latis.reader.tsml.EmailAdapter"
+           location="imap://doug.lindholm:xxx@imap.gmail.com/AGU" />
+           
+  <index/>
+  <time/>
+  <text id="sender"  length="64"/>
+  <text id="subject" length="256"/>
+  <text id="content" length="1024"/>
 
-  <dataset name="agu_email"> 
-
-    <adapter class="latis.reader.tsml.EmailAdapter"
-             location="imap://doug.lindholm:xxx@imap.gmail.com/AGU" />
-             
-    <index/>
-    <time/>
-    <text name="sender"  length="64"/>
-    <text name="subject" length="256"/>
-    <text name="content" length="1024"/>
-
-  </dataset>
-
-</tsml>
+</dataset>

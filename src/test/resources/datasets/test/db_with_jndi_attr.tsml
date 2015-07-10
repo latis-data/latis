@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
-  <dataset name="db_with_bad_java_location">
 
-    <adapter class="latis.reader.tsml.JdbcAdapter"
-             jndi="this jndi location doesn't actually have to work"
-             table="FAKE_TABLE" />
-             
-    <function>
-    	<integer name="foo" />
-    	<integer name="bar" />
-    </function>
-  </dataset>
-</tsml>   
+<dataset id="db_with_bad_java_location">
+  <adapter class="latis.reader.tsml.JdbcAdapter"
+           jndi="this jndi location doesn't actually have to work"
+           table="FAKE_TABLE" />
+           
+  <function>
+  	<integer id="foo" />
+  	<integer id="bar" />
+  </function>
+
+</dataset>

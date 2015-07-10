@@ -21,7 +21,7 @@ class Tsml(val xml: Elem) {
    * Pull the &lt;dataset&gt; element from the XML, and wrap it in a DatasetMl
    * class
    */
-  lazy val dataset: DatasetMl = new DatasetMl((xml \ "dataset").head) //assumes only one "dataset" element
+  lazy val dataset: DatasetMl = new DatasetMl(xml) //assumes only one "dataset" element
   
   /**
    * Get a sequence of processing instructions' text values (proctext) 
@@ -36,7 +36,7 @@ class Tsml(val xml: Elem) {
    * as a Map from the type (target) to a Seq of values (proctext).
    */
   lazy val processingInstructions: Map[String, Seq[String]] = { //TODO: currently only searches first level children of "dataset"
-    val pis: Seq[ProcInstr] = (xml \ "dataset")(0).child.filter(_.isInstanceOf[ProcInstr]).map(_.asInstanceOf[ProcInstr])
+    val pis: Seq[ProcInstr] = xml(0).child.filter(_.isInstanceOf[ProcInstr]).map(_.asInstanceOf[ProcInstr])
     val pimap: Map[String, Seq[ProcInstr]] = pis.groupBy(_.target) //put into Map by target name
     pimap.map((pair) => (pair._1, pair._2.map(_.proctext))) //change Seq of PIs to Seq of their text values
     //TODO: do we need to override this Map's "default" to return an empty Seq[String]?
@@ -49,11 +49,10 @@ object Tsml {
   
   def apply(xml: Node): Tsml = xml match {
     case e: Elem => e.label match {
-      case "tsml" => new Tsml(e)
-      case "dataset" => new Tsml(<tsml>{e}</tsml>) //wrap dataset in tsml
-      case _ => throw new RuntimeException("Must construct Tsml from a 'tsml' or 'dataset' XML Element.")
+      case "dataset" => new Tsml(e)
+      case _ => throw new RuntimeException("Must construct Tsml from a 'dataset' XML Element.")
     }
-    case _ => throw new RuntimeException("Must construct Tsml from a 'tsml' or 'dataset' XML Element.")
+    case _ => throw new RuntimeException("Must construct Tsml from a 'dataset' XML Element.")
   }
   
   def apply(url: URL): Tsml = {
@@ -63,7 +62,7 @@ object Tsml {
       case null => new Tsml(xml) //no ref, use top level dataset element
       case ref: String => {
         (xml \\ "dataset").find(node => (node \ "@name").text == ref) match {
-          case Some(node) => new Tsml(<tsml>{node.head}</tsml>) 
+          case Some(node) => Tsml(node) 
           case None => throw new RuntimeException("Can't find dataset with reference: " + ref)
         }
       }
