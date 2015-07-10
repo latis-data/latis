@@ -3,13 +3,16 @@ package latis.reader.tsml.ml
 import java.io.File
 import java.io.FileNotFoundException
 import java.net.URL
-
 import scala.xml.Elem
 import scala.xml.Node
 import scala.xml.ProcInstr
 import scala.xml.XML
-
 import latis.util.LatisProperties
+import scala.xml.transform.RewriteRule
+import scala.xml.UnprefixedAttribute
+import scala.xml.transform.RuleTransformer
+import scala.xml.Null
+import scala.xml.MetaData
 
 
 /**
@@ -41,6 +44,18 @@ class Tsml(val xml: Elem) {
     pimap.map((pair) => (pair._1, pair._2.map(_.proctext))) //change Seq of PIs to Seq of their text values
     //TODO: do we need to override this Map's "default" to return an empty Seq[String]?
   }
+  
+  def setLocation(loc: String): Tsml = {
+    val newloc = new UnprefixedAttribute("location", loc, Null)
+    val rr = new RewriteRule {
+      override def transform(n: Node): Seq[Node] = n match {
+        case e: Elem if(e.label == "adapter") => e % newloc
+        case other => other
+      }
+    }
+    val rt = new RuleTransformer(rr)
+    Tsml(rt.transform(xml).head)
+  }
 
   override def toString = xml.toString
 }
@@ -60,7 +75,7 @@ object Tsml {
     val xml = XML.load(url)
     //If the URL includes a reference ("#" anchor), include only the referenced dataset.
     url.getRef() match {
-      case null => new Tsml(xml) //no ref, use top level dataset element
+      case null => Tsml(xml) //no ref, use top level dataset element
       case ref: String => {
         (xml \\ "dataset").find(node => (node \ "@name").text == ref) match {
           case Some(node) => new Tsml(<tsml>{node.head}</tsml>) 
