@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <dataset id="leap_seconds">
-  <adapter class="latis.reader.tsml.AsciiAdapter"
+  <adapter class="latis.reader.tsml.ColumnarAdapter"
            commentCharacter="#"
            delimiter="\s+"
-           location="datasets/test/leap-seconds.list" />
-           <!--TODO: remote URL-->
-           
+           columns="0;1"
+           location="http://www.ietf.org/timezones/data/leap-seconds.list" />
+             
   <time type="integer">
     <metadata units="seconds since 1900-01-01"/>
   </time>
