@@ -1,7 +1,7 @@
 {"scalar": {
 "metadata": {"foo": {
-"units": "milliseconds since 1970-01-01",
-"alias": "time"
+"alias": "time",
+"units": "milliseconds since 1970-01-01"
 },
 "ssn": {
 
