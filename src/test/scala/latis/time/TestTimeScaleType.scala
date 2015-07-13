@@ -77,6 +77,7 @@ class TestTimeScaleType {
   @Test
   def formatted_time_with_native_default = {
     //The native scale does not know about leap seconds so just plays along
+    System.clearProperty("time.scale.type")
     val md = Metadata("units" -> "yyyyMMdd")
     val time1 = Time(md, "20150630")
     val time2 = Time(md, "20150702")
