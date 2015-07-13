@@ -41,6 +41,8 @@ class TsmlReader(tsml: Tsml) extends DatasetAccessor {
 
 object TsmlReader {
   
+  def apply(tsml: Tsml) = new TsmlReader(tsml)
+  
   def apply(url: URL) = new TsmlReader(Tsml(url))
 
   def apply(path: String) = new TsmlReader(Tsml(path))
