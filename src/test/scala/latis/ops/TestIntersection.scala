@@ -17,7 +17,7 @@ class TestIntersection {
     val ds1 = Dataset(Function.fromValues(Seq(1,2,4), Seq(1,2,3)))
     val ds2 = Dataset(Function.fromValues(Seq(1,3,4), Seq(4,5,6)))
     val op = new Intersection()
-    val ds = op(Dataset(Tuple(ds1.unwrap, ds2.unwrap)))
+    val ds = op(ds1, ds2)
     //AsciiWriter.write(ds)
     val data = ds.toDoubles
     assertEquals(2, data(0).length) //# domain values

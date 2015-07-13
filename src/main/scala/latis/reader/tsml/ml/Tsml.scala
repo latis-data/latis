@@ -1,11 +1,14 @@
 package latis.reader.tsml.ml
 
 import java.io.File
+import java.io.FileNotFoundException
 import java.net.URL
+
 import scala.xml.Elem
 import scala.xml.Node
 import scala.xml.ProcInstr
 import scala.xml.XML
+
 import latis.util.LatisProperties
 
 
@@ -18,7 +21,7 @@ class Tsml(val xml: Elem) {
    * Pull the &lt;dataset&gt; element from the XML, and wrap it in a DatasetMl
    * class
    */
-  lazy val dataset: DatasetMl = new DatasetMl((xml \ "dataset").head) //assumes only one "dataset" element
+  lazy val dataset: DatasetMl = new DatasetMl(xml) //assumes only one "dataset" element
   
   /**
    * Get a sequence of processing instructions' text values (proctext) 
@@ -33,7 +36,7 @@ class Tsml(val xml: Elem) {
    * as a Map from the type (target) to a Seq of values (proctext).
    */
   lazy val processingInstructions: Map[String, Seq[String]] = { //TODO: currently only searches first level children of "dataset"
-    val pis: Seq[ProcInstr] = (xml \ "dataset")(0).child.filter(_.isInstanceOf[ProcInstr]).map(_.asInstanceOf[ProcInstr])
+    val pis: Seq[ProcInstr] = xml(0).child.filter(_.isInstanceOf[ProcInstr]).map(_.asInstanceOf[ProcInstr])
     val pimap: Map[String, Seq[ProcInstr]] = pis.groupBy(_.target) //put into Map by target name
     pimap.map((pair) => (pair._1, pair._2.map(_.proctext))) //change Seq of PIs to Seq of their text values
     //TODO: do we need to override this Map's "default" to return an empty Seq[String]?
@@ -46,11 +49,10 @@ object Tsml {
   
   def apply(xml: Node): Tsml = xml match {
     case e: Elem => e.label match {
-      case "tsml" => new Tsml(e)
-      case "dataset" => new Tsml(<tsml>{e}</tsml>) //wrap dataset in tsml
-      case _ => throw new RuntimeException("Must construct Tsml from a 'tsml' or 'dataset' XML Element.")
+      case "dataset" => new Tsml(e)
+      case _ => throw new RuntimeException("Must construct Tsml from a 'dataset' XML Element.")
     }
-    case _ => throw new RuntimeException("Must construct Tsml from a 'tsml' or 'dataset' XML Element.")
+    case _ => throw new RuntimeException("Must construct Tsml from a 'dataset' XML Element.")
   }
   
   def apply(url: URL): Tsml = {
@@ -60,7 +62,7 @@ object Tsml {
       case null => new Tsml(xml) //no ref, use top level dataset element
       case ref: String => {
         (xml \\ "dataset").find(node => (node \ "@name").text == ref) match {
-          case Some(node) => new Tsml(<tsml>{node.head}</tsml>) 
+          case Some(node) => Tsml(node) 
           case None => throw new RuntimeException("Can't find dataset with reference: " + ref)
         }
       }
@@ -78,39 +80,13 @@ object Tsml {
    */
   def apply(path: String): Tsml = {
     //Try using the given path.
-    findDatasetTSML(path) match {
-      case Some(tsml) => tsml
-      case None => {
+    try TsmlResolver.fromPath(path) catch {
+      case e: FileNotFoundException => {
         //Try prepending the dataset.dir property
         val dspath = LatisProperties.getOrElse("dataset.dir", "datasets") + File.separator + path
-        findDatasetTSML(dspath) match {
-          case Some(tsml) => tsml
-          case None => throw new Error("Unable to locate the dataset descriptor for " + path)
-        }
+        TsmlResolver.fromPath(dspath)
       }
     }
-  }
-  
-  /**
-   * Helper method to find the tsml descriptor given a path.
-   */
-  private def findDatasetTSML(path: String): Option[Tsml] = {
-    //TODO: make sure path resolves?
-    val url = if (path.contains(":")) path //already absolute with a scheme
-    else if (path.startsWith(File.separator)) "file:" + path //absolute file path
-    else getClass.getResource("/"+path) match { //try in the classpath (e.g. "resources")
-      case url: URL => url.toString
-      case null => {
-        //Try looking in the working directory.
-        //Make sure it exists, otherwise this would become a catch-all
-        val file = scala.util.Properties.userDir + File.separator + path
-        if (new File(file).exists) "file:" + file  //TODO: use java7 Files
-        else null
-      }
-    }
-    
-    if (url != null) Some(Tsml(new URL(url)))
-    else None
   }
   
   /**

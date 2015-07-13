@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="tsi">
-
-    <adapter class="latis.reader.tsml.AsciiAdapter"
-    		 delimiter="\s+"
-             location="datasets/tsi.txt" />
+<dataset id="tsi">
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+    	   delimiter="\s+"
+           location="datasets/tsi.txt" />
              
-    <function length="403">
-      <time name="year" 
-            units="years since 0000-01-01" 
-            long_name="Year"/>
-    
-      <real name="tsi"
-            units="W/m^2"
-            long_name="Total Solar Irradiance"/>
-    </function>
+  <function length="403">
+    <time> 
+      <metadata name="year" 
+                units="years since 0000-01-01" 
+                long_name="Year"/>
+    </time>
+  
+    <real>
+      <metadata name="tsi"
+                units="W/m^2"
+                long_name="Total Solar Irradiance"/>
+    </real>
+  </function>
 
-  </dataset>
-
-</tsml>
+</dataset>

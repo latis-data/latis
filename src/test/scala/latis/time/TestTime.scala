@@ -107,6 +107,12 @@ class TestTime {
   //@Test def int_type_without_units = ???
   //@Test def int_type_with_invalid_units = ???
   
+  @Test @Ignore //should throw exception (LATIS-329)
+  def time_construction_with_invalid_units = {
+    val t = Time(Metadata(Map("units" -> "my days since 2000-01-01")), 14)
+    fail
+  }
+  
   //@Test 
   def fractional_years {
     //TODO: off due to leap days

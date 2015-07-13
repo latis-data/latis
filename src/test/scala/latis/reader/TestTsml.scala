@@ -3,8 +3,10 @@ package latis.reader
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
+import latis.metadata.Catalog
 import latis.reader.tsml.TsmlReader
 import latis.reader.tsml.ml.DatasetMl
+import latis.reader.tsml.ml.TsmlResolver
 
 class TestTsml  {
 
@@ -28,5 +30,26 @@ class TestTsml  {
     assert(ds.unwrap.toSeq(0).getMetadata("alias").isDefined)
     assert(!ds.unwrap.toSeq(1).getMetadata("alias").isDefined)
 //    Writer.fromSuffix("meta").write(ds)
+  }
+  
+  @Test
+  def resolve_url {
+    val url = Catalog.getTsmlUrl("properties")    
+    val tsml = TsmlResolver.fromUrl(url)
+    assert(tsml.toString.contains("""id="properties""""))
+  }
+  
+  @Test
+  def resolve_path {
+    val path = "datasets/test/properties.tsml"
+    val tsml = TsmlResolver.fromPath(path)
+    assert(tsml.toString.contains("""id="properties""""))
+  }
+  
+  @Test
+  def resolve_name {
+    val name = "properties"
+    val tsml = TsmlResolver.fromName(name)
+    assert(tsml.toString.contains("""id="properties""""))
   }
 }

@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tsml>
 
-  <dataset name="vecmag">
+<dataset id="vecmag">
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+   		   delimiter="\s+"
+           location="datasets/test/vecmag.txt" />
 
-    <adapter class="latis.reader.tsml.AsciiAdapter"
-    		 delimiter="\s+"
-             location="datasets/test/vecmag.txt" />
-             
-    <time name="t" units="milliseconds since 1970-01-01" />
-    
-    <real name="a"/>
-    <real name="b"/>
-    <real name="c"/>
-    <?derived X = SQRT(a*a+b*b+c*c)?>
-    <?derived X2 = MAG(a,b,c)?>
-    <?derived Y = X + a?>
-    <?derived Z = 123.4?>
-      
+  <time id="t"/>
+  
+  <real id="a"/>
+  <real id="b"/>
+  <real id="c"/>
+  <?derived X = SQRT(a*a+b*b+c*c)?>
+  <?derived X2 = MAG(a,b,c)?>
+  <?derived Y = X + a?>
+  <?derived Z = 123.4?>
 
-  </dataset>
-
-</tsml>
+</dataset>

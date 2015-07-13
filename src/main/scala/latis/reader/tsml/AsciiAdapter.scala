@@ -11,7 +11,7 @@ import scala.io.Source
 import com.typesafe.scalalogging.slf4j.Logging
 
 
-class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Logging {
+class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Logging {
 
   //---- Manage data source ---------------------------------------------------
   
@@ -36,8 +36,9 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    * line to indicate that it should not be read as data. 
    * Defaults to null, meaning that no line should be ignored (except empty lines).
    * Return null if there are no comments to skip.
+   * Use a lazy val since this will be used for every line.
    */
-  def getCommentCharacter: String = getProperty("commentCharacter") match {
+  lazy val getCommentCharacter: String = getProperty("commentCharacter") match {
     case Some(s) => s
     case None    => null
   }
@@ -75,7 +76,21 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    */
   def getVariableNames: Seq[String] = getOrigScalarNames
 
-    
+  /**
+   * Get the String used as the data marker from tsml file.
+   * Use a lazy val since this will be used for every line.
+   */
+  lazy val getDataMarker: String = getProperty("marker") match {
+    case Some(s) => s
+    case None => null
+  }
+  
+  /**
+   * Keep track of whether we have encountered a data marker.
+   */
+  private var foundDataMarker = false
+
+
   //---- Parse operations -----------------------------------------------------
   
   /**
@@ -86,6 +101,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
     val dlm = getDelimiter
     val records = getLineIterator.grouped(lpr).map(_.mkString(dlm))
     
+ //TODO: apply length of Function if given
     getProperty("limit") match {
       case Some(s) => records.take(s.toInt) //TODO: deal with bad value
       case None    => records
@@ -108,9 +124,20 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter[String](tsml) with Loggi
    * iterator from Source.getLines.
    */
   def shouldSkipLine(line: String): Boolean = {
-    //TODO: what if nothing but whitespace? trim?
+    val d = getDataMarker
     val c = getCommentCharacter
-    line.isEmpty() || (c != null && line.startsWith(c))
+
+    if (d == null || foundDataMarker) {
+      // default behavior: ignore empty lines and lines that start with comment characters
+      line.isEmpty() || (c != null && line.startsWith(c))
+    } else {
+      // We have a data marker and we haven't found it yet,
+      // therefore we should ignore everything until we
+      // find it. We should also exclude the data marker itself
+      // when we find it. 
+      if (line.startsWith(d)) foundDataMarker = true;
+      true
+    }
   }
   
   /**

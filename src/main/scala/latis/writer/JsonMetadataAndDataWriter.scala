@@ -142,12 +142,6 @@ class JsonMetadataAndDataWriter extends JsonWriter {
       }
     }
   }
-  
-  /**
-   * keep track of the outer domain of nested functions
-   */
-  private var prepend = List[String]()
-
     
   /**
    * Represent a tuple as an array with each element being an array of values.
