@@ -24,5 +24,5 @@ class TestFileAggAdapter {
     val data = ds.toDoubleMap
     assertEquals(19.0, data("T").head, 0.0)
   }
-
+  
 }
