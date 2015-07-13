@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset id="ascii_ssi">
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           delimiter=" "
+           linesPerRecord="2"
+           limit="1"
+           location="datasets/test/ascii_ssi.txt" />
+  
+  <!--
+  (iw -> w, iw -> b, time -> (tsi, iw -> ssi))
+  -->
+  
+  <tuple>
+  <!-- extra funtion layer with one sample so we can read the 5 inner samples on two lines -->
+   <function length="1">
+    <index/>
+    <function length="5">
+      <index id="iw" />
+      <real id="wavelength" />
+    </function>
+  </function>
+<!--    
+    <function length="5">
+      <index id="iw" />
+      <real id="bandwidth" />
+    </function>
+  
+    <function>
+      <time type="text">
+        <metadata units="yyyy-MM-dd"/>
+      </time>
+      <real id="tsi" />
+      <function length="5">
+        <index id="iw" />
+        <real id="ssi" />
+      </function>
+    </function>
+-->  
+  </tuple>
+  
+</dataset>

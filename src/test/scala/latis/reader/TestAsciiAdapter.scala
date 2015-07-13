@@ -20,5 +20,11 @@ class TestAsciiAdapter  {
     assertEquals("1619.5", data("year")(0)) // check the first value
     assertEquals("1628.5", data("year")(9)) // check the last value
   }
+  
+  //@Test
+  def ascii_ssi = {
+    val ds = TsmlReader("datasets/test/ascii_ssi.tsml").getDataset
+    AsciiWriter.write(ds)
+  }
 
 }
