@@ -8,33 +8,34 @@ import java.io.PrintWriter
  * Writer to present a Dataset in a way that reflects how it is modeled.
  */
 class AsciiWriter extends TextWriter {
-  //TODO: rename ModelWriter?
-  
-  private var indent = 0
-  
+   
   override def makeHeader(dataset: Dataset) = dataset.toString + newLine
-    
-  override def makeSample(sample: Sample): String = makeTuple(sample)
-  
+      
+  override lazy val delimiter = " -> "
   /**
    * Override to add arrow for mapping domain values to range values 
    * and to put "()" around tuple elements.
    */
-  override def makeTuple(tuple: Tuple): String = tuple match {
-    case Sample(d, r) => varToString(d) + " -> " + varToString(r)
-    case Tuple(vars) => vars.map(varToString(_)).mkString("(", delimiter, ")")
+  override def makeTuple(tuple: Tuple): String = {
+    val delimiter = ", "
+    tuple.getVariables.map(varToString(_)).mkString("(", delimiter, ")")
   }
   
   /**
-   * Override to indent nested function samples.
+   * Override so we don't call makeTuple.
    */
-  override def makeFunction(function: Function): String = {
-    indent += 5
-    val s = function.iterator.map(varToString(_)).mkString("", newLine + " "*indent, "")
-    indent -= 5
-    s
+  override def makeSample(sample: Sample): String = sample match {
+    case Sample(d, r: Function) => {
+      prepend :+= varToString(d)
+      varToString(r)
+    }
+    case Sample(d, r) => {
+      val pre = if(prepend.isEmpty) "" else prepend.mkString("", delimiter, delimiter)
+      val s = varToString(d) + delimiter + varToString(r)
+      pre + s
+    }
   }
-
+  
 }
 
 object AsciiWriter {
