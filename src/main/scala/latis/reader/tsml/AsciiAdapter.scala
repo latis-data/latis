@@ -101,6 +101,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Logg
     val dlm = getDelimiter
     val records = getLineIterator.grouped(lpr).map(_.mkString(dlm))
     
+ //TODO: apply length of Function if given
     getProperty("limit") match {
       case Some(s) => records.take(s.toInt) //TODO: deal with bad value
       case None    => records
