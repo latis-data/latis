@@ -30,6 +30,11 @@ import latis.util.iterator.ZipIterator
  */
 class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte]]](tsml) {
   
+  lazy val order = getProperty("byteOrder", "big-endian") match {
+    case "big-endian" => ByteOrder.BIG_ENDIAN
+    case "little-endian" => ByteOrder.LITTLE_ENDIAN
+  }
+  
   /**
    * Gets the ByteBuffer for each Scalar in the Dataset from the file
    * with that Scalar's name in the directory specified in the tsml.
@@ -38,10 +43,7 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
     val names = getOrigScalarNames
     val locs = names.map(n => new File(getUrlFile, n + ".bin"))
     val files = locs.map(loc => new RandomAccessFile(loc, "r"))
-    val order = this.getProperty("byteOrder", "big-endian") match {
-      case "big-endian" => ByteOrder.BIG_ENDIAN
-      case "little-endian" => ByteOrder.LITTLE_ENDIAN
-    }
+    
     val channels = files.map(_.getChannel)
     val bbs = channels.map(channel => channel.map(MapMode.READ_ONLY, 0, channel.size))
     
@@ -97,10 +99,10 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
    * Make Data for the correct Scalar type given a template and Byte Array 
    */
   def makeData(bytes: Array[Byte], vTemplate: Variable): Data = vTemplate match {
-    case _: Integer => LongValue(ByteBuffer.wrap(bytes).getLong)
-    case _: Real => DoubleValue(ByteBuffer.wrap(bytes).getDouble)
+    case _: Integer => LongValue(ByteBuffer.wrap(bytes).order(order).getLong)
+    case _: Real => DoubleValue(ByteBuffer.wrap(bytes).order(order).getDouble)
     case t: Text => {
-      val buffer = ByteBuffer.wrap(bytes).asCharBuffer
+      val buffer = ByteBuffer.wrap(bytes).order(order).asCharBuffer
       val chars = Array.ofDim[Char](t.length)
       buffer.get(chars)
       StringValue(StringUtils.padOrTruncate(new String(chars),t.length))
