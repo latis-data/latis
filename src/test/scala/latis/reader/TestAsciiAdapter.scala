@@ -32,7 +32,7 @@ class TestAsciiAdapter  {
     assertEquals(23.3, data("myReal").last, 0.0)
   }
 
-  //@Test
+  @Test
   def ascii_ssi = {
     val ds = TsmlReader("datasets/test/ascii_ssi.tsml").getDataset
     AsciiWriter.write(ds)
