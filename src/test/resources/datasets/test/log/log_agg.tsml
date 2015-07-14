@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset>
+  <adapter class="latis.reader.tsml.FileAggAdapter"
+           pattern="latis.log-?(\d\d\d\d-\d\d-\d\d)?"
+           template="log/log"
+           fileList="log/log_list"
+           location="src/test/resources/datasets/test/log"/>
+         
+  <index/>   <!--must have a variable defined-->
+
+</dataset>

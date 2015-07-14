@@ -35,12 +35,28 @@ class FileAggAdapter(tsml: Tsml) extends FileListAdapter(tsml) {
     case Some(name) => TsmlResolver.fromName(name)
     case None => throw new Exception("Nrl2AggAdapter requires 'template' attribute in tsml")
   }
+  
+  /**
+   * A name of a dataset that will give the wanted file list. If not specified, 
+   * the file list will be read from the tsml of this adapter.
+   */
+  lazy val fileList = getProperty("fileList") match {
+    case Some(name) => TsmlReader(TsmlResolver.fromName(name))
+    case None => null
+  }
       
   /**
    * The name of each file to be read. Can be filtered with fileOps.
    */
-  lazy val getFileList = new FileListAdapter(tsml).getDataset(fileOps) match {
+  lazy val getFileList = {
+    val ds = fileList match {
+      case null => new FileListAdapter(tsml).getDataset(fileOps)
+      case _ => fileList.getDataset(fileOps)
+    }
+    
+    ds match {
       case Dataset(f: Function) => f.iterator.map(_.toSeq.find(_.hasName("file")).get.getValue.toString)
+    }
   }
   
   /**
@@ -53,6 +69,9 @@ class FileAggAdapter(tsml: Tsml) extends FileListAdapter(tsml) {
       }))
   }
   
+  /**
+   * Pass time selection to the FileListAdapter. 
+   */
   override def handleOperation(op: Operation): Boolean = op match {
     case Selection("time", o, value) => o match {
       case "<" | "<=" => {
