@@ -5,9 +5,10 @@ import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel.MapMode
-import scala.Array.canBuildFrom
+
 import scala.Option.option2Iterable
 import scala.collection.mutable.ListBuffer
+
 import latis.data.Data
 import latis.data.value.DoubleValue
 import latis.data.value.LongValue
@@ -15,12 +16,14 @@ import latis.data.value.StringValue
 import latis.dm.Function
 import latis.dm.Integer
 import latis.dm.Real
+import latis.dm.Scalar
 import latis.dm.Text
+import latis.dm.Tuple
 import latis.dm.Variable
 import latis.reader.tsml.ml.Tsml
-import latis.util.iterator.BufferIterator
-import latis.util.iterator.PeekIterator
+import latis.util.DataMapUtils
 import latis.util.StringUtils
+import latis.util.iterator.BufferIterator
 import latis.util.iterator.LoopIterator
 import latis.util.iterator.RepeatIterator
 import latis.util.iterator.ZipIterator
@@ -79,16 +82,25 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
     //map each domain to how many times its values must be repeated 
     //(the product of the length of its inner functions)
     //this is how many rows one Sample of that Function would take in a table format
-    val reps = functions.map(_.getDomain).zip(functions.map(f => innerLength(f.getSample))).toMap
+    val reps = getReps(getOrigDataset.unwrap, 1)
     
     //inner Function domains must be looped because they are repeated for each outer domain Sample
     val loops = functions.map(_.getRange.findFunction).flatten.map(_.getDomain)
     
     val its = buffers.zip(vars).map(p => BufferIterator(p._1, p._2))
-    val rits = its.zip(vars).map(p => new RepeatIterator(p._1, reps.withDefaultValue(1)(p._2)))//apply repetitions
+    val rits = its.zip(vars).map(p => new RepeatIterator(p._1, reps(p._2.getName)))//apply repetitions
     val lrits = rits.zip(vars).map(p => if(loops.contains(p._2)) new LoopIterator(p._1) else p._1)//apply loops
     new ZipIterator(lrits)//ZipIterator changes Seq[Iterator[Array[Byte]]] => Iterator[Seq[Array[Byte]]]
   }
+  
+  def getReps(v: Variable, i: Int): Map[String, Int] = v match {
+    case s: Scalar => Map(s.getName -> i)
+    case t: Tuple => t.getVariables.map(getReps(_, i)).reduceLeft(_ ++ _)
+    case f: Function => {
+      val rps = DataMapUtils.innerLength(f.getSample)
+      getReps(f.getSample, rps)
+    }
+  }  
   
   def parseRecord(rec: Seq[Array[Byte]]): Option[Map[String,Data]] = {
     val vars = getOrigScalars
