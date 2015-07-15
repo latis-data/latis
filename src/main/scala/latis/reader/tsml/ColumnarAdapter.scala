@@ -19,7 +19,7 @@ class ColumnarAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
   override def extractValues(record: String): Seq[String] = {
     //Note, trim record first to deal with leading white space.
     val ss = record.trim.split(getDelimiter)
-    if(ss.length < columnIndices.last.last) List() //Ignore rows with fewer columns than those requested
+    if(ss.length < columnIndices.flatten.max) List() //Ignore rows with fewer columns than those requested
     else columnIndices.map(is => is.map(ss(_)).mkString(" ")) //append with " " for now since delimiter could be a regex
   }
   
