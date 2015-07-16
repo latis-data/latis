@@ -53,6 +53,20 @@ class TestLeapSecondUtil {
   }
   
   @Test
+  def spot_check_tai_time_scale = {
+    System.setProperty("time.scale.type", "UTC")
+    val utcts = TimeScale("1970-01-01", TimeUnit.MILLISECOND, TimeScaleType.UTC)
+    val taits = TimeScale("1958-01-01", TimeUnit.SECOND, TimeScaleType.TAI)
+    val tai = Time(taits,1.81569604E9)
+    val utc = tai.convert(utcts)
+    val s = utc.format("yyyy-MM-dd HH:mm:ss").toString
+    assertEquals("2015-07-16 00:00:04", s)
+    
+    val time = Time.fromIso(s).convert(taits).getNumberData.longValue
+    assertEquals(1815696040, time)
+  }
+  
+  @Test
   def utc_to_past_tai_to_utc_at_java_epoch = {
     val utcts = TimeScale("1970-01-01", TimeUnit.MILLISECOND, TimeScaleType.UTC)
     val taits = TimeScale("1958-01-01", TimeUnit.SECOND, TimeScaleType.TAI)
