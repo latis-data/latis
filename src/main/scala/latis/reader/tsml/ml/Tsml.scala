@@ -1,12 +1,18 @@
 package latis.reader.tsml.ml
 
 import java.io.File
+import java.io.FileNotFoundException
 import java.net.URL
 import scala.xml.Elem
 import scala.xml.Node
 import scala.xml.ProcInstr
 import scala.xml.XML
 import latis.util.LatisProperties
+import scala.xml.transform.RewriteRule
+import scala.xml.UnprefixedAttribute
+import scala.xml.transform.RuleTransformer
+import scala.xml.Null
+import scala.xml.MetaData
 
 
 /**
@@ -38,6 +44,18 @@ class Tsml(val xml: Elem) {
     pimap.map((pair) => (pair._1, pair._2.map(_.proctext))) //change Seq of PIs to Seq of their text values
     //TODO: do we need to override this Map's "default" to return an empty Seq[String]?
   }
+  
+  def setLocation(loc: String): Tsml = {
+    val newloc = new UnprefixedAttribute("location", loc, Null)
+    val rr = new RewriteRule {
+      override def transform(n: Node): Seq[Node] = n match {
+        case e: Elem if(e.label == "adapter") => e % newloc
+        case other => other
+      }
+    }
+    val rt = new RuleTransformer(rr)
+    Tsml(rt.transform(xml).head)
+  }
 
   override def toString = xml.toString
 }
@@ -56,7 +74,7 @@ object Tsml {
     val xml = XML.load(url)
     //If the URL includes a reference ("#" anchor), include only the referenced dataset.
     url.getRef() match {
-      case null => new Tsml(xml) //no ref, use top level dataset element
+      case null => Tsml(xml) //no ref, use top level dataset element
       case ref: String => {
         (xml \\ "dataset").find(node => (node \ "@name").text == ref) match {
           case Some(node) => Tsml(node) 
@@ -77,39 +95,13 @@ object Tsml {
    */
   def apply(path: String): Tsml = {
     //Try using the given path.
-    findDatasetTSML(path) match {
-      case Some(tsml) => tsml
-      case None => {
+    try TsmlResolver.fromPath(path) catch {
+      case e: FileNotFoundException => {
         //Try prepending the dataset.dir property
         val dspath = LatisProperties.getOrElse("dataset.dir", "datasets") + File.separator + path
-        findDatasetTSML(dspath) match {
-          case Some(tsml) => tsml
-          case None => throw new Error("Unable to locate the dataset descriptor for " + path)
-        }
+        TsmlResolver.fromPath(dspath)
       }
     }
-  }
-  
-  /**
-   * Helper method to find the tsml descriptor given a path.
-   */
-  private def findDatasetTSML(path: String): Option[Tsml] = {
-    //TODO: make sure path resolves?
-    val url = if (path.contains(":")) path //already absolute with a scheme
-    else if (path.startsWith(File.separator)) "file:" + path //absolute file path
-    else getClass.getResource("/"+path) match { //try in the classpath (e.g. "resources")
-      case url: URL => url.toString
-      case null => {
-        //Try looking in the working directory.
-        //Make sure it exists, otherwise this would become a catch-all
-        val file = scala.util.Properties.userDir + File.separator + path
-        if (new File(file).exists) "file:" + file  //TODO: use java7 Files
-        else null
-      }
-    }
-    
-    if (url != null) Some(Tsml(new URL(url)))
-    else None
   }
   
   /**

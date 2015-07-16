@@ -152,5 +152,5 @@ class TextWriter extends Writer {
    */
   override def mimeType: String = getProperty("mimeType", "text/plain")
   
-  private var prepend = List[String]()
+  protected var prepend = List[String]()
 }

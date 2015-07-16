@@ -9,7 +9,8 @@ object TimeScaleType extends Enumeration {
   val UTC    = Value("UTC")
   val TAI    = Value("TAI")
   
-  lazy val default: TimeScaleType = LatisProperties.get("time.scale.type") match {
+  //Note, using def instead of lazy val to support tests.
+  def default: TimeScaleType = LatisProperties.get("time.scale.type") match {
     case Some(s) => TimeScaleType.withName(s)  //TODO: handle error
     case None => NATIVE
   }

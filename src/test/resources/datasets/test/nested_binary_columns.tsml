@@ -6,6 +6,7 @@
   
   <function>
     <real id="a"/>
+    <integer id="myInt"/>
     <function length="3">
       <integer id="b2"/>
       <integer id="c"/>

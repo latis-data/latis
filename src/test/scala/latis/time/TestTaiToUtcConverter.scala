@@ -1,20 +1,19 @@
 package latis.time
 
 import java.util.Date
-
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-
 import latis.time.TimeScaleType.TAI
 import latis.time.TimeScaleType.UTC
 import latis.time.TimeUnit.SECOND
+import org.junit.Ignore
 
 class TestTaiToUtcConverter {
   
   @Test
   def test_construction {
-    val ts = TimeScale.DEFAULT
+    val ts = TimeScale.JAVA
     val utc = TimeScale(ts, UTC)
     val tai = TimeScale(ts, TAI)
     val conv = TimeConverter(tai, utc)
@@ -211,5 +210,18 @@ class TestTaiToUtcConverter {
     assertEquals(expected, t2, 0)
   }
 
-
+  @Test
+  def pre_utc_epoch = {
+    val ts = TimeScale("TAI seconds since 1958-01-01")
+    val t = Time(ts, 1798761635) //confirmed by other source
+    val ts2 = TimeScale("UTC milliseconds since 1970-01-01")
+    val t2 = t.convert(ts2) 
+    val s = t2.format("yyyy-MM-dd HH:mm:ss")
+    assertEquals("2015-01-01 00:00:00", s)
+    
+    System.setProperty("time.scale.type", "UTC")
+    val t3 = Time.fromIso("2015-01-01")
+    val t4 = t3.convert(ts)
+    assertEquals(1798761635, t4.getNumberData.longValue)
+  }
 }
