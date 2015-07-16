@@ -2,7 +2,7 @@
 
 <dataset>
   <adapter class="latis.reader.tsml.LogListAdapter"
-           pattern="latis.log-?(\d\d\d\d-\d\d-\d\d)?"
+           pattern="latis.txt-?(\d\d\d\d-\d\d-\d\d)?"
            location="src/test/resources/datasets/test/log"/>
          
   <time type="text">

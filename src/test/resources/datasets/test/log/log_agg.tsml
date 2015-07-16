@@ -2,7 +2,7 @@
 
 <dataset>
   <adapter class="latis.reader.tsml.FileAggAdapter"
-           pattern="latis.log-?(\d\d\d\d-\d\d-\d\d)?"
+           pattern="latis.txt-?(\d\d\d\d-\d\d-\d\d)?"
            template="log/log"
            fileList="log/log_list"
            location="src/test/resources/datasets/test/log"/>

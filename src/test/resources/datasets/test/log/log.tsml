@@ -3,7 +3,7 @@
 <dataset id="log">
   <adapter class="latis.reader.tsml.RegexAdapter"
            pattern="\[(\S+)\s+(\w+)\s+(\S+)\s+\((\S+)\)\] (.*)"
-           location="src/test/resources/datasets/test/log/latis.log" />
+           location="src/test/resources/datasets/test/log/latis.txt" />
            
   <time type="text" length="23">
     <metadata units="yyyy-MM-dd'T'HH:mm:ss.SSS"/>
