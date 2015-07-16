@@ -4,7 +4,7 @@
   <adapter class="latis.reader.tsml.AsciiAdapter"
    		   delimiter="\s+"
            location="datasets/test/vecmag.txt" />
-             
+
   <time id="t"/>
   
   <real id="a"/>
@@ -13,6 +13,6 @@
   <?derived X = SQRT(a*a+b*b+c*c)?>
   <?derived X2 = MAG(a,b,c)?>
   <?derived Y = X + a?>
-  <?derived Z = 123.4?> 
+  <?derived Z = 123.4?>
 
 </dataset>

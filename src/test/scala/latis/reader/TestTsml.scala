@@ -2,11 +2,13 @@ package latis.reader
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-
 import latis.metadata.Catalog
 import latis.reader.tsml.TsmlReader
 import latis.reader.tsml.ml.DatasetMl
 import latis.reader.tsml.ml.TsmlResolver
+import scala.xml.UnprefixedAttribute
+import scala.xml.Null
+import latis.reader.tsml.ml.Tsml
 
 class TestTsml  {
 
@@ -52,4 +54,12 @@ class TestTsml  {
     val tsml = TsmlResolver.fromName(name)
     assert(tsml.toString.contains("""id="properties""""))
   }
+  
+  @Test
+  def set_location {
+    val tsml = Tsml(<dataset><adapter location="foo"/></dataset>)
+    val t2 = tsml.setLocation("bar")
+    assert(t2.toString.contains("""location="bar""""))
+  }
+  
 }

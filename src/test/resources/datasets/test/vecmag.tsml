@@ -12,6 +12,5 @@
   <real id="b"/>
   <real id="c"/>
   <?derived X = SQRT(a*a+b*b+c*c)?>
-      
 
 </dataset>

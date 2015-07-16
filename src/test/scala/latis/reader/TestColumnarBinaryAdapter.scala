@@ -2,11 +2,15 @@ package latis.reader
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-
 import latis.util.iterator.LoopIterator
 import latis.util.iterator.RepeatIterator
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Sample
+import latis.dm.Integer
+import org.junit.Ignore
 
 class TestColumnarBinaryAdapter extends AdapterTests{
   
@@ -25,9 +29,19 @@ class TestColumnarBinaryAdapter extends AdapterTests{
     assertEquals(List((1,1),(2,2),(1,3),(2,4)), it1.zip(it2).toList)
   }
   
-//  @Test
-//  def test {
-//    val ds = TsmlReader("datasets/test/nested_binary_columns.tsml").getDataset
-//    AsciiWriter.write(ds)
-//  }  
+  @Test @Ignore //broke by adding scalar to range: a -> (myInt, b2 -> c)
+  def from_tsml {
+    val ds = TsmlReader("datasets/test/nested_binary_columns.tsml").getDataset
+    AsciiWriter.write(ds)
+    ds match {
+      case Dataset(Function(f1it)) => f1it.toList.last.range match {
+        case Function(f2it) => f2it.toList.last match {
+          case Sample(Integer(d), Integer(r)) => {
+            assertEquals(3, d)
+            assertEquals(18, r)
+          }
+        }
+      }
+    }
+  }  
 }

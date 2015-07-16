@@ -65,7 +65,11 @@ class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operatio
 }
 
 object UnitConversion extends OperationFactory {
-  
+  //Note, TimeScales constructed from formatted time units (e.g. yyyy-MM-dd)
+  //will use the time.scale.type property and default to NATIVE. For now. (LATIS-322)
+  //Numerical units (units since epoch) will use the NATIVE type unless prepended by "UTC " or "TAI ".
+  //Since unit conversion is a "behavior" of LaTiS, it makes sense to use time.scale.type here.
+ 
   /**
    * Constructor used by OperationFactory.
    */

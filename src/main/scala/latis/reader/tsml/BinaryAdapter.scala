@@ -1,10 +1,8 @@
 package latis.reader.tsml
 
 import java.nio.ByteBuffer
-
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
-
 import latis.data.Data
 import latis.dm.Integer
 import latis.dm.Real
@@ -12,6 +10,7 @@ import latis.dm.Scalar
 import latis.dm.Text
 import latis.reader.tsml.ml.Tsml
 import latis.util.StringUtils
+import java.nio.ByteOrder
 
 class BinaryAdapter(tsml: Tsml) extends IterativeAdapter[ByteBuffer](tsml) {
   
@@ -26,6 +25,11 @@ class BinaryAdapter(tsml: Tsml) extends IterativeAdapter[ByteBuffer](tsml) {
     if (source != null) source.close
   }
   
+  val order = getProperty("byteOrder", "big-endian") match {
+      case "big-endian" => ByteOrder.BIG_ENDIAN
+      case "little-endian" => ByteOrder.LITTLE_ENDIAN
+    }
+  
   lazy val blockSize = getOrigScalars.map(_.getSize).sum
   
   def getBuffer: ByteBuffer = {
@@ -35,7 +39,7 @@ class BinaryAdapter(tsml: Tsml) extends IterativeAdapter[ByteBuffer](tsml) {
     for(c <- a._1) {
       buffer.put(c.toByte)
     }
-    buffer.rewind.asInstanceOf[ByteBuffer]
+    buffer.rewind.asInstanceOf[ByteBuffer].order(order)
   }
   
   def getRecordIterator: Iterator[ByteBuffer] = {
@@ -47,7 +51,7 @@ class BinaryAdapter(tsml: Tsml) extends IterativeAdapter[ByteBuffer](tsml) {
     while(buffer.hasRemaining) {
       val arr = Array.ofDim[Byte](blockSize)
       buffer.get(arr)
-      seq += ByteBuffer.wrap(arr)
+      seq += ByteBuffer.wrap(arr).order(order)
     }
     seq.toSeq
   }
