@@ -17,7 +17,7 @@ class TestUtcToTaiConverter {
   
   @Test
   def test_construction {
-    val ts = TimeScale.DEFAULT
+    val ts = TimeScale.JAVA
     val utc = TimeScale(ts, UTC)
     val tai = TimeScale(ts, TAI)
     val conv = TimeConverter(utc, tai)

@@ -80,7 +80,7 @@ class TestTime {
     val t = Time("text", Metadata(Map("units" -> "yyyy-MM-dd")))
     assertTrue(t.isInstanceOf[Text])
     assertEquals("10", t.getMetadata("length").get)
-    assertEquals("milliseconds since 1970-01-01", t.getUnits.toString) //default numeric units
+    assertEquals("yyyy-MM-dd", t.getUnits.toString) //default numeric units
   }
   
   @Test def text_type_without_units = {
@@ -88,7 +88,7 @@ class TestTime {
     assertTrue(t.isInstanceOf[Text])
     assertEquals("23", t.getMetadata("length").get)
     assertEquals("yyyy-MM-dd'T'HH:mm:ss.SSS", t.getMetadata("units").get)
-    assertEquals("milliseconds since 1970-01-01", t.getUnits.toString) //default numeric units
+    assertEquals("yyyy-MM-dd'T'HH:mm:ss.SSS", t.getUnits.toString) //default numeric units
   }
 
   //@Test def text_type_with_units_and_length = ???
@@ -102,11 +102,6 @@ class TestTime {
     assertEquals("years since 2000-01-01", t.getUnits.toString)
   }
   
-  @Test def real_type_without_units = {
-    val t = Time("real", Metadata.empty)
-    assertTrue(t.isInstanceOf[Real])
-    assertEquals("milliseconds since 1970-01-01", t.getUnits.toString)
-  }
   //@Test def real_type_with_invalid_units = ???
   //@Test def int_type_with_units = ???
   //@Test def int_type_without_units = ???
@@ -154,6 +149,18 @@ class TestTime {
     //val time = Time(List(d,t), Metadata(Map("units" -> "seconds")))
     
     
+  }
+  
+  @Test
+  def second_sixty_as_leap_second_ignored = {
+    //Note, this is not ideal. The 60th second more appropriately belongs to the previous day.
+    //See http://www.ietf.org/timezones/data/leap-seconds.list
+    //Unix seems to do it this way.
+    val ms0 = Time.isoToJava("2015-06-30T23:59:59")
+    val ms1 = Time.isoToJava("2015-06-30T23:59:60")
+    val ms2 = Time.isoToJava("2015-07-01T00:00:00")
+    assertEquals(ms1, ms0+1000)
+    assertEquals(ms1, ms2)
   }
   
 }

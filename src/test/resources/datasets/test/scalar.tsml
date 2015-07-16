@@ -6,7 +6,7 @@
            delimiter="\s+"
            location="datasets/scalar.txt" />
            
-  <time id="foo" />
+  <time id="foo"/>
   
   <real id="ssn"/>
 
