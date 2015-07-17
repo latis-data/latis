@@ -19,7 +19,7 @@ class FileAggAdapter(tsml: Tsml) extends FileListAdapter(tsml) {
    */
   var fileOps = {
     //get the DomainBinner proccessing instruction if available
-    val domBin = tsml.getProcessingInstructions("dom_bin")
+    val domBin = tsml.getProcessingInstructions("domBin")
     ArrayBuffer[Operation](domBin.map(s => DomainBinner(s.split(","))):_*)
   }
   /**
@@ -38,7 +38,7 @@ class FileAggAdapter(tsml: Tsml) extends FileListAdapter(tsml) {
   
   /**
    * A name of a dataset that will give the wanted file list. If not specified, 
-   * the file list will be read from the tsml of this adapter.
+   * the file list will be read from the tsml of this adapter using FileListAdapter.
    */
   lazy val fileList = getProperty("fileList") match {
     case Some(name) => TsmlReader(TsmlResolver.fromName(name))
