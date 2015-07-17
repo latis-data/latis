@@ -79,11 +79,8 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
     val buffers = getBuffers
     val vars = getOrigScalars
     
-    //map each domain to how many times its values must be repeated 
-    //(the product of the length of its inner functions)
-    //this is how many rows one Sample of that Function would take in a table format
-    val reps = getReps(getOrigDataset.unwrap, 1)
-    
+    //How many times each value must be repeated in a table format
+    val reps = rowsPerSample(getOrigDataset.unwrap, 1)
     //inner Function domains must be looped because they are repeated for each outer domain Sample
     val loops = functions.map(_.getRange.findFunction).flatten.map(_.getDomain)
     
@@ -93,12 +90,17 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
     new ZipIterator(lrits)//ZipIterator changes Seq[Iterator[Array[Byte]]] => Iterator[Seq[Array[Byte]]]
   }
   
-  def getReps(v: Variable, i: Int): Map[String, Int] = v match {
+  /**
+   * The number of times that each value is repeated in a table format.
+   * Calculated as the product of lengths of Functions that are nested more deeply 
+   * than the given Variable.  
+   */
+  def rowsPerSample(v: Variable, i: Int): Map[String, Int] = v match {
     case s: Scalar => Map(s.getName -> i)
-    case t: Tuple => t.getVariables.map(getReps(_, i)).reduceLeft(_ ++ _)
+    case t: Tuple => t.getVariables.map(rowsPerSample(_, i)).reduceLeft(_ ++ _)
     case f: Function => {
       val rps = DataMapUtils.innerLength(f.getSample)
-      getReps(f.getSample, rps)
+      rowsPerSample(f.getSample, rps)
     }
   }  
   
