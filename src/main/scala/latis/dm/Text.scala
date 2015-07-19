@@ -30,6 +30,7 @@ object Text {
   
   val DEFAULT_LENGTH = 4
   
+  def apply(v: String): Text = new AbstractScalar(data = Data(v.toString)) with Text
   def apply(v: AnyVal): Text = new AbstractScalar(data = Data(v.toString)) with Text
 
   def apply(md: Metadata): Text = new AbstractScalar(md) with Text
