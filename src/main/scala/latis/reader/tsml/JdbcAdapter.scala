@@ -14,7 +14,7 @@ import scala.collection.Seq
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 import javax.naming.InitialContext
 import javax.naming.NameNotFoundException
@@ -52,7 +52,7 @@ import latis.util.StringUtils
 /**
  * Adapter for databases that support JDBC.
  */
-class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](tsml) with Logging {
+class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](tsml) with LazyLogging {
   //TODO: catch exceptions and close connections
 
   def getRecordIterator: Iterator[JdbcAdapter.JdbcRecord] = new JdbcAdapter.JdbcRecordIterator(resultSet)

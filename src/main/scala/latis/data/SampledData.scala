@@ -2,7 +2,7 @@ package latis.data
 
 import scala.collection.JavaConversions.mapAsScalaMap
 
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 import latis.data.seq.DataSeq
 import latis.data.set.DomainSet
@@ -13,7 +13,7 @@ import net.sf.ehcache.Cache
 import net.sf.ehcache.CacheManager
 import net.sf.ehcache.Element
 
-class SampledData extends IterableData with Logging {
+class SampledData extends IterableData with LazyLogging {
   
   //TODO: get length from domain set
   

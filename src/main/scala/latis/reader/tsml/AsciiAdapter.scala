@@ -8,10 +8,10 @@ import latis.dm.Variable
 import latis.reader.tsml.ml.Tsml
 import latis.util.StringUtils
 import scala.io.Source
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 
-class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Logging {
+class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with LazyLogging {
 
   //---- Manage data source ---------------------------------------------------
   

@@ -1,7 +1,7 @@
 package latis.ops
 
 import scala.Array.canBuildFrom
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 import latis.dm.Dataset
 import latis.dm.Function
@@ -23,7 +23,7 @@ import scala.collection.mutable.ArrayBuffer
  * Adds a new Variable to a Dataset according to the inputed math expression.
  * The str parameter must include the name of the new Variable followed by '=' and the expression.
  */
-class MathExpressionDerivation(private val str: String) extends Operation with Logging {
+class MathExpressionDerivation(private val str: String) extends Operation with LazyLogging {
   
   var ds: Dataset = Dataset()
   //TODO: consider defining value in an empty dataset

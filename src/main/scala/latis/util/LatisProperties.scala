@@ -4,7 +4,7 @@ import java.util.Properties
 import java.io.File
 import java.io.FileInputStream
 import java.net.URL
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 import scala.collection.JavaConversions
 import java.net.URLDecoder
 
@@ -14,7 +14,7 @@ import java.net.URLDecoder
  * 2) LaTiS properties file
  * 3) Environment variable
  */
-class LatisProperties extends Properties with Logging {
+class LatisProperties extends Properties with LazyLogging {
   
   /**
    * The name of the properties file.
