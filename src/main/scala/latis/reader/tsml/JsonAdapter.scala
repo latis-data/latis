@@ -97,7 +97,7 @@ class JsonAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
         case jre: JsResultException => try {
           Scalar(Metadata(name), s.as[JsBoolean].toString)
         } catch {
-          case jre: JsResultException => try {
+          case jre: JsResultException => {
             if(s.equals(JsNull)) Scalar(Metadata(name),"null")
             else ??? //what else could it be???
           }
