@@ -13,6 +13,8 @@ class FormattedAsciiAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
   override lazy val regex = formatToRegex(format)
   
   def formatToRegex(format: String) = {
+    //eg: 3I2 => (?:[ \d]{2}){3}
+    //matches "123456"
     val int = (s: String) => """(\d*)I(\d+),?""".r.
       replaceAllIn(s, (m: Match) => {
         val length = m.group(2)
@@ -22,19 +24,38 @@ class FormattedAsciiAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
         }
         s"(?:[ \\\\d]{$length}){$num}"
       })
+    //eg: 3F7.2 => (?:[ -\d]{4}\.[\d]{2}){3}
+    //matches "1234.56-123.45 -12.34"
     val float = (s: String) => """(\d*)F(\d+)\.(\d+),?""".r.
       replaceAllIn(s, (m: Match) => {
-        val length = m.group(2)
+        val length = m.group(2).toInt
+        val decimal = m.group(3).toInt
         val num = m.group(1) match {
           case "" => 1
           case s => s.toInt
         }
-        s"(?:[-. \\\\d]{$length}){$num}"
+        s"(?:[- \\\\d]{${length-decimal-1}}\\\\.[\\\\d]{$decimal}){$num}"
       })
+    //eg: 2A3 => (?:.{3}){2}
+    //matches "123ABC"
+    val string = (s: String) => """(\d*)A(\d*),?""".r.
+      replaceAllIn(s, (m: Match) => {
+        val length = m.group(2) match {
+          case "" => 1
+          case s => s.toInt
+        }
+        val num = m.group(1) match {
+          case "" => 1
+          case s => s.toInt
+        }
+        s"(?:.{$length}){$num}"
+      })
+    //new lines are replaced by delimiters for linesPerRecord > 1,
+    //so replace '/' in the format with a delimiter.
     val nl = (s: String) => """\/""".r. 
       replaceAllIn(s, getDelimiter)
       
-    int(float(nl(format))).r
+    int(float(string(nl(format)))).r
       
   }
   
