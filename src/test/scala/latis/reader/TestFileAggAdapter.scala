@@ -40,10 +40,10 @@ class TestFileAggAdapter {
   @Test
   def list {
     val ops = ArrayBuffer[Operation]()
-    ops += Selection("start_time>2015-07-10")
+    ops += Selection("time>2015-07-10")
     val ds = TsmlReader("log/log_list.tsml").getDataset(ops)
     val data = ds.toStringMap
-    assertEquals(1, data("file").length)
+    assertEquals(2, data("file").length)
   }
   
 }
