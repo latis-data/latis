@@ -15,7 +15,7 @@ class TestFileAggAdapter {
   @Test
   def first {
     val ops = List(FirstFilter())
-    val ds = TsmlReader("datasets/test/agg/file_agg.tsml").getDataset(ops)
+    val ds = TsmlReader("agg/file_agg.tsml").getDataset(ops)
     val data = ds.toDoubleMap
     assertEquals(0.0, data("T").head, 0.0)
   }
@@ -23,7 +23,7 @@ class TestFileAggAdapter {
   @Test
   def last {
     val ops = List(LastFilter())
-    val ds = TsmlReader("datasets/test/agg/file_agg.tsml").getDataset(ops)
+    val ds = TsmlReader("agg/file_agg.tsml").getDataset(ops)
     val data = ds.toDoubleMap
     assertEquals(19.0, data("T").head, 0.0)
   }
