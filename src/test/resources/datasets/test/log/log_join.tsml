@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset id="log_agg">
+  <adapter class="latis.reader.tsml.agg.FileJoinAdapter"/>
+
+  <dataset>
+    <adapter class="latis.reader.tsml.FileListAdapter"
+             pattern="latis.txt-(\d\d\d\d-\d\d-\d\d)"
+             location="src/test/resources/datasets/test/log"/>
+         
+    <time type="text">
+      <metadata units="yyyy-MM-dd"/>
+    </time>
+    
+    <text id="file" length="25"/>
+    <integer id="fileSize"/>
+  
+    <?domBin end,0000-00-00?>
+  
+  </dataset>
+    
+  <dataset id="log">
+    <adapter class="latis.reader.tsml.FileListAdapter"
+             pattern="latis.txt$"
+             location="src/test/resources/datasets/test/log" />
+    
+    <function>         
+      <text id="file" length="25"/>
+      <integer id="fileSize"/>
+    </function>
+    
+  </dataset>
+  
+  <dataset id="template">
+  
+    <adapter class="latis.reader.tsml.RegexAdapter"
+             pattern="\[(\S+)\s+(\w+)\s+(\S+)\s+\((\S+)\)\] (.*)"
+             location="" />
+           
+    <time type="text" length="23">
+      <metadata units="yyyy-MM-dd'T'HH:mm:ss.SSS"/>
+    </time>
+    <text id="level"   length="5" />
+    <text id="class"   length="32" />
+    <text id="thread"  length="32" />
+    <text id="message" length="256" />
+  
+  </dataset>
+
+  
+</dataset>

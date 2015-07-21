@@ -1,12 +1,9 @@
 package latis.reader.tsml.agg
 
 import latis.dm.Dataset
-import latis.dm.implicits._
+import latis.ops.Operation
 import latis.reader.tsml.TsmlAdapter
 import latis.reader.tsml.ml.Tsml
-import scala.collection.mutable.ArrayBuffer
-import latis.dm.Tuple
-import latis.ops.Operation
 
 /**
  * Base class for Adapters that aggregate (combine) Datasets.
