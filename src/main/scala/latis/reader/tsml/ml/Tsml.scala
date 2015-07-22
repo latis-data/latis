@@ -56,6 +56,14 @@ class Tsml(val xml: Elem) {
     val rt = new RuleTransformer(rr)
     Tsml(rt.transform(xml).head)
   }
+  
+  def getVariableAttribute(vname: String, attribute: String) = dataset.findVariableMl(vname) match {
+    case None => throw new Exception(s"Could not find VariableMl with name '$vname'")
+    case Some(ml) => {
+      val atts = ml.getAttributes ++ ml.getMetadataAttributes
+      atts(attribute)
+    }
+  }
 
   override def toString = xml.toString
 }

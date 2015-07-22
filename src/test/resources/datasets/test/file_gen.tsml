@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset id="file_gen">
+  
+  <adapter class="latis.reader.tsml.FileListGenerator"
+           range="1907;1924"
+           location="/tmp/latis_file_test"/>
+           
+  <time type="text" pattern="%2$tY">
+    <metadata units="yyyy"/>
+  </time>
+ 
+  <text id="file" pattern="%2$tY/%2$ty.dat" length="11"/>
+  
+</dataset>
