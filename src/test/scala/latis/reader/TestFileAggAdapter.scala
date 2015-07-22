@@ -37,13 +37,4 @@ class TestFileAggAdapter {
     assertEquals(3, data("message").length)
     }
   
-  @Test
-  def list {
-    val ops = ArrayBuffer[Operation]()
-    ops += Selection("time>2015-07-10")
-    val ds = TsmlReader("log/log_list.tsml").getDataset(ops)
-    val data = ds.toStringMap
-    assertEquals(2, data("file").length)
-  }
-  
 }
