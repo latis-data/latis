@@ -8,7 +8,7 @@ import latis.reader.tsml.TsmlReader
 class TestFileListGenerator {
   
   @Test
-  def format {
+  def test {
     val ds = TsmlReader("file_gen.tsml").getDataset
     val data = ds.toStringMap
     assertEquals("1907", data("time").head)
