@@ -71,6 +71,18 @@ object StringUtils {
   }
   
   /**
+   * Convert the given String to a Double.
+   * If not convertible, return NaN.
+   */
+  def toDouble(s: String): Double = {
+    try {
+      s.toDouble
+    } catch {
+      case e: Exception => Double.NaN
+    }
+  }
+  
+  /**
    * construct Data from a String by matching a Variable template
    */
   //TODO: support regex property for each variable
