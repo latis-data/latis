@@ -20,10 +20,7 @@ trait Text extends Scalar {
       case None => Text.DEFAULT_LENGTH
     }
   }
-  
-  def stringValue = getValue.asInstanceOf[String]
-  
-  //TODO: getStringValue? akin to Number.doubleValue, stringValue for all Vars?
+
 }
 
 object Text {
