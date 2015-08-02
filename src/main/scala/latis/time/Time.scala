@@ -184,7 +184,7 @@ object Time {
       case _: Double => new Time(scale, metadata, Data(value)) with Real
       case _: Int => new Time(scale, metadata, Data(value)) with Integer
       case _: Long => new Time(scale, metadata, Data(value)) with Integer
-      case _: StringOps => new Time(scale, metadata, Data(value.toString)) with Text
+      case _: String => new Time(scale, metadata, Data(value)) with Text
     }
   }
   
