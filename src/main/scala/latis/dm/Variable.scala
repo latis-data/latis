@@ -48,6 +48,7 @@ trait Variable {
   }
   
   //experimental: build from template with data
+  //TODO: consider updatedData akin to updatedMetadata (and scala Map.updated)
   //TODO: consider scala's CanBuildFrom...
   //TODO: pattern match here or do in subclasses?
   //TODO: don't confuse with function evaluation, call this "copy"...?
@@ -76,11 +77,11 @@ trait Variable {
       case _ => throw new UnsupportedOperationException("Real must be constructed with a DoubleValue.")
     }
     case _: Integer => data match {
-      case lv: LongValue => Integer(this.getMetadata, data)
+      case lv: LongValue => Integer(this.getMetadata, lv)
       case _ => throw new UnsupportedOperationException("Integer must be constructed with a LongValue.")
     }
     case _: Text    => data match {
-      case sv: StringValue => Text(this.getMetadata, data)
+      case sv: StringValue => Text(this.getMetadata, sv)
       case _ => throw new UnsupportedOperationException("Text must be constructed with a StringValue.")
     }
   }
