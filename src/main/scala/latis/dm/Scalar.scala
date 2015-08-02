@@ -89,19 +89,15 @@ object Scalar {
   /**
    * Construct a Scalar of the appropriate type based on the type of the data value.
    */
-  def apply(value: AnyVal): Scalar = value match {
+  def apply(value: Any): Scalar = value match {
+    case s: String => Text(s) //TODO: try to convert to numeric type?
     case d: Double => Real(d)
     case f: Float  => Real(f)
     case l: Long   => Integer(l)
     case i: Int    => Integer(i)
-    case _ => throw new Error("Unable to make Scalar from value: " + value)
+    case _ => throw new Error("Unable to make Scalar from value: " + value) //TODO: of type...
+    //TODO: if serializable, make Binary?
   }
-  
-  /**
-   * Construct a Text Variable with the given string value.
-   */
-  def apply(value: String) = Text(value)
-  //TODO: try to convert to int, double and make Integer, Real?
   
   /**
    * Construct a Scalar of the appropriate type based on the type of the data value, with metadata.
