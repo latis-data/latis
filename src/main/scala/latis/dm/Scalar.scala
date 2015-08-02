@@ -20,6 +20,12 @@ trait Scalar extends Variable {
   //note, we tried overriding this in subclasses but ran into inheritance trouble with "new Time with Real"
   def compare(that: String): Int
     
+  /**
+   * Compare the given Scalar to this.
+   * If this is a Number, the values will be compared as Doubles.
+   * If this is a Text, the other value will be converted to a String.
+   */
+  //TODO: extend Ordered?
   //TODO: unit conversions...
   def compare(that: Scalar): Int = (this,that) match {
     case (Number(d1), Number(d2)) => d1 compare d2
@@ -27,8 +33,10 @@ trait Scalar extends Variable {
     case (Number(d1), Text(s2)) => d1 compare StringUtils.toDouble(s2) //string may become NaN
     case (Text(s1), Number(d2)) => s1 compare d2.toString
   }
-
+//TODO: test trim, nan
   def getValue: Any
+  def stringValue = getValue.toString
+  
   def getFillValue: Any
   def getMissingValue: Any
   
@@ -50,6 +58,15 @@ trait Scalar extends Variable {
     }
   }
   //TODO: updatedMetadata(md: Metadata)
+  
+  //TODO: updatedValue instead of Variable.apply
+  def updatedValue(s: String): Scalar = this match {
+    //TODO: manage exception? StringUtil?
+    //TODO: Time, override?
+    case _: Integer => Integer(getMetadata, s)
+    case _: Real    => Real(getMetadata, s)
+    case _: Text    => Text(getMetadata, s)
+  }
   
 }
 
