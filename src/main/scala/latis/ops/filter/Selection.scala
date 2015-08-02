@@ -18,7 +18,7 @@ import latis.ops.resample.NearestNeighbor
  * Filter based on a basic boolean expression.
  * e.g. "foo >= 2"
  */
-protected class Selection(val vname: String, val operation: String, val value: String) extends Filter with LazyLogging {
+class Selection(val vname: String, val operation: String, val value: String) extends Filter with LazyLogging {
   //TODO: if domain, delegate to DomainSet
   //TODO: change operation to operator?
   
