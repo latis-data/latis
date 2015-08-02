@@ -9,6 +9,7 @@ import latis.data.value.StringValue
 import latis.metadata.EmptyMetadata
 import latis.metadata.Metadata
 import latis.time.Time
+import latis.util.StringUtils
 
 /**
  * Base type for all Scalar Variables.
@@ -22,11 +23,9 @@ trait Scalar extends Variable {
   //TODO: unit conversions...
   def compare(that: Scalar): Int = (this,that) match {
     case (Number(d1), Number(d2)) => d1 compare d2
-    case (Text(s1), Text(s2)) => {
-      //TODO: is it same to trim each string when comparing or should it happen upstream?
-      s1.trim compare s2.trim 
-    }
-    case _ => throw new Error("Can't compare " + this + " with " + that)
+    case (Text(s1), Text(s2)) => s1 compare s2
+    case (Number(d1), Text(s2)) => d1 compare StringUtils.toDouble(s2) //string may become NaN
+    case (Text(s1), Number(d2)) => s1 compare d2.toString
   }
 
   def getValue: Any
@@ -85,6 +84,7 @@ object Scalar {
    * Construct a Text Variable with the given string value.
    */
   def apply(value: String) = Text(value)
+  //TODO: try to convert to int, double and make Integer, Real?
   
   /**
    * Construct a Scalar of the appropriate type based on the type of the data value, with metadata.
