@@ -1,5 +1,7 @@
 package latis.ops
 
+import scala.language.implicitConversions
+
 import scala.Array.canBuildFrom
 import com.typesafe.scalalogging.LazyLogging
 
