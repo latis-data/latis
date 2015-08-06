@@ -170,7 +170,9 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Logg
   /**
    * Extract the Variable values from the given record.
    */
-  def extractValues(record: String): Seq[String] = record.trim.split(getDelimiter)
+  def extractValues(record: String): Seq[String] = splitAtDelim(record)
+  
+  def splitAtDelim(str: String) = str.trim.split(getDelimiter)
 
 }
 
