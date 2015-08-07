@@ -21,7 +21,7 @@ object StringContains extends OperationFactory {
   
   def apply(name: String, value: String) = new StringContains(name, value)
   
-  override def apply(args: Seq[String]) = StringContains(args(0), args(1))
+  override def apply(args: Seq[String]) = StringContains(args(0), args.tail.mkString(","))
   
   def unapply(sc: StringContains): Option[(String, String)] = Some((sc.vname, sc.value))
   
