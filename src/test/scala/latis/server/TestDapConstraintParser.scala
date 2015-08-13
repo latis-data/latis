@@ -85,14 +85,6 @@ class TestDapConstraintParser {
   }
   
   @Test
-  def single_quote_encoding_with_default_encoding = {
-    val s = "yyyy-MM-dd'T'HH:mm"
-    val encoded = URLEncoder.encode(s,"UTF-8") //yyyy-MM-dd%27T%27HH%3Amm
-    val decoded = URLDecoder.decode(encoded,"UTF-8")
-    assertEquals(s, decoded)
-  }
-  
-  @Test
   def single_quote_encoding_with_utf8 = { 
     val s = "yyyy-MM-dd'T'HH:mm"
     val encoded = URLEncoder.encode(s, "UTF-8")
