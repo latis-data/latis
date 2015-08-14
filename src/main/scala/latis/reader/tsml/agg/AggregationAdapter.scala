@@ -6,6 +6,7 @@ import latis.reader.tsml.TsmlAdapter
 import latis.reader.tsml.ml.Tsml
 import scala.collection.mutable.ArrayBuffer
 import latis.dm.Tuple
+import latis.ops.Operation
 
 /**
  * Base class for Adapters that aggregate (combine) Datasets.
@@ -25,10 +26,8 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   
   /**
    * Combine each aggregate Dataset into a single Dataset.
-   * These are simply grouped together, no merging logic applied.
    */
   override protected def makeOrigDataset: Dataset = {
-    //TODO: consider deeper nesting of dataset nodes
     //Get child dataset nodes
     val dsnodes = (tsml.xml \ "dataset")
     //Make a dataset for each
@@ -36,14 +35,23 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
       val tsml = Tsml(node)
       val adapter = TsmlAdapter(tsml)
       adapters += adapter
-      adapter.getDataset
+      adapter.getOrigDataset
     }
     
-    collect(dss)
+    collect(dss) 
   }  
   
-  override protected def makeDataset(ds: Dataset): Dataset = ds match {
-    case Dataset(Tuple(vars)) => Dataset(vars.reduceLeft(aggregate(_,_).unwrap), ds.getMetadata)
+  override def getDataset(ops: Seq[Operation]) = {
+    makeOrigDataset
+    val dss = adapters.map(_.getDataset(ops))
+    
+    val ds = collect(dss)
+    
+    ops.foldLeft(ds)((dataset, op) => op(dataset)) //doesn't handle any Operations
+  }
+  
+  override protected def makeDataset(ds: Dataset): Dataset = {
+    getDataset(List())
   }
     
     
@@ -51,19 +59,14 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    * Make a single Dataset that contains the Datasets to be aggregated.
    */
   def collect(datasets: Seq[Dataset]): Dataset = {
-    //Get all the top level variables from all of the datasets
-    //val vars = datasets.foldLeft(ArrayBuffer[Variable]())(_ ++ _.variables)
       
     //Make metadata
     val md = makeMetadata(tsml.dataset) //TODO: provo
     
-    //Make aggregated dataset
     //TODO: do we need a Collection type?
     //TODO: use a fold with a binary agg op?
     //for now, replace datasets with a tuple
-    val vars = datasets.map(_.unwrap)
-    val tup = Tuple(vars)
-    Dataset(tup, md) 
+    Dataset(datasets.reduceLeft(aggregate(_,_)).unwrap, md) 
   }
 
   /**
