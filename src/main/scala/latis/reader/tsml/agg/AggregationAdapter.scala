@@ -1,12 +1,9 @@
 package latis.reader.tsml.agg
 
 import latis.dm.Dataset
-import latis.dm.implicits._
+import latis.ops.Operation
 import latis.reader.tsml.TsmlAdapter
 import latis.reader.tsml.ml.Tsml
-import scala.collection.mutable.ArrayBuffer
-import latis.dm.Tuple
-import latis.ops.Operation
 
 /**
  * Base class for Adapters that aggregate (combine) Datasets.
@@ -16,7 +13,7 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   /**
    * Keep a list of adapters so we can close them.
    */
-  private val adapters = ArrayBuffer[TsmlAdapter]()
+  protected val adapters = (tsml.xml \ "dataset").map(n => TsmlAdapter(Tsml(n)))
   
   /**
    * Given a Dataset that contains other Datasets (now as a tuple)
@@ -28,21 +25,13 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    * Combine each aggregate Dataset into a single Dataset.
    */
   override protected def makeOrigDataset: Dataset = {
-    //Get child dataset nodes
-    val dsnodes = (tsml.xml \ "dataset")
-    //Make a dataset for each
-    val dss = for (node <- dsnodes) yield {
-      val tsml = Tsml(node)
-      val adapter = TsmlAdapter(tsml)
-      adapters += adapter
-      adapter.getOrigDataset
-    }
+    //Make a dataset for each adapter
+    val dss = adapters.map(_.getOrigDataset)
     
     collect(dss) 
   }  
   
   override def getDataset(ops: Seq[Operation]) = {
-    makeOrigDataset
     val dss = adapters.map(_.getDataset(ops))
     
     val ds = collect(dss)
