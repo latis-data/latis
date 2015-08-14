@@ -32,9 +32,6 @@ repositories {
 dependencies {
 	compile "javax.servlet:servlet-api:2.5"
 	
-	//JavaMail
-	compile 'javax.mail:mail:1.4.7'
-	
 	compile 'org.scala-lang:scala-library:2.10.4'
 	
 	//Support for logging
@@ -46,12 +43,6 @@ dependencies {
 	
 	testCompile 'junit:junit:4.+'
 	testCompile 'org.apache.derby:derby:10.10.1.1'
-	
-	//Support for writing png images
-	compile 'jfree:jfreechart:1.0.12'
-	
-	//iCalendar support
-	compile 'net.sf.biweekly:biweekly:0.3.2'
 	
 	//apache math commons
 	compile 'org.apache.commons:commons-math:2.2'

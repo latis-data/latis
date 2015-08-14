@@ -92,7 +92,7 @@ class FileAggAdapter(tsml: Tsml) extends FileListAdapter(tsml) {
   }    
   
   override def getDataset = {
-    val dir = getUrl.toString
+    val dir = getUrl.toString.replaceAll(" ", "%20")
     val files = getFileList.map(dir + "/" + _)
     val it = filesToSamplesIterator(files)
     val stemp = it.peek

@@ -15,7 +15,7 @@ class TestDomainBinner {
     ops += DomainBinner("start", "10")
     val ds = TsmlReader("scalar.tsml").getDataset(ops)
     val data = ds.toDoubleMap
-    assertEquals(10, data("end_foo").last, 0.0)
+    assertEquals(10, data("stop_foo").last, 0.0)
     assertEquals(0.0, data("start_foo").head, 0.0)
   }
   
@@ -25,7 +25,7 @@ class TestDomainBinner {
     ops += DomainBinner("end", "-1")
     val ds = TsmlReader("scalar.tsml").getDataset(ops)
     val data = ds.toDoubleMap
-    assertEquals(9, data("end_foo").last, 0.0)
+    assertEquals(9, data("stop_foo").last, 0.0)
     assertEquals(-1, data("start_foo").head, 0.0)
   }
 
