@@ -4,7 +4,7 @@
   <adapter class="latis.reader.tsml.FileAggAdapter"
            template="agg/scalar_ts_2col_0to9"
            pattern="scalar_ts_2col_1?0-1?9.txt"
-           location="datasets/test/agg" />
+           location="src/test/resources/datasets/test/agg" />
            
   <function>
     <text id="file" length="25"/>

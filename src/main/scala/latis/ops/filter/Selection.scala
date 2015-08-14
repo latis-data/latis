@@ -74,6 +74,16 @@ protected class Selection(val vname: String, val operation: String, val value: S
     }
   }
   
+  override def applyToFunction(f: Function): Option[Function] = {
+   (f.getDomain.hasName(vname), f.getRange.findVariableByName("bounds")) match {
+      case (true, Some(Tuple(vars))) => operation match {
+        case op if(op.contains("<")) => Selection(vars(0).getName, operation, value).applyToFunction(f).asInstanceOf[Option[Function]]
+        case op if(op.contains(">")) => Selection(vars(1).getName, operation, value).applyToFunction(f).asInstanceOf[Option[Function]]
+      }
+      case _ => super.applyToFunction(f)
+    }
+  }
+  
   private def isValid(comparison: Int): Boolean = {
     if (operation == "!=") {
       comparison != 0
