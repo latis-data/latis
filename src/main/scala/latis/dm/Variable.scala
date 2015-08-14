@@ -77,6 +77,7 @@ trait Variable {
     }
     case _: Integer => data match {
       case lv: LongValue => Integer(this.getMetadata, data)
+      case dv: DoubleValue => Integer(this.getMetadata, LongValue(dv.longValue))
       case _ => throw new UnsupportedOperationException("Integer must be constructed with a LongValue.")
     }
     case _: Text    => data match {

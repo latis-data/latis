@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset>
+  <metadata name="mock"/>
+  <adapter class="latis.reader.tsml.MockAdapter"/>
+   
+  <function length="10">     
+    <integer id="foo"/>
+    <real id="x"/>
+  </function>
+  
+  <?derived x=SIN(x)/(x-5.1)?>
+
+</dataset>
