@@ -79,6 +79,13 @@ class CatalogOverviewWriter extends Writer {
           "accessUrl" -> accessUrl.stringValue
       ))
     }
+    case TupleMatch(name: Text, TupleMatch(description: Text, TupleMatch(accessUrl: Text))) => {
+      companion.leafTmpl.applyValues(Map(
+          "name" -> name.stringValue,
+          "description" -> description.stringValue,
+          "accessUrl" -> accessUrl.stringValue
+      ))
+    }
     case Tuple(vars) => vars.map(varToString(_)).mkString
   }
   

@@ -68,7 +68,8 @@ class HtmlTemplateWriter extends TextWriter {
         "das" -> makeDas(dataset),
         "form-items" -> makeFormItems(dataset),
         "output-select-option-elements" -> selectOptions,
-        "range-select-option-elements" -> rangeVars.map(name => s"""<option value="$name">$name</option>""").mkString
+        "range-select-option-elements" -> rangeVars.map(name => s"""<option value="$name">$name</option>""").mkString,
+        "graph-enabled" -> graphEnabled.toString
     )
     
     printWriter.print(mainTmpl.applyValues(values))
