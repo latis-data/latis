@@ -92,15 +92,6 @@ class TestDapConstraintParser {
     assertEquals(s, decoded)
   }
   
-  @Test // decode(s)/encode(s) is being deprecated so we have to specify the decode/encode scheme
-        // which makes me wonder if this test still relevant
-  def single_quote_decode_default_with_utf8 = {
-    val s = "yyyy-MM-dd'T'HH:mm"
-    val encoded = URLEncoder.encode(s,"UTF-8")
-    val decoded = URLDecoder.decode(encoded, "UTF-8")
-    assertEquals(s, decoded)
-  }
-  
   @Test
   def single_quote_encode_with_iso_decode_with_utf8 = {
     val s = "yyyy-MM-dd'T'HH:mm"
