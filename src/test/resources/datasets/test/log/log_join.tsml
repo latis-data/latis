@@ -13,7 +13,6 @@
     </time>
     
     <text id="file" length="25"/>
-    <integer id="fileSize"/>
   
     <?domBin end,0000-00-00?>
   
