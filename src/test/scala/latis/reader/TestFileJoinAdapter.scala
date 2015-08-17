@@ -34,10 +34,26 @@ class TestFileJoinAdapter {
   @Test
   def logs {
     val ops = ArrayBuffer[Operation]()
+    val ds = TsmlReader("log/log_join.tsml").getDataset(ops)
+    assertEquals(6, ds.getLength)
+  }
+  
+  @Test
+  def first_two_log_files {
+    val ops = ArrayBuffer[Operation]()
     ops += Selection("time<2015-07-10")
     val ds = TsmlReader("log/log_join.tsml").getDataset(ops)
     val data = ds.toStringMap
     assertEquals("2015-07-01T10:11:12.136", data("time").last)
+  }
+  
+  @Test
+  def last_two_log_files {
+    val ops = ArrayBuffer[Operation]()
+    ops += Selection("time>2015-07-10")
+    val ds = TsmlReader("log/log_join.tsml").getDataset(ops)
+    val data = ds.toStringMap
+    assertEquals("2015-07-12T10:11:12.136", data("time").head)
   }
   
 }
