@@ -24,10 +24,8 @@
              pattern="latis.txt$"
              location="src/test/resources/datasets/test/log" />
     
-    <function>         
-      <text id="file" length="25"/>
-      <integer id="fileSize"/>
-    </function>
+    <index/>
+    <text id="file" length="25"/>
     
   </dataset>
   
