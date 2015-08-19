@@ -8,6 +8,7 @@ import latis.dm.Variable
 import latis.util.StringUtils
 import latis.util.iterator.MappingIterator
 import latis.util.iterator.PeekIterator
+import latis.metadata.Metadata
 
 /**
  * Used for domains that represent a range of values but have only one explicit value.
@@ -18,32 +19,38 @@ import latis.util.iterator.PeekIterator
  */
 class DomainBinner(knownValues: String, fillVal: String) extends Operation {
   
-  var (binStart, binEnd): (Variable, Variable) = (null, null)
+  var (binStart, binStop): (Variable, Variable) = (null, null)
   var pit: PeekIterator[Sample] = null
   
+  /**
+   * Returns a Tuple containing the bounds of this Variable
+   */
   override def applyToScalar(scalar: Scalar) = {
     val name = scalar.getName
     knownValues match {
       case "start" => {
         binStart = scalar.updatedMetadata("name" -> s"start_$name")
-        binEnd = pit.peek match {
+        binStop = pit.peek match {
           case null => scalar(StringUtils.parseStringValue(fillVal, scalar)).
-            asInstanceOf[Scalar].updatedMetadata("name" -> s"end_$name")
-          case Sample(d: Scalar, r) => d.updatedMetadata("name" -> s"end_$name")
+            asInstanceOf[Scalar].updatedMetadata("name" -> s"stop_$name")
+          case Sample(d: Scalar, r) => d.updatedMetadata("name" -> s"stop_$name")
         }
       }
       case "end" => {
-        binStart = binEnd.asInstanceOf[Scalar].updatedMetadata("name" -> s"start_$name")
-        binEnd = scalar.updatedMetadata("name" -> s"end_$name")
+        binStart = binStop.asInstanceOf[Scalar].updatedMetadata("name" -> s"start_$name")
+        binStop = scalar.updatedMetadata("name" -> s"stop_$name")
       }
     }
-    Some(Tuple(binStart, binEnd))
+    Some(Tuple(List(binStart, binStop), Metadata("bounds")))
   }
   
   override def applyToSample(sample: Sample) = {
     applyToVariable(sample.domain) match {
-      case Some(d) => Some(Sample(d, sample.range))
-      case None => None
+      case Some(t:Tuple) => sample.range match{
+        case Tuple(vars) => Some(Sample(sample.domain, Tuple(vars :+ t)))
+        case other => Some(Sample(sample.domain, Tuple(other, t)))
+      }
+      case _ => None
     }
   }
   
@@ -51,8 +58,8 @@ class DomainBinner(knownValues: String, fillVal: String) extends Operation {
     val temp = function.getDomain
     val name = temp.getName
     pit = PeekIterator(function.iterator)
-    binEnd = temp(StringUtils.parseStringValue(fillVal, temp)).
-      asInstanceOf[Scalar].updatedMetadata("name" -> s"end_$name")
+    binStop = temp(StringUtils.parseStringValue(fillVal, temp)).
+      asInstanceOf[Scalar].updatedMetadata("name" -> s"stop_$name")
     
     super.applyToFunction(Function(function, pit))
   }

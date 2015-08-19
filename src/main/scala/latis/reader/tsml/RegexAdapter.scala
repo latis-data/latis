@@ -11,7 +11,7 @@ class RegexAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
   /**
    * Get the required regular expression pattern from the adapter definition.
    */
-  val regex = getProperty("pattern") match {
+  lazy val regex = getProperty("pattern") match {
     case Some(s: String) => s.r
     case None => throw new RuntimeException("RegexAdapter requires a regular expression definition 'pattern'.")
   }

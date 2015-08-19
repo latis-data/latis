@@ -43,9 +43,9 @@ class StreamingFileListAdapter(tsml: Tsml) extends RegexAdapter(tsml){
    */
   override def extractValues(record: String) = {
     val chunks = record.split(',')
-    if (chunks.length != 2) throw new Exception("\"" + record + "\" does not fit expected record pattern \"file name, file size\"")
     val fileName = chunks(0)
-    val size = chunks(1)
+    val size = if (getOrigScalarNames.contains("fileSize")) chunks(1)
+      else ""
     regex.findFirstMatchIn(fileName) match {
       case Some(m) => (m.subgroups :+ fileName) :+ size //add the file name and size
       case None => List[String]()

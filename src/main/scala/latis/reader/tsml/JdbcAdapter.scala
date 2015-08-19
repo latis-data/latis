@@ -216,10 +216,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
         }
       }
       case _ => {
-        //Let LaTiS operations deal with constraints on index
-        if (name == "index") false
-        //This is not one of our variables. Err on the side of assuming this is a user mistake.
-        else throw new Error("JdbcAdapter can't process selection for unknown parameter: " + name)
+        //This is not one of our variables, let latis handle it.
+        logger.warn("JdbcAdapter can't process selection for unknown parameter: " + name)
+        false
       }
     }
 

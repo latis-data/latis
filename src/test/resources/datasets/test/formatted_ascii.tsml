@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset id="formatted_ascii">
+  <adapter class="latis.reader.tsml.FormattedAsciiAdapter"
+           delimiter=" "
+           format="(I4,2I2)/(I1)(F3.1)(A)"
+           linesPerRecord="2"
+           location="datasets/test/formatted.txt" />
+  
+  <time type="text">
+    <metadata name="myTime" units="yyyyMMdd"/>
+  </time>
+ 
+  <integer id="myInt"/>
+  <real    id="myReal"/>
+  <text    id="myText"/>
+  
+</dataset>

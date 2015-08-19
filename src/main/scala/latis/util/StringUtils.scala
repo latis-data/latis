@@ -39,6 +39,11 @@ object StringUtils {
   }
   
   /**
+   * Replaces any non-word characters (not a letter or number) with that character escaped.
+   */
+  def escapeNonWords(str: String) = """\W""".r.replaceAllIn(str, "\\\\" + _)
+  
+  /**
    * Return the given string padded or truncated to the given length (number of characters).
    * If the String is shorter than the desired length, it will be padded with spaces on the right.
    * If the String is longer than the desired length, it will be truncated on the right.

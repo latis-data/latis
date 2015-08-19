@@ -1,0 +1,25 @@
+<dataset id="log_agg">
+  <adapter class="latis.reader.tsml.agg.FileJoinAdapter"/>
+
+  <dataset>
+    <adapter class="latis.reader.tsml.FileListAdapter"
+             pattern="scalar_ts_2col_1?0-1?9.txt"
+             location="src/test/resources/datasets/test/agg"/>
+         
+    <index/>
+    <text id="file" length="25"/>
+    
+  </dataset>
+      
+  <dataset id="template">
+    <adapter class="latis.reader.tsml.AsciiAdapter"
+             delimiter="\s+"
+             location="" />
+           
+    <time id="T"/>
+    <integer id="A"/>
+
+  </dataset>
+
+  
+</dataset>

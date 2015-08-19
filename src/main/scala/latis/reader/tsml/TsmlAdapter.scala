@@ -3,14 +3,12 @@ package latis.reader.tsml
 import java.io.File
 import java.net.URI
 import java.net.URL
-
 import scala.Option.option2Iterable
 import scala.annotation.migration
 import scala.collection.Map
 import scala.collection.Seq
 import scala.collection.immutable
 import scala.collection.mutable
-
 import latis.data.Data
 import latis.data.seq.DataSeq
 import latis.dm.Dataset
@@ -35,6 +33,7 @@ import latis.reader.tsml.ml.TupleMl
 import latis.reader.tsml.ml.VariableMl
 import latis.time.Time
 import latis.util.DataUtils
+import latis.ops.DomainBinner
 
 
 /**
@@ -423,7 +422,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
         })
         filteredDerivedFields.map(MathExpressionDerivation(_))
       }
-    projections ++ selections ++ conversions ++ renames ++ derivations
+    val domBin = tsml.getProcessingInstructions("domBin").map(s => DomainBinner(s.split(',')))
+    projections ++ selections ++ conversions ++ renames ++ derivations ++ domBin
   }
   
   /**

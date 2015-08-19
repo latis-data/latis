@@ -17,18 +17,18 @@ class BinaryAdapter(tsml: Tsml) extends IterativeAdapter[ByteBuffer](tsml) {
   private var source: Source = null 
 
   def getDataSource: Source = {
-    if (source == null) source = Source.fromURL(getUrl, "ISO-8859-1")
+    if (source == null) source = Source.fromURL(getUrl, "ISO-8859-1") //TODO: is this safe? what about UTF-8?
     source
   }
   
   override def close {
     if (source != null) source.close
   }
-  
+
   val order = getProperty("byteOrder", "big-endian") match {
-      case "big-endian" => ByteOrder.BIG_ENDIAN
-      case "little-endian" => ByteOrder.LITTLE_ENDIAN
-    }
+    case "big-endian" => ByteOrder.BIG_ENDIAN
+    case "little-endian" => ByteOrder.LITTLE_ENDIAN
+  }
   
   lazy val blockSize = getOrigScalars.map(_.getSize).sum
   
