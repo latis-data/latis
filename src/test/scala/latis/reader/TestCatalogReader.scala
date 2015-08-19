@@ -10,16 +10,16 @@ class TestCatalogReader {
   def flat {
     val ds = FlatCatalogReader().getDataset
     val data = ds.toStringMap
-    assertEquals(data("name")(0), "agg/agg")
-    assertEquals(data("accessURL")(0), "agg/agg")
+    assertEquals("agg/agg_append", data("name")(0))
+    assertEquals("agg/agg_append", data("accessURL")(0))
   }
   
   @Test
   def nested {
     val ds = CatalogReader().getDataset
     val data = ds.toStringMap
-    assertEquals(data("name")(0), "agg")
-    assertEquals(data("accessURL")(0), "agg")   
+    assertEquals("agg", data("name")(0))
+    assertEquals("agg_append", data("accessURL")(0))   
     assert(!data("name").contains("ssi"))
   }
   

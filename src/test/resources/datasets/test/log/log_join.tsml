@@ -14,20 +14,10 @@
     
     <text id="file" length="25"/>
   
-    <?domBin end,0000-00-00?>
+    <?domBin start,3000-01-01?>
   
   </dataset>
     
-  <dataset id="log">
-    <adapter class="latis.reader.tsml.FileListAdapter"
-             pattern="latis.txt$"
-             location="src/test/resources/datasets/test/log" />
-    
-    <index/>
-    <text id="file" length="25"/>
-    
-  </dataset>
-  
   <dataset id="template">
   
     <adapter class="latis.reader.tsml.RegexAdapter"
