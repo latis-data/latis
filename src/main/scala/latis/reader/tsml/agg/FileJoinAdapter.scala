@@ -1,12 +1,13 @@
 package latis.reader.tsml.agg
 
 import scala.Option.option2Iterable
-
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.reader.tsml.TsmlAdapter
 import latis.reader.tsml.TsmlReader
 import latis.reader.tsml.ml.Tsml
+import latis.util.iterator.PeekIterator
+import latis.dm.Sample
 
 /**
  * An AggregationAdapter that reads data from each file in a file list 
@@ -52,8 +53,21 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
     val z = datasets.zip(adapters.map(_.getUrl.toString.replaceAll(" ", "%20")))
     val files = z.flatMap(p => getFileName(p._1, p._2))
     
-    val dss = files.map(file => TsmlReader(template.setLocation(file)).getDataset)
-    super.collect(dss.toSeq)
+    val readers = files.map(file => TsmlReader(template.setLocation(file))).iterator
+    
+    val md = makeMetadata(tsml.dataset)
+    val sit = readers.flatMap(r => r.getDataset match {
+      case Dataset(Function(it)) => new PeekIterator[Sample] {
+        def getNext = it.next match {
+          case null => r.close; null;
+          case e => e
+        }
+      }
+    })
+    val f = TsmlAdapter(template).getOrigDataset match {
+      case Dataset(f: Function) => f //get the function template
+    }
+    Dataset(Function(f, sit), md)
   }
   
   /**
