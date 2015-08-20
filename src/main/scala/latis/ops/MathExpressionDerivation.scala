@@ -124,9 +124,8 @@ class MathExpressionDerivation(private val str: String) extends Operation {
     "^"     -> POWER,
     "<"     -> LT,
     "&"     -> AND,
-    "MAG"   -> (foldOps("MAG")(_,_)),
     "ATAN2" -> (Math.atan2(_,_))
-  )
+  ).withDefault(x => foldOps(x)(_,_))
   //Map of operations that take indefinitely many inputs
   lazy val foldOps: Map[String, (Double*) => Double] = Map(
     "MAG" -> (dl => Math.sqrt(dl.foldLeft(0.0)(_ + Math.pow(_,2))))
