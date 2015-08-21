@@ -4,9 +4,9 @@ import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.OutputStream
-
 import scala.Array.canBuildFrom
 import scala.collection.mutable.ArrayBuffer
+import java.net.URLEncoder
 
 /**
  * Utility methods for working with files.
@@ -65,4 +65,8 @@ object FileUtils {
     out.flush
     input.close
   }
+  
+  
+  def encodeSpaces(file: String) = file.replaceAll(" ", "%20") //URI's must have ' ' encoded as '%20'
+  def decodeSpaces(file: String) = file.replaceAll("%20", " ") //File's cannot have ' ' encoded as '%20'
 }
