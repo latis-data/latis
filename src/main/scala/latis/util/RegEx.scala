@@ -74,7 +74,7 @@ object RegEx {
      * Don't try to match groups since we have a variable number of groups and this
      * would only capture the first and last elements.
      */
-    lazy val PROJECTION = s"$VARIABLE(?:(?:$DELIMITER)$VARIABLE)*"
+    lazy val PROJECTION = s"($VARIABLE(?:(?:$DELIMITER)$VARIABLE)*)"
     
     /**
      * List of arguments, such as for a function call.

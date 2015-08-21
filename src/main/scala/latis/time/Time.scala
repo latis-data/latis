@@ -169,7 +169,7 @@ object Time {
    * TODO: use or remove 'type' in metadata (e.g. real, integer, text)
    * TODO: interpret value in context of units
    */
-  def apply(md: Metadata, value: AnyVal): Time = {
+  def apply(md: Metadata, value: Any): Time = {
     var metadata = md
     val scale = md.get("units") match {
       case Some(u) => TimeScale(u)
@@ -184,12 +184,12 @@ object Time {
       case _: Double => new Time(scale, metadata, Data(value)) with Real
       case _: Int => new Time(scale, metadata, Data(value)) with Integer
       case _: Long => new Time(scale, metadata, Data(value)) with Integer
-      case _: StringOps => new Time(scale, metadata, Data(value.toString)) with Text
+      case _: String => new Time(scale, metadata, Data(value)) with Text
     }
   }
   
       
-  def apply(scale: TimeScale, value: AnyVal): Time = {
+  def apply(scale: TimeScale, value: Any): Time = {
     //make some metadata
     val md = Metadata(Map("name" -> "time", "units" -> scale.toString))
     value match {
@@ -200,6 +200,7 @@ object Time {
     }
   }
 
+  def apply(value: String): Time = Time(TimeScale.JAVA, value)
   def apply(value: AnyVal): Time = Time(TimeScale.JAVA, value)
   
   def apply(date: Date): Time = Time(date.getTime())

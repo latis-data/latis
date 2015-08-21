@@ -6,11 +6,9 @@
              pattern="scalar_ts_2col_1?0-1?9.txt"
              location="src/test/resources/datasets/test/agg"/>
          
-    <function>
-      <text id="file" length="25"/>
-      <integer id="fileSize"/>
-    </function>
-  
+    <index/>
+    <text id="file" length="25"/>
+    
   </dataset>
       
   <dataset id="template">

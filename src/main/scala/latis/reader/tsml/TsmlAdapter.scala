@@ -3,8 +3,9 @@ package latis.reader.tsml
 import java.io.File
 import java.net.URI
 import java.net.URL
+import java.net.URLDecoder
+import java.net.URLEncoder
 import scala.Option.option2Iterable
-import scala.annotation.migration
 import scala.collection.Map
 import scala.collection.Seq
 import scala.collection.immutable
@@ -19,6 +20,7 @@ import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.metadata.Metadata
+import latis.ops.DomainBinner
 import latis.ops.MathExpressionDerivation
 import latis.ops.Operation
 import latis.ops.Projection
@@ -33,7 +35,7 @@ import latis.reader.tsml.ml.TupleMl
 import latis.reader.tsml.ml.VariableMl
 import latis.time.Time
 import latis.util.DataUtils
-import latis.ops.DomainBinner
+import latis.ops.filter.Selection
 
 
 /**
@@ -423,7 +425,6 @@ abstract class TsmlAdapter(val tsml: Tsml) {
         filteredDerivedFields.map(MathExpressionDerivation(_))
       }
     val domBin = tsml.getProcessingInstructions("domBin").map(s => DomainBinner(s.split(',')))
-    
     projections ++ selections ++ conversions ++ renames ++ derivations ++ domBin
   }
   
@@ -446,7 +447,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //Note, can't be relative to the tsml file since we only have xml here. Tsml could be from any source.
     properties.get("location") match {
       case Some(loc) => {
-        val uri = new URI(loc)
+        val uri = new URI(URLEncoder.encode(loc,"utf-8"))
         if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
         else if (loc.startsWith(File.separator)) new URL("file:" + loc) //absolute path
         else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
@@ -476,7 +477,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   def getUrlFile: File = {
     val url = getUrl
-    new File(url.getPath.replace("%20", " "))
+    new File(URLDecoder.decode(url.getPath,"utf-8"))
   }
   
   

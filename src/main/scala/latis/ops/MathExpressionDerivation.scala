@@ -1,7 +1,9 @@
 package latis.ops
 
+import scala.language.implicitConversions
+
 import scala.Array.canBuildFrom
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 import latis.dm.Dataset
 import latis.dm.Function
@@ -23,7 +25,7 @@ import scala.collection.mutable.ArrayBuffer
  * Adds a new Variable to a Dataset according to the inputed math expression.
  * The str parameter must include the name of the new Variable followed by '=' and the expression.
  */
-class MathExpressionDerivation(private val str: String) extends Operation with Logging {
+class MathExpressionDerivation(private val str: String) extends Operation with LazyLogging {
   
   var ds: Dataset = Dataset()
   //TODO: consider defining value in an empty dataset
@@ -78,40 +80,13 @@ class MathExpressionDerivation(private val str: String) extends Operation with L
   }
   
   /**
-   * Used to replace the data for a Scalar with the data created by parsing the expression.
-   */
-  def replaceVariable(in: Variable, replacement: Scalar): Variable = in match {
-    case s: Scalar => replaceInScalar(s, replacement)
-    case t: Tuple => replaceInTuple(t, replacement)
-    case f: Function => ??? //nested functions not supported
-  }
-  
-  def replaceInScalar(in: Scalar, replacement: Scalar) = {
-    if(in.getName == replacement.getName) in(replacement.getData)
-    else in
-  }
-  
-  def replaceInTuple(in: Tuple, replacement: Scalar) = {
-    Tuple(in.getVariables.map(replaceVariable(_, replacement)), in.getMetadata)
-  }
-  
-  def replaceInSample(in: Sample, replacement: Scalar) = {
-    val domain = replaceVariable(in.domain, replacement)
-    val range = replaceVariable(in.range, replacement)
-    Sample(domain, range)
-  }
-  
-  /**
    * Adds the derived variable to the sample. 
    */
   override def applyToSample(sample: Sample): Option[Sample] = {
     val name = varName
     ds = sample
     val r = Real(Metadata(name), parseExpression(varExpr).unwrap.getData)
-    sample.findVariableByName(name) match {
-      case None => Some(Sample(sample.domain, Tuple(sample.range.toSeq :+ r)))
-      case Some(v) => Some(replaceInSample(sample, r))
-    }
+    Some(Sample(sample.domain, Tuple(sample.range.toSeq :+ r)))
   }
   
   /**
@@ -138,8 +113,14 @@ class MathExpressionDerivation(private val str: String) extends Operation with L
     val availableVarNames = sample.toSeq.map(v => v.getName).toList
     
     if (dependentVars.forall(depVar => availableVarNames.contains(depVar))) {
-      if(availableVarNames.contains(varName)) Some(sample)
-      else Some(Sample(sample.domain,Tuple(sample.range.toSeq :+ Real(Metadata(varName)))))
+      Some(
+        Sample(
+          sample.domain,
+          Tuple(
+            sample.range.toSeq :+ Real(Metadata(varName))
+          )
+        )
+      )
     }
     else {
       None

@@ -58,7 +58,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   
   def rename(origName: String, newName: String): Dataset = RenameOperation(origName, newName)(this)
   
-  def replaceValue(v1: AnyVal, v2: AnyVal): Dataset = ReplaceValueOperation(v1,v2)(this)
+  def replaceValue(v1: Any, v2: Any): Dataset = ReplaceValueOperation(v1,v2)(this)
   
   def reduce = Reduction.reduce(this)
   
