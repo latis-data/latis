@@ -151,7 +151,7 @@ object SampledFunction {
   def apply(domain: Variable, range: Variable, samples: Iterator[Sample], metadata: Metadata = EmptyMetadata) = {
     if (samples == null) throw new Error("Can't construct a SampledFunction with a null Sample Iterator.")
     val sit = domain match {
-      case i: Index => IndexSet().iterator.zip(samples).map(p => Sample(Index(p._1), p._2.range))
+      case i: Index => IndexSet().iterator.zip(samples).map(p => Sample(Index(i.getMetadata, p._1), p._2.range))
       case _ => samples
     }
     val sf = new SampledFunction(domain, range, metadata=metadata){
@@ -164,7 +164,7 @@ object SampledFunction {
     if (samples == null) throw new Error("Can't construct a SampledFunction with a null Sample Iterable.")
     val template = samples.head
     val sit = template.domain match {
-      case i: Index => Iterable.range(0,samples.size).zip(samples).map(p => Sample(Index(p._1), p._2.range))
+      case i: Index => Iterable.range(0,samples.size).zip(samples).map(p => Sample(Index(i.getMetadata, p._1), p._2.range))
       case _ => samples
     }
     val sf = new SampledFunction(template.domain, template.range, metadata=metadata)
