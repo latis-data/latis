@@ -2,7 +2,7 @@
 
 <dataset id="nested_binary_columns">
   <adapter class="latis.reader.tsml.ColumnarBinaryAdapter"
-           location="datasets/test/ssi/" />
+           location="${java.io.tmpdir}" />
   
   <function>
     <real id="a"/>

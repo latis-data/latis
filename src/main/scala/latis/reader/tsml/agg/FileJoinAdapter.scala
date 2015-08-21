@@ -51,7 +51,7 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
    * Read each file and aggregate the results.
    */
   override def collect(datasets: Seq[Dataset]): Dataset = {
-    val z = datasets.zip(adapters.map(a => FileUtils.encodeSpaces(a.getUrl.getPath)))
+    val z = datasets.zip(adapters.map(a => a.getUrl.getPath))
     val files = z.flatMap(p => getFileName(p._1, p._2))
     
     val readers = files.map(file => TsmlReader(template.setLocation(file))).iterator

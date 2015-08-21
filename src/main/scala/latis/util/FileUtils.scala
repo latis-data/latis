@@ -7,6 +7,8 @@ import java.io.OutputStream
 import scala.Array.canBuildFrom
 import scala.collection.mutable.ArrayBuffer
 import java.net.URLEncoder
+import java.net.URI
+import java.net.URL
 
 /**
  * Utility methods for working with files.
@@ -66,7 +68,13 @@ object FileUtils {
     input.close
   }
   
-  
-  def encodeSpaces(file: String) = file.replaceAll(" ", "%20") //URI's must have ' ' encoded as '%20'
-  def decodeSpaces(file: String) = file.replaceAll("%20", " ") //File's cannot have ' ' encoded as '%20'
+  def getUrl(loc: String) = {
+    val uri = new URI(URLEncoder.encode(loc,"utf-8"))
+    if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
+    else if (loc.startsWith(File.separator)) new URL("file:" + loc) //absolute path
+    else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
+      case url: URL => url
+      case null => new URL("file:" + scala.util.Properties.userDir + File.separator + loc) //relative to current working directory
+    }
+  }
 }
