@@ -34,6 +34,7 @@ import latis.reader.tsml.ml.VariableMl
 import latis.time.Time
 import latis.util.DataUtils
 import latis.ops.DomainBinner
+import latis.util.FileUtils
 
 
 /**
@@ -445,12 +446,13 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     //Note, can't be relative to the tsml file since we only have xml here. Tsml could be from any source.
     properties.get("location") match {
       case Some(loc) => {
-        val uri = new URI(loc)
+        val eloc = FileUtils.encodeSpaces(loc)
+        val uri = new URI(eloc)
         if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
-        else if (loc.startsWith(File.separator)) new URL("file:" + loc) //absolute path
-        else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
+        else if (eloc.startsWith(File.separator)) new URL("file:" + eloc) //absolute path
+        else getClass.getResource("/"+eloc) match { //relative path: try looking in the classpath
           case url: URL => url
-          case null => new URL("file:" + scala.util.Properties.userDir + File.separator + loc) //relative to current working directory
+          case null => new URL("file:" + scala.util.Properties.userDir + File.separator + eloc) //relative to current working directory
         }
       }
       case None => throw new RuntimeException("No 'location' attribute in TSML adapter definition.")
@@ -475,7 +477,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   def getUrlFile: File = {
     val url = getUrl
-    new File(url.getPath.replace("%20", " "))
+    new File(FileUtils.decodeSpaces(url.getPath))
   }
   
   

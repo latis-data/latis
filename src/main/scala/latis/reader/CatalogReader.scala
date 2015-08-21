@@ -20,6 +20,7 @@ import latis.dm.Text
 import latis.dm.Tuple
 import latis.metadata.Metadata
 import latis.util.LatisProperties
+import latis.util.FileUtils
 
 /**
  * Create a catalog from a given directory which defaults to the 'dataset.dir' property
@@ -31,15 +32,16 @@ class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "
   /**
    * The path of 'loc'
    */
-  val dir = {
-    val uri = new URI(loc)
+  val dir = FileUtils.decodeSpaces({
+    val eloc = FileUtils.encodeSpaces(loc)
+    val uri = new URI(eloc)
     if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
-    else if (loc.startsWith(File.separator)) new URL("file:" + loc) //absolute path
-    else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
+    else if (loc.startsWith(File.separator)) new URL("file:" + eloc) //absolute path
+    else getClass.getResource("/"+eloc) match { //relative path: try looking in the classpath
       case url: URL => url
-      case null => new URL("file:" + scala.util.Properties.userDir + File.separator + loc) //relative to current working directory 
+      case null => new URL("file:" + scala.util.Properties.userDir + File.separator + eloc) //relative to current working directory 
     }
-  }.getPath
+  }.getPath)
   
   //samples from which this dataset's function will be constructed
   var samples = ArrayBuffer[Sample]()
