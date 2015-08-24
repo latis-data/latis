@@ -2,6 +2,7 @@ package latis.reader.tsml
 
 import latis.reader.tsml.ml.Tsml
 import latis.util.FileUtils
+import java.net.URLDecoder
 
 /**
  * Return a list of files as a Dataset.
@@ -19,7 +20,7 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
   override def getRecordIterator = {
     //see StreamingFileListAdapter for an iterative version of this adapter.
     //TODO: support ftp...?
-    val dir = getUrl.getPath //assumes a file URL 
+    val dir = URLDecoder.decode(getUrl.getPath, "utf-8") //assumes a file URL 
     FileUtils.listAllFilesWithSize(dir).iterator
   }
   
