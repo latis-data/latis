@@ -7,7 +7,9 @@ import scala.collection.mutable.ArrayBuffer
 import javax.xml.ws.http.HTTPException
 import latis.ops.Operation
 import latis.ops.Projection
+import latis.ops.NoOp
 import latis.ops.filter.Selection
+import latis.util.RegEx.PROJECTION
 import latis.util.RegEx.OPERATION
 import latis.util.RegEx.SELECTION
 
@@ -22,12 +24,8 @@ class DapConstraintParser {
     val buffer = new ArrayBuffer[Operation]() 
     
     if (args.nonEmpty) {
-      //handle expressions for selections and other operations
-      buffer ++= args.tail.map(parseExpression(_))
-      
-      //projection expression should be first among the args
-      //but last to be applied, may be empty string
-      if (args.head.length > 0) buffer += Projection(args(0).split(","))
+      //parse expressions for projections, selections, and filters
+      buffer ++= args.filter(_.nonEmpty).map(parseExpression(_))
  
     } //else return an empty list
 
@@ -42,6 +40,7 @@ class DapConstraintParser {
   def parseExpression(expression: String): Operation = {
     //TODO: Option? error handling
     expression match {
+      case PROJECTION.r(name) => Projection(name)
       case SELECTION.r(name, op, value) => Selection(name, op, value)
       case OPERATION.r(name, args) => (name,args) match {
         //for testing handling of http errors

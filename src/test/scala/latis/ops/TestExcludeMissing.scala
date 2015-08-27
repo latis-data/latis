@@ -3,6 +3,7 @@ package latis.ops
 import org.junit._
 import Assert._
 import latis.dm.Dataset
+import latis.dm.Naught
 import latis.dm.Function
 import latis.dm.TestDataset
 import latis.ops.filter.ExcludeMissing
@@ -57,8 +58,8 @@ class TestExcludeMissing {
   
   @Test
   def missing_scalar_function_with_defined_missing_value = {
-    val domain = Real()
-    val range = Real(Metadata(Map("missing_value" -> "0")))
+    val domain = Real(Metadata("name" -> "foo"))
+    val range = Real(Metadata("missing_value" -> "0"))
     val data = SampledData.fromValues(List(0,1,2), List(3,0,5))
     val ds = Dataset(Function(domain, range, data = data))
     val ds2 = ExcludeMissing()(ds)

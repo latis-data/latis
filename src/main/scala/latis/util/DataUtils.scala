@@ -215,17 +215,12 @@ object DataUtils {
         }
         
         //for each outer sample, construct the SampledData for this nested Function
-        val rangeDatas = (0 until length).map{ i =>
-          iteratorMapToIterableData(iteratorMap, f.getRange, domainData.length);
+        val datas = (0 until length).map{ i =>
+          val rangeData = iteratorMapToIterableData(iteratorMap, f.getRange, domainData.length);
           //val rangeData = DataSeq(rdatas)
-          
+          SampledData(domainData, rangeData)
         }
-        val domain = (0 until length).foldLeft(DataSeq())((ds,i) => ds.append(domainData))
-        val range = DataSeq(rangeDatas)
-        val datas = domain.iterator.zip(range.iterator).map(_ match {
-          case (i1: IterableData, i2: IterableData) => SampledData(i1,i2)
-        })
-        //val datas = SampledData(domain, DataSeq(rangeDatas))
+        
         //combine the 'length' Function Data-s into a single IterableData
         DataSeq(datas)
       }
@@ -242,11 +237,7 @@ object DataUtils {
     }
 
     val domain = sampleTemplate.domain
-    val domainData = domain match {
-      case _: Index => IndexSet()
-      case _: Scalar => dataMap(domain.getName)
-      case t: Tuple => domain.toSeq.map(s => dataMap(s.getName)).reduceLeft(_ zip _)
-    }
+    val domainData = domain.toSeq.map(s => dataMap(s.getName)).reduceLeft(_ zip _)//dataMap(domain.getName)
 
     val range = sampleTemplate.range
 

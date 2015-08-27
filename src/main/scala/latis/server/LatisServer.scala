@@ -2,7 +2,7 @@ package latis.server
 
 import java.net.URLDecoder
 
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
@@ -15,7 +15,7 @@ import latis.util.LatisServerProperties
 import latis.writer.HttpServletWriter
 import latis.writer.OverviewWriter
 
-class LatisServer extends HttpServlet with Logging {
+class LatisServer extends HttpServlet with LazyLogging {
 
   override def init() {
     logger.info("Initializing LatisServer.")

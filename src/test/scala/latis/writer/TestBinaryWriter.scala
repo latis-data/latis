@@ -2,7 +2,7 @@ package latis.writer
 
 import org.junit._
 import Assert._
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 import latis.dm._
 import latis.metadata.Metadata
 import latis.time.Time
@@ -50,15 +50,15 @@ class TestBinaryWriter extends WriterTest{
     write_to_file(fof, "bin")
   }
   
-  @Before
-  def open_output_file {
-    fos = new FileOutputStream("src/test/resources/datasets/test/ssi/b.bin")
-  }
-  
-  @After
-  def close_output_file {
-    fos.close
-  }
+//  @Before
+//  def open_output_file {
+//    fos = new FileOutputStream("src/test/resources/datasets/test/ssi/b.bin")
+//  }
+//  
+//  @After
+//  def close_output_file {
+//    fos.close
+//  }
 
   //@Test
   def real = Writer(fos, "bin").write(TestDataset.real)

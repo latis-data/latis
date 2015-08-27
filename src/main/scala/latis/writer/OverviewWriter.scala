@@ -13,6 +13,9 @@ import latis.metadata.Catalog
 import scala.collection.immutable.DefaultMap
 import latis.reader.tsml.TsmlReader
 import java.io.ByteArrayOutputStream
+import java.io.FileNotFoundException
+import latis.reader.CatalogReader
+import latis.reader.FlatCatalogReader
 
 class OverviewWriter(servletConfig: ServletConfig) {
   
@@ -48,9 +51,13 @@ class OverviewWriter(servletConfig: ServletConfig) {
   }
   
   private lazy val catalog: Dataset = {
-    val tsmlUrl = Catalog.getTsmlUrl("catalog")
-    val reader = TsmlReader(tsmlUrl)
-    reader.getDataset()
+    try {
+      val tsmlUrl = Catalog.getTsmlUrl("catalog")
+      val reader = TsmlReader(tsmlUrl)
+      reader.getDataset()
+    } catch {
+      case e: FileNotFoundException => CatalogReader().getDataset
+    }
   }
   
   private def catalogHtml(): String = {

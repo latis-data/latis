@@ -5,11 +5,11 @@ import latis.ops.Operation
 import latis.util.DataUtils
 import latis.util.iterator.MappingIterator
 import latis.util.iterator.PeekIterator
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 //TODO: SampleMappedFunction?
 class WrappedFunction(function: Function, val operation: Operation) 
-  extends SampledFunction(function.getDomain, function.getRange) with Logging {
+  extends SampledFunction(function.getDomain, function.getRange) with LazyLogging {
   
   //TODO: deal with Function metadata, length
   

@@ -12,7 +12,7 @@ import latis.data.SampleData
 import latis.util.iterator.PeekIterator
 import latis.util.iterator.MappingIterator
 import latis.data.EmptyData
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 /**
  * A SampledFunction represents a discrete Function whose values are defined
@@ -20,7 +20,7 @@ import com.typesafe.scalalogging.slf4j.Logging
  * domain value to a range value.
  */
 class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = EmptyMetadata, data: SampledData = EmptyData) 
-    extends AbstractVariable(metadata, data) with Function with Logging {
+    extends AbstractVariable(metadata, data) with Function with LazyLogging {
 
   //expose domain and range via defs only so we can override
   //TODO: no longer the case? require operation to make new SampledFunction if it changes the type instead of a wrapped function

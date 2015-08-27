@@ -14,7 +14,7 @@ import scala.collection.Seq
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 import javax.naming.InitialContext
 import javax.naming.NameNotFoundException
@@ -52,7 +52,7 @@ import latis.util.StringUtils
 /**
  * Adapter for databases that support JDBC.
  */
-class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](tsml) with Logging {
+class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](tsml) with LazyLogging {
   //TODO: catch exceptions and close connections
 
   def getRecordIterator: Iterator[JdbcAdapter.JdbcRecord] = new JdbcAdapter.JdbcRecordIterator(resultSet)
@@ -216,10 +216,9 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
         }
       }
       case _ => {
-        //Let LaTiS operations deal with constraints on index
-        if (name == "index") false
-        //This is not one of our variables. Err on the side of assuming this is a user mistake.
-        else throw new Error("JdbcAdapter can't process selection for unknown parameter: " + name)
+        //This is not one of our variables, let latis handle it.
+        logger.warn("JdbcAdapter can't process selection for unknown parameter: " + name)
+        false
       }
     }
 

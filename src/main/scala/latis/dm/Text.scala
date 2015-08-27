@@ -20,28 +20,33 @@ trait Text extends Scalar {
       case None => Text.DEFAULT_LENGTH
     }
   }
-  
-  def stringValue = getValue.asInstanceOf[String]
-  
-  //TODO: getStringValue? akin to Number.doubleValue, stringValue for all Vars?
+
 }
 
 object Text {
   
   val DEFAULT_LENGTH = 4
+  //TODO: parameterize in latis.properties?
   
-  def apply(v: AnyVal): Text = new AbstractScalar(data = Data(v.toString)) with Text
+  def apply(data: Data): Text = data match {
+    case v: StringValue => new AbstractScalar(data = data) with Text
+    case _ => throw new UnsupportedOperationException("A Text must be constructed with a StringValue.")
+  }
+  
+  //def apply(v: String): Text = Text(StringValue(v))
+  def apply(v: Any): Text = Text(StringValue(v.toString))
+
+  
+  def apply(md: Metadata, data: Data): Text = data match {
+    case v: StringValue => new AbstractScalar(md, data) with Text
+    case _ => throw new UnsupportedOperationException("A Text must be constructed with a StringValue.") 
+  }
+  
+  def apply(md: Metadata, v: Any): Text = Text(md, StringValue(v.toString))
 
   def apply(md: Metadata): Text = new AbstractScalar(md) with Text
-  
-  def apply(md: Metadata, data: Data): Text = new AbstractScalar(md, data) with Text
-  
-  def apply(md: Metadata, v: Any): Text = v match {
-    case sv: StringValue => new AbstractScalar(md, sv) with Text
-    //not allowed  case av: AnyVal => new AbstractScalar(md, Data(v.toString)) with Text
-    //TODO: consider restricting this to valid values
-    case _ => new AbstractScalar(md, Data(v.toString)) with Text
-  }
 
-  def unapply(v: Text): Option[String] = Some(v.getValue.asInstanceOf[String])
+
+  def unapply(v: Text): Option[String] = Some(v.getValue.asInstanceOf[String]) 
+  //TODO: scalar.stringValue?
 }

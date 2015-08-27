@@ -2,7 +2,7 @@
 
 <dataset id="binary_columns">
   <adapter class="latis.reader.tsml.ColumnarBinaryAdapter"
-           location="datasets/test/ssi/" />
+           location="${java.io.tmpdir}" />
   
   <time type="text" length="10">
     <metadata name="myTime" units="yyyy/MM/dd"/>

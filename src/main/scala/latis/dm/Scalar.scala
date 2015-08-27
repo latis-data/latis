@@ -9,6 +9,7 @@ import latis.data.value.StringValue
 import latis.metadata.EmptyMetadata
 import latis.metadata.Metadata
 import latis.time.Time
+import latis.util.StringUtils
 
 /**
  * Base type for all Scalar Variables.
@@ -19,17 +20,23 @@ trait Scalar extends Variable {
   //note, we tried overriding this in subclasses but ran into inheritance trouble with "new Time with Real"
   def compare(that: String): Int
     
+  /**
+   * Compare the given Scalar to this.
+   * If this is a Number, the values will be compared as Doubles.
+   * If this is a Text, the other value will be converted to a String.
+   */
+  //TODO: extend Ordered?
   //TODO: unit conversions...
   def compare(that: Scalar): Int = (this,that) match {
     case (Number(d1), Number(d2)) => d1 compare d2
-    case (Text(s1), Text(s2)) => {
-      //TODO: is it same to trim each string when comparing or should it happen upstream?
-      s1.trim compare s2.trim 
-    }
-    case _ => throw new Error("Can't compare " + this + " with " + that)
+    case (Text(s1), Text(s2)) => s1 compare s2
+    case (Number(d1), Text(s2)) => d1 compare StringUtils.toDouble(s2) //string may become NaN
+    case (Text(s1), Number(d2)) => s1 compare d2.toString
   }
-
+//TODO: test trim, nan
   def getValue: Any
+  def stringValue = getValue.toString
+  
   def getFillValue: Any
   def getMissingValue: Any
   
@@ -52,6 +59,15 @@ trait Scalar extends Variable {
   }
   //TODO: updatedMetadata(md: Metadata)
   
+  //TODO: updatedValue instead of Variable.apply
+  def updatedValue(s: String): Scalar = this match {
+    //TODO: manage exception? StringUtil?
+    //TODO: Time, override?
+    case _: Integer => Integer(getMetadata, s)
+    case _: Real    => Real(getMetadata, s)
+    case _: Text    => Text(getMetadata, s)
+  }
+  
 }
 
 object Scalar {
@@ -73,18 +89,15 @@ object Scalar {
   /**
    * Construct a Scalar of the appropriate type based on the type of the data value.
    */
-  def apply(value: AnyVal): Scalar = value match {
+  def apply(value: Any): Scalar = value match {
+    case s: String => Text(s) //TODO: try to convert to numeric type?
     case d: Double => Real(d)
     case f: Float  => Real(f)
     case l: Long   => Integer(l)
     case i: Int    => Integer(i)
-    case _ => throw new Error("Unable to make Scalar from value: " + value)
+    case _ => throw new Error("Unable to make Scalar from value: " + value) //TODO: of type...
+    //TODO: if serializable, make Binary?
   }
-  
-  /**
-   * Construct a Text Variable with the given string value.
-   */
-  def apply(value: String) = Text(value)
   
   /**
    * Construct a Scalar of the appropriate type based on the type of the data value, with metadata.

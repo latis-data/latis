@@ -5,7 +5,7 @@ import latis.dm.Scalar
 import latis.dm.Text
 import latis.time.Time
 import latis.util.RegEx.SELECTION
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 import latis.util.iterator.MappingIterator
 import latis.dm.Sample
 import latis.dm.Variable
@@ -18,7 +18,7 @@ import latis.ops.resample.NearestNeighbor
  * Filter based on a basic boolean expression.
  * e.g. "foo >= 2"
  */
-protected class Selection(val vname: String, val operation: String, val value: String) extends Filter with Logging {
+class Selection(val vname: String, val operation: String, val value: String) extends Filter with LazyLogging {
   //TODO: if domain, delegate to DomainSet
   //TODO: change operation to operator?
   
