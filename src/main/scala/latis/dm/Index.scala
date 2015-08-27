@@ -20,6 +20,10 @@ object Index {
   def apply(value: Int): Index = new AbstractScalar(metadata = Metadata("index"), data = IndexValue(value)) with Index
   
   def apply(data: Data): Index = new AbstractScalar(metadata = Metadata("index"), data = data) with Index
+  
+  def apply(md: Metadata, v: Int): Index = new AbstractScalar(metadata = md, IndexValue(v)) with Index
+
+  def apply(md: Metadata, data: Data): Index = new AbstractScalar(metadata = md, data = data) with Index
 
   /**
    * Expose the index value represented by this Variable.

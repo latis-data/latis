@@ -24,6 +24,7 @@ import scala.collection.mutable.ArrayBuffer
 import latis.data.IterableData
 import latis.data.value.StringValue
 import java.util.Arrays
+import latis.data.set.IndexSet
 
 /*
  * Use Cases
@@ -208,7 +209,10 @@ object DataUtils {
       case f: Function => { //just a Function template
         //TODO: support arbitrary nested Function domains (non-cartesian)
         //use dataMap to reuse same inner domain values for each outer sample
-        val domainData = dataMap(f.getDomain.getName)
+        val domainData = f.getDomain match {
+          case i: Index => IndexSet(f.getLength)
+          case e => dataMap(e.getName)
+        }
         
         //for each outer sample, construct the SampledData for this nested Function
         val datas = (0 until length).map{ i =>
@@ -439,7 +443,7 @@ object DataUtils {
       }
     }
 
-    case v: Index => Index(bb.getInt) //Note, index data is kept in Variable's Data
+    case v: Index => Index(v.getMetadata, bb.getInt) //Note, index data is kept in Variable's Data
     case v: Real => Real(template.getMetadata, bb.getDouble)
     case v: Integer => Integer(template.getMetadata, bb.getLong)
 
