@@ -69,12 +69,20 @@ object FileUtils {
   }
   
   def getUrl(loc: String) = {
-    val uri = new URI(URLEncoder.encode(loc,"utf-8"))
+    val uri = new URI(loc)
     if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
     else if (loc.startsWith(File.separator)) new URL("file:" + loc) //absolute path
     else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
       case url: URL => url
-      case null => new URL("file:" + scala.util.Properties.userDir + File.separator + loc) //relative to current working directory
+      case null => {
+        
+        val dir = scala.util.Properties.userDir
+          .split(File.separator)
+          .map(URLEncoder.encode(_, "utf-8").replace("+", "%20")) // http://stackoverflow.com/questions/4737841/urlencoder-not-able-to-translate-space-character
+          .mkString(File.separator)
+          
+        new URL("file:" + dir + File.separator + loc) //relative to current working directory
+      }
     }
   }
 }
