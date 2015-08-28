@@ -43,9 +43,11 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
   /**
    * Get datasets to read the file list from. The last dataset is the template, so it is dropped.
    */
-  override protected val adapters = (tsml.xml \ "dataset").map(n => TsmlAdapter(Tsml(n))).dropRight(1)
+  //override protected val adapters = (tsml.xml \ "dataset").map(n => TsmlAdapter(Tsml(n))).dropRight(1)
+  override protected val adapters = List(TsmlAdapter(Tsml((tsml.xml \ "dataset").head)))
   
-  val template = (tsml.xml \ "dataset").map(n => Tsml(n)).last
+ // val template = (tsml.xml \ "dataset").map(n => Tsml(n)).last
+  val template = Tsml((tsml.xml \ "dataset").last)
   
   /**
    * Read each file and aggregate the results.
@@ -75,7 +77,8 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
    * Get the full path of the 'file' variable in ds.
    */
   def getFileName(ds: Dataset, dir: String) = ds match {
-    case Dataset(Function(it)) => it.flatMap(_.toSeq.find(_.hasName("file"))).map(dir + "/" +_.getValue.toString)
+    //case Dataset(Function(it)) => it.flatMap(_.toSeq.find(_.hasName("file"))).map(dir + "/" +_.getValue.toString)
+    case Dataset(Function(it)) => it.flatMap(_.toSeq.find(_.hasName("file"))).map(_.getValue.toString)
   }
 
 }
