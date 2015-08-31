@@ -21,15 +21,6 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    */
   def aggregate(left: Dataset, right: Dataset): Dataset
   
-  /**
-   * Combine each aggregate Dataset into a single Dataset.
-   */
-  override protected def makeOrigDataset: Dataset = {
-    //Make a dataset for each adapter
-    val dss = adapters.map(_.getOrigDataset)
-    
-    collect(dss) 
-  }  
   
   override def getDataset(ops: Seq[Operation]) = {
     val dss = adapters.map(_.getDataset(ops))
