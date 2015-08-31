@@ -7,7 +7,7 @@
              location="src/test/resources/datasets/test/agg"/>
          
     <index/>
-    <text id="file" length="25"/>
+    <text id="file" length="120"/>
     
   </dataset>
       
