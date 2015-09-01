@@ -23,9 +23,6 @@ import latis.util.FileUtils
  *     ...
  *   </dataset>
  *   
- *   (More file list datasets may be included here to append to the 
- *   first file list.)
- *   
  *   <dataset>
  *     ...
  *     A dataset that gives the structure of the final dataset.
@@ -41,41 +38,43 @@ import latis.util.FileUtils
 class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
   
   /**
-   * Get datasets to read the file list from. The last dataset is the template, so it is dropped.
+   * Construct the adapter for the file list dataset.
    */
-  override protected val adapters = (tsml.xml \ "dataset").map(n => TsmlAdapter(Tsml(n))).dropRight(1)
+  override protected val adapters = List(TsmlAdapter(Tsml((tsml.xml \ "dataset").head)))
   
-  val template = (tsml.xml \ "dataset").map(n => Tsml(n)).last
+  /**
+   * Tsml for the template to be used to read each file.
+   */
+  val template = Tsml((tsml.xml \ "dataset").last)
   
   /**
    * Read each file and aggregate the results.
    */
   override def collect(datasets: Seq[Dataset]): Dataset = {
-    val z = datasets.zip(adapters.map(a => a.getUrl.getPath))
-    val files = z.flatMap(p => getFileName(p._1, p._2))
+    //Get list of file names from the first dataset.
+    val files = datasets.head match {
+      case Dataset(Function(it)) => it.flatMap(_.toSeq.find(_.hasName("file"))).map(_.getValue.toString).toList
+    }
     
-    val readers = files.map(file => TsmlReader(template.setLocation(file))).iterator
+    //Make a TsmlReader for each file from the tsml template with the file location inserted.
+    val readers = files.map(file => TsmlReader(template.setLocation(file)))
     
-    val md = makeMetadata(tsml.dataset)
+    //Make an iterator over each file dataset, appending their samples
     val sit = readers.flatMap(r => r.getDataset match {
       case Dataset(Function(it)) => new PeekIterator[Sample] {
         def getNext = it.next match {
-          case null => r.close; null;
-          case e => e
+          case null => r.close; null; //TODO: need better assurance that readers get closed
+          case sample => sample
         }
       }
     })
+    
     val f = TsmlAdapter(template).getOrigDataset match {
       case Dataset(f: Function) => f //get the function template
     }
-    Dataset(Function(f, sit), md)
-  }
-  
-  /**
-   * Get the full path of the 'file' variable in ds.
-   */
-  def getFileName(ds: Dataset, dir: String) = ds match {
-    case Dataset(Function(it)) => it.flatMap(_.toSeq.find(_.hasName("file"))).map(dir + "/" +_.getValue.toString)
+    
+    val md = makeMetadata(tsml.dataset)
+    Dataset(Function(f, sit.iterator), md)
   }
 
 }

@@ -7,7 +7,8 @@
   <text id="version"     length="8"/>
   <text id="dataset.dir" length="64"/>
   <text id="jndi.name"   length="16"/>
-  <text id="log.file"    length="64"/>
+  <text id="log.dir"     length="64"/>
+  <text id="log.file"    length="16"/>
   
   <text id="user.timezone"   length="16"/>
   <text id="time.scale.type" length="3"/>
