@@ -34,19 +34,6 @@ class TextAppender(name: String, suffix: String) extends Operation() {
     }
   }
   
-  /**
-   * Override to remove special nested Function logic. 
-   */
-  override def applyToFunction(function: Function): Option[Variable] = {
-    val mit = new MappingIterator(function.iterator, (s: Sample) => this.applyToSample(s))
-    val template = mit.peek match {
-      case null => function.getSample //empty iterator so no-op
-      case s => s
-    }
-    Some(Function(template.domain, template.range, mit, function.getMetadata))
-  }
-  
-
 }
 
 object TextAppender extends OperationFactory {
