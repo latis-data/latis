@@ -21,15 +21,6 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    */
   def aggregate(left: Dataset, right: Dataset): Dataset
   
-  /**
-   * Combine each aggregate Dataset into a single Dataset.
-   */
-  override protected def makeOrigDataset: Dataset = {
-    //Make a dataset for each adapter
-    val dss = adapters.map(_.getOrigDataset)
-    
-    collect(dss) 
-  }  
   
   override def getDataset(ops: Seq[Operation]) = {
     val dss = adapters.map(_.getDataset(ops))
@@ -52,9 +43,7 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     //Make metadata
     val md = makeMetadata(tsml.dataset) //TODO: provo
     
-    //TODO: do we need a Collection type?
-    //TODO: use a fold with a binary agg op?
-    //for now, replace datasets with a tuple
+    //Apply the aggregation to the datasets
     Dataset(datasets.reduceLeft(aggregate(_,_)).unwrap, md) 
   }
 
