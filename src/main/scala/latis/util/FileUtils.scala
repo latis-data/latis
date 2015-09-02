@@ -4,11 +4,9 @@ import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.OutputStream
+
 import scala.Array.canBuildFrom
 import scala.collection.mutable.ArrayBuffer
-import java.net.URLEncoder
-import java.net.URI
-import java.net.URL
 
 /**
  * Utility methods for working with files.
@@ -68,21 +66,4 @@ object FileUtils {
     input.close
   }
   
-  def getUrl(loc: String) = {
-    val uri = new URI(loc)
-    if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
-    else if (loc.startsWith(File.separator)) new URL("file:" + loc) //absolute path
-    else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
-      case url: URL => url
-      case null => {
-        
-        val dir = scala.util.Properties.userDir
-          .split(File.separator)
-          .map(URLEncoder.encode(_, "utf-8").replace("+", "%20")) // http://stackoverflow.com/questions/4737841/urlencoder-not-able-to-translate-space-character
-          .mkString(File.separator)
-          
-        new URL("file:" + dir + File.separator + loc) //relative to current working directory
-      }
-    }
-  }
 }

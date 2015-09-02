@@ -5,6 +5,9 @@ import latis.dm.Integer
 import latis.dm.Real
 import latis.dm.Text
 import latis.dm.Variable
+import java.net.URL
+import java.io.File
+import java.net.URLEncoder
 
 /**
  * Utility methods for manipulating Strings.
@@ -107,4 +110,22 @@ object StringUtils {
     }
     case t: Text    => Data(StringUtils.padOrTruncate(value, t.length)) //enforce length
   }
+  
+  def getUrl(loc: String): URL = {
+    if(loc.matches("""\w+:.+""")) new URL(loc) //absolute
+    else if (loc.startsWith(File.separator)) new URL("file:" + loc) 
+    else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
+      case url: URL => url
+      case null => {
+              
+        val dir = scala.util.Properties.userDir
+          .split(File.separator)
+          .map(URLEncoder.encode(_, "utf-8").replace("+", "%20")) // http://stackoverflow.com/questions/4737841/urlencoder-not-able-to-translate-space-character
+          .mkString(File.separator)
+                
+        new URL("file:" + dir + File.separator + loc) //relative to current working directory
+      }
+    }
+  }
+  
 }

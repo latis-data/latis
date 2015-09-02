@@ -36,6 +36,8 @@ import latis.reader.tsml.ml.VariableMl
 import latis.time.Time
 import latis.util.DataUtils
 import latis.ops.filter.Selection
+import java.net.MalformedURLException
+import latis.util.StringUtils
 
 
 /**
@@ -446,23 +448,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   def getUrl: URL = {
     //Note, can't be relative to the tsml file since we only have xml here. Tsml could be from any source.
     properties.get("location") match {
-      case Some(loc) => {
-      	val uri = new URI(loc)
-        if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
-        else if (loc.startsWith(File.separator)) new URL("file:" + loc) //absolute path
-        else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
-          case url: URL => url
-          case null => {
-            
-            val dir = scala.util.Properties.userDir
-              .split(File.separator)
-              .map(URLEncoder.encode(_, "utf-8").replace("+", "%20")) // http://stackoverflow.com/questions/4737841/urlencoder-not-able-to-translate-space-character
-              .mkString(File.separator)
-              
-            new URL("file:" + dir + File.separator + loc) //relative to current working directory
-          }
-        }
-      }
+      case Some(loc) => StringUtils.getUrl(loc)
       case None => throw new RuntimeException("No 'location' attribute in TSML adapter definition.")
     }
   }
