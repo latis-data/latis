@@ -8,11 +8,12 @@ import latis.dm.Tuple
 import latis.dm.Variable
 import latis.ops.Operation
 import latis.dm.WrappedFunction
+import latis.ops.Idempotence
 
 /**
  * Subtype of Operation that may drop samples.
  */
-class Filter extends Operation {
+class Filter extends Operation with Idempotence {
   //TODO: see scala's withFilter, FilterMonadic
   
   /*
