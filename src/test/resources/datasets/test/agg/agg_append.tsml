@@ -5,17 +5,27 @@
   <dataset id="ds1">
     <adapter class="latis.reader.tsml.AsciiAdapter"
              delimiter="\s+"
-             location="datasets/test/agg/scalar_ts_2col_0-9.txt" />
-    <time id="T" />
-    <real id="A"/>
+             location="datasets/test/agg/canonical_union_1.txt" />
+    <time type="text" length="10">
+      <metadata name="myTime" units="yyyy/MM/dd"/>
+    </time>
+   
+    <integer id="myInt"/>
+    <real    id="myReal"/>
+    <text    id="myText"/>
   </dataset>
 
   <dataset id="ds2">
     <adapter class="latis.reader.tsml.AsciiAdapter"
              delimiter="\s+"
-             location="datasets/test/agg/scalar_ts_2col_10-19.txt" />
-    <time id="T" />
-    <real id="A"/>
+             location="datasets/test/agg/canonical_union_2.txt" />
+    <time type="text" length="10">
+      <metadata name="myTime" units="yyyy/MM/dd"/>
+    </time>
+   
+    <integer id="myInt"/>
+    <real    id="myReal"/>
+    <text    id="myText"/>
   </dataset>
 
 </dataset>

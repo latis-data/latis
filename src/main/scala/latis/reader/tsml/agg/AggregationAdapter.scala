@@ -1,6 +1,7 @@
 package latis.reader.tsml.agg
 
 import latis.dm.Dataset
+import latis.ops.Idempotence
 import latis.ops.Operation
 import latis.reader.tsml.TsmlAdapter
 import latis.reader.tsml.ml.Tsml
@@ -23,7 +24,8 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   
   
   override def getDataset(ops: Seq[Operation]) = {
-    val dss = adapters.map(_.getDataset(ops))
+    val (idempotent, others) = ops.partition(_.isInstanceOf[Idempotence])
+    val dss = adapters.map(_.getDataset(idempotent))
     
     val ds = collect(dss)
     
