@@ -3,7 +3,6 @@ package latis.ops
 import scala.annotation.migration
 import scala.util.parsing.combinator.JavaTokenParsers
 import scala.util.parsing.combinator.PackratParsers
-
 import latis.dm.Index
 import latis.dm.Integer
 import latis.dm.Real
@@ -21,6 +20,7 @@ import latis.ops.math.BinOp.MULTIPLY
 import latis.ops.math.BinOp.POWER
 import latis.ops.math.BinOp.SUBTRACT
 import latis.time.Time
+import latis.dm.Dataset
 
 /**
  * Adds a new Variable to a Dataset according to the inputed math expression.
@@ -45,6 +45,22 @@ class MathExpressionDerivation(private val str: String) extends Operation {
    */
   private lazy val parsedExpr = MathParser(varExpr).getOrElse(throw new
       Exception(s"Unable to parse expression: $varExpr"))
+  
+  def eval(expr: Expr, values: Map[String, Double]): Double = expr match {
+    case NumExpr(n) => n
+    case IdExpr(id) => values(id)
+    case OpExpr(op, dl @ _*) => foldOps.get(op) match {
+      case Some(f) => f(dl.map(eval(_, values)): _*)
+      case None => binOps.get(op) match {
+        case Some(f) if(dl.length == 2)=> f(eval(dl(0), values), eval(dl(1), values))
+        case _ => unOps.get(op) match {
+          case Some(f) if(dl.length == 1)=> f(eval(dl(0), values))
+          //If we get here, we probably have the wrong number of parameters for the operation
+          case _ => throw new Error(s"Could not evaluate $op with parameters: ${dl.map(eval(_,values))}")
+        }
+      }
+    }
+  }    
       
   /**
    * Evaluate the derivation expression with whatever values
@@ -52,6 +68,29 @@ class MathExpressionDerivation(private val str: String) extends Operation {
    */
   private def deriveField = eval(parsedExpr, values)
       
+  /**
+   * Test whether the given dataset contains all of the variables
+   * needed to evaluate the parsed expression, and all operations
+   * are known.
+   */
+  override def apply(ds: Dataset): Dataset = {
+    def canEval(exp: Expr, names: Seq[String]): Boolean = exp match {
+      case NumExpr(n) => true
+      case IdExpr(id) => names.contains(id)
+      case OpExpr(op, dl @ _*) => {
+        dl.forall(canEval(_, names)) &&
+        (foldOps.keySet ++ binOps.keySet ++ unOps.keySet).contains(op)
+      }
+    }
+    val names = ds match {
+      case Dataset(v) => v.toSeq.map(_.getName) ++ values.keySet
+      case _ => values.keySet.toSeq //constants
+    }
+    if(canEval(parsedExpr, names)) super.apply(ds)
+    else ds //can't apply derivation, so return original dataset
+  }
+   
+  
   /**
    * Keep a map of each Number Scalar to its value.
    */
@@ -63,10 +102,11 @@ class MathExpressionDerivation(private val str: String) extends Operation {
    */
   override def applyToScalar(s: Scalar): Option[Scalar] = {
     if (s.hasName(varName)) s match {
+      case t: Time => Some(Time(t.getMetadata + ("units" -> "milliseconds since 1970"), deriveField))
       case i: Index => Some(Real(i.getMetadata, deriveField)) //replace Index with Real
       case i: Integer => Some(Integer(i.getMetadata, deriveField))
       case r: Real => Some(Real(r.getMetadata, deriveField))
-      case Text(s) => throw new Exception("MathExpressionDerivation cannot be applied to Text Variables.")
+      case Text(s) => throw new Error("MathExpressionDerivation cannot be applied to Text Variables.")
     } else Some(s)
   }
   
@@ -135,16 +175,7 @@ class MathExpressionDerivation(private val str: String) extends Operation {
   trait Expr
   case class NumExpr(n: Double) extends Expr
   case class IdExpr(id: String) extends Expr
-  case class UnOpExpr(op: String, expr: Expr) extends Expr 
-  case class BinOpExpr(op: String, left: Expr, right: Expr) extends Expr
-  case class FoldOpExpr(op: String, exprs: Expr*) extends Expr 
-  def eval(expr: Expr, values: Map[String, Double]): Double = expr match {
-    case NumExpr(n) => n
-    case IdExpr(id) => values(id)
-    case UnOpExpr(op, e) => unOps(op)(eval(e, values))
-    case BinOpExpr(op, l, r) => binOps(op)(eval(l, values), eval(r, values))
-    case FoldOpExpr(op, dl @ _*) => foldOps(op)(dl.map(eval(_, values)): _*)
-  }
+  case class OpExpr(op: String, exprs: Expr*) extends Expr 
   
   object MathParser extends JavaTokenParsers with PackratParsers {
     
@@ -152,35 +183,33 @@ class MathExpressionDerivation(private val str: String) extends Operation {
     
     //parse boolean and
     lazy val and: PackratParser[Expr] = 
-      (lt ~ "&" ~ and ^^ {case lt ~ op ~ and => BinOpExpr(op, lt, and)}
+      (lt ~ "&" ~ and ^^ {case lt ~ op ~ and => OpExpr(op, lt, and)}
         | lt )
     
     //parse less than
     lazy val lt: PackratParser[Expr] = 
-      (pm ~ "<" ~ lt ^^ {case pm ~ op ~ lt => BinOpExpr(op, pm, lt)}
+      (pm ~ "<" ~ lt ^^ {case pm ~ op ~ lt => OpExpr(op, pm, lt)}
         | pm )
     
     //parse top level addition and subtraction
     lazy val pm: PackratParser[Expr] = 
-      (pm ~ ("+"|"-") ~ md ^^ {case pm ~ op ~ md => BinOpExpr(op, pm, md)}
+      (pm ~ ("+"|"-") ~ md ^^ {case pm ~ op ~ md => OpExpr(op, pm, md)}
         | md )
         
     //parse top level multiplication and division
     lazy val md: PackratParser[Expr] = 
-      (md ~ ("*"|"/"|"%") ~ pow ^^ {case md ~ op ~ p => BinOpExpr(op, md, p)}
+      (md ~ ("*"|"/"|"%") ~ pow ^^ {case md ~ op ~ p => OpExpr(op, md, p)}
         | pow )
     
     //parse top level exponentiation
     lazy val pow: PackratParser[Expr] = 
-      (value ~ "^" ~ pow ^^ {case v ~ op ~ p => BinOpExpr(op, v, p)}
+      (value ~ "^" ~ pow ^^ {case v ~ op ~ p => OpExpr(op, v, p)}
         | value )
         
     //parse a named function, expression in parentheses, variable name, or number
     lazy val value: PackratParser[Expr] = 
-      ( "-" ~ value                                    ^^ {case op ~ v => UnOpExpr(op, v)}
-        | ident ~ ("(" ~> expr <~ ")")                 ^^ {case id ~ e => UnOpExpr(id, e)}
-        | ident ~ ("(" ~> expr) ~ ("," ~> expr <~ ")") ^^ {case id ~ l ~ r => BinOpExpr(id, l, r)}
-        | ident ~ ("(" ~> rep(",".? ~> expr) <~ ")")   ^^ {case id ~ es => FoldOpExpr(id, es:_*)}
+      ( "-" ~ value                                    ^^ {case op ~ v => OpExpr(op, v)}
+        | ident ~ ("(" ~> rep(",".? ~> expr) <~ ")")   ^^ {case id ~ es => OpExpr(id, es:_*)}
         | ("(" ~> expr <~ ")")                         ^^ {case e => e}
         | ident                                        ^^ {case id => IdExpr(id)}
         | floatingPointNumber                          ^^ {case n => NumExpr(n.toDouble)}

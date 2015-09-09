@@ -1,16 +1,15 @@
 package latis.ops
 
 import scala.collection.mutable.ArrayBuffer
-
 import org.junit.Assert.assertEquals
 import org.junit.Ignore
 import org.junit.Test
-
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.TestDataset
 import latis.metadata.Metadata
 import latis.reader.tsml.TsmlReader
+import latis.writer.AsciiWriter
 
 class TestMathExpressionDerivation {
   
@@ -282,6 +281,12 @@ class TestMathExpressionDerivation {
   def nested_override {
     val ds = MathExpressionDerivation("y = z + 0.4")(TestDataset.function_of_functions)
     assertEquals(10, ds.toDoubleMap("y")(3), 0.0)
+  }
+  
+  @Test
+  def override_text_time {
+    val ds = MathExpressionDerivation("myTime=myTime+8.64E7")(TestDataset.time_series)
+    assertEquals(8.64E7, ds.toDoubleMap("myTime")(0), 0.0)
   }
 
   def assertEqualContents[T](s1: Seq[T], s2: Seq[T]) {
