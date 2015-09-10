@@ -136,6 +136,16 @@ class TestStringUtils {
   }
   
   @Test
+  def parse_int_fill {
+    val template = Integer(Metadata("missing_value"->"12"))
+    val d = StringUtils.parseStringValue("fill", template)
+    d match {
+      case LongValue(l) => assertEquals(12, l)
+      case _ => fail
+    }
+  }
+  
+  @Test
   def parse_real_int {
     val template = Real(Metadata("real"))
     val d = StringUtils.parseStringValue("-1", template)
@@ -161,6 +171,16 @@ class TestStringUtils {
     val d = StringUtils.parseStringValue("1e3", template)
     d match {
       case DoubleValue(r) => assertEquals(1000.0, r, 0.0)
+      case _ => fail
+    }
+  }
+  
+  @Test
+  def parse_real_fill {
+    val template = Real(Metadata("missing_value"->"3.14"))
+    val d = StringUtils.parseStringValue("fill", template)
+    d match {
+      case DoubleValue(r) => assertEquals(3.14, r, 0.0)
       case _ => fail
     }
   }
