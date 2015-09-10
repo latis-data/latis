@@ -42,11 +42,6 @@ object StringUtils {
   }
   
   /**
-   * Replaces any non-word characters (not a letter or number) with that character escaped.
-   */
-  def escapeNonWords(str: String) = """\W""".r.replaceAllIn(str, "\\\\" + _)
-  
-  /**
    * Return the given string padded or truncated to the given length (number of characters).
    * If the String is shorter than the desired length, it will be padded with spaces on the right.
    * If the String is longer than the desired length, it will be truncated on the right.
@@ -95,19 +90,12 @@ object StringUtils {
    */
   //TODO: support regex property for each variable
   def parseStringValue(value: String, variableTemplate: Variable): Data = variableTemplate match {
-    case _: Integer => try {
-      //If value looks like a float, take everything up to the decimal point.
-      val s = if (value.contains(".")) value.substring(0, value.indexOf("."))
-      else value
-      Data(s.trim.toLong)
-    } catch {
-      case e: NumberFormatException => Data(variableTemplate.asInstanceOf[Integer].getFillValue.asInstanceOf[Long])
-    }
-    case _: Real => try {
-      Data(value.trim.toDouble)
-    } catch {
-      case e: NumberFormatException => Data(variableTemplate.asInstanceOf[Real].getFillValue.asInstanceOf[Double])
-    }
+    case _: Integer => if(isNumeric(value)) Data(toDouble(value).toLong)
+      else Data(variableTemplate.asInstanceOf[Integer].getFillValue.asInstanceOf[Long])
+      
+    case _: Real => if(isNumeric(value)) Data(toDouble(value))
+      else Data(variableTemplate.asInstanceOf[Real].getFillValue.asInstanceOf[Double])
+      
     case t: Text    => Data(StringUtils.padOrTruncate(value, t.length)) //enforce length
   }
   
@@ -116,13 +104,8 @@ object StringUtils {
     else if (loc.startsWith(File.separator)) new URL("file:" + loc) 
     else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
       case url: URL => url
-      case null => {
-              
+      case null => {  
         val dir = scala.util.Properties.userDir
-          .split(File.separator)
-          .map(URLEncoder.encode(_, "utf-8").replace("+", "%20")) // http://stackoverflow.com/questions/4737841/urlencoder-not-able-to-translate-space-character
-          .mkString(File.separator)
-                
         new URL("file:" + dir + File.separator + loc) //relative to current working directory
       }
     }
