@@ -60,4 +60,10 @@ class TestTimeFormatter {
     assertEquals(data("myTime")(1), "1970-01-02T00:00:00")
   }
   
+  @Test(expected=classOf[UnsupportedOperationException])
+  def invalid_format {
+    val op = Operation("format_time", List("foobar"))
+    //never gets applied so it won't overload the log
+  }
+  
 }

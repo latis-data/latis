@@ -59,21 +59,18 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
     case _ => throw new Error("Can't compare " + this + " with " + that)
   }
   
-  //override to deal with ISO formatted time strings  
+  /**
+   * Text Time can be compared to either iso or java-time strings. 
+   * Numeric Time can be compared to either iso or numeric strings. 
+   */
   override def compare(that: String): Int = {
-    //TODO: look for units and see if 'that' matches...
-    RegEx.TIME.r findFirstIn that match {
-      //If the string matches the ISO format
-      //Make Time from ISO formatted time string (based on time.scale.type), convert to our time scale
-      case Some(s) => compare(Time.fromIso(s)) 
-      //Otherwise assume we have a numeric value in our time scale
-      case _ => getData match {
-        case LongValue(l) => l compare that.toLong
-        //TODO: allow 'that' to be double even if this is Integer?, careful about precision loss
-        //case LongValue(l) => l.toDouble compare that.toDouble
-        case NumberData(d) => d compare that.toDouble
-        case _: TextData => getJavaTime compare that.toLong
-        //TODO: handle format errors
+    try {
+      getJavaTime compare Time.isoToJava(that)
+    } catch {
+      case e: Exception => getData match {
+        case LongValue(l)   => l compare that.toLong
+        case DoubleValue(d) => d compare that.toDouble
+        case StringValue(s) => getJavaTime compare that.toLong
       }
     }
   }

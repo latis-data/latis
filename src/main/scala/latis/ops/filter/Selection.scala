@@ -74,6 +74,11 @@ class Selection(val vname: String, val operation: String, val value: String) ext
     }
   }
   
+  /**
+   * If we are selecting on the Function domain and we have bounds data 
+   * in the range and the operation include ">" or "<", apply a new 
+   * Selection using the bounds.
+   */
   override def applyToFunction(f: Function): Option[Function] = {
    (f.getDomain.hasName(vname), f.getRange.findVariableByName("bounds")) match {
       case (true, Some(Tuple(vars))) => operation match {
@@ -103,7 +108,23 @@ object Selection {
   def apply(vname: String, operation: String, value: String): Operation = {
     //delegate to NearestNeighbor filter for '~' operator
     if (operation == "~") NearestNeighborFilter(vname, value)
-    else new Selection(vname, operation, value)
+    
+    //validate time selections before they are applied to every Sample
+    else vname match {
+      case "time" => { 
+        try Time.isoToJava(value) 
+          catch {
+            case e: Exception => try value.toDouble 
+              catch {
+                case e: Exception => throw new UnsupportedOperationException(
+                  s"Invalid Selection: could not parse '$value' as a time string.")
+              }
+          }
+        //'value' is a valid time string
+        new Selection(vname, operation, value)
+      }
+      case _ => new Selection(vname, operation, value)
+    }
   }
   
   def apply(expression: String): Operation = expression.trim match {
