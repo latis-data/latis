@@ -11,7 +11,10 @@ import java.text.ParseException
 class TimeFormat(format: String) {
 
   private val sdf: SimpleDateFormat = {
-    val sdf = new SimpleDateFormat(format)
+    val sdf = try new SimpleDateFormat(format) catch {
+      case e: Exception => throw new IllegalArgumentException(
+        s"Could not parse '$format' as a time format: ${e.getMessage}")
+    }
     sdf.setTimeZone(TimeZone.getTimeZone("GMT"))
     sdf
   }
