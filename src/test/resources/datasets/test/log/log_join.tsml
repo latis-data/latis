@@ -12,7 +12,7 @@
       <metadata units="yyyy-MM-dd"/>
     </time>
     
-    <text id="file" length="120"/>
+    <text id="file" length="20"/>
   
     <?domBin start,3000-01-01?>
   

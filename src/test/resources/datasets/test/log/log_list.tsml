@@ -1,0 +1,12 @@
+<dataset>
+  <adapter class="latis.reader.tsml.FileListAdapter"
+           pattern="latis.txt-(\d\d\d\d-\d\d-\d\d)"
+           location="src/test/resources/datasets/test/log"/>
+       
+  <time type="text">
+    <metadata units="yyyy-MM-dd"/>
+  </time>
+  
+  <text id="file" length="20"/>
+
+</dataset>
