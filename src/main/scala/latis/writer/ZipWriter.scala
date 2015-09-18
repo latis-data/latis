@@ -15,12 +15,12 @@ import latis.dm.Text
 /**
  * Write a zip file of the files contained in a file list dataset.
  */
-class ZipWriter extends FileWriter {
+class ZipWriter extends Writer {
   
-  def writeFile(dataset: Dataset, file: File) = {
+  def write(dataset: Dataset) = {
     
     lazy val dir = dataset.getMetadata.get("srcDir") match {
-      case Some(sd) => sd
+      case Some(sd) => sd + File.separator
       case None => "" //???
     }
     
@@ -45,13 +45,13 @@ class ZipWriter extends FileWriter {
       Stream.continually(bufferedReader.read)
     }
     
-    val zip = new ZipOutputStream(new FileOutputStream(file))
+    val zip = new ZipOutputStream(getOutputStream)
     try {
       for (f <- files) {
         //add zip entry to output stream
         zip.putNextEntry(new ZipEntry(f))
 
-        val in = Source.fromFile(dir + File.separator + f).bufferedReader
+        val in = Source.fromFile(dir + f).bufferedReader
         try {
           readerStream(in).takeWhile(_ > -1).foreach(zip.write(_))
         }

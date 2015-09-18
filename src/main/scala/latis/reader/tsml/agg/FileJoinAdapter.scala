@@ -55,12 +55,12 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
   def getFilePaths(ds: Dataset): Iterator[String] = {
     lazy val dir = ds.getMetadata.get("srcDir") match {
       case None => ""
-      case Some(sd) => sd
+      case Some(sd) => sd + File.separator
     }
     
     ds match {
       case Dataset(Function(it)) => it.map(_.findVariableByName("file") match {
-        case Some(Text(file)) => dir + File.separator + file
+        case Some(Text(file)) => dir + file
         case None => throw new Exception(s"No 'file' Variable found in Dataset '$ds'")
       })
     }
