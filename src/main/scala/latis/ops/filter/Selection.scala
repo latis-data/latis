@@ -13,6 +13,7 @@ import latis.dm.WrappedFunction
 import latis.dm.Tuple
 import latis.ops.Operation
 import latis.ops.resample.NearestNeighbor
+import latis.util.StringUtils
 
 /**
  * Filter based on a basic boolean expression.
@@ -112,16 +113,9 @@ object Selection {
     //validate time selections before they are applied to every Sample
     else vname match {
       case "time" => { 
-        try Time.isoToJava(value) 
-          catch {
-            case e: Exception => try value.toDouble 
-              catch {
-                case e: Exception => throw new UnsupportedOperationException(
-                  s"Invalid Selection: could not parse '$value' as a time string.")
-              }
-          }
-        //'value' is a valid time string
-        new Selection(vname, operation, value)
+        if(Time.isValidIso(value) || StringUtils.isNumeric(value)) new Selection(vname, operation, value)
+        else throw new UnsupportedOperationException(
+          s"Invalid Selection: could not parse '$value' as a time string.")
       }
       case _ => new Selection(vname, operation, value)
     }
