@@ -10,6 +10,8 @@ import java.util.TimeZone
 import latis.metadata.VariableMetadata
 import latis.data.value.LongValue
 import scala.collection.immutable.StringOps
+import latis.util.StringUtils
+import com.typesafe.scalalogging.LazyLogging
 
 
 class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
@@ -59,23 +61,18 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
     case _ => throw new Error("Can't compare " + this + " with " + that)
   }
   
-  //override to deal with ISO formatted time strings  
+  /**
+   * Text Time can be compared to either iso or java-time strings. 
+   * Numeric Time can be compared to either iso or numeric strings. 
+   */
   override def compare(that: String): Int = {
-    //TODO: look for units and see if 'that' matches...
-    RegEx.TIME.r findFirstIn that match {
-      //If the string matches the ISO format
-      //Make Time from ISO formatted time string (based on time.scale.type), convert to our time scale
-      case Some(s) => compare(Time.fromIso(s)) 
-      //Otherwise assume we have a numeric value in our time scale
-      case _ => getData match {
-        case LongValue(l) => l compare that.toLong
-        //TODO: allow 'that' to be double even if this is Integer?, careful about precision loss
-        //case LongValue(l) => l.toDouble compare that.toDouble
-        case NumberData(d) => d compare that.toDouble
-        case _: TextData => getJavaTime compare that.toLong
-        //TODO: handle format errors
-      }
+    if(Time.isValidIso(that)) getJavaTime compare Time.isoToJava(that)
+    else if(StringUtils.isNumeric(that)) getData match {
+      case LongValue(l)   => l compare that.toLong
+      case DoubleValue(d) => d compare that.toDouble
+      case StringValue(s) => getJavaTime compare that.toLong
     }
+    else throw new IllegalArgumentException(s"'$that' could not be interpreted as a time string, could not be compared to $this.")
   }
 
 }
@@ -83,6 +80,16 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
 //=============================================================================
 
 object Time {
+  
+  /**
+   * Test that the given string can be parsed as a TimeFormat. 
+   */
+  def isValidIso(s: String): Boolean = try {
+    isoToJava(s)
+    true
+  } catch {
+    case e: IllegalArgumentException => false
+  }
   
   /**
    * Create a Time instance from the given ISO8601 formatted string.
