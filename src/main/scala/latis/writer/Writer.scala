@@ -58,7 +58,18 @@ abstract class Writer {
     file = null
     this.outputStream = out
   }
-  def getOutputStream = outputStream
+  
+  /**
+   * Return the outputStream if it exists. If we have a file instead,
+   * return a FileOutputStream.
+   */
+  def getOutputStream = outputStream match {
+    case null => file match {
+      case null => ??? //TODO: error
+      case _ => new FileOutputStream(file)
+    }
+    case _ => outputStream
+  }
   
   private[writer] var file: File = null
   private[writer] def setFile(file: File) = {
