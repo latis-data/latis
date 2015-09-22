@@ -124,7 +124,7 @@ object Operation {
     import scala.reflect.runtime.currentMirror
     
     val cls = getClassFromOpName(opName)
-    val moduleSymbol = currentMirror.classSymbol(cls).companionSymbol.asModule
+    val moduleSymbol = currentMirror.classSymbol(cls).companion.asModule
     currentMirror.reflectModule(moduleSymbol).instance.asInstanceOf[OperationFactory] 
   }
     
