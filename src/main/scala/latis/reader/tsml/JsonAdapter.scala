@@ -45,6 +45,7 @@ class JsonAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   
     //read entire source into string, join with new line
     val jsonString = getDataSource.getLines.mkString(sys.props("line.separator"))
+    //TODO: deal with JsArray at top level
     val fields = Json.parse(jsonString).as[JsObject].fields
     val value: (String, JsValue) = fields.length match {
       case 0 => return(Dataset.empty)
@@ -58,6 +59,7 @@ class JsonAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     val dsname = value._1
     val v = value._2.as[JsObject]
     val vars = getValue(v.fields(0)) //one Variable per Dataset
+    //TODO: if more than one field, wrap in Tuple
     
     Dataset(vars, Metadata(dsname))
   }
