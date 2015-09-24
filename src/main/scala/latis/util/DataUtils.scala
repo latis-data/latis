@@ -25,6 +25,7 @@ import latis.data.IterableData
 import latis.data.value.StringValue
 import java.util.Arrays
 import latis.data.set.IndexSet
+import latis.data.value.IndexValue
 
 /*
  * Use Cases
@@ -237,11 +238,14 @@ object DataUtils {
     }
 
     val domain = sampleTemplate.domain
-    val domainData = domain.toSeq.map(s => dataMap(s.getName)).reduceLeft(_ zip _)//dataMap(domain.getName)
+    val domainData: DataSeq = domain match {
+      case _: Index => DataSeq(IndexValue(0))
+      case _ => domain.toSeq.map(s => dataMap(s.getName)).reduceLeft(_ zip _)
+    }
 
     val range = sampleTemplate.range
 
-    val length = domainData.length
+    val length = domainData.length //number of dimensions?
 
     val rangeData = iteratorMapToIterableData(iteratorMap, range, length)
 
