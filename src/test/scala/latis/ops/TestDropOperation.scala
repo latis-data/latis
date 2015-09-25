@@ -136,14 +136,7 @@ class TestDropOperation {
   
   @Test
   def test_function_of_function_with_drop_1 {
-    val exp = Sample(Integer(Metadata("x"), 0), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * 0 + j)))))
-
-    AsciiWriter.write(exp)
-    System.out.println("f_of_f")
-    AsciiWriter.write(TestDataset.function_of_functions)
-    System.out.println("takeright(1)(f_of_f)")
-    AsciiWriter.write(DropOperation(1)(TestDataset.function_of_functions))
-    
+    val exp = Sample(Integer(Metadata("x"), 0), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * 0 + j)))))    
     assertEquals(exp, DropOperation(1)(TestDataset.function_of_functions).unwrap.asInstanceOf[Function].iterator.next)
   }
   
