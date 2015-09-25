@@ -17,7 +17,7 @@ class TestOdering {
   
   @Test
   def integer = {
-    val list = List(Integer(2), Integer(3), Integer(1))
+    val list: List[Integer] = List(Integer(2), Integer(3), Integer(1))
     //val lsit2 = list.sorted 
     /*
      * diverging implicit expansion for type scala.math.Ordering[latis.dm.Integer] 
