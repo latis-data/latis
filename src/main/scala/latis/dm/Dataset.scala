@@ -76,6 +76,28 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   }
   
   /**
+   * Until we can enforce sorting of function samples this will do so. 
+   * Assumes Function with Integer domain only, for now.
+   * Sort by range if domain is Index.
+   * TODO: implement as Operation.
+   * See latis-mms-web TestDatasets
+   */
+  def sorted: Dataset = variable match {
+    case f @ Function(samples) => {
+      f.getDomain match {
+        case _: Index   => Dataset(Function(samples.toSeq.sortBy(s => s match {case Sample(_, Tuple(Seq(d: Integer))) => d})(Integer(0))))
+        case _: Integer => Dataset(Function(samples.toSeq.sortBy(s => s match {case Sample(d: Integer, _) => d})(Integer(0))))
+      }
+    }
+  }
+  
+  def last: Dataset = variable match {
+    case Function(samples) => {
+      Dataset(Function(List(samples.toSeq.last)))
+    }
+  }
+    
+  /**
    * Realize the Data for this Dataset so we can close the Reader.
    * Inspired by Scala's Stream.force.
    * This will return a new Dataset that is logicall equivalent.
