@@ -7,7 +7,16 @@ import latis.metadata.Metadata
 /**
  * Trait for Scalars representing integer (long) data values.
  */
-trait Integer extends Scalar with Number
+trait Integer extends Scalar with Number with Ordering[Integer] {
+  
+  /**
+   * Implement Ordering for Integer Variables so we can sort.
+   */
+  def compare(x: Integer, y: Integer): Int = (x,y) match {
+    case (Integer(a), Integer(b)) => a compare b
+  }
+  
+}
 
 
 object Integer {
