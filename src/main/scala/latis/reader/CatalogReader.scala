@@ -11,10 +11,8 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
-
 import scala.Ordering
 import scala.collection.mutable.ArrayBuffer
-
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Sample
@@ -22,6 +20,7 @@ import latis.dm.Text
 import latis.dm.Tuple
 import latis.metadata.Metadata
 import latis.util.LatisProperties
+import latis.ops.Operation
 
 /**
  * Create a catalog from a given directory which defaults to the 'dataset.dir' property
@@ -71,6 +70,8 @@ class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "
       } else FileVisitResult.CONTINUE
     }
   }
+  
+  def getDataset(operations: Seq[Operation]) = getDataset
   
   def getDataset = {
     Files.walkFileTree(Paths.get(dir), new FileVisitDelegator)
