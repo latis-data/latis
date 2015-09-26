@@ -40,7 +40,7 @@ class FlatCatalogReader extends DatasetAccessor {
   
   def getDataset(operations: Seq[Operation]) = getDataset
   
-  def getDataset = {
+  override def getDataset = {
     val files = FileUtilsNio.listAllFilesWithSize(dir).map(_.takeWhile(_ != ','))
     val names = files.filter(_.endsWith(".tsml")).map(_.stripSuffix(".tsml"))
     val accessUrls = names

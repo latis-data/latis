@@ -73,7 +73,7 @@ class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "
   
   def getDataset(operations: Seq[Operation]) = getDataset
   
-  def getDataset = {
+  override def getDataset = {
     Files.walkFileTree(Paths.get(dir), new FileVisitDelegator)
     val sorted = samples.sortBy(s => s.domain match {
       case Text(str) => str

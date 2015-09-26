@@ -19,7 +19,7 @@ trait DatasetAccessor {
    * Return the Dataset that this accessor is responsible for.
    * This may involve considerable construction.
    */
-  def getDataset(): Dataset
+  def getDataset(): Dataset = getDataset(Seq[Operation]())
   
   /**
    * Return the Dataset with the given Operations applied to it.
