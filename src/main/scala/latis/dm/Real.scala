@@ -7,7 +7,15 @@ import latis.metadata.Metadata
 /**
  * Trait for Scalars representing real (double) data values.
  */
-trait Real extends Scalar with Number
+trait Real extends Scalar with Number with Ordering[Real] {
+  
+  /**
+   * Implement Ordering for Real Variables so we can sort.
+   */
+  def compare(x: Real, y: Real): Int = (x,y) match {
+    case (Real(a), Real(b)) => a compare b
+  }
+}
 
 
 object Real {
