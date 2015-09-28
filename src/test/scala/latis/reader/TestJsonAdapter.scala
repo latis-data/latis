@@ -25,11 +25,4 @@ class TestJsonAdapter {
     assertEquals("2", data(1)(1))
   }
   
-  @Test
-  def equivalent {
-    val ds1 = TsmlReader("datasets/test/json.tsml").getDataset
-    val ds2 = JsonReader("datasets/test/mixed.json").getDataset
-    assertEquals(ds1,ds2)
-  }
-
 }

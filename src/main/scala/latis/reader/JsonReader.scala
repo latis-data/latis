@@ -71,7 +71,7 @@ class JsonReader(path: String) extends DatasetAccessor {
     val fields = obj.fields
     val v = if(fields.length == 1) fields.head._2 match {
       case a: JsArray => makeFunction(obj)
-      case o: JsObject => makeTuple(o)
+      case o: JsObject => makeVariable(o)
       case other => makeScalar(obj)
     } else makeTuple(obj)
     v
