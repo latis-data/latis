@@ -1,9 +1,7 @@
 package latis.server
 
 import java.net.URLDecoder
-
 import com.typesafe.scalalogging.LazyLogging
-
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -14,6 +12,7 @@ import latis.util.LatisProperties
 import latis.util.LatisServerProperties
 import latis.writer.HttpServletWriter
 import latis.writer.OverviewWriter
+import latis.reader.DatasetAccessor
 
 class LatisServer extends HttpServlet with LazyLogging {
 
@@ -25,7 +24,7 @@ class LatisServer extends HttpServlet with LazyLogging {
 
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
     //Need to expose outside of try scope:
-    var reader: TsmlReader = null
+    var reader: DatasetAccessor = null
     var dataset: Dataset = null
 
     try {      
@@ -64,21 +63,19 @@ class LatisServer extends HttpServlet with LazyLogging {
       val suffix = if(index < 0) "html" else path.substring(index + 1); //suffix for Writer
       val dsname = if(index < 0) path.substring(1) else path.substring(1, index); //dataset name, drop leading "/"
 
-      //Get the URL to the Dataset's TSML descriptor.
-      logger.debug("Locating dataset: " + dsname)
-      val tsml = TsmlResolver.fromName(dsname)
+      //Get the DatasetAccessor for the requested dataset.
+      logger.debug("Locating dataset accessor: " + dsname)
       
-      logger.debug("Reading dataset from TSML")
-      //Construct the reader for this Dataset.
-      reader = TsmlReader(tsml)
+      reader = DatasetAccessor.fromName(dsname)
 
+      //TODO: consider parsing args before creating the reader so we can exit with errors before accessing other resources
       //Convert the query arguments into a mutable collection of Operations.
       //Adapters should remove Operations from this if they handle them
       //  passing the rest for others to handle.
       val args = query.split("&")
       val operations = (new DapConstraintParser).parseArgs(args)
       
-      //Get the Dataset from the Reader. 
+      //Get the Dataset from the DatasetAccessor. 
       dataset = reader.getDataset(operations)
       
       //Make the Writer, wrapped for Servlet output.

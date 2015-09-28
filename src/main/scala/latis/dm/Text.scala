@@ -8,7 +8,14 @@ import scala.collection.immutable.StringOps
 /**
  * Trait for Scalars representing text data.
  */
-trait Text extends Scalar { 
+trait Text extends Scalar with Ordering[Text] {
+  
+  /**
+   * Implement Ordering for Real Variables so we can sort.
+   */
+  def compare(x: Text, y: Text): Int = (x,y) match {
+    case (Text(a), Text(b)) => a compare b
+  }
   
   //Get the nominal/max length of this Text Variable.
   //If not defined in the metadata, the default is 4 chars (8 bytes).

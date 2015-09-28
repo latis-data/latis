@@ -44,7 +44,7 @@ class JsonReader(path: String) extends DatasetAccessor {
     if (source != null) source.close
   }
   
-  def getDataset: Dataset = {
+  override def getDataset: Dataset = {
   
     //read entire source into string, join with new line
     val jsonString = getDataSource.getLines.mkString(sys.props("line.separator"))

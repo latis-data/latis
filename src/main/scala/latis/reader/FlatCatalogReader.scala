@@ -5,7 +5,6 @@ import java.net.URI
 import java.net.URL
 import java.net.URLDecoder
 import java.net.URLEncoder
-
 import latis.data.value.StringValue
 import latis.dm.Dataset
 import latis.dm.Function
@@ -15,6 +14,7 @@ import latis.metadata.Metadata
 import latis.util.DataMapUtils
 import latis.util.FileUtilsNio
 import latis.util.LatisProperties
+import latis.ops.Operation
 
 /**
  * Creates a catalog of the tsml's found in 'dataset.dir'.
@@ -38,7 +38,9 @@ class FlatCatalogReader extends DatasetAccessor {
   lazy val template = Function(Text(Metadata("name")), Tuple(Text(Metadata("description")),
       Tuple(Text(Metadata("accessURL")), Metadata("distribution"))))
   
-  def getDataset = {
+  def getDataset(operations: Seq[Operation]) = getDataset
+  
+  override def getDataset = {
     val files = FileUtilsNio.listAllFilesWithSize(dir).map(_.takeWhile(_ != ','))
     val names = files.filter(_.endsWith(".tsml")).map(_.stripSuffix(".tsml"))
     val accessUrls = names

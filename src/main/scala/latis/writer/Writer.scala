@@ -2,13 +2,12 @@ package latis.writer
 
 import latis.dm.Dataset
 import latis.util.LatisProperties
-
 import java.io.File
 import java.io.OutputStream
-
 import scala.collection.immutable
 import scala.collection.mutable
 import java.io.FileOutputStream
+import latis.util.ReflectionUtils
 
 /**
  * Base class for Dataset writers.
@@ -157,9 +156,7 @@ object Writer {
    * Construct writer from class name using reflection.
    */
   def fromClass(cname: String): Writer = {
-    val cls = Class.forName(cname)
-    val ctor = cls.getConstructor()
-    ctor.newInstance().asInstanceOf[Writer]
+    ReflectionUtils.constructClassByName(cname).asInstanceOf[Writer]
   }
   
 }
