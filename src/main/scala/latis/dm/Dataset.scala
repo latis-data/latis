@@ -56,6 +56,8 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   def project(varNames: Seq[String]): Dataset = Projection(varNames)(this)
   def project(vname: String): Dataset = Projection(Seq(vname))(this)
   
+  def select(expression: String): Dataset = Selection(expression)(this)
+  
   def rename(origName: String, newName: String): Dataset = RenameOperation(origName, newName)(this)
   
   def replaceValue(v1: Any, v2: Any): Dataset = ReplaceValueOperation(v1,v2)(this)
@@ -93,6 +95,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   }
   
   def last: Dataset = variable match {
+    //TODO: use Last filter
     case Function(samples) => {
       Dataset(Function(List(samples.toSeq.last)))
     }
