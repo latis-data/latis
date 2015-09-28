@@ -1,5 +1,6 @@
 package latis.ops
 
+import scala.collection.mutable.ArrayBuffer
 import latis.dm.Function
 import latis.dm.implicits._
 import latis.dm.Real
@@ -17,8 +18,8 @@ import latis.dm.Tuple
 import latis.dm.Text
 import latis.dm.Index
 import latis.time.Time
+import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
-
 
 class TestTakeOperation {
   
@@ -50,22 +51,14 @@ class TestTakeOperation {
   @Test
   def test_scalar {
     assertEquals(TestDataset.integer, TakeOperation(0)(TestDataset.integer))
-  }
+  } 
   @Test
   def test_tuple_of_scalars {
     assertEquals(TestDataset.tuple_of_scalars, TakeOperation(5)(TestDataset.tuple_of_scalars))
-  }
-  /*
-   * Fails, need to determine why.
+  } 
   @Test
   def test_tuple_of_functions {
     assertEquals(TestDataset.tuple_of_functions, TakeOperation(1)(TestDataset.tuple_of_functions))
-  }
-  * 
-  */
-  @Test
-  def test_function_of_scalar_with_take_0 {
-    assertEquals(0, TakeOperation(0)(TestDataset.function_of_scalar).getLength)
   }
   @Test
   def test_function_of_scalar_with_take_1 {
@@ -87,6 +80,40 @@ class TestTakeOperation {
   @Test
   def test_metadata_length {
     assertEquals(Some("2"), TakeOperation(2)(TestDataset.function_of_scalar_with_length).unwrap.asInstanceOf[Function].getMetadata("length"))
+  }
+  
+  @Test
+  def test_tsml_data {
+    val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
+    val ds = TakeOperation(2)(data)
+    ds match {
+      case Dataset(x) => x match {
+        case Function(f) => f.toList.last match {
+          case Sample(Real(r1),Real(r2)) => {
+            assertEquals(1620.5,r1,0)
+            assertEquals(1360.4894,r2,0)
+          }
+        }
+      }
+    }
+  }
+  
+  @Test
+  def test_tsml_data_with_ops {
+    val ops = ArrayBuffer[Operation]()
+    ops += Operation("take",List("2"))
+    val ds1 = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
+    val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset(ops)
+    data match {
+      case Dataset(x) => x match {
+        case Function(f) => f.toList.last match {
+          case Sample(Real(r1),Real(r2)) => {
+            assertEquals(1620.5,r1,0)
+            assertEquals(1360.4894,r2,0)
+          }
+        }
+      }
+    }
   }
 
 }
