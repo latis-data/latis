@@ -45,12 +45,16 @@ class Reduction extends Operation  {
 
   /**
    * If the given Function has only one sample, reduce to that Sample.
+   * If the domain of that sample is an Index, just keep the range.
    * If the Function has no samples, return None.
    */
   override def applyToFunction(function: Function) = {
     val n = function.getLength
     if (n == 0) None
-    else if (n == 1) applyToSample(function.iterator.next)
+    else if (n == 1) applyToSample(function.iterator.next) match {
+      case Some(Sample(_: Index, range)) => Some(range)
+      case ov: Option[Variable] => ov
+    }
     else Some(WrappedFunction(function, this))
   }
   
