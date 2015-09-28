@@ -1,5 +1,6 @@
 package latis.ops
 
+import scala.collection.mutable.ArrayBuffer
 import latis.dm.Function
 import latis.dm.implicits._
 import latis.dm.Real
@@ -20,8 +21,6 @@ import latis.time.Time
 import latis.reader.tsml.TsmlReader
 import latis.dm.Variable
 import latis.writer.AsciiWriter
-
-
 
 
 class TestTakeRightOperation {
@@ -191,56 +190,44 @@ class TestTakeRightOperation {
     assertEquals(Some("2"), ds.unwrap.asInstanceOf[Function].getMetadata("length"))
   }
   
-  /*
-   * Would like to add something like this, where data is read from a tsml file. 
-   *
+
   @Test
   def test_tsml_data {
     val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
-    AsciiWriter.write(data)
-    AsciiWriter.write(TakeRightOperation(1)(data))
     val ds = TakeRightOperation(1)(data)
     ds match {
-      case Dataset(x) => {
-        System.out.println(x.toString())
-        x match {
-        case Function(f) => {
-          System.out.println(f.toList.toString())
-        }
-        }
-      }
-    }
-    assertEquals(data,data)
-  }
-  * 
-  */
-  
-  /*
-   * Should takeRight alter a tuple of functions?
-   * Why does "t" below print as a Vector and not a Seq of Samples?
-   * 
-   *
-  @Test
-  def test_takeright_tuple_of_functions {
-    AsciiWriter.write(TestDataset.tuple_of_functions)
-    val ds = TakeRightOperation(1)(TestDataset.tuple_of_functions)
-    AsciiWriter.write(ds)
-    ds match {
       case Dataset(x) => x match {
-        case Tuple(t) => t match {
-          case Vector(s) => s match {
-            case Sample(Integer(i),Real(r)) => {
-              assertEquals(12,i)
-              assertEquals(2.0,r,0)
-            }
+        case Function(f) => f.toList.head match {
+          case Sample(Real(r1),Real(r2)) => {
+            assertEquals(1628.5,r1,0)
+            assertEquals(1360.4767,r2,0)
           }
         }
       }
     }
-    //assertEquals(TestDataset.tuple_of_functions, DropOperation(0)(TestDataset.tuple_of_functions))
   }
-  * 
-  */
-
   
+  @Test
+  def test_tsml_data_with_ops {
+    val ops = ArrayBuffer[Operation]()
+    ops += Operation("takeright",List("1"))
+    val ds1 = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
+    val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset(ops)
+    data match {
+      case Dataset(x) => x match {
+        case Function(f) => f.toList.head match {
+          case Sample(Real(r1),Real(r2)) => {
+            assertEquals(1628.5,r1,0)
+            assertEquals(1360.4767,r2,0)
+          }
+        }
+      }
+    }
+  }
+    
+  @Test
+  def test_tuple_of_functions {
+    assertEquals(TestDataset.tuple_of_functions, TakeRightOperation(1)(TestDataset.tuple_of_functions))
+  }
+
 }
