@@ -61,6 +61,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   def replaceValue(v1: Any, v2: Any): Dataset = ReplaceValueOperation(v1,v2)(this)
   
   def reduce = Reduction.reduce(this)
+  def flatten = reduce
   
   def intersect(that: Dataset): Dataset = Intersection(this, that)
   
