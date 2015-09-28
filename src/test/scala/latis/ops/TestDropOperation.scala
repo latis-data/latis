@@ -1,7 +1,8 @@
 package latis.ops
 
-import latis.dm.Function
+import scala.collection.mutable.ArrayBuffer
 
+import latis.dm.Function
 import latis.dm.implicits._
 import latis.dm.Real
 import latis.metadata.Metadata
@@ -151,54 +152,72 @@ class TestDropOperation {
     }
   }
   
-  /*
-   * Would like to add test that reads data from tsml file.
-   *
   @Test
   def test_tsml_data {
     val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
-    AsciiWriter.write(data)
-    AsciiWriter.write(DropOperation(1)(data))
-    val ds = DropOperation(1)(data)
+    val ds = DropOperation(9)(data)
     ds match {
-      case Dataset(x) => {
-        System.out.println(x.toString())
-        x match {
-        case Function(f) => {
-          System.out.println(f.toList.toString())
-        }
+      case Dataset(x) => x match {
+        case Function(f) => f.toList.head match {
+          case Sample(Real(r1),Real(r2)) => {
+            assertEquals(1628.5,r1,0)
+            assertEquals(1360.4767,r2,0)
+          }
         }
       }
     }
-    assertEquals(data,ds)
   }
+  
+  @Test
+  def test_tsml_data_with_ops {
+    val ops = ArrayBuffer[Operation]()
+    ops += Operation("drop",List("2"))
+    val ds1 = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
+    val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset(ops)
+    data match {
+      case Dataset(x) => x match {
+        case Function(f) => f.toList.head match {
+          case Sample(Real(r1),Real(r2)) => {
+            assertEquals(1621.5,r1,0)
+            assertEquals(1360.4856,r2,0)
+          }
+        }
+      }
+    }
+  }
+  
+ /*
+  * Drop(1) removes all 10 -> *
+  * ie.  /*
+  * TakeRight(1) keeps only 12 -> *
+  * ie. (11 -> 1.0
+  *      12 -> 2.0, 11 -> 11.0
+  *      12 -> 12.0, 11 -> 21.0
+  *      12 -> 22.0, 11 -> 31.0
+  *      12 -> 32.0)
+  * is this the proper behavior?
   * 
   */
-  
-  
-  /*
-   * How should drop behave with a tuple of functions?
-   * 
   @Test
-  def test_should_drop_tuple_of_functions {
-    //AsciiWriter.write(TestDataset.tuple_of_functions)
-    //System.out.println(TestDataset.tuple_of_functions)
-    
+  def test_takeright_tuple_of_functions {
+    AsciiWriter.write(TestDataset.tuple_of_functions)
     val ds = DropOperation(1)(TestDataset.tuple_of_functions)
     AsciiWriter.write(ds)
     ds match {
       case Dataset(x) => x match {
-        case Tuple(t) => {
-            AsciiWriter.write(t)
-            System.out.println(t.toList.head)
-            assertEquals(8,t.head.getSize)
+        case Tuple(t) => t.toList.head match {
+            case Function(it) => it.toList.head match {
+              case Sample(Integer(i),Real(r)) => {
+              assertEquals(12,i)
+              assertEquals(2.0,r,0)
+            }
+          }
         }
       }
     }
-    
-    assertEquals(TestDataset.tuple_of_functions, DropOperation(0)(TestDataset.tuple_of_functions))
   }
-  *
+  * is this the proper behavior?
+  * 
   */
   
 }
