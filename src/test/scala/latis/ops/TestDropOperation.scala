@@ -185,39 +185,5 @@ class TestDropOperation {
       }
     }
   }
-  
- /*
-  * Drop(1) removes all 10 -> *
-  * ie.  /*
-  * TakeRight(1) keeps only 12 -> *
-  * ie. (11 -> 1.0
-  *      12 -> 2.0, 11 -> 11.0
-  *      12 -> 12.0, 11 -> 21.0
-  *      12 -> 22.0, 11 -> 31.0
-  *      12 -> 32.0)
-  * is this the proper behavior?
-  * 
-  */
-  @Test
-  def test_takeright_tuple_of_functions {
-    AsciiWriter.write(TestDataset.tuple_of_functions)
-    val ds = DropOperation(1)(TestDataset.tuple_of_functions)
-    AsciiWriter.write(ds)
-    ds match {
-      case Dataset(x) => x match {
-        case Tuple(t) => t.toList.head match {
-            case Function(it) => it.toList.head match {
-              case Sample(Integer(i),Real(r)) => {
-              assertEquals(12,i)
-              assertEquals(2.0,r,0)
-            }
-          }
-        }
-      }
-    }
-  }
-  * is this the proper behavior?
-  * 
-  */
-  
+
 }
