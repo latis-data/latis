@@ -137,8 +137,8 @@ class TestDropOperation {
   
   @Test
   def test_function_of_function_with_drop_1 {
-    val exp = Sample(Integer(Metadata("x"), 0), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * 0 + j)))))    
-    assertEquals(exp, DropOperation(1)(TestDataset.function_of_functions).unwrap.asInstanceOf[Function].iterator.next)
+    val exp = Sample(Integer(Metadata("x"), 3), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * 3 + j)))))    
+    assertEquals(exp, DropOperation(3)(TestDataset.function_of_functions).unwrap.asInstanceOf[Function].iterator.next)
   }
   
   @Test
