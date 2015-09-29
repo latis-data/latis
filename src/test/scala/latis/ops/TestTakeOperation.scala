@@ -102,7 +102,7 @@ class TestTakeOperation {
   def test_tsml_data_with_ops {
     val ops = ArrayBuffer[Operation]()
     ops += Operation("take",List("2"))
-    val ds1 = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
+    //val ds1 = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
     val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset(ops)
     data match {
       case Dataset(x) => x match {
