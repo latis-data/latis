@@ -38,7 +38,7 @@ class TestOperationFactory {
       Operation("limit", List("1","2"))
       fail //shouldn't get here
     } catch {
-      case e: UnsupportedOperationException => assertTrue(e.getMessage.endsWith("LimitFilter accepts only one argument"))
+      case e: UnsupportedOperationException => assertTrue(e.getMessage.endsWith("The TakeOperation accepts only one argument"))
       case _: Throwable => fail
     }
   }
