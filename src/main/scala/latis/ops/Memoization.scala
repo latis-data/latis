@@ -2,6 +2,7 @@ package latis.ops
 
 import latis.dm.Function
 import latis.dm.Variable
+import latis.dm.Sample
 
 
 /**
@@ -13,7 +14,13 @@ class Memoization extends Operation {
 
   override def applyToFunction(function: Function): Option[Variable] = {
     val md = function.getMetadata
-    val samples = function.iterator.toList
+    val samples = function.iterator.toList.map(s => s match {
+      //recurse into inner functions
+      case Sample(d, f: Function) => applyToFunction(f) match {
+        case Some(f2) => Sample(d, f2)
+      }
+      case _ => s
+    })
     //TODO consider IndexedSeq (Vector)? index tied to DomainSet
     Some(Function(samples, md))
   }
