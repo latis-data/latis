@@ -35,7 +35,7 @@ class JsonWriter extends TextWriter {
 //  override def makeFooter(dataset: Dataset) = "}" //"}}"
     
   override def makeHeader(dataset: Dataset) = "{\"" + dataset.getName + "\": {\n"
-  override def makeFooter(dataset: Dataset) = "}}"
+  override def makeFooter(dataset: Dataset) = "}}\n"
 
   override def writeFunction(function: Function) {
     printWriter.print(makeLabel(function) + "[")
