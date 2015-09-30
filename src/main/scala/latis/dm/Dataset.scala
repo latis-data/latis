@@ -90,6 +90,8 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
       f.getDomain match {
         case _: Index   => Dataset(Function(samples.toSeq.sortBy(s => s match {case Sample(_, Tuple(Seq(d: Integer))) => d})(Integer(0))))
         case _: Integer => Dataset(Function(samples.toSeq.sortBy(s => s match {case Sample(d: Integer, _) => d})(Integer(0))))
+        case _: Real    => Dataset(Function(samples.toSeq.sortBy(s => s match {case Sample(d: Real, _) => d})(Real(0))))
+        case _: Text    => Dataset(Function(samples.toSeq.sortBy(s => s match {case Sample(d: Text, _) => d})(Text(""))))
       }
     }
   }
