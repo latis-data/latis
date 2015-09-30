@@ -119,11 +119,13 @@ class JsonWriter extends TextWriter {
   }
   
   /**
-   * Escape quotes and back-slashes
+   * Escape quotes and back-slashes and newlines
    */
   def escape(s: String): String = {
     //TODO: find cleaner solution
-    s.replaceAllLiterally("""\""", """\\""").replaceAllLiterally(""""""", """\"""")
+    s.replaceAllLiterally("""\""", """\\""")
+    .replaceAllLiterally(""""""", """\"""")
+    .replaceAll("""\n""", """\\n""")
   }
   
   override def mimeType: String = "application/json" 
