@@ -125,6 +125,7 @@ class JsonAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
    * make a Latis Scalar from a JsValue
    */
   def makeScalar(s: JsValue, name: String): Scalar = {
+    //TODO: doesn't deal with time
     try {
       val num = s.as[JsNumber].value
       if(num.isValidLong) Scalar(Metadata(name), num.longValue) 
