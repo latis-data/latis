@@ -238,8 +238,8 @@ object DataUtils {
     }
 
     val domain = sampleTemplate.domain
-    val domainData: DataSeq = domain match {
-      case _: Index => DataSeq(IndexValue(0))
+    val domainData: IterableData = domain match {
+      case _: Index => IndexSet()
       case _ => domain.toSeq.map(s => dataMap(s.getName)).reduceLeft(_ zip _)
     }
 

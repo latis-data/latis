@@ -27,20 +27,15 @@ class JsonAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   lazy val json = Json.parse(getDataSource.mkString)
   
   override def init = {
-    getOrigDataset match {
-      case Dataset(v) => {
-        val vars = v.toSeq
-        val names = vars.map(_.getName)
-        names.foreach(name => {
-          val vals = (json\\name).map(_.toString.stripPrefix("\"").stripSuffix("\""))
-          val vtemplate = vars(names.indexOf(name))
-          val datas = DataSeq(vals.map(StringUtils.parseStringValue(_, vtemplate)))
-          
-          cache(name, datas)
-        })
-      }
-    }
-    
+    val vars = getOrigScalars
+    val names = getOrigScalarNames
+    names.foreach(name => {
+      val vals = (json\\name).map(_.toString.stripPrefix("\"").stripSuffix("\""))
+      val vtemplate = vars(names.indexOf(name))
+      val datas = DataSeq(vals.map(StringUtils.parseStringValue(_, vtemplate)))
+      
+      cache(name, datas)
+    })
   }
   
 }

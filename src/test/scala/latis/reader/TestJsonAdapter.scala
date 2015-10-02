@@ -22,7 +22,7 @@ class TestJsonAdapter {
     val data = ds.toStrings
     assertEquals(5, data.length)
     assertEquals(3, data(2).length)
-    assertEquals("2", data(1)(1))
+    assertEquals("2", data(2)(1))
   }
   
   @Test
