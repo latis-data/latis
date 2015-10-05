@@ -2,8 +2,10 @@
 
 <dataset id="json">
   <adapter class="latis.reader.tsml.JsonAdapter"
-           location="datasets/test/mixed.json" />
+           location="datasets/test/mixed_array.json" />
            
+  <index/>
+  
   <time type="text" length="10">
     <metadata name="myTime" units="yyyy/MM/dd"/>
   </time>
