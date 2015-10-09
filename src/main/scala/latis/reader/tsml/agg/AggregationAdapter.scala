@@ -1,11 +1,10 @@
 package latis.reader.tsml.agg
 
 import latis.dm.Dataset
-import latis.dm.implicits._
+import latis.ops.Idempotence
+import latis.ops.Operation
 import latis.reader.tsml.TsmlAdapter
 import latis.reader.tsml.ml.Tsml
-import scala.collection.mutable.ArrayBuffer
-import latis.dm.Tuple
 
 /**
  * Base class for Adapters that aggregate (combine) Datasets.
@@ -15,7 +14,7 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   /**
    * Keep a list of adapters so we can close them.
    */
-  private val adapters = ArrayBuffer[TsmlAdapter]()
+  protected val adapters = (tsml.xml \ "dataset").map(n => TsmlAdapter(Tsml(n)))
   
   /**
    * Given a Dataset that contains other Datasets (now as a tuple)
@@ -23,27 +22,18 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    */
   def aggregate(left: Dataset, right: Dataset): Dataset
   
-  /**
-   * Combine each aggregate Dataset into a single Dataset.
-   * These are simply grouped together, no merging logic applied.
-   */
-  override protected def makeOrigDataset: Dataset = {
-    //TODO: consider deeper nesting of dataset nodes
-    //Get child dataset nodes
-    val dsnodes = (tsml.xml \ "dataset")
-    //Make a dataset for each
-    val dss = for (node <- dsnodes) yield {
-      val tsml = Tsml(node)
-      val adapter = TsmlAdapter(tsml)
-      adapters += adapter
-      adapter.getDataset
-    }
-    
-    collect(dss)
-  }  
   
-  override protected def makeDataset(ds: Dataset): Dataset = ds match {
-    case Dataset(Tuple(vars)) => Dataset(vars.reduceLeft(aggregate(_,_).unwrap), ds.getMetadata)
+  override def getDataset(ops: Seq[Operation]) = {
+    val (idempotent, others) = ops.partition(_.isInstanceOf[Idempotence])
+    val dss = adapters.map(_.getDataset(idempotent))
+    
+    val ds = collect(dss)
+    
+    ops.foldLeft(ds)((dataset, op) => op(dataset)) //doesn't handle any Operations
+  }
+  
+  override protected def makeDataset(ds: Dataset): Dataset = {
+    getDataset(List())
   }
     
     
@@ -51,19 +41,12 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    * Make a single Dataset that contains the Datasets to be aggregated.
    */
   def collect(datasets: Seq[Dataset]): Dataset = {
-    //Get all the top level variables from all of the datasets
-    //val vars = datasets.foldLeft(ArrayBuffer[Variable]())(_ ++ _.variables)
       
     //Make metadata
     val md = makeMetadata(tsml.dataset) //TODO: provo
     
-    //Make aggregated dataset
-    //TODO: do we need a Collection type?
-    //TODO: use a fold with a binary agg op?
-    //for now, replace datasets with a tuple
-    val vars = datasets.map(_.unwrap)
-    val tup = Tuple(vars)
-    Dataset(tup, md) 
+    //Apply the aggregation to the datasets
+    Dataset(datasets.reduceLeft(aggregate(_,_)).unwrap, md) 
   }
 
   /**

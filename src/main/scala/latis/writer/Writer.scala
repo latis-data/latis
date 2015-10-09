@@ -2,13 +2,12 @@ package latis.writer
 
 import latis.dm.Dataset
 import latis.util.LatisProperties
-
 import java.io.File
 import java.io.OutputStream
-
 import scala.collection.immutable
 import scala.collection.mutable
 import java.io.FileOutputStream
+import latis.util.ReflectionUtils
 
 /**
  * Base class for Dataset writers.
@@ -58,7 +57,18 @@ abstract class Writer {
     file = null
     this.outputStream = out
   }
-  def getOutputStream = outputStream
+  
+  /**
+   * Return the outputStream if it exists. If we have a file instead,
+   * return a FileOutputStream.
+   */
+  def getOutputStream = outputStream match {
+    case null => file match {
+      case null => ??? //TODO: error
+      case _ => new FileOutputStream(file)
+    }
+    case _ => outputStream
+  }
   
   private[writer] var file: File = null
   private[writer] def setFile(file: File) = {
@@ -146,9 +156,7 @@ object Writer {
    * Construct writer from class name using reflection.
    */
   def fromClass(cname: String): Writer = {
-    val cls = Class.forName(cname)
-    val ctor = cls.getConstructor()
-    ctor.newInstance().asInstanceOf[Writer]
+    ReflectionUtils.constructClassByName(cname).asInstanceOf[Writer]
   }
   
 }

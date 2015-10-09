@@ -7,35 +7,48 @@ import latis.metadata.Metadata
 /**
  * Trait for Scalars representing integer (long) data values.
  */
-trait Integer extends Scalar with Number
+trait Integer extends Scalar with Number with Ordering[Integer] {
+  
+  /**
+   * Implement Ordering for Integer Variables so we can sort.
+   */
+  def compare(x: Integer, y: Integer): Int = (x,y) match {
+    case (Integer(a), Integer(b)) => a compare b
+  }
+  
+}
 
 
 object Integer {
   
+  def apply(data: Data): Integer = data match {
+    case v: LongValue => new AbstractScalar(data = v) with Integer
+    case _ => throw new UnsupportedOperationException("An Integer must be constructed with a LongValue.")
+  }
+  
+  def apply(v: String): Integer = Integer(LongValue(v.toLong))
+  def apply(v: Double): Integer = Integer(LongValue(v.toLong))
+  def apply(v: Float):  Integer = Integer(LongValue(v.toLong))
+  def apply(v: Long):   Integer = Integer(LongValue(v))
+  def apply(v: Int):    Integer = Integer(LongValue(v.toLong))
+  def apply(v: Short):  Integer = Integer(LongValue(v.toLong))
+
+  
+  def apply(md: Metadata, data: Data): Integer = data match {
+    case dv: LongValue => new AbstractScalar(md, data) with Integer
+    case _ => throw new UnsupportedOperationException("An Integer must be constructed with a LongValue.")
+  }
+  
+  def apply(md: Metadata, v: String): Integer = Integer(md, LongValue(v.toLong))
+  def apply(md: Metadata, v: Double): Integer = Integer(md, LongValue(v.toLong))
+  def apply(md: Metadata, v: Float):  Integer = Integer(md, LongValue(v.toLong))
+  def apply(md: Metadata, v: Long):   Integer = Integer(md, LongValue(v))
+  def apply(md: Metadata, v: Int):    Integer = Integer(md, LongValue(v.toLong))
+  def apply(md: Metadata, v: Short):  Integer = Integer(md, LongValue(v.toLong))
+  
   def apply(md: Metadata): Integer = new AbstractScalar(md) with Integer
 
-  def apply(md: Metadata, data: Data): Integer = new AbstractScalar(md, data) with Integer
-  def apply(md: Metadata, v: Long): Integer = new AbstractScalar(md, Data(v)) with Integer
-
-  def apply(v: Long): Integer = new AbstractScalar(data = Data(v)) with Integer
-  def apply(v: AnyVal): Integer = v match {
-    case i: Int    => Integer(i.toLong)
-    case d: Double => Integer(d.toLong)
-    case f: Float  => Integer(f.toLong)
-    case s: Short  => Integer(s.toLong)
-    case st: scala.collection.immutable.StringOps => Integer(st.toLong)
-  }
-    
-  def apply(md: Metadata, v: Any): Integer = v match {
-    case l: Long => new AbstractScalar(md, data = LongValue(l)) with Integer
-    case lv: LongValue => new AbstractScalar(md, lv) with Integer
-    case d: Double => Integer(md,d.toLong)
-    case i: Int    => Integer(md,i.toLong)
-    case f: Float  => Integer(md,f.toLong)
-    case s: Short  => Integer(md,s.toLong)
-    case st: scala.collection.immutable.StringOps => Integer(md,st.toLong)
-  }
-    
+  
   /**
    * Expose the long value represented by this Variable.
    */

@@ -56,11 +56,14 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   def project(varNames: Seq[String]): Dataset = Projection(varNames)(this)
   def project(vname: String): Dataset = Projection(Seq(vname))(this)
   
+  def select(expression: String): Dataset = Selection(expression)(this)
+  
   def rename(origName: String, newName: String): Dataset = RenameOperation(origName, newName)(this)
   
-  def replaceValue(v1: AnyVal, v2: AnyVal): Dataset = ReplaceValueOperation(v1,v2)(this)
+  def replaceValue(v1: Any, v2: Any): Dataset = ReplaceValueOperation(v1,v2)(this)
   
   def reduce = Reduction.reduce(this)
+  def flatten = reduce
   
   def intersect(that: Dataset): Dataset = Intersection(this, that)
   
@@ -75,6 +78,31 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
     Dataset(v) //TODO: metadata
   }
   
+  /**
+   * Until we can enforce sorting of function samples this will do so. 
+   * Assumes Function with Integer domain only, for now.
+   * Sort by range if domain is Index.
+   * TODO: implement as Operation.
+   * See latis-mms-web TestDatasets
+   */
+  def sorted: Dataset = variable match {
+    case f @ Function(samples) => {
+      f.getDomain match {
+        case _: Index   => Dataset(Function(samples.toSeq.sortBy(s => s match {case Sample(_, Tuple(Seq(d: Integer))) => d})(Integer(0))))
+        case _: Integer => Dataset(Function(samples.toSeq.sortBy(s => s match {case Sample(d: Integer, _) => d})(Integer(0))))
+        case _: Real    => Dataset(Function(samples.toSeq.sortBy(s => s match {case Sample(d: Real, _) => d})(Real(0))))
+        case _: Text    => Dataset(Function(samples.toSeq.sortBy(s => s match {case Sample(d: Text, _) => d})(Text(""))))
+      }
+    }
+  }
+  
+  def last: Dataset = variable match {
+    //TODO: use Last filter
+    case Function(samples) => {
+      Dataset(Function(List(samples.toSeq.last)))
+    }
+  }
+    
   /**
    * Realize the Data for this Dataset so we can close the Reader.
    * Inspired by Scala's Stream.force.

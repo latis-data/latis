@@ -4,6 +4,20 @@
   
   <adapter class="latis.reader.tsml.PropertiesAdapter"/>
   
-  <text id="version" length="8"/>
+  <tuple>
+    <text id="version"     length="8"/>
+    <text id="dataset.dir" length="64"/>
+    <text id="jndi.name"   length="16"/>
+    <text id="log.dir"     length="64"/>
+    <text id="log.file"    length="16"/>
+  
+    <text id="user.timezone"   length="16"/>
+    <text id="time.scale.type" length="3"/>
+  
+    <text id="java.version" length="16"/>
+    <!--text id="java.io.tmpdir" length="32"/-->
+    <text id="os.name"    length="8"/>
+    <text id="os.version" length="16"/>
+  </tuple>
 
 </dataset>

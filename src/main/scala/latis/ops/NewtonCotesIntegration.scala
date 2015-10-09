@@ -1,6 +1,6 @@
 package latis.ops
 
-import org.apache.commons.math.analysis.interpolation.SplineInterpolator
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator
 
 import latis.dm.Function
 

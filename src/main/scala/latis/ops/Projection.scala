@@ -14,7 +14,7 @@ import latis.util.iterator.MappingIterator
 /**
  * Exclude variables not named in the given list.
  */
-class Projection(val names: Seq[String]) extends Operation {
+class Projection(val names: Seq[String]) extends Operation with Idempotence {
   //TODO: support long names, e.g. tupA.foo  , build into hasName?
   //TODO: consider projecting only part of nD domain. only if it is a product set
   

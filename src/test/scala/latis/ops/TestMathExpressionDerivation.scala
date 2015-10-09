@@ -1,16 +1,15 @@
 package latis.ops
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
-import latis.dm.TestDataset
-import latis.reader.tsml.TsmlReader
-import latis.writer.AsciiWriter
 import scala.collection.mutable.ArrayBuffer
+import org.junit.Assert.assertEquals
+import org.junit.Ignore
+import org.junit.Test
 import latis.dm.Dataset
 import latis.dm.Function
-import org.junit.Ignore
-import latis.dm.Sample
+import latis.dm.TestDataset
 import latis.metadata.Metadata
+import latis.reader.tsml.TsmlReader
+import latis.writer.AsciiWriter
 
 class TestMathExpressionDerivation {
   
@@ -40,18 +39,6 @@ class TestMathExpressionDerivation {
   def test_math_on_empty_dataset {
     val ds = MathExpressionDerivation("A=PI+E")(Dataset.empty)
     assert(ds.isEmpty)
-  }
-  
-  @Test
-  def test_dependentVars1 {
-    val ds = MathExpressionDerivation("A=X+1")
-    assertEquals(List("X"), ds.dependentVars)
-  }
-  
-  @Test
-  def test_dependentVars2 {
-    val ds = MathExpressionDerivation("A=SIN(X)+Y/Z+E")
-    assertEquals(List("X", "Y", "Z"), ds.dependentVars)
   }
   
   @Test
@@ -284,6 +271,24 @@ class TestMathExpressionDerivation {
     assertEquals(5.0, ds.toDoubleMap("A")(0), 0.0)
   }
   
+  @Test 
+  def nested {
+    val ds = MathExpressionDerivation("a = -z")(TestDataset.function_of_functions)
+    assertEquals(-10, ds.toDoubleMap("a")(3), 0.0)
+  }
+  
+  @Test 
+  def nested_override {
+    val ds = MathExpressionDerivation("y = z + 0.4")(TestDataset.function_of_functions)
+    assertEquals(10, ds.toDoubleMap("y")(3), 0.0)
+  }
+  
+  @Test
+  def override_text_time {
+    val ds = MathExpressionDerivation("myTime=myTime+8.64E7")(TestDataset.time_series)
+    assertEquals(8.64E7, ds.toDoubleMap("myTime")(0), 0.0)
+  }
+
   def assertEqualContents[T](s1: Seq[T], s2: Seq[T]) {
     if (s1.length != s2.length) {
       throw new AssertionError("Sequences did not have the same length")
@@ -296,57 +301,4 @@ class TestMathExpressionDerivation {
       }
     }
   }
-  
-  @Test
-  def split1 {
-    val inst = MathExpressionDerivation("")
-    val chunks = inst.split("(hello, world)")
-    assertEqualContents(List("(hello, world)"), chunks)
-  }
-  
-  @Test
-  def split2 {
-    val inst = MathExpressionDerivation("")
-    val chunks = inst.split("(hello, world),hello,world")
-    assertEqualContents(List("(hello, world)", "hello", "world"), chunks)
-  }
-  
-  @Test
-  def split3 {
-    val inst = MathExpressionDerivation("")
-    val chunks = inst.split("(hello, world),hello,world,")
-    assertEqualContents(List("(hello, world)", "hello", "world", ""), chunks)
-  }
-  
-  @Test
-  def split4 {
-    val inst = MathExpressionDerivation("")
-    val chunks = inst.split("(hello, world),(hello, world),(hello, world),hello,world,")
-    val expected = List(
-        "(hello, world)",
-        "(hello, world)",
-        "(hello, world)",
-        "hello",
-        "world",
-        ""
-    )
-    assertEqualContents(expected, chunks)
-  }
-  
-  @Test
-  def split5 {
-    val inst = MathExpressionDerivation("")
-    val chunks = inst.split(",(hello, world),(hello, world),(hello, world),hello,world,")
-    val expected = List(
-        "",
-        "(hello, world)",
-        "(hello, world)",
-        "(hello, world)",
-        "hello",
-        "world",
-        ""
-    )
-    assertEqualContents(expected, chunks)
-  }
-  
 }

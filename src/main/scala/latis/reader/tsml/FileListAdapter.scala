@@ -2,6 +2,9 @@ package latis.reader.tsml
 
 import latis.reader.tsml.ml.Tsml
 import latis.util.FileUtils
+import java.net.URLDecoder
+import java.io.File
+import latis.dm.Dataset
 
 /**
  * Return a list of files as a Dataset.
@@ -13,16 +16,21 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
   //Note: Using the RegexAdapter with "()" around the file name pattern almost works.
   //      The matcher returns it first but we want the file variable to be last.
   
+  lazy val directory = URLDecoder.decode(getUrl.getPath, "utf-8") //assumes a file URL 
+  
+  override def getDataset = {
+    super.getDataset match {
+      case ds @ Dataset(v) => Dataset(v, ds.getMetadata + ("srcDir" -> directory))
+    }
+  }
+  
   /**
    * A record consists of a file name, file size.
    */
   override def getRecordIterator = {
-    //TODO: can we do this without reading all file names into memory?
-    //TODO: see java 7 java.nio.file, DirectoryStream,...
-    //  FileSystems.getDefault().getPathMatcher("regex:.*").matches(path)
+    //see StreamingFileListAdapter for an iterative version of this adapter.
     //TODO: support ftp...?
-    val dir = getUrl.getPath //assumes a file URL 
-    FileUtils.listAllFilesWithSize(dir).iterator
+    FileUtils.listAllFilesWithSize(directory).iterator
   }
   
   /**
@@ -31,7 +39,8 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
    */
   override def extractValues(record: String) = {
     val fileName = record.split(',')(0)
-    val size = record.split(',')(1)
+    val size = if (getOrigScalarNames.contains("fileSize")) record.split(',')(1)
+      else ""
     regex.findFirstMatchIn(fileName) match {
       case Some(m) => (m.subgroups :+ fileName) :+ size //add the file name
       case None => List[String]()

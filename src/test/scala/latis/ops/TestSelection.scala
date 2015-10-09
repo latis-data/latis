@@ -351,6 +351,14 @@ class TestSelection {
     assertEquals(2, data("x")(1), 0)
   }
   
+  @Test(expected=classOf[UnsupportedOperationException])
+  def invalid_time_selection {
+    val ds = TestDataset.time_series
+    val op = Selection("time>=1970/01")
+    val ds2 = op(ds)
+    val data = ds2.toDoubleMap
+  }
+  
 }
 
 

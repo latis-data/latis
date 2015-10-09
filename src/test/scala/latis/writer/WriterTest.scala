@@ -8,7 +8,7 @@ import scala.io.Source
 
 import org.junit.Assert.assertEquals
 
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 import latis.dm.Dataset
 import latis.dm.TestNestedFunction
@@ -16,7 +16,7 @@ import latis.dm.Variable
 import latis.metadata.Metadata
 import latis.reader.tsml.TsmlReader
 
-class WriterTest extends Logging {
+class WriterTest extends LazyLogging {
     
   var tmpFile = java.io.File.createTempFile("LaTiS", "WriterTest")
   tmpFile.deleteOnExit

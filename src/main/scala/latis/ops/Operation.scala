@@ -1,6 +1,8 @@
 package latis.ops
 
 import scala.Option.option2Iterable
+import scala.reflect.runtime.currentMirror
+
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Sample
@@ -8,18 +10,12 @@ import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.util.LatisProperties
-import latis.util.iterator.PeekIterator
 import latis.util.iterator.MappingIterator
 
 /**
  * Base type for operations that transform on Dataset into another.
  */
 abstract class Operation {
-
-  /**
-   * Hack so we know when we are working on nested Functions: > 1.
-   */
-  protected var functionNestingLevel = 0
   
   /**
    * Apply this Operation to the given Dataset.
@@ -44,7 +40,7 @@ abstract class Operation {
     case scalar: Scalar     => applyToScalar(scalar)
     case sample: Sample     => applyToSample(sample)
     case tuple: Tuple       => applyToTuple(tuple)
-    case function: Function => functionNestingLevel += 1; applyToFunction(function)
+    case function: Function => applyToFunction(function)
   }
 
   /**
@@ -78,18 +74,12 @@ abstract class Operation {
    * to be applied to each sample as it iterates.
    */
   def applyToFunction(function: Function): Option[Variable] = {
-    if (functionNestingLevel > 1) {
-      ??? //breaks TimeFormatter on nested functions
-      Some(function) //hack to avoid wrapping nested functions
-    } 
-    else {
-      val mit = new MappingIterator(function.iterator, (s: Sample) => this.applyToSample(s))
-      val template = mit.peek match {
-        case null => function.getSample //empty iterator so no-op
-        case s => s
-      }
-      Some(Function(template.domain, template.range, mit, function.getMetadata))
+    val mit = new MappingIterator(function.iterator, (s: Sample) => this.applyToSample(s))
+    val template = mit.peek match {
+      case null => function.getSample //empty iterator so no-op
+      case s => s
     }
+    Some(Function(template.domain, template.range, mit, function.getMetadata))
   }
   
 }
@@ -134,7 +124,7 @@ object Operation {
     import scala.reflect.runtime.currentMirror
     
     val cls = getClassFromOpName(opName)
-    val moduleSymbol = currentMirror.classSymbol(cls).companionSymbol.asModule
+    val moduleSymbol = currentMirror.classSymbol(cls).companion.asModule
     currentMirror.reflectModule(moduleSymbol).instance.asInstanceOf[OperationFactory] 
   }
     

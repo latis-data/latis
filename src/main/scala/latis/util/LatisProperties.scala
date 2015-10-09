@@ -4,9 +4,10 @@ import java.util.Properties
 import java.io.File
 import java.io.FileInputStream
 import java.net.URL
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 import scala.collection.JavaConversions
 import java.net.URLDecoder
+import java.util.TimeZone
 
 /**
  * Singleton for access to properties with the following precedence:
@@ -14,7 +15,7 @@ import java.net.URLDecoder
  * 2) LaTiS properties file
  * 3) Environment variable
  */
-class LatisProperties extends Properties with Logging {
+class LatisProperties extends Properties with LazyLogging {
   
   /**
    * The name of the properties file.
@@ -35,7 +36,19 @@ class LatisProperties extends Properties with Logging {
       throw new RuntimeException("Unable to load properties file: " + file, e)
     }
   }
-            
+
+  /**
+   * Set the default time zone. Default to UTC.
+   * Note, this will only be invoked if LatisProperties is referenced.
+   * Server instances will invoke this but some unit tests may not.
+   */
+  val tz = getProperty("time.zone", "UTC")
+  try {
+    TimeZone.setDefault(TimeZone.getTimeZone(tz))
+  } catch {
+    case e: Exception => throw new RuntimeException(s"Unable to set default time zone for: $tz")
+  }
+  
   /**
    * Find the property file with the following precedence:
    * 1) latis.config system property

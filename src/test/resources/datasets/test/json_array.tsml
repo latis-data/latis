@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset id="json">
+  <adapter class="latis.reader.tsml.JsonAdapter"
+           location="datasets/test/mixed_array.json" />
+           
+  <index/>
+  
+  <time type="text" length="10">
+    <metadata name="myTime" units="yyyy/MM/dd"/>
+  </time>
+ 
+  <integer id="myInt"/>
+  <real    id="myReal"/>
+  <text    id="myText"/>
+   
+</dataset>

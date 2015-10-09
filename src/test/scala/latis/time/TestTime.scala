@@ -5,6 +5,10 @@ import Assert._
 import latis.metadata.Metadata
 import latis.dm.Real
 import latis.dm.Text
+import latis.dm.Function
+import latis.dm.Dataset
+import latis.ops.TimeFormatter
+import latis.dm.Sample
 
 class TestTime {
 
@@ -163,4 +167,27 @@ class TestTime {
     assertEquals(ms1, ms2)
   }
   
+  @Test
+  def time_from_formatted_string = {
+    val ds = Dataset(Time("2015-10-01")) //TODO: MatchError
+    TimeFormatter("yyyy/DDD")(ds) match {
+      case Dataset(Text(s)) => assertEquals("2015/274", s)
+    }
+  }
+  
+  @Test 
+  def time_from_formatted_string_with_metadata_name_only = {
+    val ds = Dataset(Time(Metadata("time"), "2015-10-01"))  //TODO: makes numeric units, should be formatted
+    TimeFormatter("yyyy/DDD")(ds) match {
+      case Dataset(Text(s)) => assertEquals("2015/274", s)
+    }
+  }
+  
+  @Test
+  def time_from_formatted_string_with_metadata_with_units = {
+    val ds = Dataset(Time(Metadata(Map("name" -> "time", "units" -> "yyyy-MM-dd")), "2015-10-01"))
+    TimeFormatter("yyyy/DDD")(ds) match {
+      case Dataset(Text(s)) => assertEquals("2015/274", s)
+    }
+  }
 }

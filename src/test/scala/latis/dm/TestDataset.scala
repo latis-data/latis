@@ -3,7 +3,7 @@ package latis.dm
 import latis.dm.implicits._
 import org.junit._
 import Assert._
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 import latis.dm._
 import latis.metadata.Metadata
 import latis.time.Time
@@ -87,7 +87,7 @@ object TestDataset {
   def real = Dataset(Real(Metadata("myReal"), 3.14), Metadata("realDS"))
   def integer = Dataset(Integer(Metadata("myInteger"), 42), Metadata("intDS"))
   def text = Dataset(Text(Metadata("myText"), "Hi"), Metadata("textDS"))
-  def real_time = Dataset(Time(Metadata("myRealTime"), 1000.0), Metadata("timeDS"))
+  def real_time = Dataset(Time(Metadata(Map("name" -> "myRealTime", "type" -> "real", "units" -> "days since 2000")), 1000.0), Metadata("timeDS"))
   def text_time = Dataset(Time(Metadata(Map("name" -> "myTextTime", "type" -> "text", "length" -> "10", "units" -> "yyyy-MM-dd")), "1970/01/01"), Metadata("text_timeDS"))
   def int_time = Dataset(Time(Metadata(Map("name" -> "myIntegerTime", "type" -> "integer")), 1000.toLong), Metadata("integer_timeDS"))
   //def scalars = Dataset(List(Real(Metadata("myReal"), 3.14), Integer(Metadata("myInteger"), 42), Text(Metadata("myText"), "Hi"), Time(Metadata("myRealTime"), 1000.0)), Metadata("scalarDS"))

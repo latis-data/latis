@@ -12,7 +12,7 @@ import latis.data.SampleData
 import latis.util.iterator.PeekIterator
 import latis.util.iterator.MappingIterator
 import latis.data.EmptyData
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 /**
  * A SampledFunction represents a discrete Function whose values are defined
@@ -20,7 +20,7 @@ import com.typesafe.scalalogging.slf4j.Logging
  * domain value to a range value.
  */
 class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = EmptyMetadata, data: SampledData = EmptyData) 
-    extends AbstractVariable(metadata, data) with Function with Logging {
+    extends AbstractVariable(metadata, data) with Function with LazyLogging {
 
   //expose domain and range via defs only so we can override
   //TODO: no longer the case? require operation to make new SampledFunction if it changes the type instead of a wrapped function
@@ -151,7 +151,7 @@ object SampledFunction {
   def apply(domain: Variable, range: Variable, samples: Iterator[Sample], metadata: Metadata = EmptyMetadata) = {
     if (samples == null) throw new Error("Can't construct a SampledFunction with a null Sample Iterator.")
     val sit = domain match {
-      case i: Index => IndexSet().iterator.zip(samples).map(p => Sample(Index(p._1), p._2.range))
+      case i: Index => IndexSet().iterator.zip(samples).map(p => Sample(Index(i.getMetadata, p._1), p._2.range))
       case _ => samples
     }
     val sf = new SampledFunction(domain, range, metadata=metadata){
@@ -164,7 +164,7 @@ object SampledFunction {
     if (samples == null) throw new Error("Can't construct a SampledFunction with a null Sample Iterable.")
     val template = samples.head
     val sit = template.domain match {
-      case i: Index => Iterable.range(0,samples.size).zip(samples).map(p => Sample(Index(p._1), p._2.range))
+      case i: Index => Iterable.range(0,samples.size).zip(samples).map(p => Sample(Index(i.getMetadata, p._1), p._2.range))
       case _ => samples
     }
     val sf = new SampledFunction(template.domain, template.range, metadata=metadata)

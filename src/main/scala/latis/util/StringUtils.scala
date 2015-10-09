@@ -5,6 +5,9 @@ import latis.dm.Integer
 import latis.dm.Real
 import latis.dm.Text
 import latis.dm.Variable
+import java.net.URL
+import java.io.File
+import java.net.URLEncoder
 
 /**
  * Utility methods for manipulating Strings.
@@ -71,23 +74,41 @@ object StringUtils {
   }
   
   /**
+   * Convert the given String to a Double.
+   * If not convertible, return NaN.
+   */
+  def toDouble(s: String): Double = {
+    try {
+      s.toDouble
+    } catch {
+      case e: Exception => Double.NaN
+    }
+  }
+  
+  /**
    * construct Data from a String by matching a Variable template
    */
   //TODO: support regex property for each variable
   def parseStringValue(value: String, variableTemplate: Variable): Data = variableTemplate match {
-    case _: Integer => try {
-      //If value looks like a float, take everything up to the decimal point.
-      val s = if (value.contains(".")) value.substring(0, value.indexOf("."))
-      else value
-      Data(s.trim.toLong)
-    } catch {
-      case e: NumberFormatException => Data(variableTemplate.asInstanceOf[Integer].getFillValue.asInstanceOf[Long])
-    }
-    case _: Real => try {
-      Data(value.trim.toDouble)
-    } catch {
-      case e: NumberFormatException => Data(variableTemplate.asInstanceOf[Real].getFillValue.asInstanceOf[Double])
-    }
+    case _: Integer => if(isNumeric(value)) Data(toDouble(value).toLong)
+      else Data(variableTemplate.asInstanceOf[Integer].getFillValue.asInstanceOf[Long])
+      
+    case _: Real => if(isNumeric(value)) Data(toDouble(value))
+      else Data(variableTemplate.asInstanceOf[Real].getFillValue.asInstanceOf[Double])
+      
     case t: Text    => Data(StringUtils.padOrTruncate(value, t.length)) //enforce length
   }
+  
+  def getUrl(loc: String): URL = {
+    if(loc.matches("""\w+:.+""")) new URL(loc) //absolute
+    else if (loc.startsWith(File.separator)) new URL("file:" + loc) 
+    else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
+      case url: URL => url
+      case null => {  
+        val dir = scala.util.Properties.userDir
+        new URL("file:" + dir + File.separator + loc) //relative to current working directory
+      }
+    }
+  }
+  
 }

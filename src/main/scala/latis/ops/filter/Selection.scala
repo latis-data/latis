@@ -5,7 +5,7 @@ import latis.dm.Scalar
 import latis.dm.Text
 import latis.time.Time
 import latis.util.RegEx.SELECTION
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 import latis.util.iterator.MappingIterator
 import latis.dm.Sample
 import latis.dm.Variable
@@ -13,12 +13,13 @@ import latis.dm.WrappedFunction
 import latis.dm.Tuple
 import latis.ops.Operation
 import latis.ops.resample.NearestNeighbor
+import latis.util.StringUtils
 
 /**
  * Filter based on a basic boolean expression.
  * e.g. "foo >= 2"
  */
-protected class Selection(val vname: String, val operation: String, val value: String) extends Filter with Logging {
+class Selection(val vname: String, val operation: String, val value: String) extends Filter with LazyLogging {
   //TODO: if domain, delegate to DomainSet
   //TODO: change operation to operator?
   
@@ -74,6 +75,21 @@ protected class Selection(val vname: String, val operation: String, val value: S
     }
   }
   
+  /**
+   * If we are selecting on the Function domain and we have bounds data 
+   * in the range and the operation include ">" or "<", apply a new 
+   * Selection using the bounds.
+   */
+  override def applyToFunction(f: Function): Option[Function] = {
+   (f.getDomain.hasName(vname), f.getRange.findVariableByName("bounds")) match {
+      case (true, Some(Tuple(vars))) => operation match {
+        case op if(op.contains("<")) => Selection(vars(0).getName, operation, value).applyToFunction(f).asInstanceOf[Option[Function]]
+        case op if(op.contains(">")) => Selection(vars(1).getName, operation, value).applyToFunction(f).asInstanceOf[Option[Function]]
+      }
+      case _ => super.applyToFunction(f)
+    }
+  }
+  
   private def isValid(comparison: Int): Boolean = {
     if (operation == "!=") {
       comparison != 0
@@ -93,7 +109,16 @@ object Selection {
   def apply(vname: String, operation: String, value: String): Operation = {
     //delegate to NearestNeighbor filter for '~' operator
     if (operation == "~") NearestNeighborFilter(vname, value)
-    else new Selection(vname, operation, value)
+    
+    //validate time selections before they are applied to every Sample
+    else vname match {
+      case "time" => { 
+        if(Time.isValidIso(value) || StringUtils.isNumeric(value)) new Selection(vname, operation, value)
+        else throw new UnsupportedOperationException(
+          s"Invalid Selection: could not parse '$value' as a time string.")
+      }
+      case _ => new Selection(vname, operation, value)
+    }
   }
   
   def apply(expression: String): Operation = expression.trim match {

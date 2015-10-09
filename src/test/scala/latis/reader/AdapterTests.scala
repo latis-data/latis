@@ -1,10 +1,15 @@
 package latis.reader
 
+import scala.collection.mutable.ArrayBuffer
+
 import org.junit.Assert.assertEquals
 import org.junit.Test
+
+import latis.dm.Dataset
 import latis.ops.BinAverage
 import latis.ops.Operation
 import latis.ops.Projection
+import latis.ops.RenameOperation
 import latis.ops.filter.FirstFilter
 import latis.ops.filter.LastFilter
 import latis.ops.filter.LimitFilter
@@ -12,7 +17,6 @@ import latis.ops.filter.Selection
 import latis.ops.math.MathOperation
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
-import latis.dm.Dataset
 
 abstract class AdapterTests {
   
@@ -232,6 +236,18 @@ abstract class AdapterTests {
     val data = ds.toDoubleMap
     assertEquals(43200000, data("myTime").head, 0.0)
     assertEquals(3.0, data("myInt").head, 0.0)
+  }
+  
+  @Test
+  def convert_then_rename {
+    val ops = ArrayBuffer[Operation]()
+    ops += Operation("convert",List("time","days since 1858-11-17"))
+    ops += RenameOperation("myTime", "MJD")
+    val ds = getDataset(ops)
+//    AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+    assertEquals(3, data("MJD").length)
+    assertEquals(40588.0, data("MJD")(1), 0.0)
   }
   
   //---- Test Rename Operation -------------------------------------------//

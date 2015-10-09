@@ -57,17 +57,7 @@ class TestAggregation {
     assertEquals("(T -> A)", ds.toString)
     assertEquals(20, ds.getLength) //20 samples
   }
-    
-  @Test
-  def test_tsml_append {
-    val ds = TsmlReader("datasets/test/agg/agg_append.tsml").getDataset
-    //AsciiWriter.write(ds)
-    val data = ds.toDoubleMap
-    assertEquals(20, data("T").length)
-    assertEquals(2, data.keySet.size)
-    assertEquals("agg_test", ds.getName)
-  }
-  
+      
 //  @Test
 //  def test_combine_variables {
 //    val ds1 = TsmlReader("datasets/test/scalar_ts_2col_0-9.tsml").getDataset

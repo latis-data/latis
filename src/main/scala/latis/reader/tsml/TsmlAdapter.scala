@@ -3,14 +3,13 @@ package latis.reader.tsml
 import java.io.File
 import java.net.URI
 import java.net.URL
-
+import java.net.URLDecoder
+import java.net.URLEncoder
 import scala.Option.option2Iterable
-import scala.annotation.migration
 import scala.collection.Map
 import scala.collection.Seq
 import scala.collection.immutable
 import scala.collection.mutable
-
 import latis.data.Data
 import latis.data.seq.DataSeq
 import latis.dm.Dataset
@@ -21,6 +20,7 @@ import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.metadata.Metadata
+import latis.ops.DomainBinner
 import latis.ops.MathExpressionDerivation
 import latis.ops.Operation
 import latis.ops.Projection
@@ -35,6 +35,9 @@ import latis.reader.tsml.ml.TupleMl
 import latis.reader.tsml.ml.VariableMl
 import latis.time.Time
 import latis.util.DataUtils
+import latis.ops.filter.Selection
+import java.net.MalformedURLException
+import latis.util.StringUtils
 
 
 /**
@@ -423,7 +426,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
         })
         filteredDerivedFields.map(MathExpressionDerivation(_))
       }
-    projections ++ selections ++ conversions ++ renames ++ derivations
+    val domBin = tsml.getProcessingInstructions("domBin").map(s => DomainBinner(s.split(',')))
+    projections ++ selections ++ conversions ++ renames ++ derivations ++ domBin
   }
   
   /**
@@ -444,15 +448,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   def getUrl: URL = {
     //Note, can't be relative to the tsml file since we only have xml here. Tsml could be from any source.
     properties.get("location") match {
-      case Some(loc) => {
-        val uri = new URI(loc)
-        if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
-        else if (loc.startsWith(File.separator)) new URL("file:" + loc) //absolute path
-        else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
-          case url: URL => url
-          case null => new URL("file:" + scala.util.Properties.userDir + File.separator + loc) //relative to current working directory
-        }
-      }
+      case Some(loc) => StringUtils.getUrl(loc)
       case None => throw new RuntimeException("No 'location' attribute in TSML adapter definition.")
     }
   }
@@ -475,7 +471,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   def getUrlFile: File = {
     val url = getUrl
-    new File(url.getPath.replace("%20", " "))
+    new File(URLDecoder.decode(url.getPath,"utf-8"))
   }
   
   

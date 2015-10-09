@@ -8,10 +8,10 @@ import latis.dm.Variable
 import latis.reader.tsml.ml.Tsml
 import latis.util.StringUtils
 import scala.io.Source
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 
-class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Logging {
+class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with LazyLogging {
 
   //---- Manage data source ---------------------------------------------------
   
@@ -152,7 +152,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Logg
     
     //assume one value per scalar per record
     val vars = getOrigScalars
-    val values = extractValues(record)
+    val values = extractValues(record).filterNot(_.isEmpty)
     
     //If we don't parse as many values as expected, assume we have an invalid record and skip it.
     if (vars.length != values.length) {
@@ -170,7 +170,9 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Logg
   /**
    * Extract the Variable values from the given record.
    */
-  def extractValues(record: String): Seq[String] = record.trim.split(getDelimiter)
+  def extractValues(record: String): Seq[String] = splitAtDelim(record)
+  
+  def splitAtDelim(str: String) = str.trim.split(getDelimiter)
 
 }
 

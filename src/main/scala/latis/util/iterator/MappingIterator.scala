@@ -1,7 +1,7 @@
 package latis.util.iterator
 
 import scala.annotation.tailrec
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.scalalogging.LazyLogging
 
 /**
  * An Iterator that looks ahead and caches the next sample.
@@ -12,7 +12,7 @@ import com.typesafe.scalalogging.slf4j.Logging
  * This implementation of the PeekIterator applies a function
  * mapping to each element as it iterates.
  */
-class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) extends PeekIterator[T] with Logging {
+class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) extends PeekIterator[T] with LazyLogging {
   //Note, the bound on Null allows us to return null for generic type T.
   //TODO: could we do it.flatMap(f)? but would no longer be a PeekIterator? unless we do CanBuildFrom...?
 

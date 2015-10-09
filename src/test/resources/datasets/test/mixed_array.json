@@ -1,0 +1,20 @@
+[
+{
+"myTime": "1970/01/01",
+"myInt": 1,
+"myReal": 1.1,
+"myText": "A"
+},
+{
+"myTime": "1970/01/02",
+"myInt": 2,
+"myReal": 2.2,
+"myText": "B"
+},
+{
+"myTime": "1970/01/03",
+"myInt": 3,
+"myReal": 3.3,
+"myText": "C"
+}
+]
