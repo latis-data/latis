@@ -163,9 +163,7 @@ object Time {
     val scale = md.get("units") match {
       case Some(u) => TimeScale(u)
       case None => {
-        //Use default time scale, add units to metadata
-        metadata = md + ("units" -> TimeScale.JAVA.toString)
-        TimeScale.JAVA
+        throw new Error("Time can only be constructed without units from an iso time string.")
       }
     }
     new Time(scale, metadata)
@@ -181,9 +179,10 @@ object Time {
     val scale = md.get("units") match {
       case Some(u) => TimeScale(u)
       case None => {
-        //Use default time scale, add units to metadata
-        metadata = md + ("units" -> TimeScale.JAVA.toString)
-        TimeScale.JAVA
+        val unit = if(isValidIso(value.toString)) TimeFormat.fromIsoValue(value.toString).toString
+          else throw new Error("Time can only be constructed without units from an iso time string.")
+        metadata = md + ("units" -> unit)
+        TimeScale.apply(unit)
       }
     }
     value match {
@@ -204,10 +203,15 @@ object Time {
       case _: Double => new Time(scale, md, Data(value)) with Real
       case _: Int => new Time(scale, md, Data(value)) with Integer
       case _: Long => new Time(scale, md, Data(value)) with Integer
+      case _: String => new Time(scale, md, Data(value)) with Text
     }
   }
 
-  def apply(value: String): Time = Time(TimeScale.JAVA, value)
+  def apply(value: String): Time = {
+    if(isValidIso(value)) fromIso(value)
+    else throw new Error("Time can only be constructed without units from an iso time string.")
+
+  }
   def apply(value: AnyVal): Time = Time(TimeScale.JAVA, value)
   
   def apply(date: Date): Time = Time(date.getTime())
