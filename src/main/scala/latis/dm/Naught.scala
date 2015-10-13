@@ -15,6 +15,7 @@ class Naught extends Variable {
   def findFunction: Option[latis.dm.Function] = None
   
   def findVariableByName(name: String): Option[latis.dm.Variable] = None
+  def findAllVariablesByName(name: String) = Seq()
   
   def getData: Data = Data.empty
   
