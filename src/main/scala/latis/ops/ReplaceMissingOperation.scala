@@ -25,8 +25,14 @@ object ReplaceMissingOperation extends OperationFactory {
   
   override def apply(args: Seq[String]): ReplaceMissingOperation = {
     if (args.length != 1) throw new UnsupportedOperationException("The ReplaceMissingOperation requires one argument.")
-    val v: ScalaNumericAnyConversions = ???
-    //TODO: need to know what type to convert string to
+    val v: ScalaNumericAnyConversions = args.headOption match  {
+      case Some(s) => {
+        if (s == "NaN") Double.NaN
+        else ???
+        //TODO: need to know what type to convert string to
+      }
+    }
+    
     ReplaceMissingOperation(v)
   }
   
