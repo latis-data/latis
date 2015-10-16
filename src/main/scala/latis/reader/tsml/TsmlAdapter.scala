@@ -38,6 +38,8 @@ import latis.util.DataUtils
 import latis.ops.filter.Selection
 import java.net.MalformedURLException
 import latis.util.StringUtils
+import scala.collection.mutable.ArrayBuffer
+import latis.ops.TimeFormatter
 
 
 /**
@@ -398,24 +400,26 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    */
   def piOps: Seq[Operation] = {
     //TODO: consider order
-    //TODO: add other PI types? rename,...
-    /*
-     * TODO: unify handling/parsing of service constraints and PIs
-     * foo(bar) = <?foo bar?> ?
-     */
+    
+    val ops = ArrayBuffer[Operation]()
+    //LATIS-400: tsml.processingInstructions.map(pi => Operation(pi._1, pi._2)).toSeq
     
     val projectedNames = tsml.getProcessingInstructions("project")
     val projections = projectedNames.map(Projection(_)) 
-    val selections  = tsml.getProcessingInstructions("select").map(Selection(_))
+    ops ++= projections
+    
+    ops ++= tsml.getProcessingInstructions("select").map(Selection(_))
+    
     //Unit conversions: "convert vname units"
-    val conversions = tsml.getProcessingInstructions("convert").map(s => {
+    ops ++= tsml.getProcessingInstructions("convert").map(s => {
       val index = s.indexOf(" ")
       val vname = s.substring(0, index).trim
       val units = s.substring(index).trim
       UnitConversion(vname, units)
     })
     
-    val renames = tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
+    ops ++= tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
+    
     val derivedFields = tsml.getProcessingInstructions("derived")
     val derivations = if((projectedVariableNames ++ projections).isEmpty) derivedFields.map(MathExpressionDerivation(_)) 
       else {
@@ -426,8 +430,13 @@ abstract class TsmlAdapter(val tsml: Tsml) {
         })
         filteredDerivedFields.map(MathExpressionDerivation(_))
       }
-    val domBin = tsml.getProcessingInstructions("domBin").map(s => DomainBinner(s.split(',')))
-    projections ++ selections ++ conversions ++ renames ++ derivations ++ domBin
+    ops ++= derivations
+    
+    ops ++= tsml.getProcessingInstructions("domBin").map(s => DomainBinner(s.split(',')))
+
+    ops ++= tsml.getProcessingInstructions("format_time").map(TimeFormatter(_)) 
+    
+    ops.toSeq
   }
   
   /**
