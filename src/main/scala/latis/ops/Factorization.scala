@@ -1,6 +1,7 @@
 package latis.ops
 
 import latis.dm._
+import latis.metadata.Metadata
 
 class Factorization extends Operation {
 
@@ -104,7 +105,10 @@ object Factorization {
       //TODO: do we dare use Scalar as key? need equals, hashCode
       
       //extract metadata from new domain
-      val domainMetadata = new_samples.head.domain.getMetadata
+      val domainMetadata = new_samples.headOption match {
+        case Some(s) => s.domain.getMetadata
+        case None => Metadata.empty
+      }
       
       val z = for ((value, samples) <- map) yield {
         //range should be the new_samples, need to remove the variable that is now the domain
