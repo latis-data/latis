@@ -40,6 +40,7 @@ import java.net.MalformedURLException
 import latis.util.StringUtils
 import scala.collection.mutable.ArrayBuffer
 import latis.ops.TimeFormatter
+import latis.ops.ReplaceMissingOperation
 
 
 /**
@@ -435,6 +436,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     ops ++= tsml.getProcessingInstructions("domBin").map(s => DomainBinner(s.split(',')))
 
     ops ++= tsml.getProcessingInstructions("format_time").map(TimeFormatter(_)) 
+    
+    tsml.getProcessingInstructions("replace_missing").headOption match {
+      case Some(mv) => ops += ReplaceMissingOperation(List(mv))
+      case None =>
+    }
     
     ops.toSeq
   }
