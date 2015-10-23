@@ -11,6 +11,7 @@ import latis.dm.Real
 class ReplaceMissingOperation(value: ScalaNumericAnyConversions) extends Operation {
   //TODO: ExcludeMissing, filter
   //TODO: apply to text
+  //TODO: update metadata missing_value
 
   override def applyToScalar(scalar: Scalar): Option[Scalar] = scalar match {
     case r: Real if (r.isMissing) => Some(Real(r.getMetadata, value.doubleValue))
@@ -31,6 +32,7 @@ object ReplaceMissingOperation extends OperationFactory {
         else ???
         //TODO: need to know what type to convert string to
       }
+      case None => ???
     }
     
     ReplaceMissingOperation(v)
