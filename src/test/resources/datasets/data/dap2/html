@@ -25,7 +25,7 @@ ylabel: 'unknown',
     Sequence {
         String myTime;
         Structure {
-            Int64 myInt;
+            Int32 myInt;
             Float64 myReal;
             String myText;
         } unknown;
