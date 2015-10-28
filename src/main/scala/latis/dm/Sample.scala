@@ -18,5 +18,8 @@ object Sample {
   /**
    * Expose the domain and range components of the Sample as a pair.
    */
-  def unapply(sample: Sample): Option[(Variable, Variable)] = Some((sample.domain, sample.range))
+  def unapply(sample: Sample): Option[(Variable, Variable)] = {
+    if (sample.domain != null && sample.range != null) Some((sample.domain, sample.range))
+    else None
+  }
 }
