@@ -18,6 +18,7 @@ class Memoization extends Operation {
       //recurse into inner functions
       case Sample(d, f: Function) => applyToFunction(f) match {
         case Some(f2) => Sample(d, f2)
+        case None => ???
       }
       case _ => s
     })

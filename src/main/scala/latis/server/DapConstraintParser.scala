@@ -14,6 +14,7 @@ import latis.util.RegEx.OPERATION
 import latis.util.RegEx.SELECTION
 
 class DapConstraintParser {
+  //Note, using a class instead of object to avoid concurrency issues.
   //TODO: consider a parser combinator
 
   /**
