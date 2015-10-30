@@ -87,6 +87,8 @@ class LeftOuterJoin extends Aggregation {
   //TODO: util method
   def makeFillVariable(v: Variable): Variable = v match {
     case s: Scalar => Scalar(s.getMetadata, s.getFillValue)
+    case Tuple(vars) => Tuple(vars.map(makeFillVariable(_))) //preserve type by keeping members
+    case f: Function => Function(f.getDomain, f.getRange, f.getMetadata) //empty Function that preserves type
   }
 }
 
