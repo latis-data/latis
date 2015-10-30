@@ -8,6 +8,7 @@ import latis.ops.agg.CollectionAggregation
 import latis.ops.agg.TileAggregation
 import latis.dm._
 import latis.ops.agg.Intersection
+import latis.metadata.Metadata
 
 class TestIntersection {
   
@@ -25,7 +26,23 @@ class TestIntersection {
     assertEquals(6.0, data(1)(3), 0.0)
   }
   
-  //TODO: test metadata preservation
+  @Test
+  def metadata_preservation = {
+    val samples1 = (0 to 3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
+    val samples2 = (0 to 3).map(i => Sample(Real(Metadata("t"), i+1), Real(Metadata("b"), i*2)))
+    val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
+    val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
+    val md = Metadata("dataset3")
+    val ds3 = Intersection(ds1, ds2, md)
+    //latis.writer.AsciiWriter.write(ds1)
+    //latis.writer.AsciiWriter.write(ds2)
+    //latis.writer.AsciiWriter.write(ds3)
+    assertEquals("dataset3", ds3.getName)
+    ds3 match {
+      case Dataset(f: Function) => assertEquals("function1", f.getName) //uses Function from first dataset for now
+    }
+  }
+  
   
   //@Test
   def tuple_functions {

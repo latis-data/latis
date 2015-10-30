@@ -8,6 +8,8 @@ import scala.collection.mutable.ArrayBuffer
 import latis.dm.Tuple
 import latis.dm.Function
 import latis.ops.Reduction
+import latis.metadata.EmptyMetadata
+import latis.metadata.Metadata
 
 class Intersection extends Aggregation { 
   //use case: x -> (a,b) intersect x -> (c,d) => x -> (a,b,c,d) 
@@ -44,10 +46,10 @@ class Intersection extends Aggregation {
     
     //TODO: update metadata
     //use metadata from first Dataset for new Dataset
+    //Note, dataset metadata must be passed in via the super apply(ds1, ds2, md)
     val fmd = f1.getMetadata
-    val dsmd = ds1.getMetadata
     
-    Dataset(Function(dtype, rtype, samples, fmd), dsmd)
+    Dataset(Function(dtype, rtype, samples, fmd))
   }
   
   private def getNextMatchingSamplePair(it1: Iterator[Sample], it2: Iterator[Sample]): Option[(Sample,Sample)] = {
@@ -75,5 +77,5 @@ class Intersection extends Aggregation {
 object Intersection {
   
   def apply() = new Intersection()
-  def apply(ds1: Dataset, ds2: Dataset) = new Intersection()(ds1, ds2)
+  def apply(ds1: Dataset, ds2: Dataset, md: Metadata = EmptyMetadata) = new Intersection()(ds1, ds2, md)
 }
