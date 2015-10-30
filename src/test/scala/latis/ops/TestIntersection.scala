@@ -25,6 +25,8 @@ class TestIntersection {
     assertEquals(6.0, data(1)(3), 0.0)
   }
   
+  //TODO: test metadata preservation
+  
   //@Test
   def tuple_functions {
     val ds1 = TsmlReader("/home/lindholm/git/webtcad-mms/src/test/resources/datasets/Schemas.tsml").getDataset

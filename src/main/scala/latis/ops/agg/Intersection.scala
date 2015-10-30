@@ -42,7 +42,12 @@ class Intersection extends Aggregation {
       }
     }
     
-    Dataset(Function(dtype, rtype, samples))
+    //TODO: update metadata
+    //use metadata from first Dataset for new Dataset
+    val fmd = f1.getMetadata
+    val dsmd = ds1.getMetadata
+    
+    Dataset(Function(dtype, rtype, samples, fmd), dsmd)
   }
   
   private def getNextMatchingSamplePair(it1: Iterator[Sample], it2: Iterator[Sample]): Option[(Sample,Sample)] = {
