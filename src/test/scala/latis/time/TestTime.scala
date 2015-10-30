@@ -190,4 +190,20 @@ class TestTime {
       case Dataset(Text(s)) => assertEquals("2015/274", s)
     }
   }
+  
+  @Test
+  def unspecified_2_digit_year {
+    val ds = Dataset(Time(Metadata(Map("name" -> "time", "units" -> "yy-MM-dd")), "15-10-01"))
+    TimeFormatter("yyyy-MM-dd")(ds) match {
+      case Dataset(Text(s)) => assertEquals("2015-10-01", s)
+    }
+  }
+  
+  @Test
+  def specified_2_digit_year {
+    val ds = Dataset(Time(Metadata(Map("name" -> "time", "units" -> "yy-MM-dd", "century_start_date" -> "1900")), "15-10-01"))
+    TimeFormatter("yyyy-MM-dd")(ds) match {
+      case Dataset(Text(s)) => assertEquals("1915-10-01", s)
+    }
+  }
 }
