@@ -169,7 +169,7 @@ class TestTime {
   
   @Test
   def time_from_formatted_string = {
-    val ds = Dataset(Time("2015-10-01")) //TODO: MatchError
+    val ds = Dataset(Time("2015-10-01"))
     TimeFormatter("yyyy/DDD")(ds) match {
       case Dataset(Text(s)) => assertEquals("2015/274", s)
     }
@@ -177,7 +177,7 @@ class TestTime {
   
   @Test 
   def time_from_formatted_string_with_metadata_name_only = {
-    val ds = Dataset(Time(Metadata("time"), "2015-10-01"))  //TODO: makes numeric units, should be formatted
+    val ds = Dataset(Time(Metadata("time"), "2015-10-01"))
     TimeFormatter("yyyy/DDD")(ds) match {
       case Dataset(Text(s)) => assertEquals("2015/274", s)
     }
