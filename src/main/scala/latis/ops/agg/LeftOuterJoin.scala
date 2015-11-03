@@ -68,7 +68,13 @@ class LeftOuterJoin extends Aggregation {
             case None => makeFillVariable(f2.getRange)
           }
           
-          val range = reduction.applyToTuple(Tuple(s1.range, range2)).get //flatten
+          val range = reduction.applyToTuple(Tuple(s1.range, range2)) match {
+            case Some(v: Variable) => v
+            case None => {
+              println("broke")
+              ???
+            }
+          }
           Sample(d1,range)
           
         } else null

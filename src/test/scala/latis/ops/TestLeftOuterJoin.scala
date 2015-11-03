@@ -142,4 +142,15 @@ class TestLeftOuterJoin {
       }
     }
   }
+  
+  //@Test
+  def empty_second = {
+    val samples1 = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
+    val samples2 = List[Sample]() //.map(i => Sample(Real(Metadata("t"), i), Real(Metadata("b"), i*2)))
+    val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
+    val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
+    val op = new LeftOuterJoin()
+    val ds = op(ds1, ds2)
+    AsciiWriter.write(ds)
+  }
 }
