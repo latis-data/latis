@@ -32,6 +32,13 @@ class JsonMetadataAndDataWriter extends JsonWriter {
         sb append "\"metadata\": {" //metadata object label
         sb append mdvarToString(Sample(function.getDomain, function.getRange)) //metadata
         sb append "},\n"
+        
+        //Add array of parameter names in same order as data array.
+        //Note, the order of the parameters in the metadata object above 
+        //  is not preserved in JavaScript. (LATIS-406)
+        //This may continue to evolve to better align with the LEMR Dataset ontology.
+        val vnames = function.toSeq.map(v => "\"" + v.getName + "\"") //Seq of quoted parameter names
+        sb append vnames.mkString("\"parameters\": [ ", ", ", " ],\n")
     
         sb append "\"data\": " //start data object
       }
