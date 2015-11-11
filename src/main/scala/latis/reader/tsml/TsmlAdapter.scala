@@ -41,6 +41,7 @@ import latis.util.StringUtils
 import scala.collection.mutable.ArrayBuffer
 import latis.ops.TimeFormatter
 import latis.ops.ReplaceMissingOperation
+import latis.ops.TimeTupleToTime
 
 
 /**
@@ -435,7 +436,12 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     
     ops ++= tsml.getProcessingInstructions("domBin").map(s => DomainBinner(s.split(',')))
 
-    ops ++= tsml.getProcessingInstructions("format_time").map(TimeFormatter(_)) 
+    ops ++= tsml.getProcessingInstructions("format_time").map(TimeFormatter(_))
+    
+    tsml.getProcessingInstructions("convertTimeTupleToTime").headOption match {
+      case Some(_) => ops += TimeTupleToTime()
+      case None =>
+    }
     
     tsml.getProcessingInstructions("replace_missing").headOption match {
       case Some(mv) => ops += ReplaceMissingOperation(List(mv))
