@@ -65,6 +65,12 @@ class Tsml(val xml: Elem) {
     }
   }
   
+  /**
+   * Look for an attribute for the variable with the given name.
+   * Try XML attributes of the variable's element first, then try 
+   * its metadata element. Return an Option so we can better handle
+   * cases where no such variable or attribute is defined.
+   */
   def findVariableAttribute(vname: String, attribute: String): Option[String] = dataset.findVariableMl(vname) match {
     case None => None
     case Some(ml) => {
