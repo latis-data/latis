@@ -168,8 +168,9 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
             case Some(m) => m  //use the matching part
             case None => p._2.getFillValue.toString  //use a fill value since this doesn't match
           }
-          case None => p._1  //no regex pattern to match
+          case None => p._1  //no regex pattern to match so use the original value
         }
+        //convert the data values to Data objects using the Variable as a template
         StringUtils.parseStringValue(value, p._2)
       })
       
