@@ -162,7 +162,17 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
       None
     } else {
       val vnames: Seq[String] = vars.map(_.getName)
-      val datas: Seq[Data] = (values zip vars).map(p => StringUtils.parseStringValue(p._1, p._2))
+      val datas: Seq[Data] = (values zip vars).map(p => {
+        val value = tsml.findVariableAttribute(p._2.getName, "regex") match { //look for regex as tsml attribute
+          case Some(s) => s.r.findFirstIn(p._1) match { //try to match the value with the regex
+            case Some(m) => m  //use the matching part
+            case None => p._1  //use the entire value
+          }
+          case None => p._1  //no regex pattern to match
+        }
+        StringUtils.parseStringValue(value, p._2)
+      })
+      
       Some((vnames zip datas).toMap)
     }
   }
