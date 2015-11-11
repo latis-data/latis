@@ -6,44 +6,31 @@ import latis.metadata.Metadata
 import latis.data.value.StringValue
 
 /**
- * If a Tuple named "time" containing Text elements for year, month, and day
- * is encountered in the Dataset, replace it with a Time variable.
- * TODO: generalize to combinations including time.
+ * If a Tuple named "time" containing Text elements for date and time elements
+ * is encountered in the Dataset, replace it with a Time Scalar of type Text.
+ * Each component must have a "units" metadata property that adheres to the
+ * Java SimpleDateFormat. The Text string values will be joined with " " to
+ * make a single time value and the units will be joined with " " to create
+ * a single units/format. These will be used to construct a new Time of type Text.
  */
 class TimeTupleToTime extends Operation {
   
   /**
    * The default applyToTuple isn't applied to Function domains
-   * so override applyToSample.
+   * so override applyToSample to handle both domain and range.
    */
   override def applyToSample(sample: Sample): Option[Sample] = {
     for (domain <- applyToVariable(sample.domain); range <- applyToVariable(sample.range)) yield Sample(domain, range)
   }
   
+  /**
+   * If the Tuple has the name "time", combine the string values and units
+   * to make a new Time of type Text.
+   */
   override def applyToTuple(tuple: Tuple): Option[Variable] = {
     tuple.getName match {
       case "time" => tuple match {
         case Tuple(vars) => {
-          /*
-           * TODO:
-           * build format for pieces? of in tuple metadata?
-           * Time as formatted Text or java time?
-           * ++ignore vname and just use units/format
-           */
-//          //make Map of var name to string value
-//          val vMap = vars.map(v => {
-//            val vname = v.getName  //get variable name
-//            val value = v match {case Text(s) => s}  //extract string value
-//            (vname, value)
-//          }).toMap
-          
-//          //build up time value and format
-//          val value = new StringBuilder()
-//          val format = new StringBuilder()
-//          
-//          //TODO: handle bad config and time options
-//          vMap("year")
-          
           //extract text values and join with space
           //TODO: join with delimiter, problem when we use regex
           val value = vars.map(_ match {case Text(s) => s}).mkString(" ")
@@ -65,6 +52,7 @@ class TimeTupleToTime extends Operation {
 }
 
 object TimeTupleToTime extends OperationFactory {
+  //Implement OperationFactory so we can invoke this as a processing instruction.
   override def apply(): TimeTupleToTime = new TimeTupleToTime
   override def apply(args: Seq[String]): TimeTupleToTime = TimeTupleToTime()
 }
