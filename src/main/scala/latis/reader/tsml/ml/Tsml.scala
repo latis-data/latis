@@ -64,6 +64,23 @@ class Tsml(val xml: Elem) {
       atts(attribute)
     }
   }
+  
+  def findVariableAttribute(vname: String, attribute: String): Option[String] = dataset.findVariableMl(vname) match {
+    case None => None
+    case Some(ml) => {
+      //try xml attributes for the variable element
+      ml.getAttributes.get(attribute) match {
+        case s: Some[String] => s  //found it in variable attributes
+        case None => {
+          //else try metadata attributes
+          ml.getMetadataAttributes.get(attribute) match {
+            case s: Some[String] => s  //found it in metadata attributes
+            case None => None  //attribute not found for the given variable
+          }
+        }
+      }
+    }
+  }
 
   override def toString = xml.toString
 }
