@@ -36,4 +36,20 @@ class TestTimeTupleToTime {
       case Dataset(t: Time) => assertEquals(1000l, t.getJavaTime)
     }
   }
+  
+  @Test
+  def in_function_domain = {
+    val year = Text(Metadata("units" -> "yyyy"), "2015")
+    val mon  = Text(Metadata("units" -> "MM"), "11")
+    val day  = Text(Metadata("units" -> "dd"), "01")
+    val time = Tuple(List(year, mon, day), Metadata("time"))
+    val ds = Dataset(Function(List(Sample(time, Real(3.14)))))
+    val op = TimeTupleToTime()
+    val ds2 = op(ds)
+    ds2 match {
+      case Dataset(Function(it)) => it.next match {
+        case Sample(t: Time, _) => assertEquals(1446336000000l, t.getJavaTime)
+      }
+    }
+  }
 }
