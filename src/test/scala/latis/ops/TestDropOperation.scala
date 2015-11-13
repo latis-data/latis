@@ -26,7 +26,7 @@ import latis.writer.AsciiWriter
 class TestDropOperation {
   
   @Test
-  def test_drop_0 {
+  def drop_0 {
     val ds = DropOperation(0)(TestDataset.canonical)
     ds match {
       case Dataset(Function(s)) => assertEquals(3,s.toList.length)
@@ -34,7 +34,7 @@ class TestDropOperation {
   }
   
   @Test
-  def test_drop_1 {
+  def drop_1 {
     val ds = DropOperation(1)(TestDataset.canonical)
     ds match {
       case Dataset(Function(s)) => s.toList.head match {
@@ -53,7 +53,7 @@ class TestDropOperation {
   }
   
   @Test
-  def test_drop_2 {
+  def drop_2 {
     val ds = DropOperation(2)(TestDataset.canonical)
     ds match {
       case Dataset(Function(s)) => s.toList.head match {
@@ -72,7 +72,7 @@ class TestDropOperation {
   }
   
   @Test
-  def test_drop_3 {
+  def drop_3 {
     val ds = DropOperation(3)(TestDataset.canonical)
     ds match {
       case Dataset(Function(s)) => assertEquals(0,s.toList.length)
@@ -87,7 +87,7 @@ class TestDropOperation {
   }
   
   @Test
-  def test_should_not_drop_scalar {
+  def should_not_drop_scalar {
     val ds = DropOperation(1)(TestDataset.integer)
     ds match {
       case Dataset(x) => x match {
@@ -99,7 +99,7 @@ class TestDropOperation {
   }
   
   @Test
-  def test_should_not_drop_tuple_of_scalars {
+  def should_not_drop_tuple_of_scalars {
     val ds = DropOperation(5)(TestDataset.tuple_of_scalars)
     ds match {
       case Dataset(x) => x match {
@@ -112,37 +112,37 @@ class TestDropOperation {
   }
   
   @Test
-  def test_function_of_scalar_with_drop_0 {
+  def function_of_scalar_with_drop_0 {
     val ds = DropOperation(0)(TestDataset.function_of_scalar)
     assertEquals(3, ds.getLength)
   }
   
   @Test
-  def test_function_of_scalar_with_drop_1 {
+  def function_of_scalar_with_drop_1 {
     val ds = DropOperation(1)(TestDataset.function_of_scalar)
     assertEquals(2, ds.getLength)
   }
   
   @Test
-  def test_function_of_scalar_with_drop_3 {
+  def function_of_scalar_with_drop_3 {
     val ds = DropOperation(3)(TestDataset.function_of_scalar)
     assertEquals(0, ds.getLength)
   }
   
   @Test
-  def test_function_of_scalar_with_drop_5 {
+  def function_of_scalar_with_drop_5 {
     val ds = DropOperation(5)(TestDataset.function_of_scalar)
     assertEquals(0, ds.getLength)
   }
   
   @Test
-  def test_function_of_function_with_drop_1 {
+  def function_of_function_with_drop_1 {
     val exp = Sample(Integer(Metadata("x"), 3), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * 3 + j)))))    
     assertEquals(exp, DropOperation(3)(TestDataset.function_of_functions).unwrap.asInstanceOf[Function].iterator.next)
   }
   
   @Test
-  def test_empty_function {
+  def empty_function {
     val emptyfunc = Dataset(Function(Real(Metadata("domain")), Real(Metadata("range")), Iterator.empty, Metadata(Map("length" -> "0"))), Metadata("empty_function"))
     val ds = DropOperation(5)(TestDataset.empty_function)
     ds match {
@@ -153,7 +153,7 @@ class TestDropOperation {
   }
   
   @Test
-  def test_tsml_data {
+  def drop_using_tsml_data {
     val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
     val ds = DropOperation(9)(data)
     ds match {
@@ -169,7 +169,7 @@ class TestDropOperation {
   }
   
   @Test
-  def test_tsml_data_with_ops {
+  def drop_using_tsml_data_with_ops {
     val ops = ArrayBuffer[Operation]()
     ops += Operation("drop",List("2"))
     val ds1 = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
