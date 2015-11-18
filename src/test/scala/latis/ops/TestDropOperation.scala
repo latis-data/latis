@@ -136,7 +136,7 @@ class TestDropOperation {
   }
   
   @Test
-  def function_of_function_with_drop_1 {
+  def function_of_function_with_drop {
     val exp = Sample(Integer(Metadata("x"), 3), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * 3 + j)))))    
     assertEquals(exp, DropOperation(3)(TestDataset.function_of_functions).unwrap.asInstanceOf[Function].iterator.next)
   }
@@ -154,7 +154,8 @@ class TestDropOperation {
   
   @Test
   def drop_using_tsml_data {
-    val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
+    val data = TsmlReader("data_with_marker").getDataset
+    //val data = DatasetAccessor.fromName("data_with_marker").getDataset
     val ds = DropOperation(9)(data)
     ds match {
       case Dataset(x) => x match {
@@ -172,9 +173,9 @@ class TestDropOperation {
   def drop_using_tsml_data_with_ops {
     val ops = ArrayBuffer[Operation]()
     ops += Operation("drop",List("2"))
-    val ds1 = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
-    val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset(ops)
-    data match {
+    val ds = TsmlReader("data_with_marker").getDataset(ops)
+    //val ds = DatasetAccessor.fromName("data_with_marker").getDataset(ops)
+    ds match {
       case Dataset(x) => x match {
         case Function(f) => f.toList.head match {
           case Sample(Real(r1),Real(r2)) => {
