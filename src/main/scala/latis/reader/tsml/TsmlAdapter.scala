@@ -234,7 +234,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   protected def makeDataset(ds: Dataset): Dataset = {
     makeVariable(ds.unwrap) match {
       case Some(v) => Dataset(v, ds.getMetadata)
-      case None => throw new Error("No variables created for dataset")
+      case None => throw new Error("No variables created for dataset: " + ds.getName)
     }
     
   } 
