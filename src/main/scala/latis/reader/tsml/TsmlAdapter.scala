@@ -41,6 +41,7 @@ import latis.util.StringUtils
 import scala.collection.mutable.ArrayBuffer
 import latis.ops.TimeFormatter
 import latis.ops.ReplaceMissingOperation
+import latis.ops.TimeTupleToTime
 
 
 /**
@@ -404,6 +405,12 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     
     val ops = ArrayBuffer[Operation]()
     //LATIS-400: tsml.processingInstructions.map(pi => Operation(pi._1, pi._2)).toSeq
+        
+    //needs to happen before time selections
+    tsml.getProcessingInstructions("convertTimeTupleToTime").headOption match {
+      case Some(_) => ops += TimeTupleToTime()
+      case None =>
+    }
     
     val projectedNames = tsml.getProcessingInstructions("project")
     val projections = projectedNames.map(Projection(_)) 
@@ -435,7 +442,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
     
     ops ++= tsml.getProcessingInstructions("domBin").map(s => DomainBinner(s.split(',')))
 
-    ops ++= tsml.getProcessingInstructions("format_time").map(TimeFormatter(_)) 
+    ops ++= tsml.getProcessingInstructions("format_time").map(TimeFormatter(_))
     
     tsml.getProcessingInstructions("replace_missing").headOption match {
       case Some(mv) => ops += ReplaceMissingOperation(List(mv))
