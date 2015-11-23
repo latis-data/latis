@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset>
+  <metadata name="pivot"/>
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           delimiter="\s+"
+           location="datasets/test/pivot.txt" />
+           
+  <time type="real"/>
+  
+  <integer id="foo"/>
+  <integer id="bar">
+    <metadata missing_value="-999"/>
+  </integer>
+  
+  <?pivot foo,3?>
+
+</dataset>

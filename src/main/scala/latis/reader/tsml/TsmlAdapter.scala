@@ -41,6 +41,7 @@ import latis.util.StringUtils
 import scala.collection.mutable.ArrayBuffer
 import latis.ops.TimeFormatter
 import latis.ops.ReplaceMissingOperation
+import latis.ops.Pivot
 import latis.ops.TimeTupleToTime
 
 
@@ -448,6 +449,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
       case Some(mv) => ops += ReplaceMissingOperation(List(mv))
       case None =>
     }
+    
+    ops ++= tsml.getProcessingInstructions("pivot").map(s => Pivot(s.split(',')))
     
     ops.toSeq
   }
