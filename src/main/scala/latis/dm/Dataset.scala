@@ -43,6 +43,8 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
     case _ => 0
   }
   
+  def getSize = variable.getSize
+  
   def findVariableByName(name: String): Option[Variable] = variable match {
     case null => None
     case _ => variable.findVariableByName(name)
