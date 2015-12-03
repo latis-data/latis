@@ -185,7 +185,7 @@ class TestMathExpressionDerivation {
   
   @Test
   def test_tsml {
-    val ds = TsmlReader("vecmag.tsml").getDataset
+    val ds = TsmlReader("datasets/test/vecmag.tsml").getDataset
     //AsciiWriter.write(ds)
     val it = ds.unwrap.asInstanceOf[Function].iterator
     it.next
@@ -196,7 +196,7 @@ class TestMathExpressionDerivation {
   def with_projection {
     val ops = ArrayBuffer[Operation]()
     ops += Projection("t,a,b,c,X")
-    val ds = TsmlReader("vecmag.tsml").getDataset(ops)
+    val ds = TsmlReader("datasets/test/vecmag.tsml").getDataset(ops)
     //AsciiWriter.write(ds)
     val data = ds.toDoubleMap
     assertEquals(1.7320508075688772, data("X")(1), 0.0)
@@ -207,7 +207,7 @@ class TestMathExpressionDerivation {
   def dont_project_derived_param {
     val ops = ArrayBuffer[Operation]()
     ops += Projection("t,a,b,c")
-    val ds = TsmlReader("vecmag.tsml").getDataset(ops)
+    val ds = TsmlReader("datasets/test/vecmag.tsml").getDataset(ops)
     //AsciiWriter.write(ds)
     val data = ds.toDoubleMap
     assert(!data.contains("X"))
@@ -217,7 +217,7 @@ class TestMathExpressionDerivation {
   def dont_project_input_params {
     val ops = ArrayBuffer[Operation]()
     ops += Projection("t,X")
-    val ds = TsmlReader("vecmag.tsml").getDataset(ops)
+    val ds = TsmlReader("datasets/test/vecmag.tsml").getDataset(ops)
     //AsciiWriter.write(ds)
     val data = ds.toDoubleMap
     assertEquals(1.7320508075688772, data("X")(1), 0.0)
@@ -227,7 +227,7 @@ class TestMathExpressionDerivation {
   
   @Test
   def derived_field_as_input {
-    val ds = TsmlReader("vecmag2.tsml").getDataset
+    val ds = TsmlReader("datasets/test/vecmag2.tsml").getDataset
     //AsciiWriter.write(ds)
     val data = ds.toDoubleMap
     assertEquals(2.7320508075688772, data("Y")(1), 0.0)
@@ -237,7 +237,7 @@ class TestMathExpressionDerivation {
   def non_projected_derived_field_as_input {
     val ops = ArrayBuffer[Operation]()
     ops += Projection("t,Y")
-    val ds = TsmlReader("vecmag2.tsml").getDataset(ops)
+    val ds = TsmlReader("datasets/test/vecmag2.tsml").getDataset(ops)
     //AsciiWriter.write(ds)
     val data = ds.toDoubleMap
     assert(data.isEmpty)
@@ -245,7 +245,7 @@ class TestMathExpressionDerivation {
   
   @Test
   def constant_in_tsml {
-    val ds = TsmlReader("vecmag2.tsml").getDataset
+    val ds = TsmlReader("datasets/test/vecmag2.tsml").getDataset
     //AsciiWriter.write(ds)
     val data = ds.toDoubleMap
     assertEquals(123.4, data("Z").head, 0.0)
@@ -260,7 +260,7 @@ class TestMathExpressionDerivation {
   
   @Test
   def mag {
-    val ds = TsmlReader("vecmag2.tsml").getDataset
+    val ds = TsmlReader("datasets/test/vecmag2.tsml").getDataset
     val data = ds.toDoubleMap
     assertEquals(data("X")(2), data("X2")(2), 0.0001)
   }

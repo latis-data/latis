@@ -13,6 +13,6 @@
     <metadata missing_value="-999"/>
   </integer>
   
-  <?pivot foo,3?>
+  <?pivot foo;3?>
 
 </dataset>
