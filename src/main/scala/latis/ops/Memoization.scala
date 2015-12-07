@@ -23,7 +23,11 @@ class Memoization extends Operation {
       case _ => s
     })
     //TODO consider IndexedSeq (Vector)? index tied to DomainSet
-    Some(Function(samples, md))
+    
+    //Add 'length' to the Function Metadata
+    val md2 = md + ("length" -> samples.length.toString)
+    
+    Some(Function(samples, md2))
   }
   //TODO: deal with nested Functions? Or is only the outer Function allowed to be built with an iterator.
   

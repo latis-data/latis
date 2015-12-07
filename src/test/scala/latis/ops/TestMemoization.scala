@@ -26,4 +26,11 @@ class TestMemoization {
     assertEquals(data2("myTime").length, 3) //op didn't change number of samples
   }
   
+  @Test
+  def length_metadata = {
+    val ds = TestDataset.numeric_time_series
+    assert(ds.unwrap.getMetadata.isEmpty)
+    val ds2 = ds.force
+    assertEquals("3", ds2.unwrap.getMetadata("length").get)
+  }
 }
