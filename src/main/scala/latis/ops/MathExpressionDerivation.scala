@@ -223,5 +223,5 @@ class MathExpressionDerivation(private val str: String) extends Operation {
 object MathExpressionDerivation extends OperationFactory {
   def apply(str: String): MathExpressionDerivation = new MathExpressionDerivation(str.filter(_ != ' '))
   
-  override def apply(args: Seq[String]) = MathExpressionDerivation(args.head)
+  override def apply(args: Seq[String]) = MathExpressionDerivation(args.mkString(","))
 }

@@ -404,7 +404,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * in the processing instruction.
    */
   def piOps: Seq[Operation] = {
-    tsml.processingInstructions.toSeq.flatMap(pi => pi._2.map(s => Operation(pi._1, s.split(';'))))
+    tsml.processingInstructions.toSeq.flatMap(pi => pi._2.map(s => Operation(pi._1, s.split(','))))
   }
   
   /**
