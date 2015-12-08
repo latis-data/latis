@@ -113,4 +113,9 @@ class TestBinAverage {
 //    assertEquals(1413417690033.0, data("time").head, 0.0)
 //    assertEquals(21.631854255497455, data("myReal").head, 0.0)
 //  }
+  
+    //@Test
+    //def optional_param_test = {
+    //  ???
+    //}
 }
