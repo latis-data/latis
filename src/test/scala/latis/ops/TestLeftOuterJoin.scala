@@ -143,7 +143,7 @@ class TestLeftOuterJoin {
     }
   }
   
-  @Test
+  @Test @Ignore
   def empty_second = {
     val samples1 = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
     val samples2 = List[Sample]() //.map(i => Sample(Real(Metadata("t"), i), Real(Metadata("b"), i*2)))
