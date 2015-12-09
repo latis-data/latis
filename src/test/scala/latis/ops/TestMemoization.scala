@@ -33,4 +33,20 @@ class TestMemoization {
     val ds2 = ds.force
     assertEquals("3", ds2.unwrap.getMetadata("length").get)
   }
+  
+  @Test
+  def nested_function_not_memoized = {
+    val ds = TestDataset.function_of_functions2
+    ds.toDoubleMap //traverse once
+    val map = ds.toDoubleMap //traverse twice
+    assert(map.isEmpty)
+  }
+  
+  @Test
+  def nested_function_memoized = {
+    val ds = TestDataset.function_of_functions2.force
+    ds.toDoubleMap //traverse once
+    val map = ds.toDoubleMap //traverse twice
+    assert(map.nonEmpty)
+  }
 }
