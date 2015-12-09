@@ -12,16 +12,23 @@ import latis.dm.Sample
  */
 class Memoization extends Operation {
 
+  /*
+   * should only need to realize lazy data: Function iterator
+   * presumably only the outer function since that is where iterative adapters are lazy
+   * or should we traverse the whole thing as is we are writing it?
+   * do we need to worry about internal functions being traverable once?
+   */
   override def applyToFunction(function: Function): Option[Variable] = {
     val md = function.getMetadata
-    val samples = function.iterator.toList.map(s => s match {
-      //recurse into inner functions
-      case Sample(d, f: Function) => applyToFunction(f) match {
-        case Some(f2) => Sample(d, f2)
-        case None => ???
-      }
-      case _ => s
-    })
+    val samples = function.iterator.toList
+//    .map(s => s match {
+//      //recurse into inner functions //TODO: needed?
+//      case Sample(d, f: Function) => applyToFunction(f) match {
+//        case Some(f2) => Sample(d, f2)
+//        case None => ???
+//      }
+//      case _ => s
+//    })
     //TODO consider IndexedSeq (Vector)? index tied to DomainSet
     
     //Add 'length' to the Function Metadata
