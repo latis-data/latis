@@ -25,7 +25,8 @@ class Reduction extends Operation  {
     //TODO: don't reduce if tuple is named, preserve namespace
     //  option to force?
     //  what about other metadata? concat names with "_"?
-    val vars = tuple.getVariables.flatMap(applyToVariable(_)) 
+    var vars = tuple.getVariables
+    vars = vars.flatMap(applyToVariable(_)) 
     vars.length match {
       case 0 => None
       case 1 => Some(vars.head) //drop the redundant Tuple layer

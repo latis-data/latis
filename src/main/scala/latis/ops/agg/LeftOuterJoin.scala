@@ -68,7 +68,8 @@ class LeftOuterJoin extends Aggregation {
             case None => makeFillVariable(f2.getRange)
           }
           
-          val range = reduction.applyToTuple(Tuple(s1.range, range2)) match {
+     val z = reduction.applyToTuple(Tuple(s1.range, range2))
+          val range = z match {
             case Some(v: Variable) => v
             case None => {
               println("broke")
