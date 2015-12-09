@@ -18,6 +18,7 @@ import scala.math.ScalaNumericAnyConversions
 import latis.ops.agg.Intersection
 import latis.ops.Reduction
 import latis.ops.Memoization
+import latis.util.CacheManager
 
 /**
  * The main abstraction for a dataset that encapsulates everything about the dataset. 
@@ -113,6 +114,13 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
    * This will return a new Dataset that is logicall equivalent.
    */
   def force: Dataset = Memoization()(this)
+  
+  /**
+   * Store this Dataset in the CacheManager.
+   * This will return a new memoized instance of the Dataset.
+   * The original may be spent due TraversableOnce issues.
+   */
+  def cache: Dataset = CacheManager.cacheDataset(this)
   
   /**
    * Expose the top level Variable in this Dataset.
