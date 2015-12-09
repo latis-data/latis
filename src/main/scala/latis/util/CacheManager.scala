@@ -32,11 +32,15 @@ object CacheManager {
    * Add a dataset to the cache.
    * The Dataset will be memoized to ensure that it contains all of its
    * data so it is no longer coupled to its source.
+   * This will return the cached dataset since the original may be spent
+   * due to TraversableOnce issues.
    * It is expected that the Dataset has Metadata that defines the name.
    */
-  def cacheDataset(dataset: Dataset) = {
+  def cacheDataset(dataset: Dataset): Dataset = {
     //Make sure dataset is memoized (all the Data loaded)
-    instance.cache += dataset.getName -> dataset.force
+    val ds = dataset.force
+    instance.cache += dataset.getName -> ds
+    ds
   }
   
   /**
