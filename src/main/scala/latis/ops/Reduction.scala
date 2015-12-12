@@ -1,7 +1,14 @@
 package latis.ops
 
-import latis.dm._
 import scala.collection.mutable.ArrayBuffer
+
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Index
+import latis.dm.Sample
+import latis.dm.Tuple
+import latis.dm.Variable
+import latis.dm.WrappedFunction
 
 /**
  * Reduce any Tuples of one element to that element and reduce any 
@@ -25,8 +32,7 @@ class Reduction extends Operation  {
     //TODO: don't reduce if tuple is named, preserve namespace
     //  option to force?
     //  what about other metadata? concat names with "_"?
-    var vars = tuple.getVariables
-    vars = vars.flatMap(applyToVariable(_)) 
+    val vars = tuple.getVariables.flatMap(applyToVariable(_)) 
     vars.length match {
       case 0 => None
       case 1 => Some(vars.head) //drop the redundant Tuple layer
@@ -50,6 +56,7 @@ class Reduction extends Operation  {
    * If the Function has no samples, return None.
    */
   override def applyToFunction(function: Function) = {
+    //TODO: TraversableOnce issues?
     val n = function.getLength
     if (n == 0) None
     else if (n == 1) applyToSample(function.iterator.next) match {

@@ -23,11 +23,23 @@ class LeftOuterJoin extends Aggregation {
    * maybe some common chunk of code?
    */
   
-  def aggregate(ds1: Dataset, ds2: Dataset) = {    
+  def aggregate(ds1: Dataset, ds2: Dataset): Dataset = {    
     val (f1, f2, it1, it2) = (ds1, ds2) match {
-      case(Dataset(f1 @ Function(it1)), Dataset(f2 @ Function(it2))) => (f1, f2, it1, it2)
+      case(Dataset(f1 @ Function(it1)), Dataset(f2 @ Function(it2))) => {
+        //TODO: what if ranges have same parameter? keep first?
+        //make sure the domains are consistent, match on name for now
+        if (f1.getDomain.getName != f2.getDomain.getName) {
+          val msg = s"Can't join Functions with different domains."
+          throw new UnsupportedOperationException(msg)
+        }
+        (f1, f2, it1, it2)
+      }
       case _ => throw new UnsupportedOperationException("LeftOuterJoin expects a Function in each of the Datasets it aggregates.")
     }
+    
+    //Don't join an empty function
+    if (f2.isEmpty) return ds1
+    if (f1.isEmpty) return ds2
     
     val reduction = new Reduction
     
@@ -68,11 +80,9 @@ class LeftOuterJoin extends Aggregation {
             case None => makeFillVariable(f2.getRange)
           }
           
-     val z = reduction.applyToTuple(Tuple(s1.range, range2))
-          val range = z match {
+          val range = reduction.applyToTuple(Tuple(s1.range, range2)) match {
             case Some(v: Variable) => v
             case None => {
-              println("broke")
               ???
             }
           }
