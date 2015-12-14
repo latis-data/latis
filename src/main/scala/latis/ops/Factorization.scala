@@ -127,7 +127,7 @@ object Factorization {
          * 
          */
         val domain = Scalar(domainMetadata, value)
-        //TODO: preserve metadata
+        //TODO: preserve Time domain (LATIS-419)
         
         //val z = samples.map(_.range)
         //TODO: need these samples to be Samples, not just Tuples
