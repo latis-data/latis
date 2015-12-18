@@ -16,9 +16,8 @@ import latis.ops.filter.ExcludeMissing
  * If range is tuple, take first element, for now.
  * Nested Functions not yet supported.
  */
-class BinAverageByWidth(binWidth: Double) extends Operation {
+class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends Operation {
   //TODO: accept ISO 8601 time duration
-  //TODO: support start value
   //TODO: start with min of time coverage instead of 1st sample
   //TODO: deal with 'length' metadata
   //TODO: deal with missing values
@@ -30,17 +29,21 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
    * Get bin width via getter so it can be overridden.
    */
   def getBinWidth = binWidth
-
+  
   override def applyToFunction(f: Function): Option[Variable] = {
     val fit = PeekIterator(f.iterator)
     //If the function has no samples, make a new Function around this iterator (since we can't reuse the orig)
     if (fit.isEmpty) Some(Function(f, fit))
     else {
-      //get initial domain value so we know where to start
-      //TODO: allow specification of initial value, e.g. so daily avg is midnight to midnight
-      val startValue = getDomainValue(fit.peek)
+      //Get initial domain value so we know where to start,
+      //default to first sample in the data if no startVal was provided in constructor
+      var tempStartValue: Double = 0  //'0' is arbitrary
+      if (startVal.isNaN) tempStartValue = getDomainValue(fit.peek)
+      else tempStartValue = startVal
+      
+      val startValue = tempStartValue //because this value should really be a val, not a var
       var nextValue = startValue
-      var index = 0
+      var index = 0  //TODO: this is not used
       val domainMetadata = f.getDomain.getMetadata
       val rangeMetadata = reduce(f.getRange).getMetadata //first scalar
 
@@ -172,13 +175,13 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
 object BinAverageByWidth extends OperationFactory {
   
   override def apply(args: Seq[String]): BinAverageByWidth = {
-    if (args.length > 1) throw new UnsupportedOperationException("The BinAverage operation accepts only one argument")
+    if (args.length > 2) throw new UnsupportedOperationException("The BinAverage operation only accepts up to two arguments")
     try {
       BinAverageByWidth(args.head.toDouble)
     } catch {
-      case e: NumberFormatException => throw new UnsupportedOperationException("The BinAverage requires a single numeric argument")
+      case e: NumberFormatException => throw new UnsupportedOperationException("The BinAverage requires numeric arguments")
     }
   }
     
-  def apply(binWidth: Double): BinAverageByWidth = new BinAverageByWidth(binWidth)
+  def apply(binWidth: Double, startVal: Double = Double.NaN): BinAverageByWidth = new BinAverageByWidth(binWidth, startVal)
 }
