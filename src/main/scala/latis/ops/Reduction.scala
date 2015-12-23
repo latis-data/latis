@@ -15,6 +15,7 @@ import latis.dm.WrappedFunction
  * Functions with one Sample to that Sample.
  */
 class Reduction extends Operation  {
+  //TODO: rename to Flatten, "reduce" in scala reduces a collection to a single value by recursively applying a binary operation
   
   /**
    * Apply to the domain and range of the sample and package in a new sample.
