@@ -2,22 +2,43 @@ package latis.ops.resample
 
 import latis.dm.Sample
 import latis.dm.Variable
+import latis.ops.Operation
+import latis.dm.Function
 
-trait Resampling {
-  
+class Resampling extends Operation with NoInterpolation {
   /*
-   * TODO: 
-   * interp: D -> Option[D] = 
-   * exterp: D -> Option[D] = 
-   * default to error if no exact match
+   * TODO: construct with DomainSet?
+   * currently DomainSet is just Data
+   * need to be able to match type, name?
+   *   convert units...
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
    */
+   
 
-  def resample(samples: Array[Sample], domain: Variable): Some[Sample] = {
-    
-    
+  override def applyToFunction(function: Function): Option[Variable] = {
     
     ???
   }
+
+  def resample(samples: Array[Sample], domain: Variable): Some[Sample] = {
+    //TODO: make sure domains are consistent, unit conversion...
+    domain match {
+      case _ => ???
+    }
+
+    ???
+  }
+
+}
+
   
   /*
    * add static members that implement "resample"?
@@ -72,7 +93,20 @@ trait Resampling {
    *     how to define implicit Resampling for a Function?
    *     mixin?
    *     does sorted get it from param'd type of List?
-   *   impl as Operation
+   * impl as Operation
+   *   given ds, find Function with matching domain
+   *   construct with new domain set and optional Resampling
+   *   f2 = f.resample... OR applyToFunction 
+   *     eventually delegate to Resampling
+   *   Consider how other operations have class defined in properties
+   *     operation.resample.class = ?
+   *     no dataset granularity
+   *    *are there other operations like this? 
+   *       integration
+   *     order of precedence:
+   *       specified optional param
+   *       mixed in resampling (tsml or reader.myds.resampling property)
+   *       operation.resample.class
    *   
    * How to mixin different resampling strategy
    *   tsml attribute
@@ -80,13 +114,71 @@ trait Resampling {
    *     with reflection?
    *   implicit def resampling
    *   latis property
+   * need better reconstruction to preserve mixin 
+   *   like case class copy
+   *   use reflection to avoid hard-coding mixin options?
+   * is mixin the best way to deal with resampling strategy?
+   *   composition: HAS-A?
+   *   dependency injection
    *   
-   * smpFunction.resample(domainSet)
-   *   iterator.sliding(n)
-   * resampling.resample(samples: array[Sample], domain: Variable)
+   * sampledFunction.resample(domainSet) +optional resampling
+   *   *this only be done as an operation on a dataset?
+   *   iterator.sliding(n), or later? probably later since the interp algorithm knows sliding window size
+   *   continuousFunction.sample(domainSet)? or same resample? would presumably use eval/apply, no interp
+   * resampling.resample(samples: array[Sample], domain: Variable) 
+   *   note: doesn't rely on state like an Operation might
+   *   in terms of latis structures
+   *   do we need that distinction at this level?
+   *     most interp will use doubles but we might want to support Text or Integer resampling
+   *   could we reuse the interp function for multiple resamplings?
+   *     same reason commons-math interpolate returns a function
+   *   should this take the full iterator of samples (apply sliding here)?
+   *     or even take Function as arg?
+   *     domain or domainSet?
+   *     
+   * Resampling traits provide interpolation and extrapolation functions
+   *   built from xs:Array[Double], ys:Array[Double], return f: Double -> Double
+   *     nD domains? require product (Cartesian?) sets for now?
+   *     be consistent with commons-math: BivariateGridInterpolator.interpolate(double[] xval, double[] yval, double[][] fval): BivariateFunction
+   * 
+   * Do we need a "resampling" abstraction? YES
+   *   we can "evaluate" a LaTiS Function
+   *   one sample vs a domainSet, optimization possibility only?   
+   *   resampling on a set (must be ordered) can be streamed
+   *   general evaluation can't depend on a stream  
+   * 
+   * trait with self type annotations
+   *   trait FooResampling {this: BarInterp with BazExtrap => ... }
+   * Interpolation trait
+   *   impl org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator ?
+   *     interpolate(double[] xval, double[] yval): UnivariateFunction
+   *   use commons-math Interpolator instances
+   *     as a member of our trait, delegate to its interpolate
+   *   interpolator(xs: Array[Double], ys: Array[Double]): Double -> Double
+   *   what about tuple ranges, need iterator for each
+   *     can invoke interpolator for each
+   *   not to mention that it will need to be invoked for each sliding window
+   *   
+   * Who should do the sliding?
+   *   the Resampling trait should know
+   *     use sliding on function's iterator
+   *     duplication in extracting values from samples but more idiomatic
+   *     otherwise need to manage a "cache" of recent data values
+   *   the Interpolation trait will be used for each window
    */
   
+    /*
+   * TODO: 
+   * interp: D -> Option[D] = 
+   * exterp: D -> Option[D] = 
+   * default to error if no exact match
+   */
+  
+  
+
+  
 /*
+trait inheritance tinkering from ScalaTest on kestrel
 
 trait O {
   implicit def value: String = "o"
@@ -116,4 +208,3 @@ object ImplicitFromTrait extends App {
 }
   
 */
-}
