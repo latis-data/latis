@@ -33,6 +33,10 @@ trait Scalar extends Variable {
     case (Number(d1), Text(s2)) => d1 compare StringUtils.toDouble(s2) //string may become NaN
     case (Text(s1), Number(d2)) => s1 compare d2.toString
   }
+  
+  def > (that: Scalar): Boolean = this.compare(that) > 0
+  def < (that: Scalar): Boolean = this.compare(that) < 0
+  
 //TODO: test trim, nan
   def getValue: Any
   def stringValue = getValue.toString
