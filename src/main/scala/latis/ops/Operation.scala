@@ -16,6 +16,17 @@ import latis.util.iterator.MappingIterator
  * Base type for operations that transform on Dataset into another.
  */
 abstract class Operation {
+  /*
+   * TODO: Unary and Binary Operations
+   * traits
+   * traits for common pattern matching workflows?
+   * 
+   * operation as function, via apply
+   * should we apply to any variable or always require wrapping in dataset?
+   * monadic issues?
+   * 
+   * TODO: trait for streamable operations?
+   */
   
   /**
    * Apply this Operation to the given Dataset.
