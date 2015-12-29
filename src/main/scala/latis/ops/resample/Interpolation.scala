@@ -1,5 +1,8 @@
 package latis.ops.resample
 
+import latis.dm.Sample
+import latis.dm.Scalar
+
 trait Interpolation { 
   
   /**
@@ -7,6 +10,8 @@ trait Interpolation {
    * when given an x value it will optionally return a corresponding y value.
    */
   def interpolator(xs: Array[Double], ys: Array[Double]): Double => Option[Double]
+  
+  def interpolate(samples: Array[Sample], domain: Scalar): Option[Sample] = ???
   
   /**
    * Number of samples needed to perform an interpolation
