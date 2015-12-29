@@ -14,28 +14,31 @@ import latis.util.StringUtils
 /**
  * Base type for all Scalar Variables.
  */
-trait Scalar extends Variable {
+trait Scalar extends Variable with Ordered[Scalar] {
   
   //move to AbstractScalar since mixing in Time with Text means that anything here overrides Time?
   //note, we tried overriding this in subclasses but ran into inheritance trouble with "new Time with Real"
   def compare(that: String): Int
     
   /**
-   * Compare the given Scalar to this.
+   * Implement trait Ordered[Scalar]. Compare the given Scalar to this.
    * If this is a Number, the values will be compared as Doubles.
    * If this is a Text, the other value will be converted to a String.
    */
-  //TODO: extend Ordered?
   //TODO: unit conversions...
   def compare(that: Scalar): Int = (this,that) match {
+    //preserve precision when comparing potentially big Integers
+    //otherwise use double form
+    case (Integer(l1), Integer(l2)) => l1 compare l2 
     case (Number(d1), Number(d2)) => d1 compare d2
     case (Text(s1), Text(s2)) => s1 compare s2
     case (Number(d1), Text(s2)) => d1 compare StringUtils.toDouble(s2) //string may become NaN
     case (Text(s1), Number(d2)) => s1 compare d2.toString
   }
   
-  def > (that: Scalar): Boolean = this.compare(that) > 0
-  def < (that: Scalar): Boolean = this.compare(that) < 0
+  //come for free by extending Ordered trait
+  //def > (that: Scalar): Boolean = this.compare(that) > 0
+  //def < (that: Scalar): Boolean = this.compare(that) < 0
   
 //TODO: test trim, nan
   def getValue: Any
