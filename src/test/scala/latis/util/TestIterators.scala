@@ -43,12 +43,12 @@ class TestIterators {
     assertEquals(null, a)
   }
   
-  //@Test
+  @Test
   def dont_double_wrap {
     val it: Iterator[Int] = List(1, 2, 3, 4).iterator
     val pit = PeekIterator(it)
     val pit2 = PeekIterator(pit)
-    //TODO: test that pit and pit2 are the same object
+    assert(pit eq pit2) //same instance
   }
   
   @Test
