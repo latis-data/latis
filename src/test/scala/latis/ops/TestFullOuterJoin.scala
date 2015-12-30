@@ -15,8 +15,8 @@ class TestFullOuterJoin {
   
   @Test
   def same_in_both = {
-    val samples1 = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
-    val samples2 = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("b"), i*2)))
+    val samples1 = List(1,2,3,4,5).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
+    val samples2 = List(1,2,3,4,5).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("b"), i*2)))
     val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
     val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
     val op = new FullOuterJoin()
