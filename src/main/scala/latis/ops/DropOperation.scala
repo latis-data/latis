@@ -10,12 +10,12 @@ class DropOperation(val n: Int) extends Operation {
     //get data without first n samples
     val samples = function.iterator.drop(n).toList
     
-    // drop does not update length metadata
-    // since it doesn't make sense for infinite streams
+    // update length metadata
+    val md = function.getMetadata + ("length" -> samples.length.toString)
     
     //make the new function
     samples.length match {
-      case 0 => Some(Function(function.getDomain, function.getRange, Iterator.empty)) //empty Function with type of original
+      case 0 => Some(Function(function.getDomain, function.getRange, Iterator.empty, md)) //empty Function with type of original
       case _ => Some(Function(samples))
     }
   }
