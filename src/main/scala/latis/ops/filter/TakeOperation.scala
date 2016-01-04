@@ -9,11 +9,11 @@ class TakeOperation(val n: Int) extends Filter {
   override def applyToFunction(function: Function) = {
     //Assume we can hold this all in memory.
     
-    //get the first 'limit' samples, or all if we had less
+    //get the first 'n' samples, or all if we had less
     val samples = function.iterator.take(n).toList
     
     //change length of Function in metadata
-    val md = Metadata(function.getMetadata.getProperties + ("length" -> samples.length.toString))
+    val md = function.getMetadata + ("length" -> samples.length.toString)
     
     //make the new function with the updated metadata
     samples.length match {
