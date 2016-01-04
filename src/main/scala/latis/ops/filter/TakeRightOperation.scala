@@ -11,22 +11,19 @@ class TakeRightOperation(val n: Int) extends Filter {
     //Assume we can hold this all in memory.
  
     (n,function) match {
-      case (_,Function(it)) if it.isEmpty => {
-        Some(function)
-      }
-      case (i: Int,_) if (i <= 0) => Some(Function.empty)
-      case (i: Int,_) if (i > 0) => {
+      case (_,Function(it)) if it.isEmpty => Some(Function(function.getDomain, function.getRange, Iterator.empty, function.getMetadata()))
+      case (i: Int,_) if (i <= 0) => Some(Function(function.getDomain, function.getRange, Iterator.empty, function.getMetadata()))
+      case (i: Int,_) => {
           //get data with rightmost n samples
           val samples = function.iterator.sliding(n).toList.last
           //change length of Function in metadata
-          val md = Metadata(function.getMetadata.getProperties + ("length" -> samples.length.toString))
+          val md = function.getMetadata + ("length" -> samples.length.toString)
           //make the new function with the updated metadata
           samples.length match {
             case 0 => Some(Function(function.getDomain, function.getRange, Iterator.empty, md)) //empty Function with type of original
             case _ => Some(Function(samples, md))
           }
       }
-      case _ => throw new UnsupportedOperationException("Incorrect agrs for TakeRightOperation: need n > 0 and a dataset")
     }
   } 
 }
