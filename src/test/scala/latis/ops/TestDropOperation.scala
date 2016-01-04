@@ -19,6 +19,7 @@ import latis.dm.Tuple
 import latis.dm.Text
 import latis.dm.Index
 import latis.time.Time
+import latis.reader.DatasetAccessor
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
 
@@ -44,11 +45,8 @@ class TestDropOperation {
             assertEquals(2.2,r,0)
             assertEquals("B",t)
           }
-          case _ => fail
         }
-        case _ => fail
       }
-      case _ => fail
     }
   }
   
@@ -63,11 +61,8 @@ class TestDropOperation {
             assertEquals(3.3,r,0)
             assertEquals("C",t)
           }
-          case _ => fail
         }
-        case _ => fail
       }
-      case _ => fail
     }
   }
   
@@ -92,9 +87,7 @@ class TestDropOperation {
     ds match {
       case Dataset(x) => x match {
         case Integer(i) => assertEquals(42,i)
-        case _ => fail
       }
-      case _ => fail
     }
   }
   
@@ -105,7 +98,6 @@ class TestDropOperation {
       case Dataset(x) => x match {
         case Tuple(y) => y.head match {
           case Integer(i) => assertEquals(0,i)
-          case _ => fail
         }
       }
     }
@@ -137,8 +129,9 @@ class TestDropOperation {
   
   @Test
   def function_of_function_with_drop {
-    val exp = Sample(Integer(Metadata("x"), 3), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * 3 + j)))))    
-    assertEquals(exp, DropOperation(3)(TestDataset.function_of_functions).unwrap.asInstanceOf[Function].iterator.next)
+    val temp = DropOperation(3)(TestDataset.function_of_functions)
+    val len = temp.getLength
+    assertEquals(1,len)
   }
   
   @Test
@@ -154,8 +147,7 @@ class TestDropOperation {
   
   @Test
   def drop_using_tsml_data {
-    val data = TsmlReader("data_with_marker").getDataset
-    //val data = DatasetAccessor.fromName("data_with_marker").getDataset
+    val data = DatasetAccessor.fromName("data_with_marker").getDataset
     val ds = DropOperation(9)(data)
     ds match {
       case Dataset(x) => x match {
@@ -173,8 +165,7 @@ class TestDropOperation {
   def drop_using_tsml_data_with_ops {
     val ops = ArrayBuffer[Operation]()
     ops += Operation("drop",List("2"))
-    val ds = TsmlReader("data_with_marker").getDataset(ops)
-    //val ds = DatasetAccessor.fromName("data_with_marker").getDataset(ops)
+    val ds = DatasetAccessor.fromName("data_with_marker").getDataset(ops)
     ds match {
       case Dataset(x) => x match {
         case Function(f) => f.toList.head match {
