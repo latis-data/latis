@@ -15,6 +15,7 @@ import latis.ops.Operation
 import latis.ops.resample.NearestNeighbor
 import latis.util.StringUtils
 import latis.ops.OperationFactory
+import latis.dm.Dataset
 
 /**
  * Filter based on a basic boolean expression.
@@ -22,7 +23,11 @@ import latis.ops.OperationFactory
  */
 class Selection(val vname: String, val operation: String, val value: String) extends Filter with LazyLogging {
   //TODO: if domain, delegate to DomainSet
-  //TODO: change operation to operator?
+
+  override def apply(ds: Dataset) = ds.findVariableByName(vname) match {
+    case None => throw new UnsupportedOperationException(s"Cannot select on unknown variable '$vname'")
+    case _ => super.apply(ds)
+  }
   
   override def applyToScalar(scalar: Scalar): Option[Scalar] = {
     //If the filtering causes an exception, log a warning and return None.
