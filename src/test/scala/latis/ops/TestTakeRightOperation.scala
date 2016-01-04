@@ -18,7 +18,7 @@ import latis.dm.Tuple
 import latis.dm.Text
 import latis.dm.Index
 import latis.time.Time
-import latis.reader.tsml.TsmlReader
+import latis.reader.DatasetAccessor
 import latis.dm.Variable
 import latis.writer.AsciiWriter
 
@@ -26,7 +26,7 @@ import latis.writer.AsciiWriter
 class TestTakeRightOperation {
  
   @Test
-  def test_takeright_0 {
+  def takeright_0 {
     val ds = TakeRightOperation(0)(TestDataset.canonical)
     ds match {
       case Dataset(Function(s)) => assertEquals(true, s.isEmpty)
@@ -34,7 +34,7 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_takeright_neg {
+  def takeright_neg {
     val ds = TakeRightOperation(-1)(TestDataset.canonical)
     ds match {
       case Dataset(Function(s)) => assertEquals(true, s.isEmpty)
@@ -42,7 +42,7 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_takeright_1 {
+  def takeright_1 {
     val ds = TakeRightOperation(1)(TestDataset.canonical)
     ds match {
       case Dataset(Function(s)) => s.toList.head match {
@@ -58,7 +58,7 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_takeright_2 {
+  def takeright_2 {
     val ds = TakeRightOperation(2)(TestDataset.canonical)
     ds match {
       case Dataset(Function(s)) => s.toList.head match {
@@ -74,13 +74,13 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_takeright_empty_dataset {
+  def takeright_empty_dataset {
     val ds = TakeRightOperation(5)(Dataset.empty)
     assertEquals(Dataset.empty, ds)
   }
   
   @Test
-  def test_should_not_takeright_scalar {
+  def should_not_takeright_scalar {
     val ds = TakeRightOperation(1)(TestDataset.integer)
     ds match {
       case Dataset(x) => x match {
@@ -92,7 +92,7 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_should_not_takeright_tuple_of_scalars {
+  def should_not_takeright_tuple_of_scalars {
     val ds = TakeRightOperation(5)(TestDataset.tuple_of_scalars)
     ds match {
       case Dataset(x) => x match {
@@ -105,7 +105,7 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_function_of_scalar_with_takeright_0 {
+  def function_of_scalar_with_takeright_0 {
     val ds = TakeRightOperation(0)(TestDataset.function_of_scalar)
     ds match {
       case Dataset(Function(s)) => assertEquals(true, s.isEmpty)
@@ -113,7 +113,7 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_function_of_scalar_with_takeright_1 {
+  def function_of_scalar_with_takeright_1 {
     val ds = TakeRightOperation(1)(TestDataset.function_of_scalar)
     assertEquals(1, ds.getLength)
     ds match {
@@ -127,7 +127,7 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_function_of_scalar_with_takeright_2 {
+  def function_of_scalar_with_takeright_2 {
     val ds = TakeRightOperation(2)(TestDataset.function_of_scalar)
     assertEquals(2, ds.getLength)
     ds match {
@@ -141,7 +141,7 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_function_of_scalar_with_takeright_5 {
+  def function_of_scalar_with_takeright_5 {
     val ds = TakeRightOperation(5)(TestDataset.function_of_scalar)
     assertEquals(3, ds.getLength)
     ds match {
@@ -155,7 +155,7 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_function_of_function_with_takeright_1 {
+  def function_of_function_with_takeright_1 {
     val ds = TakeRightOperation(1)(TestDataset.function_of_functions)
     ds match {
       case Dataset(Function(f)) => f.toList.head match{
@@ -173,7 +173,7 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_empty_function {
+  def takeright_empty_function {
     val ds = TakeRightOperation(5)(TestDataset.empty_function)
     ds match {
       case Dataset(x) => x match {
@@ -185,15 +185,15 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_metadata_length {
+  def takeright_metadata_length {
     val ds = TakeRightOperation(2)(TestDataset.function_of_scalar_with_length)
     assertEquals(Some("2"), ds.unwrap.asInstanceOf[Function].getMetadata("length"))
   }
   
 
   @Test
-  def test_tsml_data {
-    val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
+  def takeright_tsml_data {
+    val data = DatasetAccessor.fromName("data_with_marker").getDataset
     val ds = TakeRightOperation(1)(data)
     ds match {
       case Dataset(x) => x match {
@@ -208,11 +208,10 @@ class TestTakeRightOperation {
   }
   
   @Test
-  def test_tsml_data_with_ops {
+  def takeright_tsml_data_with_ops {
     val ops = ArrayBuffer[Operation]()
     ops += Operation("takeright",List("1"))
-    val ds1 = TsmlReader("datasets/test/data_with_marker.tsml").getDataset
-    val data = TsmlReader("datasets/test/data_with_marker.tsml").getDataset(ops)
+    val data = DatasetAccessor.fromName("data_with_marker").getDataset(ops)
     data match {
       case Dataset(x) => x match {
         case Function(f) => f.toList.head match {
