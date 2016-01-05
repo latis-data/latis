@@ -69,18 +69,6 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
   }
   
   /**
-   * Override so that Projections aren't passed to the file list.
-   */
-  override def getDataset(ops: Seq[Operation]) = {
-    val (filter, others) = ops.partition(_.isInstanceOf[Filter])
-    val dss = adapters.map(_.getDataset(filter))
-    
-    val ds = collect(dss)
-    
-    ops.foldLeft(ds)((dataset, op) => op(dataset)) //doesn't handle any Operations
-  }
-  
-  /**
    * Read each file and aggregate the results.
    */
   override def collect(datasets: Seq[Dataset]): Dataset = {

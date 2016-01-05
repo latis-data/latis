@@ -15,8 +15,4 @@ class TestTileUnionAdapter extends AdapterTests{
   @Test @Ignore 
   override def select_on_index_when_no_projected_domain {}
   
-  //selecting on unprojected variable is now an exception, so this breaks
-  //when the selection is applied to the combined dataset. 
-  @Test @Ignore 
-  override def select_on_non_projected_domain_with_selection_first {}
 }
