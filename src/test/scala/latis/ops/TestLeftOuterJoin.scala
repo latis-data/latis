@@ -143,14 +143,29 @@ class TestLeftOuterJoin {
     }
   }
   
-  //@Test
+  @Test
   def empty_second = {
     val samples1 = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
-    val samples2 = List[Sample]() //.map(i => Sample(Real(Metadata("t"), i), Real(Metadata("b"), i*2)))
+    val samples2 = List[Sample]()
+    val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
+    val ds2 = Dataset(Function(Real(Metadata("t")), Real(Metadata("b")), Iterator.empty, Metadata("function2")), Metadata("dataset2"))
+    val op = new LeftOuterJoin()
+    val ds = op(ds1, ds2)
+    latis.writer.AsciiWriter.write(ds)
+    val data = ds.toDoubles
+    assertEquals(3, data(0).length) //3 samples
+    assertEquals(2, data.length) //only 2 parameters
+  }
+  
+  @Test(expected=classOf[UnsupportedOperationException])
+  def mismatched_domain = {
+    val samples1 = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
+    val samples2 = List(1,2,3).map(i => Sample(Real(Metadata("x"), i), Real(Metadata("b"), i*2)))
     val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
     val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
     val op = new LeftOuterJoin()
     val ds = op(ds1, ds2)
-    AsciiWriter.write(ds)
   }
+  
+  //TODO: same range variable
 }

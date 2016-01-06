@@ -5,12 +5,12 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-
 import scala.io.Source
-
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Text
+import java.io.BufferedInputStream
+import java.io.FileInputStream
 
 /**
  * Write a zip file of the files contained in a file list dataset.
@@ -21,7 +21,7 @@ class ZipWriter extends Writer {
     
     lazy val dir = dataset.getMetadata.get("srcDir") match {
       case Some(sd) => sd + File.separator
-      case None => "" //???
+      case None => "" //write to current directory
     }
     
     //Get the name of each file as it appears in the file list.
@@ -35,28 +35,18 @@ class ZipWriter extends Writer {
       case None => throw new IllegalArgumentException("ZipWriter can only write Datasets that contain a 'file' Variable.")
     }
     
-    /**
-     * A stream of values from the given BufferedReader.
-     * A value of -1 will be returned when there are no more values
-     * to be read, but the stream will never be empty.
-     */
-    def readerStream(bufferedReader: BufferedReader) = {
-      //when there is nothing left to read, a value of -1 will be returned, but the stream will never be empty.
-      Stream.continually(bufferedReader.read)
-    }
-    
     val zip = new ZipOutputStream(getOutputStream)
     try {
       for (f <- files) {
         //add zip entry to output stream
         zip.putNextEntry(new ZipEntry(f))
 
-        val in = Source.fromFile(dir + f).bufferedReader
+        val bis = new BufferedInputStream(new FileInputStream(dir + f))
         try {
-          readerStream(in).takeWhile(_ > -1).foreach(zip.write(_))
+          Stream.continually(bis.read).takeWhile(-1 !=).foreach(zip.write(_))
         }
         finally {
-          in.close
+          bis.close
         }
 
         zip.closeEntry

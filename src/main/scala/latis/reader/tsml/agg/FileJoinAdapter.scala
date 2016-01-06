@@ -11,6 +11,8 @@ import latis.dm.Sample
 import latis.util.FileUtils
 import latis.dm.Text
 import java.io.File
+import latis.ops.Operation
+import latis.ops.filter.Filter
 
 /**
  * An AggregationAdapter that reads data from each file in a file list 
@@ -64,6 +66,18 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
         case None => throw new Exception(s"No 'file' Variable found in Dataset '$ds'")
       })
     }
+  }
+  
+  /**
+   * Override so that Projections aren't passed to the file list.
+   */
+  override def getDataset(ops: Seq[Operation]) = {
+    val (filter, others) = ops.partition(_.isInstanceOf[Filter])
+    val dss = adapters.map(_.getDataset(filter))
+    
+    val ds = collect(dss)
+    
+    ops.foldLeft(ds)((dataset, op) => op(dataset)) //doesn't handle any Operations
   }
   
   /**

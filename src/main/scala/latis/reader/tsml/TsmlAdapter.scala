@@ -41,6 +41,8 @@ import latis.util.StringUtils
 import scala.collection.mutable.ArrayBuffer
 import latis.ops.TimeFormatter
 import latis.ops.ReplaceMissingOperation
+import latis.ops.Pivot
+import latis.ops.TimeTupleToTime
 
 
 /**
@@ -234,7 +236,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   protected def makeDataset(ds: Dataset): Dataset = {
     makeVariable(ds.unwrap) match {
       case Some(v) => Dataset(v, ds.getMetadata)
-      case None => throw new Error("No variables created for dataset")
+      case None => throw new Error("No variables created for dataset: " + ds.getName)
     }
     
   } 
@@ -398,51 +400,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   /**
    * Get the TSML Processing Instructions as a Seq of Operations.
+   * Ops with multiple input parameters should have those parameters separated by ';'
+   * in the processing instruction.
    */
   def piOps: Seq[Operation] = {
-    //TODO: consider order
-    
-    val ops = ArrayBuffer[Operation]()
-    //LATIS-400: tsml.processingInstructions.map(pi => Operation(pi._1, pi._2)).toSeq
-    
-    val projectedNames = tsml.getProcessingInstructions("project")
-    val projections = projectedNames.map(Projection(_)) 
-    ops ++= projections
-    
-    ops ++= tsml.getProcessingInstructions("select").map(Selection(_))
-    
-    //Unit conversions: "convert vname units"
-    ops ++= tsml.getProcessingInstructions("convert").map(s => {
-      val index = s.indexOf(" ")
-      val vname = s.substring(0, index).trim
-      val units = s.substring(index).trim
-      UnitConversion(vname, units)
-    })
-    
-    ops ++= tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
-    
-    val derivedFields = tsml.getProcessingInstructions("derived")
-    val derivations = if((projectedVariableNames ++ projections).isEmpty) derivedFields.map(MathExpressionDerivation(_)) 
-      else {
-        val allProjected = projectedVariableNames ++ projectedNames.flatMap(_.split(','))
-        val filteredDerivedFields = derivedFields.filter(f => {
-          val searchString = f.substring(0, f.indexOf('=')).trim
-          allProjected.contains(searchString)
-        })
-        filteredDerivedFields.map(MathExpressionDerivation(_))
-      }
-    ops ++= derivations
-    
-    ops ++= tsml.getProcessingInstructions("domBin").map(s => DomainBinner(s.split(',')))
-
-    ops ++= tsml.getProcessingInstructions("format_time").map(TimeFormatter(_)) 
-    
-    tsml.getProcessingInstructions("replace_missing").headOption match {
-      case Some(mv) => ops += ReplaceMissingOperation(List(mv))
-      case None =>
-    }
-    
-    ops.toSeq
+    tsml.processingInstructions.toSeq.flatMap(pi => pi._2.map(s => Operation(pi._1, s.split(',').map(_.trim))))
   }
   
   /**

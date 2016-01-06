@@ -2,6 +2,7 @@ package latis.ops
 
 import latis.dm._
 import latis.metadata.Metadata
+import latis.time.Time
 
 class Factorization extends Operation {
 
@@ -126,8 +127,14 @@ object Factorization {
          * can we know the I was a domain var and reconstruct the nested Function?
          * 
          */
-        val domain = Scalar(domainMetadata, value)
-        //TODO: preserve metadata
+        
+        //Construct domain variable, assumes 1D
+        //preserve Time domain
+        //  trigger off of "time" name from metadata for now, doesn't support "time" alias
+        val domain = domainMetadata.get("name") match {
+          case Some(s) if (s == "time") => Time(domainMetadata, value)
+          case _ => Scalar(domainMetadata, value)
+        }
         
         //val z = samples.map(_.range)
         //TODO: need these samples to be Samples, not just Tuples
