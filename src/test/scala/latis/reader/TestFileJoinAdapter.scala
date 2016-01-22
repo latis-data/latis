@@ -56,4 +56,12 @@ class TestFileJoinAdapter {
     assertEquals("2015-07-12T10:11:12.136", data("time").head)
   }
   
+  @Test
+  def select_on_dataset_content = {
+    val ops = ArrayBuffer[Operation]()
+    ops += Selection(s"message =~ ..2")
+    val ds = DatasetAccessor.fromName("log/log_join").getDataset(ops)
+    //val ds = DatasetAccessor.fromName("log/log").getDataset(ops)
+    latis.writer.AsciiWriter.write(ds)
+  }
 }
