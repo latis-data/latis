@@ -13,6 +13,8 @@ import latis.dm.Text
 import java.io.File
 import latis.ops.Operation
 import latis.ops.filter.Filter
+import latis.ops.filter.Selection
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * An AggregationAdapter that reads data from each file in a file list 
@@ -94,6 +96,39 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
     
     val md = makeMetadata(tsml.dataset)
     Dataset(Function(f, sit), md)
+  }
+  
+  lazy val toHandle = ArrayBuffer[Operation]()
+  
+  override def handleOperation(op: Operation): Boolean = op match {
+    case s @ Selection(name, _, _) => {
+      val ods = adapters.head.getOrigDataset
+      ods.findVariableByName(name) match {
+        case None => false
+        case Some(_) => {
+          toHandle += s
+          val tods = TsmlAdapter(template).getOrigDataset
+          tods.findVariableByName(name) match {
+            case None => true
+            case Some(_) => false
+          }
+        }
+      }
+    }
+    case f: Filter => {
+      toHandle += f
+      false
+    }
+    case _ => false
+  }
+  
+  override def getDataset(ops: Seq[Operation]) = {
+    val (handled, pass) = ops.partition(handleOperation)
+    val dss = adapters.map(_.getDataset(toHandle))
+    
+    val ds = collect(dss)
+    
+    pass.foldLeft(ds)((dataset, op) => op(dataset)) 
   }
 
 }
