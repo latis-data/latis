@@ -67,6 +67,7 @@ trait Scalar extends Variable with Ordered[Scalar] {
   //TODO: updatedMetadata(md: Metadata)
   
   //TODO: updatedValue instead of Variable.apply
+  //TODO: use "copy" like Scala's case classes (LATIS-428)
   def updatedValue(s: String): Scalar = this match {
     //TODO: manage exception? StringUtil?
     //TODO: Time, override?
