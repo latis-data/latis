@@ -400,11 +400,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   /**
    * Get the TSML Processing Instructions as a Seq of Operations.
-   * Ops with multiple input parameters should have those parameters separated by ';'
+   * Ops with multiple input parameters should have those parameters separated by ','
    * in the processing instruction.
    */
   def piOps: Seq[Operation] = {
-    tsml.processingInstructions.toSeq.flatMap(pi => pi._2.map(s => Operation(pi._1, s.split(',').map(_.trim))))
+    tsml.processingInstructions.map(pi => Operation(pi._1, pi._2.split(',').map(_.trim)))
   }
   
   /**

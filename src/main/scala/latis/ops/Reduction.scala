@@ -69,8 +69,9 @@ class Reduction extends Operation  {
   
 }
 
-object Reduction {
-  //TODO: extend OptionFactory, allow in server request?
+object Reduction extends OperationFactory {
+
+  override def apply() = new Reduction()
   
   def reduce(dataset: Dataset): Dataset = {
     (new Reduction)(dataset)
