@@ -15,7 +15,6 @@ class TestReplaceMissing {
   def replace_with_number = {
     val ds1 = TestDataset.function_of_scalar_with_nan
     val ds2 = ReplaceMissingOperation(-999)(ds1)
-    latis.writer.AsciiWriter.write(ds2)
     ds2 match {
       case Dataset(Function(it)) => it.next; it.next match {
         case Sample(_, Real(d)) => assertEquals(-999.0, d, 0.0)
@@ -27,7 +26,6 @@ class TestReplaceMissing {
   def replace_with_number_as_string = {
     val ds1 = TestDataset.function_of_scalar_with_nan
     val ds2 = ReplaceMissingOperation(List("-999"))(ds1)
-    //latis.writer.AsciiWriter.write(ds2)
     ds2 match {
       case Dataset(Function(it)) => it.next; it.next match {
         case Sample(_, Real(d)) => assertEquals(-999.0, d, 0.0)
