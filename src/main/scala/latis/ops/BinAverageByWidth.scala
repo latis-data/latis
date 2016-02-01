@@ -37,13 +37,10 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
     else {
       //Get initial domain value so we know where to start,
       //default to first sample in the data if no startVal was provided in constructor
-      var tempStartValue: Double = 0  //'0' is arbitrary
-      if (startVal.isNaN) tempStartValue = getDomainValue(fit.peek)
-      else tempStartValue = startVal
-      
-      val startValue = tempStartValue //because this value should really be a val, not a var
+      val startValue = if (startVal.isNaN) getDomainValue(fit.peek)      
+                       else startVal                                      
+ 
       var nextValue = startValue
-      var index = 0  //TODO: this is not used
       val domainMetadata = f.getDomain.getMetadata
       val rangeMetadata = reduce(f.getRange).getMetadata //first scalar
 
