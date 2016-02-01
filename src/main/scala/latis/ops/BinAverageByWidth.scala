@@ -61,6 +61,7 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
             //TODO: munge metadata
             val domainValue = nextValue - 0.5 * getBinWidth //bin center
             val domain = fit.current.domain match {
+              //TODO: use "copy"
               case _: Time => Time(domainMetadata, domainValue)
               case _ => Real(domainMetadata, domainValue)
             } 
@@ -69,11 +70,16 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
             val range = computeStatistics(binnedSamples) match {
               case Some(range) => range
               case None => {
-                //fill empty bin with NaNs
+                //fill empty bin with missing_value or NaN
+                val fillValue = rangeMetadata.get("missing_value") match {
+                  case Some(s) => s.toDouble
+                  case None => Double.NaN
+                }
+                //TODO: use scalar.getFillValue
                 //TODO: or call getNext if we want to skip empty bins
-                val mean = Real(rangeMetadata, Double.NaN)
-                val min  = Real(Metadata("min"), Double.NaN)
-                val max  = Real(Metadata("max"), Double.NaN)
+                val mean = Real(rangeMetadata, fillValue)
+                val min  = Real(Metadata("min"), fillValue)
+                val max  = Real(Metadata("max"), fillValue)
                 val count = Real(Metadata("count"), 0)
                 Tuple(mean, min, max, count) //TODO: add metadata, consider model for bins
               }
