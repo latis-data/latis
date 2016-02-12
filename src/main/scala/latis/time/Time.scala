@@ -60,7 +60,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
       //Use java time for Text times.
       val otherData = t.convert(timeScale) match {
         case _: Text => LongValue(t.getJavaTime)
-        case _: Number => t.getNumberData
+        case n: Number => n.getNumberData
       }
 
       //Base comparison on our type so we can get the benefit of double precision or long accuracy
