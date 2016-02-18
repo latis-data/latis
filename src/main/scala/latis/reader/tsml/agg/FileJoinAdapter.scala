@@ -98,14 +98,12 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
           case sample => sample
         }
       }
-    })
+    }).buffered
     
-    val f = TsmlAdapter(template).getOrigDataset match {
-      case Dataset(f: Function) => f //get the function template
-    }
+    val temp = sit.head
     
     val md = makeMetadata(tsml.dataset)
-    Dataset(Function(f, sit), md)
+    Dataset(Function(temp.domain, temp.range, sit), md)
   }
 
 }
