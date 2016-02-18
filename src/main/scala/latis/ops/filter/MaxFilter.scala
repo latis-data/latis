@@ -48,6 +48,8 @@ class MaxFilter(name: String) extends Filter {
     //----Normal Code Below--------------------------------------------------------------------------
     
     //change length of Function in metadata
+    //mdSquash does nothing but squash a bug; if samples isn't used like this nothing works for some reason...
+    val mdSquash = Metadata(function.getMetadata.getProperties + ("length" -> samples.length.toString))
     val md = Metadata(function.getMetadata.getProperties + ("length" -> keepSamples.length.toString))
     
     //make the new function with the updated metadata
@@ -64,10 +66,10 @@ class MaxFilter(name: String) extends Filter {
    */
   override def applyToSample(sample: Sample): Option[Sample] = {
  println("Applying to Sample!")
+      //val x = sample.getVariables.map(applyToVariable(_)) 
       val x = sample.getVariables.map(applyToVariable(_)) 
       x.find(_.isEmpty) match { //Watch this. Assuming it throws away bad variables, thus bad samples.
-        case Some(_) => None    //found an invalid variable, exclude the entire sample
-        case None => {
+        case None => {          //FOUND A PROBLEM! Even when a Scalar has been discarded from the sample, this block of code is executed; Sample NOT discarded.
           val s = Sample(sample.domain, sample.range)
           keepSamples += s
           println("keepSamples: " + keepSamples)
@@ -75,6 +77,7 @@ class MaxFilter(name: String) extends Filter {
             println("keepSamples[name]: " + keepSamples(0).findVariableByName(name).get.getData)
           Some(s)
         }
+        case Some(_) => None    //found an invalid variable, exclude the entire sample
       }
   }
   
@@ -109,10 +112,12 @@ class MaxFilter(name: String) extends Filter {
 						 //Found a new max value, so initiate grand master plan...
 						 println("scalarValue greater than currentMax!")
 						 keepSamples.clear 
+						 currentMax = scalarValue
+						 println("currentMax: " + currentMax)
 						 Some(scalar) 
 
 					  }
-			      if (scalarValue == currentMax) {
+						else if (scalarValue == currentMax) {
 				      //Keep the sample
 			        println("scalarValue equals currentMax!")
 				      Some(scalar)
