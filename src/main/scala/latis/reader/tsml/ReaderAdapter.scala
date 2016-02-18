@@ -12,7 +12,7 @@ import latis.reader.tsml.ml.Tsml
  */
 class ReaderAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   
-  val reader = {
+  lazy val reader = {
     val reader_name = getProperty("reader") match {
       case Some(name) => name
       case None => throw new RuntimeException("ReaderAdapter requires a reader class definition 'reader'.")
