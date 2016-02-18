@@ -20,7 +20,7 @@ class MaxFilter(name: String) extends Filter {
   
   override def applyToFunction(function: Function) = {
     //Apply Operation to every sample from the iterator
-    val samples = function.iterator.flatMap(applyToSample(_))
+    function.iterator.foreach(applyToSample(_))
     
     //-----Dumb Testing-----------------------------------------------------------------------------
     
@@ -49,7 +49,7 @@ class MaxFilter(name: String) extends Filter {
     
     //change length of Function in metadata
     //mdSquash does nothing but squash a bug; if samples isn't used like this nothing works for some reason...
-    val mdSquash = Metadata(function.getMetadata.getProperties + ("length" -> samples.length.toString))
+    //val mdSquash = Metadata(function.getMetadata.getProperties + ("length" -> samples.length.toString))
     val md = Metadata(function.getMetadata.getProperties + ("length" -> keepSamples.length.toString))
     
     //make the new function with the updated metadata
@@ -94,8 +94,12 @@ class MaxFilter(name: String) extends Filter {
   /**
    * Apply Operation to a Tuple
    */
-  override def applyToTuple(tup: Tuple): Option[Tuple] = {
-    Some(Tuple(tup.getVariables.flatMap(applyToVariable(_))))
+  override def applyToTuple(tuple: Tuple): Option[Tuple] = {
+    val x = tuple.getVariables.map(applyToVariable(_))
+    x.find(_.isEmpty) match{
+      case Some(_) => None //found an invalid variable, exclude the entire tuple
+      case None => Some(Tuple(x.map(_.get), tuple.getMetadata))
+    }
   }
 
   /**
