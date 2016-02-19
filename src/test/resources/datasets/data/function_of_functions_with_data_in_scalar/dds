@@ -1,8 +1,8 @@
 Dataset {
     Sequence {
-        Int64 x;
+        Int32 x;
         Sequence {
-            Int64 y;
+            Int32 y;
             Float64 z;
         } samples;
     } function_of_functions_with_data_in_scalar;

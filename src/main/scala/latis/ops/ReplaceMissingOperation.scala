@@ -14,6 +14,7 @@ class ReplaceMissingOperation(value: ScalaNumericAnyConversions) extends Operati
   //TODO: update metadata missing_value
 
   override def applyToScalar(scalar: Scalar): Option[Scalar] = scalar match {
+    //TODO: use scalar.copy(data = ...) (LATIS-428)
     case r: Real if (r.isMissing) => Some(Real(r.getMetadata, value.doubleValue))
     case i: Integer if (i.isMissing) => Some(Integer(i.getMetadata, value.longValue))
     case _ => Some(scalar)
@@ -29,7 +30,7 @@ object ReplaceMissingOperation extends OperationFactory {
     val v: ScalaNumericAnyConversions = args.headOption match  {
       case Some(s) => {
         if (s == "NaN") Double.NaN
-        else ???
+        else s.toDouble
         //TODO: need to know what type to convert string to
       }
       case None => ???

@@ -83,8 +83,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   
   /**
    * Until we can enforce sorting of function samples this will do so. 
-   * Assumes Function with Integer domain only, for now.
-   * Sort by range if domain is Index.
+   * Sort by range if domain is Index. (Only integer range, for now.)
    * TODO: implement as Operation.
    * See latis-mms-web TestDatasets
    */
