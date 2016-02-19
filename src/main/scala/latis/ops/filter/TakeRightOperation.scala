@@ -6,23 +6,23 @@ import latis.ops.OperationFactory
 
 
 class TakeRightOperation(val n: Int) extends Filter {
-  
+
   override def applyToFunction(function: Function) = {
     //Assume we can hold this all in memory.
- 
-    (n,function) match {
-      case (_,Function(it)) if it.isEmpty => Some(Function(function.getDomain, function.getRange, Iterator.empty, function.getMetadata()))
-      case (i: Int,_) if (i <= 0) => Some(Function(function.getDomain, function.getRange, Iterator.empty, function.getMetadata()))
-      case (i: Int,_) => {
-          //get data with rightmost n samples
-          val samples = function.iterator.sliding(n).toList.last
-          //change length of Function in metadata
-          val md = function.getMetadata + ("length" -> samples.length.toString)
-          //make the new function with the updated metadata
-          samples.length match {
-            case 0 => Some(Function(function.getDomain, function.getRange, Iterator.empty, md)) //empty Function with type of original
-            case _ => Some(Function(samples, md))
-          }
+
+    (n, function) match {
+      case (_, Function(it)) if it.isEmpty => Some(Function(function.getDomain, function.getRange, Iterator.empty, function.getMetadata()))
+      case (i: Int, _) if (i <= 0) => Some(Function(function.getDomain, function.getRange, Iterator.empty, function.getMetadata()))
+      case (i: Int, _) => {
+        //get data with rightmost n samples
+        val samples = function.iterator.sliding(n).toList.last
+        //change length of Function in metadata
+        val md = function.getMetadata + ("length" -> samples.length.toString)
+        //make the new function with the updated metadata
+        samples.length match {
+          case 0 => Some(Function(function.getDomain, function.getRange, Iterator.empty, md)) //empty Function with type of original
+          case _ => Some(Function(samples, md))
+        }
       }
     }
   } 
