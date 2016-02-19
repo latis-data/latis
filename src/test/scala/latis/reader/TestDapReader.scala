@@ -41,4 +41,11 @@ class TestDapReader {
     assertEquals(2, data("myInt").length)
   }
     
+  //@Test
+  def remote = {
+    val ops = ArrayBuffer[Operation]()
+    val r = new DapReader("http://localhost:8080/lisird3/latis/historical_tsi")
+    val ds = r.getDataset(ops)
+    latis.writer.AsciiWriter.write(ds)
+  }
 }
