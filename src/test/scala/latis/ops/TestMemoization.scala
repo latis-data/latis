@@ -26,4 +26,27 @@ class TestMemoization {
     assertEquals(data2("myTime").length, 3) //op didn't change number of samples
   }
   
+  @Test
+  def length_metadata = {
+    val ds = TestDataset.numeric_time_series
+    assert(ds.unwrap.getMetadata.isEmpty)
+    val ds2 = ds.force
+    assertEquals("3", ds2.unwrap.getMetadata("length").get)
+  }
+  
+  @Test
+  def nested_function_not_memoized = {
+    val ds = TestDataset.function_of_functions2
+    ds.toDoubleMap //traverse once
+    val map = ds.toDoubleMap //traverse twice
+    assert(map.isEmpty)
+  }
+  
+  @Test
+  def nested_function_memoized = {
+    val ds = TestDataset.function_of_functions2.force
+    ds.toDoubleMap //traverse once
+    val map = ds.toDoubleMap //traverse twice
+    assert(map.nonEmpty)
+  }
 }

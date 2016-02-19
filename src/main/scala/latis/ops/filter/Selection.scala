@@ -14,6 +14,7 @@ import latis.dm.Tuple
 import latis.ops.Operation
 import latis.ops.resample.NearestNeighbor
 import latis.util.StringUtils
+import latis.ops.OperationFactory
 
 /**
  * Filter based on a basic boolean expression.
@@ -104,7 +105,12 @@ class Selection(val vname: String, val operation: String, val value: String) ext
 }
 
 
-object Selection {
+object Selection extends OperationFactory {
+  
+  override def apply(args: Seq[String]): Operation = {
+    //should be only one arg: expression
+    Selection(args.head)
+  }
   
   def apply(vname: String, operation: String, value: String): Operation = {
     //delegate to NearestNeighbor filter for '~' operator

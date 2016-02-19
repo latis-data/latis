@@ -169,7 +169,7 @@ class TestTime {
   
   @Test
   def time_from_formatted_string = {
-    val ds = Dataset(Time("2015-10-01")) //TODO: MatchError
+    val ds = Dataset(Time("2015-10-01"))
     TimeFormatter("yyyy/DDD")(ds) match {
       case Dataset(Text(s)) => assertEquals("2015/274", s)
     }
@@ -177,7 +177,7 @@ class TestTime {
   
   @Test 
   def time_from_formatted_string_with_metadata_name_only = {
-    val ds = Dataset(Time(Metadata("time"), "2015-10-01"))  //TODO: makes numeric units, should be formatted
+    val ds = Dataset(Time(Metadata("time"), "2015-10-01"))
     TimeFormatter("yyyy/DDD")(ds) match {
       case Dataset(Text(s)) => assertEquals("2015/274", s)
     }
@@ -188,6 +188,22 @@ class TestTime {
     val ds = Dataset(Time(Metadata(Map("name" -> "time", "units" -> "yyyy-MM-dd")), "2015-10-01"))
     TimeFormatter("yyyy/DDD")(ds) match {
       case Dataset(Text(s)) => assertEquals("2015/274", s)
+    }
+  }
+  
+  @Test
+  def unspecified_2_digit_year {
+    val ds = Dataset(Time(Metadata(Map("name" -> "time", "units" -> "yy-MM-dd")), "15-10-01"))
+    TimeFormatter("yyyy-MM-dd")(ds) match {
+      case Dataset(Text(s)) => assertEquals("2015-10-01", s)
+    }
+  }
+  
+  @Test
+  def specified_2_digit_year {
+    val ds = Dataset(Time(Metadata(Map("name" -> "time", "units" -> "yy-MM-dd", "century_start_date" -> "1900")), "15-10-01"))
+    TimeFormatter("yyyy-MM-dd")(ds) match {
+      case Dataset(Text(s)) => assertEquals("1915-10-01", s)
     }
   }
 }

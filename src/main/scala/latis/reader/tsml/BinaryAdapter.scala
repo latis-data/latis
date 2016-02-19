@@ -12,6 +12,10 @@ import latis.reader.tsml.ml.Tsml
 import latis.util.StringUtils
 import java.nio.ByteOrder
 
+/**
+ * Read a binary file via scala's Source which is not very efficient
+ * since it involved character encoding.
+ */
 class BinaryAdapter(tsml: Tsml) extends IterativeAdapter[ByteBuffer](tsml) {
   
   private var source: Source = null 

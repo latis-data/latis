@@ -42,7 +42,15 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
         case Some(f) => f
         case None => TimeFormat.ISO.toString //default to ISO format
       }
-      TimeFormat(format).parse(text.stringValue)
+      //century_start_date should be an iso date string 
+      getMetadata("century_start_date") match {
+        case None => TimeFormat(format).parse(text.stringValue)
+        case Some(date) => {
+          val time = Time.fromIso(date)
+          TimeFormat(format).setCenturyStart(time).parse(text.stringValue)
+        }
+      }
+      
     }
   }
 

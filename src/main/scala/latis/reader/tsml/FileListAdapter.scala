@@ -39,10 +39,12 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
    */
   override def extractValues(record: String) = {
     val fileName = record.split(',')(0)
-    val size = if (getOrigScalarNames.contains("fileSize")) record.split(',')(1)
-      else ""
+    val size = record.split(',')(1)
     regex.findFirstMatchIn(fileName) match {
-      case Some(m) => (m.subgroups :+ fileName) :+ size //add the file name
+      case Some(m) => {
+        if (getOrigScalarNames.contains("fileSize")) (m.subgroups :+ fileName) :+  size 
+          else (m.subgroups :+ fileName)
+      } //add the file name
       case None => List[String]()
     }
   }

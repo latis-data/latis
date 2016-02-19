@@ -30,6 +30,15 @@ class TimeFormat(format: String) {
       case e: ParseException => throw new IllegalArgumentException("Unable to parse time string (" + string + ") with the format " + format)
     }
   }
+  
+  /**
+   * Sets the 100-year period 2-digit years will be interpreted as 
+   * being in to begin on the Time.
+   */
+  def setCenturyStart(date: Time): TimeFormat = {
+    sdf.set2DigitYearStart(new Date(date.getJavaTime))
+    this
+  }
 
   override def toString = format
 }
