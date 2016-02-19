@@ -27,24 +27,20 @@ class Tsml(val xml: Elem) {
   lazy val dataset: DatasetMl = new DatasetMl(xml) //assumes only one "dataset" element
   
   /**
-   * Get a sequence of processing instructions' text values (proctext) 
-   * for the given type (target).
+   * Get all the processing instructions (ProcInstr) for the Dataset
+   * as a Seq of the type (target) and String value (proctext).
    */
-  def getProcessingInstructions(target: String): Seq[String] = {
-    processingInstructions.getOrElse(target, Seq.empty)
+  lazy val processingInstructions: Seq[(String,String)] = { 
+    val pis: Seq[ProcInstr] = xml.descendant.flatMap(_ match {
+      case pi: ProcInstr => Some(pi)
+      case _ => None
+    })
+    pis.map(pi => pi.target -> pi.proctext)
   }
   
   /**
-   * Get all the processing instructions (ProcInstr) for the Dataset
-   * as a Map from the type (target) to a Seq of values (proctext).
+   * Update this tsml's adapter.location attribute.  
    */
-  lazy val processingInstructions: Map[String, Seq[String]] = { //TODO: currently only searches first level children of "dataset"
-    val pis: Seq[ProcInstr] = xml(0).child.filter(_.isInstanceOf[ProcInstr]).map(_.asInstanceOf[ProcInstr])
-    val pimap: Map[String, Seq[ProcInstr]] = pis.groupBy(_.target) //put into Map by target name
-    pimap.map((pair) => (pair._1, pair._2.map(_.proctext))) //change Seq of PIs to Seq of their text values
-    //TODO: do we need to override this Map's "default" to return an empty Seq[String]?
-  }
-  
   def setLocation(loc: String): Tsml = {
     val newloc = new UnprefixedAttribute("location", loc, Null)
     val rr = new RewriteRule {
@@ -62,6 +58,29 @@ class Tsml(val xml: Elem) {
     case Some(ml) => {
       val atts = ml.getAttributes ++ ml.getMetadataAttributes
       atts(attribute)
+    }
+  }
+  
+  /**
+   * Look for an attribute for the variable with the given name.
+   * Try XML attributes of the variable's element first, then try 
+   * its metadata element. Return an Option so we can better handle
+   * cases where no such variable or attribute is defined.
+   */
+  def findVariableAttribute(vname: String, attribute: String): Option[String] = dataset.findVariableMl(vname) match {
+    case None => None
+    case Some(ml) => {
+      //try xml attributes for the variable element
+      ml.getAttributes.get(attribute) match {
+        case s: Some[String] => s  //found it in variable attributes
+        case None => {
+          //else try metadata attributes
+          ml.getMetadataAttributes.get(attribute) match {
+            case s: Some[String] => s  //found it in metadata attributes
+            case None => None  //attribute not found for the given variable
+          }
+        }
+      }
     }
   }
 

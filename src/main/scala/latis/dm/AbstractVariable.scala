@@ -17,7 +17,7 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
   def getData: Data = data
   
   def getName = name
-  private lazy val name = metadata.get("name") match {
+  private lazy val name = getMetadata.get("name") match {
     case Some(s) => s
     case None => this match {
       case _: Function => "samples" //default name for Functions

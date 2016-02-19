@@ -15,7 +15,7 @@
   <real    id="myReal"/>
   <text    id="myText"/>
   
-  <text id="file" length="256"/>
+  <text id="file" length="24"/>
   <integer id="fileSize"/>
 
 </dataset>

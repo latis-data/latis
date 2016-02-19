@@ -6,14 +6,20 @@ import latis.util.DataUtils
 import latis.util.iterator.MappingIterator
 import latis.util.iterator.PeekIterator
 import com.typesafe.scalalogging.LazyLogging
+import latis.metadata.Metadata
 
 //TODO: SampleMappedFunction?
 class WrappedFunction(function: Function, val operation: Operation) 
   extends SampledFunction(function.getDomain, function.getRange) with LazyLogging {
   
-  //TODO: deal with Function metadata, length
-  
   logger.debug("Making WrappedFunction for " + function +" " + operation)
+  
+  /**
+   * Delegate to wrapped Function to get metadata.
+   * TODO: The Operation should be responsible for updating the metadata
+   *   such as filters that could specify a length.
+   */
+  override def getMetadata(): Metadata = function.getMetadata()
   
   /**
    * Override iterator to apply the Operation to each sample as it iterates (lazy).

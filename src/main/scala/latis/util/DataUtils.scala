@@ -1,8 +1,18 @@
 package latis.util
 
+import java.nio.ByteBuffer
+
+import scala.collection.Map
+import scala.collection.mutable
+
 import latis.data.Data
 import latis.data.EmptyData
+import latis.data.IterableData
 import latis.data.SampleData
+import latis.data.SampledData
+import latis.data.seq.DataSeq
+import latis.data.set.IndexSet
+import latis.data.value.StringValue
 import latis.dm.Binary
 import latis.dm.Function
 import latis.dm.Index
@@ -15,16 +25,6 @@ import latis.dm.Text
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.time.Time
-import java.nio.ByteBuffer
-import scala.collection.Map
-import scala.collection.mutable
-import latis.data.SampledData
-import latis.data.seq.DataSeq
-import scala.collection.mutable.ArrayBuffer
-import latis.data.IterableData
-import latis.data.value.StringValue
-import java.util.Arrays
-import latis.data.set.IndexSet
 
 /*
  * Use Cases
@@ -179,14 +179,12 @@ object DataUtils {
     val rangeData = bufferMapToData(bufferMap, sampleTemplate.range)
     SampleData(domainData, rangeData)
   }
-
+  
   /**
    * Given a data map from variable name to DataSeq (column oriented, e.g. TsmlAdapter cache) and a Sample template,
    * construct SampledData that can be used when constructing a Sampled Function.
    */
   def dataMapToSampledData(dataMap: Map[String, DataSeq], sampleTemplate: Sample): SampledData = {
-    //TODO: consider IndexSet
-    //TODO: consider nD domain
     //TODO: consider nested function without consistent domain samples (non-cartesian)
     //TODO: consider laziness, always wrap iterator? IterableOnce issues, Stream?
 
@@ -235,13 +233,29 @@ object DataUtils {
       val datas = kv._2
       (name, datas.iterator)
     }
-
+    
+    //Makes data from the cartesian product of mulitple data seq's. 
+    //Used for combining the data of nD domains. 
+    def productSet(s1: Seq[Data], ss: Seq[Data]*): Seq[Data] = ss.length match {
+      case 0 => s1
+      case 1 => for(d1 <- s1; d2 <- ss.head) yield d1 concat d2
+      case _ => productSet(productSet(s1, ss.head), ss.tail:_*)
+    }
+    
     val domain = sampleTemplate.domain
-    val domainData = domain.toSeq.map(s => dataMap(s.getName)).reduceLeft(_ zip _)//dataMap(domain.getName)
+    val domainData: IterableData = domain match {
+      case _: Index => IndexSet()
+      case s: Scalar => dataMap(s.getName)
+      case t: Tuple => {
+        val datas = t.toSeq.map(s => dataMap(s.getName).iterator.toSeq)
+        IterableData(productSet(datas.head, datas.tail: _*))
+        //what if we are given data which already represents the product?
+      }
+    }
 
     val range = sampleTemplate.range
 
-    val length = domainData.length
+    val length = domainData.length //number of dimensions?
 
     val rangeData = iteratorMapToIterableData(iteratorMap, range, length)
 

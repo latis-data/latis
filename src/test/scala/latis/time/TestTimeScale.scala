@@ -3,6 +3,10 @@ package latis.time
 import org.junit._
 import Assert._
 import java.util.Date
+import latis.metadata.Metadata
+import latis.dm.Dataset
+import latis.writer.AsciiWriter
+import latis.ops.TimeFormatter
 
 class TestTimeScale {
 
@@ -78,6 +82,11 @@ class TestTimeScale {
     assertEquals("yyyy-MM-dd", ts.toString) //string representation will preserve the format
   }
   
+  @Test(expected = classOf[IllegalArgumentException])
+  def invalid_format {
+    val u = "yyyy-MM-foo"
+    val t = Time(Metadata("units" -> u), "aaaa-aa-aaa")
+    AsciiWriter.write(Dataset(t))
+  }
   
-  //TODO: test invalid inputs
 }

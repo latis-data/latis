@@ -111,7 +111,7 @@ object Function {
   }
 
   def apply(vs: Seq[Variable]): SampledFunction = Function(vs, EmptyMetadata)
-  
+  //TODO: accept Iterable?
   
   /**
    * Construct from a Seq of domain Variables and a Seq of range Variables.

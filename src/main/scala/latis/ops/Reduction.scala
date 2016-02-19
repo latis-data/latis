@@ -1,7 +1,14 @@
 package latis.ops
 
-import latis.dm._
 import scala.collection.mutable.ArrayBuffer
+
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Index
+import latis.dm.Sample
+import latis.dm.Tuple
+import latis.dm.Variable
+import latis.dm.WrappedFunction
 
 /**
  * Reduce any Tuples of one element to that element and reduce any 
@@ -45,19 +52,25 @@ class Reduction extends Operation  {
 
   /**
    * If the given Function has only one sample, reduce to that Sample.
+   * If the domain of that sample is an Index, just keep the range.
    * If the Function has no samples, return None.
    */
   override def applyToFunction(function: Function) = {
+    //TODO: TraversableOnce issues?
     val n = function.getLength
     if (n == 0) None
-    else if (n == 1) applyToSample(function.iterator.next)
+    else if (n == 1) applyToSample(function.iterator.next) match {
+      case Some(Sample(_: Index, range)) => Some(range)
+      case ov: Option[Variable] => ov
+    }
     else Some(WrappedFunction(function, this))
   }
   
 }
 
-object Reduction {
-  //TODO: extend OptionFactory, allow in server request?
+object Reduction extends OperationFactory {
+
+  override def apply() = new Reduction()
   
   def reduce(dataset: Dataset): Dataset = {
     (new Reduction)(dataset)

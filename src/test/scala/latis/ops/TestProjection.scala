@@ -2,7 +2,6 @@ package latis.ops
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Real
@@ -13,6 +12,8 @@ import latis.dm.implicits.variableToDataset
 import latis.metadata.Metadata
 import latis.ops.filter.FirstFilter
 import latis.ops.filter.Selection
+import latis.dm.Index
+import latis.dm.Sample
 
 class TestProjection {
   //TODO: use TestDataset-s
@@ -159,6 +160,22 @@ class TestProjection {
     assertEquals("index", domain.getName)
     assertEquals("w", range.getRange.getName)
     assertEquals(3, range.getLength)
+  }
+  
+  @Test
+  def project_domains_only_in_function_function {
+    //make sure domain of nested function becomes range when range not projected
+    // (t -> index -> w)
+    val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
+    val proj = new Projection(List("t","w")) 
+    val ds2 = proj(ds1)
+    ds2 match {
+      case Dataset(Function(it)) => it.next match {
+        case Sample(_, Function(it2)) => it2.next match {
+          case Sample(_: Index, w) => assertEquals("w", w.getName)
+        }
+      }
+    }
   }
   
   @Test

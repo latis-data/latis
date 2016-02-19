@@ -25,7 +25,7 @@ class TsmlReader(tsml: Tsml) extends DatasetAccessor {
    * Return the LaTiS Dataset that TSML represents.
    */
   //TODO: careful, need to make sure kids can override without lazy val init problems, just use the ops call for now
-  def getDataset: Dataset = getDataset(Seq[Operation]())
+  override def getDataset: Dataset = getDataset(Seq[Operation]())
   
   //TODO: what happens if called multiple times for the same reader?
   def getDataset(operations: Seq[Operation]): Dataset = {

@@ -54,11 +54,8 @@ class Projection(val names: Seq[String]) extends Operation with Idempotence {
    * Return None if all elements are excluded.
    */
   override def applyToTuple(tuple: Tuple): Option[Tuple] = {
-    //Apply projection order. If this is a stand-alone Tuple, the data should already live within its elements.
-    //Otherwise it is part of a Function which should handle the data restructuring.
-    //This won't affect the domain variables which will be first (and establish ordering for samples of multidimensional domains)
-    val vars = names.flatMap(tuple.findVariableByName(_)).flatMap(applyToVariable(_))
-    //val vars = tuple.getVariables.flatMap(applyToVariable(_)) //orig var order
+    //val vars = names.flatMap(tuple.findVariableByName(_)).flatMap(applyToVariable(_)) //projection order
+    val vars = tuple.getVariables.flatMap(applyToVariable(_)) //orig var order
     if (vars.length == 0) None
     else Some(Tuple(vars, tuple.getMetadata)) //assumes Tuple does not contain data
   }
@@ -79,9 +76,9 @@ class Projection(val names: Seq[String]) extends Operation with Idempotence {
   override def toString = names.mkString(",")
 }
 
-object Projection {
+object Projection extends OperationFactory {
   
-  def apply(names: Seq[String]) = new Projection(names)
+  override def apply(names: Seq[String]) = new Projection(names)
     
   def apply(expression: String): Projection = expression.trim match {
     //case PROJECTION.r(names) => //Note, regex match will only expose first and last

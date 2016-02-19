@@ -38,6 +38,11 @@ import latis.util.DataUtils
 import latis.ops.filter.Selection
 import java.net.MalformedURLException
 import latis.util.StringUtils
+import scala.collection.mutable.ArrayBuffer
+import latis.ops.TimeFormatter
+import latis.ops.ReplaceMissingOperation
+import latis.ops.Pivot
+import latis.ops.TimeTupleToTime
 
 
 /**
@@ -231,7 +236,7 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   protected def makeDataset(ds: Dataset): Dataset = {
     makeVariable(ds.unwrap) match {
       case Some(v) => Dataset(v, ds.getMetadata)
-      case None => throw new Error("No variables created for dataset")
+      case None => throw new Error("No variables created for dataset: " + ds.getName)
     }
     
   } 
@@ -395,39 +400,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   
   /**
    * Get the TSML Processing Instructions as a Seq of Operations.
+   * Ops with multiple input parameters should have those parameters separated by ','
+   * in the processing instruction.
    */
   def piOps: Seq[Operation] = {
-    //TODO: consider order
-    //TODO: add other PI types? rename,...
-    /*
-     * TODO: unify handling/parsing of service constraints and PIs
-     * foo(bar) = <?foo bar?> ?
-     */
-    
-    val projectedNames = tsml.getProcessingInstructions("project")
-    val projections = projectedNames.map(Projection(_)) 
-    val selections  = tsml.getProcessingInstructions("select").map(Selection(_))
-    //Unit conversions: "convert vname units"
-    val conversions = tsml.getProcessingInstructions("convert").map(s => {
-      val index = s.indexOf(" ")
-      val vname = s.substring(0, index).trim
-      val units = s.substring(index).trim
-      UnitConversion(vname, units)
-    })
-    
-    val renames = tsml.getProcessingInstructions("rename").map(RenameOperation(_)) 
-    val derivedFields = tsml.getProcessingInstructions("derived")
-    val derivations = if((projectedVariableNames ++ projections).isEmpty) derivedFields.map(MathExpressionDerivation(_)) 
-      else {
-        val allProjected = projectedVariableNames ++ projectedNames.flatMap(_.split(','))
-        val filteredDerivedFields = derivedFields.filter(f => {
-          val searchString = f.substring(0, f.indexOf('=')).trim
-          allProjected.contains(searchString)
-        })
-        filteredDerivedFields.map(MathExpressionDerivation(_))
-      }
-    val domBin = tsml.getProcessingInstructions("domBin").map(s => DomainBinner(s.split(',')))
-    projections ++ selections ++ conversions ++ renames ++ derivations ++ domBin
+    tsml.processingInstructions.map(pi => Operation(pi._1, pi._2.split(',').map(_.trim)))
   }
   
   /**

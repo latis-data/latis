@@ -4,6 +4,7 @@ import latis.reader.tsml.ml.Tsml
 import latis.util.FileUtils
 import java.net.URLDecoder
 import java.io.File
+import latis.dm.Dataset
 
 /**
  * Return a list of files as a Dataset.
@@ -16,6 +17,12 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
   //      The matcher returns it first but we want the file variable to be last.
   
   lazy val directory = URLDecoder.decode(getUrl.getPath, "utf-8") //assumes a file URL 
+  
+  override def getDataset = {
+    super.getDataset match {
+      case ds @ Dataset(v) => Dataset(v, ds.getMetadata + ("srcDir" -> directory))
+    }
+  }
   
   /**
    * A record consists of a file name, file size.
@@ -32,10 +39,12 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
    */
   override def extractValues(record: String) = {
     val fileName = record.split(',')(0)
-    val size = if (getOrigScalarNames.contains("fileSize")) record.split(',')(1)
-      else ""
+    val size = record.split(',')(1)
     regex.findFirstMatchIn(fileName) match {
-      case Some(m) => (m.subgroups :+ directory + File.separator + fileName) :+ size //add the file name
+      case Some(m) => {
+        if (getOrigScalarNames.contains("fileSize")) (m.subgroups :+ fileName) :+  size 
+          else (m.subgroups :+ fileName)
+      } //add the file name
       case None => List[String]()
     }
   }

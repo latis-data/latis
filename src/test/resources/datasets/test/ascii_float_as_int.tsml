@@ -2,7 +2,6 @@
 
 <dataset id="ascii_iterative">
   <adapter class="latis.reader.tsml.AsciiAdapter"
-           cache="none"
            delimiter="\s+"
            commentCharacter="#"
            location="datasets/test/mixed.txt" />

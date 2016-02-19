@@ -10,6 +10,8 @@ import java.util.TimeZone
 import latis.metadata.VariableMetadata
 import latis.data.value.LongValue
 import scala.collection.immutable.StringOps
+import latis.util.StringUtils
+import com.typesafe.scalalogging.LazyLogging
 
 
 class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
@@ -40,7 +42,15 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
         case Some(f) => f
         case None => TimeFormat.ISO.toString //default to ISO format
       }
-      TimeFormat(format).parse(text.stringValue)
+      //century_start_date should be an iso date string 
+      getMetadata("century_start_date") match {
+        case None => TimeFormat(format).parse(text.stringValue)
+        case Some(date) => {
+          val time = Time.fromIso(date)
+          TimeFormat(format).setCenturyStart(time).parse(text.stringValue)
+        }
+      }
+      
     }
   }
 
@@ -59,23 +69,18 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
     case _ => throw new Error("Can't compare " + this + " with " + that)
   }
   
-  //override to deal with ISO formatted time strings  
+  /**
+   * Text Time can be compared to either iso or java-time strings. 
+   * Numeric Time can be compared to either iso or numeric strings. 
+   */
   override def compare(that: String): Int = {
-    //TODO: look for units and see if 'that' matches...
-    RegEx.TIME.r findFirstIn that match {
-      //If the string matches the ISO format
-      //Make Time from ISO formatted time string (based on time.scale.type), convert to our time scale
-      case Some(s) => compare(Time.fromIso(s)) 
-      //Otherwise assume we have a numeric value in our time scale
-      case _ => getData match {
-        case LongValue(l) => l compare that.toLong
-        //TODO: allow 'that' to be double even if this is Integer?, careful about precision loss
-        //case LongValue(l) => l.toDouble compare that.toDouble
-        case NumberData(d) => d compare that.toDouble
-        case _: TextData => getJavaTime compare that.toLong
-        //TODO: handle format errors
-      }
+    if(Time.isValidIso(that)) getJavaTime compare Time.isoToJava(that)
+    else if(StringUtils.isNumeric(that)) getData match {
+      case LongValue(l)   => l compare that.toLong
+      case DoubleValue(d) => d compare that.toDouble
+      case StringValue(s) => getJavaTime compare that.toLong
     }
+    else throw new IllegalArgumentException(s"'$that' could not be interpreted as a time string, could not be compared to $this.")
   }
 
 }
@@ -83,6 +88,16 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
 //=============================================================================
 
 object Time {
+  
+  /**
+   * Test that the given string can be parsed as a TimeFormat. 
+   */
+  def isValidIso(s: String): Boolean = try {
+    isoToJava(s)
+    true
+  } catch {
+    case e: IllegalArgumentException => false
+  }
   
   /**
    * Create a Time instance from the given ISO8601 formatted string.
@@ -156,9 +171,7 @@ object Time {
     val scale = md.get("units") match {
       case Some(u) => TimeScale(u)
       case None => {
-        //Use default time scale, add units to metadata
-        metadata = md + ("units" -> TimeScale.JAVA.toString)
-        TimeScale.JAVA
+        throw new Error("Time can only be constructed without units from an iso time string.")
       }
     }
     new Time(scale, metadata)
@@ -174,9 +187,10 @@ object Time {
     val scale = md.get("units") match {
       case Some(u) => TimeScale(u)
       case None => {
-        //Use default time scale, add units to metadata
-        metadata = md + ("units" -> TimeScale.JAVA.toString)
-        TimeScale.JAVA
+        val unit = if(isValidIso(value.toString)) TimeFormat.fromIsoValue(value.toString).toString
+          else throw new Error("Time can only be constructed without units from an iso time string.")
+        metadata = md + ("units" -> unit)
+        TimeScale.apply(unit)
       }
     }
     value match {
@@ -197,10 +211,15 @@ object Time {
       case _: Double => new Time(scale, md, Data(value)) with Real
       case _: Int => new Time(scale, md, Data(value)) with Integer
       case _: Long => new Time(scale, md, Data(value)) with Integer
+      case _: String => new Time(scale, md, Data(value)) with Text
     }
   }
 
-  def apply(value: String): Time = Time(TimeScale.JAVA, value)
+  def apply(value: String): Time = {
+    if(isValidIso(value)) fromIso(value)
+    else throw new Error("Time can only be constructed without units from an iso time string.")
+
+  }
   def apply(value: AnyVal): Time = Time(TimeScale.JAVA, value)
   
   def apply(date: Date): Time = Time(date.getTime())

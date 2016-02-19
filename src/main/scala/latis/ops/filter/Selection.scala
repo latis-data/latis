@@ -13,6 +13,8 @@ import latis.dm.WrappedFunction
 import latis.dm.Tuple
 import latis.ops.Operation
 import latis.ops.resample.NearestNeighbor
+import latis.util.StringUtils
+import latis.ops.OperationFactory
 
 /**
  * Filter based on a basic boolean expression.
@@ -74,6 +76,11 @@ class Selection(val vname: String, val operation: String, val value: String) ext
     }
   }
   
+  /**
+   * If we are selecting on the Function domain and we have bounds data 
+   * in the range and the operation include ">" or "<", apply a new 
+   * Selection using the bounds.
+   */
   override def applyToFunction(f: Function): Option[Function] = {
    (f.getDomain.hasName(vname), f.getRange.findVariableByName("bounds")) match {
       case (true, Some(Tuple(vars))) => operation match {
@@ -98,12 +105,26 @@ class Selection(val vname: String, val operation: String, val value: String) ext
 }
 
 
-object Selection {
+object Selection extends OperationFactory {
+  
+  override def apply(args: Seq[String]): Operation = {
+    //should be only one arg: expression
+    Selection(args.head)
+  }
   
   def apply(vname: String, operation: String, value: String): Operation = {
     //delegate to NearestNeighbor filter for '~' operator
     if (operation == "~") NearestNeighborFilter(vname, value)
-    else new Selection(vname, operation, value)
+    
+    //validate time selections before they are applied to every Sample
+    else vname match {
+      case "time" => { 
+        if(Time.isValidIso(value) || StringUtils.isNumeric(value)) new Selection(vname, operation, value)
+        else throw new UnsupportedOperationException(
+          s"Invalid Selection: could not parse '$value' as a time string.")
+      }
+      case _ => new Selection(vname, operation, value)
+    }
   }
   
   def apply(expression: String): Operation = expression.trim match {

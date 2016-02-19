@@ -9,6 +9,10 @@ import latis.reader.tsml.ml.Tsml
 import latis.util.iterator.PeekIterator
 import latis.dm.Sample
 import latis.util.FileUtils
+import latis.dm.Text
+import java.io.File
+import latis.ops.Operation
+import latis.ops.filter.Filter
 
 /**
  * An AggregationAdapter that reads data from each file in a file list 
@@ -48,13 +52,40 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
   val template = Tsml((tsml.xml \ "dataset").last)
   
   /**
+   * Extract the file paths from a file list Dataset.
+   */
+  def getFilePaths(ds: Dataset): Iterator[String] = {
+    lazy val dir = ds.getMetadata.get("srcDir") match {
+      case None => ""
+      case Some(sd) => sd + File.separator
+    }
+    
+    ds match {
+      case Dataset(Function(it)) => it.map(_.findVariableByName("file") match {
+        case Some(Text(file)) => dir + file
+        case None => throw new Exception(s"No 'file' Variable found in Dataset '$ds'")
+      })
+    }
+  }
+  
+  /**
+   * Override so that Projections aren't passed to the file list.
+   */
+  override def getDataset(ops: Seq[Operation]) = {
+    val (filter, others) = ops.partition(_.isInstanceOf[Filter])
+    val dss = adapters.map(_.getDataset(filter))
+    
+    val ds = collect(dss)
+    
+    ops.foldLeft(ds)((dataset, op) => op(dataset)) //doesn't handle any Operations
+  }
+  
+  /**
    * Read each file and aggregate the results.
    */
   override def collect(datasets: Seq[Dataset]): Dataset = {
     //Get list of file names from the first dataset.
-    val files = datasets.head match {
-      case Dataset(Function(it)) => it.flatMap(_.toSeq.find(_.hasName("file"))).map(_.getValue.toString).toList
-    }
+    val files = getFilePaths(datasets.head) 
     
     //Make a TsmlReader for each file from the tsml template with the file location inserted.
     val readers = files.map(file => TsmlReader(template.setLocation(file)))
@@ -67,14 +98,12 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
           case sample => sample
         }
       }
-    })
+    }).buffered
     
-    val f = TsmlAdapter(template).getOrigDataset match {
-      case Dataset(f: Function) => f //get the function template
-    }
+    val temp = sit.head
     
     val md = makeMetadata(tsml.dataset)
-    Dataset(Function(f, sit.iterator), md)
+    Dataset(Function(temp.domain, temp.range, sit), md)
   }
 
 }

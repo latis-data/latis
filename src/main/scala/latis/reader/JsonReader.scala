@@ -1,9 +1,7 @@
 package latis.reader
 
 import java.io.File
-import java.net.URI
 import java.net.URL
-import java.net.URLEncoder
 
 import scala.io.Source
 
@@ -17,12 +15,12 @@ import latis.dm.Variable
 import latis.metadata.Metadata
 import latis.ops.Operation
 import latis.time.Time
+import latis.util.StringUtils
 import play.api.libs.json.JsArray
 import play.api.libs.json.JsBoolean
 import play.api.libs.json.JsNull
 import play.api.libs.json.JsNumber
 import play.api.libs.json.JsObject
-import play.api.libs.json.JsResultException
 import play.api.libs.json.JsString
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
@@ -38,43 +36,30 @@ class JsonReader(path: String) extends DatasetAccessor {
    * Get the Source from which we will read data.
    */
   def getDataSource: Source = {
-    if (source == null) source = Source.fromURL(getUrl)
+    if (source == null) source = Source.fromURL(StringUtils.getUrl(path))
     source
   }
-  
-  def getUrl: URL = {
-    val uri = new URI(path.replace(" ", "%20"))
-    if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
-    else if (path.startsWith(File.separator)) new URL("file:" + path) //absolute path
-    else getClass.getResource("/"+path) match { //relative path: try looking in the classpath
-      case url: URL => url
-      case null => new URL("file:" + scala.util.Properties.userDir + File.separator + path) //relative to current working directory
-    }
-  }
-  
+    
   def close {
     if (source != null) source.close
   }
   
-  def getDataset: Dataset = {
+  override def getDataset: Dataset = {
   
     //read entire source into string, join with new line
     val jsonString = getDataSource.getLines.mkString(sys.props("line.separator"))
-    val fields = Json.parse(jsonString).as[JsObject].fields
-    val value: (String, JsValue) = fields.length match {
-      case 0 => return(Dataset.empty)
-      case 1 => fields(0) //{Dataset: {Variable: ... }}
-      case _ => { //{Var1: ... , Var2: ... , ...}
-        val name = path.slice(path.lastIndexOf(File.separator)+1, path.indexOf(".json"))
-        val vars: JsObject = JsObject(fields)
-        (name, JsObject(Seq(("variables", vars))))//{fileName: {variables: {Var1: {...}, Var2: {...}, ...}}}
-      }
-    }
-    val dsname = value._1
-    val v = value._2.as[JsObject]
-    val vars = getValue(v.fields(0)) //one Variable per Dataset
+    val value = Json.parse(jsonString)
+    val name = path.slice(path.lastIndexOf(File.separator)+1, path.indexOf(".json"))
     
-    Dataset(vars, Metadata(dsname))
+    //wrap the raw json so that it looks like a latis dataset
+    val obj = value match {
+      case o: JsObject if(o.keys.size == 1) => o //already looks like latis dataset 
+      case _ => JsObject(Seq((name, value))) //wrap with dataset name
+    }
+    
+    val v = makeVariable(obj)
+    val dsname = obj.keys.head
+    Dataset(v, Metadata(dsname))
   }
   
   def getDataset(ops: Seq[Operation]): Dataset = ops.reverse.foldRight(getDataset)(_(_))
@@ -82,50 +67,49 @@ class JsonReader(path: String) extends DatasetAccessor {
   /**
    * make a JsValue into a Latis Variable. First tries the value as an array, then an object, and then a scalar
    */
-  def makeValue(name: String, value: JsValue): Variable = {
-    try {
-      val array = value.as[JsArray]
-      makeArray(array, name)
-    } catch {
-      case jre: JsResultException => try {
-        val obj = value.as[JsObject]
-        makeObject(obj, name)
-      } catch {
-        case jre: JsResultException => makeScalar(value, name)
-      }
-    }
+  def makeVariable(obj: JsObject): Variable = {
+    val fields = obj.fields
+    val v = if(fields.length == 1) fields.head._2 match {
+      case a: JsArray => makeFunction(obj)
+      case o: JsObject => makeVariable(o)
+      case other => makeScalar(obj)
+    } else makeTuple(obj)
+    v
   }
-  def getValue(field: (String, JsValue)) = (makeValue _).tupled(field)
   
   /**
    * make a Latis Scalar from a JsValue
    */
-  def makeScalar(s: JsValue, name: String): Scalar = s match {
-    case n: JsNumber => {
-      val num = n.value
-      if(num.isValidLong) Scalar(Metadata(name), num.longValue)
-      else Scalar(Metadata(name), num.doubleValue)
+  def makeScalar(s: JsObject): Scalar = {
+    val name = s.keys.head
+    s.fields.head._2 match {
+      case n: JsNumber => {
+        val num = n.value
+        if(num.isValidLong) Scalar(Metadata(name), num.longValue)
+        else Scalar(Metadata(name), num.doubleValue)
+      }
+      case t: JsString => if(Time.isValidIso(t.value)) Time.fromIso(t.value)
+        else Scalar(Metadata(name), t.value)
+      case b: JsBoolean => Scalar(Metadata(name), b.toString)
+      case JsNull => Scalar(Metadata(name), "null")
+      case _ => ???
     }
-    case t: JsString => try {
-      Time.fromIso(t.value)
-    } catch {
-      case e: Exception => Scalar(Metadata(name), t.value)
-    }
-    case b: JsBoolean => Scalar(Metadata(name), b.toString)
-    case JsNull => Scalar(Metadata(name), "null")
-    case _ => ???//JsArray and JsObject should not make it here
   }
   
   /**
    * make a Latis Function from a JsArray
    */
-  def makeArray(arr: JsArray, name: String): Function = {
-    val it = arr.value
+  def makeFunction(arr: JsObject): Function = {
+    val name = arr.keys.head
+    val it = arr.fields.head._2 match {
+      case a: JsArray => a.value
+      case _ => ???
+    }
     Function(it.map(makeSample(_)), Metadata(name))
   }
   
   def makeSample(value: JsValue): Sample = {
-    makeValue("sample", value) match {
+    makeVariable(JsObject(Seq(("sample", value)))) match {
       case t: Tuple => Sample(t.getVariables.head, Tuple(t.getVariables.tail))
       case s => Sample(Index(), s)
     }
@@ -134,8 +118,9 @@ class JsonReader(path: String) extends DatasetAccessor {
   /**
    * make Latis Tuple from a JsObject
    */
-  def makeObject(obj: JsObject, name: String): Tuple = {
-    val vars = obj.fields.map(getValue(_))
+  def makeTuple(obj: JsObject): Tuple = {
+    val name = obj.keys.head
+    val vars = obj.fields.map(f => makeVariable(JsObject(Seq(f))))
         
     Tuple(vars, Metadata(name))
   }

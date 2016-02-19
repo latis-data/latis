@@ -15,10 +15,10 @@ import java.util.TimeZone
 class TimeScale(val epoch: Date, val unit: TimeUnit, val tsType: TimeScaleType) extends UnitOfMeasure("TODO") {
   //TODO: consider using millis for epoch instead of Date
 
-  private var format = ""
+  private var format: TimeFormat = null
 
   override def toString() = {
-    if (format.nonEmpty) format
+    if (format != null) format.toString
     else {
       val sb = new StringBuilder()
       tsType.toString match {
@@ -90,7 +90,7 @@ object TimeScale {
           //formatted
           val ts = TimeScale.JAVA //will get tsType from time.scale.type property
           //hack format into TimeScale so we can use it when printing units
-          ts.format = s
+          ts.format = TimeFormat(s)
           ts
         }
       }

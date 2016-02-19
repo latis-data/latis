@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<dataset id="ascii_granule">
-  <adapter class="latis.reader.tsml.GranuleAsciiAdapter"
-           delimiter="\s+"
-           commentCharacter="#"
-           location="datasets/test/mixed.txt" />
+<dataset id="json">
+  <adapter class="latis.reader.tsml.JsonAdapter"
+           location="datasets/test/mixed_array.json" />
+           
+  <index/>
   
   <time type="text" length="10">
     <metadata name="myTime" units="yyyy/MM/dd"/>
@@ -13,5 +13,5 @@
   <integer id="myInt"/>
   <real    id="myReal"/>
   <text    id="myText"/>
-  
+   
 </dataset>

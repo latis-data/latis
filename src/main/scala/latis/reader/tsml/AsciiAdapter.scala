@@ -152,7 +152,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
     
     //assume one value per scalar per record
     val vars = getOrigScalars
-    val values = extractValues(record).filterNot(_.isEmpty)
+    val values = extractValues(record)
     
     //If we don't parse as many values as expected, assume we have an invalid record and skip it.
     if (vars.length != values.length) {
@@ -162,7 +162,18 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
       None
     } else {
       val vnames: Seq[String] = vars.map(_.getName)
-      val datas: Seq[Data] = (values zip vars).map(p => StringUtils.parseStringValue(p._1, p._2))
+      val datas: Seq[Data] = (values zip vars).map(p => {
+        val value = tsml.findVariableAttribute(p._2.getName, "regex") match { //look for regex as tsml attribute
+          case Some(s) => s.r.findFirstIn(p._1) match { //try to match the value with the regex
+            case Some(m) => m  //use the matching part
+            case None => p._2.getFillValue.toString  //use a fill value since this doesn't match
+          }
+          case None => p._1  //no regex pattern to match so use the original value
+        }
+        //convert the data values to Data objects using the Variable as a template
+        StringUtils.parseStringValue(value, p._2)
+      })
+      
       Some((vnames zip datas).toMap)
     }
   }
