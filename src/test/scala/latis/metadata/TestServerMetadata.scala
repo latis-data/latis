@@ -28,7 +28,7 @@ class TestServerMetadata {
     val firstOp = firstOpOpt.get
     assertEquals("first", firstOp.name)
     assertEquals("FirstFilter", firstOp.className)
-    assertEquals("return only the first time sample", firstOp.description)
+    assertEquals("return only the first sample", firstOp.description)
   }
 
 }
