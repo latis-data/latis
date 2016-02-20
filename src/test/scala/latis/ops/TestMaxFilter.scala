@@ -23,7 +23,7 @@ class TestMaxFilter {
   @Test
   def test_canonical = {
     val ds1 = TestDataset.canonical
-    val ds2 = MaxFilter("myReal")(ds1)
+    val ds2 = MaxFilter("myInt")(ds1)
     latis.writer.AsciiWriter.write(ds2) 
   }
   
