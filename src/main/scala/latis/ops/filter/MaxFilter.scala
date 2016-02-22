@@ -1,27 +1,39 @@
 package latis.ops.filter
 
+import scala.collection.mutable.ArrayBuffer
+
+import com.typesafe.scalalogging.LazyLogging
+
 import latis.dm.Function
-import latis.ops.OperationFactory
 import latis.dm.Sample
 import latis.dm.Scalar
-import latis.dm.Variable
 import latis.dm.Tuple
-import latis._
+import latis.dm.Variable
 import latis.metadata.Metadata
-import scala.collection.mutable.ArrayBuffer
+import latis.ops.OperationFactory
 
 /**
  * Return the sample containing the max Scalar of any outer Function in the Dataset.
  */
-class MaxFilter(name: String) extends Filter {
+class MaxFilter(name: String) extends Filter with LazyLogging {
   
-  //While you're at it, if you don't find Scalar of "name," why not return that empty function?
-  //(That logic will obviously be handled in applyToFunction. Just set this to any old Scalar.
-  var currentMax = Scalar("0.0") //Wrong. This should probably be first Scalar of name "name"
+  var currentMax = Scalar("0") //Arbitrary; this gets immediately reset to first Scalar of name "name" 
   var keepSamples = ArrayBuffer[Sample]()
   
-  override def applyToFunction(function: Function) = {
-    //Apply Operation to every sample from the iterator
+  override def applyToFunction(function: Function): Option[Function] = {
+    //Set currentMax to the first Scalar of name "name"
+    //or return an empty function if no such Scalar exists
+    function match {
+      case Function(it) => {
+        val s = it.next
+        val v = s.findVariableByName(name) match {
+          case Some(v) => currentMax = v.asInstanceOf[Scalar]  
+          case None    => return Some(Function(function.getDomain, function.getRange, Iterator.empty)) //empty Function with type of original
+        }
+      }
+    }
+    
+    //Scalar "name" exists, so apply Operation to every sample from the iterator
     function.iterator.foreach(applyToSample(_))
     
     //change length of the Function in metadata
@@ -38,28 +50,14 @@ class MaxFilter(name: String) extends Filter {
    * Apply Operation to a Sample
    */
   override def applyToSample(sample: Sample): Option[Sample] = {
-    
-      //add if statement here to check if "name" exists in sample
-      //if it doesn't, make that empty function here!
-      val vars = sample.range.toSeq  //This shouldn't exclude domain like now. 
-      var containsName = false       //Well really, all of this code shouldn't exist.
-      for (variable <- vars) {       //There's definitely a better way to do this.
-        if (variable.getName == name)
-          containsName = true
-      }
-      if (!containsName) {
-        return None
-      }
-   
- 
       val x = sample.getVariables.map(applyToVariable(_)) 
-      x.find(_.isEmpty) match { //Watch this. Assuming it throws away bad variables, thus bad samples.
+      x.find(_.isEmpty) match { 
         case None => {          
           val s = Sample(sample.domain, sample.range)
           keepSamples += s
           Some(s)
         }
-        case Some(_) => None    //found an invalid variable, exclude the entire sample
+        case Some(_) => None //found an invalid variable, exclude the entire sample
       }
   }
   
@@ -95,7 +93,7 @@ class MaxFilter(name: String) extends Filter {
 			  case s: Scalar => if (scalar.hasName(name)) { 
 				  val comparison = s.compare(currentMax)
 						if (comparison > 0) {
-						  //Found a new max value, so initiate grand master plan...
+						  //Found a new max value, so update currentMax and forget old samples
 						  keepSamples.clear 
 						  currentMax = s
 						  Some(scalar) 
@@ -105,7 +103,7 @@ class MaxFilter(name: String) extends Filter {
 				      Some(scalar)
 			      }
 			      else {
-				      //Trash this sample! 
+				      //Trash this sample
 				      None
 			      }
 			    } else { 
@@ -114,7 +112,7 @@ class MaxFilter(name: String) extends Filter {
 		    }
 		  } catch {
 		  case e: Exception => {
-		   //logger.warn("Selection filter threw an exception: " + e.getMessage)
+		    logger.warn("Max filter threw an exception: " + e.getMessage)
 			  None
 		  }
 	  }
