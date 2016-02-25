@@ -1,8 +1,10 @@
 package latis.reader
 
-import scala.annotation.migration
+import scala.io.Codec
+import scala.io.Codec.ISO8859
 import scala.io.Source
 import scala.util.parsing.combinator.JavaTokenParsers
+
 import latis.dm.Binary
 import latis.dm.Dataset
 import latis.dm.Function
@@ -15,18 +17,18 @@ import latis.dm.Text
 import latis.dm.Tuple
 import latis.dm.Variable
 import latis.metadata.Metadata
-import scala.collection.mutable.MapBuilder
 import latis.ops.Operation
-import java.net.URL
 
-class DapReader(url: String) extends DatasetAccessor{
+class DapReader(url: String) extends DatasetAccessor {
   
   override def close = {}
   
-  lazy val dds = Source.fromURL(url + ".dds").getLines.mkString(" ")
-  lazy val das = Source.fromURL(url + ".das").getLines.mkString(" ")
+  val codec: Codec = ISO8859
+  
+  lazy val dds = Source.fromURL(url + ".dds")(codec).getLines.mkString(" ")
+  lazy val das = Source.fromURL(url + ".das")(codec).getLines.mkString(" ")
   lazy val data = {
-    val chars = Source.fromURL(url + ".dods").drop(dds.length + "\nData:\n".length)
+    val chars = Source.fromURL(url + ".dods")(codec).drop(dds.length + "\nData:\n".length)
     //The data should be formatted in 4-byte chunks, but Source reads one byte at a time.
     //Each char read corresponds to one byte. Combine 16-bit Chars into 32-bit Ints. 
     chars.grouped(4).map(cs => (cs(0).toInt << 24) + (cs(1).toInt << 16) + (cs(2).toInt << 8) + (cs(3).toInt))
