@@ -68,7 +68,7 @@ class MinFilter(name: String) extends Filter with LazyLogging {
     case scalar: Scalar     =>  applyToScalar(scalar)
     case sample: Sample     =>  applyToSample(sample)
     case tuple: Tuple       =>  applyToTuple(tuple)
-    case function: Function => applyToFunction(function)
+    case function: Function =>  applyToFunction(function)
   }
   
   /**
