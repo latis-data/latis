@@ -7,8 +7,10 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
-
 import scala.collection.mutable.ArrayBuffer
+import java.io.InputStream
+import java.net.URL
+import java.nio.file.FileSystems
 
 /**
  * Utility methods for working with files.
@@ -48,5 +50,34 @@ object FileUtilsNio {
     val buffer = ArrayBuffer[String]()
     Files.walkFileTree(Paths.get(dir), new FileSizeAccumulatorVisitor(dir, buffer))
     buffer.sorted
+  }
+  
+  
+  /**
+   * Download a file and save it locally.
+   */
+  def downloadFile(url: URL, file: File) = {
+    //TODO: handle exceptions
+    //TODO: create directories?
+    var in: InputStream = null
+    try {
+      in = url.openStream
+      Files.copy(in, file.toPath)
+    } finally {
+      if (in != null) in.close
+    }
+  }
+  
+  /**
+   * Download a file to a tmp file.
+   * Return the name of the file.
+   */
+  def downloadTmpFile(url: URL): File = {
+    val fileName = url.getPath.split(File.separator).last
+    val tmpDir = Files.createTempDirectory("latis").toString
+    val path = FileSystems.getDefault().getPath(tmpDir, fileName)
+    val file = path.toFile
+    downloadFile(url, file)
+    file
   }
 }

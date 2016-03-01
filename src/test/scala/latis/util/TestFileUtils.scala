@@ -3,6 +3,7 @@ package latis.util
 import org.junit._
 import Assert._
 import java.io.File
+import java.net.URL
 
 class TestFileUtils {
   
@@ -50,5 +51,12 @@ class TestFileUtils {
   def stream_file {
     val file = new File("/data_systems/data/web-tcad/catalog_cache/live/catalog.json?&schemaName=MMS_schema001")
     FileUtils.streamFile(file, System.out)
+  }
+  
+  //@Test
+  def download_tmp_file = {
+    val url = new URL("http://naif.jpl.nasa.gov/pub/naif/MAVEN/kernels/sclk/MVN_SCLKSCET.00000.tsc")
+    val file = FileUtilsNio.downloadTmpFile(url)
+    println(file.getAbsolutePath)
   }
 }
