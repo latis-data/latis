@@ -93,6 +93,11 @@ class MaxFilter(name: String) extends Filter with LazyLogging {
 			  case s: Scalar => if (scalar.hasName(name)) { 
 				  val comparison = s.compare(currentMax)
 						if (comparison > 0) {
+						  //comparison with NaN yields 1, so check here to avoid overwriting max with a NaN
+						  if (s.isNumeric) 
+						    if (s.getNumberData.doubleValue.isNaN) 
+						      return None
+						    			  
 						  //Found a new max value, so update currentMax and forget old samples
 						  keepSamples.clear 
 						  currentMax = s

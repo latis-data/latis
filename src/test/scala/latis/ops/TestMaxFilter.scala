@@ -90,7 +90,32 @@ class TestMaxFilter {
       }
     }
   }
+  
+  @Test
+  def canonical_max_invalid_name_length = {
+    val ds1 = TestDataset.canonical
+    val ds2 = MaxFilter("Science!")(ds1)
+    
+    ds2 match {
+      case Dataset(func) => {
+        assertEquals(None, func.getMetadata("length"))
+      }
+    }
+  }
 
+  @Test
+  def max_with_NaN = {
+    val ds1 = TestDataset.function_of_tuple_with_nan
+    val ds2 = MaxFilter("myReal")(ds1)
+    //AsciiWriter.write(ds2)
+    ds2 match {
+      case Dataset(Function(it)) => {
+        it.next match {case Sample(Integer(i), Tuple(Seq(Real(r), Text(txt)))) => 
+          assertEquals(2.0, r, 0.001)}
+      }
+    }
+  }
+  
   @Test
   def one_max_in_middle = {
     //val samples = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i*2)))
@@ -455,5 +480,7 @@ class TestMaxFilter {
       }
     }
   }
+  
+  //non-canonical ds tests here
   
 }

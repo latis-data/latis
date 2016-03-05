@@ -90,6 +90,31 @@ class TestMinFilter {
       }
     }
   }
+  
+  @Test
+  def canonical_max_invalid_name_length = {
+    val ds1 = TestDataset.canonical
+    val ds2 = MinFilter("Don't Exist!")(ds1)
+    
+    ds2 match {
+      case Dataset(func) => {
+        assertEquals(None, func.getMetadata("length"))
+      }
+    }
+  }
+  
+  @Test
+  def min_with_NaN = {
+    val ds1 = TestDataset.function_of_tuple_with_nan
+    val ds2 = MinFilter("myReal")(ds1)
+    //AsciiWriter.write(ds2)
+    ds2 match {
+      case Dataset(Function(it)) => {
+        it.next match {case Sample(Integer(i), Tuple(Seq(Real(r), Text(txt)))) => 
+          assertEquals(0.0, r, 0.001)}
+      }
+    }
+  }
 
   @Test
   def one_min_in_middle = {
