@@ -17,7 +17,7 @@ import latis.ops.OperationFactory
  */
 class MaxFilter(name: String) extends Filter with LazyLogging {
   
-  var currentMax = Scalar("0") //Arbitrary; this gets immediately reset to first Scalar of name "name" 
+  var currentMax: Scalar = null //This gets immediately reset to first Scalar of name "name" 
   var keepSamples = ArrayBuffer[Sample]()
   
   override def applyToFunction(function: Function): Option[Function] = {
@@ -50,15 +50,15 @@ class MaxFilter(name: String) extends Filter with LazyLogging {
    * Apply Operation to a Sample
    */
   override def applyToSample(sample: Sample): Option[Sample] = {
-      val x = sample.getVariables.map(applyToVariable(_)) 
-      x.find(_.isEmpty) match { 
-        case None => {          
-          val s = Sample(sample.domain, sample.range)
-          keepSamples += s
-          Some(s)
-        }
-        case Some(_) => None //found an invalid variable, exclude the entire sample
+    val x = sample.getVariables.map(applyToVariable(_)) 
+    x.find(_.isEmpty) match { 
+      case None => {          
+        val s = Sample(sample.domain, sample.range)
+        keepSamples += s
+        Some(s)
       }
+      case Some(_) => None //found an invalid variable, exclude the entire sample
+    }
   }
   
   /**
