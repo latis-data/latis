@@ -24,7 +24,7 @@ class TestMinFilter {
   //@Test
   def test_canonical = {
     val ds1 = TestDataset.canonical
-    val ds2 = MinFilter("myText")(ds1)
+    val ds2 = MinFilter("myReal")(ds1)
     latis.writer.AsciiWriter.write(ds2) 
   }
   

@@ -22,7 +22,7 @@ class MaxFilter(name: String) extends Filter with LazyLogging {
   
   override def applyToFunction(function: Function): Option[Function] = {
     //Set currentMax to the first Scalar of name "name"
-    //or return an empty function if no such Scalar exists
+    //or return an empty function if no such Scalar exists.
     function match {
       case Function(it) => {
         val s = it.next
