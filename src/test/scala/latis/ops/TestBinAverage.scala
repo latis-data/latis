@@ -60,11 +60,11 @@ class TestBinAverage {
     assertEquals(1, BinAverage(86400000.0*3)(TestDataset.time_series).getLength)
   }
 
+//-----BinAverageByWidth----------------------------------------------------------  
+  
   @Test
   def quikscat_telemetry_data_by_width {
-    //val op = DapConstraintParser.parseExpression("binave(60000)")
     val ops = ArrayBuffer[Operation]()
-    //ops += MathOperation((d: Double) => d*2)
     ops += Projection("time,myReal")
     ops += Selection("time>=2014-10-16T00:01")
     ops += Selection("time<2014-10-16T00:10")
@@ -74,13 +74,14 @@ class TestBinAverage {
     // ascii_iterative: (time -> (myReal, min, max, stddev, count))
     // 1413417689533 -> (21.631854255497455, 21.22629925608635, 21.65319925546646, 0.0938258653030056, 60)
     val data = ds.toDoubleMap
+    
     assertEquals(9, data("time").length)
     assertEquals(1413417690033.0, data("time").head, 0.0)
     assertEquals(21.631854255497455, data("myReal").head, 0.0)
   }
 
   @Test
-  def quikscat_telemetry_count {
+  def quikscat_telemetry_count_by_width {
     val ops = ArrayBuffer[Operation]()
     ops += Projection("time,myReal,count")
     ops += Selection("time>=2014-10-16T00:01")
@@ -88,10 +89,27 @@ class TestBinAverage {
     ops += new BinAverageByWidth(60000.0) //1 minute
     val ds = TsmlReader("binave.tsml").getDataset(ops)
     val data = ds.toDoubleMap
+    
     assertEquals(9, data("time").length)
     assertEquals(60, data("count").head, 0.0)
   }
-
+  
+  @Test
+  def optional_param_test = {
+    val ops = ArrayBuffer[Operation]()
+    ops += Projection("time,myReal,count")
+    ops += Selection("time>=2014-10-16T00:01")
+    ops += Selection("time<2014-10-16T00:10")
+    ops += new BinAverageByWidth(60000.0, 0) //1 minute, 0
+    val ds = TsmlReader("binave.tsml").getDataset(ops)
+    AsciiWriter.write(ds)
+    //val data = ds.toDoubleMap
+    
+    //assertEquals(9, data("time").length)
+    //assertEquals(60, data("count").head, 0.0)
+  }
+  
+  
 //  @Test
 //  def quikscat_telemetry_data_by_count {
 //    //val op = DapConstraintParser.parseExpression("binave(60000)")
@@ -113,9 +131,4 @@ class TestBinAverage {
 //    assertEquals(1413417690033.0, data("time").head, 0.0)
 //    assertEquals(21.631854255497455, data("myReal").head, 0.0)
 //  }
-  
-    //@Test
-    //def optional_param_test = {
-    //  ???
-    //}
 }
