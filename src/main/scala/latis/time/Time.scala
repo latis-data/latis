@@ -15,7 +15,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 
 class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
-  extends AbstractScalar(metadata, data) { 
+  extends AbstractScalar(metadata, data) with Number { 
 
   //Note: there is a one-to-one mapping between java time (ms since 1970) and formatted time.
   //Leap second considerations do not apply when going between the numeric and formatted form.
@@ -33,7 +33,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
   
   def getJavaTime: Long = getData match {
     //Note, converts from the data's time scale (with it's own type) to JAVA time which uses the time.scale.type property.
-    case num: NumberData => convert(TimeScale.JAVA).getNumberData.longValue
+    case num: NumberData => convert(TimeScale.JAVA).getData.asInstanceOf[NumberData].longValue
     
     //Note, time scale type doesn't matter. If either is "NATIVE", leap seconds will not be applied.
     //  If both are UTC, they are not different. TAI is not supported for Text Times.
@@ -58,7 +58,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
     case t: Time => {
       //Convert 'that' Time to our time scale.
       //Note, converted Times will have numeric (double or long) data values.
-      val otherData = t.convert(timeScale).getNumberData
+      val otherData = t.convert(timeScale).getData.asInstanceOf[NumberData]//.getNumberData
       //Base comparison on our type so we can get the benefit of double precision or long accuracy
       getData match {
         case LongValue(l) => l compare otherData.longValue
@@ -82,7 +82,17 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
     }
     else throw new IllegalArgumentException(s"'$that' could not be interpreted as a time string, could not be compared to $this.")
   }
-
+  
+  /*
+   * Identical method as Variable.getNumberData except
+   * for text, return the java time as a LongValue.
+   * This allows us to treat all Times as Numbers. 
+   */
+  override def getNumberData: NumberData = this match {
+    case _: Integer => super.getNumberData 
+    case _: Real    => super.getNumberData
+    case _: Text    => LongValue(getJavaTime)      
+  }
 }
 
 //=============================================================================
