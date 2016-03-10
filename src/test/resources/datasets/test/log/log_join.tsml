@@ -3,36 +3,12 @@
 <dataset id="log_agg">
   <adapter class="latis.reader.tsml.agg.FileJoinAdapter"/>
 
-  <dataset>
-    <adapter class="latis.reader.tsml.FileListAdapter"
-             pattern="latis.txt-(\d\d\d\d-\d\d-\d\d)"
-             location="src/test/resources/datasets/test/log"/>
-         
-    <time type="text">
-      <metadata units="yyyy-MM-dd"/>
-    </time>
+  <dataset id="log/log_list">
     
-    <text id="file" length="20"/>
-  
     <?domBin start,3000-01-01?>
   
   </dataset>
     
-  <dataset id="template">
-  
-    <adapter class="latis.reader.tsml.RegexAdapter"
-             pattern="\[(\S+)\s+(\w+)\s+(\S+)\s+\((\S+)\)\] (.*)"
-             location="" />
-           
-    <time type="text">
-      <metadata units="yyyy-MM-dd'T'HH:mm:ss.SSS"/>
-    </time>
-    <text id="level"   length="5" />
-    <text id="class"   length="32" />
-    <text id="thread"  length="32" />
-    <text id="message" length="256" />
-  
-  </dataset>
-
+  <dataset id="log/log"/>
   
 </dataset>

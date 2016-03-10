@@ -58,7 +58,7 @@ class TestTsml  {
   @Test
   def set_location {
     val tsml = Tsml(<dataset><adapter location="foo"/></dataset>)
-    val t2 = tsml.setLocation("bar")
+    val t2 = tsml.dataset.setLocation("bar")
     assert(t2.toString.contains("""location="bar""""))
   }
   
