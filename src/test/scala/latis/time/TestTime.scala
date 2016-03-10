@@ -211,10 +211,10 @@ class TestTime {
   
   @Test
   def get_number_data_test {
-    val ds1 = latis.dm.TestDataset.canonical
-    ds1 match {
+    val ds = latis.dm.TestDataset.canonical
+    ds match {
       case Dataset(Function(it)) => it.next; it.next match {
-        case Sample(Number(t), _) => assertEquals(8.64E7, t, 0.01)
+        case Sample(Number(t), _) => assertEquals(8.64E7, t, 0)
       }
     }
   }

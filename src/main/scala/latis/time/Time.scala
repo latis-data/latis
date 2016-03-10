@@ -33,7 +33,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
   
   def getJavaTime: Long = getData match {
     //Note, converts from the data's time scale (with it's own type) to JAVA time which uses the time.scale.type property.
-    case num: NumberData => convert(TimeScale.JAVA).getData.asInstanceOf[NumberData].longValue
+    case num: NumberData => convert(TimeScale.JAVA).getNumberData.longValue
     
     //Note, time scale type doesn't matter. If either is "NATIVE", leap seconds will not be applied.
     //  If both are UTC, they are not different. TAI is not supported for Text Times.
@@ -58,7 +58,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
     case t: Time => {
       //Convert 'that' Time to our time scale.
       //Note, converted Times will have numeric (double or long) data values.
-      val otherData = t.convert(timeScale).getData.asInstanceOf[NumberData]//.getNumberData
+      val otherData = t.convert(timeScale).getNumberData
       //Base comparison on our type so we can get the benefit of double precision or long accuracy
       getData match {
         case LongValue(l) => l compare otherData.longValue
@@ -89,9 +89,8 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
    * This allows us to treat all Times as Numbers. 
    */
   override def getNumberData: NumberData = this match {
-    case _: Integer => super.getNumberData 
-    case _: Real    => super.getNumberData
-    case _: Text    => LongValue(getJavaTime)      
+    case _: Text => LongValue(getJavaTime)  
+    case _       => super.getNumberData  
   }
 }
 
