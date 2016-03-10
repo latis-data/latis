@@ -9,6 +9,8 @@ import latis.dm.Function
 import latis.dm.Dataset
 import latis.ops.TimeFormatter
 import latis.dm.Sample
+import latis.dm.Tuple
+import latis.dm.Number
 
 class TestTime {
 
@@ -204,6 +206,16 @@ class TestTime {
     val ds = Dataset(Time(Metadata(Map("name" -> "time", "units" -> "yy-MM-dd", "century_start_date" -> "1900")), "15-10-01"))
     TimeFormatter("yyyy-MM-dd")(ds) match {
       case Dataset(Text(s)) => assertEquals("1915-10-01", s)
+    }
+  }
+  
+  @Test
+  def get_number_data_test {
+    val ds = latis.dm.TestDataset.canonical
+    ds match {
+      case Dataset(Function(it)) => it.next; it.next match {
+        case Sample(Number(t), _) => assertEquals(8.64E7, t, 0)
+      }
     }
   }
 }
