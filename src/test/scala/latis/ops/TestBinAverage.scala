@@ -103,11 +103,11 @@ class TestBinAverage {
     ops += new BinAverageByWidth(60000.0, 1413417630000.0) //1 minute, starting at 2014-10-16 00:00:30
     ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
     val ds = TsmlReader("binave.tsml").getDataset(ops)
-    AsciiWriter.write(ds)
-    //val data = ds.toDoubleMap
-    
-    //assertEquals(9, data("time").length)
-    //assertEquals(60, data("count").head, 0.0)
+    //AsciiWriter.write(ds)
+     val data = ds.toDoubleMap
+     
+    assertEquals(1413417660000.0, data("time").head, 0)
+    assertEquals(30, data("count").head, 0.0)
   }
   
   
