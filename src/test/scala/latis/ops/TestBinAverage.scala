@@ -109,14 +109,6 @@ class TestBinAverage {
     assertEquals(1413417660000.0, data("time").head, 0) 
     assertEquals(30, data("count").head, 0.0)
     assertEquals(60, data("count").tail.head, 0.0)
-    
-        
-    //NOTES TO SHAWN:
-      //midpoint should be 30 seconds after given option parameter argument
-      //"we want to test that time is the value we expect"
-      //v match case Number(d) => d       <- after Time extends Number
-    //look at count in DS
-    //Think edge cases for binning after data, slightly after beginning, etc. Return nothing if after data (probably).
   }
   
   @Test
