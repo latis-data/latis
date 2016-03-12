@@ -104,10 +104,68 @@ class TestBinAverage {
     ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
     val ds = TsmlReader("binave.tsml").getDataset(ops)
     //AsciiWriter.write(ds)
-     val data = ds.toDoubleMap
+    val data = ds.toDoubleMap
      
-    assertEquals(1413417660000.0, data("time").head, 0)
+    assertEquals(1413417660000.0, data("time").head, 0) 
     assertEquals(30, data("count").head, 0.0)
+    assertEquals(60, data("count").tail.head, 0.0)
+    
+        
+    //NOTES TO SHAWN:
+      //midpoint should be 30 seconds after given option parameter argument
+      //"we want to test that time is the value we expect"
+      //v match case Number(d) => d       <- after Time extends Number
+    //look at count in DS
+    //Think edge cases for binning after data, slightly after beginning, etc. Return nothing if after data (probably).
+  }
+  
+  @Test
+  def optional_param_just_after_beginning = {
+    val ops = ArrayBuffer[Operation]()
+    ops += Projection("time,myReal,count")
+    ops += Selection("time>=2014-10-16T00:01")
+    ops += Selection("time<2014-10-16T00:10")
+    ops += new BinAverageByWidth(30000.0, 1413417675000.0) //30 second bins, starting at 2014-10-16 00:01:15
+    ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
+    val ds = TsmlReader("binave.tsml").getDataset(ops)
+    //AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+     
+    assertEquals(1413417690000.0, data("time").head, 0) 
+    assertEquals(45, data("count").head, 0.0)
+    assertEquals(30, data("count").tail.head, 0.0)
+  }
+  
+  @Test
+  def optional_param_after_data = { //Returns all data in one bin. Should we return nothing instead?
+    val ops = ArrayBuffer[Operation]()
+    ops += Projection("time,myReal,count")
+    ops += Selection("time>=2014-10-16T00:01")
+    ops += Selection("time<2014-10-16T00:10")
+    ops += new BinAverageByWidth(60000.0, 1413418260000.0) //1 minute bins, starting at 2014-10-16 00:11:00
+    ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
+    val ds = TsmlReader("binave.tsml").getDataset(ops)
+    //AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+
+    assertEquals(540, data("count").head, 0.0)
+  }
+  
+  @Test
+  def optional_param_middle_of_data = { //First bin's time is 7 seconds after request. How strange should we consider that?
+    val ops = ArrayBuffer[Operation]()
+    ops += Projection("time,myReal,count")
+    ops += Selection("time>=2014-10-16T00:01")
+    ops += Selection("time<2014-10-16T00:10")
+    ops += new BinAverageByWidth(15000.0, 1413417930000.0) //15 second bins, starting at 2014-10-16 00:05:30
+    ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
+    val ds = TsmlReader("binave.tsml").getDataset(ops)
+    //AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+
+    assertEquals(1413417937000.0, data("time").head, 0.0)
+    assertEquals(285, data("count").head, 0.0)
+    assertEquals(15, data("count").tail.head, 0.0)
   }
   
   
