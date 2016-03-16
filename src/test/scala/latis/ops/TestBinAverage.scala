@@ -112,6 +112,22 @@ class TestBinAverage {
   }
   
   @Test
+  def optional_param_before_beginning = {
+    val ops = ArrayBuffer[Operation]()
+    ops += Projection("time,myReal,count")
+    ops += Selection("time>=2014-10-16T00:01")
+    ops += Selection("time<2014-10-16T00:10")
+    ops += new BinAverageByWidth(30000.0, 1413416700000.0) //30 second bins, starting at 2014-10-15 23:45:00
+    ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
+    val ds = TsmlReader("binave.tsml").getDataset(ops)
+    //AsciiWriter.write(ds)
+    val data = ds.toDoubleMap
+     
+    assertEquals(1413416715000.0, data("time").head, 0) 
+    assertEquals(0.0, data("count").head, 0.0)
+  }
+  
+  @Test
   def optional_param_just_after_beginning = {
     val ops = ArrayBuffer[Operation]()
     ops += Projection("time,myReal,count")
@@ -144,7 +160,7 @@ class TestBinAverage {
   }
   
   @Test
-  def optional_param_middle_of_data = { //First bin's time is 7 seconds after request. How strange should we consider that?
+  def optional_param_middle_of_data = { 
     val ops = ArrayBuffer[Operation]()
     ops += Projection("time,myReal,count")
     ops += Selection("time>=2014-10-16T00:01")
@@ -156,10 +172,13 @@ class TestBinAverage {
     val data = ds.toDoubleMap
 
     assertEquals(1413417937000.0, data("time").head, 0.0)
-    assertEquals(285, data("count").head, 0.0)
+    assertEquals(285, data("count").head, 0.0) //285 is from previous data; we really don't want that data
     assertEquals(15, data("count").tail.head, 0.0)
   }
   
+  
+  
+  //CREATE TEST WITH EMPTY DATASET; RETURN EMPTY DS, formatted as if bins existed (A, A min, A max, Count)
   
 //  @Test
 //  def quikscat_telemetry_data_by_count {

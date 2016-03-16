@@ -41,6 +41,7 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
                        else startVal                                      
  
       var nextValue = startValue
+      val domainType = f.getDomain //Used in pattern match below to decide between Time or Real
       val domainMetadata = f.getDomain.getMetadata
       val rangeMetadata = reduce(f.getRange).getMetadata //first scalar
 
@@ -56,8 +57,9 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
             
             //create domain with bin center as its value, reuse original metadata
             //TODO: munge metadata
-            val domainValue = nextValue - 0.5 * getBinWidth //bin center
-            val domain = fit.current.domain match {
+            val domainValue = nextValue - (0.5 * getBinWidth) //bin center    
+            
+            val domain = domainType match { //Note this pattern match only cares about type, not the sample itself
               case _: Time => Time(domainMetadata, domainValue)
               case _ => Real(domainMetadata, domainValue)
             } 
