@@ -5,6 +5,7 @@ import latis.data.EmptyData
 import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
 import latis.ops.Projection
+import latis.ops.filter.FirstFilter
 import latis.ops.filter.LastFilter
 import latis.ops.filter.Selection
 import latis.ops.math.BasicMath
@@ -101,6 +102,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
     }
   }
   
+  def first: Dataset = FirstFilter()(this)
   def last: Dataset = LastFilter()(this)
     
   /**
