@@ -36,9 +36,14 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
     if (fit.isEmpty) Some(Function(f, fit))
     else {
       //Get initial domain value so we know where to start,
-      //default to first sample in the data if no startVal was provided in constructor
-      val startValue = if (startVal.isNaN) getDomainValue(fit.peek)      
-                       else startVal                                      
+      //default to first sample in the data if no startVal was provided in constructor.
+      //Currently, an error is thrown if requested startVal is greater than first sample
+      val firstSampleTime = getDomainValue(fit.peek)
+      val startValue = if (!startVal.isNaN && startVal <= firstSampleTime) startVal      
+                       else if (!startVal.isNaN && startVal > firstSampleTime) {
+                         throw new UnsupportedOperationException("Requested start value should not be after the start of data")
+                       }
+                       else firstSampleTime                     
  
       var nextValue = startValue
       val domainType = f.getDomain //Used in pattern match below to decide between Time or Real

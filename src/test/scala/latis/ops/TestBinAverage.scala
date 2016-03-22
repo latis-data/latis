@@ -128,57 +128,111 @@ class TestBinAverage {
   }
   
   @Test
-  def optional_param_just_after_beginning = {
+  def optional_param_at_beginning = {
     val ops = ArrayBuffer[Operation]()
     ops += Projection("time,myReal,count")
     ops += Selection("time>=2014-10-16T00:01")
     ops += Selection("time<2014-10-16T00:10")
-    ops += new BinAverageByWidth(30000.0, 1413417675000.0) //30 second bins, starting at 2014-10-16 00:01:15
-    ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
-    val ds = TsmlReader("binave.tsml").getDataset(ops)
-    //AsciiWriter.write(ds)
-    val data = ds.toDoubleMap
-     
-    assertEquals(1413417690000.0, data("time").head, 0) 
-    assertEquals(45, data("count").head, 0.0)
-    assertEquals(30, data("count").tail.head, 0.0)
-  }
-  
-  @Test
-  def optional_param_after_data = { //Returns all data in one bin. Should we return nothing instead?
-    val ops = ArrayBuffer[Operation]()
-    ops += Projection("time,myReal,count")
-    ops += Selection("time>=2014-10-16T00:01")
-    ops += Selection("time<2014-10-16T00:10")
-    ops += new BinAverageByWidth(60000.0, 1413418260000.0) //1 minute bins, starting at 2014-10-16 00:11:00
+    ops += new BinAverageByWidth(15000.0, 1413417660033.0) //15 second bins, starting at 2014-10-16 00:01:00.033
     ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
     val ds = TsmlReader("binave.tsml").getDataset(ops)
     //AsciiWriter.write(ds)
     val data = ds.toDoubleMap
 
-    assertEquals(540, data("count").head, 0.0)
-  }
-  
-  @Test
-  def optional_param_middle_of_data = { 
-    val ops = ArrayBuffer[Operation]()
-    ops += Projection("time,myReal,count")
-    ops += Selection("time>=2014-10-16T00:01")
-    ops += Selection("time<2014-10-16T00:10")
-    ops += new BinAverageByWidth(15000.0, 1413417930000.0) //15 second bins, starting at 2014-10-16 00:05:30
-    ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
-    val ds = TsmlReader("binave.tsml").getDataset(ops)
-    //AsciiWriter.write(ds)
-    val data = ds.toDoubleMap
-
-    assertEquals(1413417937000.0, data("time").head, 0.0)
-    assertEquals(285, data("count").head, 0.0) //285 is from previous data; we really don't want that data
+    assertEquals(1413417667000.0, data("time").head, 0) 
+    assertEquals(15, data("count").head, 0.0)
     assertEquals(15, data("count").tail.head, 0.0)
   }
   
+  @Test
+  def optional_param_just_after_beginning = { //Assert that an exception is thrown
+    var thrown = false
+    try {
+      val ops = ArrayBuffer[Operation]()
+      ops += Projection("time,myReal,count")
+      ops += Selection("time>=2014-10-16T00:01")
+      ops += Selection("time<2014-10-16T00:10")
+      ops += new BinAverageByWidth(30000.0, 1413417675000.0) //30 second bins, starting at 2014-10-16 00:01:15
+      ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
+      val ds = TsmlReader("binave.tsml").getDataset(ops)
+      //AsciiWriter.write(ds)
+      val data = ds.toDoubleMap
+    } catch {
+      case e: UnsupportedOperationException =>  thrown = true
+    }
+     
+    assertEquals(true, thrown)
+    //OLD TEST RESULTS BEFORE ERROR THROWING
+    //assertEquals(1413417690000.0, data("time").head, 0) 
+    //assertEquals(45, data("count").head, 0.0)
+    //assertEquals(30, data("count").tail.head, 0.0)
+  }
+  
+  @Test
+  def optional_param_after_data = { //Assert that an exception is thrown
+    var thrown = false
+    try {
+      val ops = ArrayBuffer[Operation]()
+      ops += Projection("time,myReal,count")
+      ops += Selection("time>=2014-10-16T00:01")
+      ops += Selection("time<2014-10-16T00:10")
+      ops += new BinAverageByWidth(60000.0, 1413418260000.0) //1 minute bins, starting at 2014-10-16 00:11:00
+      ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
+      val ds = TsmlReader("binave.tsml").getDataset(ops)
+      //AsciiWriter.write(ds)
+      val data = ds.toDoubleMap
+    } catch {
+      case e: UnsupportedOperationException =>  thrown = true
+    }
+
+    assertEquals(true, thrown)
+    //OLD TEST RESULTS BEFORE ERROR THROWING
+    //assertEquals(540, data("count").head, 0.0) //All data in one bin; not what we want
+  }
+  
+  @Test
+  def optional_param_middle_of_data = { //Assert that an exception is thrown
+    var thrown = false
+    try {
+      val ops = ArrayBuffer[Operation]()
+      ops += Projection("time,myReal,count")
+      ops += Selection("time>=2014-10-16T00:01")
+      ops += Selection("time<2014-10-16T00:10")
+      ops += new BinAverageByWidth(15000.0, 1413417930000.0) //15 second bins, starting at 2014-10-16 00:05:30
+      ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
+      val ds = TsmlReader("binave.tsml").getDataset(ops)
+      //AsciiWriter.write(ds)
+      val data = ds.toDoubleMap
+    } catch {
+      case e: UnsupportedOperationException =>  thrown = true
+    }
+
+    assertEquals(true, thrown)
+    //OLD TEST RESULTS BEFORE ERROR THROWING
+    //assertEquals(1413417937000.0, data("time").head, 0.0)
+    //assertEquals(285, data("count").head, 0.0) //285 is from previous data; we really don't want that data
+    //assertEquals(15, data("count").tail.head, 0.0)
+  }
   
   
-  //CREATE TEST WITH EMPTY DATASET; RETURN EMPTY DS, formatted as if bins existed (A, A min, A max, Count)
+  //CREATE TEST WITH EMPTY DATASET. Return empty DS, formatted as if bins existed? (A, A min, A max, Count)
+  //(not yet implemented)
+  @Test
+  def optional_param_empty_ds = { 
+    val ops = ArrayBuffer[Operation]()
+    ops += Projection("time,myReal,count")
+    ops += Selection("time=0")
+    ops += new BinAverageByWidth(15000.0, 0.0) //15 second bins
+    ops += TimeFormatter("yyyy-MM-dd HH:mm:ss")
+    val ds = TsmlReader("binave.tsml").getDataset(ops)
+    AsciiWriter.write(ds)
+    
+    //val data = ds.toDoubleMap
+    //assertEquals(0, data("count").head, 0.0)
+  }
+  
+  
+//-----deprecated test--------------------------------------------------------------------------------------------------  
   
 //  @Test
 //  def quikscat_telemetry_data_by_count {
