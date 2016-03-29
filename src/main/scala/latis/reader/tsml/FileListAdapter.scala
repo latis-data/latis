@@ -16,7 +16,7 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
   //Note: Using the RegexAdapter with "()" around the file name pattern almost works.
   //      The matcher returns it first but we want the file variable to be last.
   
-  lazy val directory = URLDecoder.decode(getUrl.getPath, "utf-8") //assumes a file URL 
+  lazy val directory = URLDecoder.decode(getUrl.getPath, "utf-8").stripSuffix(File.separator) //assumes a file URL 
   
   override def getDataset = {
     super.getDataset match {
