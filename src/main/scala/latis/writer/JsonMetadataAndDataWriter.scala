@@ -13,6 +13,16 @@ import scala.collection.mutable.ArrayBuffer
 class JsonMetadataAndDataWriter extends JsonWriter {
   //TODO: refactor to reuse these pieces from Metadata and CompactJson Writers which are rapidly becoming obsolete
     
+  override def write(dataset: Dataset) = dataset match {
+    case Dataset(v) => super.write(dataset)
+    case _ => {
+      val name = dataset.getName
+      val str = s"""{"$name": {"metadata":{}, "data": []}}"""
+      printWriter.write(str)
+      printWriter.flush()
+    }
+  }
+  
   /**
    * Override to insert metadata.
    */
