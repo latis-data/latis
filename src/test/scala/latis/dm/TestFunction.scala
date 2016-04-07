@@ -58,6 +58,32 @@ class TestFunction {
     assertEquals(data("index")(1), 1.0, 0.0)
   }
   
+  @Test 
+  def evaluate_legal {
+    val f = TestFunction.function_of_tuple_with_mixed_types
+    val dom = Integer(1)
+    val exp = Some(Tuple(Real(Metadata("myReal"), 1), Text(Metadata("myText"), "one")))
+    assertEquals(exp, f(dom))
+  }
+  
+  @Test 
+  def evaluate_missing {
+    val f = TestFunction.function_of_scalar_with_iterable_data
+    val dom = Real(1.5)
+    val exp = None
+    assertEquals(exp, f(dom))
+  }
+  
+  @Test
+  def compose {
+    val f = TestFunction.function_of_tuple_with_mixed_types
+    val g = TestFunction.function_of_scalar_with_other_types
+    val comp = f.compose(g)
+    val data = Dataset(comp).toDoubles
+    assertEquals(3, data.length)
+    assertEquals(2, data(0).length)
+    assertEquals(11.0, data(0)(1), 0.0)
+  }
   
   
 //  @Test(expected = classOf[Error])
@@ -89,6 +115,14 @@ object TestFunction {
                        Sample(Real(2), Real(2)))
     Function(samples)
   }
+  
+  def function_of_scalar_with_other_types = {
+    val samples = List(Sample(Real(Metadata("x"), 10), Integer(0)), 
+                       Sample(Real(Metadata("x"), 11), Integer(1)), 
+                       Sample(Real(Metadata("x"), 12), Integer(3)))
+    Function(samples)
+  }
+  
 
 //  def function_with_one_sample_of_tuple_with_data_from_kids = {
 //    Function.fromValues(List(List(0.0), List(0.0), List(10.0)))
