@@ -208,6 +208,20 @@ object TestDataset {
     Dataset(Function(samples), Metadata("tuple_domain"))
   }
   
+  def function_of_lon_lat = {
+    //Create samples for test dataset
+	    val sample1 = Sample(Tuple(Integer(Metadata("lon"), 105.7821), Real(Metadata("lat"), 39.5501)), Integer(Metadata("int"), 1))                                 
+	    
+	    val sample2 = Sample(Tuple(Integer(Metadata("lon"), 105.6821), Integer(Metadata("lat"), 39.4501)), Integer(Metadata("int"), 2))
+	    val sample3 = Sample(Tuple(Integer(Metadata("lon"), 105.5821), Integer(Metadata("lat"), 39.3501)), Integer(Metadata("int"), 3))
+	    val sample4 = Sample(Tuple(Integer(Metadata("lon"), 105.4821), Integer(Metadata("lat"), 39.2501)), Integer(Metadata("int"), 4))
+	    val sample5 = Sample(Tuple(Integer(Metadata("lon"), 105.3821), Integer(Metadata("lat"), 39.1501)), Integer(Metadata("int"), 5))
+	    
+	    val samples = List(sample1, sample2, sample3, sample4, sample5)
+	    
+	    Dataset(Function(samples, Metadata("function")), Metadata("dataset"))
+  }
+  
 //  def datasets = Seq(empty, real, integer, text, real_time, text_time, int_time, scalars, binary, tuple_of_scalars,
 //                     tuple_of_tuples, tuple_of_functions, scalar_tuple, mixed_tuple, function_of_scalar,
 //                     function_of_tuple, function_of_functions, mixed_function, empty_function, index_function, combo)
