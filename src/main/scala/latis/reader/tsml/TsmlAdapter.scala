@@ -308,12 +308,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * to the Dataset by the TsmlAdapter class.
    * The default behavior is for the Adapter subclass to handle no operations.
    */
-  def handleOperation(op: Operation): Boolean = op match {
-    case p @ Projection(names) => projectedVariableNames ++= names; false 
-    case _ => false
-  }
+  def handleOperation(op: Operation): Boolean = false
   
-  private var projectedVariableNames = Seq[String]()
   
   //---- Caching --------------------------------------------------------------
   //TODO: consider mutability issues

@@ -8,7 +8,7 @@ import latis.dm.Index
 import latis.dm.Sample
 import latis.dm.Tuple
 import latis.dm.Variable
-import latis.dm.WrappedFunction
+import latis.util.iterator.MappingIterator
 
 /**
  * Reduce any Tuples of one element to that element and reduce any 
@@ -55,15 +55,21 @@ class Reduction extends Operation  {
    * If the domain of that sample is an Index, just keep the range.
    * If the Function has no samples, return None.
    */
-  override def applyToFunction(function: Function) = {
-    //TODO: TraversableOnce issues?
-    val n = function.getLength
-    if (n == 0) None
-    else if (n == 1) applyToSample(function.iterator.next) match {
-      case Some(Sample(_: Index, range)) => Some(range)
-      case ov: Option[Variable] => ov
+  override def applyToFunction(function: Function): Option[Variable] = {
+    val mit = new MappingIterator(function.iterator, (s: Sample) => this.applyToSample(s))
+    if(!mit.hasNext) None
+    else {
+      val first = mit.next
+      mit.hasNext match {
+        case false => first match {
+          case Sample(_: Index, _: Index) => None
+          case Sample(_: Index, range) => Some(range)
+          case other => Some(other)
+        }
+        case true => Some(Function(first.domain, first.range, Iterator.single(first) ++ mit, function.getMetadata))
+      }
+      
     }
-    else Some(WrappedFunction(function, this))
   }
   
 }

@@ -19,7 +19,7 @@ class DatasetMl(xml: Node) extends TupleMl(xml) {
    */
   def getVariableMl: VariableMl = {
     val es = Tsml.getVariableNodes(xml)
-    if (es.isEmpty) throw new Error("TSML does not defien any variables.")
+    if (es.isEmpty) throw new Error("TSML does not define any variables.")
     
 //TODO: wrap multiple vars in tuple
     //if (es.length > 1) ???

@@ -22,7 +22,11 @@ class Memoization extends Operation {
     //Add 'length' to the Function Metadata
     val md2 = md + ("length" -> samples.length.toString)
  
-    Some(Function(samples, md2))
+    samples.length match {
+      case 0 => Some(Function(function.getDomain, function.getRange, md2))
+      case _ => Some(Function(samples, md2))
+    }
+    
   }
 }
 

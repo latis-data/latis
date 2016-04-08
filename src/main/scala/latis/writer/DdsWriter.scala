@@ -46,10 +46,10 @@ class DdsWriter extends TextWriter {
    */
   override def makeScalar(scalar:Scalar): String = scalar match {
     case _: Real    => indent(count) + "Float64 " + scalar.getName + ";\n"
-    case _: Integer => indent(count) + "Int64 "   + scalar.getName + ";\n"
+    case _: Integer => indent(count) + "Int32 "   + scalar.getName + ";\n"
     case _: Text    => indent(count) + "String "  + scalar.getName + ";\n"
     case _: Binary  => "NaN"
-    case _: Index => indent(count) + "Int64 " + scalar.getName + ";\n"
+    case _: Index => indent(count) + "Int32 " + scalar.getName + ";\n"
   }
   
   /**

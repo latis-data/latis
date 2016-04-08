@@ -142,10 +142,15 @@ class JsonMetadataAndDataWriter extends JsonWriter {
         prepend = prepend.dropRight(d.toSeq.length)
         str
       }
-      case _ => {
-        val vars = (d.toSeq ++ r.toSeq).filterNot(_.isInstanceOf[Index])
+      case t: Tuple => if(t.getArity > 1) {
+        val vars = (d.toSeq ++ t.getVariables).filterNot(_.isInstanceOf[Index])
         val vs = vars.map(varToString(_))
         (prepend ++ vs).mkString("[", ",", "]") 
+      } else makeSample(Sample(d, t.getVariables.head))
+      case s: Scalar => {
+        val vars = (d.toSeq :+ s).filterNot(_.isInstanceOf[Index])
+        val vs = vars.map(varToString(_))
+        (prepend ++ vs).mkString("[", ",", "]")
       }
     }
   }

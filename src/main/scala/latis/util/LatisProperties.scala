@@ -145,13 +145,20 @@ object LatisProperties {
       case s: String => Some(s)
       case _ => instance.getProperty(property) match {
         case s: String => Some(s)
-        case _ => System.getenv(property) match {
+        case _ => System.getenv(javaPropertyNameToEnvVar(property)) match {
           case s: String => Some(s)
           case _ => None
         }
       }
     }
   }
+  
+  /**
+   * Given the name of a java property (i.e. all lower case with "."s)
+   * create a conventional Unix environment variable name: all upper case 
+   * with "." replaces with "_".
+   */
+  private def javaPropertyNameToEnvVar(s: String) = s.replace(".", "_").toUpperCase
   
   /**
    * Clear the existing properties causing the singleton to reload the properties.

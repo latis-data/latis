@@ -5,6 +5,8 @@ import latis.data.EmptyData
 import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
 import latis.ops.Projection
+import latis.ops.filter.FirstFilter
+import latis.ops.filter.LastFilter
 import latis.ops.filter.Selection
 import latis.ops.math.BasicMath
 import latis.util.DataMap
@@ -57,7 +59,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   
   def project(proj: Projection): Dataset = proj(this)
   def project(varNames: Seq[String]): Dataset = Projection(varNames)(this)
-  def project(vname: String): Dataset = Projection(Seq(vname))(this)
+  def project(expression: String): Dataset = Projection(expression)(this)
   
   def select(expression: String): Dataset = Selection(expression)(this)
   
@@ -83,8 +85,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   
   /**
    * Until we can enforce sorting of function samples this will do so. 
-   * Assumes Function with Integer domain only, for now.
-   * Sort by range if domain is Index.
+   * Sort by range if domain is Index. (Only integer range, for now.)
    * TODO: implement as Operation.
    * See latis-mms-web TestDatasets
    */
@@ -101,12 +102,8 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
     }
   }
   
-  def last: Dataset = variable match {
-    //TODO: use Last filter
-    case Function(samples) => {
-      Dataset(Function(List(samples.toSeq.last)))
-    }
-  }
+  def first: Dataset = FirstFilter()(this)
+  def last: Dataset = LastFilter()(this)
     
   /**
    * Realize the Data for this Dataset so we can close the Reader.
