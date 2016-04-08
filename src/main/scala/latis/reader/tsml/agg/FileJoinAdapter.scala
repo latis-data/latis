@@ -86,6 +86,7 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
     
     //Make an iterator over each file dataset, appending their samples
     val sit = readers.flatMap(r => r.getDataset match {
+      case Dataset.empty => None
       case Dataset(f @ Function(it)) => new PeekIterator[Sample] {
         def getNext = it.next match {
           case null => r.close; null; //TODO: need better assurance that readers get closed
@@ -94,10 +95,12 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
       }
     }).buffered
     
-    val temp = sit.head
-    
     val md = makeMetadata(tsml.dataset)
-    Dataset(Function(temp.domain, temp.range, sit, fmd), md)
+    
+    if(sit.hasNext) {
+      val temp = sit.head  
+      Dataset(Function(temp.domain, temp.range, sit, fmd), md)
+    } else Dataset(null, md)
   }
   
   lazy val toHandle = ArrayBuffer[Operation]()
