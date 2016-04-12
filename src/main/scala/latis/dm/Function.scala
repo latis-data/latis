@@ -56,6 +56,7 @@ trait Function extends Variable {
   
   //evaluate
   def apply(arg: Variable): Option[Variable]
+  def compose(g: Function): Function
 }
   
   /*
