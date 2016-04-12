@@ -53,7 +53,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
       case None => None
     }) 
     
-    Function(g.getDomain, range, it, Metadata(s"${this.getName} of ${g.getName}"))
+    Function(g.getDomain, range, it, g.getMetadata + ("name" -> s"${this.getName} of ${g.getName}"))
   }
   
   
