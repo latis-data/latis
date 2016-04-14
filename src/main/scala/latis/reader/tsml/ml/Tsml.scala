@@ -14,6 +14,7 @@ import scala.xml.transform.RuleTransformer
 import scala.xml.Null
 import scala.xml.MetaData
 import scala.xml.NodeSeq.Empty
+import java.net.URI
 
 
 /**
@@ -27,12 +28,12 @@ class Tsml(val xml: Elem) {
    * to look for another tsml file with the dataset's name.
    */
   lazy val dataset: DatasetMl = xml \ "adapter" match {
-    case Empty => xml \ "@id" match {
-      case Empty => xml \ "metadata" \ "@name" match {
-        case Empty => throw new Exception("Tsml does not define an adpater or a name for this dataset.")
-        case e => TsmlResolver.fromName(e.text).dataset
+    case Empty => xml \ "@ref" match {
+      case Empty => throw new Exception("Tsml does not define an adpater or a name for this dataset.")
+      case e => {
+        if(new URI(e.text).isAbsolute) TsmlResolver.fromUrl(new URL(e.text)).dataset
+        else TsmlResolver.fromName(e.text).dataset
       }
-      case e => TsmlResolver.fromName(e.text).dataset
     }
     case e => new DatasetMl(xml) //assumes only one "dataset" element
   }
