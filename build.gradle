@@ -16,10 +16,6 @@ apply plugin: 'lasp.gitflow'
 apply plugin: 'lasp.utils'
 apply plugin: 'lasp.publishing'
 apply plugin: 'scala'
-apply plugin: 'eclipse'
-
-//Define Java version for generated class files.
-targetCompatibility = 1.6
 
 //Repositories for dependencies.
 repositories {
@@ -71,4 +67,4 @@ publishing {
 	}
 }
 
-task wrapper(type: Wrapper) { gradleVersion = '2.6' }
+task wrapper(type: Wrapper) { gradleVersion = '2.12' }
