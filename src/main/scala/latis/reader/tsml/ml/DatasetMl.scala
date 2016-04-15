@@ -2,6 +2,11 @@ package latis.reader.tsml.ml
 
 import scala.xml.Node
 import latis.util.StringUtils
+import scala.xml.UnprefixedAttribute
+import scala.xml.Null
+import scala.xml.transform.RewriteRule
+import scala.xml.Elem
+import scala.xml.transform.RuleTransformer
 
 /**
  * Wrapper for TSML that defines a Dataset.
@@ -51,5 +56,21 @@ class DatasetMl(xml: Node) extends TupleMl(xml) {
     val atts = (xml \ "adapter").head.attributes
     val seq = for (att <- atts) yield (att.key, StringUtils.resolveParameterizedString(att.value.text))
     seq.toMap
+  }
+  
+  
+  /**
+   * Create a new Tsml with the adapter.location attribute updated.  
+   */
+  def setLocation(loc: String): Tsml = {
+    val newloc = new UnprefixedAttribute("location", loc, Null)
+    val rr = new RewriteRule {
+      override def transform(n: Node): Seq[Node] = n match {
+        case e: Elem if(e.label == "adapter") => e % newloc
+        case other => other
+      }
+    }
+    val rt = new RuleTransformer(rr)
+    Tsml(rt.transform(xml).head)
   }
 }

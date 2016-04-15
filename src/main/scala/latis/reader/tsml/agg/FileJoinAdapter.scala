@@ -79,7 +79,7 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
     val files = getFilePaths(datasets.head) 
     
     //Make a TsmlReader for each file from the tsml template with the file location inserted.
-    val readers = files.map(file => TsmlReader(template.setLocation(file)))
+    val readers = files.map(file => TsmlReader(template.dataset.setLocation(file)))
     
     //Expose the Function's metadata, the last one should be fine
     var fmd: Metadata = Metadata.empty
