@@ -15,6 +15,14 @@ class TestFullOuterJoin {
   
   @Test
   def same_in_both = {
+    /*
+     * a t1 t2  b
+     * 1  1  1  2
+     * 2  2  2  4
+     * 3  3  3  6
+     * 4  4  4  8
+     * 5  5  5  10
+     */
     val samples1 = List(1,2,3,4,5).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
     val samples2 = List(1,2,3,4,5).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("b"), i*2)))
     val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
@@ -34,6 +42,12 @@ class TestFullOuterJoin {
   
   @Test
   def extra_in_second_in_middle = {
+    /*
+     * a t1 t2  b
+     * 1  1  1  2
+     *       2  4
+     * 3  3  3  6
+     */
     val samples1 = List(1,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
     val samples2 = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("b"), i*2)))
     val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
@@ -52,6 +66,12 @@ class TestFullOuterJoin {
   
   @Test
   def extra_in_second_at_end = {
+    /*
+     * a t1 t2  b
+     * 1  1  1  2
+     * 2  2  2  4
+     *       3  6
+     */
     val samples1 = List(1,2).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
     val samples2 = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("b"), i*2)))
     val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
@@ -70,6 +90,12 @@ class TestFullOuterJoin {
   
   @Test
   def extra_in_second_at_start = {
+    /*
+     * a t1 t2  b
+     *       1  2
+     * 2  2  2  4
+     * 3  3  3  6
+     */
     val samples1 = List(2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
     val samples2 = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("b"), i*2)))
     val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
@@ -88,6 +114,12 @@ class TestFullOuterJoin {
   
   @Test
   def extra_in_first_in_middle = {
+    /*
+     * a t1 t2  b
+     * 1  1  1  2
+     * 2  2 
+     * 3  3  3  6
+     */
     val samples1 = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
     val samples2 = List(1,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("b"), i*2)))
     val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
@@ -107,6 +139,12 @@ class TestFullOuterJoin {
   
   @Test
   def extra_in_first_at_end = {
+    /*
+     * a t1 t2  b
+     * 1  1  1  2
+     * 2  2  2  4
+     * 3  3 
+     */
     val samples1 = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
     val samples2 = List(1,2).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("b"), i*2)))
     val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
@@ -126,6 +164,12 @@ class TestFullOuterJoin {
   
   @Test
   def extra_in_first_at_start = {
+    /*
+     * a t1 t2  b
+     * 1  1
+     * 2  2  2  4
+     * 3  3  3  6
+     */
     val samples1 = List(1,2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("a"), i)))
     val samples2 = List(2,3).map(i => Sample(Real(Metadata("t"), i), Real(Metadata("b"), i*2)))
     val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
