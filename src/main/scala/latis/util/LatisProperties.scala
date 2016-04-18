@@ -154,6 +154,25 @@ object LatisProperties {
   }
   
   /**
+   * Gather the properties that start with a given root (not including the ".").
+   * Use the remaining part of the key name for the new property name.
+   * This can be used to get all the properties for a given writer, for example,
+   * so it doesn't have to know the name that maps to it.
+   * e.g. "writer.foo.delimiter" becomes "delimiter"
+   */
+  def getPropertiesWithRoot(root: String): Map[String, String] = {
+    //e.g. "writer.foo"
+    val props = scala.collection.mutable.Map[String, String]()
+    val keyPrefix = root + "."
+    val keys = LatisProperties.keys.filter(_.startsWith(keyPrefix))
+    for (key <- keys) {
+      val k = key.substring(keyPrefix.length) //skip the root
+      props += (k -> LatisProperties(key))
+    }
+    props.toMap
+  }
+  
+  /**
    * Given the name of a java property (i.e. all lower case with "."s)
    * create a conventional Unix environment variable name: all upper case 
    * with "." replaces with "_".

@@ -25,21 +25,17 @@ abstract class Writer {
   //---- Writer properties from latis.properties ------------------------------
   
   /**
-   * Store XML attributes for this Adapter definition as a properties Map.
+   * Store latis.properties for this Writer as a properties Map.
    */
   private var properties: immutable.Map[String,String] = immutable.Map[String,String]()
 
   /**
    * Return Some property value or None if property does not exist.
-   * 
-   * Properties are read from the XML attributes for this Adapter
    */
   def getProperty(name: String): Option[String] = properties.get(name)
   
   /**
    * Return property value or default if property does not exist.
-   * 
-   * Properties are read from the XML attributes for this Adapter
    */
   def getProperty(name: String, default: String): String = getProperty(name) match {
     case Some(v) => v
@@ -133,18 +129,11 @@ object Writer {
         val writer = fromClass(cname)
         //add properties from the writer definition in latis.properties
         //writer.properties 
-        val props = mutable.Map[String, String]()
-        val keyPrefix = "writer." + suffix + "."
-        val keys = LatisProperties.keys.filter(_.startsWith(keyPrefix))
-        for (key <- keys) {
-          val k = key.substring(keyPrefix.length) //skip "writer.sfx."
-          props += (k -> LatisProperties(key))
-        }
+        val props = LatisProperties.getPropertiesWithRoot("writer." + suffix)
         
         //add the suffix to the properties, too
-        props += ("suffix" -> suffix)
-        
-        writer.properties = props.toMap //make it immutable
+        //props += ("suffix" -> suffix)
+        writer.properties = props + ("suffix" -> suffix)
         writer.outputStream = System.out  //default to standard out
         writer
       }
