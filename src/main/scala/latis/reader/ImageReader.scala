@@ -1,12 +1,17 @@
 package latis.reader
 
-import latis.data._
-import latis.dm._
-import latis.metadata.Metadata
-import latis.ops.Operation
 import java.io.InputStream
 import java.net.URL
+
 import javax.imageio.ImageIO
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Integer
+import latis.dm.Real
+import latis.dm.Sample
+import latis.dm.Tuple
+import latis.metadata.Metadata
+import latis.ops.Operation
 
 class ImageReader extends DatasetAccessor {
   //TODO: have readers (DataSource?) manage input stream like Writers manage output, or better
