@@ -46,7 +46,7 @@ class ImageReader extends DatasetAccessor {
     }
     
     //add length to function metadata
-    val fmd = Metadata("nrow" -> nrow.toString(), "ncol" -> ncol.toString())
+    val fmd = Metadata("name" -> "image", "nrow" -> nrow.toString(), "ncol" -> ncol.toString())
     val dataset = Dataset(Function(samples, fmd))
     
     //apply operations
