@@ -12,6 +12,7 @@ import latis.dm.Sample
 import latis.dm.Tuple
 import latis.metadata.Metadata
 import latis.ops.Operation
+import latis.util.StringUtils
 
 class ImageReader extends DatasetAccessor {
   //TODO: have readers (DataSource?) manage input stream like Writers manage output, or better
@@ -26,23 +27,26 @@ class ImageReader extends DatasetAccessor {
   }
   
   def getDataset(operations: Seq[Operation]): Dataset = {
+    //(row, col) -> (band0, band1, band2)
+    //don't try to re-orient as typical (x,y), use operation for that
+    //Raster defines minX and minY to be the upper left.
     val buffer = ImageIO.read(inputStream)
     val raster = buffer.getData()
-    val nx = raster.getWidth
-    val ny = raster.getHeight
+    val ncol = raster.getWidth
+    val nrow = raster.getHeight
     val nbands = raster.getNumBands
     val darray = new Array[Double](nbands) //tmp array to read pixel bands into
     
-    val samples = for (x <- 0 until nx; y <- 0 until ny) yield {
-      val domain = Tuple(Integer(Metadata("x"), x), Integer(Metadata("y"), y))
-      val data = raster.getPixel(x, ny-y-1, darray) //reverse y-direction
+    val samples = for (row <- 0 until nrow; col <- 0 until ncol) yield {
+      val domain = Tuple(Integer(Metadata("row"), row), Integer(Metadata("col"), col))
+      val data = raster.getPixel(col, row, darray) //transpose, getPixel wants (x,y)
       val bands = data.zipWithIndex.map(p => Real(Metadata(s"band${p._2}"), p._1))
       val range = Tuple(bands)
       Sample(domain, range)
     }
     
     //add length to function metadata
-    val fmd = Metadata("nx" -> nx.toString(), "ny" -> ny.toString())
+    val fmd = Metadata("nrow" -> nrow.toString(), "ncol" -> ncol.toString())
     val dataset = Dataset(Function(samples, fmd))
     
     //apply operations
@@ -57,9 +61,9 @@ class ImageReader extends DatasetAccessor {
 
 object ImageReader {
   
-  def apply(url: String) = {
+  def apply(location: String) = {
     val reader = new ImageReader()
-    reader.url = Some(new URL(url))
+    reader.url = Some(StringUtils.getUrl(location))
     reader
   }
 }
