@@ -147,8 +147,9 @@ object Dataset {
   def apply(v: Variable): Dataset = new Dataset(v)
   def apply(): Dataset = new Dataset(null)
   
-  val empty = Dataset()
-  
+  val empty = new Dataset(null) {
+    override def toString() = "empty"
+  }
   
   //extract the contained Variable
   def unapply(dataset: Dataset): Option[Variable] = {
