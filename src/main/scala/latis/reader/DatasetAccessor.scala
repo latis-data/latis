@@ -9,11 +9,11 @@ import latis.util.ReflectionUtils
 import latis.reader.tsml.TsmlReader
 
 /**
- * Trait that provide data access for a Dataset.
+ * Base class that provide data access for a Dataset.
  * A DatasetAccessor is responsible for constructing a Dataset
  * and returning data for the Variables it contains.
  */
-trait DatasetAccessor {
+abstract class DatasetAccessor {
 
   /**
    * Return the Dataset that this accessor is responsible for.
@@ -31,6 +31,27 @@ trait DatasetAccessor {
    * Release any resources that this accessor acquired.
    */
   def close()
+  
+  //---- reader properties from latis.properties ------------------------------
+  
+  /**
+   * Store latis.properties as a properties Map.
+   */
+  private var properties: Map[String,String] = Map[String,String]()
+
+  /**
+   * Return Some property value or None if property does not exist.
+   */
+  def getProperty(name: String): Option[String] = properties.get(name)
+  
+  /**
+   * Return property value or default if property does not exist.
+   */
+  def getProperty(name: String, default: String): String = getProperty(name) match {
+    case Some(v) => v
+    case None => default
+  }
+
 }
 
 object DatasetAccessor extends LazyLogging {
@@ -42,7 +63,7 @@ object DatasetAccessor extends LazyLogging {
    */
   def fromName(datasetName: String): DatasetAccessor = {
     //Look for a matching "reader" property.
-    LatisProperties.get(s"reader.${datasetName}.class") match {
+    val reader = LatisProperties.get(s"reader.${datasetName}.class") match {
       case Some(s) => ReflectionUtils.constructClassByName(s).asInstanceOf[DatasetAccessor]
       case None => {
         //Try TsmlResolver
@@ -51,5 +72,10 @@ object DatasetAccessor extends LazyLogging {
         TsmlReader(tsml)
       }
     }
+    
+    //Add properties from latis.properties
+    reader.properties = LatisProperties.getPropertiesWithRoot("reader." + datasetName)
+    
+    reader
   }
 }

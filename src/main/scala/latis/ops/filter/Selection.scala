@@ -24,9 +24,12 @@ import latis.dm.Dataset
 class Selection(val vname: String, val operation: String, val value: String) extends Filter with LazyLogging {
   //TODO: if domain, delegate to DomainSet
 
-  override def apply(ds: Dataset) = ds.findVariableByName(vname) match {
-    case None => throw new UnsupportedOperationException(s"Cannot select on unknown variable '$vname'")
-    case _ => super.apply(ds)
+  override def apply(ds: Dataset) = ds match {
+    case Dataset(v) => ds.findVariableByName(vname) match {
+      case None => throw new UnsupportedOperationException(s"Cannot select on unknown variable '$vname'")
+      case _ => super.apply(ds)
+    }
+    case _ => ds
   }
   
   override def applyToScalar(scalar: Scalar): Option[Scalar] = {

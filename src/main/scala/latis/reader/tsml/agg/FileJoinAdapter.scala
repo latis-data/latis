@@ -15,6 +15,7 @@ import latis.ops.Operation
 import latis.ops.filter.Filter
 import latis.ops.filter.Selection
 import scala.collection.mutable.ArrayBuffer
+import latis.metadata.Metadata
 
 /**
  * An AggregationAdapter that reads data from each file in a file list 
@@ -78,22 +79,28 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
     val files = getFilePaths(datasets.head) 
     
     //Make a TsmlReader for each file from the tsml template with the file location inserted.
-    val readers = files.map(file => TsmlReader(template.setLocation(file)))
+    val readers = files.map(file => TsmlReader(template.dataset.setLocation(file)))
+    
+    //Expose the Function's metadata, the last one should be fine
+    var fmd: Metadata = Metadata.empty
     
     //Make an iterator over each file dataset, appending their samples
     val sit = readers.flatMap(r => r.getDataset match {
-      case Dataset(Function(it)) => new PeekIterator[Sample] {
+      case Dataset.empty => None
+      case Dataset(f @ Function(it)) => new PeekIterator[Sample] {
         def getNext = it.next match {
           case null => r.close; null; //TODO: need better assurance that readers get closed
-          case sample => sample
+          case sample => fmd = f.getMetadata; sample
         }
       }
     }).buffered
     
-    val temp = sit.head
-    
     val md = makeMetadata(tsml.dataset)
-    Dataset(Function(temp.domain, temp.range, sit), md)
+    
+    if(sit.hasNext) {
+      val temp = sit.head  
+      Dataset(Function(temp.domain, temp.range, sit, fmd), md)
+    } else Dataset(null, md)
   }
   
   lazy val toHandle = ArrayBuffer[Operation]()

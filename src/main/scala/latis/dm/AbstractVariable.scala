@@ -7,6 +7,8 @@ import latis.metadata.EmptyMetadata
 import scala.Option.option2Iterable
 import scala.collection.Seq
 import latis.util.DataUtils
+import scala.collection.mutable.ArrayBuilder
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Implementation for much of what Variables need to do.
@@ -91,19 +93,32 @@ abstract class AbstractVariable(val metadata: Metadata = EmptyMetadata, val data
   /**
    * Find the first Variable within this Variable by the given name or alias.
    */
-  def findVariableByName(name: String): Option[Variable] = {
-    if (hasName(name)) Some(this)
-    else this match {
-      case _: Scalar => None  //didn't match above
-      case Tuple(vars) => {
-        val matchingVars = vars.flatMap(_.findVariableByName(name))
-        matchingVars.length match {
-          case 0 => None
-          case _ => Some(matchingVars.head)
-          //case n: Int => throw new RuntimeException("Found " + n + " variables that match the name: " + name)
+  def findVariableByName(name: String): Option[Variable] = findAllVariablesByName(name) match {
+    case Seq() => None
+    case Seq(v1, _*) => Some(v1)
+  }
+
+  /**
+   * Find all Variables within this Variable by the given name or alias.
+   */
+  def findAllVariablesByName(name: String): Seq[Variable] = {
+    name.split('.') match {
+      case Array(n) => {
+        val vbuf = ArrayBuffer[Variable]()
+        if (hasName(name)) vbuf += this
+        this match {
+          case _: Scalar => 
+          case Tuple(vars) => {
+            val matchingVars = vars.flatMap(_.findAllVariablesByName(name))
+            vbuf ++= matchingVars
+          }
+          case f: Function => vbuf ++= Sample(f.getDomain, f.getRange).findAllVariablesByName(name) //delegate to Tuple
         }
+        vbuf.toSeq
       }
-      case f: Function => Sample(f.getDomain, f.getRange).findVariableByName(name) //delegate to Tuple
+      case Array(n1, n2 @ _*) => {
+        findAllVariablesByName(n1).flatMap(_.findAllVariablesByName(n2.mkString(".")))
+      }
     }
   }
 

@@ -1,27 +1,27 @@
 package latis.writer
 
-import java.io.BufferedReader
+import java.io.BufferedInputStream
 import java.io.File
-import java.io.FileOutputStream
+import java.net.URL
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import scala.io.Source
+
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Text
-import java.io.BufferedInputStream
-import java.io.FileInputStream
 
 /**
- * Write a zip file of the files contained in a file list dataset.
+ * Write a zip file of the URLs contained in a URL list dataset.
+ * This is designed to supersede ZipWriter.
  */
-class ZipWriter extends Writer {
+class ZipWriter2 extends Writer {
+  //TODO: provide option to specify prefix for zip entries
   
   def write(dataset: Dataset) = {
     
-    lazy val dir = dataset.getMetadata.get("srcDir") match {
-      case Some(sd) => sd + File.separator
-      case None => "" //file names to zip are relative to current directory
+    lazy val baseUrl = dataset.getMetadata.get("baseUrl") match {
+      case Some(b) => b + File.separator
+      case None => "" //URLs are already complete
     }
     
     //Get the name of each file as it appears in the file list.
@@ -41,7 +41,8 @@ class ZipWriter extends Writer {
         //add zip entry to output stream
         zip.putNextEntry(new ZipEntry(f))
 
-        val bis = new BufferedInputStream(new FileInputStream(dir + f))
+        val url = new URL(baseUrl + f)
+        val bis = new BufferedInputStream(url.openStream())
         try {
           Stream.continually(bis.read).takeWhile(-1 !=).foreach(zip.write(_))
         }

@@ -29,11 +29,32 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   def getSample: Sample = Sample(domain, range)
   
   
-  //evaluate, use resample Operation for SampledFunctions
+  //evaluate
+  //TODO: use resample Operation for SampledFunctions
   def apply(arg: Variable): Option[Variable] = {
+    val x = iterator.find(s => (s.domain, arg) match {
+      case (a: Scalar, b: Scalar) => a.compare(b) == 0
+      case _ => throw new IllegalArgumentException("Cannot evaluate a Function with a non-Scalar domain.")
+    })
     
+    x match {
+      case Some(s: Sample) => Some(s.range)
+      case None => None
+    }
+  }
+  
+  /**
+   * Compose two functions such that the resulting function has the domain of g
+   * and the range of this.
+   */
+  def compose(g: Function): Function = {
+    _iterable = iterator.toSeq //need to be able to reuse the data
+    val it = new MappingIterator(g.iterator, (s: Sample) => this(s.range) match {
+      case Some(v) => Some(Sample(s.domain, v))
+      case None => None
+    }) 
     
-    ???
+    Function(g.getDomain, range, it, g.getMetadata + ("name" -> s"${this.getName} of ${g.getName}"))
   }
   
   

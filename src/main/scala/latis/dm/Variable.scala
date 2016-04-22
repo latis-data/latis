@@ -28,6 +28,7 @@ trait Variable {
   def getSize: Int
   
   def findVariableByName(name: String): Option[Variable]
+  def findAllVariablesByName(name: String): Seq[Variable]
   def findFunction: Option[Function]
   def hasName(name: String): Boolean
   
