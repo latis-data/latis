@@ -78,4 +78,16 @@ object DatasetAccessor extends LazyLogging {
     
     reader
   }
+  
+  /**
+   * Implement a DatasetAccessor that simply wraps a Dataset.
+   */
+  def apply(dataset: Dataset): DatasetAccessor = new DatasetAccessor() {
+    //TODO: make sure it is memoized, immutable
+    def getDataset(operations: Seq[Operation]): Dataset = {
+      operations.foldLeft(dataset)((ds, op) => op(ds))
+    }
+    
+    def close {}
+  }
 }
