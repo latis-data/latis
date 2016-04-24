@@ -7,6 +7,7 @@ import com.typesafe.scalalogging.LazyLogging
 import latis.reader.tsml.ml.TsmlResolver
 import latis.util.ReflectionUtils
 import latis.reader.tsml.TsmlReader
+import latis.util.CacheManager
 
 /**
  * Base class that provide data access for a Dataset.
@@ -62,20 +63,25 @@ object DatasetAccessor extends LazyLogging {
    * If not found, it will delegate to the TsmlResolver.
    */
   def fromName(datasetName: String): DatasetAccessor = {
-    //Look for a matching "reader" property.
-    val reader = LatisProperties.get(s"reader.${datasetName}.class") match {
-      case Some(s) => ReflectionUtils.constructClassByName(s).asInstanceOf[DatasetAccessor]
+    //See if the dataset is cached.
+    val reader = CacheManager.getDataset(datasetName) match {
+      case Some(ds) => DatasetAccessor(ds)
       case None => {
-        //Try TsmlResolver
-        val tsml = TsmlResolver.fromName(datasetName)
-        logger.debug("Reading dataset from TSML")
-        TsmlReader(tsml)
+        //Look for a matching "reader" property.
+        LatisProperties.get(s"reader.${datasetName}.class") match {
+          case Some(s) => ReflectionUtils.constructClassByName(s).asInstanceOf[DatasetAccessor]
+          case None => {
+            //Try TsmlResolver
+            val tsml = TsmlResolver.fromName(datasetName)
+            logger.debug("Reading dataset from TSML")
+            TsmlReader(tsml)
+          }
+        }
       }
     }
     
     //Add properties from latis.properties
     reader.properties = LatisProperties.getPropertiesWithRoot("reader." + datasetName)
-    
     reader
   }
   

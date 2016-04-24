@@ -5,6 +5,9 @@ import org.junit.Test
 
 import latis.dm.TestDataset
 import latis.ops.filter.FirstFilter
+import latis.dm.Dataset
+import latis.dm.Real
+import latis.metadata.Metadata
 
 class TestDatasetAccessor {
   
@@ -21,4 +24,13 @@ class TestDatasetAccessor {
     val ds = reader.getDataset(List(FirstFilter()))
     assertEquals(1, ds.getLength)
   }
+  
+  @Test
+  def dataset_from_cache = {
+    Dataset(Real(3.14), Metadata("pi")).cache
+    DatasetAccessor.fromName("pi").getDataset() match {
+      case Dataset(Real(d)) => assertEquals(3.14, d, 0.0)
+    }
+  }
+  
 }
