@@ -81,7 +81,9 @@ object DatasetAccessor extends LazyLogging {
     }
     
     //Add properties from latis.properties
-    reader.properties = LatisProperties.getPropertiesWithRoot("reader." + datasetName)
+    reader.properties = {
+      LatisProperties.getPropertiesWithRoot("reader." + datasetName) + ("name" -> datasetName)
+    }
     reader
   }
   
