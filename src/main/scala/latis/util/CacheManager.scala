@@ -55,4 +55,13 @@ object CacheManager {
    */
   def getDatasets: immutable.Map[String,Dataset] = instance.cache.toMap  //make immutable
 
+  /**
+   * Remove all entries from the cache.
+   */
+  def clear = instance.cache.clear
+  
+  /**
+   * Remove a single dataset from the cache.
+   */
+  def removeDataset(name: String): Option[Dataset] = instance.cache.remove(name)
 }

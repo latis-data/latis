@@ -8,6 +8,7 @@ import scala.collection.mutable.ArrayBuffer
 import latis.ops.Operation
 import latis.ops.Projection
 import latis.ops.filter.FirstFilter
+import latis.ops.filter.Selection
 
 class TestCache {
   
@@ -20,6 +21,8 @@ class TestCache {
     CacheManager.cacheDataset(ds1)
     CacheManager.cacheDataset(ds2)
     val ds3 = DatasetAccessor.fromName("cache").getDataset
+    CacheManager.clear //clean up for other tests
+    
     ds3 match {
       case Dataset(Function(it)) => it.next match {
         case Sample(_,Tuple(vars)) => vars(1) match {case Integer(n) => assertEquals(132l, n)}
@@ -42,13 +45,16 @@ class TestCache {
     CacheManager.cacheDataset(ds2)
     
     val ops = ArrayBuffer[Operation]()
-    ops += Projection("name")
-    ops += FirstFilter()
+    ops += Selection("name=col")
+    //ops += Projection("name")
+    //ops += FirstFilter()
     
     val ds = DatasetAccessor.fromName("cache").getDataset(ops)
+    CacheManager.clear //clean up for other tests
+    
     ds match {
       case Dataset(Function(it)) => it.next match {
-        case Sample(_,Tuple(vars)) => vars(0) match {case Text(s) => assertEquals("ascii_iterative", s)}
+        case Sample(_,Tuple(vars)) => vars(1) match {case Integer(l) => assertEquals(132, l)}
       }
     }
   }
