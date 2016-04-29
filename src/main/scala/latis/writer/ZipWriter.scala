@@ -21,7 +21,7 @@ class ZipWriter extends Writer {
     
     lazy val dir = dataset.getMetadata.get("srcDir") match {
       case Some(sd) => sd + File.separator
-      case None => "" //write to current directory
+      case None => "" //file names to zip are relative to current directory
     }
     
     //Get the name of each file as it appears in the file list.

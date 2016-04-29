@@ -41,7 +41,7 @@ abstract class Operation {
         case None => Dataset.empty
       }
     }
-    case _ => Dataset.empty
+    case _ => dataset
   }
   
   /**

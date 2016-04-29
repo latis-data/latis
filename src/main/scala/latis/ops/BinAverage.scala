@@ -42,7 +42,6 @@ class BinAverage(binWidth: Double) extends Operation {
     val dom = bin(0).domain match {
       case t: Time => t match {
         case r: Number => Time(t.getMetadata, bin.map(_.domain.getNumberData.doubleValue).sum/count)
-        case t: Text => Time(t.getMetadata, bin.map(_.domain.asInstanceOf[Time].getJavaTime).sum/count)
       }
       case n: Number => Real(n.getMetadata, bin.map(_.domain.getNumberData.doubleValue).sum/count)
     }

@@ -59,5 +59,10 @@ object Metadata {
    * Construct Metadata from a single property.
    */
   def apply(property: (String,String)): Metadata = new VariableMetadata(immutable.Map(property))
+  
+  /**
+   * Construct Metadata from a list of properties.
+   */
+  def apply(properties: (String,String)*): Metadata = new VariableMetadata(immutable.Map(properties: _*))
 
 }

@@ -113,4 +113,14 @@ class TestBinAverage {
 //    assertEquals(1413417690033.0, data("time").head, 0.0)
 //    assertEquals(21.631854255497455, data("myReal").head, 0.0)
 //  }
+  
+    @Test
+    def optional_param_test_zero = {
+      assertEquals(3, BinAverageByWidth(86400000.0, 0.0)(TestDataset.time_series).getLength)
+    }
+    
+    @Test
+    def optional_param_test_one = {
+      assertEquals(2, BinAverageByWidth(86400000.0, 1.0)(TestDataset.time_series).getLength)
+    }
 }

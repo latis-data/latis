@@ -40,9 +40,8 @@ abstract class Integration(a: Double = Double.NaN, b: Double = Double.NaN) exten
    * Get the Double value of a Number or Time, otherwise NaN.
    */
   def varToDouble(v: Variable): Double = v match {
-    case n: Number => n.doubleValue
+    case Number(d) => d
     case t: Tuple => t.getVariables.map(varToDouble(_)).head //only takes the first value in a Tuple for now
-    case t: Time => t.getJavaTime.toDouble
     case _ => Double.NaN
   }
 

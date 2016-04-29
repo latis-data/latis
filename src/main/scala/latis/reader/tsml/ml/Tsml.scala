@@ -13,6 +13,8 @@ import scala.xml.UnprefixedAttribute
 import scala.xml.transform.RuleTransformer
 import scala.xml.Null
 import scala.xml.MetaData
+import scala.xml.NodeSeq.Empty
+import java.net.URI
 
 
 /**
@@ -22,9 +24,19 @@ class Tsml(val xml: Elem) {
   
   /**
    * Pull the &lt;dataset&gt; element from the XML, and wrap it in a DatasetMl
-   * class
+   * class. If the dataset element does not define an adapter, use the TsmlResolver
+   * to look for another tsml file with the dataset's name.
    */
-  lazy val dataset: DatasetMl = new DatasetMl(xml) //assumes only one "dataset" element
+  lazy val dataset: DatasetMl = xml \ "adapter" match {
+    case Empty => xml \ "@ref" match {
+      case Empty => throw new Exception("Tsml does not define an adpater or a name for this dataset.")
+      case e => {
+        if(new URI(e.text).isAbsolute) TsmlResolver.fromUrl(new URL(e.text)).dataset
+        else TsmlResolver.fromName(e.text).dataset
+      }
+    }
+    case e => new DatasetMl(xml) //assumes only one "dataset" element
+  }
   
   /**
    * Get all the processing instructions (ProcInstr) for the Dataset
@@ -36,21 +48,6 @@ class Tsml(val xml: Elem) {
       case _ => None
     })
     pis.map(pi => pi.target -> pi.proctext)
-  }
-  
-  /**
-   * Update this tsml's adapter.location attribute.  
-   */
-  def setLocation(loc: String): Tsml = {
-    val newloc = new UnprefixedAttribute("location", loc, Null)
-    val rr = new RewriteRule {
-      override def transform(n: Node): Seq[Node] = n match {
-        case e: Elem if(e.label == "adapter") => e % newloc
-        case other => other
-      }
-    }
-    val rt = new RuleTransformer(rr)
-    Tsml(rt.transform(xml).head)
   }
   
   def getVariableAttribute(vname: String, attribute: String) = dataset.findVariableMl(vname) match {

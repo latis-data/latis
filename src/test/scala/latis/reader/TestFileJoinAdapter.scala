@@ -56,4 +56,13 @@ class TestFileJoinAdapter {
     assertEquals("2015-07-12T10:11:12.136", data("time").head)
   }
   
+  @Test
+  def select_on_dataset_content = {
+    val ops = ArrayBuffer[Operation]()
+    ops += Selection(s"message =~ ..2")
+    val ds = DatasetAccessor.fromName("log/log_join").getDataset(ops)
+    val data = ds.toStrings
+    assertEquals(3, data(0).length)
+    assertEquals("1.2", data.last.head)
+  }
 }

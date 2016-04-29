@@ -23,7 +23,10 @@ class FileListGenerator(tsml: Tsml) extends IterativeAdapter2[Int](tsml) {
   
   def parseRecord(rec: Int) = {
     val names = getOrigScalarNames
+    //each scalar should have a "pattern" attribute that tells how to format the variable
     val formats = names.map(tsml.getVariableAttribute(_, "pattern"))
+    //make a string for each variable from its "pattern" property. 
+    //the record is interpreted as an iso string. 
     val strings = formats.map(_.format(rec, Time.isoToJava(rec.toString)))
     
     val datas = (strings zip getOrigScalars).map(p => StringUtils.parseStringValue(p._1, p._2))

@@ -13,6 +13,9 @@ import latis.dm.Text
 import java.io.File
 import latis.ops.Operation
 import latis.ops.filter.Filter
+import latis.ops.filter.Selection
+import scala.collection.mutable.ArrayBuffer
+import latis.metadata.Metadata
 
 /**
  * An AggregationAdapter that reads data from each file in a file list 
@@ -69,18 +72,6 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
   }
   
   /**
-   * Override so that Projections aren't passed to the file list.
-   */
-  override def getDataset(ops: Seq[Operation]) = {
-    val (filter, others) = ops.partition(_.isInstanceOf[Filter])
-    val dss = adapters.map(_.getDataset(filter))
-    
-    val ds = collect(dss)
-    
-    ops.foldLeft(ds)((dataset, op) => op(dataset)) //doesn't handle any Operations
-  }
-  
-  /**
    * Read each file and aggregate the results.
    */
   override def collect(datasets: Seq[Dataset]): Dataset = {
@@ -88,24 +79,61 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
     val files = getFilePaths(datasets.head) 
     
     //Make a TsmlReader for each file from the tsml template with the file location inserted.
-    val readers = files.map(file => TsmlReader(template.setLocation(file)))
+    val readers = files.map(file => TsmlReader(template.dataset.setLocation(file)))
+    
+    //Expose the Function's metadata, the last one should be fine
+    var fmd: Metadata = Metadata.empty
     
     //Make an iterator over each file dataset, appending their samples
     val sit = readers.flatMap(r => r.getDataset match {
-      case Dataset(Function(it)) => new PeekIterator[Sample] {
+      case Dataset.empty => None
+      case Dataset(f @ Function(it)) => new PeekIterator[Sample] {
         def getNext = it.next match {
           case null => r.close; null; //TODO: need better assurance that readers get closed
-          case sample => sample
+          case sample => fmd = f.getMetadata; sample
         }
       }
-    })
-    
-    val f = TsmlAdapter(template).getOrigDataset match {
-      case Dataset(f: Function) => f //get the function template
-    }
+    }).buffered
     
     val md = makeMetadata(tsml.dataset)
-    Dataset(Function(f, sit), md)
+    
+    if(sit.hasNext) {
+      val temp = sit.head  
+      Dataset(Function(temp.domain, temp.range, sit, fmd), md)
+    } else Dataset(null, md)
+  }
+  
+  lazy val toHandle = ArrayBuffer[Operation]()
+  
+  override def handleOperation(op: Operation): Boolean = op match {
+    case s @ Selection(name, _, _) => {
+      val ods = adapters.head.getOrigDataset
+      ods.findVariableByName(name) match {
+        case None => false
+        case Some(_) => {
+          toHandle += s
+          val tods = TsmlAdapter(template).getOrigDataset
+          tods.findVariableByName(name) match {
+            case None => true
+            case Some(_) => false
+          }
+        }
+      }
+    }
+    case f: Filter => {
+      toHandle += f
+      false
+    }
+    case _ => false
+  }
+  
+  override def getDataset(ops: Seq[Operation]) = {
+    val (handled, pass) = ops.partition(handleOperation)
+    val dss = adapters.map(_.getDataset(toHandle))
+    
+    val ds = collect(dss)
+    
+    pass.foldLeft(ds)((dataset, op) => op(dataset)) 
   }
 
 }
