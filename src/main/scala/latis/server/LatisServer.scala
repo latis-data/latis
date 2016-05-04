@@ -21,21 +21,24 @@ class LatisServer extends HttpServlet with LazyLogging {
     LatisProperties.init(new LatisServerProperties(getServletConfig))
     //TODO: should we reload properties with every request?
   }
-
+  
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
     //Need to expose outside of try scope:
     var reader: DatasetAccessor = null
     var dataset: Dataset = null
-
-    try {      
+    
+    try {
       //Get the request not including the constraints.
       val path = request.getPathInfo
-      
-      //Get the query string from the request.
       val query = request.getQueryString match {
-        case s: String => URLDecoder.decode(s, "UTF-8")
-        case _ => ""
+        case s: String => {
+          val parts = s.split("&")
+          println("parts: " + parts(0))
+          parts.map(x => URLDecoder.decode(x, "UTF-8"))
+          }
+        case _ => Array("")
       }
+      val operations = (new DapConstraintParser).parseArgs(query)
       
       // If someone requests "/latis" redirect them to
       // "/latis/" (the Catalog page)
@@ -67,15 +70,9 @@ class LatisServer extends HttpServlet with LazyLogging {
       logger.debug("Locating dataset accessor: " + dsname)
       
       reader = DatasetAccessor.fromName(dsname)
-
-      //TODO: consider parsing args before creating the reader so we can exit with errors before accessing other resources
-      //Convert the query arguments into a mutable collection of Operations.
-      //Adapters should remove Operations from this if they handle them
-      //  passing the rest for others to handle.
-      val args = query.split("&")
-      val operations = (new DapConstraintParser).parseArgs(args)
       
       //Get the Dataset from the DatasetAccessor. 
+      // operations was produced by parseArgs at the beginning
       dataset = reader.getDataset(operations)
       
       //Make the Writer, wrapped for Servlet output.
