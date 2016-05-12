@@ -4,9 +4,9 @@ import latis.data.NumberData
 import scala.math.BigDecimal.RoundingMode
 
 trait Number { this: Scalar =>
-  def doubleValue: Double = applyRounding(getNumberData.doubleValue).toDouble
-  def longValue: Long = applyRounding(getNumberData.longValue).toLong
-  def intValue: Int = applyRounding(getNumberData.intValue).toInt
+  def doubleValue: Double = getNumberData.doubleValue.toDouble
+  def longValue: Long = getNumberData.longValue.toLong
+  def intValue: Int = getNumberData.intValue.toInt
   
   def applyRounding(d: Double): Double = (this.getMetadata("sigfigs"), this.getMetadata("precision")) match {
     case (None, None) => d
