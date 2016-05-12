@@ -9,6 +9,7 @@ import java.io.DataOutputStream
 import java.io.File
 import latis.dm._
 import latis.metadata.Metadata
+import latis.reader.DatasetAccessor
 
 class TestTextWriter extends WriterTest{
 
@@ -43,4 +44,14 @@ class TestTextWriter extends WriterTest{
     write_to_file(fof, "txt")
   }
   
+  @Test
+  def write_with_precision = {
+    val ds = DatasetAccessor.fromName("ascii_precision").getDataset
+    //latis.writer.AsciiWriter.write(ds)
+    ds match {
+      case Dataset(Function(it)) => it.next match {
+        case Sample(_, Real(d)) => assertEquals("0.12", d.toString)
+      }
+    }
+  }
 }
