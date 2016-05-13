@@ -1,6 +1,7 @@
 package latis.ops.filter
 
 import latis.dm.Scalar
+import latis.dm.Tuple
 import latis.ops.OperationFactory
 
 /*
@@ -31,7 +32,18 @@ class MaxDeltaFilter(name: String, maxDelta: Double) extends Filter {
         }
       } else Some(scalar) 
     }
-  }  
+  }
+  
+  /*
+   * Apply operation to a Tuple
+   */
+  override def applyToTuple(tuple: Tuple): Option[Tuple] = {
+    val x = tuple.getVariables.map(applyToVariable(_))
+    x.find(_.isEmpty) match {
+      case Some(_) => None //Found an unacceptable delta, exclude the entire tuple
+      case None    => Some(Tuple(x.map(_.get), tuple.getMetadata))
+    }
+  }
 
 }
 
