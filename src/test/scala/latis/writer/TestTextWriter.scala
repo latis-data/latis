@@ -54,9 +54,6 @@ class TestTextWriter extends WriterTest{
           println(s.getMetadata("precision"))
           assertEquals("0.12", latis.writer.TextWriter.makeScalar(s))
         }
-        case Sample(_, _) => {
-          assertEquals(1, 1)
-        }
       }
     }
   }
