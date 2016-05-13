@@ -47,10 +47,16 @@ class TestTextWriter extends WriterTest{
   @Test
   def write_with_precision = {
     val ds = DatasetAccessor.fromName("ascii_precision").getDataset
-    latis.writer.AsciiWriter.write(ds)
+    //latis.writer.TextWriter.write(ds)
     ds match {
       case Dataset(Function(it)) => it.next match {
-        case Sample(_, Real(d)) => assertEquals("0.12", d.toString)
+        case Sample(_, s:Scalar) => {
+          println(s.getMetadata("precision"))
+          assertEquals("0.12", latis.writer.TextWriter.makeScalar(s))
+        }
+        case Sample(_, _) => {
+          assertEquals(1, 1)
+        }
       }
     }
   }

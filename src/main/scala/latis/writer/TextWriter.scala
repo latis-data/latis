@@ -14,6 +14,7 @@ import latis.dm.Variable
 import latis.util.FirstThenOther
 
 import java.io.PrintWriter
+import java.io.OutputStream
 
 /**
  * Generic writer for tabulated ASCII output.
@@ -103,24 +104,24 @@ class TextWriter extends Writer {
   /**
    * Convert Scalar value to a String.
    */
+  
   def makeScalar(scalar: Scalar): String = {
+    println(scalar)
     val form = (scalar.getMetadata("precision"), scalar.getMetadata("sigfigs")) match {
       case (None, None) => None
       case (Some(precision), None) => "%."+precision.toInt+"f"
       case (None, Some(sigfigs)) => "%."+sigfigs.toInt+"g"
       case (_, _) => None
     }
+    println(scalar)
     (form, scalar) match {
-      // Indices cannot have precision or sigfigs
       case (_, Index(i))   => i.toString
-      // Reals and Integers can
       case (None, Real(d)) => d.toString
       case (f:String, Real(d))    => f.format(d)
       case (None, Integer(l)) => l.toString
       case (f:String, Integer(l)) => f.format(l)
-      // Text/Binary can't (shouldn't?)
-      case (_, Text(s))    => s.trim
-      case (_, Binary(b))  => "blob" //TODO: uuencode?
+      case (None, Text(s))    => s.trim
+      case (None, Binary(b))  => "blob" //TODO: uuencode?
       //TODO: use Scalar.toStringValue?
       //TODO: deal with Time format
     }
@@ -167,3 +168,14 @@ class TextWriter extends Writer {
   
   protected var prepend = List[String]()
 }
+
+object TextWriter extends TextWriter {
+  def apply(out: OutputStream): TextWriter = {
+    val writer = new TextWriter()
+    writer.setOutputStream(out)
+    writer
+  }
+  
+  def apply(): TextWriter = TextWriter(System.out)
+}
+
