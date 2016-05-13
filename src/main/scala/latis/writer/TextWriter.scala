@@ -104,19 +104,23 @@ class TextWriter extends Writer {
    * Convert Scalar value to a String.
    */
   def makeScalar(scalar: Scalar): String = {
-    var format = (scalar.getMetadata("precision"), scalar.getMetadata("sigfigs")) match {
+    val form = (scalar.getMetadata("precision"), scalar.getMetadata("sigfigs")) match {
       case (None, None) => None
       case (Some(precision), None) => "%."+precision.toInt+"f"
       case (None, Some(sigfigs)) => "%."+sigfigs.toInt+"g"
       case (_, _) => None
     }
-    println(format)
-    scalar match {
-      case Index(i)   => i.toString
-      case Real(d)    => d.toString
-      case Integer(l) => l.toString
-      case Text(s)    => s.trim
-      case Binary(b)  => "blob" //TODO: uuencode?
+    (form, scalar) match {
+      // Indices cannot have precision or sigfigs
+      case (_, Index(i))   => i.toString
+      // Reals and Integers can
+      case (None, Real(d)) => d.toString
+      case (f:String, Real(d))    => f.format(d)
+      case (None, Integer(l)) => l.toString
+      case (f:String, Integer(l)) => f.format(l)
+      // Text/Binary can't (shouldn't?)
+      case (_, Text(s))    => s.trim
+      case (_, Binary(b))  => "blob" //TODO: uuencode?
       //TODO: use Scalar.toStringValue?
       //TODO: deal with Time format
     }
