@@ -45,16 +45,102 @@ class TestTextWriter extends WriterTest{
   }
   
   @Test
-  def write_with_precision = {
+  def makeScalar_with_precision_from_dataset = {
+    // Basic testing for precision metadata
     val ds = DatasetAccessor.fromName("ascii_precision").getDataset
-    //latis.writer.TextWriter.write(ds)
+    val assertArray: Array[String] = Array(
+                                            "0.12",
+                                            "123.12"
+                                          )
     ds match {
-      case Dataset(Function(it)) => it.next match {
+      case Dataset(Function(it)) => for(cmpStr <- assertArray) it.next match {
         case Sample(_, s:Scalar) => {
-          println(s.getMetadata("precision"))
-          assertEquals("0.12", latis.writer.TextWriter.makeScalar(s))
+          assertEquals(cmpStr, latis.writer.TextWriter.makeScalar(s))
         }
       }
     }
+  }
+
+  @Test
+  def makeScalar_with_sigfigs_from_dataset = {
+    // Basic testing for sigfig metadata
+    val ds = DatasetAccessor.fromName("ascii_sigfigs").getDataset
+    val assertArray: Array[String] = Array(
+                                            "0.12",
+                                            "1.2e+02"
+                                          )
+    ds match {
+      case Dataset(Function(it)) => for(cmpStr <- assertArray) it.next match {
+        case Sample(_, s:Scalar) => {
+          assertEquals(cmpStr, latis.writer.TextWriter.makeScalar(s))
+        }
+      }
+    }
+  }
+
+  @Test
+  def int_ignores_precision = {
+    val prec0: Metadata = Metadata(("precision", "0"))
+    val prec2: Metadata = Metadata(("precision", "2"))
+
+    val assertArray: Array[String] = Array("42", "42")
+
+    val testArray: Array[Scalar] = Array(
+                                          Scalar(prec0, 42),
+                                          Scalar(prec2, 42)
+                                        )
+
+    for(i <- 0 until 2) {
+      val cmpStr = assertArray(i)
+      val testSclr = testArray(i)
+      assertEquals("Assertion failed for " +
+                    testSclr.getValue +
+                    " with precision " +
+                    testSclr.getMetadata("precision"),
+                    cmpStr, 
+                    latis.writer.TextWriter.makeScalar(testSclr))
+    }
+  }
+
+  @Test
+  def varied_precision = {
+    //Different precision values
+    val prec0: Metadata = Metadata(("precision", "0"))
+    val prec2: Metadata = Metadata(("precision", "2"))
+    val prec5: Metadata = Metadata(("precision", "5"))
+    val prec10: Metadata = Metadata(("precision", "10"))
+
+    val assertArray: Array[String] = Array(
+                                            "42",
+                                            "42.42",
+                                            "42.42345",
+                                            "42.4234500000"
+                                          )
+    val testArray: Array[Scalar] = Array(
+                                          Scalar(prec0, 42.42345),
+                                          Scalar(prec2, 42.42345),
+                                          Scalar(prec5, 42.42345),
+                                          Scalar(prec10, 42.42345)
+                                        )
+    for(i <- 0 until 4) {
+      val cmpStr = assertArray(i)
+      val testSclr = testArray(i)
+      assertEquals("Assertion failed for " +
+                    testSclr.getValue +
+                    " with precision " +
+                    testSclr.getMetadata("precision"),
+                    cmpStr, 
+                    latis.writer.TextWriter.makeScalar(testSclr))
+    }
+  }
+
+  @Test
+  def varied_sigfigs_ints = {
+    val sigf0: Metadata = Metadata(("sigfigs", "0"))
+  }
+
+  @Test
+  def varied_sigfig_reals = {
+    val sigf0: Metadata = Metadata(("sigfigs", "0"))
   }
 }

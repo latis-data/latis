@@ -106,20 +106,24 @@ class TextWriter extends Writer {
    */
   
   def makeScalar(scalar: Scalar): String = {
-    println(scalar)
     val form = (scalar.getMetadata("precision"), scalar.getMetadata("sigfigs")) match {
       case (None, None) => None
       case (Some(precision), None) => "%."+precision.toInt+"f"
       case (None, Some(sigfigs)) => "%."+sigfigs.toInt+"g"
+      // For now, we're just going to disallow having both properties
       case (_, _) => None
     }
-    println(scalar)
+    println(form)
     (form, scalar) match {
       case (_, Index(i))   => i.toString
       case (None, Real(d)) => d.toString
       case (f:String, Real(d))    => f.format(d)
-      case (None, Integer(l)) => l.toString
-      case (f:String, Integer(l)) => f.format(l)
+      // If precision is specified for an int, ignore it
+      case (f:String, Integer(l)) => f.endsWith("g") match {
+        case true => f.format(l)
+        case false => l.toString
+      }
+        case (_, Integer(l)) => l.toString
       case (None, Text(s))    => s.trim
       case (None, Binary(b))  => "blob" //TODO: uuencode?
       //TODO: use Scalar.toStringValue?
