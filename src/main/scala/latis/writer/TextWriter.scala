@@ -103,14 +103,23 @@ class TextWriter extends Writer {
   /**
    * Convert Scalar value to a String.
    */
-  def makeScalar(scalar: Scalar): String = scalar match {
-    case Index(i)   => i.toString
-    case Real(d)    => d.toString
-    case Integer(l) => l.toString
-    case Text(s)    => s.trim
-    case Binary(b)  => "blob" //TODO: uuencode?
-    //TODO: use Scalar.toStringValue?
-    //TODO: deal with Time format
+  def makeScalar(scalar: Scalar): String = {
+    var format = (scalar.getMetadata("precision"), scalar.getMetadata("sigfigs")) match {
+      case (None, None) => None
+      case (Some(precision), None) => "%."+precision.toInt+"f"
+      case (None, Some(sigfigs)) => "%."+sigfigs.toInt+"g"
+      case (_, _) => None
+    }
+    println(format)
+    scalar match {
+      case Index(i)   => i.toString
+      case Real(d)    => d.toString
+      case Integer(l) => l.toString
+      case Text(s)    => s.trim
+      case Binary(b)  => "blob" //TODO: uuencode?
+      //TODO: use Scalar.toStringValue?
+      //TODO: deal with Time format
+    }
   }
   
   /**
