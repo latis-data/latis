@@ -5,7 +5,7 @@ import latis.ops.OperationFactory
 
 /*
  *  Removes all data points of a given name from the dataset 
- *  that differ more than 'maxDelta' in value from their preceding points
+ *  that differ more than 'maxDelta' in value from their preceding points.
  */
 class MaxDeltaFilter(name: String, maxDelta: Double) extends Filter {
   
@@ -33,9 +33,8 @@ class MaxDeltaFilter(name: String, maxDelta: Double) extends Filter {
     }
   }  
 
-
-
 }
+
 
 object MaxDeltaFilter extends OperationFactory {
   def apply(name: String, maxDelta: Double): MaxDeltaFilter = new MaxDeltaFilter(name, maxDelta)
