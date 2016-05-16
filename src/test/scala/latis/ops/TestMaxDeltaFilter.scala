@@ -134,7 +134,7 @@ class TestMaxDeltaFilter {
   }
   
   @Test
-  def two_dimensional_range = {
+  def two_dimensional_range = { // t -> (v, x)
     val sample1 = Sample(Integer(Metadata("t"), 1), Tuple(Real(Metadata("v"), 3.5), Real(Metadata("x"), 6.5)))
     val sample2 = Sample(Integer(Metadata("t"), 2), Tuple(Real(Metadata("v"), 3.2), Real(Metadata("x"), 6.2)))
     val sample3 = Sample(Integer(Metadata("t"), 3), Tuple(Real(Metadata("v"), 3.6), Real(Metadata("x"), 6.6)))
@@ -164,7 +164,7 @@ class TestMaxDeltaFilter {
   }
   
   @Test
-  def two_dimensional_domain = {
+  def two_dimensional_domain = { // (lat, lon) -> v
     val sample1 = Sample(Tuple(Real(Metadata("lat"), 1.0), Real(Metadata("lon"), 1.0)), Real(Metadata("v"), 3.5))
     val sample2 = Sample(Tuple(Real(Metadata("lat"), 2.0), Real(Metadata("lon"), 2.0)), Real(Metadata("v"), 3.2))
     val sample3 = Sample(Tuple(Real(Metadata("lat"), 3.0), Real(Metadata("lon"), 3.0)), Real(Metadata("v"), 3.6))
@@ -194,7 +194,7 @@ class TestMaxDeltaFilter {
   }
   
   @Test
-  def domain_2D_range_3D = {
+  def domain_2D_range_3D = { // ((lat, lon) -> (v, x, txt))
     val sample1 = Sample(Tuple(Real(Metadata("lat"), 1.0), Real(Metadata("lon"), 1.0)), 
                     Tuple(Real(Metadata("v"), 3.5), Integer(Metadata("x"), 6), Text(Metadata("txt"), "a")))
     val sample2 = Sample(Tuple(Real(Metadata("lat"), 2.0), Real(Metadata("lon"), 2.0)), 
