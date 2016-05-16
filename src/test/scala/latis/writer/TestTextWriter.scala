@@ -82,7 +82,7 @@ class TestTextWriter extends WriterTest{
   def real_prioritizes_precision = {
     val prec2_sigfig2: Metadata = Metadata(("precision", "2"), ("sigfigs", "2"))
 
-    val testScalar: Scalar = Scalar(prec2_sigfig2, 1234.421)
+    val testScalar: Real = Real(prec2_sigfig2, 1234.421)
 
     val cmpStr: String = "1234.42"
 
@@ -97,11 +97,11 @@ class TestTextWriter extends WriterTest{
 
     val assertArray: Array[String] = Array("42", "42", "4.2e+03")
 
-    val testArray: Array[Scalar] = Array(
-                                          Scalar(prec0, 42),
-                                          Scalar(prec2, 42),
-                                          Scalar(prec2_sigfig2, 4212)
-                                        )
+    val testArray: Array[Integer] = Array(
+                                           Integer(prec0, 42),
+                                           Integer(prec2, 42),
+                                           Integer(prec2_sigfig2, 4212)
+                                         )
 
     for(i <- 0 until 2) {
       val cmpStr = assertArray(i)
@@ -139,12 +139,12 @@ class TestTextWriter extends WriterTest{
                                             "42.42345",
                                             "42.4234500000"
                                           )
-    val testArray: Array[Scalar] = Array(
-                                          Scalar(prec0, 42.42345),
-                                          Scalar(prec2, 42.42345),
-                                          Scalar(prec5, 42.42345),
-                                          Scalar(prec10, 42.42345)
-                                        )
+    val testArray: Array[Real] = Array(
+                                        Real(prec0, 42.42345),
+                                        Real(prec2, 42.42345),
+                                        Real(prec5, 42.42345),
+                                        Real(prec10, 42.42345)
+                                      )
     for(i <- 0 until 4) {
       val cmpStr = assertArray(i)
       val testSclr = testArray(i)
@@ -174,11 +174,11 @@ class TestTextWriter extends WriterTest{
                                              "42123.00000"
                                            )
 
-    val testArray: Array[Scalar] = Array(
-                                          Scalar(sigf1, 42123),
-                                          Scalar(sigf2, 42123),
-                                          Scalar(sigf5, 42123),
-                                          Scalar(sigf10, 42123)
+    val testArray: Array[Integer] = Array(
+                                          Integer(sigf1, 42123),
+                                          Integer(sigf2, 42123),
+                                          Integer(sigf5, 42123),
+                                          Integer(sigf10, 42123)
                                         )
 
     for(i <- 0 until 4) {
@@ -212,12 +212,12 @@ class TestTextWriter extends WriterTest{
                                              "4.212300000"
                                            )
 
-    val testArray: Array[Scalar] = Array(
-                                          Scalar(sigf1, 4.2123),
-                                          Scalar(sigf2, 4.2123),
-                                          Scalar(sigf5, 4.2123),
-                                          Scalar(sigf10, 4.2123)
-                                        )
+    val testArray: Array[Real] = Array(
+                                        Real(sigf1, 4.2123),
+                                        Real(sigf2, 4.2123),
+                                        Real(sigf5, 4.2123),
+                                        Real(sigf10, 4.2123)
+                                      )
 
     for(i <- 0 until 4) {
       val cmpStr = assertArray(i)
