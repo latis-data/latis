@@ -7,14 +7,24 @@ import latis.dm.Function
 import latis.dm.Sample
 import latis.dm.Scalar
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.TreeSet
 import latis.ops.resample.NoExtrapolation
 import latis.util.iterator.PeekIterator
+import latis.dm.Number
+import latis.dm.Tuple
+import latis.dm.Real
+import latis.dm.Variable
 
 /**
  * Given two Datasets that each contain a Function with the same domain Variable,
  * create a single Function that contains ALL samples of both Functions using
  * fill values as needed.
  * This implementation assumes that all samples can be held in memory.
+ * A common domain Set is created then used to evaluate each Function. 
+ * The resulting ranges are joined.
+ * Assumes the domain is one dimensional and numeric, for now, and that there
+ * are no nested Functions.
+ * Missing values will be used for interpolations and extrapolations.
  */
 class FullOuterJoin2 extends Join with NoInterpolation with NoExtrapolation {
   
@@ -22,13 +32,71 @@ class FullOuterJoin2 extends Join with NoInterpolation with NoExtrapolation {
    * get domain sets, put in same set (no dups) to get final set
    * eval both and join results in new range
    * 
-   * evaluate like interpolate
+   * assume domain is numeric, use Doubles
+   * use TreeMap, sorted
+   * assume time: Double -> range (Real or Tuple)
+   * join left would be easy - fill just ds2
+   *   but we need to go back and fill all
+   * 
+   * 
+   * evaluate = interpolate
+   * 
+   * 
+   * invoke for many datasets (e.g. webtcad download) via POST of URLs to this operation
+   * 
+   * 
    */
   
-  def joinFunctions(f1: Function, f2: Function): Function = {
+  def joinFunctions(f1: Function, f2: Function): Option[Function] = {
+    //combine domain values from both into a sorted set
+    val domainSet = getDomainSet(f1,f2)
+    //define domain metadata, assume both Functions share the same domain metadata
+    val domainMetadata = f1.getDomain.getMetadata()
+   
+    //evaluate both functions for each domain sample
+    val samples = domainSet.toSeq.map(d => {
+      //construct the domain Variable for this sample
+      val domain = Real(domainMetadata, d)
+      //evaluate f1
+      val range1 = f1(domain) match {
+        case Some(v) => v
+        case None => fillMissing(f1.getRange)
+      }
+      //evaluate f2
+      val range2 = f2(domain) match {
+        case Some(v) => v
+        case None => fillMissing(f2.getRange)
+      }
+      
+      //join the results
+      val range = joinVariables(range1, range2) match {
+        case Some(v) => v
+        case None => throw new Error("Failed to join datasets.")
+      }
+      
+      //construct the resulting sample
+      Sample(domain, range)
+    })
     
-    
-    ???
+    //TODO: update metadata, get from f1 for now
+    val fmd = f1.getMetadata()
+    Some(Function(samples, fmd))
+  }
+  
+  private def fillMissing(variable: Variable): Variable = variable match {
+    case s: Scalar => Scalar(s.getMetadata, s.getFillValue) //TODO: use copy
+    case Tuple(vars) => Tuple(vars.map(fillMissing(_))) //recursive
+    case _ => throw new Error("Can't fill missing for Functions.")
+  }
+  
+  private def getDomainSet(f1: Function, f2: Function) = {
+    //make a sorted set that contains the domain values of each Function
+    val domainSet = TreeSet[Double]()
+    //put f1 domain values in sorted set
+    f1.iterator.map(_.domain match { case Number(v) => domainSet += v }).toList
+    //put f2 domain values in sorted set
+    f2.iterator.map(_.domain match { case Number(v) => domainSet += v }).toList
+    domainSet
   }
   
   def apply(ds1: Dataset, ds2: Dataset): Dataset = {
@@ -48,126 +116,128 @@ class FullOuterJoin2 extends Join with NoInterpolation with NoExtrapolation {
           throw new UnsupportedOperationException(msg)
         }
 
-        val f = joinFunctions(f1, f2)
-        Dataset(f)
+        joinFunctions(f1, f2) match {
+          case Some(v) => Dataset(v)
+          case None => throw new Error("Failed to join datasets.")
+        }
       }
     }
   }
   
-  private def makeSampleIterator(f1: Function, f2: Function) = new PeekIterator[Sample]() {
-    //Define indices of the inner pair of samples in a sliding window.
-    //These are used to align each dataset for interpolation.
-    //TODO: assert even, >=2
-    val upper = interpolationWindowSize / 2
-    val lower = upper - 1
-
-    //Create the sliding iterators so we can interpolate within sliding windows.
-    //Do this lazily so we don't access data until we have to.
-    lazy val pit1 = PeekIterator(f1.iterator.sliding(interpolationWindowSize)) //.withPartial(false))
-    lazy val pit2 = PeekIterator(f2.iterator.sliding(interpolationWindowSize)) //.withPartial(false))
-    
-    //temporary arrays of Samples for the sliding windows
-    var as: Array[Sample] = Array() //left dataset window (a)
-    var bs: Array[Sample] = Array() //right dataset window (b)
-    def firstPass = as.isEmpty  //both should be empty
-    //define extrapolation mode based on 'compare':
-    //  <0 if as are smaller (extrapolating bs)
-    //  >0 if bs are smaller (extrapolating as)
-    var extrapolationMode = 0 
-//TODO: can we turn extrapolationMode back on at the end?
-    //diff signs: just use <0 = left = as need extrap
-    //or generalize mode to include interp and done?
-    //use empty as,bs when done?
-    //allow partial window, use length of as,bs?
-    
-    //Populate the next set of windows (as, bs), increment iterators as needed
-    def loadNextWindows = {
-      //get first set of samples if we don't have them yet
-      if (firstPass) {
-        //note, if either is empty, it should have been taken care of by now as an empty dataset
-        as = pit1.next.toArray
-        bs = pit2.next.toArray
-        //if the domain values aren't the same, start in extrapolation mode
-        val a1 = as(lower).domain.asInstanceOf[Scalar]
-        val b1 = bs(lower).domain.asInstanceOf[Scalar]
-        extrapolationMode = b1.compare(a1) // <0 if as need extrap...
-      } else { //not first pass
-        if (extrapolationMode == 0) { //we've been in normal interpolation mode
-          //increment based on upper end of region of interest
-          //a2, b2 are the basis of the next comparison
-     //TODO: can't assume a2 and b2 will be there with partial windows
-          if (as.length < upper + 1) { //partial window (without upper, thus extrapolation needed) near the end of dataset1
-            extrapolationMode = -1
-    //TODO: but still got an inperp to do in B at the last A, do we need to use window size in interp logic below?
-          }
-          val a2 = as(upper).domain.asInstanceOf[Scalar]
-          val b2 = bs(upper).domain.asInstanceOf[Scalar]
-//          if (a2 <= b2) {
-//            if (pit1.hasNext) as = pit1.next.toArray
-//   //TODO: consider partial windows
-//            else extrapolationMode = 
+//  private def makeSampleIterator(f1: Function, f2: Function) = new PeekIterator[Sample]() {
+//    //Define indices of the inner pair of samples in a sliding window.
+//    //These are used to align each dataset for interpolation.
+//    //TODO: assert even, >=2
+//    val upper = interpolationWindowSize / 2
+//    val lower = upper - 1
+//
+//    //Create the sliding iterators so we can interpolate within sliding windows.
+//    //Do this lazily so we don't access data until we have to.
+//    lazy val pit1 = PeekIterator(f1.iterator.sliding(interpolationWindowSize)) //.withPartial(false))
+//    lazy val pit2 = PeekIterator(f2.iterator.sliding(interpolationWindowSize)) //.withPartial(false))
+//    
+//    //temporary arrays of Samples for the sliding windows
+//    var as: Array[Sample] = Array() //left dataset window (a)
+//    var bs: Array[Sample] = Array() //right dataset window (b)
+//    def firstPass = as.isEmpty  //both should be empty
+//    //define extrapolation mode based on 'compare':
+//    //  <0 if as are smaller (extrapolating bs)
+//    //  >0 if bs are smaller (extrapolating as)
+//    var extrapolationMode = 0 
+////TODO: can we turn extrapolationMode back on at the end?
+//    //diff signs: just use <0 = left = as need extrap
+//    //or generalize mode to include interp and done?
+//    //use empty as,bs when done?
+//    //allow partial window, use length of as,bs?
+//    
+//    //Populate the next set of windows (as, bs), increment iterators as needed
+//    def loadNextWindows = {
+//      //get first set of samples if we don't have them yet
+//      if (firstPass) {
+//        //note, if either is empty, it should have been taken care of by now as an empty dataset
+//        as = pit1.next.toArray
+//        bs = pit2.next.toArray
+//        //if the domain values aren't the same, start in extrapolation mode
+//        val a1 = as(lower).domain.asInstanceOf[Scalar]
+//        val b1 = bs(lower).domain.asInstanceOf[Scalar]
+//        extrapolationMode = b1.compare(a1) // <0 if as need extrap...
+//      } else { //not first pass
+//        if (extrapolationMode == 0) { //we've been in normal interpolation mode
+//          //increment based on upper end of region of interest
+//          //a2, b2 are the basis of the next comparison
+//     //TODO: can't assume a2 and b2 will be there with partial windows
+//          if (as.length < upper + 1) { //partial window (without upper, thus extrapolation needed) near the end of dataset1
+//            extrapolationMode = -1
+//    //TODO: but still got an inperp to do in B at the last A, do we need to use window size in interp logic below?
 //          }
-          
-          if (a2 <= b2 && pit1.hasNext) as = pit1.next.toArray  //TODO: if !hasNext
-          if (a2 >= b2 && pit2.hasNext) bs = pit2.next.toArray  //TODO: if !hasNext
-          //note, both need to advance if the upper values match 
-          //since interp is based on the lower values in the window
-        } else if (extrapolationMode > 0) { //extrap bs
-  //TODO: if we are using etrap mode for end of data, deal with end of both and thus this iterator
-          val a2 = as(upper).domain.asInstanceOf[Scalar]
-          val b1 = bs(lower).domain.asInstanceOf[Scalar]
-          a2.compare(b1) match {
-            case 0 => as = pit1.next.toArray; extrapolationMode = 0  //TODO: if !hasNext, only first and last samples match, need to join them
-            case i: Int if (i < 0) => as = pit1.next.toArray //TODO: if !hasNext, no overlap between datasets, start extrapolating on the end of the other
-            case i: Int if (i > 0) => extrapolationMode = 0
-          }
-        } else if (extrapolationMode < 0) { //extrap as
-          val b2 = bs(upper).domain.asInstanceOf[Scalar]
-          val a1 = as(lower).domain.asInstanceOf[Scalar]
-          b2.compare(a1) match {
-            case 0 => bs = pit2.next.toArray; extrapolationMode = 0 //TODO: if !hasNext, only first and last samples match, need to join them
-            case i: Int if (i < 0) => bs = pit2.next.toArray  //TODO: if !hasNext, no overlap between datasets, start extrapolating on the end of the other
-            case i: Int if (i > 0) => extrapolationMode = 0
-          }
-        }
-      }
-    }
+//          val a2 = as(upper).domain.asInstanceOf[Scalar]
+//          val b2 = bs(upper).domain.asInstanceOf[Scalar]
+////          if (a2 <= b2) {
+////            if (pit1.hasNext) as = pit1.next.toArray
+////   //TODO: consider partial windows
+////            else extrapolationMode = 
+////          }
+//          
+//          if (a2 <= b2 && pit1.hasNext) as = pit1.next.toArray  //TODO: if !hasNext
+//          if (a2 >= b2 && pit2.hasNext) bs = pit2.next.toArray  //TODO: if !hasNext
+//          //note, both need to advance if the upper values match 
+//          //since interp is based on the lower values in the window
+//        } else if (extrapolationMode > 0) { //extrap bs
+//  //TODO: if we are using etrap mode for end of data, deal with end of both and thus this iterator
+//          val a2 = as(upper).domain.asInstanceOf[Scalar]
+//          val b1 = bs(lower).domain.asInstanceOf[Scalar]
+//          a2.compare(b1) match {
+//            case 0 => as = pit1.next.toArray; extrapolationMode = 0  //TODO: if !hasNext, only first and last samples match, need to join them
+//            case i: Int if (i < 0) => as = pit1.next.toArray //TODO: if !hasNext, no overlap between datasets, start extrapolating on the end of the other
+//            case i: Int if (i > 0) => extrapolationMode = 0
+//          }
+//        } else if (extrapolationMode < 0) { //extrap as
+//          val b2 = bs(upper).domain.asInstanceOf[Scalar]
+//          val a1 = as(lower).domain.asInstanceOf[Scalar]
+//          b2.compare(a1) match {
+//            case 0 => bs = pit2.next.toArray; extrapolationMode = 0 //TODO: if !hasNext, only first and last samples match, need to join them
+//            case i: Int if (i < 0) => bs = pit2.next.toArray  //TODO: if !hasNext, no overlap between datasets, start extrapolating on the end of the other
+//            case i: Int if (i > 0) => extrapolationMode = 0
+//          }
+//        }
+//      }
+//    }
     
     
-    def getNext: Sample = {
-      //Populate the windows of samples (as, bs) for the next joined sample.
-      loadNextWindows
-      
-      //If there are no more samples in either dataset, we are done.
-      //TODO: consider partial windows
-/*
- * TODO: haven't used current samples yet so don't use hasNext
- * but need to know if one was already at end and needs exterp
- * add matching null samples at +/- infinity?
- */
-      if (!pit1.hasNext && !pit2.hasNext) null
-      else {
-        //If one dataset has no more samples, extrapolate
-        if (!pit1.hasNext) extrapolate(as, bs(lower).domain.asInstanceOf[Scalar]) match {
-          case Some(sample) => joinSamples(sample, bs(lower))
-          case None => ??? //TODO: fill
-        } else if (!pit2.hasNext) extrapolate(bs, as(lower).domain.asInstanceOf[Scalar]) match {
-          case Some(sample) => joinSamples(as(lower), sample)
-          case None => ??? //TODO: fill
-        }
-        
-        else {
-          //Get the domain variable of the samples to compare
-        //Assumes scalar domains, for now
-        var a1 = as(lower).domain.asInstanceOf[Scalar]
-        var b1 = bs(lower).domain.asInstanceOf[Scalar]
-        }
-      
-        ???
-      }
-    }
-    
-  }
+//    def getNext: Sample = {
+//      //Populate the windows of samples (as, bs) for the next joined sample.
+//      loadNextWindows
+//      
+//      //If there are no more samples in either dataset, we are done.
+//      //TODO: consider partial windows
+///*
+// * TODO: haven't used current samples yet so don't use hasNext
+// * but need to know if one was already at end and needs exterp
+// * add matching null samples at +/- infinity?
+// */
+//      if (!pit1.hasNext && !pit2.hasNext) null
+//      else {
+//        //If one dataset has no more samples, extrapolate
+//        if (!pit1.hasNext) extrapolate(as, bs(lower).domain.asInstanceOf[Scalar]) match {
+//          case Some(sample) => joinSamples(sample, bs(lower))
+//          case None => ??? //TODO: fill
+//        } else if (!pit2.hasNext) extrapolate(bs, as(lower).domain.asInstanceOf[Scalar]) match {
+//          case Some(sample) => joinSamples(as(lower), sample)
+//          case None => ??? //TODO: fill
+//        }
+//        
+//        else {
+//          //Get the domain variable of the samples to compare
+//        //Assumes scalar domains, for now
+//        var a1 = as(lower).domain.asInstanceOf[Scalar]
+//        var b1 = bs(lower).domain.asInstanceOf[Scalar]
+//        }
+//      
+//        ???
+//      }
+//    }
+//    
+//  }
     
 
 
