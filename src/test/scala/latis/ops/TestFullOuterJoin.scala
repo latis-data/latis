@@ -252,8 +252,8 @@ class TestFullOuterJoin {
     ds match {
       case Dataset(Function(it)) => {
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b), Real(c), Real(d)))) => assertEquals((1,0,0,2,3), (t,a,b,c,d))}
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b), Real(c), Real(d)))) => assertEquals((1,2,4,0,0), (t,a,b,c,d))}
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b), Real(c), Real(d)))) => assertEquals((1,3,5,6,9), (t,a,b,c,d))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b), Real(c), Real(d)))) => assertEquals((2,2,4,0,0), (t,a,b,c,d))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b), Real(c), Real(d)))) => assertEquals((3,3,5,6,9), (t,a,b,c,d))}
         assert(!it.hasNext)
       }
     }
