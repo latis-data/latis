@@ -8,7 +8,7 @@ import latis.ops.OperationFactory
  *  Removes all data points of a given name from the dataset 
  *  that differ more than 'maxDelta' in value from their preceding points.
  */
-class MaxDeltaFilter(name: String, maxDelta: Double) extends Filter {
+class MaxDeltaFilter(val name: String, val maxDelta: Double) extends Filter {
   
   var currentValue: Double = Double.NaN
   
@@ -49,5 +49,11 @@ class MaxDeltaFilter(name: String, maxDelta: Double) extends Filter {
 
 
 object MaxDeltaFilter extends OperationFactory {
+  
+  override def apply(args: Seq[String]): MaxDeltaFilter = args match {
+    case Seq(name, value) => new MaxDeltaFilter(name, value.toDouble)
+    //TODO: error handling
+  }
+    
   def apply(name: String, maxDelta: Double): MaxDeltaFilter = new MaxDeltaFilter(name, maxDelta)
 }

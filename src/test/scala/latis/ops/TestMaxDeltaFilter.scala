@@ -234,6 +234,14 @@ class TestMaxDeltaFilter {
     }
   }
   
-  
+  @Test
+  def from_expression = {
+    Operation("maxDelta", Seq("foo","10")) match {
+      case mdf: MaxDeltaFilter => {
+        assertEquals("foo", mdf.name)
+        assertEquals(10, mdf.maxDelta, 0.0)
+      }
+    }
+  }
   
 }
