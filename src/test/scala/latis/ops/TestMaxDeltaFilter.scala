@@ -16,12 +16,12 @@ import latis.ops.filter.MaxDeltaFilter
 class TestMaxDeltaFilter {
   
   @Test
-  def one_bad_value = {
+  def one_bad_value = { // t -> v
     val sample1 = Sample(Integer(Metadata("t"), 1), Real(Metadata("v"), 3.5))
     val sample2 = Sample(Integer(Metadata("t"), 2), Real(Metadata("v"), 3.2))
     val sample3 = Sample(Integer(Metadata("t"), 3), Real(Metadata("v"), 3.6))
     val sample4 = Sample(Integer(Metadata("t"), 4), Real(Metadata("v"), 3.5))
-    val sample5 = Sample(Integer(Metadata("t"), 5), Real(Metadata("v"), 8.9))
+    val sample5 = Sample(Integer(Metadata("t"), 5), Real(Metadata("v"), 8.9)) //"bad" value
     val sample6 = Sample(Integer(Metadata("t"), 6), Real(Metadata("v"), 3.4))
     val sample7 = Sample(Integer(Metadata("t"), 7), Real(Metadata("v"), 3.1))
     
@@ -46,13 +46,13 @@ class TestMaxDeltaFilter {
   }
   
   @Test
-  def three_bad_values = {
+  def three_bad_values = { // t -> v
     val sample1 = Sample(Integer(Metadata("t"), 1), Real(Metadata("v"), 3.5))
     val sample2 = Sample(Integer(Metadata("t"), 2), Real(Metadata("v"), 3.2))
     val sample3 = Sample(Integer(Metadata("t"), 3), Real(Metadata("v"), 3.6))
-    val sample4 = Sample(Integer(Metadata("t"), 4), Real(Metadata("v"), 12.4))
-    val sample5 = Sample(Integer(Metadata("t"), 5), Real(Metadata("v"), 8.9))
-    val sample6 = Sample(Integer(Metadata("t"), 6), Real(Metadata("v"), 9.6))
+    val sample4 = Sample(Integer(Metadata("t"), 4), Real(Metadata("v"), 12.4)) //"bad" value
+    val sample5 = Sample(Integer(Metadata("t"), 5), Real(Metadata("v"), 8.9))  //"bad" value
+    val sample6 = Sample(Integer(Metadata("t"), 6), Real(Metadata("v"), 9.6))  //"bad" value
     val sample7 = Sample(Integer(Metadata("t"), 7), Real(Metadata("v"), 3.1))
     
     val samples = List(sample1, sample2, sample3, sample4, sample5, sample6, sample7)
@@ -74,14 +74,14 @@ class TestMaxDeltaFilter {
   }
   
   @Test
-  def two_bad_values_apart = {
+  def two_bad_values_apart = { // t -> v
     val sample1 = Sample(Integer(Metadata("t"), 1), Real(Metadata("v"), 3.5))
-    val sample2 = Sample(Integer(Metadata("t"), 2), Real(Metadata("v"), 9000.0))
+    val sample2 = Sample(Integer(Metadata("t"), 2), Real(Metadata("v"), 9000.0)) //"bad" value
     val sample3 = Sample(Integer(Metadata("t"), 3), Real(Metadata("v"), 3.6))
     val sample4 = Sample(Integer(Metadata("t"), 4), Real(Metadata("v"), 3.5))
     val sample5 = Sample(Integer(Metadata("t"), 5), Real(Metadata("v"), 3.9))
     val sample6 = Sample(Integer(Metadata("t"), 6), Real(Metadata("v"), 3.4))
-    val sample7 = Sample(Integer(Metadata("t"), 7), Real(Metadata("v"), 16.1))
+    val sample7 = Sample(Integer(Metadata("t"), 7), Real(Metadata("v"), 16.1))   //"bad" value
     
     val samples = List(sample1, sample2, sample3, sample4, sample5, sample6, sample7)
     
@@ -103,7 +103,7 @@ class TestMaxDeltaFilter {
   }
   
   @Test
-  def no_bad_values = {
+  def no_bad_values = { // t -> v
     val sample1 = Sample(Integer(Metadata("t"), 1), Real(Metadata("v"), 3.5))
     val sample2 = Sample(Integer(Metadata("t"), 2), Real(Metadata("v"), 3.2))
     val sample3 = Sample(Integer(Metadata("t"), 3), Real(Metadata("v"), 3.6))
@@ -139,7 +139,7 @@ class TestMaxDeltaFilter {
     val sample2 = Sample(Integer(Metadata("t"), 2), Tuple(Real(Metadata("v"), 3.2), Real(Metadata("x"), 6.2)))
     val sample3 = Sample(Integer(Metadata("t"), 3), Tuple(Real(Metadata("v"), 3.6), Real(Metadata("x"), 6.6)))
     val sample4 = Sample(Integer(Metadata("t"), 4), Tuple(Real(Metadata("v"), 3.5), Real(Metadata("x"), 6.5)))
-    val sample5 = Sample(Integer(Metadata("t"), 5), Tuple(Real(Metadata("v"), 8.9), Real(Metadata("x"), 16.9)))
+    val sample5 = Sample(Integer(Metadata("t"), 5), Tuple(Real(Metadata("v"), 8.9), Real(Metadata("x"), 16.9))) //"bad" value
     val sample6 = Sample(Integer(Metadata("t"), 6), Tuple(Real(Metadata("v"), 3.4), Real(Metadata("x"), 6.4)))
     val sample7 = Sample(Integer(Metadata("t"), 7), Tuple(Real(Metadata("v"), 4.7), Real(Metadata("x"), 6.1)))
     
@@ -171,7 +171,7 @@ class TestMaxDeltaFilter {
     val sample4 = Sample(Tuple(Real(Metadata("lat"), 4.0), Real(Metadata("lon"), 4.0)), Real(Metadata("v"), 3.5))
     val sample5 = Sample(Tuple(Real(Metadata("lat"), 5.0), Real(Metadata("lon"), 5.0)), Real(Metadata("v"), 3.1))
     val sample6 = Sample(Tuple(Real(Metadata("lat"), 6.0), Real(Metadata("lon"), 6.0)), Real(Metadata("v"), 3.4))
-    val sample7 = Sample(Tuple(Real(Metadata("lat"), 7.0), Real(Metadata("lon"), 7.0)), Real(Metadata("v"), 8.9))
+    val sample7 = Sample(Tuple(Real(Metadata("lat"), 7.0), Real(Metadata("lon"), 7.0)), Real(Metadata("v"), 8.9)) //"bad" value
     
     val samples = List(sample1, sample2, sample3, sample4, sample5, sample6, sample7)
     
@@ -204,9 +204,9 @@ class TestMaxDeltaFilter {
     val sample4 = Sample(Tuple(Real(Metadata("lat"), 4.0), Real(Metadata("lon"), 4.0)), 
                     Tuple(Real(Metadata("v"), 3.5), Integer(Metadata("x"), 6), Text(Metadata("txt"), "d")))
     val sample5 = Sample(Tuple(Real(Metadata("lat"), 5.0), Real(Metadata("lon"), 5.0)), 
-                    Tuple(Real(Metadata("v"), 8.9), Integer(Metadata("x"), 16), Text(Metadata("txt"), "e")))
+                    Tuple(Real(Metadata("v"), 8.9), Integer(Metadata("x"), 16), Text(Metadata("txt"), "e"))) //"bad" value
     val sample6 = Sample(Tuple(Real(Metadata("lat"), 6.0), Real(Metadata("lon"), 6.0)), 
-                    Tuple(Real(Metadata("v"), 9.3), Integer(Metadata("x"), 17), Text(Metadata("txt"), "f")))
+                    Tuple(Real(Metadata("v"), 9.3), Integer(Metadata("x"), 17), Text(Metadata("txt"), "f"))) //"bad" value
     val sample7 = Sample(Tuple(Real(Metadata("lat"), 7.0), Real(Metadata("lon"), 7.0)), 
                     Tuple(Real(Metadata("v"), 4.7), Integer(Metadata("x"), 7), Text(Metadata("txt"), "g")))
     
