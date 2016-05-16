@@ -106,26 +106,21 @@ class TextWriter extends Writer {
    */
   
   def makeScalar(scalar: Scalar): String = {
-    val form = (scalar.getMetadata("precision"), scalar.getMetadata("sigfigs")) match {
-      case (None, None) => None
-      case (Some(precision), None) => "%."+precision.toInt+"f"
-      case (None, Some(sigfigs)) => "%."+sigfigs.toInt+"g"
-      // For now, we're just going to disallow having both properties
-      case (_, _) => None
-    }
-    println(form)
+    val form = (scalar.getMetadata("precision"), scalar.getMetadata("sigfigs")) 
     (form, scalar) match {
-      case (_, Index(i))   => i.toString
-      case (None, Real(d)) => d.toString
-      case (f:String, Real(d))    => f.format(d)
+      // If precision or precision+sigfigs are specified
+      // Default to precision
+      case ((Some(prec), _), Real(d)) => ("%."+prec.toInt+"f").format(d)
+      case ((None, Some(sigf)), Real(d)) => ("%."+sigf.toInt+"g").format(d)
+      case ((None, None), Real(d)) => d.toString
       // If precision is specified for an int, ignore it
-      case (f:String, Integer(l)) => f.endsWith("g") match {
-        case true => f.format(l)
-        case false => l.toString
-      }
-        case (_, Integer(l)) => l.toString
-      case (None, Text(s))    => s.trim
-      case (None, Binary(b))  => "blob" //TODO: uuencode?
+      // Only concerned if sigfigs is specified
+      case ((_, Some(sigf)), Integer(l)) => ("%."+sigf.toInt+"g").format(l.toFloat)
+      case ((_, _), Integer(l)) => l.toString
+      // Ignore for all other cases
+      case ((_, _), Index(i))   => i.toString
+      case ((_, _), Text(s))    => s.trim
+      case ((_, _), Binary(b))  => "blob" //TODO: uuencode?
       //TODO: use Scalar.toStringValue?
       //TODO: deal with Time format
     }
@@ -173,7 +168,7 @@ class TextWriter extends Writer {
   protected var prepend = List[String]()
 }
 
-object TextWriter extends TextWriter {
+object TextWriter extends TextWriter{
   def apply(out: OutputStream): TextWriter = {
     val writer = new TextWriter()
     writer.setOutputStream(out)

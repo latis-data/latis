@@ -79,15 +79,28 @@ class TestTextWriter extends WriterTest{
   }
 
   @Test
+  def real_prioritizes_precision = {
+    val prec2_sigfig2: Metadata = Metadata(("precision", "2"), ("sigfigs", "2"))
+
+    val testScalar: Scalar = Scalar(prec2_sigfig2, 1234.421)
+
+    val cmpStr: String = "1234.42"
+
+    assertEquals(cmpStr, latis.writer.TextWriter.makeScalar(testScalar))
+  }
+
+  @Test
   def int_ignores_precision = {
     val prec0: Metadata = Metadata(("precision", "0"))
     val prec2: Metadata = Metadata(("precision", "2"))
+    val prec2_sigfig2: Metadata = Metadata(("precision", "2"), ("sigfigs", "2"))
 
-    val assertArray: Array[String] = Array("42", "42")
+    val assertArray: Array[String] = Array("42", "42", "4.2e+03")
 
     val testArray: Array[Scalar] = Array(
                                           Scalar(prec0, 42),
-                                          Scalar(prec2, 42)
+                                          Scalar(prec2, 42),
+                                          Scalar(prec2_sigfig2, 4212)
                                         )
 
     for(i <- 0 until 2) {
@@ -100,11 +113,21 @@ class TestTextWriter extends WriterTest{
                     cmpStr, 
                     latis.writer.TextWriter.makeScalar(testSclr))
     }
+    val cmpStr = assertArray(2)
+    val testSclr = testArray(2)
+    assertEquals(
+                  "Assertion failed for ignoring precision when present with sigfigs",
+                  cmpStr,
+                  latis.writer.TextWriter.makeScalar(testSclr)
+                )
+                  
   }
 
   @Test
   def varied_precision = {
-    //Different precision values
+    // Different precision values
+    // Tests behaviour when precision exceeeds, equals, or 
+    // is less than given data
     val prec0: Metadata = Metadata(("precision", "0"))
     val prec2: Metadata = Metadata(("precision", "2"))
     val prec5: Metadata = Metadata(("precision", "5"))
@@ -134,13 +157,80 @@ class TestTextWriter extends WriterTest{
     }
   }
 
+  // Next two tests test similar behaviour to above
+  // except with sigfigs
+  
   @Test
   def varied_sigfigs_ints = {
-    val sigf0: Metadata = Metadata(("sigfigs", "0"))
+    val sigf1: Metadata = Metadata(("sigfigs", "1"))
+    val sigf2: Metadata = Metadata(("sigfigs", "2"))
+    val sigf5: Metadata = Metadata(("sigfigs", "5"))
+    val sigf10: Metadata = Metadata(("sigfigs", "10"))
+
+    val assertArray: Array[String] =  Array(
+                                             "4e+04",
+                                             "4.2e+04",
+                                             "42123",
+                                             "42123.00000"
+                                           )
+
+    val testArray: Array[Scalar] = Array(
+                                          Scalar(sigf1, 42123),
+                                          Scalar(sigf2, 42123),
+                                          Scalar(sigf5, 42123),
+                                          Scalar(sigf10, 42123)
+                                        )
+
+    for(i <- 0 until 4) {
+      val cmpStr = assertArray(i)
+      val testSclr = testArray(i)
+      println(testSclr.getValue)
+      assertEquals(
+                    "Assertion failed for " +
+                    testSclr.getValue +
+                    " with significant figures " +
+                    testSclr.getMetadata("sigfigs"),
+                    cmpStr, 
+                    latis.writer.TextWriter.makeScalar(testSclr)
+                  )
+    }
+
+
   }
 
   @Test
-  def varied_sigfig_reals = {
-    val sigf0: Metadata = Metadata(("sigfigs", "0"))
+  def varied_sigfigs_reals = {
+    val sigf1: Metadata = Metadata(("sigfigs", "1"))
+    val sigf2: Metadata = Metadata(("sigfigs", "2"))
+    val sigf5: Metadata = Metadata(("sigfigs", "5"))
+    val sigf10: Metadata = Metadata(("sigfigs", "10"))
+
+    val assertArray: Array[String] =  Array(
+                                             "4",
+                                             "4.2",
+                                             "4.2123",
+                                             "4.212300000"
+                                           )
+
+    val testArray: Array[Scalar] = Array(
+                                          Scalar(sigf1, 4.2123),
+                                          Scalar(sigf2, 4.2123),
+                                          Scalar(sigf5, 4.2123),
+                                          Scalar(sigf10, 4.2123)
+                                        )
+
+    for(i <- 0 until 4) {
+      val cmpStr = assertArray(i)
+      val testSclr = testArray(i)
+      println(testSclr.getValue)
+      assertEquals(
+                    "Assertion failed for " +
+                    testSclr.getValue +
+                    " with significant figures " +
+                    testSclr.getMetadata("sigfigs"),
+                    cmpStr, 
+                    latis.writer.TextWriter.makeScalar(testSclr)
+                  )
+    }
   }
 }
