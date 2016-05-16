@@ -24,9 +24,12 @@ import latis.util.iterator.PeekIterator
  * are defined for the right dataset you will get a right join).
  */
 class BasicJoin extends Join {
-  //TODO: reconcile with FullOuterJoin2
-  //  this drops samples instead of filling as advertised
   //NOTE: used only by Resampling for splitting and joining tuple ranges
+  /*
+   * TODO: reconcile with FullOuterJoin2
+   *  this drops samples instead of filling as advertised
+   *  see TestBasicJoin which has the same tests as TestFullOuterJoin
+   */
   
   /**
    * Construct a Variable with values extracted from the "fill_value" metadata.
