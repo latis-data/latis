@@ -390,3 +390,7 @@ class FullOuterJoin2 extends Join with NoInterpolation with NoExtrapolation {
    * will sign just work
    */
 }
+
+object FullOuterJoin2 {
+  def apply() = new FullOuterJoin2()
+}
