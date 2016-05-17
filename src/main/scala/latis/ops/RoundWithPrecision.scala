@@ -1,9 +1,7 @@
 package latis.ops
 
-import latis.dm.Scalar
 import latis.data.NumberData
-import latis.dm.Variable
-import latis.ops.OperationFactory
+import latis.dm._
 
 import scala.math.BigDecimal.RoundingMode
 
@@ -16,12 +14,12 @@ class RoundWithPrecision(name: String) extends Operation {
     }
     (scalar.hasName(name), scalar) match {
       case (true, Real(r)) => {
-        val s = math.pow(10, roundTo.get)
-        Some(Scalar(scalar.getMetadata(), ((math.rint(r * s)) / s).toDouble))
+        val s = scala.math.pow(10, roundTo)
+        Some(Scalar(scalar.getMetadata(), ((scala.math.rint(r * s)) / s).toDouble))
       }
       case (true, Integer(l)) => {
-        val s = math.pow(10, roundTo.get)
-        Some(Scalar(scalar.getMetadata(), ((math.rint(l * s)) / s).toInt))
+        val s = scala.math.pow(10, roundTo)
+        Some(Scalar(scalar.getMetadata(), ((scala.math.rint(l * s)) / s).toLong))
       }
       case (_, _) => Some(scalar)
     }
