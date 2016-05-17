@@ -70,6 +70,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
         case _: TextData => getJavaTime compare otherData.longValue
       }
     }
+    case Number(d) => doubleValue.compare(d)  //compare numerical value, ignoring units
     case _ => throw new Error("Can't compare " + this + " with " + that)
   }
   
