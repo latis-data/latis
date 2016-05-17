@@ -66,14 +66,11 @@ abstract class AbstractScalar(metadata: Metadata = EmptyMetadata, data: Data = E
   
   /**
    * Based on the CF convention.
-   * Use NaN for the default Real missing value.
-   * Use empty string ("") for missing Text.
    */
   def getMissingValue: Any = getMetadata("missing_value") match {
     case Some(s) => _stringToValue(s) //TODO: handle parsing exception
     case None => this match {
       case _: Real => Double.NaN
-      case _: Text => ""
       case _ => throw new Error("No default missing value.") //TODO: getType?
     }
   }
