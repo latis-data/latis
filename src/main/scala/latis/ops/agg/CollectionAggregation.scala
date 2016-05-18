@@ -9,8 +9,12 @@ import latis.dm.Tuple
  */
 class CollectionAggregation extends Aggregation {
 //TODO: is there a need for this now that a Dataset can't contain other Datasets?
-  def aggregate(ds1: Dataset, ds2: Dataset) = {
-    Dataset(Tuple(ds1.unwrap, ds2.unwrap))
+  def aggregate(ds1: Dataset, ds2: Dataset) = (ds1, ds2) match {
+    case (Dataset(v), Dataset(u)) => Dataset(Tuple(v, u))
+    // If one or both datasets are empty, should we return a totally empty one?
+    // Or should we return an "incomplete" Dataset with one of the tuples being
+    // a null, following the convention of unwrap/Dataset.empty?
+    case (_, _) => Dataset.empty
   }
   
 }
