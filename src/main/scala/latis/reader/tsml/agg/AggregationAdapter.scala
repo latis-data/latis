@@ -47,7 +47,10 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     val md = makeMetadata(tsml.dataset) //TODO: provo
     
     //Apply the aggregation to the datasets
-    Dataset(datasets.reduceLeft(aggregate(_,_)).unwrap, md) 
+    datasets.reduceLeft(aggregate(_,_)) match {
+      case Dataset(v) => Dataset(v, md)
+      case _ => Dataset(null, md) //presrve the metadata
+    }
   }
 
   /**
