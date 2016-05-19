@@ -49,7 +49,7 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     //Apply the aggregation to the datasets
     datasets.reduceLeft(aggregate(_,_)) match {
       case Dataset(v) => Dataset(v, md)
-      case _ => Dataset(null, md) //presrve the metadata
+      case _ => Dataset.empty //an empty dataset should have no/empty metadata right?
     }
   }
 

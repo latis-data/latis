@@ -99,7 +99,10 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * Don't include "index" which is just a placeholder for an otherwise undefined domain.
    * The index value does not appear in the original data source. Otherwise, model it as an Integer.
    */
-  private lazy val origScalars = getOrigDataset.unwrap.toSeq.filterNot(_.isInstanceOf[Index])
+  private lazy val origScalars = getOrigDataset match {
+    case Dataset(v) => v.toSeq.filterNot(_.isInstanceOf[Index])
+    case _ => Seq()
+  }
   def getOrigScalars = origScalars
   
   /**
@@ -234,11 +237,13 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * This will be triggered the the client requests the Dataset.
    */
   protected def makeDataset(ds: Dataset): Dataset = {
-    makeVariable(ds.unwrap) match {
-      case Some(v) => Dataset(v, ds.getMetadata)
-      case None => throw new Error("No variables created for dataset: " + ds.getName)
+    ds match {
+      case Dataset(v) => makeVariable(v) match {
+        case Some(v) => Dataset(v, ds.getMetadata)
+        case None => throw new Error("No variables created for dataset: " + ds.getName)
+      }
+      case _ => Dataset.empty 
     }
-    
   } 
   
   /**
