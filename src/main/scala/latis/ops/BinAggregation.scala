@@ -56,10 +56,23 @@ class BinAggregation(agg: Seq[Sample] => Sample, binWidth: Double) extends Opera
 object BinAggregation {
   def apply(agg: Seq[Sample] => Sample, binwidth: Double) = new BinAggregation(agg, binwidth)
   
-  val SUM = (ss: Seq[Sample]) => ss.reduceLeft((s1,s2) => Sample((s1.domain+s2.domain).unwrap, (s1.range+s2.range).unwrap))
+  val SUM = (ss: Seq[Sample]) => ss.reduceLeft((s1,s2) => {
+    ((s1.domain+s2.domain), (s1.range+s2.range)) match {
+      case (Dataset(v), Dataset(u)) => Sample(v, u)
+      // domain with no range
+      case (Dataset(v), _) => Sample(v, null)
+      // range without a domain shouldn't happen
+      // or be allowed
+      case (_, _) => Sample(null, null)
+    }
+  })
   val AVERAGE = (ss: Seq[Sample]) => {
     val sum = SUM(ss)
-    Sample((sum.domain / ss.length).unwrap, (sum.range / ss.length).unwrap)
+    ((sum.domain / ss.length), (sum.range / ss.length)) match {
+      case (Dataset(v), Dataset(u)) => Sample(v, u)
+      case (Dataset(v), _) => Sample(v, null)
+      case (_, _) => Sample(null, null)
+    }
   }
   val MIN = (ss: Seq[Sample]) => {
     def compare(v1: Variable , v2: Variable): Variable = (v1, v2) match {
