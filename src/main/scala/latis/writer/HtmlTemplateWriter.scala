@@ -78,16 +78,25 @@ class HtmlTemplateWriter extends TextWriter {
   
   private def makeDds(dataset: Dataset): String = {
     val w = new DdsWriter
-    w.makeHeader(dataset) + w.varToString(dataset.unwrap) + w.makeFooter(dataset)
+    val v = dataset match {
+      case Dataset(v) => w.varToString(v)
+      case _ => ""
+    }
+    w.makeHeader(dataset) + v + w.makeFooter(dataset)
   }
   
   private def makeDas(dataset: Dataset): String = {
-    val w = new DasWriter
-    w.makeHeader(dataset) + w.varToString(dataset.unwrap) + w.makeFooter(dataset)
+    val w = new DdsWriter
+    val v = dataset match {
+      case Dataset(v) => w.varToString(v)
+      case _ => ""
+    }
+    w.makeHeader(dataset) + v + w.makeFooter(dataset)
   }
   
-  private def makeFormItems(dataset: Dataset): String = {
-    makeFormItem(dataset.unwrap)
+  private def makeFormItems(dataset: Dataset): String = dataset match{
+    case Dataset(v) => makeFormItem(v)
+    case _ => ""
   }
   
   private def makeFormItem(v: Variable): String = v match {

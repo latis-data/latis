@@ -60,7 +60,10 @@ class TextWriter extends Writer {
    */
   def write(dataset: Dataset) {
     writeHeader(dataset)
-    writeVariable(dataset.unwrap) //see JsonWriter for treating Dataset as a Tuple
+    dataset match {
+      case Dataset(v) => writeVariable(v) //see JsonWriter for treating Dataset as a Tuple
+      case _ =>
+    }
     
     writeFooter(dataset)
     printWriter.flush()
