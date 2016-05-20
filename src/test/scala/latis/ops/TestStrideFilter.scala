@@ -73,7 +73,10 @@ class TestStrideFilter {
   }
   @Test
   def test_function_of_scalar_with_stride_5 {
-    assertEquals(Sample(Real(0), Real(0)), StrideFilter(3)(TestDataset.function_of_scalar).unwrap.asInstanceOf[Function].iterator.next)    
+    StrideFilter(3)(TestDataset.function_of_scalar) match {
+      case Dataset(v) => assertEquals(Sample(Real(0), Real(0)), v.asInstanceOf[Function].iterator.next)
+      case _ => fail()
+    }
   }
   @Test
   def test_function_of_function_length_with_stride_2 {
@@ -82,9 +85,14 @@ class TestStrideFilter {
   @Test
   def test_function_of_function_with_stride_2 {
     val s = Sample(Integer(Metadata("x"), 2), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10+j), Real(Metadata("z"), 20+j)))))
-    val it = StrideFilter(2)(TestDataset.function_of_functions).unwrap.asInstanceOf[Function].iterator
-    it.next
-    assertEquals(s, it.next)
+    StrideFilter(2)(TestDataset.function_of_functions) match {
+      case Dataset(v) => {
+        val it = v.asInstanceOf[Function].iterator
+        it.next
+        assertEquals(s, it.next)
+      }
+      case _ => fail()
+    }
   }
   @Test
   def test_empty_function {
@@ -92,10 +100,16 @@ class TestStrideFilter {
   }
   @Test
   def test_metadata_change_stride_2 {
-    assertEquals(Some("2"), StrideFilter(2)(TestDataset.function_of_scalar_with_length).unwrap.asInstanceOf[Function].getMetadata("length"))
+    StrideFilter(2)(TestDataset.function_of_scalar_with_length) match {
+      case Dataset(v) => assertEquals(Some("2"), v.asInstanceOf[Function].getMetadata("length"))
+      case _ => fail()
+    }
   }
   @Test
   def test_metadata_change_stride_5 {
-    assertEquals(Some("1"), StrideFilter(5)(TestDataset.function_of_scalar_with_length).unwrap.asInstanceOf[Function].getMetadata("length"))
+    StrideFilter(5)(TestDataset.function_of_scalar_with_length) match {
+      case Dataset(v) => assertEquals(Some("1"), v.asInstanceOf[Function].getMetadata("length"))
+      case _ => fail()
+    }
   }
 }

@@ -1,6 +1,7 @@
 package latis.ops
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.fail
 import org.junit.Test
 import latis.dm.Dataset
 import latis.dm.Function
@@ -33,7 +34,10 @@ class TestProjection {
   def project_scalar_alt_form {
     val ds = Dataset(Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c"))))
     val ds2 = ds.project(Projection(List("b")))
-    assertEquals("b", ds2.unwrap.asInstanceOf[Tuple].getVariables(0).getName)
+    ds2 match {
+      case Dataset(v) => assertEquals("b", v.asInstanceOf[Tuple].getVariables(0).getName)
+      case _ => fail()
+    }
   }
   
 //  @Test
@@ -56,8 +60,10 @@ class TestProjection {
     val tup = Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val proj = new Projection(List("b"))
     val ds = proj(tup)
-    val n = ds.unwrap.asInstanceOf[Tuple].getElementCount
-    assertEquals(1, n)
+    ds match {
+      case Dataset(v) => assertEquals(1, v.asInstanceOf[Tuple].getElementCount)
+      case _ => fail()
+    }
   }
   
   @Test
@@ -65,8 +71,10 @@ class TestProjection {
     val tup = Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val proj = new Projection(List("a","c"))
     val ds = proj(tup)
-    val n = ds.unwrap.asInstanceOf[Tuple].getElementCount
-    assertEquals(2, n)
+    ds match {
+      case Dataset(v) => assertEquals(2, v.asInstanceOf[Tuple].getElementCount)
+      case _ => fail()
+    }
   }
   
   @Test
@@ -76,8 +84,10 @@ class TestProjection {
     val proj = new Projection(List("t","a"))
     val ds2 = proj(ds1)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
-    val n = ds2.unwrap.asInstanceOf[Function].getRange.toSeq.length
-    assertEquals(1, n)
+    ds2 match {
+      case Dataset(v) => assertEquals(1, v.asInstanceOf[Function].getRange.toSeq.length)
+      case _ => fail()
+    }
   }
   
   @Test
@@ -87,8 +97,10 @@ class TestProjection {
     val proj = new Projection(List("myInteger","myReal"))
     val ds2 = proj(ds1)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
-    val n = ds2.unwrap.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
-    assertEquals(1, n)
+    ds2 match {
+      case Dataset(v) => assertEquals(1, v.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount)
+      case _ => fail()
+    }
   }
   
   @Test
@@ -98,8 +110,10 @@ class TestProjection {
     val proj = new Projection(List("myInteger","myReal", "myText"))
     val ds2 = proj(ds1)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
-    val n = ds2.unwrap.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
-    assertEquals(2, n)
+    ds2 match {
+      case Dataset(v) => assertEquals(2, v.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount)
+      case _ => fail()
+    }
   }
   
   @Test
@@ -107,8 +121,10 @@ class TestProjection {
     val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
     val proj = new Projection(List("t","w","a")) 
     val ds2 = proj(ds1)
-    val n = ds2.unwrap.asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
-    assertEquals(1, n)
+    ds2 match {
+      case Dataset(v) => assertEquals(1, v.asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount)
+      case _ => fail()
+    }
   }
   
   @Test
@@ -116,12 +132,13 @@ class TestProjection {
     val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
     val proj = new Projection(List("w","a","b")) 
     val ds2 = proj(ds1)
-    val f = ds2.unwrap.asInstanceOf[Function]
-    val domain = f.getDomain
-    assertEquals("index", domain.getName)
-    
-    val n = ds2.getLength
-    assertEquals(4, n)
+    ds2 match {
+      case Dataset(v) => {
+        assertEquals("index", v.asInstanceOf[Function].getDomain.getName)
+        assertEquals(4, ds2.getLength)
+      }
+      case _ => fail()
+    }
   }
   
   @Test
@@ -129,12 +146,14 @@ class TestProjection {
     val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
     val proj = new Projection(List("t","a","b")) 
     val ds2 = proj(ds1)
-    val f = ds2.unwrap.asInstanceOf[Function]
-    val domain = f.getDomain
-    val range  = f.getRange.asInstanceOf[Function]
-    assertEquals("t", domain.getName)
-    assertEquals(4, ds2.getLength)
-    assertEquals(3, range.getLength)
+    ds2 match {
+      case Dataset(v) => {
+        assertEquals("t", v.asInstanceOf[Function].getDomain.getName)
+        assertEquals(4, ds2.getLength)
+        assertEquals(3, v.asInstanceOf[Function].getRange.asInstanceOf[Function].getLength)
+      }
+      case _ => fail()
+    }
   }
   
   @Test
@@ -142,11 +161,13 @@ class TestProjection {
     val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
     val proj = new Projection(List("t")) 
     val ds2 = proj(ds1)
-    val f = ds2.unwrap.asInstanceOf[Function]
-    val domain = f.getDomain
-    val range  = f.getRange
-    assertEquals("index", domain.getName)
-    assertEquals("t", range.getName)
+    ds2 match {
+      case Dataset(v) => {
+        assertEquals("index", v.asInstanceOf[Function].getDomain.getName)
+        assertEquals("t", v.asInstanceOf[Function].getRange.getName)
+      }
+      case _ => fail()
+    }
   }
   
   @Test
@@ -154,12 +175,14 @@ class TestProjection {
     val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
     val proj = new Projection(List("w")) 
     val ds2 = proj(ds1)
-    val f = ds2.unwrap.asInstanceOf[Function]
-    val domain = f.getDomain
-    val range  = f.getRange.asInstanceOf[Function]
-    assertEquals("index", domain.getName)
-    assertEquals("w", range.getRange.getName)
-    assertEquals(3, range.getLength)
+    ds2 match {
+      case Dataset(v) => {
+        assertEquals("index", v.asInstanceOf[Function].getDomain.getName)
+        assertEquals("w", v.asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.getName)
+        assertEquals(3, v.asInstanceOf[Function].getRange.asInstanceOf[Function].getLength)
+      }
+      case _ => fail()
+    }
   }
   
   @Test
@@ -183,10 +206,13 @@ class TestProjection {
     val ds1 = FirstFilter()(Dataset(TestNestedFunction.function_of_functions_with_tuple_range))
     val proj = new Projection(List("w")) 
     val ds2 = proj(ds1)
-    val f = ds2.unwrap.asInstanceOf[Function]
-    val range  = f.getRange.asInstanceOf[Function]
-    assertEquals(1, f.getLength)
-    assertEquals(3, range.getLength)
+    ds2 match {
+      case Dataset(v) => {
+        assertEquals(1, v.asInstanceOf[Function].getLength)
+        assertEquals(3, v.asInstanceOf[Function].getRange.asInstanceOf[Function].getLength)
+      }
+      case _ => fail()
+    }
   }
   
   @Test
@@ -194,9 +220,11 @@ class TestProjection {
     val ds1 = Selection("w=12")(Dataset(TestNestedFunction.function_of_functions_with_tuple_range))
     val proj = new Projection(List("t","b")) 
     val ds2 = proj(ds1)
-    val f = ds2.unwrap.asInstanceOf[Function]
-    val range  = f.getRange.asInstanceOf[Function]
-    assertEquals(4, f.getLength)
+    //val range  = f.getRange.asInstanceOf[Function]
+    ds2 match {
+      case Dataset(v) => assertEquals(4, v.asInstanceOf[Function].getLength)
+      case _ => fail()
+    }
     //assertEquals(1, range.getLength) //Selection does not update Metadata
     //the data is right when I use a writer, but I can't access it here correctly
     //assertEquals(2, range.getRange.toSeq(0).getNumberData.longValue) 

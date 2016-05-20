@@ -14,7 +14,7 @@ class CollectionAggregation extends Aggregation {
     // If one or both datasets are empty, should we return a totally empty one?
     // Or should we return an "incomplete" Dataset with one of the tuples being
     // a null, following the convention of unwrap/Dataset.empty?
-    case (_, _) => Dataset.empty
+    case _ => Dataset.empty
   }
   
 }

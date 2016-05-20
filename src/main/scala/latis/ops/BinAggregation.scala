@@ -63,7 +63,7 @@ object BinAggregation {
       case (Dataset(v), _) => Sample(v, null)
       // range without a domain shouldn't happen
       // or be allowed
-      case (_, _) => Sample(null, null)
+      case _ => Sample(null, null)
     }
   })
   val AVERAGE = (ss: Seq[Sample]) => {
@@ -71,7 +71,7 @@ object BinAggregation {
     ((sum.domain / ss.length), (sum.range / ss.length)) match {
       case (Dataset(v), Dataset(u)) => Sample(v, u)
       case (Dataset(v), _) => Sample(v, null)
-      case (_, _) => Sample(null, null)
+      case _ => Sample(null, null)
     }
   }
   val MIN = (ss: Seq[Sample]) => {
