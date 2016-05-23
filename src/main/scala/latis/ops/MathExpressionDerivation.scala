@@ -3,13 +3,7 @@ package latis.ops
 import scala.annotation.migration
 import scala.util.parsing.combinator.JavaTokenParsers
 import scala.util.parsing.combinator.PackratParsers
-import latis.dm.Index
-import latis.dm.Integer
-import latis.dm.Real
-import latis.dm.Sample
-import latis.dm.Scalar
-import latis.dm.Text
-import latis.dm.Tuple
+import latis.dm._
 import latis.metadata.Metadata
 import latis.ops.math.BinOp.ADD
 import latis.ops.math.BinOp.AND
@@ -20,7 +14,6 @@ import latis.ops.math.BinOp.MULTIPLY
 import latis.ops.math.BinOp.POWER
 import latis.ops.math.BinOp.SUBTRACT
 import latis.time.Time
-import latis.dm.Dataset
 
 /**
  * Adds a new Variable to a Dataset according to the inputed math expression.
@@ -121,7 +114,12 @@ class MathExpressionDerivation(private val str: String) extends Operation {
       case Index(i) => values = values + (s.getName -> i)
       case Real(d) => values = values + (s.getName -> d)
       case Integer(i) => values = values + (s.getName -> i)
-      case t: Time => values = values + (t.getName -> t.getJavaTime)
+      case t: Time => {
+        val name = t.getName
+        t match {
+          case Number(n) => values = values + (name -> n)
+        }
+      }
     })
     sample.range.findFunction match {
       case None if (!values.keySet.contains(varName)) => {
