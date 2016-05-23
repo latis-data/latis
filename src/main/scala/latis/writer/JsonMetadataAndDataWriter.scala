@@ -1,13 +1,9 @@
 package latis.writer
 
-import latis.dm.Variable
-import latis.dm.Scalar
+import latis.dm._
+import latis.data.value.LongValue
+import latis.data.value.DoubleValue
 import latis.time.Time
-import latis.dm.Sample
-import latis.dm.Index
-import latis.dm.Tuple
-import latis.dm.Function
-import latis.dm.Dataset
 import scala.collection.mutable.ArrayBuffer
 
 class JsonMetadataAndDataWriter extends JsonWriter {
@@ -127,7 +123,11 @@ class JsonMetadataAndDataWriter extends JsonWriter {
     //TODO: user should apply replace_missing(NaN) once that is working
     if (scalar.isMissing) "null"
     else scalar match {
-      case t: Time => t.getJavaTime.toString  //use java time for "compact" json
+      case t: Time => t match {
+        case Number(n) => {
+          n.asInstanceOf[Long].toString
+        }
+      }
       case _ => super.makeScalar(scalar)
     }
   }
