@@ -34,9 +34,11 @@ dependencies {
 	compile 'org.scala-lang:scala-parser-combinators:2.11.0-M4'
 
 	//Support for logging
-	compile 'com.typesafe.scala-logging:scala-logging_2.11:3.1.0'
-	compile 'ch.qos.logback:logback-classic:1.1.3'
-	compile 'org.codehaus.groovy:groovy-all:2.3.10' //this version needs to match
+	compile 'com.typesafe.scala-logging:scala-logging_2.11:3.4.0'
+	compile 'ch.qos.logback:logback-classic:1.1.7'
+	compile 'org.codehaus.groovy:groovy-all:2.4.4' 
+	//this groovy version needs to match the version used by gradle
+	//logging failed when not set
 
 	//JSON from Play
 	compile 'com.typesafe.play:play-json_2.11:2.3.10'
