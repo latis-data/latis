@@ -123,11 +123,7 @@ class JsonMetadataAndDataWriter extends JsonWriter {
     //TODO: user should apply replace_missing(NaN) once that is working
     if (scalar.isMissing) "null"
     else scalar match {
-      case t: Time => t match {
-        case Number(n) => {
-          n.asInstanceOf[Long].toString
-        }
-      }
+      case t: Time => t.getJavaTime.toString
       case _ => super.makeScalar(scalar)
     }
   }
