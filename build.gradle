@@ -8,7 +8,7 @@ buildscript {
 	}
 	dependencies {
 		classpath 'lasp:gitflow-plugin:1.7.0' // http://stash.lasp.colorado.edu/projects/WEBAPPS/repos/gradle-gitflow-plugin/browse
-		classpath 'lasp:utils-plugin:1.2.0' // http://stash.lasp.colorado.edu/projects/WEBAPPS/repos/gradle-utils-plugin/browse
+		classpath 'lasp:utils-plugin:1.3.0' // http://stash.lasp.colorado.edu/projects/WEBAPPS/repos/gradle-utils-plugin/browse
 		classpath 'lasp:publishing-plugin:1.2.0' // http://stash.lasp.colorado.edu/projects/WEBAPPS/repos/gradle-publishing-plugin/browse
 	}
 }
