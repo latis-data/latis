@@ -75,7 +75,6 @@ object DataMap {
       //Add double to buffer for Numbers, otherwise NaN
       v match {
         case Number(d) => buffer += d
-        case t:Time => buffer += t.getJavaTime.toDouble
         case _ => buffer += Double.NaN
       }
     }
