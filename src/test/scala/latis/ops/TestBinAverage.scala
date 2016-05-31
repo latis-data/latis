@@ -71,12 +71,12 @@ class TestBinAverage {
     ops += new BinAverageByWidth(60000.0) //1 minute
     val ds = TsmlReader("binave.tsml").getDataset(ops)
     //AsciiWriter.write(ds)
-    // ascii_iterative: (time -> (myReal, min, max, stddev, count))
-    // 1413417689533 -> (21.631854255497455, 21.22629925608635, 21.65319925546646, 0.0938258653030056, 60)
+    //ascii_iterative: (time -> (myReal, min, max, count))
+    //1.413417690033E12 -> (21.631854255497466, 21.22629925608635, 21.65319925546646, 60.0)
     val data = ds.toDoubleMap
     assertEquals(9, data("time").length)
     assertEquals(1413417690033.0, data("time").head, 0.0)
-    assertEquals(21.631854255497455, data("myReal").head, 0.0)
+    assertEquals(21.631854255497455, data("myReal").head, 1e-12)
   }
 
   @Test

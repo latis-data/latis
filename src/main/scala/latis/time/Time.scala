@@ -57,8 +57,12 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
   override def compare(that: Scalar): Int = that match {
     case t: Time => {
       //Convert 'that' Time to our time scale.
-      //Note, converted Times will have numeric (double or long) data values.
-      val otherData = t.convert(timeScale).getNumberData
+      //Use java time for Text times.
+      val otherData = t.convert(timeScale) match {
+        case _: Text => LongValue(t.getJavaTime)
+        case n: Number => n.getNumberData
+      }
+
       //Base comparison on our type so we can get the benefit of double precision or long accuracy
       getData match {
         case LongValue(l) => l compare otherData.longValue
@@ -66,6 +70,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
         case _: TextData => getJavaTime compare otherData.longValue
       }
     }
+    case Number(d) => doubleValue.compare(d)  //compare numerical value, ignoring units
     case _ => throw new Error("Can't compare " + this + " with " + that)
   }
   

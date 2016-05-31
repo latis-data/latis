@@ -43,12 +43,12 @@ class TestIterators {
     assertEquals(null, a)
   }
   
-  //@Test
+  @Test
   def dont_double_wrap {
     val it: Iterator[Int] = List(1, 2, 3, 4).iterator
     val pit = PeekIterator(it)
     val pit2 = PeekIterator(pit)
-    //TODO: test that pit and pit2 are the same object
+    assert(pit eq pit2) //same instance
   }
   
   @Test
@@ -110,4 +110,35 @@ class TestIterators {
     assertEquals(4, a)
   }
   
+  @Test
+  def lazy_peek_iterator = { //don't access source until asking. LATIS-403
+    var initialized = false
+    var hasNextCalled = false
+    var counter = 0
+    
+    //make Iterator representing the original data source
+    val it = new Iterator[Int] {
+      initialized = true
+      def hasNext = {
+        hasNextCalled = true
+        counter < 10
+      }
+      def next = {
+        counter = counter + 1
+        counter
+      }
+    }
+    
+    //make PeekIterator from a regular Iterator and make sure it doesn't access data
+    //note that if the original iterator accesses data during construction, there is nothing we can do
+    val pit = PeekIterator(it)
+    assert(initialized)
+    assert(!hasNextCalled)
+    assertEquals(0, counter) 
+    
+    //peek at the first element and see that it invoked the Iterator's hasNext and next methods
+    pit.peek
+    assert(hasNextCalled)
+    assertEquals(1, counter) 
+  }
 }

@@ -19,16 +19,16 @@ import latis.dm.Variable
 import latis.metadata.Metadata
 import latis.ops.Operation
 
-class DapReader(url: String) extends DatasetAccessor {
+class DapReader(baseUrl: String, query: String) extends DatasetAccessor {
   
   override def close = {}
   
   val codec: Codec = ISO8859
   
-  lazy val dds = Source.fromURL(url + ".dds")(codec).getLines.mkString(" ")
-  lazy val das = Source.fromURL(url + ".das")(codec).getLines.mkString(" ")
+  lazy val dds = Source.fromURL(baseUrl + ".dds?" + query)(codec).getLines.mkString(" ")
+  lazy val das = Source.fromURL(baseUrl + ".das?" + query)(codec).getLines.mkString(" ")
   lazy val data = {
-    val chars = Source.fromURL(url + ".dods")(codec).drop(dds.length + "\nData:\n".length)
+    val chars = Source.fromURL(baseUrl + ".dods?" + query)(codec).drop(dds.length + "\nData:\n".length)
     //The data should be formatted in 4-byte chunks, but Source reads one byte at a time.
     //Each char read corresponds to one byte. Combine 16-bit Chars into 32-bit Ints. 
     chars.grouped(4).map(cs => (cs(0).toInt << 24) + (cs(1).toInt << 16) + (cs(2).toInt << 8) + (cs(3).toInt))
@@ -263,5 +263,13 @@ class DapReader(url: String) extends DatasetAccessor {
 }
 
 object DapReader {
-  def apply(url: String) = new DapReader(url)
+  
+  def apply(url: String): DapReader = {
+    //keep the base URL (without the output suffix) and query string
+    url.split("""\.\w+\??""") match {
+      case Array(u,q) => new DapReader(u,q)
+      case Array(u) => new DapReader(u,"")
+    }
+  }
+  
 }

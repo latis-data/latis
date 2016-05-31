@@ -30,7 +30,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   
   
   //evaluate
-  //TODO: use resample Operation for SampledFunctions
+  //TODO: use interpolation and extrapolation strategies
   def apply(arg: Variable): Option[Variable] = {
     val x = iterator.find(s => (s.domain, arg) match {
       case (a: Scalar, b: Scalar) => a.compare(b) == 0

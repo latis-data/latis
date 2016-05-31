@@ -14,7 +14,7 @@ class TestDapReader {
   @Test
   def data {
     val url = StringUtils.getUrl("src/test/resources/datasets/test/dap/dap2")
-    val r = new DapReader(url.toString)
+    val r = DapReader(url.toString)
     val ds = r.getDataset
     val data = ds.toDoubleMap
     assertEquals(2, data("myInt")(1), 0.0)
@@ -24,7 +24,7 @@ class TestDapReader {
   @Test
   def metadata {
     val url = StringUtils.getUrl("src/test/resources/datasets/test/dap/dap2")
-    val r = new DapReader(url.toString)
+    val r = DapReader(url.toString)
     val ds = r.getDataset
     val t = ds.findVariableByName("myTime").get
     assertEquals("yyyy/MM/dd", t.getMetadata("units").get)
@@ -35,7 +35,7 @@ class TestDapReader {
     val ops = ArrayBuffer[Operation]()
     ops += Selection("myInt>1")
     val url = StringUtils.getUrl("src/test/resources/datasets/test/dap/dap2")
-    val r = new DapReader(url.toString)
+    val r = DapReader(url.toString)
     val ds = r.getDataset(ops)
     val data = ds.toDoubleMap
     assertEquals(2, data("myInt").length)
@@ -44,7 +44,7 @@ class TestDapReader {
   //@Test
   def remote = {
     val ops = ArrayBuffer[Operation]()
-    val r = new DapReader("http://localhost:8080/lisird3/latis/historical_tsi")
+    val r = DapReader("http://localhost:8080/lisird3/latis/historical_tsi")
     val ds = r.getDataset(ops)
     latis.writer.AsciiWriter.write(ds)
   }
