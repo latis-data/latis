@@ -34,6 +34,7 @@ import latis.ops.Projection
 import latis.ops.RenameOperation
 import latis.ops.filter.FirstFilter
 import latis.ops.filter.LastFilter
+import latis.ops.filter.LimitFilter
 import latis.ops.filter.Selection
 import latis.reader.tsml.ml.Tsml
 import latis.time.Time
@@ -239,8 +240,17 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       //let the caller know that we handled this operation
       true 
     }
-      
 
+    case LimitFilter(limit) if limit < 0 => {
+      throw new UnsupportedOperationException("LimitFilter must be used with a value greater than or equal to 0")
+    }
+
+    case LimitFilter(limit) if limit >= 0 => {
+      order = "ASC"
+      setProperty("limit", limit.toString)
+      true
+    }
+      
     //Rename operation: apply in projection clause of sql: 'select origName as newName'
     //These will be combined with the projected variables in the select clause with "old as new".
     case RenameOperation(origName, newName) => {
