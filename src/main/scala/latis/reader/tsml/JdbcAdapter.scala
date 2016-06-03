@@ -426,7 +426,14 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       sb append " from " + getTable
 
       val p = makePredicate
-      if (p.nonEmpty) sb append " where " + p
+      getProperty("limit") match {
+        case Some("0") => {
+          if (p.nonEmpty) sb append " where " + p + " AND false"
+          else sb append " where false"
+        }
+        case _ => if (p.nonEmpty) sb append " where " + p
+      }
+      
 
       //Sort by domain variable.
       //assume domain is scalar, for now
@@ -442,7 +449,6 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
         }
         case _ => //no function so no domain variable to sort by
       }
-
       sb.toString
     }
   }

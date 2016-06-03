@@ -210,7 +210,6 @@ class TestJdbcAdapter extends AdapterTests {
   def test_limit_filter_negative {
     var wasCaught = false
     val ops = List(LimitFilter(-1))
-    println("BEGINNING FILTER NEGATIVE TEST")
     try {
       val ds = getDataset(ops)
     }
@@ -223,23 +222,9 @@ class TestJdbcAdapter extends AdapterTests {
   @Test
   def test_limit_filter_zero {
     val ops = List(LimitFilter(0))
-    println("BEGINNING FILTER ZERO TEST")
     val ds = getDataset(ops)
     val expected = 0
-    println(ds.getLength)
     ds match {
-      case Dataset(Function(it)) => assertEquals(expected, it.length)
-    }
-  }
-
-  @Test
-  def test_test_limit_filter {
-    val ops = List(LimitFilter(2))
-    println("BEGINNING FILTER TEST")
-    val ds = getDataset(ops)
-    val expected = 0
-    val ds2 = LimitFilter(0)(ds)
-    ds2 match {
       case Dataset(Function(it)) => assertEquals(expected, it.length)
     }
   }
@@ -247,7 +232,6 @@ class TestJdbcAdapter extends AdapterTests {
   @Test
   def test_limit_filter {
     val ops = List(LimitFilter(2))
-    println("BEGINNING FILTER TEST")
     val ds = getDataset(ops)
     val expected = 2
     ds match {
@@ -258,7 +242,6 @@ class TestJdbcAdapter extends AdapterTests {
   @Test
   def test_limit_filter_greater_than_dataset {
     val ops = List(LimitFilter(100))
-    println("BEGINNING GREATER THAN TEST")
     val ds = getDataset(ops)
     val expected = 3
     ds match {
