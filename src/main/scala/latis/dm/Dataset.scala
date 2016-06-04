@@ -21,6 +21,7 @@ import latis.ops.agg.Intersection
 import latis.ops.Reduction
 import latis.ops.Memoization
 import latis.util.CacheManager
+import latis.ops.filter.TakeOperation
 
 /**
  * The main abstraction for a dataset that encapsulates everything about the dataset. 
@@ -104,6 +105,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   
   def first: Dataset = FirstFilter()(this)
   def last: Dataset = LastFilter()(this)
+  def take(n: Int) = TakeOperation(n)(this)
     
   /**
    * Realize the Data for this Dataset so we can close the Reader.
