@@ -16,6 +16,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMetadata, data: Data = EmptyData) 
   extends AbstractScalar(metadata, data) with Number { 
+  //TODO: make sure metadata has alias=time?
 
   //Note: there is a one-to-one mapping between java time (ms since 1970) and formatted time.
   //Leap second considerations do not apply when going between the numeric and formatted form.
