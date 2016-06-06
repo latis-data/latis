@@ -575,8 +575,6 @@ object JdbcAdapter {
 
   case class JdbcRecord(resultSet: ResultSet)
 
-
-
   class JdbcEmptyIterator() extends Iterator[JdbcAdapter.JdbcRecord] {
     private var _hasNext = false
     
