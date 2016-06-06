@@ -56,7 +56,10 @@ import latis.util.StringUtils
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](tsml) with LazyLogging {
   //TODO: catch exceptions and close connections
 
-  def getRecordIterator: Iterator[JdbcAdapter.JdbcRecord] = new JdbcAdapter.JdbcRecordIterator(resultSet)
+  def getRecordIterator: Iterator[JdbcAdapter.JdbcRecord] = getProperty("limit") match {
+    case Some(lim) if (lim.toInt == 0) => new JdbcAdapter.JdbcEmptyIterator()
+    case _ => new JdbcAdapter.JdbcRecordIterator(resultSet)
+  }
 
   /**
    * Parse the data based on the Variable type (and the database column type, for time).
@@ -426,13 +429,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       sb append " from " + getTable
 
       val p = makePredicate
-      getProperty("limit") match {
-        case Some("0") => {
-          if (p.nonEmpty) sb append " where " + p + " AND false"
-          else sb append " where false"
-        }
-        case _ => if (p.nonEmpty) sb append " where " + p
-      }
+      if (p.nonEmpty) sb append " where " + p
       
 
       //Sort by domain variable.
@@ -577,6 +574,15 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
 object JdbcAdapter {
 
   case class JdbcRecord(resultSet: ResultSet)
+
+
+
+  class JdbcEmptyIterator() extends Iterator[JdbcAdapter.JdbcRecord] {
+    private var _hasNext = false
+    
+    def next() = null
+    def hasNext() = _hasNext
+  }
 
   class JdbcRecordIterator(resultSet: ResultSet) extends Iterator[JdbcAdapter.JdbcRecord] {
     private var _didNext = false
