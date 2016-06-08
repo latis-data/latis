@@ -21,6 +21,7 @@ import latis.ops.agg.Intersection
 import latis.ops.Reduction
 import latis.ops.Memoization
 import latis.util.CacheManager
+import latis.ops.ReduceTuple
 
 /**
  * The main abstraction for a dataset that encapsulates everything about the dataset. 
@@ -68,6 +69,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   def replaceValue(v1: Any, v2: Any): Dataset = ReplaceValueOperation(v1,v2)(this)
   
   def reduce = Reduction.reduce(this)
+  def reduceTuple = ReduceTuple.reduce(this)
   def flatten = reduce
   
   def intersect(that: Dataset): Dataset = Intersection(this, that)
