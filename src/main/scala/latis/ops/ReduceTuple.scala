@@ -8,14 +8,7 @@ import latis.dm.Variable
 /**
  * Reduce any Tuples of one element to that element.
  */
-class ReduceTuple extends Operation  {
-
-  /**
-   * Apply to the domain and range of the sample and package in a new sample.
-   */
-  override def applyToSample(sample: Sample): Option[Sample] = sample match {
-    case Sample(d,r) => for (d2 <- applyToVariable(d); r2 <- applyToVariable(r)) yield Sample(d2,r2)
-  }
+class ReduceTuple extends Operation2  {
   
   /**
    * Recursively apply to all elements.
@@ -31,9 +24,9 @@ class ReduceTuple extends Operation  {
   
 }
 
-object ReduceTuple extends OperationFactory {
+object ReduceTuple {
 
-  override def apply() = new ReduceTuple()
+  def apply() = new ReduceTuple()
   
   def reduce(dataset: Dataset): Dataset = {
     (new ReduceTuple)(dataset)
