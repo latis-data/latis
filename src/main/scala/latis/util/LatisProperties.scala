@@ -33,7 +33,8 @@ class LatisProperties extends Properties with LazyLogging {
   } catch {
     case e: Exception => {
       //logger.warn("Unable to load properties file: " + file)
-      throw new RuntimeException("Unable to load properties file: " + file, e)
+      // Temporarily disabled to play nice with  REPL
+      //throw new RuntimeException("Unable to load properties file: " + file, e)
     }
   }
 
