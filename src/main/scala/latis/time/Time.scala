@@ -32,6 +32,8 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
   
   def format(format: TimeFormat): String = format.format(getJavaTime)
   
+  def toDate: Date = new Date(getJavaTime)
+  
   def getJavaTime: Long = getData match {
     //Note, converts from the data's time scale (with it's own type) to JAVA time which uses the time.scale.type property.
     case num: NumberData => convert(TimeScale.JAVA).getNumberData.longValue
