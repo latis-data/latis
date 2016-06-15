@@ -22,6 +22,16 @@ import latis.dm.Naught
  *   can benefit knowing that domain won't change
  */
 abstract class Operation2 {
+  /*
+   * UnaryOperation, BinaryOperation
+   * DomainOperation, CoDomainOperation
+   * enforce by making some methods final?
+   * Filter: can only drop samples, trait?
+   * 
+   * or focus on Operations as functions of V -> V with a map method on dataset
+   * but how to override parts without subclass polymorphisp
+   * use partial functions?
+   */
   
   /**
    * Apply this Operation to the given Dataset.
