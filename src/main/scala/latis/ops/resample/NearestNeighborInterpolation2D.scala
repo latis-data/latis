@@ -51,6 +51,6 @@ trait NearestNeighborInterpolation2D extends Interpolation {
     }
 
     //hooray index magic/math!
-    Some(range(xcoord*xs.length+ycoord))
+    Some(range(xcoord*ys.length+ycoord))
   }
 }
