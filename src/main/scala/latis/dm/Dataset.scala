@@ -163,3 +163,14 @@ object Dataset {
   }
   
 }
+
+/**
+ * Provide a convenient way to pattern match on a Dataset and extract an
+ * Iterator of Function Samples.
+ */
+object DatasetSamples {
+  def unapply(dataset: Dataset): Option[Iterator[Sample]] = dataset match {
+    case Dataset(Function(it)) => Some(it)
+    case _ => None
+  }
+}
