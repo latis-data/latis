@@ -71,7 +71,6 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   
   def reduce = Reduction.reduce(this)
   def reduceTuple = ReduceTuple.reduce(this)
-  def flatten = reduce
   
   def intersect(that: Dataset): Dataset = Intersection(this, that)
   
