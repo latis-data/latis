@@ -64,5 +64,4 @@ class Resampling(domainSet: Iterable[Variable]) extends Operation with NoInterpo
       case _ => (d: Double) => Some(Double.NaN)
     }
   }
-  
 }

@@ -30,8 +30,6 @@ trait NearestNeighborInterpolation2D extends Interpolation {
     }
 
     val ycoord = ys.find( _ > y) match {
-      //this part here is heavily reliant on a cartesian grid
-      //may need to refactor in the future to be more general
       case Some(upperBound) => {
         //some upper bound to the y value exists
         //find lower bound
@@ -51,6 +49,8 @@ trait NearestNeighborInterpolation2D extends Interpolation {
     }
 
     //hooray index magic/math!
-    Some(range(xcoord*ys.length+ycoord))
+    val index = xcoord*ys.length+ycoord
+    if (index < range.length) Some(range(index))
+    else None
   }
 }
