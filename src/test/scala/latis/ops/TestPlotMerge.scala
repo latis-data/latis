@@ -12,7 +12,7 @@ import latis.metadata.Metadata
 class TestPlotMerge {
 
   @Test
-  def TestMerge {
+  def TestMismatchedDimensionMerge {
     val intVar = Integer(Metadata("dataVal"), 0)
     val xVar = Real(Metadata("lon"), 0.0)
     val yVar = Real(Metadata("lat"), 0.0)
@@ -50,11 +50,41 @@ class TestPlotMerge {
                                   intVar(Data(12)),
                                   intVar(Data(13))
                                 )
+    val correct = Array(
+                     Array(0.1, 0.1, 1, 10),
+                     Array(0.1, 0.2, 2, 11),
+                     Array(0.1, 0.3, 3, 11),
+                     Array(0.2, 0.1, 4, 12),
+                     Array(0.2, 0.2, 5, 13),
+                     Array(0.2, 0.3, 6, 13),
+                     Array(0.3, 0.1, 7, 12),
+                     Array(0.3, 0.2, 8, 13),
+                     Array(0.3, 0.3, 9, 13)
+                   )
     val ds1 = Dataset(Function(domain1.zip(range1).map(p => Sample(p._1, p._2))))
     val ds2 = Dataset(Function(domain2.zip(range2).map(p => Sample(p._1, p._2))))
     val results = new PlotMerge()(ds1, ds2)
     results match {
-      case Dataset(Function(it)) => assertEquals(9, it.length)
+      case Dataset(Function(it)) => {
+        assertEquals(9, it.length)
+        var index = 0;
+        while(it.hasNext) {
+          val compVal = it.next
+          it.next match {
+            case Sample(Tuple(tv1), Tuple(tv2)) => {
+              val x = tv1(0).getNumberData.doubleValue
+              val y = tv1(1).getNumberData.doubleValue
+              val r1 = tv2(0).getNumberData.intValue
+              val r2 = tv2(1).getNumberData.intValue
+              assertEquals(correct(index)(0), x, 0)
+              assertEquals(correct(index)(1), y, 0)
+              assertEquals(correct(index)(2), r1, 0)
+              assertEquals(correct(index)(3), r2, 0)
+              index += 1
+            }
+          }
+        }
+      }
     }
   }
 }
