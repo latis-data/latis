@@ -12,15 +12,7 @@ class PlotMerge extends BinaryOperation {
     val f1 = ds1 match {
       case Dataset(f: Function) => f
     }
-  /*
-    val domainSet = f1.iterator.toArray.map( p => p match { 
-      case Sample(t: Tuple, _) => {
-        val d1 = t.getVariables(0).getNumberData.doubleValue
-        val d2 = t.getVariables(1).getNumberData.doubleValue
-        (d1, d2)
-      }
-    })
-  */
+
     val domainSet = f1.iterator.toArray.map( p => p match {
       case Sample(t: Tuple, _) => t
     })
