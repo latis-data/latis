@@ -56,7 +56,7 @@ class TestPlotMerge {
     val results = new PlotMerge()(ds1, ds2)
     results match {
       case Dataset(Function(it)) => {
-        assertEquals(9, it.length)
+        assertEquals(4, it.length)
         var index = 0;
         while(it.hasNext) {
           val compVal = it.next

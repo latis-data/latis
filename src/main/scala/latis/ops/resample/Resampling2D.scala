@@ -8,6 +8,7 @@ import latis.dm.Sample
 import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
+import latis.dm.Naught
 import latis.dm.implicits.variableToDataset
 import latis.ops.Operation
 import latis.ops.Split
@@ -38,7 +39,7 @@ class Resampling2D(domainSet: Iterable[Variable]) extends Operation with NoInter
             case _ => None
           })
           domainSet.zip(rvals).map(p => Sample(p._1, p._2 match {
-            case None => r.getFillValue
+            case None => Naught()
             case _ => r(Data(p._2))
           }))
         }

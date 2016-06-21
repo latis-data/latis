@@ -25,12 +25,12 @@ class PlotMerge() extends BinaryOperation {
   
     val newRange1 = ds1 match {
       case Dataset(Function(it)) => it.toArray.map( p => p match {
-        case Sample(_, s: Scalar) => s
+        case Sample(_, v: Any) => v
       })
     }
     val newRange2 = ds match {
       case Dataset(Function(it)) => it.toArray.map( p => p match {
-        case Sample(_, s: Scalar) => s
+        case Sample(_, v: Any) => v
       })
     }
     val range = newRange1.zip(newRange2).map( p => Tuple(p._1, p._2) )
