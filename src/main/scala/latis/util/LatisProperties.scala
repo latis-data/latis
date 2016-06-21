@@ -33,10 +33,7 @@ class LatisProperties extends Properties with LazyLogging {
   } catch {
     case e: Exception => {
       //logger.warn("Unable to load properties file: " + file)
-      ///I've commented the below so that the scala REPL will play nice with the
-      //latis.properties. I will remove this when merging with dev
-      //~Dylan Nguyen 5/23
-      //throw new RuntimeException("Unable to load properties file: " + file, e)
+      throw new RuntimeException("Unable to load properties file: " + file, e)
     }
   }
 
