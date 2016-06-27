@@ -28,15 +28,10 @@ class ZipWriter2 extends Writer with LazyLogging {
     
     //Get the name of each file as it appears in the file list.
     //Throw an exception if a 'file' Variable cannot be found in the Dataset.
-    val files = dataset.findVariableByName("file") match {
-      case Some(v) => dataset match {  
-        case Dataset(Function(it)) => it.map(_.findVariableByName("file") match {
-          case Some(Text(t)) => t
-        })
-      }
-      case None => throw new IllegalArgumentException("ZipWriter can only write Datasets that contain a 'file' Variable.")
-    }
-    
+    val data = dataset.project("file").toStringMap
+    val files = if (data.contains("file")) data("file")
+      else throw new IllegalArgumentException("ZipWriter can only write Datasets that contain a 'file' Variable.")
+
     val zip = new ZipOutputStream(getOutputStream)
     try {
       for (f <- files) {
