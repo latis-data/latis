@@ -139,7 +139,8 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
       case Some(s) => s + ": "
       case None => ""
     }
-    pre + "(" + variable.toString + ")"
+    val vs = if (variable == null) "" else variable.toString
+    pre + "(" + vs + ")"
   }
 }
 
