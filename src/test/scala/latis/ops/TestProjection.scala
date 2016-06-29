@@ -14,6 +14,7 @@ import latis.ops.filter.FirstFilter
 import latis.ops.filter.Selection
 import latis.dm.Index
 import latis.dm.Sample
+import scala.concurrent.Await
 
 class TestProjection {
   //TODO: use TestDataset-s
@@ -33,7 +34,7 @@ class TestProjection {
   def project_scalar_alt_form {
     val ds = Dataset(Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c"))))
     val ds2 = ds.project(Projection(List("b")))
-    assertEquals("b", ds2.unwrap.asInstanceOf[Tuple].getVariables(0).getName)
+    assertEquals("b", ds2.unwrap.getName)
   }
   
 //  @Test
@@ -56,8 +57,7 @@ class TestProjection {
     val tup = Tuple(Real(Metadata("a")), Real(Metadata("b")), Real(Metadata("c")))
     val proj = new Projection(List("b"))
     val ds = proj(tup)
-    val n = ds.unwrap.asInstanceOf[Tuple].getElementCount
-    assertEquals(1, n)
+    ds match { case Dataset(v) => assert(v.isInstanceOf[Real]) }
   }
   
   @Test
@@ -87,8 +87,11 @@ class TestProjection {
     val proj = new Projection(List("myInteger","myReal"))
     val ds2 = proj(ds1)
     //TODO: test same domain: val domain = ds.getVariableByIndex(0).asInstanceOf[Function].domain
-    val n = ds2.unwrap.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
-    assertEquals(1, n)
+    ds2 match {
+      case Dataset(Function(it)) => it.next match {
+        case Sample(_, Real(v)) => assertEquals(0, v, 0.0)
+      }
+    }
   }
   
   @Test
@@ -107,8 +110,8 @@ class TestProjection {
     val ds1 = Dataset(TestNestedFunction.function_of_functions_with_tuple_range)
     val proj = new Projection(List("t","w","a")) 
     val ds2 = proj(ds1)
-    val n = ds2.unwrap.asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.asInstanceOf[Tuple].getElementCount
-    assertEquals(1, n)
+    
+    assert(ds2.unwrap.asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.isInstanceOf[Real])
   }
   
   @Test
@@ -202,7 +205,34 @@ class TestProjection {
     //assertEquals(2, range.getRange.toSeq(0).getNumberData.longValue) 
   }
   
-  //TODO: project nothing
+
+  @Test
+  def project_nothing_in_scalar = {
+    val ds = Dataset(Real(Metadata("x"), 3.14)).project("z")
+    assert(ds.isEmpty)
+  }
+  
+  @Test
+  def project_nothing_in_tuple = {
+    val ds = Dataset(Tuple(Real(Metadata("x"), 1), Real(Metadata("y"), 2))).project("z")
+    assert(ds.isEmpty)
+  }
+  
+  @Test
+  def project_nothing_in_function = {
+    val samples = List(Sample(Real(Metadata("x"), 1), Real(Metadata("y"), 2)))
+    val ds = Dataset(Function(samples)).project("z")
+    assert(ds.isEmpty)
+  }
+  
+  @Test
+  def project_nothing_in_index_function = {
+    val samples = List(Sample(Index(), Real(Metadata("y"), 2)))
+    val ds = Dataset(Function(samples)).project("z")
+    assert(ds.isEmpty)
+  }
+  
+  
   //TODO: def project_scalar_in_function_scalar_range_without_domain => IndexFunction
   //TODO: domain only
   //TODO: reorder

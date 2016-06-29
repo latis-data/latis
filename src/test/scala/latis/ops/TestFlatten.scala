@@ -48,4 +48,22 @@ class TestFlatten {
     }
   }
   
+  @Test
+  def functions_in_tuple = {
+    val samples1 = List(Sample(Index(), Real(Metadata("x"), 1.1)), Sample(Index(), Real(Metadata("x"), 2.2)))
+    val samples2 = List(Sample(Index(), Real(Metadata("y"), 3.3)), Sample(Index(), Real(Metadata("y"), 4.4)))
+    val function1 = Function(samples1)
+    val function2 = Function(samples2)
+    val ds = Dataset(Tuple(function1, function2)).project("y")
+    
+    val ds2 = Flatten()(ds)
+    ds2 match {
+      case Dataset(Function(it)) => {
+        it.next match { case Sample(_: Index, Real(d)) => assertEquals(3.3, d, 0.0) }
+        it.next match { case Sample(_: Index, Real(d)) => assertEquals(4.4, d, 0.0) }
+        assert(!it.hasNext)
+      }
+    }
+    
+  }
 }
