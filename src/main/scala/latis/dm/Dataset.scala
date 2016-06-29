@@ -23,6 +23,7 @@ import latis.ops.Memoization
 import latis.util.CacheManager
 import latis.ops.ReduceTuple
 import latis.ops.filter.TakeOperation
+import latis.ops.Flatten
 
 /**
  * The main abstraction for a dataset that encapsulates everything about the dataset. 
@@ -71,6 +72,8 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   
   def reduce = Reduction.reduce(this)
   def reduceTuple = ReduceTuple.reduce(this)
+  
+  def flatten = Flatten()(this)
   
   def intersect(that: Dataset): Dataset = Intersection(this, that)
   
