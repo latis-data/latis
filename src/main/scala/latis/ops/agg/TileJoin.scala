@@ -16,7 +16,7 @@ class TileJoin extends Join {
       case (Dataset(v1), Dataset(v2)) => (v1, v2) match {
         case (f1 @ Function(it1), f2 @ Function(it2)) => {
           //TODO: assumes both functions have the same type, units
-          Dataset(Function(f1.getDomain, f1.getRange, it1 ++ it2))
+          Dataset(Function(f1.getDomain, f1.getRange, it1 ++ it2, f1.getMetadata))
         }
         case _ => throw new UnsupportedOperationException("TileJoin expects a Function in each of the Datasets it joins.")
       }
