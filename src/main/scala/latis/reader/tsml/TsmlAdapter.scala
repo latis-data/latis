@@ -43,12 +43,13 @@ import latis.ops.TimeFormatter
 import latis.ops.ReplaceMissingOperation
 import latis.ops.Pivot
 import latis.ops.TimeTupleToTime
+import com.typesafe.scalalogging.LazyLogging
 
 
 /**
  * Base class for Adapters that read a dataset as defined by TSML.
  */
-abstract class TsmlAdapter(val tsml: Tsml) {
+abstract class TsmlAdapter(val tsml: Tsml) extends LazyLogging {
   
   /**
    * Abstract method to remind subclasses that they need to clean up their resources.
@@ -236,9 +237,11 @@ abstract class TsmlAdapter(val tsml: Tsml) {
   protected def makeDataset(ds: Dataset): Dataset = {
     makeVariable(ds.unwrap) match {
       case Some(v) => Dataset(v, ds.getMetadata)
-      case None => throw new Error("No variables created for dataset: " + ds.getName)
+      case None => {
+        logger.warn("Empty Dataset created for " + ds.getName)
+        Dataset.empty
+      }
     }
-    
   } 
   
   /**

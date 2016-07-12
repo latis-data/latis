@@ -21,6 +21,9 @@ import latis.ops.agg.Intersection
 import latis.ops.Reduction
 import latis.ops.Memoization
 import latis.util.CacheManager
+import latis.ops.ReduceTuple
+import latis.ops.filter.TakeOperation
+import latis.ops.Flatten
 
 /**
  * The main abstraction for a dataset that encapsulates everything about the dataset. 
@@ -68,7 +71,9 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   def replaceValue(v1: Any, v2: Any): Dataset = ReplaceValueOperation(v1,v2)(this)
   
   def reduce = Reduction.reduce(this)
-  def flatten = reduce
+  def reduceTuple = ReduceTuple.reduce(this)
+  
+  def flatten = Flatten()(this)
   
   def intersect(that: Dataset): Dataset = Intersection(this, that)
   
@@ -104,6 +109,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   
   def first: Dataset = FirstFilter()(this)
   def last: Dataset = LastFilter()(this)
+  def take(n: Int) = TakeOperation(n)(this)
     
   /**
    * Realize the Data for this Dataset so we can close the Reader.
@@ -136,7 +142,8 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
       case Some(s) => s + ": "
       case None => ""
     }
-    pre + "(" + variable.toString + ")"
+    val vs = if (variable == null) "" else variable.toString
+    pre + "(" + vs + ")"
   }
 }
 
@@ -158,4 +165,15 @@ object Dataset {
     else Some(v)
   }
   
+}
+
+/**
+ * Provide a convenient way to pattern match on a Dataset and extract an
+ * Iterator of Function Samples.
+ */
+object DatasetSamples {
+  def unapply(dataset: Dataset): Option[Iterator[Sample]] = dataset match {
+    case Dataset(Function(it)) => Some(it)
+    case _ => None
+  }
 }

@@ -14,14 +14,16 @@ class UpdateMetadata(vname: String, update: (String, String)) extends Operation 
     
     if (name == vname) {
       val md = dsmd + update
-      Dataset(dataset.unwrap, md) 
+      Dataset(dataset match { case Dataset(v) => v; case _ => null }, md) 
     } else { //try the kids
-      val v = applyToVariable(dataset.unwrap) match {
-        case Some(v) => v
-        case None => throw new Error("No variable found with name: " + vname)
-        //TODO: error or no-op?
+      val v = dataset match {
+        case Dataset(v) => applyToVariable(v) match {
+          case Some(v) => v
+          case None => throw new Error("No variable found with name: " + vname)
+          //TODO: error or no-op?
+        }
+        case _ => null
       }
-    
       Dataset(v, dsmd)
     }
   }
