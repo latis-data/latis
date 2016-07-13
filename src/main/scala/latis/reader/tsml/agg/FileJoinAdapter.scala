@@ -68,6 +68,7 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
         case Some(Text(file)) => dir + file
         case None => throw new Exception(s"No 'file' Variable found in Dataset '$ds'")
       })
+      case _ => Iterator.empty
     }
   }
   
@@ -76,7 +77,10 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
    */
   override def collect(datasets: Seq[Dataset]): Dataset = {
     //Get list of file names from the first dataset.
-    val files = getFilePaths(datasets.head) 
+    val files = datasets.headOption match {
+      case Some(ds) => getFilePaths(ds)
+      case None => Iterator.empty
+    }
     
     //Make a TsmlReader for each file from the tsml template with the file location inserted.
     val readers = files.map(file => TsmlReader(template.dataset.setLocation(file)))
