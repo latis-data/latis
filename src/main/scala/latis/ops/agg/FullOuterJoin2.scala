@@ -14,6 +14,7 @@ import latis.dm.Number
 import latis.dm.Tuple
 import latis.dm.Real
 import latis.dm.Variable
+import latis.data.value.DoubleValue
 
 /**
  * Given two Datasets that each contain a Function with the same domain Variable,
@@ -51,12 +52,14 @@ class FullOuterJoin2 extends Join with NoInterpolation with NoExtrapolation {
     //combine domain values from both into a sorted set
     val domainSet = getDomainSet(f1,f2)
     //define domain metadata, assume both Functions share the same domain metadata
+    val origDomain = f1.getDomain
     val domainMetadata = f1.getDomain.getMetadata()
    
     //evaluate both functions for each domain sample
     val samples = domainSet.toSeq.map(d => {
       //construct the domain Variable for this sample
-      val domain = Real(domainMetadata, d)
+      val domain = origDomain(DoubleValue(d))
+      
       //evaluate f1
       val range1 = f1(domain) match {
         case Some(v) => v
