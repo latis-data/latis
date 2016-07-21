@@ -69,6 +69,7 @@ trait Variable {
         }
         case _: Integer => data match {
           case lv: LongValue => new Time(scale, md, data) with Integer
+          case dv: DoubleValue => new Time(scale, md, data) with Integer
           case _ => throw new UnsupportedOperationException("Integer must be constructed with a LongValue.")
         }
       }
