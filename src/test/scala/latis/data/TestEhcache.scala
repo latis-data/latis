@@ -39,42 +39,41 @@ class TestEhcache {
     assert(s2.isEmpty)
   }
   
-//  @Test
+  //@Test
   def reuse_iterator {
     val ds = TsmlReader("datasets/test/scalar.tsml").getDataset
-    val f = ds match {
-      case Dataset(v) => v.asInstanceOf[Function]
-      case _ => null
+    ds match {
+      case Dataset(f: Function) => {
+        assertEquals(10, f.iterator.length)
+        assertEquals(10, f.iterator.length)
+        assertEquals(10, f.iterator.length)
+      }
     }
-    assertEquals(10, f.iterator.length)
-    assertEquals(10, f.iterator.length)
-    assertEquals(10, f.iterator.length)
-    
   }
   
 //  @Test 
   def two_functions { //caching doesn't work when alternating functions
     val ds1 = TestDataset.function_of_scalar
     val ds2 = TestDataset.function_of_tuple
-    val (f1, f2) = (ds1, ds2) match {
-      case (Dataset(v1), Dataset(v2)) => (v1.asInstanceOf[Function], v2.asInstanceOf[Function])
-      case _ => (null, null)
+    (ds1, ds2) match {
+      case (Dataset(f1: Function), Dataset(f2: Function)) => {
+        assertEquals(3, f1.iterator.length)
+        assertEquals(3, f2.iterator.length)
+        assertEquals(0, f1.iterator.length)
+      }
     }
     
-    assertEquals(3, f1.iterator.length)
-    assertEquals(3, f2.iterator.length)
-    assertEquals(0, f1.iterator.length)
   }
   
 //  @Test
   def nested_function { //caching doesn't work with nested functions
     val ds = TestDataset.function_of_functions
-    val f = ds match {
-      case Dataset(v) => v.asInstanceOf[Function]
-      case _ => null
+    ds match {
+      case Dataset(f: Function) => {
+        assertEquals(4, f.iterator.length)
+        assertEquals(0, f.iterator.length)
+      }
     }
-    assertEquals(4, f.iterator.length)
-    assertEquals(0, f.iterator.length)
   }
   
 }
