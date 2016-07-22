@@ -1,6 +1,6 @@
 package latis.ops
 
-import org.junit.Assert.assertEquals
+import org.junit.Assert._
 import org.junit.Assert.fail
 import org.junit.Test
 import latis.dm.Dataset
@@ -121,7 +121,7 @@ class TestProjection {
     val proj = new Projection(List("t","w","a")) 
     val ds2 = proj(ds1)
     ds2 match {
-      case Dataset(v) => assertEquals(1, v.asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.isInstanceOf[Real])
+      case Dataset(v) => assertTrue(v.asInstanceOf[Function].getRange.asInstanceOf[Function].getRange.isInstanceOf[Real])
       case _ => fail()
     }
   }
