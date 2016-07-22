@@ -12,7 +12,10 @@ class CsvWriter extends TextWriter {
   
   override def makeHeader(dataset: Dataset): String = {
     //don't include Index variable
-    dataset.unwrap.toSeq.filterNot(_.isInstanceOf[Index]).map(makeHeading(_)).mkString("", delimiter, newLine) 
+    dataset match {
+      case Dataset(v) => v.toSeq.filterNot(_.isInstanceOf[Index]).map(makeHeading(_)).mkString("", delimiter, newLine)
+      case _ => "\n"
+    }
   }
   
   /**

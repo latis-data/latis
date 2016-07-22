@@ -150,8 +150,12 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     //Get list of projected Scalars in projection order paired with their database type.
     //Saves us having to get the type for every sample.
     //Note, uses original variable names which are replaced for a rename operation as needed.
+    lazy val v = getOrigDataset match {
+      case Dataset(v) => v
+      case _ => null
+    }
     val vars: Seq[Variable] = if (projectedVariableNames.isEmpty) getOrigScalars
-    else projectedVariableNames.flatMap(getOrigDataset.unwrap.findVariableByName(_)) //TODO: error if not found? redundant with other (earlier?) test
+    else projectedVariableNames.flatMap(v.findVariableByName(_)) //TODO: error if not found? redundant with other (earlier?) test
 
     //TODO: Consider case where PI does rename. User should never see orig names so should be able to use new name.
 
@@ -196,23 +200,29 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     case p: Projection => handleProjection(p)
 
     //TODO: factor out handleSelection?
-    case sel @ Selection(name, op, value) => getOrigDataset.unwrap.findVariableByName(name) match {
-      //TODO: allow use of renamed variable? but sql where wants orig name
-      case Some(v) if (v.isInstanceOf[Time]) => handleTimeSelection(name, op, value)
-      case Some(v) if (getOrigScalarNames.contains(name)) => {
-        //add a selection to the sql, may need to change operation
-        op match {
-          case "==" => v match {
-            case _: Text => selections append name + "=" + quoteStringValue(value); true
-            case _       => selections append name + "=" + value; true
+    case sel @ Selection(name, op, value) => getOrigDataset match {
+      case Dataset(v) => v.findVariableByName(name) match {
+        //TODO: allow use of renamed variable? but sql where wants orig name
+        case Some(v) if (v.isInstanceOf[Time]) => handleTimeSelection(name, op, value)
+        case Some(v) if (getOrigScalarNames.contains(name)) => {
+          //add a selection to the sql, may need to change operation
+          op match {
+            case "==" => v match {
+              case _: Text => selections append name + "=" + quoteStringValue(value); true
+              case _       => selections append name + "=" + value; true
+            }
+            case "=~" =>
+              selections append name + " like '%" + value + "%'"; true
+            case "~" => false //almost equal (e.g. nearest sample) not supported by sql
+            case _ => v match {
+              case _: Text => selections append name + op + quoteStringValue(value); true
+              case _       => selections append name + op + value; true
+            }
           }
-          case "=~" =>
-            selections append name + " like '%" + value + "%'"; true
-          case "~" => false //almost equal (e.g. nearest sample) not supported by sql
-          case _ => v match {
-            case _: Text => selections append name + op + quoteStringValue(value); true
-            case _       => selections append name + op + value; true
-          }
+        }
+        case _ => {
+          logger.warn("Dataset is empty")
+          false
         }
       }
       case _ => {
@@ -279,7 +289,11 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     //support ISO time string as value
 
     //Get the Time variable with the given name
-    val tvar = getOrigDataset.unwrap.findVariableByName(vname) match {
+    val v = getOrigDataset match {
+      case Dataset(v) => v
+      case _ => null
+    }
+    val tvar = v.findVariableByName(vname) match {
       case Some(t: Time) => t
       case _ => throw new Error("Time variable not found in dataset.")
     }

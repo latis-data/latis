@@ -5,6 +5,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
+import org.junit.Assert.fail
 import org.junit.BeforeClass
 import org.junit.Test
 import latis.dm.Dataset
@@ -105,7 +106,10 @@ class TestStreamingFileListAdapter { //can't extend AdapterTests because Samples
   def project_diff_order {
     val ops = List(Projection("myTime, myReal, myInt"))
     val ds = getDataset(ops)
-    assertEquals("myInt", ds.unwrap.toSeq(2).getName)
+    ds match {
+      case Dataset(v) => assertEquals("myInt", v.toSeq(2).getName)
+      case _ => fail()
+    }
   }
   
   @Test

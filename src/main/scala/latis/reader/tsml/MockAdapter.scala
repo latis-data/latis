@@ -26,7 +26,11 @@ class MockAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    */
   override def init = {
     val names = getOrigScalarNames
-    val lengths = dataLengths(getOrigDataset.unwrap,1)
+    val v = getOrigDataset match {
+      case Dataset(v) => v
+      case _ => null
+    }
+    val lengths = dataLengths(v,1)
     
     val values = names.map(name => getValues(name, lengths(name)))
     val data = getOrigScalars.zip(values).map(p => p._1 match {
