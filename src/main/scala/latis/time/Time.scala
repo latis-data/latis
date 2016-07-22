@@ -62,7 +62,6 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
       //Convert 'that' Time to our time scale.
       //Use java time for Text times.
       val otherData = t.convert(timeScale) match {
-        case _: Text => LongValue(t.getJavaTime)
         case n: Number => n.getNumberData
       }
 

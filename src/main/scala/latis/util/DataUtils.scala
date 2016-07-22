@@ -509,7 +509,6 @@ object DataUtils {
    * If the Variable is Time of type Text, the value will be in milliseconds since 1970-01-01.
    */
   def getDoubleValue(variable: Variable): Double = variable match {
-    case t: Time if (! t.isNumeric) => t.getJavaTime.toDouble  //use java time if Time is represented as Text
     case Number(d) => d
     //TODO: deal with empty data
     case _ => Double.NaN
