@@ -112,14 +112,8 @@ class MathExpressionDerivation(private val str: String) extends Operation {
   override def applyToSample(sample: Sample): Option[Sample] = {
     sample.toSeq.foreach(s => s match {
       case Index(i) => values = values + (s.getName -> i)
-      case Real(d) => values = values + (s.getName -> d)
       case Integer(i) => values = values + (s.getName -> i)
-      case t: Time => {
-        val name = t.getName
-        t match {
-          case Number(n) => values = values + (name -> n)
-        }
-      }
+      case Number(d) => values = values + (s.getName -> d)  //Real or Time as Text
     })
     sample.range.findFunction match {
       case None if (!values.keySet.contains(varName)) => {
