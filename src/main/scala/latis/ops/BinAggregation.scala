@@ -24,7 +24,7 @@ class BinAggregation(agg: Seq[Sample] => Sample, binWidth: Double) extends Opera
 	   * Error if not a 1D numeric Scalar. Time will be treated as unix ms.
 	   */
 	  private def getDomainValue(sample: Sample): Double = sample.domain match {
-	    case t: Time => t.getJavaTime.toDouble //TODO: only if type Text? user would need to know/use native units
+	    //TODO: only if type Text? user would need to know/use native units
 	    case Number(d) => d
 	    case _ => throw new Error("BinAggregation supports only one dimensional numeric domains.")
 	  }

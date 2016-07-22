@@ -28,5 +28,5 @@ node_modules
 # Editor backups
 *~
 
-# Linux .swp files
+# swp files
 *.swp
