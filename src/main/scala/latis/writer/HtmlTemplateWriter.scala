@@ -86,7 +86,7 @@ class HtmlTemplateWriter extends TextWriter {
   }
   
   private def makeDas(dataset: Dataset): String = {
-    val w = new DdsWriter
+    val w = new DasWriter
     val v = dataset match {
       case Dataset(v) => w.varToString(v)
       case _ => ""
