@@ -66,6 +66,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
       getData match {
         case LongValue(l) => l compare otherData.longValue
         case NumberData(d) => d compare otherData.doubleValue
+        case _: TextData => getJavaTime compare otherData.longValue
       }
     }
     case Number(d) => doubleValue.compare(d)  //compare numerical value, ignoring units
@@ -81,6 +82,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
     else if(StringUtils.isNumeric(that)) getData match {
       case LongValue(l)   => l compare that.toLong
       case DoubleValue(d) => d compare that.toDouble
+      case StringValue(s) => getJavaTime compare that.toLong
     }
     else throw new IllegalArgumentException(s"'$that' could not be interpreted as a time string, could not be compared to $this.")
   }
