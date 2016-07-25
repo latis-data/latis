@@ -22,6 +22,7 @@ class TestTakeMaxVersion {
     val ds1 = Dataset(Function(samples, Metadata("function")), Metadata("dataset"))
     val ds2 = TakeMaxVersion()(ds1)
     
+    //latis.writer.AsciiWriter.write(ds1)
     //latis.writer.AsciiWriter.write(ds2)
     ds2 match {
       case Dataset(Function(it)) => {
@@ -37,7 +38,7 @@ class TestTakeMaxVersion {
   }
   
   @Test
-  def three_versions = {
+  def three_versions_not_in_order = {
     val md = Metadata(Map("name" -> "time", "units" -> "milliseconds since 1970-01-01"))
     
     val sample1 = Sample(Integer(Metadata("i"), 1), Tuple(Integer(md, 0), Integer(Metadata("version"), 1), Text(Metadata("foo"), "foo_t0_v1") ) )
@@ -52,6 +53,7 @@ class TestTakeMaxVersion {
     val ds1 = Dataset(Function(samples, Metadata("function")), Metadata("dataset"))
     val ds2 = TakeMaxVersion()(ds1)
     
+    //latis.writer.AsciiWriter.write(ds1)
     //latis.writer.AsciiWriter.write(ds2)
     ds2 match {
       case Dataset(Function(it)) => {
@@ -80,6 +82,34 @@ class TestTakeMaxVersion {
     val ds1 = Dataset(Function(samples, Metadata("function")), Metadata("dataset"))
     val ds2 = TakeMaxVersion()(ds1)
     
+    //latis.writer.AsciiWriter.write(ds1)
+    //latis.writer.AsciiWriter.write(ds2)
+    ds2 match {
+      case Dataset(Function(it)) => {
+        it.next match {
+          case Sample(Integer(i), Tuple(Seq(Text(txt)))) => assertEquals((0, "foo_t0_v1"), (i, txt))
+        }
+        it.next match {
+          case Sample(Integer(i), Tuple(Seq(Text(txt)))) => assertEquals((1, "foo_t1_v5"), (i, txt))
+        }
+      }
+      assert(!it.hasNext)
+    }
+  }
+  
+  @Test
+  def one_version = {
+    val md = Metadata(Map("name" -> "time", "units" -> "milliseconds since 1970-01-01"))
+    
+    val sample1 = Sample(Integer(Metadata("i"), 1), Tuple(Integer(md, 0), Integer(Metadata("version"), 1), Text(Metadata("foo"), "foo_t0_v1") ) )
+    val sample2 = Sample(Integer(Metadata("i"), 4), Tuple(Integer(md, 1), Integer(Metadata("version"), 5), Text(Metadata("foo"), "foo_t1_v5") ) )
+    
+    val samples = List(sample1, sample2)
+    
+    val ds1 = Dataset(Function(samples, Metadata("function")), Metadata("dataset"))
+    val ds2 = TakeMaxVersion()(ds1)
+    
+    //latis.writer.AsciiWriter.write(ds1)
     //latis.writer.AsciiWriter.write(ds2)
     ds2 match {
       case Dataset(Function(it)) => {
