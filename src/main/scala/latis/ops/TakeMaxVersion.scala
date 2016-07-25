@@ -1,6 +1,8 @@
 package latis.ops;
 
-import latis.dm._
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Sample
 
 /**
  * Given a Dataset of the form:
@@ -14,12 +16,10 @@ class TakeMaxVersion extends Operation {
 	override def apply(dataset: Dataset): Dataset = {
     val samples = dataset.groupBy("time").sorted match {  //make sorted function of time
       case Dataset(Function(it)) => it.toList.map(sample => {
-        //for each time, make a function of revision and keep the max 
+        //for each time, make a function of version and keep the max 
         sample match {
           case Sample(time, f) => {
-            //TODO: If the version isn't a single sortable Scalar, use a derived field (e.g. version * 1000 + revision), 
-            //      then invoke TakeMaxVersion operation via a PI.
-            val ds2 = Dataset(f).groupBy("version").sorted.last //sample with max revision
+            val ds2 = Dataset(f).groupBy("version").sorted.last //sample with max version
             val range = ds2 match {
               //(index -> index -> range)
               case Dataset(Function(it)) => it.next match {
@@ -38,7 +38,6 @@ class TakeMaxVersion extends Operation {
     Dataset(Function(samples), md)
   }
 	  
-
 }
 
 object TakeMaxVersion extends OperationFactory {
