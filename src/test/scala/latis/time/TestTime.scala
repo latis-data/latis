@@ -11,6 +11,7 @@ import latis.ops.TimeFormatter
 import latis.dm.Sample
 import latis.dm.Tuple
 import latis.dm.Number
+import latis.data.value.DoubleValue
 
 class TestTime {
 
@@ -222,6 +223,15 @@ class TestTime {
       case Dataset(Function(it)) => it.next; it.next match {
         case Sample(Number(t), _) => assertEquals(8.64E7, t, 0)
       }
+    }
+  }
+  
+  @Test
+  def copy_text_time_with_numeric_data = {
+    val t1 = Time(Metadata("name" -> "time", "units" -> "yyyy-MM-dd HH:mm:ss"), "")
+    val t2 = t1(DoubleValue(1000.0))
+    t2 match {
+      case Text(s) => assertEquals("1970-01-01 00:00:01", s)
     }
   }
 }
