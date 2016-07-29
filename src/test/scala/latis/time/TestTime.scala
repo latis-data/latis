@@ -70,6 +70,12 @@ class TestTime {
     assertEquals("2013-338T23:00:00.000", iso_ord)
   }
   
+  @Test
+  def javaToIso = {
+    val iso = Time.javaToIso(0)
+    assertEquals("1970-01-01T00:00:00.000", iso)
+  }
+  
   //TODO: test other flavors, with time zone,...
 
   

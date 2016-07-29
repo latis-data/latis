@@ -130,7 +130,11 @@ object Time {
    */
   def isoToJava(s: String): Long = TimeFormat.fromIsoValue(s).parse(s)
   
-
+  /**
+   * Given the number of milliseconds since 1970-01-01, return an ISO8601 formatted time string.
+   */
+  def javaToIso(ms: Long): String = TimeFormat.ISO.format(ms)
+    
   /**
    * Only used by TsmlAdapter (and tests) as a Variable template in orig Dataset (no Data).
    * Since the Time applies to a Dataset, look for the time_scale_type definition in the Metadata.
@@ -234,8 +238,8 @@ object Time {
   def apply(value: String): Time = {
     if(isValidIso(value)) fromIso(value)
     else throw new Error("Time can only be constructed without units from an iso time string.")
-
   }
+  
   def apply(value: AnyVal): Time = Time(TimeScale.JAVA, value)
   
   def apply(date: Date): Time = Time(date.getTime())
