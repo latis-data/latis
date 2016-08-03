@@ -15,7 +15,7 @@ import latis.data.seq.DataSeq
 
 class Test2D {
   
-  //@Test
+  @Test
   def write_scalar_function_3x3 = AsciiWriter.write(Test2D.scalar_function_3x3)
   
   @Test
@@ -44,8 +44,21 @@ object Test2D {
     val domainData = DataSeq(for (x <- 0 until 3; y <- 0 until 3) yield Data(x) concat Data(y))
     val rangeData = DataSeq(Seq.tabulate(3, 3)((x,y) => Data(x+y)).flatten)
     val data = SampledData(domainData, rangeData)
-    
+
     Dataset(Function(Tuple(x,y), a, data = data))
+  }
+  
+  def function_of_tuples_3x3 = {
+    val x = Integer(Metadata("X"))
+    val y = Integer(Metadata("Y"))
+    val a = Integer(Metadata("A"))
+    val b = Integer(Metadata("B"))
+    
+    val domainData = DataSeq(for (x <- 0 until 2; y <- 0 until 4) yield Data(x) concat Data(y))
+    val rangeData = DataSeq(for (x <- 0 until 2; y <- 0 until 4) yield Data(x) concat Data(x+y))
+    val data = SampledData(domainData, rangeData)
+
+    Dataset(Function(Tuple(x,y), Tuple(a,b), data = data))
   }
   
   //TODO: support 2D Seq from Seq.tabulate
