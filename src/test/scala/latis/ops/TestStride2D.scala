@@ -24,17 +24,16 @@ import latis.data.seq.DataSeq
 class TestStride2D {
   
   @Test
-  def test_2d_with_stride_1_1 {
+  def test_2d_with_stride_1_1_on_3x3 {
     assertEquals(Test2D.scalar_function_3x3, Stride2D(1, 1)(Test2D.scalar_function_3x3))
   }
 
   @Test
-  def test_2d_with_stride_3_2 {
+  def test_2d_with_stride_3_2_on_3x3 {
     val x = Integer(Metadata("X"))
     val y = Integer(Metadata("Y"))
     val a = Integer(Metadata("A"))
     
-    // Super hacky way of building the correct result dataset
     val domainData = DataSeq(for (x <- 0 until 1; y <- 0 until 3 if y % 2 == 0) yield Data(x) concat Data(y))
     val rangeData = DataSeq(Seq.tabulate(1, 2)((x,y) => Data((x+y)*2)).flatten)
     val data = SampledData(domainData, rangeData)
@@ -48,7 +47,7 @@ class TestStride2D {
   }
   
   @Test
-  def test_2d_with_stride_2_1 {
+  def test_2d_with_stride_2_1_on_3x3 {
     val x = Integer(Metadata("X"))
     val y = Integer(Metadata("Y"))
     val a = Integer(Metadata("A"))
@@ -66,7 +65,7 @@ class TestStride2D {
   }
   
   @Test
-  def test_2d_with_stride_1_3 {
+  def test_2d_with_stride_1_3_on_3x3 {
     val x = Integer(Metadata("X"))
     val y = Integer(Metadata("Y"))
     val a = Integer(Metadata("A"))
@@ -84,7 +83,25 @@ class TestStride2D {
   }
   
   @Test
-  def test_2d_tuple_with_stride_2_2 {
+  def test_2d_with_stride_3_1_on_4x3 {
+    val x = Integer(Metadata("X"))
+    val y = Integer(Metadata("Y"))
+    val a = Integer(Metadata("A"))
+    
+    val domainData = DataSeq(for (x <- 0 until 4 if x % 3 == 0; y <- 0 until 3) yield Data(x) concat Data(y))
+    val rangeData = DataSeq(Seq.tabulate(4, 3)((x,y) => Data(x+(y+(x*2)))).flatten)
+    val data = SampledData(domainData, rangeData)
+
+    val correctDataset = Dataset(Function(Tuple(x,y), a, data = data))
+    
+//    AsciiWriter.write(correctDataset)
+//    AsciiWriter.write(Test2D.scalar_function_4x3)
+   
+    assertEquals(correctDataset, Stride2D(3, 1)(Test2D.scalar_function_4x3))
+  }
+  
+  @Test
+  def test_2d_tuple_with_stride_2_2_on_2x4 {
     val x = Integer(Metadata("X"))
     val y = Integer(Metadata("Y"))
     val a = Integer(Metadata("A"))
@@ -99,7 +116,7 @@ class TestStride2D {
 //    AsciiWriter.write(correctDataset)
 //    AsciiWriter.write(Test2D.function_of_tuples_3x3)
    
-    assertEquals(correctDataset, Stride2D(2, 2)(Test2D.function_of_tuples_3x3))
+    assertEquals(correctDataset, Stride2D(2, 2)(Test2D.function_of_tuples_2x4))
   }
   
   @Test
