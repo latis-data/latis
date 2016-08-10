@@ -38,7 +38,7 @@ class TestStride2D {
     val rangeData = DataSeq(Seq.tabulate(1, 2)((x,y) => Data((x+y)*2)).flatten)
     val data = SampledData(domainData, rangeData)
 
-    val correctDataset = Dataset(Function(Tuple(x,y), a, data = data))
+    val correctDataset = Dataset(Function(Tuple(x,y), a, Metadata(Map("length"->"2")), data = data))
     
 //    AsciiWriter.write(correctDataset)
 //    AsciiWriter.write(Test2D.scalar_function_3x3)
@@ -56,7 +56,7 @@ class TestStride2D {
     val rangeData = DataSeq(Seq.tabulate(2, 3)((x,y) => Data((x*2)+y)).flatten)
     val data = SampledData(domainData, rangeData)
 
-    val correctDataset = Dataset(Function(Tuple(x,y), a, data = data))
+    val correctDataset = Dataset(Function(Tuple(x,y), a, Metadata(Map("length"->"6")), data = data))
     
 //    AsciiWriter.write(correctDataset)
 //    AsciiWriter.write(Test2D.scalar_function_3x3)
@@ -74,7 +74,7 @@ class TestStride2D {
     val rangeData = DataSeq(Seq.tabulate(3, 1)((x,y) => Data(x+y)).flatten)
     val data = SampledData(domainData, rangeData)
 
-    val correctDataset = Dataset(Function(Tuple(x,y), a, data = data))
+    val correctDataset = Dataset(Function(Tuple(x,y), a, Metadata(Map("length"->"3")), data = data))
     
 //    AsciiWriter.write(correctDataset)
 //    AsciiWriter.write(Test2D.scalar_function_3x3)
@@ -92,7 +92,7 @@ class TestStride2D {
     val rangeData = DataSeq(Seq.tabulate(4, 3)((x,y) => Data(x+(y+(x*2)))).flatten)
     val data = SampledData(domainData, rangeData)
 
-    val correctDataset = Dataset(Function(Tuple(x,y), a, data = data))
+    val correctDataset = Dataset(Function(Tuple(x,y), a, Metadata(Map("length"->"6")), data = data))
     
 //    AsciiWriter.write(correctDataset)
 //    AsciiWriter.write(Test2D.scalar_function_4x3)
@@ -111,7 +111,7 @@ class TestStride2D {
     val rangeData = DataSeq(for (x <- 0 until 2 if x % 2 == 0; y <- 0 until 4 if y % 2 == 0) yield Data(x) concat Data(x+y))
     val data = SampledData(domainData, rangeData)
     
-    val correctDataset = Dataset(Function(Tuple(x,y), Tuple(a, b), data = data))
+    val correctDataset = Dataset(Function(Tuple(x,y), Tuple(a, b), Metadata(Map("length"->"2")), data = data))
     
 //    AsciiWriter.write(correctDataset)
 //    AsciiWriter.write(Test2D.function_of_tuples_3x3)
