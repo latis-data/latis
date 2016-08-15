@@ -39,7 +39,10 @@ class TestBinaryWriter extends WriterTest{
   def print_bytes {
     val w = new BinaryWriter
     val ds = getDataset(fof)
-    val v = ds.unwrap
+    val v = ds match {
+      case Dataset(v) => v
+      case _ => null
+    }
     for(b <- w.varToBytes(v)) println(b.toInt.toHexString.replace("ffffff", ""))
     
     AsciiWriter.write(getDataset("dap2"))

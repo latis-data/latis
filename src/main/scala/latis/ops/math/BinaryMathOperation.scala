@@ -16,7 +16,10 @@ class BinaryMathOperation(op: (Double, Double) => Double, other: Dataset) extend
   /**
    * The second operand, encapsulated within the 'other' Dataset.
    */
-  val otherVar: Variable = other.unwrap
+  val otherVar: Variable = other match {
+    case Dataset(v) => v
+    case _ => null
+  }
   
   /**
    * Because we have the other Variable managed by this Operation and we will need to recurse on it

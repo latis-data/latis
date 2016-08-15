@@ -3,6 +3,7 @@ package latis.ops
 import org.junit._
 import Assert._
 import scala.collection.mutable.ArrayBuffer
+import latis.dm.Dataset
 import latis.dm.TestDataset
 import latis.writer.AsciiWriter
 
@@ -29,9 +30,15 @@ class TestMemoization {
   @Test
   def length_metadata = {
     val ds = TestDataset.numeric_time_series
-    assert(ds.unwrap.getMetadata.isEmpty)
+    ds match {
+      case Dataset(v) => assert(v.getMetadata.isEmpty)
+      case _ => fail()
+    }
     val ds2 = ds.force
-    assertEquals("3", ds2.unwrap.getMetadata("length").get)
+    ds2 match {
+      case Dataset(v) => assertEquals("3", v.getMetadata("length").get)
+      case _ => fail()
+    }
   }
   
   @Test

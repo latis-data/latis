@@ -80,7 +80,10 @@ class TestTakeOperation {
   }
   @Test
   def take_metadata_length {
-    assertEquals(Some("2"), TakeOperation(2)(TestDataset.function_of_scalar_with_length).unwrap.asInstanceOf[Function].getMetadata("length"))
+    TakeOperation(2)(TestDataset.function_of_scalar_with_length) match {
+      case Dataset(v) => assertEquals(Some("2"), v.asInstanceOf[Function].getMetadata("length"))
+      case _ => fail()
+    }
   }
   
   @Test

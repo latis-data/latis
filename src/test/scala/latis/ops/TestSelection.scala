@@ -1,6 +1,7 @@
 package latis.ops
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.fail
 import org.junit.Test
 
 import latis.data.SampledData
@@ -31,7 +32,10 @@ class TestSelection {
     val ds = filter(f)
     //AsciiWriter().write(expected)
     //AsciiWriter().write(ds)
-    assert(expected equals ds.unwrap)
+    ds match {
+      case Dataset(v) => assert(expected equals v)
+      case _ => fail()
+    }
   }
 
   
@@ -105,8 +109,10 @@ class TestSelection {
   def outside_range {
     val ds = Dataset(scalarFunction)
     val ds2 = ds.filter("time > 5")
-    val f = ds2.unwrap.asInstanceOf[Function]
-    assertEquals(0, f.getLength)
+    ds2 match {
+      case Dataset(v) => assertEquals(0, v.asInstanceOf[Function].getLength)
+      case _ => fail()
+    }
   }
     
   //----------------------------------------------

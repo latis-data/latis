@@ -1,5 +1,6 @@
 package latis.ops
 
+import org.junit.Assert.fail
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -19,7 +20,10 @@ class TestSubtraction {
   }
   @Test
   def test_real_value {
-    assertEquals(0, (3.14 - TestDataset.real).unwrap.getNumberData.doubleValue, 0.0)
+    (3.14 - TestDataset.real) match {
+      case Dataset(v) => assertEquals(0, v.getNumberData.doubleValue, 0.0)
+      case _ => fail()
+    }
   }
   @Test
   def test_real_md {
@@ -27,7 +31,10 @@ class TestSubtraction {
   }
   @Test
   def test_integer_value {
-    assertEquals(-44, ((-2) - TestDataset.integer).unwrap.getNumberData.intValue)
+    ((-2) - TestDataset.integer) match {
+      case Dataset(v) => assertEquals(-44, v.getNumberData.intValue)
+      case _ => fail()
+    }
   }
   @Test
   def test_integer_md {
@@ -35,19 +42,31 @@ class TestSubtraction {
   }
   @Test
   def test_text {
-    assertEquals(Double.NaN, (TestDataset.text - 1).unwrap.getNumberData.doubleValue, 0.0)
+    (TestDataset.text - 1) match {
+      case Dataset(v) => assertEquals(Double.NaN, v.getNumberData.doubleValue, 0.0)
+      case _ => fail()
+    }
   }
   @Test
   def test_time {
-    assertEquals(500, (TestDataset.real_time - 500).unwrap.getNumberData.doubleValue, 0.0)
+    (TestDataset.real_time - 500) match {
+      case Dataset(v) => assertEquals(500, v.getNumberData.doubleValue, 0.0)
+      case _ => fail()
+    }
   }
   @Test
   def test_tuple_of_tuples {
-    assertEquals(Tuple(Real(10), Real(10)), (10 - TestDataset.tuple_of_tuples).unwrap.asInstanceOf[Tuple].getVariables(0))
+    (10 - TestDataset.tuple_of_tuples) match {
+      case Dataset(v) => assertEquals(Tuple(Real(10), Real(10)), v.asInstanceOf[Tuple].getVariables(0))
+      case _ => fail()
+    }
   }
   @Test
   def test_function_of_scalar {
-    assertEquals(Sample(Real(0), Real(-1)), (TestDataset.function_of_scalar - 1).unwrap.asInstanceOf[Function].iterator.next)
+    (TestDataset.function_of_scalar - 1) match {
+      case Dataset(v) => assertEquals(Sample(Real(0), Real(-1)), v.asInstanceOf[Function].iterator.next)
+      case _ => fail()
+    }
   }
 
 }

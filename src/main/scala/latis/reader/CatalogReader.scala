@@ -62,9 +62,10 @@ class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "
       if(path.toString != dir) {
         //recurse to created a nested function
         val ds = CatalogReader(path.toString).getDataset
-        ds.unwrap match {
-          case f: Function if(f.isEmpty) => //drop empty catalogs
-          case v => samples += Sample(Text(Metadata("name"), ds.getName.drop(dir.length + 1)), v)
+        ds match {
+          case Dataset(Function(f)) if(f.isEmpty) => //drop empty catalogs
+          case Dataset(v) => samples += Sample(Text(Metadata("name"), ds.getName.drop(dir.length + 1)), v)
+          case _ => //empty dataset? 
         }
         FileVisitResult.SKIP_SUBTREE
       } else FileVisitResult.CONTINUE

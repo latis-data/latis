@@ -44,7 +44,10 @@ class DapReader(baseUrl: String, query: String) extends DatasetAccessor {
   override def getDataset(ops: Seq[Operation]): Dataset = {
     val md = getOrigDataset.getMetadata
     val od = ops.foldLeft(getOrigDataset)((ds,op) => op(ds))
-    val ov = od.unwrap
+    val ov = od match {
+      case Dataset(v) => v
+      case _ => null
+    }
     
     val v = ov match {
       //Handle the first function iteratively. The rest of the functions 
