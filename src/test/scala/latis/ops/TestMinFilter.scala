@@ -478,4 +478,16 @@ class TestMinFilter {
     }
   }
   
+  @Test
+  def emtpy_function = {
+    val ds1 = TestDataset.empty_function
+    val ds2 = MinFilter("myInt")(ds1)
+    
+    ds2 match {
+      case Dataset(Function(it)) => {
+        assertEquals(null, it.next)
+      }
+    }
+  }
+  
 }

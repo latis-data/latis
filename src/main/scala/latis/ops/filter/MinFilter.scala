@@ -25,12 +25,17 @@ class MinFilter(name: String) extends Filter with LazyLogging {
     //or return an empty function if no such Scalar exists.
     function match {
       case Function(it) => {
-        val s = it.next
-        val v = s.findVariableByName(name) match {
-          case Some(v) => currentMin = v.asInstanceOf[Scalar] 
-          case None    => return Some(Function(function.getDomain, function.getRange, Iterator.empty)) //empty Function with type of original
+        it.isEmpty match {
+          case false => { //function is not empty
+            val s = it.next
+            val v = s.findVariableByName(name) match {
+              case Some(v) => currentMin = v.asInstanceOf[Scalar] 
+              case None    => return Some(Function(function.getDomain, function.getRange, Iterator.empty)) //empty Function with type of original
+            }
+          }
+          case true => return Some(Function(function.getDomain, function.getRange, Iterator.empty)) //empty Function with type of original
         }
-      }
+      }  
     }
     
     //Scalar "name" exists, so apply Operation to every sample from the iterator
