@@ -114,7 +114,7 @@ class TestStride2D {
     val correctDataset = Dataset(Function(Tuple(x,y), Tuple(a, b), Metadata(Map("length"->"2")), data = data))
     
 //    AsciiWriter.write(correctDataset)
-//    AsciiWriter.write(Test2D.function_of_tuples_3x3)
+//    AsciiWriter.write(Test2D.function_of_tuples_2x4)
    
     assertEquals(correctDataset, Stride2D(2, 2)(Test2D.function_of_tuples_2x4))
   }
@@ -136,7 +136,7 @@ class TestStride2D {
   @Test
   def test_stride_0_1 {
     try {
-      Stride2D(0, 0)(TestDataset.canonical)
+      Stride2D(0, 1)(TestDataset.canonical)
       fail("stride(0, x) should throw an exception")
     }
     catch {case e: Exception => }
@@ -145,7 +145,7 @@ class TestStride2D {
   @Test
   def test_stride_1_0 {
     try {
-      Stride2D(0, 0)(TestDataset.canonical)
+      Stride2D(1, 0)(TestDataset.canonical)
       fail("stride(x, 0) should throw an exception")
     }
     catch {case e: Exception => }
