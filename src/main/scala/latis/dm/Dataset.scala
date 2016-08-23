@@ -24,6 +24,7 @@ import latis.util.CacheManager
 import latis.ops.ReduceTuple
 import latis.ops.filter.TakeOperation
 import latis.ops.Flatten
+import latis.ops.Sort
 
 /**
  * The main abstraction for a dataset that encapsulates everything about the dataset. 
@@ -88,25 +89,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
     Dataset(v) //TODO: metadata
   }
   
-  /**
-   * Until we can enforce sorting of function samples this will do so. 
-   * Sort by range if domain is Index. (Only integer range, for now.)
-   * TODO: implement as Operation.
-   * See latis-mms-web TestDatasets
-   */
-  def sorted: Dataset = variable match {
-    case f @ Function(samples) => {
-      val ss = samples.toSeq
-      if (ss.length == 0) this //empty dataset
-      else f.getDomain match {
-        case _: Index   => Dataset(Function(ss.sortBy(s => s match {case Sample(_, Tuple(Seq(d: Integer))) => d})(Integer(0))))
-        case _: Integer => Dataset(Function(ss.sortBy(s => s match {case Sample(d: Integer, _) => d})(Integer(0))))
-        case _: Real    => Dataset(Function(ss.sortBy(s => s match {case Sample(d: Real, _) => d})(Real(0))))
-        case _: Text    => Dataset(Function(ss.sortBy(s => s match {case Sample(d: Text, _) => d})(Text(""))))
-      }
-    }
-  }
-  
+  def sorted: Dataset = Sort()(this)
   def first: Dataset = FirstFilter()(this)
   def last: Dataset = LastFilter()(this)
   def take(n: Int) = TakeOperation(n)(this)
