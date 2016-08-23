@@ -1,10 +1,15 @@
 package latis.ops
 
-import latis.dm._
-import latis.metadata._
-import org.junit._
-import Assert._
-import latis.ops.TakeMaxVersion
+import org.junit.Assert._
+import org.junit.Test
+
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Integer
+import latis.dm.Sample
+import latis.dm.Text
+import latis.dm.Tuple
+import latis.metadata.Metadata
 
 class TestTakeMaxVersion {
   
