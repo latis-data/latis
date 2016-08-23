@@ -44,8 +44,33 @@ object Test2D {
     val domainData = DataSeq(for (x <- 0 until 3; y <- 0 until 3) yield Data(x) concat Data(y))
     val rangeData = DataSeq(Seq.tabulate(3, 3)((x,y) => Data(x+y)).flatten)
     val data = SampledData(domainData, rangeData)
+
+    Dataset(Function(Tuple(x,y), a, Metadata(Map("length"->"9")), data = data))
+  }
+  
+  def scalar_function_4x3 = {
+    val x = Integer(Metadata("X"))
+    val y = Integer(Metadata("Y"))
+    val a = Integer(Metadata("A"))
     
-    Dataset(Function(Tuple(x,y), a, data = data))
+    val domainData = DataSeq(for (x <- 0 until 4; y <- 0 until 3) yield Data(x) concat Data(y))
+    val rangeData = DataSeq(Seq.tabulate(4, 3)((x,y) => Data(x+y)).flatten)
+    val data = SampledData(domainData, rangeData)
+
+    Dataset(Function(Tuple(x,y), a, Metadata(Map("length"->"12")), data = data))
+  }
+  
+  def function_of_tuples_2x4 = {
+    val x = Integer(Metadata("X"))
+    val y = Integer(Metadata("Y"))
+    val a = Integer(Metadata("A"))
+    val b = Integer(Metadata("B"))
+    
+    val domainData = DataSeq(for (x <- 0 until 2; y <- 0 until 4) yield Data(x) concat Data(y))
+    val rangeData = DataSeq(for (x <- 0 until 2; y <- 0 until 4) yield Data(x) concat Data(x+y))
+    val data = SampledData(domainData, rangeData)
+
+    Dataset(Function(Tuple(x,y), Tuple(a,b), Metadata(Map("length"->"8")), data = data))
   }
   
   //TODO: support 2D Seq from Seq.tabulate

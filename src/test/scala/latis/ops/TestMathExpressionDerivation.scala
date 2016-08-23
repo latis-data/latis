@@ -187,7 +187,10 @@ class TestMathExpressionDerivation {
   def test_tsml {
     val ds = DatasetAccessor.fromName("vecmag").getDataset
     //AsciiWriter.write(ds)
-    val it = ds.unwrap.asInstanceOf[Function].iterator
+    val it = ds match {
+      case Dataset(v) => v.asInstanceOf[Function].iterator
+      case _ => null 
+    }
     it.next
     assertEquals(1.7320508075688772, it.next.findVariableByName("X").get.getNumberData.doubleValue, 0.0)
   }

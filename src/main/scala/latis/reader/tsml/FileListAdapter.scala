@@ -21,6 +21,7 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
   override def getDataset = {
     super.getDataset match {
       case ds @ Dataset(v) => Dataset(v, ds.getMetadata + ("srcDir" -> directory))
+      case _ => Dataset.empty
     }
   }
   

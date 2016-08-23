@@ -42,22 +42,37 @@ class Projection(val names: Seq[String]) extends Operation with Idempotence {
     val pd = applyToVariable(sample.domain)
     val pr = applyToVariable(sample.range)
     (pd,pr) match {
-      case (Some(d), Some(r)) => Some(Sample(d,r))
-      case (None, Some(r))    => Some(Sample(Index(), r)) //no domain, so replace it with Index
-      case (Some(d), None)    => Some(Sample(Index(), d)) //no range, so make domain the range of an index function
-      case (None, None) => None //Note, could be an inner Function that is not projected
+      case (Some(d), Some(r))     => Some(Sample(d,r))
+      case (None, Some(r))        => Some(Sample(Index(), r)) //no domain, so replace it with Index
+      case (Some(_: Index), None) => None //Index is just a place holder, no need to keep "index -> index" Function
+      case (Some(d), None)        => Some(Sample(Index(), d)) //no range, so make it an index Function of the domain
+      case (None, None)           => None //Note, could be an inner Function that is not projected
     }
   }
   
   /**
    * Apply to all elements in the Tuple. 
    * Return None if all elements are excluded.
+   * If only one element in the Tuple is projected, return that element.
    */
-  override def applyToTuple(tuple: Tuple): Option[Tuple] = {
+  override def applyToTuple(tuple: Tuple): Option[Variable] = {
     //val vars = names.flatMap(tuple.findVariableByName(_)).flatMap(applyToVariable(_)) //projection order
     val vars = tuple.getVariables.flatMap(applyToVariable(_)) //orig var order
-    if (vars.length == 0) None
-    else Some(Tuple(vars, tuple.getMetadata)) //assumes Tuple does not contain data
+    vars.length match {
+      case 0 => None
+      case 1 => {
+        //reduce a Tuple of one element to that element
+        //TODO: if the Tuple had a name, append it to the var name with a "."
+        val v = vars.head 
+//        val md = tuple.getMetadata("name") match {
+//          case Some(s) => v.getMetadata() + ("name" -> s + "." + v.getName)
+//          case None => v.getMetadata()
+//        }
+//        Some(v.copy(md))
+        Some(v)
+      }
+      case _ => Some(Tuple(vars, tuple.getMetadata)) //assumes Tuple does not contain data
+    }
   }
   
   /**

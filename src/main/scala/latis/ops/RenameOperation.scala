@@ -20,14 +20,16 @@ class RenameOperation(val origName: String, val newName: String) extends Operati
     
     if (name == origName) {
       val md = dsmd + ("name" -> newName)
-      Dataset(dataset.unwrap, md) 
+      Dataset(dataset match { case Dataset(v) => v; case _ => null }, md) 
     } else { //try the kids
-      val v = applyToVariable(dataset.unwrap) match {
-        case Some(v) => v
-        case None => throw new Error("No variable found with name: " + origName)
-        //TODO: error or no-op?
+      val v = dataset match {
+        case Dataset(v) => applyToVariable(v) match {
+          case Some(v) => v
+          case None => throw new Error("No variable found with name: " + origName)
+          //TODO: error or no-op?
+        }
+        case _ => null
       }
-    
       Dataset(v, dsmd)
     }
   }

@@ -8,9 +8,13 @@ import latis.dm.Tuple
  * No attempt at joining is made.
  */
 class CollectionAggregation extends Aggregation {
-//TODO: is there a need for this now that a Dataset can't contain other Datasets?
-  def aggregate(ds1: Dataset, ds2: Dataset) = {
-    Dataset(Tuple(ds1.unwrap, ds2.unwrap))
+
+  def aggregate(ds1: Dataset, ds2: Dataset) = (ds1, ds2) match {
+    //TODO: we should the variable of either or both. 
+    //  It seems that we do this somewhere. 
+    //  Let's punt since this will be deprecated in favor of Join.
+    case (Dataset(v), Dataset(u)) => Dataset(Tuple(v, u))
+    case _ => Dataset.empty
   }
   
 }

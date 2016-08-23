@@ -103,6 +103,7 @@ object Scalar {
     case f: Float  => Real(f)
     case l: Long   => Integer(l)
     case i: Int    => Integer(i)
+    case b: Boolean => Text(b)
     case _ => throw new Error("Unable to make Scalar from value: " + value) //TODO: of type...
     //TODO: if serializable, make Binary?
   }
@@ -117,6 +118,7 @@ object Scalar {
     case l: Long   => Integer(metadata, l)
     case i: Int    => Integer(metadata, i)
     case s: String => Text(metadata, s)
+    case b: Boolean => Text(metadata, b)
     //Data Value types
     case dv: DoubleValue => Real(metadata, dv)
     case lv: LongValue   => Integer(metadata, lv)

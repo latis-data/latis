@@ -19,7 +19,10 @@ trait Aggregation extends Operation {
   override def apply(dataset: Dataset) = dataset match {
     //support for old usage
     case Dataset(Tuple(Seq(f1: Function, f2: Function))) => 
-      Dataset(aggregate(Dataset(f1), Dataset(f2)).unwrap, dataset.getMetadata)
+      aggregate(Dataset(f1), Dataset(f2)) match {
+        case Dataset(v) => Dataset(v, dataset.getMetadata)
+        case _ => Dataset.empty //TODO: keep metadata?
+      }
     case _ => throw new UnsupportedOperationException("An Aggregation can only be applied to two or more Datasets.")
   }
   

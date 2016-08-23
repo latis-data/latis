@@ -187,7 +187,10 @@ class TestTakeRightOperation {
   @Test
   def takeright_metadata_length {
     val ds = TakeRightOperation(2)(TestDataset.function_of_scalar_with_length)
-    assertEquals(Some("2"), ds.unwrap.asInstanceOf[Function].getMetadata("length"))
+    ds match {
+      case Dataset(v) => assertEquals(Some("2"), v.asInstanceOf[Function].getMetadata("length"))
+      case _ => fail()
+    }
   }
   
 

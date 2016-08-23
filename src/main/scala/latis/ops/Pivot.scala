@@ -7,6 +7,7 @@ import latis.dm.Function
 import latis.dm.Sample
 import latis.dm.Scalar
 import latis.dm.Tuple
+import latis.dm.Dataset
 import latis.dm.implicits.variableToDataset
 import latis.util.iterator.PeekIterator
 
@@ -48,7 +49,10 @@ class Pivot(vname: String, l: Int) extends Operation {
         
         val vtemp = pivots.head._2       
         val missingData = Data(pivots.head._2.getMissingValue)
-        val renamedVar = (i: Int) => RenameOperation(vtemp.getName, vname+i)(vtemp).unwrap
+        val renamedVar = (i: Int) => RenameOperation(vtemp.getName, vname+i)(vtemp) match {
+          case Dataset(v) => v
+          case _ => null
+        }
         //for a pivot index, see if we have data for that index or else return missing data
         val getData = (i: Int) => pivots.find(_._1 == i) match {
           case Some((_, v)) => v.getData

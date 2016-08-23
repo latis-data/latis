@@ -96,7 +96,6 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
    */
   private def getDomainValue(sample: Sample): Double = sample.domain match {
     case Number(d) => d
-    case t: Time => t.getJavaTime.toDouble
     case _ => throw new Error("BinAverage supports only one dimensional numeric domains.")
   }
   
