@@ -34,6 +34,7 @@ import latis.ops.Projection
 import latis.ops.RenameOperation
 import latis.ops.filter.FirstFilter
 import latis.ops.filter.LastFilter
+import latis.ops.filter.LimitFilter
 import latis.ops.filter.Selection
 import latis.reader.tsml.ml.Tsml
 import latis.time.Time
@@ -55,7 +56,10 @@ import latis.util.StringUtils
 class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](tsml) with LazyLogging {
   //TODO: catch exceptions and close connections
 
-  def getRecordIterator: Iterator[JdbcAdapter.JdbcRecord] = new JdbcAdapter.JdbcRecordIterator(resultSet)
+  def getRecordIterator: Iterator[JdbcAdapter.JdbcRecord] = getProperty("limit") match {
+    case Some(lim) if (lim.toInt == 0) => new JdbcAdapter.JdbcEmptyIterator()
+    case _ => new JdbcAdapter.JdbcRecordIterator(resultSet)
+  }
 
   /**
    * Parse the data based on the Variable type (and the database column type, for time).
@@ -249,8 +253,17 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       //let the caller know that we handled this operation
       true 
     }
-      
 
+    case LimitFilter(limit) if limit < 0 => {
+      throw new UnsupportedOperationException("LimitFilter must be used with a value greater than or equal to 0")
+    }
+
+    case LimitFilter(limit) if limit >= 0 => {
+      order = "ASC"
+      setProperty("limit", limit.toString)
+      true
+    }
+      
     //Rename operation: apply in projection clause of sql: 'select origName as newName'
     //These will be combined with the projected variables in the select clause with "old as new".
     case RenameOperation(origName, newName) => {
@@ -431,6 +444,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
 
       val p = makePredicate
       if (p.nonEmpty) sb append " where " + p
+      
 
       //Sort by domain variable.
       //assume domain is scalar, for now
@@ -446,7 +460,6 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
         }
         case _ => //no function so no domain variable to sort by
       }
-
       sb.toString
     }
   }
@@ -575,6 +588,13 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
 object JdbcAdapter {
 
   case class JdbcRecord(resultSet: ResultSet)
+
+  class JdbcEmptyIterator() extends Iterator[JdbcAdapter.JdbcRecord] {
+    private var _hasNext = false
+    
+    def next() = null
+    def hasNext() = _hasNext
+  }
 
   class JdbcRecordIterator(resultSet: ResultSet) extends Iterator[JdbcAdapter.JdbcRecord] {
     private var _didNext = false
