@@ -57,7 +57,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
     }
   }
 
-  override def compare(that: Scalar): Int = that match {
+  override def compare(that: Variable): Int = that match {
     case t: Time => {
       //Convert 'that' Time to our time scale.
       //Use java time for Text times.
