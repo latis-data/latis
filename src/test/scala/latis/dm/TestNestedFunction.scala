@@ -25,7 +25,11 @@ class TestNestedFunction {
   def select_inner_domain {
     val ds = Dataset(TestNestedFunction.function_of_functions_with_sampled_data)
     val ds2 = Selection("y>10")(ds)
-    val f = ds2.unwrap.asInstanceOf[Function].iterator.next.asInstanceOf[Sample].range.asInstanceOf[Function]
+    val v = ds2 match {
+      case Dataset(v) => v
+      case _ => null
+    }
+    val f = v.asInstanceOf[Function].iterator.next.asInstanceOf[Sample].range.asInstanceOf[Function]
     val n = f.getLength
     assertEquals(3, n)
   }
@@ -34,19 +38,16 @@ class TestNestedFunction {
   def select_inner_range {
     val ds = Dataset(TestNestedFunction.function_of_functions_with_sampled_data)
     val ds2 = Selection("z>20")(ds)
-    val dataMaps = ds2.unwrap.asInstanceOf[Function].iterator.map(_.range.asInstanceOf[Function]).toList.map(Dataset(_).toDoubleMap)
+    val v = ds2 match {
+      case Dataset(v) => v
+      case _ => null
+    }
+    val dataMaps = v.asInstanceOf[Function].iterator.map(_.range.asInstanceOf[Function]).toList.map(Dataset(_).toDoubleMap)
     assertEquals(4, dataMaps.length) //all original inner functions still exist (change in behavior after 2.8.3)
     //TODO: currently returning only matching samples, not complete spectrum, but md has orig length
     assert(dataMaps(1).isEmpty) 
     assertEquals(2, dataMaps(2)("y").length)
     assertEquals(3, dataMaps(3)("y").length)
-//=======
-//    val fs = ds2.unwrap.asInstanceOf[Function].iterator.map(_.range.asInstanceOf[Function]).toList
-//    assertEquals(2, fs.length)
-//    //AsciiWriter.write(Dataset(fs(0)))
-//    //assertEquals(2, fs(0).getLength) //TODO: currently returning only matching samples, not complete spectrum, but md has orig length
-//    assertEquals(3, fs(1).getLength)
-//>>>>>>> refs/heads/dataset-not-tuple
   }
   
   //@Test

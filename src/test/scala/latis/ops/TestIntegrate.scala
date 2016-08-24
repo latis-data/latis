@@ -19,7 +19,10 @@ class TestIntegrate {
   @Test
   def test_canonical = {
     val expected = Real(3.456E8)
-    assertEquals(expected, RiemannTrapezoidIntegration()(TestDataset.canonical).unwrap)
+    RiemannTrapezoidIntegration()(TestDataset.canonical) match {
+      case Dataset(v) => assertEquals(expected, v)
+      case _ => fail()
+    }
   }
   
   //TODO: error?
@@ -59,20 +62,29 @@ class TestIntegrate {
   def test_function_of_scalars = {
     val ds = TestDataset.function_of_scalar
     val expected = Real(2)
-    assertEquals(expected, RiemannTrapezoidIntegration()(ds).unwrap)
+    RiemannTrapezoidIntegration()(ds) match {
+      case Dataset(v) => assertEquals(expected, v)
+      case _ => fail()
+    }
   }
   
   @Test
   def test_function_of_functions = {
     val ds = TestDataset.function_of_functions
     val expected = Sample(Integer(Metadata("x"), 0), Real(2))
-    assertEquals(expected, RiemannTrapezoidIntegration()(ds).unwrap.asInstanceOf[Function].iterator.next)
+    RiemannTrapezoidIntegration()(ds) match {
+      case Dataset(v) => assertEquals(expected, v.asInstanceOf[Function].iterator.next)
+      case _ => fail()
+    }
   }
   
   @Test
   def test_empty_function = {
     val ds = TestDataset.empty_function
-    assertEquals(Real(0), RiemannTrapezoidIntegration()(ds).unwrap)
+    RiemannTrapezoidIntegration()(ds) match {
+      case Dataset(v) => assertEquals(Real(0), v)
+      case _ => fail()
+    }
   }
   
   @Test
@@ -82,9 +94,9 @@ class TestIntegrate {
                        Sample(Real(4), Real(3)))
     val ds = Dataset(Function(samples))
     val ds2 = RiemannTrapezoidIntegration()(ds)
-    ds2.unwrap match {
-      case Number(n) => assertEquals(8.0, n, 0.0)
-      case _ => fail
+    ds2 match {
+      case Dataset(Number(n)) => assertEquals(8.0, n, 0.0)
+      case _ => fail()
     }
   } 
   
@@ -96,8 +108,8 @@ class TestIntegrate {
                        Sample(Real(3.5), Real(8.610772692918544E-6)))
     val ds = Dataset(Function(samples))
     val ds2 = NewtonCotesIntegration()(ds)
-    ds2.unwrap match {
-      case Number(n) => assertEquals(3.41806e-05, n, 1e-8)
+    ds2 match {
+      case Dataset(Number(n)) => assertEquals(3.41806e-05, n, 1e-8)
       //IDL's int_tabulated (5-point Newton-Cotes) produces 3.41806e-05
       //Ours produces 3.4326066929679656E-5
       case _ => fail

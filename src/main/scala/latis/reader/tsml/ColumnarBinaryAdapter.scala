@@ -13,6 +13,7 @@ import latis.data.Data
 import latis.data.value.DoubleValue
 import latis.data.value.LongValue
 import latis.data.value.StringValue
+import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Integer
 import latis.dm.Real
@@ -63,10 +64,14 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
    * A list of Functions in the Dataset. Assumes Functions are nested linearly;
    * i.e. there are no Tuples with more than one Function.
    */
-  val functions: List[Function] = { 
-    if(getOrigDataset.unwrap.findFunction.isEmpty) List()
+  val functions: List[Function] = {
+    val v = getOrigDataset match {
+      case Dataset(v) => v
+      case _ => null
+    }
+    if(v.findFunction.isEmpty) List()
     val b = ListBuffer[Function]()
-    b += getOrigDataset.unwrap.findFunction.get
+    b += v.findFunction.get
     while(b.last.getRange.findFunction.nonEmpty) b += b.last.getRange.findFunction.get
     b.toList
   }
@@ -80,7 +85,11 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
     val vars = getOrigScalars
     
     //How many times each value must be repeated in a table format
-    val reps = rowsPerSample(getOrigDataset.unwrap, 1)
+    val v = getOrigDataset match {
+      case Dataset(v) => v
+      case _ => null
+    }
+    val reps = rowsPerSample(v, 1)
     //inner Function domains must be looped because they are repeated for each outer domain Sample
     val loops = functions.map(_.getRange.findFunction).flatten.map(_.getDomain)
     

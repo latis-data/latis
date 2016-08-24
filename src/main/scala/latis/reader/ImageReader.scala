@@ -55,7 +55,9 @@ class ImageReader extends DatasetAccessor {
   }
 
   def close {
-    if (url != null) inputStream.close()
+    try{ if (!url.isEmpty) inputStream.close() } catch {
+      case _: Exception => 
+    }
   }
 }
 

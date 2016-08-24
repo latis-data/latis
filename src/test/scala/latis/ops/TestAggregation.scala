@@ -52,7 +52,10 @@ class TestAggregation {
     val agg = TileAggregation()
     val ds = agg(ds1, ds2)
     //AsciiWriter.write(ds)       
-    val v = ds.unwrap
+    val v = ds match {
+      case Dataset(v) => v
+      case _ => null
+    }
     assert(v.isInstanceOf[Function]) //successfully aggregated into one Function
     assertEquals("(T -> A)", ds.toString)
     assertEquals(20, ds.getLength) //20 samples

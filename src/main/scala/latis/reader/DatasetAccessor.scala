@@ -2,12 +2,13 @@ package latis.reader
 
 import latis.dm.Dataset
 import latis.ops.Operation
-import latis.util.LatisProperties
+import latis.util._
 import com.typesafe.scalalogging.LazyLogging
 import latis.reader.tsml.ml.TsmlResolver
 import latis.util.ReflectionUtils
 import latis.reader.tsml.TsmlReader
 import latis.util.CacheManager
+import java.net.URL
 
 /**
  * Base class that provide data access for a Dataset.
@@ -27,6 +28,20 @@ abstract class DatasetAccessor {
    */
   def getDataset(operations: Seq[Operation]): Dataset
   
+  /**
+   * Get the URL of the data source from this adapter's definition.
+   * This will come from the adapter's 'location' attribute.
+   * It will try to resolve relative paths by looking in the classpath
+   * then looking in the current working directory.
+   */
+  def getUrl: URL = {
+    //TODO: borrowed from TsmlAdapter, can we share this impl?
+    //Note, can't be relative to the tsml file since we only have xml here. Tsml could be from any source.
+    properties.get("location") match {
+      case Some(loc) => StringUtils.getUrl(loc)
+      case None => throw new RuntimeException("No 'location' defined for dataset.")
+    }
+  }
   
   /**
    * Release any resources that this accessor acquired.

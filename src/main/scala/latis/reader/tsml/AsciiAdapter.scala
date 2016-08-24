@@ -183,7 +183,8 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
    */
   def extractValues(record: String): Seq[String] = splitAtDelim(record)
   
-  def splitAtDelim(str: String) = str.trim.split(getDelimiter)
+  def splitAtDelim(str: String) = str.trim.split(getDelimiter, -1)
+  //Note, use "-1" so trailing ","s will yield empty strings.
 
 }
 

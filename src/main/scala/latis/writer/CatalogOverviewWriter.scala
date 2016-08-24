@@ -26,7 +26,11 @@ class CatalogOverviewWriter extends Writer {
   }
   
   def write(dataset: Dataset) {
-    writeVariable(dataset.unwrap)
+    val v = dataset match {
+      case Dataset(v) => v
+      case _ => null
+    }
+    writeVariable(v)
     printer.flush()
   }
   
