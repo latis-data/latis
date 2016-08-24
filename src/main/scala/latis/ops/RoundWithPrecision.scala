@@ -7,7 +7,15 @@ import scala.math.BigDecimal.RoundingMode
 
 class RoundWithPrecision(name: String, digits: Option[Int] = None) extends Operation {
   val errorMessage: String = "Precision must be a postive integer"
- 
+
+  override def applyToSample(sample: Sample): Option[Sample] = {
+    (applyToVariable(sample.domain), applyToVariable(sample.range)) match {
+      case (Some(d), Some(r)) => Some(Sample(d, r))
+      //if applying to either variable fails, invalidate teh whole sample (?)
+      case _ => None
+    }
+  }
+
   override def applyToScalar(scalar: Scalar): Option[Scalar] = {
     val roundTo: Int = (digits, scalar.getMetadata("precision")) match {
       case (Some(i), _) if i.toInt < 0 => throw new Error(errorMessage)
