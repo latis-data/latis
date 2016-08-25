@@ -9,7 +9,7 @@ import latis.writer.AsciiWriter
 import latis.data.value.LongValue
 import latis.data.value.DoubleValue
 
-class TestSotringOperation {
+class TestSortingOperation {
   
   lazy val f1 = {
     val f = (p: (Int, Int)) => Tuple(Real(Metadata("longitude"), p._1), Real(Metadata("latitude"), p._2))
