@@ -8,6 +8,8 @@ import org.junit._
 import Assert._
 import latis.data.value.DoubleValue
 import latis.metadata.Metadata
+import latis.ops.RoundWithPrecision
+import latis.ops.RoundWithSigfigs
 
 class TestDoubleValue {
 
@@ -32,9 +34,18 @@ class TestDoubleValue {
   @Test
   def rounding {
     //AsciiWriter.write(TestDataset.function_of_scalar_with_rounding)
-    val data = TestDataset.function_of_scalar_with_rounding.toDoubles
-    assertEquals(2.0, data(0)(2), 0.0)
-    assertEquals(120, data(1)(1), 0.0)
+    val ds = TestDataset.function_of_scalar_with_rounding
+    val ds2 = RoundWithPrecision("a")(ds) 
+    val ds3 = RoundWithSigfigs("b")(ds2)
+
+    ds3 match {
+      case Dataset(Function(it)) => it.next match {
+        case Sample(Real(r), Integer(i)) => {
+          assertEquals(r, -0.00, 0.0)
+          assertEquals(i, 100, 0.0)
+        }
+      }
+    }
   }
   
   @Test @Ignore //we are not getting the expected behavior in text output

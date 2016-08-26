@@ -7,24 +7,6 @@ trait Number { this: Scalar =>
   def doubleValue: Double = getNumberData.doubleValue.toDouble
   def longValue: Long = getNumberData.longValue.toLong
   def intValue: Int = getNumberData.intValue.toInt
-  
-  def applyRounding(d: Double): Double = (this.getMetadata("sigfigs"), this.getMetadata("precision")) match {
-    case (None, None) => d
-    case (Some(sf), None) => {
-      val s = math.pow(10, sf.toInt - math.log10(math.abs(d)).ceil)
-      (math.rint(d * s)) / s
-    }
-    case (None, Some(p)) => {
-      val s = math.pow(10,p.toInt)
-      (math.rint(d * s)) / s
-    }
-    case (Some(sf), Some(p)) => {
-      val s1 = math.pow(10, sf.toInt - math.log10(math.abs(d)).ceil)  
-      val s2 = math.pow(10,p.toInt)
-      val s = math.min(s1,s2)
-      (math.rint(d * s)) / s
-    }
-  }
 }
 
 object Number {
