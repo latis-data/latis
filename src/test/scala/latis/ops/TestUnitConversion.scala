@@ -3,6 +3,7 @@ package latis.ops
 import org.junit._
 import Assert._
 import scala.collection.mutable.ArrayBuffer
+import latis.dm.Dataset
 import latis.dm.TestDataset
 import latis.writer.AsciiWriter
 
@@ -17,7 +18,10 @@ class TestUnitConversion {
     val data = ds2.toDoubleMap
     assertEquals(data("myTime").head, -24.0, 0)
         
-    val tv = ds2.unwrap.findVariableByName("time").get
+    val tv = ds2 match {
+      case Dataset(v) => v.findVariableByName("time").get
+      case _ => null
+    }
     //TODO: assertEquals("hours since 2000-01-02", tv.getMetadata("units").get)
   }
   

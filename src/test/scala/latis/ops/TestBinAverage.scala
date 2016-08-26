@@ -18,7 +18,10 @@ class TestBinAverage {
   @Test 
   def test_bin1 {
     val expected = Sample(Real(0.0),Tuple(Real(0),Real(Metadata("min"),0),Real(Metadata("max"),0),Real(Metadata("stddev"),Double.NaN),Integer(Metadata("count"),1)))
-    assertEquals(expected, BinAverage(1.0)(TestDataset.function_of_scalar).unwrap.asInstanceOf[Function].iterator.next)
+    BinAverage(1.0)(TestDataset.function_of_scalar) match {
+      case Dataset(v) => assertEquals(expected, v.asInstanceOf[Function].iterator.next)
+      case _ => fail()
+    }
   }
   @Test 
   def test_bin1_length {
@@ -28,7 +31,10 @@ class TestBinAverage {
   @Test 
   def test_bin2 {
     val expected = Sample(Real(0.5),Tuple(Real(0.5),Real(Metadata("min"),0),Real(Metadata("max"),1),Real(Metadata("stddev"),Math.sqrt(2)/2.0),Integer(Metadata("count"),2)))
-    assertEquals(expected, BinAverage(2.0)(TestDataset.function_of_scalar).unwrap.asInstanceOf[Function].iterator.next)
+    BinAverage(2.0)(TestDataset.function_of_scalar) match {
+      case Dataset(v) => assertEquals(expected, v.asInstanceOf[Function].iterator.next)
+      case _ => fail()
+    }
   }
   @Test
   def test_bin2_length{
@@ -38,7 +44,10 @@ class TestBinAverage {
   @Test 
   def test_bin3 {
     val expected = Sample(Real(1),Tuple(Real(1),Real(Metadata("min"),0),Real(Metadata("max"),2),Real(Metadata("stddev"),1),Integer(Metadata("count"),3)))
-    assertEquals(expected, BinAverage(3.0)(TestDataset.function_of_scalar).unwrap.asInstanceOf[Function].iterator.next)
+    BinAverage(3.0)(TestDataset.function_of_scalar) match {
+      case Dataset(v) => assertEquals(expected, v.asInstanceOf[Function].iterator.next)
+      case _ => fail()
+    }
   }
   @Test
   def test_bin3_length {
@@ -71,12 +80,12 @@ class TestBinAverage {
     ops += new BinAverageByWidth(60000.0) //1 minute
     val ds = TsmlReader("binave.tsml").getDataset(ops)
     //AsciiWriter.write(ds)
-    // ascii_iterative: (time -> (myReal, min, max, stddev, count))
-    // 1413417689533 -> (21.631854255497455, 21.22629925608635, 21.65319925546646, 0.0938258653030056, 60)
+    //ascii_iterative: (time -> (myReal, min, max, count))
+    //1.413417690033E12 -> (21.631854255497466, 21.22629925608635, 21.65319925546646, 60.0)
     val data = ds.toDoubleMap
     assertEquals(9, data("time").length)
     assertEquals(1413417690033.0, data("time").head, 0.0)
-    assertEquals(21.631854255497455, data("myReal").head, 0.0)
+    assertEquals(21.631854255497455, data("myReal").head, 1e-12)
   }
 
   @Test

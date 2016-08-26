@@ -37,13 +37,8 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
     else {
       //Get initial domain value so we know where to start,
       //default to first sample in the data if no startVal was provided in constructor
-      var tempStartValue: Double = 0  //'0' is arbitrary
-      if (startVal.isNaN) tempStartValue = getDomainValue(fit.peek)
-      else tempStartValue = startVal
+      var nextValue = if (startVal.isNaN) getDomainValue(fit.peek) else startVal
       
-      val startValue = tempStartValue //because this value should really be a val, not a var
-      var nextValue = startValue
-      var index = 0  //TODO: this is not used
       val domainMetadata = f.getDomain.getMetadata
       val rangeMetadata = reduce(f.getRange).getMetadata //first scalar
 
@@ -101,7 +96,6 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
    */
   private def getDomainValue(sample: Sample): Double = sample.domain match {
     case Number(d) => d
-    case t: Time => t.getJavaTime.toDouble
     case _ => throw new Error("BinAverage supports only one dimensional numeric domains.")
   }
   
@@ -110,16 +104,6 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
     //TODO: pattern match on range type so we can eventually extend this
     //TODO: make Function from these samples then apply mean, min, max?
     //TODO: consider CF binning conventions
-    //TODO: use count to weigh bins
-
-    /*
-     * TODO: remove missing values
-     * NaNs don't behave with min...
-     * use exclude_missing operation?
-     * use fill value instead of NaN to fill empty bins
-     * 
-     */
-    //val samples2 = samples.map()
     
     if (samples.isEmpty) None
     else {
@@ -133,27 +117,41 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
         case None => return None
       }
       
-      val meanValue = values.sum / values.length
+      //if the original data was already binned, use the counts to weigh the bins and ignore empty bins
+      val counts: Array[Double] = data.get("count") match {
+        case Some(cs) => cs //counts for each bin
+        case None => Array.fill(values.length)(1) //treat regular samples as bins of size 1
+      }
+      
+      //total number of samples going into the stats
+      val n = counts.sum 
+      val count = Real(Metadata("count"), n)
+      
+      //weigh by counts per bin
+      val meanValue = values.zip(counts).foldLeft(0.0)((s,p) => s + p._1 * p._2 / n) 
       val mean = Real(rangeTemplate.getMetadata, meanValue)
       
-      //if the original data was already binned (i.e. has min and max value) then use them.
+      //if the original data was already binned (i.e. has min and max value) then use them
+      //but not if the bin was empty
       val minValue = data.get("min") match {
-        case Some(ms) => ms.min
+        case Some(ms) => {
+          val vs = ms.zip(counts).filter(_._2 != 0).map(_._1)
+          if (vs.isEmpty) Double.NaN
+          else vs.min
+        }
         case None => values.min
       }
       val min = Real(Metadata("min"), minValue)
       
       val maxValue = data.get("max") match {
-        case Some(ms) => ms.max
+        case Some(ms) => {
+          val vs = ms.zip(counts).filter(_._2 != 0).map(_._1)
+          if (vs.isEmpty) Double.NaN
+          else vs.max
+        }
         case None => values.max
       }
       val max = Real(Metadata("max"), maxValue)
-      
-      val countValue = data.get("count") match {
-        case Some(cs) => cs.sum
-        case None => values.length
-      }
-      val count = Real(Metadata("count"), countValue)
       
       Some(Tuple(mean, min, max, count))
     }

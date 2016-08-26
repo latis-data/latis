@@ -28,5 +28,5 @@ node_modules
 # Editor backups
 *~
 
-# Swap files
+# swp files
 *.swp

@@ -8,6 +8,7 @@ import scala.collection.Seq
 import latis.time.Time
 import latis.data.value.StringValue
 import latis.data.value.LongValue
+import latis.time.TimeFormat
 
 /**
  * Base type for all Variables in the LaTiS data model.
@@ -60,7 +61,26 @@ trait Variable {
       val md = t.getMetadata
       t match {
         case _: Text => data match {
-          case sv: StringValue => new Time(scale, md, data) with Text
+          case sv: StringValue => new Time(scale, md, sv) with Text
+          //If numeric, assume ms since 1970 and convert to original time format
+          case LongValue(l) => {
+            md.get("units") match {
+              case Some(s) => {
+                val time = TimeFormat(s).format(l)
+                new Time(scale, md, StringValue(time)) with Text
+              }
+              case None => throw new UnsupportedOperationException("Time has no units.")
+            }
+          }
+          case DoubleValue(d) => {
+            md.get("units") match {
+              case Some(s) => {
+                val time = TimeFormat(s).format(d.toLong)
+                new Time(scale, md, StringValue(time)) with Text
+              }
+              case None => throw new UnsupportedOperationException("Time has no units.")
+            }
+          }
           case _ => throw new UnsupportedOperationException("Text must be constructed with a StringValue.")
         }
         case _: Real => data match {
@@ -69,6 +89,7 @@ trait Variable {
         }
         case _: Integer => data match {
           case lv: LongValue => new Time(scale, md, data) with Integer
+          case dv: DoubleValue => new Time(scale, md, data) with Integer
           case _ => throw new UnsupportedOperationException("Integer must be constructed with a LongValue.")
         }
       }
@@ -79,10 +100,12 @@ trait Variable {
     }
     case _: Integer => data match {
       case lv: LongValue => Integer(this.getMetadata, lv)
+      case dv: DoubleValue => Integer(this.getMetadata, LongValue(dv.longValue))
       case _ => throw new UnsupportedOperationException("Integer must be constructed with a LongValue.")
     }
     case _: Text    => data match {
       case sv: StringValue => Text(this.getMetadata, sv)
+      case dv: DoubleValue => Text(this.getMetadata, StringValue(dv.doubleValue.toString))
       case _ => throw new UnsupportedOperationException("Text must be constructed with a StringValue.")
     }
   }

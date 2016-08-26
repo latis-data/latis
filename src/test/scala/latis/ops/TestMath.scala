@@ -16,16 +16,20 @@ class TestMath  {
   def real_addition {
     val pi = Real(3.14)
     val pi2 = pi + pi
-    val r = pi2.unwrap.asInstanceOf[Real].doubleValue
-    assertEquals(6.28, r, 0.0)
+    pi2 match {
+      case Dataset(v) => assertEquals(6.28, v.asInstanceOf[Real].doubleValue, 0.0)
+      case _ => fail()
+    }
   }  
  
   @Test
   def real_multiplication {
     val pi = Real(3.14)
     val pi2 = pi * 2
-    val r = pi2.unwrap.asInstanceOf[Real].doubleValue
-    assertEquals(6.28, r, 0.0)
+    pi2 match {
+      case Dataset(v) => assertEquals(6.28, v.asInstanceOf[Real].doubleValue, 0.0)
+      case _ => fail()
+    }
   }
 
   //@Test

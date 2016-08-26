@@ -41,4 +41,6 @@ object LimitFilter extends OperationFactory {
   }
     
   def apply(limit: Int): LimitFilter = new LimitFilter(limit)
+
+  def unapply(lf: LimitFilter): Option[Int] = Some(lf.limit)
 }

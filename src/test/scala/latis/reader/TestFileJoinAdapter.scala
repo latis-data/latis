@@ -2,7 +2,7 @@ package latis.reader
 
 import scala.collection.mutable.ArrayBuffer
 
-import org.junit.Assert.assertEquals
+import org.junit.Assert._
 import org.junit.Test
 
 import latis.ops.Operation
@@ -29,6 +29,12 @@ class TestFileJoinAdapter {
     val ds = TsmlReader("agg/agg_list_join.tsml").getDataset(ops)
     val data = ds.toDoubleMap
     assertEquals(19, data("T").head, 0.0)
+  }
+  
+  @Test
+  def empty = {
+    val ds = TsmlReader("agg/agg_list_join_empty.tsml").getDataset
+    assertTrue(ds.isEmpty)
   }
   
   @Test

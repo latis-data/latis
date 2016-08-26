@@ -3,6 +3,7 @@ package latis.ops
 import latis.dm.Function
 import latis.dm.Sample
 import latis.dm.Variable
+import latis.dm.Dataset
 import latis.dm.implicits.variableToDataset
 import latis.metadata.Metadata
 
@@ -15,7 +16,12 @@ import latis.metadata.Metadata
 class Total extends Operation {
   
   override def applyToFunction(f: Function): Option[Variable] = {
-    val addSamples = (s1: Sample, s2: Sample) => Sample(s2.domain, (s1.range + s2.range).unwrap)
+    val addSamples = (s1: Sample, s2: Sample) => {
+      s1.range+s2.range match {
+        case Dataset(v) => Sample(s2.domain, v)
+        case _ => Sample(s2.domain, null)
+      }
+    }
     
     val sample = f.iterator match {
       case e if(e.isEmpty) => null

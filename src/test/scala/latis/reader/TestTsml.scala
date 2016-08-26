@@ -1,7 +1,9 @@
 package latis.reader
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.fail
 import org.junit.Test
+import latis.dm.Dataset
 import latis.metadata.Catalog
 import latis.reader.tsml.TsmlReader
 import latis.reader.tsml.ml.DatasetMl
@@ -29,8 +31,13 @@ class TestTsml  {
   @Test
   def two_time {
     val ds = TsmlReader("datasets/test/two_time.tsml").getDataset
-    assert(ds.unwrap.toSeq(0).getMetadata("alias").isDefined)
-    assert(!ds.unwrap.toSeq(1).getMetadata("alias").isDefined)
+    ds match {
+      case Dataset(v) => {
+        assert(v.toSeq(0).getMetadata("alias").isDefined)
+        assert(!v.toSeq(1).getMetadata("alias").isDefined)
+      }
+      case _ => fail()
+    }
 //    Writer.fromSuffix("meta").write(ds)
   }
   

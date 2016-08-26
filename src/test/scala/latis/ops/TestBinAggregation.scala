@@ -2,6 +2,7 @@ package latis.ops
 
 import org.junit.Test
 import org.junit.Assert._
+import latis.dm.Dataset
 import latis.dm.TestDataset
 import latis.writer.AsciiWriter
 import latis.reader.tsml.TsmlReader
@@ -56,7 +57,10 @@ class TestBinAggregation {
   def average {
     val ds = TsmlReader("datasets/test/scalar.tsml").getDataset
     val op = BinAggregation(BinAggregation.AVERAGE, 3)
-    val it = op(ds).unwrap.findFunction.get.iterator
+    val it = op(ds) match {
+      case Dataset(v) => v.findFunction.get.iterator
+      case _ => null
+    }
     assertEquals(1.0, it.next.domain.getNumberData.doubleValue, 0)
     assertEquals(14.0, it.next.range.getNumberData.doubleValue, 0)
   }
