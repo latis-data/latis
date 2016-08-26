@@ -4,7 +4,6 @@ import latis.dm._
 import latis.metadata._
 import org.junit._
 import Assert._
-import latis.ops.TakeMaxVersion
 
 class TestTakeMaxVersion {
   
