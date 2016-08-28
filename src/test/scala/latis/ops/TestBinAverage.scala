@@ -18,7 +18,10 @@ class TestBinAverage {
   @Test 
   def test_bin1 {
     val expected = Sample(Real(0.0),Tuple(Real(0),Real(Metadata("min"),0),Real(Metadata("max"),0),Real(Metadata("stddev"),Double.NaN),Integer(Metadata("count"),1)))
-    assertEquals(expected, BinAverage(1.0)(TestDataset.function_of_scalar).unwrap.asInstanceOf[Function].iterator.next)
+    BinAverage(1.0)(TestDataset.function_of_scalar) match {
+      case Dataset(v) => assertEquals(expected, v.asInstanceOf[Function].iterator.next)
+      case _ => fail()
+    }
   }
   @Test 
   def test_bin1_length {
@@ -28,7 +31,10 @@ class TestBinAverage {
   @Test 
   def test_bin2 {
     val expected = Sample(Real(0.5),Tuple(Real(0.5),Real(Metadata("min"),0),Real(Metadata("max"),1),Real(Metadata("stddev"),Math.sqrt(2)/2.0),Integer(Metadata("count"),2)))
-    assertEquals(expected, BinAverage(2.0)(TestDataset.function_of_scalar).unwrap.asInstanceOf[Function].iterator.next)
+    BinAverage(2.0)(TestDataset.function_of_scalar) match {
+      case Dataset(v) => assertEquals(expected, v.asInstanceOf[Function].iterator.next)
+      case _ => fail()
+    }
   }
   @Test
   def test_bin2_length{
@@ -38,7 +44,10 @@ class TestBinAverage {
   @Test 
   def test_bin3 {
     val expected = Sample(Real(1),Tuple(Real(1),Real(Metadata("min"),0),Real(Metadata("max"),2),Real(Metadata("stddev"),1),Integer(Metadata("count"),3)))
-    assertEquals(expected, BinAverage(3.0)(TestDataset.function_of_scalar).unwrap.asInstanceOf[Function].iterator.next)
+    BinAverage(3.0)(TestDataset.function_of_scalar) match {
+      case Dataset(v) => assertEquals(expected, v.asInstanceOf[Function].iterator.next)
+      case _ => fail()
+    }
   }
   @Test
   def test_bin3_length {
@@ -60,7 +69,7 @@ class TestBinAverage {
     assertEquals(1, BinAverage(86400000.0*3)(TestDataset.time_series).getLength)
   }
 
-//-----BinAverageByWidth----------------------------------------------------------  
+  //-----BinAverageByWidth----------------------------------------------------------  
   
   @Test
   def quikscat_telemetry_data_by_width {
@@ -230,6 +239,11 @@ class TestBinAverage {
     //val data = ds.toDoubleMap
     //assertEquals(0, data("count").head, 0.0)
   }
+
+  @Test
+  def optional_param_test_zero = {
+    assertEquals(3, BinAverageByWidth(86400000.0, 0.0)(TestDataset.time_series).getLength)
+  }
   
   
 //-----deprecated test--------------------------------------------------------------------------------------------------  
@@ -255,4 +269,5 @@ class TestBinAverage {
 //    assertEquals(1413417690033.0, data("time").head, 0.0)
 //    assertEquals(21.631854255497455, data("myReal").head, 0.0)
 //  }
+  
 }
