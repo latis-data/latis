@@ -33,7 +33,6 @@ class LatisServer extends HttpServlet with LazyLogging {
       val query = request.getQueryString match {
         case s: String => {
           val parts = s.split("&")
-          println("parts: " + parts(0))
           parts.map(x => URLDecoder.decode(x, "UTF-8"))
           }
         case _ => Array("")
