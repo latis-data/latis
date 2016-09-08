@@ -12,27 +12,22 @@ class ErrorWriter(response: HttpServletResponse) {
     case httpe: HTTPException => response.sendError(httpe.getStatusCode, httpe.getMessage)
     
     case _ => {
-      if(response.isCommitted()) {
-        throw e;
-      }
-      else {
-        response.reset //TODO: what are the side effects?
-        //Note, must set status before getting output stream?
-        //TODO: consider more specific errors, this is always 500
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-        response.setContentType("text/plain")
+      response.reset //TODO: what are the side effects?
+      //Note, must set status before getting output stream?
+      //TODO: consider more specific errors, this is always 500
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+      response.setContentType("text/plain")
+  
+      val errorType = e.getClass.getSimpleName
+      val rawMsg = e.getMessage
+      val errorMsg = if (rawMsg == null) "" else rawMsg
     
-        val errorType = e.getClass.getSimpleName
-        val rawMsg = e.getMessage
-        val errorMsg = if (rawMsg == null) "" else rawMsg
-      
-        val writer = new PrintWriter(response.getOutputStream)
-        writer.println("LaTiS Error: {")
-        writer.println(s"""  $errorType: "$errorMsg"""") // hello world    
-        writer.println("}")
-        writer.flush()
-        response.flushBuffer()
-      }
+      val writer = new PrintWriter(response.getOutputStream)
+      writer.println("LaTiS Error: {")
+      writer.println(s"""  $errorType: "$errorMsg"""") // hello world    
+      writer.println("}")
+      writer.flush()
+      response.flushBuffer()
     }
   
   }
