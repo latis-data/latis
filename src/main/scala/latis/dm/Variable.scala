@@ -41,12 +41,12 @@ trait Variable extends Ordered[Variable] {
   
   /*
    * Helper method to compare two sequences of variables recursively.
-   * Used below in the below compare method.
+   * Used below to compare Tuples.
    */
-  def comparePairs2(s1: Seq[Variable], s2: Seq[Variable]): Int = (s1,s2) match {
+  def comparePairs(s1: Seq[Variable], s2: Seq[Variable]): Int = (s1,s2) match {
     case (Nil,Nil) => 0
     case (_,_) => s1.head compare s2.head match {
-      case 0 => comparePairs2(s1.tail,s2.tail)
+      case 0 => comparePairs(s1.tail,s2.tail) //if the first pair matches recursively test the next pair
       case c: Int => c
     }
   }
@@ -59,10 +59,10 @@ trait Variable extends Ordered[Variable] {
     case (Number(d1), Text(s2)) => d1 compare StringUtils.toDouble(s2) //string may become NaN
     case (Text(s1), Number(d2)) => s1 compare d2.toString
     case (Tuple(a),Tuple(b)) => {
-      if (a.length != b.length) { throw new Exception("Error: Can't sort tuples of different lengths!") }
-      comparePairs2(a,b)
+      if (a.length != b.length) { throw new Exception("Error: Can't compare tuples of different lengths!") }
+      comparePairs(a,b)
     }
-    case (f1: Function,f2: Function) => throw new Exception("Error: Can't sort two latis functions!")
+    case (f1: Function,f2: Function) => throw new Exception("Error: Can't compare two LaTiS Functions!")
 
   }
   
