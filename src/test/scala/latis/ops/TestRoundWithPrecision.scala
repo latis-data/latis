@@ -27,11 +27,8 @@ class TestRoundWithPrecision {
     val ds2: Dataset = RoundWithPrecision("u", 2)(ds)
 
     ds2 match {
-      case Dataset(Function(it)) => {
-        val data = it.toSeq
-        data(0) match {
+      case Dataset(Function(it)) => it.next match {
           case Sample((_, Real(r))) => assertEquals(asserts(0), r, 0.0)
-        }
       }
     }
   }

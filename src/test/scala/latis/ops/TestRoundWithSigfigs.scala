@@ -26,11 +26,8 @@ class TestRoundWithSigfigs {
     val ds2: Dataset = RoundWithSigfigs("u", 2)(ds)
 
     ds2 match {
-      case Dataset(Function(it)) => {
-        val data = it.toSeq
-        data(0) match {
+      case Dataset(Function(it)) => it.next match {
           case Sample((_, Real(r))) => assertEquals(asserts(0), r, 0.0)
-        }
       }
     }
   }
@@ -47,11 +44,8 @@ class TestRoundWithSigfigs {
     val ds2: Dataset = RoundWithSigfigs("u", 3)(ds)
 
     ds2 match {
-      case Dataset(Function(it)) => {
-        val data = it.toSeq
-        data(0) match {
+      case Dataset(Function(it)) => it.next match {
           case Sample((_, Integer(l))) => assertEquals(asserts(0), l, 0.0)
-        }
       }
     }
   }
