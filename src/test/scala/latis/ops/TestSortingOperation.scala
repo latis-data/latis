@@ -59,8 +59,8 @@ class TestSortingOperation {
    
   @Test 
   def can_compare_tuples_of_integers {
-    val x = Seq(Integer(1),Integer(0))
-    val res = VarSort(x)
+    val x: Seq[Variable] = Seq(Integer(1),Integer(0))
+    val res = x.sorted
     List(0,1).zip(res).map(f => {
       val num = f._2 match {
         case Integer(i) => i
@@ -71,8 +71,8 @@ class TestSortingOperation {
   
   @Test 
   def can_compare_tuples_of_Text {
-    val x = Seq(Text("b"),Text("a"))
-    val res = VarSort(x)
+    val x: Seq[Variable] = Seq(Text("b"),Text("a"))
+    val res = x.sorted
     List("a","b").zip(res).map(f => {
       val s = f._2 match {
         case Text(t) => t
@@ -83,8 +83,8 @@ class TestSortingOperation {
   
   @Test 
   def can_compare_tuples_of_Real {
-    val x = Seq(Real(2),Real(1))
-    val res = VarSort(x)
+    val x: Seq[Variable] = Seq(Real(2),Real(1))
+    val res = x.sorted
     List(1,2).zip(res).map(f => {
       val num = f._2 match {
         case Real(r) => r
@@ -95,8 +95,8 @@ class TestSortingOperation {
   
   @Test
   def can_compare_tuples_of_tuples_of_ints {
-    val x = Seq(Tuple(Integer(1),Integer(0)),Tuple(Integer(0),Integer(1)))
-    val res = VarSort(x)
+    val x: Seq[Variable] = Seq(Tuple(Integer(1),Integer(0)),Tuple(Integer(0),Integer(1)))
+    val res = x.sorted
     
     res.head match {
       case Tuple(t) => {
@@ -118,8 +118,8 @@ class TestSortingOperation {
   
     @Test
   def can_compare_tuples_of_tuples_of_reals {
-    val x = Seq(Tuple(Real(1),Real(0)),Tuple(Real(0),Real(1)))
-    val res = VarSort(x)
+    val x: Seq[Variable] = Seq(Tuple(Real(1),Real(0)),Tuple(Real(0),Real(1)))
+    val res = x.sorted
     
     res.head match {
       case Tuple(t) => {
@@ -141,8 +141,8 @@ class TestSortingOperation {
   
   @Test
   def can_compare_tuples_of_tuples_of_mixed {
-    val x = Seq(Tuple(Real(1),Integer(0)),Tuple(Real(0),Integer(1)))
-    val res = VarSort(x)
+    val x: Seq[Variable] = Seq(Tuple(Real(1),Integer(0)),Tuple(Real(0),Integer(1)))
+    val res = x.sorted
     res.head match {
       case Tuple(t) => {
         val a = t.head
@@ -163,8 +163,8 @@ class TestSortingOperation {
   
   @Test(expected = classOf[Exception])
   def can_compare_tuples_of_tuples_of_different_lengths {
-    val x = Seq(Tuple(Real(1),Integer(0)),Tuple(Real(0)))
-    val res = VarSort(x)
+    val x: Seq[Variable] = Seq(Tuple(Real(1),Integer(0)),Tuple(Real(0)))
+    val res = x.sorted
   }
   
   @Test(expected = classOf[Exception])
@@ -175,7 +175,7 @@ class TestSortingOperation {
     val ff2 = f2 match {
       case Dataset(f: Function) => f
     }
-    val x = Seq(Tuple(ff1),Tuple(ff2))
-    val res = VarSort(x)
+    val x: Seq[Variable] = Seq(Tuple(ff1),Tuple(ff2))
+    val res = x.sorted
   }
 }

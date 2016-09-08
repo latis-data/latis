@@ -1,13 +1,15 @@
 package latis.ops
 
 import latis.dm.Function
+import latis.dm.Variable
 
 
 class Sort extends Operation {
     override def applyToFunction(function: Function) = {
     
     // get samples from function and sort them
-    val sortedSamples = VarSort(function.iterator.toSeq)
+    val samples: Seq[Variable] = function.iterator.toSeq
+    val sortedSamples = samples.sorted
     
     // update length metadata
     val md = function.getMetadata + ("length" -> sortedSamples.length.toString)
