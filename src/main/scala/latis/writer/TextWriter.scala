@@ -171,13 +171,3 @@ class TextWriter extends Writer {
   protected var prepend = List[String]()
 }
 
-object TextWriter extends TextWriter{
-  def apply(out: OutputStream): TextWriter = {
-    val writer = new TextWriter()
-    writer.setOutputStream(out)
-    writer
-  }
-  
-  def apply(): TextWriter = TextWriter(System.out)
-}
-

@@ -10,6 +10,7 @@ import java.io.File
 import latis.dm._
 import latis.metadata.Metadata
 import latis.reader.DatasetAccessor
+import java.io.ByteArrayOutputStream
 
 class TestTextWriter extends WriterTest{
 
@@ -45,37 +46,34 @@ class TestTextWriter extends WriterTest{
   }
   
   @Test
-  def makeScalar_with_precision_from_dataset = {
+  def textWriter_with_precision_from_dataset = {
     // Basic testing for precision metadata
     val ds = DatasetAccessor.fromName("ascii_precision").getDataset
     val assertArray: Array[String] = Array(
                                             "0.12",
                                             "123.12"
                                           )
-    ds match {
-      case Dataset(Function(it)) => for(cmpStr <- assertArray) it.next match {
-        case Sample(_, s:Scalar) => {
-          assertEquals(cmpStr, latis.writer.TextWriter.makeScalar(s))
-        }
-      }
-    }
+    val output = new ByteArrayOutputStream()
+    Writer(output, "txt").write(ds)
+    val outputArray = output.toString().split("\n")
+    val testArray = outputArray.map(v => v.split(", ")(1))
+    assertEquals(assertArray(0), testArray(0))
+    assertEquals(assertArray(1), testArray(1))
   }
 
   @Test
-  def makeScalar_with_sigfigs_from_dataset = {
+  def textWriter_with_sigfigs_from_dataset = {
     // Basic testing for sigfig metadata
     val ds = DatasetAccessor.fromName("ascii_sigfigs").getDataset
     val assertArray: Array[String] = Array(
-                                            "0.12",
-                                            "1.2e+02"
+                                            "0.12", "1.2e+02"
                                           )
-    ds match {
-      case Dataset(Function(it)) => for(cmpStr <- assertArray) it.next match {
-        case Sample(_, s:Scalar) => {
-          assertEquals(cmpStr, latis.writer.TextWriter.makeScalar(s))
-        }
-      }
-    }
+    val output = new ByteArrayOutputStream()
+    Writer(output, "txt").write(ds)
+    val outputArray = output.toString().split("\n")
+    val testArray = outputArray.map(v => v.split(", ")(1))
+    assertEquals(assertArray(0), testArray(0))
+    assertEquals(assertArray(1), testArray(1))
   }
 
   @Test
@@ -84,9 +82,18 @@ class TestTextWriter extends WriterTest{
 
     val testScalar: Real = Real(prec2_sigfig2, 1234.421)
 
+    val ds = Dataset(Function(Seq(testScalar)))
+
     val cmpStr: String = "1234.42"
 
-    assertEquals(cmpStr, latis.writer.TextWriter.makeScalar(testScalar))
+    val output = new ByteArrayOutputStream()
+    Writer(output, "txt").write(ds)
+    // filter just gets rid of the newline, no need
+    // to go with the same methods as above since
+    // there's only one sample, so no need to separate
+    // data lines, points, etc
+    val out = output.toString().filter( _ >= ' ')
+    assertEquals(cmpStr, out)
   }
 
   @Test
@@ -97,28 +104,29 @@ class TestTextWriter extends WriterTest{
 
     val assertArray: Array[String] = Array("42", "42", "4.2e+03")
 
-    val testArray: Array[Integer] = Array(
-                                           Integer(prec0, 42),
-                                           Integer(prec2, 42),
-                                           Integer(prec2_sigfig2, 4212)
-                                         )
+    val ds = Dataset(Function(Seq(
+                                  Integer(prec0, 42),
+                                  Integer(prec2, 42),
+                                  Integer(prec2_sigfig2, 4212)
+                                )))
+
+    val output = new ByteArrayOutputStream()
+    Writer(output, "txt").write(ds)
+    val testArray = output.toString().split("\n")
 
     for(i <- 0 until 2) {
       val cmpStr = assertArray(i)
       val testSclr = testArray(i)
-      assertEquals("Assertion failed for " +
-                    testSclr.getValue +
-                    " with precision " +
-                    testSclr.getMetadata("precision"),
+      assertEquals("Assertion failed for " + testSclr,
                     cmpStr, 
-                    latis.writer.TextWriter.makeScalar(testSclr))
+                    testSclr)
     }
     val cmpStr = assertArray(2)
     val testSclr = testArray(2)
     assertEquals(
                   "Assertion failed for ignoring precision when present with sigfigs",
                   cmpStr,
-                  latis.writer.TextWriter.makeScalar(testSclr)
+                  testSclr
                 )
                   
   }
@@ -139,21 +147,24 @@ class TestTextWriter extends WriterTest{
                                             "42.42345",
                                             "42.4234500000"
                                           )
-    val testArray: Array[Real] = Array(
-                                        Real(prec0, 42.42345),
-                                        Real(prec2, 42.42345),
-                                        Real(prec5, 42.42345),
-                                        Real(prec10, 42.42345)
-                                      )
+
+    val ds = Dataset(Function(Seq(
+                                  Real(prec0, 42.42345),                           
+                                  Real(prec2, 42.42345),
+                                  Real(prec5, 42.42345),
+                                  Real(prec10, 42.42345)
+                                )))
+
+    val output = new ByteArrayOutputStream()
+    Writer(output, "txt").write(ds)
+    val testArray = output.toString().split("\n")
+
     for(i <- 0 until 4) {
       val cmpStr = assertArray(i)
       val testSclr = testArray(i)
-      assertEquals("Assertion failed for " +
-                    testSclr.getValue +
-                    " with precision " +
-                    testSclr.getMetadata("precision"),
+      assertEquals("Assertion failed for " + testSclr,
                     cmpStr, 
-                    latis.writer.TextWriter.makeScalar(testSclr))
+                    testSclr)
     }
   }
 
@@ -174,28 +185,23 @@ class TestTextWriter extends WriterTest{
                                              "42123.00000"
                                            )
 
-    val testArray: Array[Integer] = Array(
-                                          Integer(sigf1, 42123),
-                                          Integer(sigf2, 42123),
-                                          Integer(sigf5, 42123),
-                                          Integer(sigf10, 42123)
-                                        )
+    val ds = Dataset(Function(Seq(
+                                  Integer(sigf1, 42123),
+                                  Integer(sigf2, 42123),
+                                  Integer(sigf5, 42123),
+                                  Integer(sigf10, 42123)
+                                )))
+    val output = new ByteArrayOutputStream()
+    Writer(output, "txt").write(ds)
+    val testArray = output.toString().split("\n")
 
     for(i <- 0 until 4) {
       val cmpStr = assertArray(i)
       val testSclr = testArray(i)
-      println(testSclr.getValue)
-      assertEquals(
-                    "Assertion failed for " +
-                    testSclr.getValue +
-                    " with significant figures " +
-                    testSclr.getMetadata("sigfigs"),
+      assertEquals("Assertion failed for " + testSclr,
                     cmpStr, 
-                    latis.writer.TextWriter.makeScalar(testSclr)
-                  )
+                    testSclr)
     }
-
-
   }
 
   @Test
@@ -212,25 +218,23 @@ class TestTextWriter extends WriterTest{
                                              "4.212300000"
                                            )
 
-    val testArray: Array[Real] = Array(
-                                        Real(sigf1, 4.2123),
-                                        Real(sigf2, 4.2123),
-                                        Real(sigf5, 4.2123),
-                                        Real(sigf10, 4.2123)
-                                      )
+    val ds = Dataset(Function(Seq(
+                                  Real(sigf1, 4.2123),
+                                  Real(sigf2, 4.2123),
+                                  Real(sigf5, 4.2123),
+                                  Real(sigf10, 4.2123)
+                                )))
+    val output = new ByteArrayOutputStream()
+    Writer(output, "txt").write(ds)
+    val testArray = output.toString().split("\n")
 
     for(i <- 0 until 4) {
       val cmpStr = assertArray(i)
       val testSclr = testArray(i)
-      println(testSclr.getValue)
       assertEquals(
-                    "Assertion failed for " +
-                    testSclr.getValue +
-                    " with significant figures " +
-                    testSclr.getMetadata("sigfigs"),
+                    "Assertion failed for " + testSclr,
                     cmpStr, 
-                    latis.writer.TextWriter.makeScalar(testSclr)
-                  )
+                    testSclr)
     }
   }
 }
