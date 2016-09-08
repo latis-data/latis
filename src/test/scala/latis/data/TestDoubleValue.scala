@@ -42,7 +42,7 @@ class TestDoubleValue {
       case Dataset(Function(it)) => it.next match {
         case Sample(Real(r), Integer(i)) => {
           assertEquals(r, -0.00, 0.0)
-          assertEquals(i, 100, 0.0)
+          assertEquals(i, 100)
         }
       }
     }

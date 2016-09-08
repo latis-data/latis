@@ -7,8 +7,7 @@ import latis.metadata.Metadata
 
 class TestRoundWithPrecision {
   val test: Metadata = Metadata("test")
-  val testMetadata1: Metadata = Metadata(("name", "u"), ("precision", "2"))
-  val testMetadata2: Metadata = Metadata(("name", "u"))
+  val testMetadata: Metadata = Metadata(("name", "u"))
 
   val testInteger1: Integer = Integer(Metadata("t"), 1)
   val testInteger2: Integer = Integer(Metadata("t"), 2)
@@ -18,7 +17,7 @@ class TestRoundWithPrecision {
 
   @Test
   def test_user_specified_precision {
-    val testSample: Sample = Sample(testInteger1, Real(testMetadata2, 2.123))
+    val testSample: Sample = Sample(testInteger1, Real(testMetadata, 2.123))
 
     val testSamples: List[Sample] = List(testSample)
 
@@ -41,7 +40,7 @@ class TestRoundWithPrecision {
   @Test
   def test_invalid_user_precision {
 
-    val testSample: Sample = Sample(testInteger1, Real(testMetadata2, 2.123))
+    val testSample: Sample = Sample(testInteger1, Real(testMetadata, 2.123))
 
     val testSamples: List[Sample] = List(testSample)
 
