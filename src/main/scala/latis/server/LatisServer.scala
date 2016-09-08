@@ -115,7 +115,7 @@ class LatisServer extends HttpServlet with LazyLogging {
         // then we can't use the ErrorWriter because it needs to set the
         // HTTP Status Code and a few extra headers, and you can't do that
         // once you've started writing the response. In lieu of that, just
-        // make sure that the error makes it to the logs somehow.
+        // make sure that the error makes it to stdout/stderr somehow.
         if(response.isCommitted()) {
           System.err.println(e);
         }
