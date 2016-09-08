@@ -23,7 +23,7 @@ class TestOdering {
      * diverging implicit expansion for type scala.math.Ordering[latis.dm.Integer] 
      * starting with method comparatorToOrdering in trait LowPriorityOrderingImplicits
      */
-    val list2 = list.sorted(Integer(0)) 
+    val list2 = list.sorted(Integer(0)) //note, we are passing the Integer as an explicit Ordering (LATIS-532)
     val list3 = list2.map(i => i match {case Integer(n) => n})
     assertEquals(1, list3(0))
     assertEquals(2, list3(1))
