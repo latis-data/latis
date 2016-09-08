@@ -7,8 +7,7 @@ import latis.metadata.Metadata
 
 class TestRoundWithSigfigs {
   val test: Metadata = Metadata("test")
-  val testMetadata1: Metadata = Metadata(("name", "u"), ("sigfigs", "2"))
-  val testMetadata2: Metadata = Metadata(("name", "u"))
+  val testMetadata: Metadata = Metadata(("name", "u"))
 
   val testInteger1: Integer = Integer(Metadata("t"), 1)
   val testInteger2: Integer = Integer(Metadata("t"), 2)
@@ -17,7 +16,7 @@ class TestRoundWithSigfigs {
 
   @Test
   def test_user_specified_sigfigs_reals {
-    val testSample: Sample = Sample(testInteger1, Real(testMetadata2, 2.123))
+    val testSample: Sample = Sample(testInteger1, Real(testMetadata, 2.123))
 
     val testSamples: List[Sample] = List(testSample)
 
@@ -38,7 +37,7 @@ class TestRoundWithSigfigs {
 
   @Test
   def test_user_specified_sigfigs_ints {
-    val testSample: Sample = Sample(testInteger1, Integer(testMetadata2, 2123))
+    val testSample: Sample = Sample(testInteger1, Integer(testMetadata, 2123))
 
     val testSamples: List[Sample] = List(testSample)
 
@@ -61,7 +60,7 @@ class TestRoundWithSigfigs {
   @Test
   def test_invalid_user_sigfigs {
 
-    val testSample: Sample = Sample(testInteger1, Real(testMetadata2, 2.123))
+    val testSample: Sample = Sample(testInteger1, Real(testMetadata, 2.123))
 
     val testSamples: List[Sample] = List(testSample)
 
