@@ -45,7 +45,7 @@ class TestRoundWithSigfigs {
 
     ds2 match {
       case Dataset(Function(it)) => it.next match {
-          case Sample((_, Integer(l))) => assertEquals(asserts(0), l, 0.0)
+          case Sample(_, Integer(l)) => assertEquals(asserts(0), l, 0.0)
       }
     }
   }
