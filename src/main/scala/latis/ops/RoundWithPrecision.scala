@@ -2,11 +2,11 @@ package latis.ops
 
 import latis.data.NumberData
 import latis.dm._
+import latis.util.StringUtils
 
 import scala.math.BigDecimal.RoundingMode
 
 class RoundWithPrecision(name: String, digits: Int) extends Operation {
-  val errorMessage: String = "Precision must be a postive integer"
 
   override def applyToSample(sample: Sample): Option[Sample] = {
     (applyToVariable(sample.domain), applyToVariable(sample.range)) match {
@@ -35,8 +35,16 @@ class RoundWithPrecision(name: String, digits: Int) extends Operation {
 object RoundWithPrecision extends OperationFactory {
 
   override def apply(args: Seq[String]): RoundWithPrecision = args match {
-    case Seq(n: String, d: String) => new RoundWithPrecision(n, d.toInt)
+    case Seq(n: String, d: String) if StringUtils.isNumeric(d) => apply(n, d.toInt)
+    case _ => throw new UnsupportedOperationException("Invalid arguments")
   }
   
-  def apply(n: String, d: Int): RoundWithPrecision = new RoundWithPrecision(n, d)
+  def apply(n: String, d: Int): RoundWithPrecision = {
+    if (d <= 0) {
+      throw new Error("Precision must be a postive integer")
+    }
+    else {
+      new RoundWithPrecision(n, d)
+    }
+  }
 }

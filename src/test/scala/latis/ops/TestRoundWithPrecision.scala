@@ -24,7 +24,8 @@ class TestRoundWithPrecision {
     val asserts: List[Double] = List(2.12)
 
     val ds: Dataset = Dataset(Function(testSamples, test), test)
-    val ds2: Dataset = RoundWithPrecision("u", 2)(ds)
+    val ds2: Dataset = RoundWithPrecision(Seq("u", "2"))(ds)
+    //val ds2: Dataset = RoundWithPrecision("u", 2)(ds)
 
     ds2 match {
       case Dataset(Function(it)) => it.next match {
@@ -44,6 +45,7 @@ class TestRoundWithPrecision {
     val ds: Dataset = Dataset(Function(testSamples, test), test)
     try {
       val ds2: Dataset = RoundWithPrecision("u", -1)(ds)
+      assertEquals("Error Checking Failed", 0, 1)
     }
     catch {
       case e: Error => assertEquals("Precision must be a postive integer", e.getMessage)
