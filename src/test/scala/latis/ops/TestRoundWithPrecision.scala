@@ -28,7 +28,7 @@ class TestRoundWithPrecision {
 
     ds2 match {
       case Dataset(Function(it)) => it.next match {
-          case Sample((_, Real(r))) => assertEquals(asserts(0), r, 0.0)
+          case Sample(_, Real(r)) => assertEquals(asserts(0), r, 0.0)
       }
     }
   }
