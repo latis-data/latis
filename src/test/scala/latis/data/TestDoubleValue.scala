@@ -35,14 +35,14 @@ class TestDoubleValue {
   def rounding {
     //AsciiWriter.write(TestDataset.function_of_scalar_with_rounding)
     val ds = TestDataset.function_of_scalar_with_rounding
-    val ds2 = RoundWithPrecision("a")(ds) 
-    val ds3 = RoundWithSigfigs("b")(ds2)
+    val ds2 = RoundWithPrecision("a", 2)(ds) 
+    val ds3 = RoundWithSigfigs("b", 1)(ds2)
 
     ds3 match {
       case Dataset(Function(it)) => it.next match {
         case Sample(Real(r), Integer(i)) => {
           assertEquals(r, -0.00, 0.0)
-          assertEquals(i, 100, 0.0)
+          assertEquals(i, 100)
         }
       }
     }
