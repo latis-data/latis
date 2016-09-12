@@ -61,6 +61,7 @@ class TestRoundWithSigfigs {
     val ds: Dataset = Dataset(Function(testSamples, test), test)
     try {
       val ds2: Dataset = RoundWithSigfigs("u", -1)(ds)
+      assertEquals("Error Checking Failed", 0, 1)
     }
     catch {
       case e: Error => assertEquals("Sigfigs must be greater than zero", e.getMessage)

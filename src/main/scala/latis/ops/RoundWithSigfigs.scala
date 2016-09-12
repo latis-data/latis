@@ -2,11 +2,11 @@ package latis.ops
 
 import latis.data.NumberData
 import latis.dm._
+import latis.util.StringUtils
 
 import scala.math.BigDecimal.RoundingMode
 
 class RoundWithSigfigs(name: String, digits: Int) extends Operation {
-  val errorMessage: String = "Sigfigs must be greater than zero"
 
   override def applyToSample(sample: Sample): Option[Sample] = {
     (applyToVariable(sample.domain), applyToVariable(sample.range)) match {
@@ -34,8 +34,16 @@ class RoundWithSigfigs(name: String, digits: Int) extends Operation {
 object RoundWithSigfigs extends OperationFactory {
 
   override def apply(args: Seq[String]): RoundWithSigfigs = args match {
-    case Seq(n: String, d: String) => new RoundWithSigfigs(n, d.toInt)
+    case Seq(n: String, d: String) if StringUtils.isNumeric(d) => apply(n, d.toInt)
+    case _ => throw new UnsupportedOperationException("Invalid arguments")
   }
   
-  def apply(n: String, d: Int): RoundWithSigfigs = new RoundWithSigfigs(n, d)
+  def apply(n: String, d: Int): RoundWithSigfigs = {
+    if (d <= 0) {
+      throw new Error("Sigfigs must be greater than zero")
+    }
+    else {
+      new RoundWithSigfigs(n, d)
+    }
+  }
 }
