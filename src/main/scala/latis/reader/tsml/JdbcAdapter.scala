@@ -258,7 +258,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       throw new UnsupportedOperationException("LimitFilter must be used with a value greater than or equal to 0")
     }
 
-    case LimitFilter(limit) if limit >= 0 => {
+    case LimitFilter(limit) if (getProperty("limit", "none") == "none") => {
       order = "ASC"
       setProperty("limit", limit.toString)
       true

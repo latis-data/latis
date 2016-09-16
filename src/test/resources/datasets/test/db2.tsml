@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset>
+  <metadata name="db" long_name="Database Test"/>
+  <adapter class="latis.reader.tsml.JdbcAdapter"
+           location="jdbc:derby:memory:testDB" 
+           driver="org.apache.derby.jdbc.EmbeddedDriver"
+           user="" password=""
+           table="test"
+           limit="2"/>
+
+  
+  <time id="myTime" type="text"/>
+  <integer id="myInt"/>
+  <real id="myReal"/>
+  <text id="myText"/>
+  
+  <!--?select myReal>2?-->
+  <!--?project myInt,myText?-->
+  
+</dataset>

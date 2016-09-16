@@ -248,6 +248,17 @@ class TestJdbcAdapter extends AdapterTests {
       case Dataset(Function(it)) => assertEquals(expected, it.length)
     }
   }
+
+
+  @Test
+  def test_user_doesnt_override_limit {
+    val ops = List(LimitFilter(3))
+    val ds = TsmlReader("datasets/test/db2.tsml").getDataset(ops)
+    val expected = 2
+    ds match {
+      case Dataset(Function(it)) => assertEquals(expected, it.length)
+    }
+  }
 }
 
 object TestJdbcAdapter {
