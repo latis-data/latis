@@ -254,14 +254,18 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       true 
     }
 
-    case LimitFilter(limit) if limit < 0 => {
-      throw new UnsupportedOperationException("LimitFilter must be used with a value greater than or equal to 0")
-    }
-
-    case LimitFilter(limit) if (getProperty("limit", "none") == "none") => {
-      order = "ASC"
-      setProperty("limit", limit.toString)
-      true
+    case LimitFilter(limit) => getProperty("limit") match {
+      // If it is already defined in the TSML, check if the requested
+      // limit is greater than Int enforced limit)
+      case Some(lim) if (lim.toInt < limit) => {
+        false
+      }
+      // Either no limit was specified or the limit in the TSML is greater than the requested limit
+      case _ if (limit >= 0)=> {
+        setProperty("limit", limit.toString)
+        true
+      }
+      case _ => throw new UnsupportedOperationException("Invalid limit specified");
     }
       
     //Rename operation: apply in projection clause of sql: 'select origName as newName'
