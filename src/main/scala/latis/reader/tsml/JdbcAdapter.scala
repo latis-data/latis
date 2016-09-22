@@ -258,7 +258,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       // If it is already defined in the TSML, check if the requested
       // limit is greater than Int enforced limit)
       case Some(lim) if (lim.toInt < limit) => {
-        false
+        true
       }
       // Either no limit was specified or the limit in the TSML is greater than the requested limit
       case _ if (limit >= 0)=> {
