@@ -9,11 +9,15 @@ import latis.time.Time
 import latis.data.value.StringValue
 import latis.data.value.LongValue
 import latis.time.TimeFormat
+import scala.math.Ordered.orderingToOrdered
+import latis.util.StringUtils
+
+
 
 /**
  * Base type for all Variables in the LaTiS data model.
  */
-trait Variable {
+trait Variable extends Ordered[Variable] {  
   def getMetadata(): Metadata //need () to avoid ambiguity
   def getMetadata(name: String): Option[String] = getMetadata.get(name)
   def getData: Data
@@ -34,6 +38,33 @@ trait Variable {
   def hasName(name: String): Boolean
   
   def toSeq: Seq[Scalar]
+  
+  /*
+   * Helper method to compare two sequences of variables recursively.
+   * Used below to compare Tuples.
+   */
+  def comparePairs(s1: Seq[Variable], s2: Seq[Variable]): Int = (s1,s2) match {
+    case (Nil,Nil) => 0
+    case (_,_) => s1.head compare s2.head match {
+      case 0 => comparePairs(s1.tail,s2.tail) //if the first pair matches recursively test the next pair
+      case c: Int => c
+    }
+  }
+  
+  def compare(that: Variable): Int = (this,that) match {
+    //preserve precision when comparing potentially big Integers otherwise use double form
+    case (Integer(l1), Integer(l2)) => l1 compare l2 
+    case (Number(d1), Number(d2)) => d1 compare d2
+    case (Text(s1), Text(s2)) => s1 compare s2
+    case (Number(d1), Text(s2)) => d1 compare StringUtils.toDouble(s2) //string may become NaN
+    case (Text(s1), Number(d2)) => s1 compare d2.toString
+    case (Tuple(a),Tuple(b)) => {
+      if (a.length != b.length) { throw new Exception("Error: Can't compare tuples of different lengths!") }
+      comparePairs(a,b)
+    }
+    case (f1: Function,f2: Function) => throw new Exception("Error: Can't compare two LaTiS Functions!")
+
+  }
   
   //Experimental: to help build a Scalar from an existing Scalar but with new metadata.
   //should also match tsml element names
@@ -110,4 +141,3 @@ trait Variable {
     }
   }
 }
-
