@@ -2,8 +2,8 @@
 
 buildscript {
 	repositories {
-		ivy {
-			url 'http://dsweb:8080/ivy'
+		flatDir {
+			dirs 'lib'
 		}
 	}
 	dependencies {
