@@ -70,6 +70,13 @@ class TestMetadata {
     assertEquals("bar", metadata("foo"))
   }
   
+  @Test
+  def append_metadata = {
+    val md1 = Metadata(Map("biz" -> "buz", "foo" -> "jar"))
+    val md = metadata ++ md1
+    assertEquals(3, md.getProperties.size)
+  }
+  
 //  @Test
 //  def name {
 //    val v = metadata.name
