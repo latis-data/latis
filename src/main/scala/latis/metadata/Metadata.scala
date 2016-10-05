@@ -21,6 +21,7 @@ trait Metadata {
    */
   def +(kv: (String,String)): Metadata = Metadata(getProperties + kv)
   //TODO: MetadataBuilder so we can keep adding properties without making a new object each time.
+  def ++(md: Metadata): Metadata = Metadata(getProperties ++ md.getProperties)
   
   def has(key: String): Boolean
   

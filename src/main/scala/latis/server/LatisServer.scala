@@ -30,14 +30,12 @@ class LatisServer extends HttpServlet with LazyLogging {
     try {
       //Get the request not including the constraints.
       val path = request.getPathInfo
-      val query = request.getQueryString match {
-        case s: String => {
-          val parts = s.split("&")
-          parts.map(x => URLDecoder.decode(x, "UTF-8"))
-          }
-        case _ => Array("")
+      //Split the query string by "&" and make an Operation for each constraint.
+      val queryArgs = request.getQueryString match {
+        case s: String => s.split("&").map(x => URLDecoder.decode(x, "UTF-8"))
+        case _ => Array[String]() //empty array
       }
-      val operations = (new DapConstraintParser).parseArgs(query)
+      val operations = (new DapConstraintParser).parseArgs(queryArgs)
       
       // If someone requests "/latis" redirect them to
       // "/latis/" (the Catalog page)
@@ -51,14 +49,14 @@ class LatisServer extends HttpServlet with LazyLogging {
       // In this case we want to return a short HTML overview
       // of the current LaTiS install
       val isPathEmpty = path.equals("/")
-      val isQueryEmpty = query.equals("")
+      val isQueryEmpty = queryArgs.isEmpty
       if (isPathEmpty && isQueryEmpty) {
         logger.info("Processing OverviewWriter request (no path or query)")
         OverviewWriter(getServletConfig).write(request, response)
         return;
       }
       
-      logger.info("Processing request: " + path + "?" + query)
+      logger.info("Processing request: " + path + "?" + queryArgs.mkString("&"))
 
       //Get the dataset name and type of the output request from the dataset suffix.
       val index = path.lastIndexOf(".");
