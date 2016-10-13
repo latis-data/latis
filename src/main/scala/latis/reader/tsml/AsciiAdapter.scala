@@ -135,7 +135,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
       // therefore we should ignore everything until we
       // find it. We should also exclude the data marker itself
       // when we find it. 
-      if (line.startsWith(d)) foundDataMarker = true;
+      if (line.matches(d)) foundDataMarker = true;
       true
     }
   }
