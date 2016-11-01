@@ -107,19 +107,21 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
     } else Dataset(null, md)
   }
   
+  //operations to be passed to getDataset for each adapter (file list and file template)
   lazy val toHandle = ArrayBuffer[Operation]()
   
   override def handleOperation(op: Operation): Boolean = op match {
     case s @ Selection(name, _, _) => {
       val ods = adapters.head.getOrigDataset
       ods.findVariableByName(name) match {
-        case None => false
+        case None => false //file list dataset does not have this parameter to select on //TODO: is this here because this used to cause selections to fail?
         case Some(_) => {
           toHandle += s
-          val tods = TsmlAdapter(template).getOrigDataset
+          val tods = TsmlAdapter(template).getOrigDataset //TODO: get from adapters instead of making another?
           tods.findVariableByName(name) match {
-            case None => true
-            case Some(_) => false
+            case None => true //if file template does not have this parameter then consider this operation handled;
+              //it might be here only for the file list dataset
+            case Some(_) => false //allow the operation to be handled elsewhere
           }
         }
       }
