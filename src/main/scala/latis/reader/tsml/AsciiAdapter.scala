@@ -21,7 +21,11 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
    * Get the Source from which we will read data.
    */
   def getDataSource: Source = {
-    if (source == null) source = Source.fromURL(getUrl)
+    if (source == null) source = {
+      val url = getUrl
+      logger.debug(s"Getting ASCII data source from $url")
+      Source.fromURL(url)
+    }
     source
   }
   
