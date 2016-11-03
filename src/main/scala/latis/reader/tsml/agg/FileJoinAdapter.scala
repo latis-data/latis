@@ -48,6 +48,7 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
    * Construct the adapter for the file list dataset.
    */
   override protected val adapters = List(TsmlAdapter(Tsml((tsml.xml \ "dataset").head)))
+  //TODO: does this need to be a list? 
   
   /**
    * Tsml for the template to be used to read each file.
@@ -107,7 +108,7 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
     } else Dataset(null, md)
   }
   
-  //operations to be passed to getDataset for each adapter (file list and file template)
+  //operations to be passed to getDataset for each adapter (only file list but not file template?)
   lazy val toHandle = ArrayBuffer[Operation]()
   
   override def handleOperation(op: Operation): Boolean = op match {
@@ -117,7 +118,7 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
         case None => false //file list dataset does not have this parameter to select on //TODO: is this here because this used to cause selections to fail?
         case Some(_) => {
           toHandle += s
-          val tods = TsmlAdapter(template).getOrigDataset //TODO: get from adapters instead of making another?
+          val tods = TsmlAdapter(template).getOrigDataset //adapter for granule, not in global adapters list
           tods.findVariableByName(name) match {
             case None => true //if file template does not have this parameter then consider this operation handled;
               //it might be here only for the file list dataset
