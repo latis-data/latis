@@ -121,7 +121,7 @@ class FileJoinAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     case ff: FirstFilter => fileListOps += ff; false
     case lf: LastFilter => fileListOps += lf; false
    
-    case _ => false //apply any other ope to the joined data
+    case _ => false //apply any other ops to the joined data
   }
   
   /**
