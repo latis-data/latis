@@ -21,7 +21,11 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
    * Get the Source from which we will read data.
    */
   def getDataSource: Source = {
-    if (source == null) source = Source.fromURL(getUrl)
+    if (source == null) source = {
+      val url = getUrl
+      logger.debug(s"Getting ASCII data source from $url")
+      Source.fromURL(url)
+    }
     source
   }
   
@@ -135,7 +139,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
       // therefore we should ignore everything until we
       // find it. We should also exclude the data marker itself
       // when we find it. 
-      if (line.startsWith(d)) foundDataMarker = true;
+      if (line.matches(d)) foundDataMarker = true;
       true
     }
   }
