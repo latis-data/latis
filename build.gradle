@@ -20,7 +20,7 @@ apply plugin: 'scala'
 //Repositories for dependencies.
 repositories {
 	ivy {
-		url "http://dsweb/ivy"
+		url "http://dsweb.lasp.colorado.edu/ivy"
 	}
 	mavenCentral()
 }
