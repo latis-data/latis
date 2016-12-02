@@ -66,7 +66,7 @@ class TestJsonWriter extends WriterTest {
     assertEquals(3, ss.length) 
   }
   
-  //@Test
+  @Test
   def missing_value {
     val domain = Real(Metadata(Map("name" -> "domain")))
     val range = Real(Metadata(Map("name" -> "range", "missing_value" -> "0")))
@@ -74,7 +74,25 @@ class TestJsonWriter extends WriterTest {
     val ds = Dataset(Function(domain, range, data = data))
     
     //Writer.fromSuffix("csv").write(ds)
-    Writer.fromSuffix("jsond").write(ds)
+    //Writer.fromSuffix("jsona").write(ds)
+    val out = new ByteArrayOutputStream()
+    Writer(out, "jsona").write(ds)
+    val s = out.toString()
+    assertTrue(s.split("\n")(2).contains("null"))
+  }
+  
+  @Test
+  def precision = {
+    val domain = Real(Metadata(Map("name" -> "domain")))
+    val range = Real(Metadata(Map("name" -> "range", "precision" -> "2")))
+    val data = SampledData.fromValues(List(0,1,2,3), List(1,2,0,4))
+    val ds = Dataset(Function(domain, range, data = data))
+    
+    //Writer.fromSuffix("jsona").write(ds)
+    val out = new ByteArrayOutputStream()
+    Writer(out, "jsona").write(ds)
+    val s = out.toString()
+    assertEquals("[2.0,0.00],", s.split("\n")(2))
   }
   
   //@Test
