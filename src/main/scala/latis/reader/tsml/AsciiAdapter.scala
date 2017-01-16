@@ -1,7 +1,6 @@
 package latis.reader.tsml
 
 import java.security.cert.X509Certificate
-
 import scala.io.Source
 
 import com.typesafe.scalalogging.LazyLogging
@@ -27,11 +26,11 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
   def getDataSource: Source = {
     if (source == null) source = {
       val url = getUrl
+      val properties = tsml.dataset.getAdapterAttributes
       logger.debug(s"Getting ASCII data source from $url")
-      val properties: Map[String,String] = tsml.dataset.getAdapterAttributes() 
       
       properties.get("trustAllHTTPS") match {
-        case Some(t) if t=="true" => getUnsecuredHTTPSDataSource
+        case Some("true") => getUnsecuredHTTPSDataSource
         case _ => Source.fromURL(url)
       }
     }
