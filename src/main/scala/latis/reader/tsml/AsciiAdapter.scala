@@ -28,10 +28,10 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
     if (source == null) source = {
       val url = getUrl
       logger.debug(s"Getting ASCII data source from $url")
+      var properties: Map[String,String] = tsml.dataset.getAdapterAttributes() 
       
-      var properties: Map[String,String] = tsml.dataset.getAdapterAttributes()
       properties.get("trustAllHTTPS") match {
-        case Some(loc) => {println("UNSECURED!"); getUnsecuredHTTPSDataSource}
+        case Some(t) if t=="true" => {println("UNSECURED!"); getUnsecuredHTTPSDataSource} 
         case None => {println("Secured!"); Source.fromURL(url)}
       }
     }
