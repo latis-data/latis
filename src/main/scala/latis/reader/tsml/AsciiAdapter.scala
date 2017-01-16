@@ -29,17 +29,17 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
       val url = getUrl
       logger.debug(s"Getting ASCII data source from $url")
       
-      if (url.toString().substring(0,5).equalsIgnoreCase("https")) //if URL uses HTTPS
+      if (url.toString().substring(0,5).equalsIgnoreCase("https")) //if URL uses HTTPS; should ideally check for a tsml property instead
         getUnsecuredHTTPSDataSource
       else 
         Source.fromURL(url)
     }
     source
-  }
+  } 
   
-  def getUnsecuredHTTPSDataSource: Source = {
+  def getUnsecuredHTTPSDataSource: Source = {  
     //SECURITY WORKAROUND TO TRUST ALL DATA SERVED BY HTTPS
-    //Achieved by configuring a SSLContext.
+    //Achieved by configuring an SSLContext.
     //'Source.fromURL' uses java.net.HttpURLConnection behind the scene,
     //so this code works simply because TrustAll bypasses checkClientTrusted and checkServerTrusted methods.
     
