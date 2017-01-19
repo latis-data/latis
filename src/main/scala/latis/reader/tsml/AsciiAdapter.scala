@@ -31,7 +31,14 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
       
       getProperty("trustAllHTTPS") match {
         case Some("true") => getUnsecuredHTTPSDataSource
-        case _ => Source.fromURL(url)
+        case _ => {
+          try {
+            Source.fromURL(url)
+          } catch {
+            case e: javax.net.ssl.SSLHandshakeException => 
+              throw new Error("HTTPS certificate not recognized. To ignore this, the property \"trustAllHTTPS=true\" can be added to your tsml configuration.")
+          }
+        }
       }
     }
     source
