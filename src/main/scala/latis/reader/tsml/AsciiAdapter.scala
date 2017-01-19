@@ -12,6 +12,7 @@ import javax.net.ssl.X509TrustManager
 import latis.data.Data
 import latis.reader.tsml.ml.Tsml
 import latis.util.StringUtils
+import scala.util.Try
 
 
 class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with LazyLogging {
@@ -26,10 +27,9 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
   def getDataSource: Source = {
     if (source == null) source = {
       val url = getUrl
-      val properties = tsml.dataset.getAdapterAttributes
       logger.debug(s"Getting ASCII data source from $url")
       
-      properties.get("trustAllHTTPS") match {
+      getProperty("trustAllHTTPS") match {
         case Some("true") => getUnsecuredHTTPSDataSource
         case _ => Source.fromURL(url)
       }
@@ -37,12 +37,13 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
     source
   } 
   
+  /*
+   * SECURITY WORKAROUND TO TRUST ALL DATA SERVED BY HTTPS
+   * Achieved by configuring an SSLContext.
+   * 'Source.fromURL' uses java.net.HttpURLConnection behind the scene,
+   * so this code works simply because TrustAll bypasses checkClientTrusted and checkServerTrusted methods.
+   */
   def getUnsecuredHTTPSDataSource: Source = {  
-    //SECURITY WORKAROUND TO TRUST ALL DATA SERVED BY HTTPS
-    //Achieved by configuring an SSLContext.
-    //'Source.fromURL' uses java.net.HttpURLConnection behind the scene,
-    //so this code works simply because TrustAll bypasses checkClientTrusted and checkServerTrusted methods.
-    
     //Bypasses both client and server validation.
     object TrustAll extends X509TrustManager {
       val getAcceptedIssuers = null
