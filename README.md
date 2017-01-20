@@ -53,4 +53,4 @@ descriptors. The service layer will accept queries that include *selection* cons
 calls (e.g. format_time(yyyyDDD)) that can subset, aggregate, and perform other 
 operations on the server before writing the resulting dataset to the client. 
 
-For more information, see the [wiki](https://github.com/latis-data/latis/wiki)
+For more information, see the [wiki](https://github.com/latis-data/latis/wiki).
