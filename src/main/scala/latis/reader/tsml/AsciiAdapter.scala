@@ -1,20 +1,16 @@
 package latis.reader.tsml
 
+import com.typesafe.scalalogging.LazyLogging
+import latis.data.Data
+import latis.reader.tsml.ml.Tsml
+import latis.util.StringUtils
 import java.security.cert.X509Certificate
 import scala.io.Source
-import javax.net.ssl.KeyManagerFactorySpi
-import javax.net.ssl._
-
-import com.typesafe.scalalogging.LazyLogging
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
 import javax.net.ssl.X509TrustManager
-import latis.data.Data
-import latis.reader.tsml.ml.Tsml
-import latis.util.StringUtils
-import scala.util.Try
 
 
 class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with LazyLogging {
@@ -32,7 +28,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
       logger.debug(s"Getting ASCII data source from $url")
       
       getProperty("trustAllHTTPS") match {
-        case Some("true") => getUnsecuredHTTPSDataSource
+        case Some("true"|"True"|"TRUE") => getUnsecuredHTTPSDataSource
         case _ => {
           try {
             Source.fromURL(url)
