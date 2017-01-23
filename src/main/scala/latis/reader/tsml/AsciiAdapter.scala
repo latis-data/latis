@@ -2,6 +2,8 @@ package latis.reader.tsml
 
 import java.security.cert.X509Certificate
 import scala.io.Source
+import javax.net.ssl.KeyManagerFactorySpi
+import javax.net.ssl._
 
 import com.typesafe.scalalogging.LazyLogging
 import javax.net.ssl.HostnameVerifier
@@ -51,6 +53,10 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
    * so this code works simply because TrustAll bypasses checkClientTrusted and checkServerTrusted methods.
    */
   def getUnsecuredHTTPSDataSource: Source = {  
+    //Store the current configurations so that they can later be restored.
+    val sf = HttpsURLConnection.getDefaultSSLSocketFactory
+    val hv = HttpsURLConnection.getDefaultHostnameVerifier
+    
     //Bypasses both client and server validation.
     object TrustAll extends X509TrustManager {
       val getAcceptedIssuers = null
@@ -70,6 +76,11 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
     
     //Actual call
     source = Source.fromURL(getUrl)
+    
+    //Reset SSLContext to avoid persisting these changes  
+    HttpsURLConnection.setDefaultSSLSocketFactory(sf)
+    HttpsURLConnection.setDefaultHostnameVerifier(hv)
+    
     source
   }
   
