@@ -1,14 +1,16 @@
 package latis.reader.tsml
 
+import com.typesafe.scalalogging.LazyLogging
 import latis.data.Data
-import latis.dm.Integer
-import latis.dm.Real
-import latis.dm.Text
-import latis.dm.Variable
 import latis.reader.tsml.ml.Tsml
 import latis.util.StringUtils
+import java.security.cert.X509Certificate
 import scala.io.Source
-import com.typesafe.scalalogging.LazyLogging
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSession
+import javax.net.ssl.X509TrustManager
 
 
 class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with LazyLogging {
@@ -24,8 +26,59 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
     if (source == null) source = {
       val url = getUrl
       logger.debug(s"Getting ASCII data source from $url")
-      Source.fromURL(url)
+      
+      getProperty("trustAllHTTPS") match {
+        case Some(x) if x.equalsIgnoreCase("true") => getUnsecuredHTTPSDataSource
+        case _ => {
+          try {
+            Source.fromURL(url)
+          } catch {
+            case e: javax.net.ssl.SSLHandshakeException => {
+              logger.error(s"HTTPS certificate not recognized. To ignore this, the property 'trustAllHTTPS=true' can be added to your tsml configuration.")
+              throw new Error("HTTPS certificate not recognized.")
+            }
+          }
+        }
+      }
     }
+    source
+  } 
+  
+  /*
+   * SECURITY WORKAROUND TO TRUST ALL DATA SERVED BY HTTPS
+   * Achieved by configuring an SSLContext.
+   * 'Source.fromURL' uses java.net.HttpURLConnection behind the scene,
+   * so this code works simply because TrustAll bypasses checkClientTrusted and checkServerTrusted methods.
+   */
+  def getUnsecuredHTTPSDataSource: Source = {  
+    //Store the current configurations so that they can later be restored.
+    val sf = HttpsURLConnection.getDefaultSSLSocketFactory
+    val hv = HttpsURLConnection.getDefaultHostnameVerifier
+    
+    //Bypasses both client and server validation.
+    object TrustAll extends X509TrustManager {
+      val getAcceptedIssuers = null
+      def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String) = {}
+      def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String) = {}
+    }
+    //Verifies all host names by simply returning true. An all-permisive trust manager.
+    object VerifyAllHostNames extends HostnameVerifier {
+      def verify(s: String, sslSession: SSLSession) = true
+    }
+
+    //SSL Context initialization and configuration
+    val sslContext = SSLContext.getInstance("SSL")
+    sslContext.init(null, Array(TrustAll), new java.security.SecureRandom())
+    HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
+    HttpsURLConnection.setDefaultHostnameVerifier(VerifyAllHostNames)
+    
+    //Actual call
+    source = Source.fromURL(getUrl)
+    
+    //Reset SSLContext to avoid persisting these changes  
+    HttpsURLConnection.setDefaultSSLSocketFactory(sf)
+    HttpsURLConnection.setDefaultHostnameVerifier(hv)
+    
     source
   }
   
