@@ -28,13 +28,15 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
       logger.debug(s"Getting ASCII data source from $url")
       
       getProperty("trustAllHTTPS") match {
-        case Some("true"|"True"|"TRUE") => getUnsecuredHTTPSDataSource
+        case Some(x) if x.equalsIgnoreCase("true") => getUnsecuredHTTPSDataSource
         case _ => {
           try {
             Source.fromURL(url)
           } catch {
-            case e: javax.net.ssl.SSLHandshakeException => 
-              throw new Error("HTTPS certificate not recognized. To ignore this, the property \"trustAllHTTPS=true\" can be added to your tsml configuration.")
+            case e: javax.net.ssl.SSLHandshakeException => {
+              logger.error(s"HTTPS certificate not recognized. To ignore this, the property 'trustAllHTTPS=true' can be added to your tsml configuration.")
+              throw new Error("HTTPS certificate not recognized.")
+            }
           }
         }
       }
