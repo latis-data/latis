@@ -76,7 +76,10 @@ class TestLimitFilter {
   @Test
   def test_function_of_function_with_limit_1 {
     val exp = Sample(Integer(Metadata("x"), 0), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * 0 + j)))))
-    assertEquals(exp, LimitFilter(1)(TestDataset.function_of_functions).unwrap.asInstanceOf[Function].iterator.next)
+    LimitFilter(1)(TestDataset.function_of_functions) match {
+      case Dataset(v) => assertEquals(exp, v.asInstanceOf[Function].iterator.next)
+      case _ => fail()
+    }
   }
   @Test
   def test_empty_function {
@@ -84,7 +87,10 @@ class TestLimitFilter {
   }
   @Test
   def test_metadata_length {
-    assertEquals(Some("2"), LimitFilter(2)(TestDataset.function_of_scalar_with_length).unwrap.asInstanceOf[Function].getMetadata("length"))
+    LimitFilter(2)(TestDataset.function_of_scalar_with_length) match {
+      case Dataset(v) => assertEquals(Some("2"), v.asInstanceOf[Function].getMetadata("length"))
+      case _ => fail()
+    }
   }
 
 }

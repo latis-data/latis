@@ -175,7 +175,7 @@ class TestRegEx {
   @Test def match_operation_with_one_arg = assertTrue("foo(bar)" matches RegEx.OPERATION)
   @Test def match_operation_with_space_padding = assertTrue("foo( bar )" matches RegEx.OPERATION)
   @Test def match_operation_with_two_args = assertTrue("foo(-1.23e+12, 1970-01-01T00:00)" matches RegEx.OPERATION)
-  @Test def dont_match_operation_with_bad_args = assertFalse("foo(b@r)" matches RegEx.OPERATION)
+  @Test def dont_match_operation_with_bad_args = assertFalse("foo(b%r)" matches RegEx.OPERATION)
   @Test def dont_match_operation_without_parens = assertFalse("foo" matches RegEx.OPERATION)
   @Test def dont_match_empty_operation = assertFalse("" matches RegEx.OPERATION)
   @Test def match_time_format = assertTrue("format_time(yyyy-MM-dd'T'HH:mm)" matches RegEx.OPERATION)

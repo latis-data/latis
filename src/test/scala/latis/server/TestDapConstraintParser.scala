@@ -120,4 +120,25 @@ class TestDapConstraintParser {
     val decoded = URLDecoder.decode(encoded, "UTF-8")
     assertEquals(s, decoded)
   }
+  
+  @Test
+  def unsupported_operation = {
+    val value = "A%B"
+    val args = s"foo=$value".split("&")
+    try {
+      val ops = (new DapConstraintParser).parseArgs(args)
+      fail
+    } catch {
+      case e: Exception => assertEquals(s"Failed to parse expression: 'foo=$value'", e.getMessage)
+    }
+  }
+  
+  @Test @Ignore //enable with LATIS-530 to test LATIS-478
+  def url_encoding_in_query = {
+    val query = "foo=A%26B"
+//    val ops = DapConstraintParser).parse(query)
+//    ops.head match {
+//      case Selection(_,_,v) => assertEquals("A&B", v)
+//    }
+  }
 }

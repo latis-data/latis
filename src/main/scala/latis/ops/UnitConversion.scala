@@ -23,26 +23,31 @@ class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operatio
    * to apply the operation to the variables in the dataset.
    */
   override def apply(dataset: Dataset) = {
-    converter = dataset.unwrap.findVariableByName(variableName) match {
-      case Some(v) => v match {
-        case s: Scalar => s.getMetadata("units") match {
-          case Some(u) => {
-            //TODO: assuming Time, for now
-            val origUnit = TimeScale(u)
-            /*
-             * TODO: this constructor creates a default time scale with java units (ms since 1970)
-             * Since both formatted times have the same TimeScale, we get a NoOp converter.
-             * Can TimeScale deal with diff formats?
-             */
-            TimeConverter(origUnit, unit.asInstanceOf[TimeScale])
+    dataset match { 
+      case Dataset(v) => {
+        converter = v.findVariableByName(variableName) match {
+          case Some(v) => v match {
+            case s: Scalar => s.getMetadata("units") match {
+              case Some(u) => {
+                //TODO: assuming Time, for now
+                val origUnit = TimeScale(u)
+                /*
+                 * TODO: this constructor creates a default time scale with java units (ms since 1970)
+                 * Since both formatted times have the same TimeScale, we get a NoOp converter.
+                 * Can TimeScale deal with diff formats?
+                 */
+                TimeConverter(origUnit, unit.asInstanceOf[TimeScale])
+              }
+              case None => throw new Error("UnitConversion: Variable has no units: " + variableName)
+            }
+            case _ => throw new Error("UnitConversion: Variable is not a Scalar: " + variableName)
           }
-          case None => throw new Error("UnitConversion: Variable has no units: " + variableName)
+          case None => throw new Error("UnitConversion: Could not find variable: " + variableName)
         }
-        case _ => throw new Error("UnitConversion: Variable is not a Scalar: " + variableName)
       }
-      case None => throw new Error("UnitConversion: Could not find variable: " + variableName)
+      // there is no data, so no units to convert. throw an error?
+      case _ => throw new Error("Dataset contains no variables")
     }
-    
     super.apply(dataset)
   }
 

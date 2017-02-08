@@ -21,6 +21,7 @@ trait Metadata {
    */
   def +(kv: (String,String)): Metadata = Metadata(getProperties + kv)
   //TODO: MetadataBuilder so we can keep adding properties without making a new object each time.
+  def ++(md: Metadata): Metadata = Metadata(getProperties ++ md.getProperties)
   
   def has(key: String): Boolean
   
@@ -59,5 +60,10 @@ object Metadata {
    * Construct Metadata from a single property.
    */
   def apply(property: (String,String)): Metadata = new VariableMetadata(immutable.Map(property))
+  
+  /**
+   * Construct Metadata from a list of properties.
+   */
+  def apply(properties: (String,String)*): Metadata = new VariableMetadata(immutable.Map(properties: _*))
 
 }

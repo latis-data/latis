@@ -51,8 +51,10 @@ class TestDataset {
     val ds1 = TsmlReader("vecmag.tsml").getDataset
     val ds2 = TsmlReader("vecmag.tsml").getDataset
     
-    val fn1 = ds1.unwrap.asInstanceOf[Function]
-    val fn2 = ds2.unwrap.asInstanceOf[Function]
+    val (fn1, fn2) = (ds1, ds2) match {
+      case (Dataset(v1), Dataset(v2)) => (v1.asInstanceOf[Function], v2.asInstanceOf[Function])
+      case (_, _) => (null, null)
+    }
     
     assertEquals(false, ds1.isEmpty)
     
@@ -98,7 +100,11 @@ object TestDataset {
   def tuple_of_tuples = Dataset(Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1.1))), Metadata("tuple_of_tuplesDS"))
   def tuple_of_functions = Dataset(TestNestedFunction.tuple_of_functions, Metadata("tuple_of_functions"))
   def scalar_tuple = Dataset(Tuple(Integer(Metadata("myInteger"), 1)), Metadata("scalar_tuple"))
-  def mixed_tuple = Dataset(Tuple(Real(Metadata("myReal"), 0.0), Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), function_of_scalar.unwrap), Metadata("mixed_tuple"))
+  def v = function_of_scalar match {
+    case Dataset(v) => v
+    case _ => null
+  }
+  def mixed_tuple = Dataset(Tuple(Real(Metadata("myReal"), 0.0), Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), v), Metadata("mixed_tuple"))
   def tuple_with_nan = Dataset(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), Double.NaN), Text(Metadata("myText"), "zero")), Metadata("tuple_with_nan"))
   
   def function_of_scalar = {
@@ -163,11 +169,15 @@ object TestDataset {
   def function_of_functions2 = Dataset(TestNestedFunction.function_of_functions_with_sampled_data, Metadata("function_of_functions2"))
   
   def function_of_functions_text = Dataset(TestNestedFunction.function_of_functions_with_text_data, Metadata("function_of_functions_text"))
-  
+ 
+  val foslist = (function_of_scalar+(0), function_of_scalar+(1), function_of_scalar+(2)) match {
+    case (Dataset(v1), Dataset(v2), Dataset(v3)) => List(v1, v2, v3)
+    case _ => List()
+  }
   def mixed_function = {
-    val samples = List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), (function_of_scalar+(0)).unwrap)),
-                       Sample(Real(Metadata("myReal"), 1.1), Tuple(Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1)), (function_of_scalar+(1)).unwrap)),
-                       Sample(Real(Metadata("myReal"), 2.2), Tuple(Tuple(Integer(Metadata("myInteger"), 2), Real(Metadata("myReal"), 2)), (function_of_scalar+(2)).unwrap)))
+    val samples = List(Sample(Real(Metadata("myReal"), 0.0), Tuple(Tuple(Integer(Metadata("myInteger"), 0), Real(Metadata("myReal"), 0)), foslist(0))),
+                       Sample(Real(Metadata("myReal"), 1.1), Tuple(Tuple(Integer(Metadata("myInteger"), 1), Real(Metadata("myReal"), 1)), foslist(1))),
+                       Sample(Real(Metadata("myReal"), 2.2), Tuple(Tuple(Integer(Metadata("myInteger"), 2), Real(Metadata("myReal"), 2)), foslist(2))))
     Dataset(Function(samples), Metadata("mixed_function"))
   }
   
@@ -199,13 +209,30 @@ object TestDataset {
   
   def index_function = Dataset(Function(List(Integer(1), Integer(2))), Metadata("indexFunctionDS"))
   
-  def combo = Dataset(Tuple(function_of_tuple.unwrap, tuple_of_tuples.unwrap, text.unwrap), Metadata("combo"))
+  def combo = (function_of_tuple, tuple_of_tuples, text) match {
+    case (Dataset(v1), Dataset(v2), Dataset(v3)) => Dataset(Tuple(v1, v2, v3), Metadata("combo"))
+    case _ => Dataset.empty
+  }
   
   def tuple_domain = {
     val samples = List(Sample(Tuple(Real(Metadata("lon"),0.0), Real(Metadata("lat"), 90.0)), Real(Metadata("x"), 0)),
                        Sample(Tuple(Real(Metadata("lon"),90.0), Real(Metadata("lat"), 0.0)), Real(Metadata("x"), 1)),
                        Sample(Tuple(Real(Metadata("lon"),180.0), Real(Metadata("lat"), -90.0)), Real(Metadata("x"), 2)))
     Dataset(Function(samples), Metadata("tuple_domain"))
+  }
+  
+  def function_of_lon_lat = {
+    //Create samples for test dataset
+	    val sample1 = Sample(Tuple(Integer(Metadata("lon"), 105.7821), Real(Metadata("lat"), 39.5501)), Integer(Metadata("int"), 1))                                 
+	    
+	    val sample2 = Sample(Tuple(Integer(Metadata("lon"), 105.6821), Integer(Metadata("lat"), 39.4501)), Integer(Metadata("int"), 2))
+	    val sample3 = Sample(Tuple(Integer(Metadata("lon"), 105.5821), Integer(Metadata("lat"), 39.3501)), Integer(Metadata("int"), 3))
+	    val sample4 = Sample(Tuple(Integer(Metadata("lon"), 105.4821), Integer(Metadata("lat"), 39.2501)), Integer(Metadata("int"), 4))
+	    val sample5 = Sample(Tuple(Integer(Metadata("lon"), 105.3821), Integer(Metadata("lat"), 39.1501)), Integer(Metadata("int"), 5))
+	    
+	    val samples = List(sample1, sample2, sample3, sample4, sample5)
+	    
+	    Dataset(Function(samples, Metadata("function")), Metadata("dataset"))
   }
   
 //  def datasets = Seq(empty, real, integer, text, real_time, text_time, int_time, scalars, binary, tuple_of_scalars,

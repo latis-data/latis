@@ -13,6 +13,9 @@ import latis.dm.Text
 import java.io.File
 import latis.ops.Operation
 import latis.ops.filter.Filter
+import latis.ops.filter.Selection
+import scala.collection.mutable.ArrayBuffer
+import latis.metadata.Metadata
 
 /**
  * An AggregationAdapter that reads data from each file in a file list 
@@ -45,6 +48,7 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
    * Construct the adapter for the file list dataset.
    */
   override protected val adapters = List(TsmlAdapter(Tsml((tsml.xml \ "dataset").head)))
+  //TODO: does this need to be a list? 
   
   /**
    * Tsml for the template to be used to read each file.
@@ -65,19 +69,8 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
         case Some(Text(file)) => dir + file
         case None => throw new Exception(s"No 'file' Variable found in Dataset '$ds'")
       })
+      case _ => Iterator.empty
     }
-  }
-  
-  /**
-   * Override so that Projections aren't passed to the file list.
-   */
-  override def getDataset(ops: Seq[Operation]) = {
-    val (filter, others) = ops.partition(_.isInstanceOf[Filter])
-    val dss = adapters.map(_.getDataset(filter))
-    
-    val ds = collect(dss)
-    
-    ops.foldLeft(ds)((dataset, op) => op(dataset)) //doesn't handle any Operations
   }
   
   /**
@@ -85,27 +78,69 @@ class FileJoinAdapter(tsml: Tsml) extends TileUnionAdapter(tsml) {
    */
   override def collect(datasets: Seq[Dataset]): Dataset = {
     //Get list of file names from the first dataset.
-    val files = getFilePaths(datasets.head) 
+    val files = datasets.headOption match {
+      case Some(ds) => getFilePaths(ds)
+      case None => Iterator.empty
+    }
     
     //Make a TsmlReader for each file from the tsml template with the file location inserted.
-    val readers = files.map(file => TsmlReader(template.setLocation(file)))
+    val readers = files.map(file => TsmlReader(template.dataset.setLocation(file)))
+    
+    //Expose the Function's metadata, the last one should be fine
+    var fmd: Metadata = Metadata.empty
     
     //Make an iterator over each file dataset, appending their samples
     val sit = readers.flatMap(r => r.getDataset match {
-      case Dataset(Function(it)) => new PeekIterator[Sample] {
+      case Dataset.empty => None
+      case Dataset(f @ Function(it)) => new PeekIterator[Sample] {
         def getNext = it.next match {
           case null => r.close; null; //TODO: need better assurance that readers get closed
-          case sample => sample
+          case sample => fmd = f.getMetadata; sample
         }
       }
-    })
-    
-    val f = TsmlAdapter(template).getOrigDataset match {
-      case Dataset(f: Function) => f //get the function template
-    }
+    }).buffered
     
     val md = makeMetadata(tsml.dataset)
-    Dataset(Function(f, sit), md)
+    
+    if(sit.hasNext) {
+      val temp = sit.head  
+      Dataset(Function(temp.domain, temp.range, sit, fmd), md)
+    } else Dataset(null, md)
+  }
+  
+  //operations to be passed to getDataset for each adapter (only file list but not file template?)
+  lazy val toHandle = ArrayBuffer[Operation]()
+  
+  override def handleOperation(op: Operation): Boolean = op match {
+    case s @ Selection(name, _, _) => {
+      val ods = adapters.head.getOrigDataset
+      ods.findVariableByName(name) match {
+        case None => false //file list dataset does not have this parameter to select on //TODO: is this here because this used to cause selections to fail?
+        case Some(_) => {
+          toHandle += s
+          val tods = TsmlAdapter(template).getOrigDataset //adapter for granule, not in global adapters list
+          tods.findVariableByName(name) match {
+            case None => true //if file template does not have this parameter then consider this operation handled;
+              //it might be here only for the file list dataset
+            case Some(_) => false //allow the operation to be handled elsewhere
+          }
+        }
+      }
+    }
+    case f: Filter => {
+      toHandle += f
+      false
+    }
+    case _ => false
+  }
+  
+  override def getDataset(ops: Seq[Operation]) = {
+    val (handled, pass) = ops.partition(handleOperation)
+    val dss = adapters.map(_.getDataset(toHandle))
+    
+    val ds = collect(dss)
+    
+    pass.foldLeft(ds)((dataset, op) => op(dataset)) 
   }
 
 }

@@ -37,4 +37,6 @@ object StrideFilter extends OperationFactory {
   }
     
   def apply(stride: Int): StrideFilter = new StrideFilter(stride)
+  
+  def unapply(filter: StrideFilter) = Some(filter.stride)
 }

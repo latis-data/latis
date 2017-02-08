@@ -1,18 +1,24 @@
 package latis.writer
 
-import latis.dm.Variable
-import latis.dm.Scalar
+import latis.dm._
+import latis.data.value.LongValue
+import latis.data.value.DoubleValue
 import latis.time.Time
-import latis.dm.Sample
-import latis.dm.Index
-import latis.dm.Tuple
-import latis.dm.Function
-import latis.dm.Dataset
 import scala.collection.mutable.ArrayBuffer
 
 class JsonMetadataAndDataWriter extends JsonWriter {
   //TODO: refactor to reuse these pieces from Metadata and CompactJson Writers which are rapidly becoming obsolete
     
+  override def write(dataset: Dataset) = dataset match {
+    case Dataset(v) => super.write(dataset)
+    case _ => {
+      val name = dataset.getName
+      val str = s"""{"$name": {"metadata":{}, "data": []}}"""
+      printWriter.write(str)
+      printWriter.flush()
+    }
+  }
+  
   /**
    * Override to insert metadata.
    */
@@ -117,7 +123,7 @@ class JsonMetadataAndDataWriter extends JsonWriter {
     //TODO: user should apply replace_missing(NaN) once that is working
     if (scalar.isMissing) "null"
     else scalar match {
-      case t: Time => t.getJavaTime.toString  //use java time for "compact" json
+      case t: Time => t.getJavaTime.toString
       case _ => super.makeScalar(scalar)
     }
   }
@@ -142,10 +148,15 @@ class JsonMetadataAndDataWriter extends JsonWriter {
         prepend = prepend.dropRight(d.toSeq.length)
         str
       }
-      case _ => {
-        val vars = (d.toSeq ++ r.toSeq).filterNot(_.isInstanceOf[Index])
+      case t: Tuple => if(t.getArity > 1) {
+        val vars = (d.toSeq ++ t.getVariables).filterNot(_.isInstanceOf[Index])
         val vs = vars.map(varToString(_))
         (prepend ++ vs).mkString("[", ",", "]") 
+      } else makeSample(Sample(d, t.getVariables.head))
+      case s: Scalar => {
+        val vars = (d.toSeq :+ s).filterNot(_.isInstanceOf[Index])
+        val vs = vars.map(varToString(_))
+        (prepend ++ vs).mkString("[", ",", "]")
       }
     }
   }

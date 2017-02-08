@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset id="ascii_precision">
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+           delimiter=";"
+           commentCharacter="#"
+           location="datasets/test/ascii_sigfigs.txt" />
+  
+  <time type="text">
+    <metadata units="yyyy-MM-dd"/>
+  </time>
+ 
+  <real id="myReal">
+    <metadata sigfigs="2"/>
+  </real>
+
+</dataset>

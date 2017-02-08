@@ -9,6 +9,9 @@ import latis.dm.Function
 import latis.dm.Dataset
 import latis.ops.TimeFormatter
 import latis.dm.Sample
+import latis.dm.Tuple
+import latis.dm.Number
+import latis.data.value.DoubleValue
 
 class TestTime {
 
@@ -66,6 +69,12 @@ class TestTime {
   def iso_to_iso_ordinal {
     val iso_ord = Time.fromIso("2013-12-04T23:00:00").format("yyyy-DDD'T'HH:mm:ss.SSS")
     assertEquals("2013-338T23:00:00.000", iso_ord)
+  }
+  
+  @Test
+  def javaToIso = {
+    val iso = Time.javaToIso(0)
+    assertEquals("1970-01-01T00:00:00.000", iso)
   }
   
   //TODO: test other flavors, with time zone,...
@@ -204,6 +213,25 @@ class TestTime {
     val ds = Dataset(Time(Metadata(Map("name" -> "time", "units" -> "yy-MM-dd", "century_start_date" -> "1900")), "15-10-01"))
     TimeFormatter("yyyy-MM-dd")(ds) match {
       case Dataset(Text(s)) => assertEquals("1915-10-01", s)
+    }
+  }
+  
+  @Test
+  def get_number_data_test {
+    val ds = latis.dm.TestDataset.canonical
+    ds match {
+      case Dataset(Function(it)) => it.next; it.next match {
+        case Sample(Number(t), _) => assertEquals(8.64E7, t, 0)
+      }
+    }
+  }
+  
+  @Test
+  def copy_text_time_with_numeric_data = {
+    val t1 = Time(Metadata("name" -> "time", "units" -> "yyyy-MM-dd HH:mm:ss"), "")
+    val t2 = t1(DoubleValue(1000.0))
+    t2 match {
+      case Text(s) => assertEquals("1970-01-01 00:00:01", s)
     }
   }
 }

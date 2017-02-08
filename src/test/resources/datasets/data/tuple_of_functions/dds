@@ -1,19 +1,19 @@
 Dataset {
     Structure {
         Sequence {
-            Int64 myInt0;
+            Int32 myInt0;
             Float64 myReal0;
         } samples;
         Sequence {
-            Int64 myInt1;
+            Int32 myInt1;
             Float64 myReal1;
         } samples;
         Sequence {
-            Int64 myInt2;
+            Int32 myInt2;
             Float64 myReal2;
         } samples;
         Sequence {
-            Int64 myInt3;
+            Int32 myInt3;
             Float64 myReal3;
         } samples;
     } tuple_of_functions;

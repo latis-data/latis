@@ -5,6 +5,7 @@ import latis.ops.Idempotence
 import latis.ops.Operation
 import latis.reader.tsml.TsmlAdapter
 import latis.reader.tsml.ml.Tsml
+import latis.ops.filter.Filter
 
 /**
  * Base class for Adapters that aggregate (combine) Datasets.
@@ -24,8 +25,8 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   
   
   override def getDataset(ops: Seq[Operation]) = {
-    val (idempotent, others) = ops.partition(_.isInstanceOf[Idempotence])
-    val dss = adapters.map(_.getDataset(idempotent))
+    val (filter, others) = ops.partition(_.isInstanceOf[Filter])
+    val dss = adapters.map(_.getDataset(filter))
     
     val ds = collect(dss)
     
@@ -46,7 +47,10 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     val md = makeMetadata(tsml.dataset) //TODO: provo
     
     //Apply the aggregation to the datasets
-    Dataset(datasets.reduceLeft(aggregate(_,_)).unwrap, md) 
+    datasets.reduceLeft(aggregate(_,_)) match {
+      case Dataset(v) => Dataset(v, md)
+      case _ => Dataset.empty //an empty dataset should have no/empty metadata right?
+    }
   }
 
   /**

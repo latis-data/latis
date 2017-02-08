@@ -2,7 +2,7 @@ package latis.reader
 
 import scala.collection.mutable.ArrayBuffer
 
-import org.junit.Assert.assertEquals
+import org.junit.Assert._
 import org.junit.Test
 
 import latis.ops.Operation
@@ -32,6 +32,12 @@ class TestFileJoinAdapter {
   }
   
   @Test
+  def empty = {
+    val ds = TsmlReader("agg/agg_list_join_empty.tsml").getDataset
+    assertTrue(ds.isEmpty)
+  }
+  
+  @Test
   def logs {
     val ops = ArrayBuffer[Operation]()
     val ds = TsmlReader("log/log_join.tsml").getDataset(ops)
@@ -56,4 +62,13 @@ class TestFileJoinAdapter {
     assertEquals("2015-07-12T10:11:12.136", data("time").head)
   }
   
+  @Test
+  def select_on_dataset_content = {
+    val ops = ArrayBuffer[Operation]()
+    ops += Selection(s"message =~ ..2")
+    val ds = DatasetAccessor.fromName("log/log_join").getDataset(ops)
+    val data = ds.toStrings
+    assertEquals(3, data(0).length)
+    assertEquals("1.2", data.last.head)
+  }
 }

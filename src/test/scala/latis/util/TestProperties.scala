@@ -46,5 +46,14 @@ class TestProperties {
     System.clearProperty("latis.config") //don't affect the other tests
     assertEquals("latis_spaces_test", version)
   }
+  
+  @Test
+  def override_with_system_properties_then_undo = {
+    assertEquals("test", LatisProperties("version"))
+    System.setProperty("version", "woozle")
+    assertEquals("woozle", LatisProperties("version"))
+    System.clearProperty("version")
+    assertEquals("test", LatisProperties("version"))
+  }
 }
 

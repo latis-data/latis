@@ -43,12 +43,13 @@ import latis.ops.TimeFormatter
 import latis.ops.ReplaceMissingOperation
 import latis.ops.Pivot
 import latis.ops.TimeTupleToTime
+import com.typesafe.scalalogging.LazyLogging
 
 
 /**
  * Base class for Adapters that read a dataset as defined by TSML.
  */
-abstract class TsmlAdapter(val tsml: Tsml) {
+abstract class TsmlAdapter(val tsml: Tsml) extends LazyLogging {
   
   /**
    * Abstract method to remind subclasses that they need to clean up their resources.
@@ -99,7 +100,10 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * Don't include "index" which is just a placeholder for an otherwise undefined domain.
    * The index value does not appear in the original data source. Otherwise, model it as an Integer.
    */
-  private lazy val origScalars = getOrigDataset.unwrap.toSeq.filterNot(_.isInstanceOf[Index])
+  private lazy val origScalars = getOrigDataset match {
+    case Dataset(v) => v.toSeq.filterNot(_.isInstanceOf[Index])
+    case _ => Seq()
+  }
   def getOrigScalars = origScalars
   
   /**
@@ -234,11 +238,16 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * This will be triggered the the client requests the Dataset.
    */
   protected def makeDataset(ds: Dataset): Dataset = {
-    makeVariable(ds.unwrap) match {
-      case Some(v) => Dataset(v, ds.getMetadata)
-      case None => throw new Error("No variables created for dataset: " + ds.getName)
+    ds match {
+      case Dataset(v) => makeVariable(v) match {
+        case Some(v) => Dataset(v, ds.getMetadata)
+        case None => {
+          logger.warn("Empty Dataset created for " + ds.getName)
+          Dataset.empty
+        }
+      }
+      case _ => Dataset.empty 
     }
-    
   } 
   
   /**
@@ -308,12 +317,8 @@ abstract class TsmlAdapter(val tsml: Tsml) {
    * to the Dataset by the TsmlAdapter class.
    * The default behavior is for the Adapter subclass to handle no operations.
    */
-  def handleOperation(op: Operation): Boolean = op match {
-    case p @ Projection(names) => projectedVariableNames ++= names; false 
-    case _ => false
-  }
+  def handleOperation(op: Operation): Boolean = false
   
-  private var projectedVariableNames = Seq[String]()
   
   //---- Caching --------------------------------------------------------------
   //TODO: consider mutability issues

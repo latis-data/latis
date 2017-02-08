@@ -54,6 +54,12 @@ class TestFileListAdapter extends AdapterTests {
   
   //@Test
   def test = writeDataset
+  /*
+   * files: (myTime -> (myInt, myReal, myText, file, fileSize))
+   * 1970001 -> (1, 1.1, A, Foo1970001bar1v1.1A.dat, 4)
+   * 1970002 -> (2, 2.2, B, Foo1970002bar2v2.2B.dat, 0)
+   * 1970003 -> (3, 3.3, C, Foo1970003bar3v3.3C.dat, 0)
+   */
   
   @Test
   def size {

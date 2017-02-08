@@ -16,9 +16,8 @@ import latis.ops.filter.ExcludeMissing
  * If range is tuple, take first element, for now.
  * Nested Functions not yet supported.
  */
-class BinAverageByWidth(binWidth: Double) extends Operation {
+class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends Operation {
   //TODO: accept ISO 8601 time duration
-  //TODO: support start value
   //TODO: start with min of time coverage instead of 1st sample
   //TODO: deal with 'length' metadata
   //TODO: deal with missing values
@@ -30,65 +29,84 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
    * Get bin width via getter so it can be overridden.
    */
   def getBinWidth = binWidth
-
+  
   override def applyToFunction(f: Function): Option[Variable] = {
     val fit = PeekIterator(f.iterator)
     //If the function has no samples, make a new Function around this iterator (since we can't reuse the orig)
     if (fit.isEmpty) Some(Function(f, fit))
     else {
-      //get initial domain value so we know where to start
-      //TODO: allow specification of initial value, e.g. so daily avg is midnight to midnight
-      val startValue = getDomainValue(fit.peek)
-      var nextValue = startValue
-      var index = 0
+      //Get initial domain value so we know where to start,
+      //default to first sample in the data if no startVal was provided in constructor.
+      //Currently, an error is thrown if requested startVal is greater than first sample
+      val firstSampleTime = getDomainValue(fit.peek)
+      val startValue = if (!startVal.isNaN && startVal <= firstSampleTime) startVal      
+                       else if (!startVal.isNaN && startVal > firstSampleTime) {
+                         throw new UnsupportedOperationException("Requested start value should not be after the start of data")
+                       }
+                       else firstSampleTime                     
+ 
+      val domainType = f.getDomain //Used in pattern match to decide between Time or Real
       val domainMetadata = f.getDomain.getMetadata
       val rangeMetadata = reduce(f.getRange).getMetadata //first scalar
 
-      //Make an iterator of new samples
-      val sampleIterator = new PeekIterator[Sample] {
-        def getNext = {
-          nextValue += getBinWidth
-          if (fit.isEmpty) null
-          else {
-            //accumulate the samples for this bin
-            val binnedSamples = ListBuffer[Sample]()
-            while (fit.hasNext && getDomainValue(fit.peek) < nextValue) binnedSamples += fit.next
+      val sampleIterator = getIteratorOfBinnedSamples(fit, startValue, domainType, domainMetadata, rangeMetadata)
+      val sampleTemplate = sampleIterator.peek
+      
+      Some(Function(sampleTemplate.domain, sampleTemplate.range, sampleIterator))
+    }
+  }
+  
+  /*
+   * Make an iterator of new samples in bins
+   */
+  private def getIteratorOfBinnedSamples(
+      fit: PeekIterator[Sample],
+      nextVal: Double,
+      dType: Variable,
+      dMetadata: Metadata,
+      rMetadata: Metadata): PeekIterator[Sample] = {
+    
+    var nextValue = nextVal
+    new PeekIterator[Sample] {
+      def getNext = {
+        nextValue += getBinWidth
+        if (fit.isEmpty) null
+        else {
+          //accumulate the samples for this bin
+          val binnedSamples = ListBuffer[Sample]()
+          while (fit.hasNext && getDomainValue(fit.peek) < nextValue) binnedSamples += fit.next
             
-            //create domain with bin center as its value, reuse original metadata
-            //TODO: munge metadata
-            val domainValue = nextValue - 0.5 * getBinWidth //bin center
-            val domain = fit.current.domain match {
-              //TODO: use "copy"
-              case _: Time => Time(domainMetadata, domainValue)
-              case _ => Real(domainMetadata, domainValue)
-            } 
+          //create domain with bin center as its value, reuse original metadata
+          //TODO: munge metadata
+          val domainValue = nextValue - (0.5 * getBinWidth) //bin center    
             
-            //compute statistics on range values
-            val range = computeStatistics(binnedSamples) match {
-              case Some(range) => range
-              case None => {
-                //fill empty bin with missing_value or NaN
-                val fillValue = rangeMetadata.get("missing_value") match {
-                  case Some(s) => s.toDouble
-                  case None => Double.NaN
-                }
-                //TODO: use scalar.getFillValue
-                //TODO: or call getNext if we want to skip empty bins
-                val mean = Real(rangeMetadata, fillValue)
-                val min  = Real(Metadata("min"), fillValue)
-                val max  = Real(Metadata("max"), fillValue)
-                val count = Real(Metadata("count"), 0)
-                Tuple(mean, min, max, count) //TODO: add metadata, consider model for bins
-              }
-            }
+          val domain = dType match { //Note this pattern match only cares about type, not the sample itself
+            case _: Time => Time(dMetadata, domainValue)
+            case _ => Real(dMetadata, domainValue)
+          } 
             
-            Sample(domain, range)
-          }
+          val range = computeRangeStatistics(binnedSamples, rMetadata)
+          Sample(domain, range)
         }
       }
-
-      val sampleTemplate = sampleIterator.peek
-      Some(Function(sampleTemplate.domain, sampleTemplate.range, sampleIterator))
+    }
+  }
+  
+  /*
+   * Compute statistics on range values
+   */
+  private def computeRangeStatistics(bins: ListBuffer[Sample], rMeta: Metadata): Tuple = {
+    computeStatistics(bins) match {
+      case Some(range) => range
+      case None => {
+        //fill empty bin with NaNs
+        //TODO: or call getNext if we want to skip empty bins
+        val mean = Real(rMeta, Double.NaN)
+        val min  = Real(Metadata("min"), Double.NaN)
+        val max  = Real(Metadata("max"), Double.NaN)
+        val count = Real(Metadata("count"), 0)
+        Tuple(mean, min, max, count) //TODO: add metadata, consider model for bins
+      }
     }
   }
   
@@ -178,13 +196,13 @@ class BinAverageByWidth(binWidth: Double) extends Operation {
 object BinAverageByWidth extends OperationFactory {
   
   override def apply(args: Seq[String]): BinAverageByWidth = {
-    if (args.length > 1) throw new UnsupportedOperationException("The BinAverage operation accepts only one argument")
+    if (args.length > 2) throw new UnsupportedOperationException("The BinAverage operation only accepts up to two arguments")
     try {
       BinAverageByWidth(args.head.toDouble)
     } catch {
-      case e: NumberFormatException => throw new UnsupportedOperationException("The BinAverage requires a single numeric argument")
+      case e: NumberFormatException => throw new UnsupportedOperationException("The BinAverage requires numeric arguments")
     }
   }
     
-  def apply(binWidth: Double): BinAverageByWidth = new BinAverageByWidth(binWidth)
+  def apply(binWidth: Double, startVal: Double = Double.NaN): BinAverageByWidth = new BinAverageByWidth(binWidth, startVal)
 }

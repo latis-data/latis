@@ -13,8 +13,7 @@ class BinAverage(binWidth: Double) extends Operation {
   override def applyToFunction(f: Function): Option[Variable] = {
     val it = new MappingIterator(f.iterator, (s: Sample) => Some(s))
     var binStart = it.peek.domain match {
-      case t: Time => t.getJavaTime
-      case n: Number => n.getNumberData.doubleValue
+      case Number(n) => n
     }
     val samples = ListBuffer[Sample]()
     while(it.hasNext) {
@@ -30,8 +29,7 @@ class BinAverage(binWidth: Double) extends Operation {
   def makeBin(it: PeekIterator[Sample], start: Double): Seq[Sample] = {
     val lb = new ListBuffer[Sample]()
     def b = it.peek.domain match {
-      case t: Time => t.getJavaTime.doubleValue < start + binWidth
-      case n: Number => n.getNumberData.doubleValue < start + binWidth
+      case Number(n) => n < start + binWidth
     }
     while(it.peek != null && b) lb += it.next
     lb.result
@@ -42,7 +40,6 @@ class BinAverage(binWidth: Double) extends Operation {
     val dom = bin(0).domain match {
       case t: Time => t match {
         case r: Number => Time(t.getMetadata, bin.map(_.domain.getNumberData.doubleValue).sum/count)
-        case t: Text => Time(t.getMetadata, bin.map(_.domain.asInstanceOf[Time].getJavaTime).sum/count)
       }
       case n: Number => Real(n.getMetadata, bin.map(_.domain.getNumberData.doubleValue).sum/count)
     }

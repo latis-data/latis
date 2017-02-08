@@ -5,6 +5,8 @@ import latis.data.EmptyData
 import latis.metadata.Metadata
 import latis.metadata.EmptyMetadata
 import latis.ops.Projection
+import latis.ops.filter.FirstFilter
+import latis.ops.filter.LastFilter
 import latis.ops.filter.Selection
 import latis.ops.math.BasicMath
 import latis.util.DataMap
@@ -19,6 +21,10 @@ import latis.ops.agg.Intersection
 import latis.ops.Reduction
 import latis.ops.Memoization
 import latis.util.CacheManager
+import latis.ops.ReduceTuple
+import latis.ops.filter.TakeOperation
+import latis.ops.Flatten
+import latis.ops.Sort
 
 /**
  * The main abstraction for a dataset that encapsulates everything about the dataset. 
@@ -57,7 +63,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   
   def project(proj: Projection): Dataset = proj(this)
   def project(varNames: Seq[String]): Dataset = Projection(varNames)(this)
-  def project(vname: String): Dataset = Projection(Seq(vname))(this)
+  def project(expression: String): Dataset = Projection(expression)(this)
   
   def select(expression: String): Dataset = Selection(expression)(this)
   
@@ -66,7 +72,9 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   def replaceValue(v1: Any, v2: Any): Dataset = ReplaceValueOperation(v1,v2)(this)
   
   def reduce = Reduction.reduce(this)
-  def flatten = reduce
+  def reduceTuple = ReduceTuple.reduce(this)
+  
+  def flatten = Flatten()(this)
   
   def intersect(that: Dataset): Dataset = Intersection(this, that)
   
@@ -81,32 +89,10 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
     Dataset(v) //TODO: metadata
   }
   
-  /**
-   * Until we can enforce sorting of function samples this will do so. 
-   * Assumes Function with Integer domain only, for now.
-   * Sort by range if domain is Index.
-   * TODO: implement as Operation.
-   * See latis-mms-web TestDatasets
-   */
-  def sorted: Dataset = variable match {
-    case f @ Function(samples) => {
-      val ss = samples.toSeq
-      if (ss.length == 0) this //empty dataset
-      else f.getDomain match {
-        case _: Index   => Dataset(Function(ss.sortBy(s => s match {case Sample(_, Tuple(Seq(d: Integer))) => d})(Integer(0))))
-        case _: Integer => Dataset(Function(ss.sortBy(s => s match {case Sample(d: Integer, _) => d})(Integer(0))))
-        case _: Real    => Dataset(Function(ss.sortBy(s => s match {case Sample(d: Real, _) => d})(Real(0))))
-        case _: Text    => Dataset(Function(ss.sortBy(s => s match {case Sample(d: Text, _) => d})(Text(""))))
-      }
-    }
-  }
-  
-  def last: Dataset = variable match {
-    //TODO: use Last filter
-    case Function(samples) => {
-      Dataset(Function(List(samples.toSeq.last)))
-    }
-  }
+  def sorted: Dataset = Sort()(this)
+  def first: Dataset = FirstFilter()(this)
+  def last: Dataset = LastFilter()(this)
+  def take(n: Int) = TakeOperation(n)(this)
     
   /**
    * Realize the Data for this Dataset so we can close the Reader.
@@ -139,7 +125,8 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
       case Some(s) => s + ": "
       case None => ""
     }
-    pre + "(" + variable.toString + ")"
+    val vs = if (variable == null) "" else variable.toString
+    pre + "(" + vs + ")"
   }
 }
 
@@ -150,8 +137,9 @@ object Dataset {
   def apply(v: Variable): Dataset = new Dataset(v)
   def apply(): Dataset = new Dataset(null)
   
-  val empty = Dataset()
-  
+  val empty = new Dataset(null) {
+    override def toString() = "empty"
+  }
   
   //extract the contained Variable
   def unapply(dataset: Dataset): Option[Variable] = {
@@ -160,4 +148,15 @@ object Dataset {
     else Some(v)
   }
   
+}
+
+/**
+ * Provide a convenient way to pattern match on a Dataset and extract an
+ * Iterator of Function Samples.
+ */
+object DatasetSamples {
+  def unapply(dataset: Dataset): Option[Iterator[Sample]] = dataset match {
+    case Dataset(Function(it)) => Some(it)
+    case _ => None
+  }
 }

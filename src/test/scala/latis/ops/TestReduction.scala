@@ -16,31 +16,46 @@ class TestReduction {
   def scalar {
     val ds = Dataset(TestReal.pi)
     val ds2 = reduce(ds)
-    assertTrue(ds2.unwrap.isInstanceOf[Real])
+    ds2 match {
+      case Dataset(v) => assertTrue(v.isInstanceOf[Real])
+      case _ => fail()
+    }
   }
 
   @Test
   def tuple_of_one {
     val ds = Dataset(TestTuple.tuple_of_real)
     val ds2 = reduce(ds)
-    assertTrue(ds2.unwrap.isInstanceOf[Real])
+    ds2 match {
+      case Dataset(v) => assertTrue(v.isInstanceOf[Real])
+      case _ => fail()
+    }
   }
 
   @Test
   def tuple_of_two {
     val ds = Dataset(TestTuple.tuple_of_reals)
     val ds2 = reduce(ds)
-    val v = ds2.unwrap
-    assertTrue(v.isInstanceOf[Tuple])
-    assertEquals(2, v.asInstanceOf[Tuple].getVariables.length)
+    ds2 match {
+      case Dataset(v) => {
+        assertTrue(v.isInstanceOf[Tuple])
+        assertEquals(2, v.asInstanceOf[Tuple].getVariables.length)
+      }
+      case _ => fail()
+    }
   }
   
   @Test
   def nested_tuples = {
     val ds = TestDataset.tuple_of_tuples
     val ds2 = ds.reduce
-    assertEquals(2, ds.unwrap.asInstanceOf[Tuple].getElementCount)
-    assertEquals(4, ds2.unwrap.asInstanceOf[Tuple].getElementCount)
+    (ds, ds2) match {
+      case (Dataset(v1), Dataset(v2)) => {
+        assertEquals(2, v1.asInstanceOf[Tuple].getElementCount)
+        assertEquals(4, v2.asInstanceOf[Tuple].getElementCount)
+      }
+      case _ => fail()
+    }
   }
 
 //  @Test
@@ -63,16 +78,20 @@ class TestReduction {
   def iterable_function_of_one {
     val ds = Dataset(TestFunction.function_with_one_sample_of_scalar_with_iterable_data)
     val ds2 = reduce(ds)
-    val v = ds2.unwrap
-    assertTrue(v.isInstanceOf[Sample])
+    ds2 match {
+      case Dataset(v) => assertTrue(v.isInstanceOf[Sample])
+      case _ => fail()
+    }
   }
   
   //TODO: need to define valid dataset @Test
   def iterable_function_of_many {
     val ds = Dataset(TestFunction.function_of_scalar_with_iterable_data)
     val ds2 = reduce(ds)
-    val v = ds2.unwrap
-    assertTrue(v.isInstanceOf[Function])
+    ds2 match {
+      case Dataset(v) => assertTrue(v.isInstanceOf[Function])
+      case _ => fail()
+    }
   }
   
   //TODO: tuple_of_one_tuple_of_one_scalar

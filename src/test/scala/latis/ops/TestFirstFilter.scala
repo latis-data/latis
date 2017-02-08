@@ -52,14 +52,20 @@ class TestFirstFilter {
   def test_function_of_scalars = {
     val ds = TestDataset.function_of_scalar
     val expected = Sample(Real(0), Real(0))
-    assertEquals(expected, Operation("first")(ds).unwrap.asInstanceOf[Function].iterator.next)
+    Operation("first")(ds) match {
+      case Dataset(v) => assertEquals(expected, v.asInstanceOf[Function].iterator.next)
+      case _ => fail()
+    }
   }
   
   @Test
   def test_function_of_functions = {
     val ds = TestDataset.function_of_functions
     val expected = Sample(Integer(Metadata("x"), 0), Function((0 until 3).map(j => Sample(Integer(Metadata("y"), 10 + j), Real(Metadata("z"), 10 * 0 + j)))))
-    assertEquals(expected, Operation("first")(ds).unwrap.asInstanceOf[Function].iterator.next)
+    Operation("first")(ds) match {
+      case Dataset(v) => assertEquals(expected, v.asInstanceOf[Function].iterator.next)
+      case _ => fail()
+    }
   }
   
   @Test
@@ -70,6 +76,9 @@ class TestFirstFilter {
   
   @Test
   def test_metadata {
-    assertEquals(Some("1"), Operation("first")(TestDataset.canonical).unwrap.getMetadata("length"))
+    Operation("first")(TestDataset.canonical) match {
+      case Dataset(v) => assertEquals(Some("1"), v.getMetadata("length"))
+      case _ => fail()
+    }
   }
 }

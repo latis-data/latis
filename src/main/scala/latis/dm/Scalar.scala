@@ -19,20 +19,11 @@ trait Scalar extends Variable {
   //move to AbstractScalar since mixing in Time with Text means that anything here overrides Time?
   //note, we tried overriding this in subclasses but ran into inheritance trouble with "new Time with Real"
   def compare(that: String): Int
-    
-  /**
-   * Compare the given Scalar to this.
-   * If this is a Number, the values will be compared as Doubles.
-   * If this is a Text, the other value will be converted to a String.
-   */
-  //TODO: extend Ordered?
-  //TODO: unit conversions...
-  def compare(that: Scalar): Int = (this,that) match {
-    case (Number(d1), Number(d2)) => d1 compare d2
-    case (Text(s1), Text(s2)) => s1 compare s2
-    case (Number(d1), Text(s2)) => d1 compare StringUtils.toDouble(s2) //string may become NaN
-    case (Text(s1), Number(d2)) => s1 compare d2.toString
-  }
+  
+  //come for free by extending Ordered trait
+  //def > (that: Scalar): Boolean = this.compare(that) > 0
+  //def < (that: Scalar): Boolean = this.compare(that) < 0
+  
 //TODO: test trim, nan
   def getValue: Any
   def stringValue = getValue.toString
@@ -60,6 +51,7 @@ trait Scalar extends Variable {
   //TODO: updatedMetadata(md: Metadata)
   
   //TODO: updatedValue instead of Variable.apply
+  //TODO: use "copy" like Scala's case classes (LATIS-428)
   def updatedValue(s: String): Scalar = this match {
     //TODO: manage exception? StringUtil?
     //TODO: Time, override?
@@ -95,6 +87,7 @@ object Scalar {
     case f: Float  => Real(f)
     case l: Long   => Integer(l)
     case i: Int    => Integer(i)
+    case b: Boolean => Text(b)
     case _ => throw new Error("Unable to make Scalar from value: " + value) //TODO: of type...
     //TODO: if serializable, make Binary?
   }
@@ -109,6 +102,7 @@ object Scalar {
     case l: Long   => Integer(metadata, l)
     case i: Int    => Integer(metadata, i)
     case s: String => Text(metadata, s)
+    case b: Boolean => Text(metadata, b)
     //Data Value types
     case dv: DoubleValue => Real(metadata, dv)
     case lv: LongValue   => Integer(metadata, lv)

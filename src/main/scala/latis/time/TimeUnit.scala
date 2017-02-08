@@ -21,7 +21,7 @@ object TimeUnit {
   val PICOSECOND  = new TimeUnit(1e-12, "picoseconds")
   units += ((PICOSECOND.name, PICOSECOND))
   
-  val NANOSECOND  = new TimeUnit(1e-9,  "nanaseconds")
+  val NANOSECOND  = new TimeUnit(1e-9,  "nanoseconds")
   units += ((NANOSECOND.name, NANOSECOND))
   
   val MICROSECOND = new TimeUnit(1e-6,  "microseconds")
