@@ -14,20 +14,33 @@ import latis.ops.Split
 import latis.ops.agg.BasicJoin
 import latis.time.Time
 
-class Resampling(domainSet: Iterable[Variable]) extends Operation with NoInterpolation {
+class Resampling2D(domainSet: Iterable[Variable]) extends Operation with NoInterpolation2D {
 
   val dname = domainSet.head.getName
 
   override def applyToFunction(function: Function): Option[Function] = {
     val newSamples = if(function.getDomain.hasName(dname)) { 
       val dvals = domainSet.head match { //only 1D for now
-        case _: Number => domainSet.map(_.getNumberData.doubleValue)
+        case _: Tuple => domainSet.map(p => p match {
+          case Tuple(tv) => {
+            val tv1 = tv(0).getNumberData.doubleValue
+            val tv2 = tv(1).getNumberData.doubleValue
+            (tv1, tv2)
+          }
+        })
       }
+      //dvals is now Array[(Double, Double)]
       function.getRange match {
         case r: Scalar => {
           val inpr = getInterpolator(function)
-          val rvals = dvals.flatMap(inpr(_))
-          domainSet.zip(rvals).map(p => Sample(p._1, r(Data(p._2))))
+          val rvals = dvals.map(p => inpr(p._1, p._2) match {
+            case Some(v) => v
+            case _ => None
+          })
+          domainSet.zip(rvals).map(p => Sample(p._1, p._2 match {
+            case None => r(Data(Double.NaN))
+            case _ => r(Data(p._2))
+          }))
         }
         case t: Tuple => { //apply resampling to each variable in the tuple individually
           val fs = Split()(function) match {
@@ -45,23 +58,19 @@ class Resampling(domainSet: Iterable[Variable]) extends Operation with NoInterpo
     else {
       function.iterator.flatMap(applyToSample(_))
     }
-
     Some(Function(newSamples.toSeq, function.getMetadata + ("length" -> newSamples.size.toString)))
   }
 
-  /**
-   * Gets the interpolator for a scalar function of Numbers. Otherwise defaults
-   * a NaN interpolator. 
-   */
-  def getInterpolator(function: Function): Double => Option[Double] = {
+  def getInterpolator(function: Function): (Double, Double) => Option[Double] = {
     val samples = function.iterator.toArray
     samples.head match {
-      case Sample(d: Number, r: Number) => {
-        val xs = samples.map(_.domain.getNumberData.doubleValue)
-        val ys = samples.map(_.range.getNumberData.doubleValue)
-        interpolator(xs,ys)
+      case Sample(tv: Tuple, r: Number) => {
+        val domain_x = samples.map(_.domain.asInstanceOf[Tuple].getVariables(0).getNumberData.doubleValue)
+        val domain_y = samples.map(_.domain.asInstanceOf[Tuple].getVariables(1).getNumberData.doubleValue)
+        val domainSet = Array(domain_x, domain_y)
+        val rangeSet = samples.map(_.range.getNumberData.doubleValue)
+        interpolator(domainSet, rangeSet)
       }
-      case _ => (d: Double) => Some(Double.NaN)
     }
   }
 }
