@@ -20,7 +20,7 @@ import latis.dm.Dataset
 class Stride2D(val stride1: Int, val stride2: Int) extends Filter {
   
   override def applyToFunction(function: Function) = {
-  
+    
     // First, we find the number of y values for each x value by finding the number of 
     // unique x values and dividing this into the total number of Samples in the function. 
     val funList = function.iterator.toList
@@ -36,11 +36,10 @@ class Stride2D(val stride1: Int, val stride2: Int) extends Filter {
     // the first item in each of these lists. 
     // Next, we group each of the sublists within each first x list into groups the length of stride2. Once 
     // again, we now only consider the first element of each of these lists.  
-    val stride1Grouped = function.iterator.grouped(yNum).grouped(stride1)       
-    val stride1List = stride1Grouped.toList
+    val stride1List = funList.grouped(yNum).grouped(stride1).toList 
     val stride2List = for (z <- (0 until stride1List.size).toList) yield stride1List(z).head.grouped(stride2)
     var finalList = List[Sample]()
-
+    
     // Here, we find the relevant Samples within our large, confusing list creation.  
     // The initial for loop is to hit each relevant x list. Upon each iteration,
     // a list is created that will be added to the final list. The .map function
@@ -50,7 +49,7 @@ class Stride2D(val stride1: Int, val stride2: Int) extends Filter {
       val listToAdd = new MappingIterator(stride2List(j).map(_.head), (s: Sample) => Some(s))
       finalList = finalList ++ listToAdd
     }
-
+    
     // Assuming we only have a total length variable in the metadata and not x and y specific lengths, 
     // we correct that here based on the strides. 
     val md = function.getMetadata("length") match {
@@ -62,7 +61,7 @@ class Stride2D(val stride1: Int, val stride2: Int) extends Filter {
         Metadata(function.getMetadata.getProperties + ("length" -> (mdXNum*mdYNum).toString))
       }
     }
-    
+        
     //AsciiWriter.write(Dataset(Function(finalList, md)))
     Some(Function(finalList, md))
   }
