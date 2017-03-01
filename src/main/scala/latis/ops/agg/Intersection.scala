@@ -10,6 +10,8 @@ import latis.dm.Function
 import latis.ops.Reduction
 import latis.metadata.EmptyMetadata
 import latis.metadata.Metadata
+import latis.ops.ReduceTuple
+import latis.dm.Variable
 
 class Intersection extends Aggregation { 
   //use case: x -> (a,b) intersect x -> (c,d) => x -> (a,b,c,d) 
@@ -21,11 +23,9 @@ class Intersection extends Aggregation {
       case _ => throw new UnsupportedOperationException("Intersection expects a Function in each of the Datasets it aggregates.")
     }
     
-    val reduction = new Reduction
-    
     //need domain and range types for new Function
     val dtype = f1.getDomain
-    val rtype = reduction.applyToTuple(Tuple(f1.getRange, f2.getRange)).get //flatten, consistent with below
+    val rtype = joinRanges(f1.getRange, f2.getRange) //flatten, consistent with below
     
     //make sample iterator
     val samples = new PeekIterator[Sample]() {
@@ -35,8 +35,7 @@ class Intersection extends Aggregation {
             //use common domain sample
             val domain = s1.domain
             //merge range values, reduce so we don't end up with extra Tuple nesting
-            //TODO: is reduce always appropriate? maybe just deal with this one layer we added? did this here because if iterable once problem?
-            val range = reduction.applyToTuple(Tuple(s1.range, s2.range)).get //Option
+            val range = joinRanges(s1.range, s2.range)
             Sample(domain, range)
           }
           case None => null
@@ -50,6 +49,17 @@ class Intersection extends Aggregation {
     val fmd = f1.getMetadata
     
     Dataset(Function(dtype, rtype, samples, fmd))
+  }
+  
+  /**
+   * Combine Scalars and Tuples into a single Tuple.
+   * Does not support Functions in the range for now.
+   */
+  private def joinRanges(v1: Variable, v2: Variable): Variable = (v1,v2) match {
+    case (Tuple(vars1), Tuple(vars2)) => Tuple(vars1 ++ vars2)
+    case (Tuple(vars1), s2: Scalar) => Tuple(vars1 :+ s2)
+    case (s1: Scalar, Tuple(vars2)) => Tuple(s1 +: vars2)
+    case (s1: Scalar, s2: Scalar) => Tuple(Seq(s1, s2))
   }
   
   private def getNextMatchingSamplePair(it1: Iterator[Sample], it2: Iterator[Sample]): Option[(Sample,Sample)] = {

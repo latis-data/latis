@@ -11,8 +11,8 @@ import latis.dm.Variable
 class ReduceTuple extends Operation2  {
   
   /**
-   * Recursively apply to all elements.
    * If a Tuple has only one element, reduce it to that element.
+   * If a Tuple has no elements, return None.
    */
   override def applyToTuple(tuple: Tuple): Option[Variable] = tuple match {
     //TODO: assumes the tuple does not own the data

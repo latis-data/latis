@@ -108,7 +108,7 @@ object Function {
       val sample = samples.head
       Function(sample.domain, sample.range, samples.iterator, md)
     }
-    case None => Function.empty
+    case None => Function(Naught(), Naught(), Iterator.empty, md) //Function.empty
   }
 
   def apply(vs: Seq[Variable]): SampledFunction = Function(vs, EmptyMetadata)

@@ -1,16 +1,14 @@
 package latis.ops.agg
 
 import latis.dm.Dataset
-import latis.dm.Sample
-import latis.util.iterator.PeekIterator
-import latis.dm.Scalar
-import scala.collection.mutable.ArrayBuffer
-import latis.dm.Tuple
 import latis.dm.Function
-import latis.ops.Reduction
+import latis.dm.Sample
+import latis.dm.Scalar
+import latis.dm.Tuple
+import latis.dm.Variable
 import latis.metadata.EmptyMetadata
 import latis.metadata.Metadata
-import latis.dm.Variable
+import latis.util.iterator.PeekIterator
 
 class LeftOuterJoin extends Aggregation { 
   //use case: x -> (a,b) LeftOuterJoin x -> (c,d) => x -> (a,b,c,d) 
@@ -41,11 +39,9 @@ class LeftOuterJoin extends Aggregation {
     if (f2.isEmpty) return ds1
     if (f1.isEmpty) return ds2
     
-    val reduction = new Reduction
-    
     //need domain and range types for new Function
     val dtype = f1.getDomain
-    val rtype = reduction.applyToTuple(Tuple(f1.getRange, f2.getRange)).get //flatten, consistent with below
+    val rtype = Tuple(f1.getRange, f2.getRange)
     
     //Make PeekIterator for the second dataset so we can look ahead
     val pit2 = PeekIterator(it2)
@@ -80,12 +76,7 @@ class LeftOuterJoin extends Aggregation {
             case None => makeFillVariable(f2.getRange)
           }
           
-          val range = reduction.applyToTuple(Tuple(s1.range, range2)) match {
-            case Some(v: Variable) => v
-            case None => {
-              ???
-            }
-          }
+          val range = Tuple(s1.range, range2)
           Sample(d1,range)
           
         } else null
