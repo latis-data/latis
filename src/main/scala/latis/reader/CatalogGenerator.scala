@@ -1,28 +1,41 @@
 package latis.reader
 
-import java.io._
-import latis.util.LatisProperties
-import java.io.File
 import scala.collection.mutable.ArrayBuffer
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.Index
+import latis.dm.Sample
+import latis.dm.Text
+import latis.ops.Operation
+import latis.util.FileUtils
+import latis.util.LatisProperties
 
-class CatalogGenerator { 
+class CatalogGenerator extends DatasetAccessor {  
   
-  private lazy val datasetNames = getListOfDatasets   //turn this into a "catalog": ds of: i -> dsName
+  private lazy val datasetNames: List[String] = getListOfDatasets   
+  private lazy val catalogDataset: Dataset = generateCatalogDataset
   
-
+  /**
+   * Return the Dataset that this accessor is responsible for (catalogDataset).
+   */
+  override def getDataset(): Dataset = catalogDataset
   
-  def getListOfFiles(dir: String): List[File] = { //move this to latis.util.FileUtils
-    val d = new File(dir)
-    if (d.exists && d.isDirectory) {
-      d.listFiles.filter(_.isFile).toList
-    } else {
-      List[File]()
-    }
-  }
+  /**
+   * Return the catalogDataset with the given Operations applied to it.
+   */
+  override def getDataset(ops: Seq[Operation]): Dataset = ops.reverse.foldRight(getDataset)(_(_))
   
+  override def close = {}
+  
+  //---- Helper Functions ------------------------------------------------------------------------
+  
+  /*
+   * Produce a list of the names of all datasets that live in 
+   * the "dataset.dir" as defined in latis.properties.
+   */
   def getListOfDatasets: List[String] = {
     val dsdir: String = LatisProperties.getOrElse("dataset.dir", "datasets")
-    val fileList = getListOfFiles(dsdir) 
+    val fileList = FileUtils.getListOfFiles(dsdir) 
     val fileNames = ArrayBuffer[String]()
     
     for (x <- fileList) {
@@ -33,5 +46,17 @@ class CatalogGenerator {
   }
   
   def getDatasetNames = datasetNames
-
+  
+  /*
+   * Convert a list of dataset names into
+   * a dataset of the form i -> dsname
+   */
+  def generateCatalogDataset = {
+    val samples = datasetNames.map(n => {
+      Sample(Index(), Text(n))
+    })
+    Dataset(Function(samples))
+  }
+  
+  //TODO: Does this need apply/unapply? Or getUrl()? And what about that latis.property entry?
 }
