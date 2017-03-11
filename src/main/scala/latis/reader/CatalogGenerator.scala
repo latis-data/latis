@@ -58,5 +58,5 @@ class CatalogGenerator extends DatasetAccessor {
     Dataset(Function(samples))
   }
   
-  //TODO: Does this need apply/unapply? Or getUrl()? And what about that latis.property entry?
+  //TODO: Does this need apply/unapply? Or getUrl()? 
 }
