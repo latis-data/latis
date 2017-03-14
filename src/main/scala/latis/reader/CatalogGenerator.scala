@@ -9,6 +9,7 @@ import latis.dm.Text
 import latis.ops.Operation
 import latis.util.FileUtils
 import latis.util.LatisProperties
+import latis.metadata.Metadata
 
 class CatalogGenerator extends DatasetAccessor {  
   
@@ -49,14 +50,13 @@ class CatalogGenerator extends DatasetAccessor {
   
   /*
    * Convert a list of dataset names into
-   * a dataset of the form i -> dsname
+   * a dataset of the form i -> ds_name
    */
   def generateCatalogDataset = {
     val samples = datasetNames.map(n => {
-      Sample(Index(), Text(n))
+      Sample(Index(), Text(Metadata("ds_name"), n))
     })
     Dataset(Function(samples))
   }
   
-  //TODO: Does this need apply/unapply? Or getUrl()? 
 }
