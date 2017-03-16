@@ -63,7 +63,8 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
           //increment based on upper end of region of interest
           //a2, b2 are the basis of the next comparison
      //TODO: can't assume a2 and b2 will be there with partial windows
-          if (as.length < upper + 1) { //partial window (without upper, thus extrapolation needed) near the end of dataset1
+          //Note, this implies extrapolation at the end
+          if (as.length < upper + 1) { //partial window (without upper, thus extrapolation needed) near the end of dataset A
             extrapolationMode = -1
     //TODO: but still got an inperp to do in B at the last A, do we need to use window size in interp logic below?
           }
@@ -103,11 +104,16 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
               as = pit1.next.toArray
               bs = pit2.next.toArray
             }
-          //TODO: do we need to distinguish between front and end extrapolation?
           
+        /*
+         * TODO: distinguish between front and end extrapolation
+         * modes: astart, bstart, aend, bend, none
+         * these are exclusive, can be in only one
+         * let's do a case for each
+         */
           
-        } else if (extrapolationMode > 0) { //extrap bs
-  //TODO: if we are using etrap mode for end of data, deal with end of both and thus this iterator
+   //************TODO: this extrap logic applies to the start of the join, this will break when extrapolating at the end
+        } else if (extrapolationMode > 0) { //have been extrapolating Bs
           val a2 = as(upper).domain
           val b1 = bs(lower).domain
           a2.compare(b1) match {
@@ -136,10 +142,10 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
         //Populate the windows of samples (as, bs) for the next joined sample.
         loadNextWindows
         
-println("getNext")
-println("as: " + as.map(_.domain.getNumberData.doubleValue).mkString(" "))
-println("bs: " + bs.map(_.domain.getNumberData.doubleValue).mkString(" "))
-println("extrap: " + extrapolationMode)  
+//println("getNext")
+//println("as: " + as.map(_.domain.getNumberData.doubleValue).mkString(" "))
+//println("bs: " + bs.map(_.domain.getNumberData.doubleValue).mkString(" "))
+//println("extrap: " + extrapolationMode)  
 //        //If one dataset has no more samples, extrapolate
 //        val joinedSample = if (!pit1.hasNext) extrapolate(as, bs(lower).domain.asInstanceOf[Scalar]) match {
 //          case Some(sample) => joinSamples(sample, bs(lower))
@@ -156,16 +162,30 @@ println("extrap: " + extrapolationMode)
           var a1 = as(lower).domain.asInstanceOf[Scalar]
           var b1 = bs(lower).domain.asInstanceOf[Scalar]
           
+          //Extrapolate a value for A
+          if (extrapolationMode < 0) extrapolate(as, b1) match {
+            case Some(sample) => joinSamples(sample, bs(lower))
+            case None => ??? //error?
+          }
+          //Extrapolate a value for B
+          else if (extrapolationMode > 0) extrapolate(bs, a1) match {
+            case Some(sample) => joinSamples(as(lower), sample)
+            case None => ??? //error?
+          }
+            
           //Need to generate an "a" sample at the value of b1
-          if (a1 < b1) interpolate(as, b1) match {
+          else if (a1 < b1) interpolate(as, b1) match {
             case Some(sample) => joinSamples(sample, bs(lower))
             case None => ??? //error? interpolation (even fill) is not supported
           }
+          
           //Need to generate a "b" sample at the value of a1
           else if (a1 > b1) interpolate(bs, a1) match {
             case Some(sample) => joinSamples(as(lower), sample)
             case None => ???
           }
+          
+          //Domain values match
           else joinSamples(as(lower), bs(lower))
         }
         

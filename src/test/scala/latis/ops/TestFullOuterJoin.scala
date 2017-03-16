@@ -280,6 +280,10 @@ class TestFullOuterJoin {
     }
   }
   
+//TODO: consider also a dataset with 1 sample
+  //TODO: test datasets that don't overlap
+  //TODO: gaps of 2 start, middle, end
+  
   @Test @Ignore //TODO: deal with duplicate names in join
   def duplicate_codomain_variable = {
     val samples1 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mda, i)))
