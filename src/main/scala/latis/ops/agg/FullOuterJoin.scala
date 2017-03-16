@@ -26,7 +26,7 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
     val upper = interpolationWindowSize / 2
     val lower = upper - 1
 
-    var noMoreData = false
+    var noMoreData = false //interpolationWindowSize / 2 samples left, assume 1 for now
     
     //Create the sliding iterators so we can interpolate within sliding windows.
     //Do this lazily so we don't access data until we have to.
@@ -75,23 +75,35 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
 //            else extrapolationMode = 
 //          }
           
-          if (a2 <= b2 && pit1.hasNext) as = pit1.next.toArray  //TODO: if !hasNext
-          if (a2 >= b2 && pit2.hasNext) bs = pit2.next.toArray  //TODO: if !hasNext
-//          if (a2 < b2)
-//            if (pit1.hasNext) as = pit1.next.toArray
-//            else extrapolationMode = -1 //out of As, need to extrapolate
-//          else if (a2 > b2)
-//            if (pit2.hasNext) bs = pit2.next.toArray
-//            else extrapolationMode = 1 //out of Bs, need to extrapolate
-//          else //a2 = b2
-//            //TODO: if one has more but the other doesn't: extrap
-//            if (!pit2.hasNext && !pit2.hasNext) noMoreData = true
-//            else {
-//              
-//            }
-          //note, both need to advance if the upper values match 
-          //since interp is based on the lower values in the window
-          
+          //if (a2 <= b2 && pit1.hasNext) as = pit1.next.toArray  //TODO: if !hasNext
+          //if (a2 >= b2 && pit2.hasNext) bs = pit2.next.toArray  //TODO: if !hasNext
+          if (a2 < b2)
+            if (pit1.hasNext) as = pit1.next.toArray
+            else extrapolationMode = -1 //out of As, need to extrapolate
+          else if (a2 > b2)
+            if (pit2.hasNext) bs = pit2.next.toArray
+            else extrapolationMode = 1 //out of Bs, need to extrapolate
+          else //a2 = b2
+            //TODO: if one has more but the other doesn't: extrap
+            if (!pit1.hasNext && !pit2.hasNext) {
+              //if we are at the end, can we just use "tail" of array?
+              as = as.tail
+              bs = bs.tail
+              noMoreData = true
+            }
+            else if (!pit1.hasNext) {
+              extrapolationMode = -1 //out of As, need to extrapolate
+            }
+            else if (!pit2.hasNext) {
+              extrapolationMode = 1 //out of Bs, need to extrapolate
+            }
+            else {
+              //both need to advance if the upper values match 
+              //note that interp is based on the lower values in the window
+              as = pit1.next.toArray
+              bs = pit2.next.toArray
+            }
+          //TODO: do we need to distinguish between front and end extrapolation?
           
           
         } else if (extrapolationMode > 0) { //extrap bs
@@ -117,15 +129,13 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
     
     
     def getNext: Sample = {
-  
-
-      //If there are no more samples in either dataset, we are done.
-      //*TODO: consider partial windows, even simple case of last samples matching
-      if (!pit1.hasNext && !pit2.hasNext) null
-      else 
-      {
-              //Populate the windows of samples (as, bs) for the next joined sample.
+  //TODO: if noMoreData, we need to do interpolationWindowSize / 2 more samples
+      //let's just assume a window of 2 for now
+      if (noMoreData) null
+      else {
+        //Populate the windows of samples (as, bs) for the next joined sample.
         loadNextWindows
+        
 println("getNext")
 println("as: " + as.map(_.domain.getNumberData.doubleValue).mkString(" "))
 println("bs: " + bs.map(_.domain.getNumberData.doubleValue).mkString(" "))
