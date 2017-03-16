@@ -26,10 +26,12 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
     val upper = interpolationWindowSize / 2
     val lower = upper - 1
 
+    var noMoreData = false
+    
     //Create the sliding iterators so we can interpolate within sliding windows.
     //Do this lazily so we don't access data until we have to.
-    lazy val pit1 = PeekIterator(f1.iterator.sliding(interpolationWindowSize)) //.withPartial(false))
-    lazy val pit2 = PeekIterator(f2.iterator.sliding(interpolationWindowSize)) //.withPartial(false))
+    lazy val pit1 = PeekIterator(f1.iterator.sliding(interpolationWindowSize))
+    lazy val pit2 = PeekIterator(f2.iterator.sliding(interpolationWindowSize))
     
     //temporary arrays of Samples for the sliding windows
     var as: Array[Sample] = Array() //left dataset window (a)
@@ -53,8 +55,8 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
         as = pit1.next.toArray
         bs = pit2.next.toArray
         //if the domain values aren't the same, start in extrapolation mode
-        val a1 = as(lower).domain.asInstanceOf[Scalar]
-        val b1 = bs(lower).domain.asInstanceOf[Scalar]
+        val a1 = as(lower).domain
+        val b1 = bs(lower).domain
         extrapolationMode = b1.compare(a1) // <0 if as need extrap...
       } else { //not first pass
         if (extrapolationMode == 0) { //we've been in normal interpolation mode
@@ -65,8 +67,8 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
             extrapolationMode = -1
     //TODO: but still got an inperp to do in B at the last A, do we need to use window size in interp logic below?
           }
-          val a2 = as(upper).domain.asInstanceOf[Scalar]
-          val b2 = bs(upper).domain.asInstanceOf[Scalar]
+          val a2 = as(upper).domain
+          val b2 = bs(upper).domain
 //          if (a2 <= b2) {
 //            if (pit1.hasNext) as = pit1.next.toArray
 //   //TODO: consider partial windows
@@ -75,20 +77,35 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
           
           if (a2 <= b2 && pit1.hasNext) as = pit1.next.toArray  //TODO: if !hasNext
           if (a2 >= b2 && pit2.hasNext) bs = pit2.next.toArray  //TODO: if !hasNext
+//          if (a2 < b2)
+//            if (pit1.hasNext) as = pit1.next.toArray
+//            else extrapolationMode = -1 //out of As, need to extrapolate
+//          else if (a2 > b2)
+//            if (pit2.hasNext) bs = pit2.next.toArray
+//            else extrapolationMode = 1 //out of Bs, need to extrapolate
+//          else //a2 = b2
+//            //TODO: if one has more but the other doesn't: extrap
+//            if (!pit2.hasNext && !pit2.hasNext) noMoreData = true
+//            else {
+//              
+//            }
           //note, both need to advance if the upper values match 
           //since interp is based on the lower values in the window
+          
+          
+          
         } else if (extrapolationMode > 0) { //extrap bs
   //TODO: if we are using etrap mode for end of data, deal with end of both and thus this iterator
-          val a2 = as(upper).domain.asInstanceOf[Scalar]
-          val b1 = bs(lower).domain.asInstanceOf[Scalar]
+          val a2 = as(upper).domain
+          val b1 = bs(lower).domain
           a2.compare(b1) match {
             case 0 => as = pit1.next.toArray; extrapolationMode = 0  //TODO: if !hasNext, only first and last samples match, need to join them
             case i: Int if (i < 0) => as = pit1.next.toArray //TODO: if !hasNext, no overlap between datasets, start extrapolating on the end of the other
             case i: Int if (i > 0) => extrapolationMode = 0
           }
         } else if (extrapolationMode < 0) { //extrap as
-          val b2 = bs(upper).domain.asInstanceOf[Scalar]
-          val a1 = as(lower).domain.asInstanceOf[Scalar]
+          val b2 = bs(upper).domain
+          val a1 = as(lower).domain
           b2.compare(a1) match {
             case 0 => bs = pit2.next.toArray; extrapolationMode = 0 //TODO: if !hasNext, only first and last samples match, need to join them
             case i: Int if (i < 0) => bs = pit2.next.toArray  //TODO: if !hasNext, no overlap between datasets, start extrapolating on the end of the other
@@ -100,35 +117,52 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
     
     
     def getNext: Sample = {
-      //Populate the windows of samples (as, bs) for the next joined sample.
-      loadNextWindows
-      
+  
+
       //If there are no more samples in either dataset, we are done.
-      //TODO: consider partial windows
-/*
- * TODO: haven't used current samples yet so don't use hasNext
- * but need to know if one was already at end and needs exterp
- * add matching null samples at +/- infinity?
- */
+      //*TODO: consider partial windows, even simple case of last samples matching
       if (!pit1.hasNext && !pit2.hasNext) null
-      else {
-        //If one dataset has no more samples, extrapolate
-        if (!pit1.hasNext) extrapolate(as, bs(lower).domain.asInstanceOf[Scalar]) match {
-          case Some(sample) => joinSamples(sample, bs(lower))
-          case None => ??? //TODO: fill
-        } else if (!pit2.hasNext) extrapolate(bs, as(lower).domain.asInstanceOf[Scalar]) match {
-          case Some(sample) => joinSamples(as(lower), sample)
-          case None => ??? //TODO: fill
+      else 
+      {
+              //Populate the windows of samples (as, bs) for the next joined sample.
+        loadNextWindows
+println("getNext")
+println("as: " + as.map(_.domain.getNumberData.doubleValue).mkString(" "))
+println("bs: " + bs.map(_.domain.getNumberData.doubleValue).mkString(" "))
+println("extrap: " + extrapolationMode)  
+//        //If one dataset has no more samples, extrapolate
+//        val joinedSample = if (!pit1.hasNext) extrapolate(as, bs(lower).domain.asInstanceOf[Scalar]) match {
+//          case Some(sample) => joinSamples(sample, bs(lower))
+//          case None => ??? //TODO: fill
+//        } else if (!pit2.hasNext) extrapolate(bs, as(lower).domain.asInstanceOf[Scalar]) match {
+//          case Some(sample) => joinSamples(as(lower), sample)
+//          case None => ??? //TODO: fill
+//        }
+//        
+//        else 
+        val joinedSample = {
+          //Get the domain variable of the samples to compare
+          //Assumes scalar domains, for now
+          var a1 = as(lower).domain.asInstanceOf[Scalar]
+          var b1 = bs(lower).domain.asInstanceOf[Scalar]
+          
+          //Need to generate an "a" sample at the value of b1
+          if (a1 < b1) interpolate(as, b1) match {
+            case Some(sample) => joinSamples(sample, bs(lower))
+            case None => ??? //error? interpolation (even fill) is not supported
+          }
+          //Need to generate a "b" sample at the value of a1
+          else if (a1 > b1) interpolate(bs, a1) match {
+            case Some(sample) => joinSamples(as(lower), sample)
+            case None => ???
+          }
+          else joinSamples(as(lower), bs(lower))
         }
         
-        else {
-          //Get the domain variable of the samples to compare
-        //Assumes scalar domains, for now
-        var a1 = as(lower).domain.asInstanceOf[Scalar]
-        var b1 = bs(lower).domain.asInstanceOf[Scalar]
+        joinedSample match {
+          case Some(sample) => sample
+          case None => null
         }
-      
-        ???
       }
     }
     
@@ -246,6 +280,7 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
         val samples = makeSampleIterator(f1, f2)
        
         //TODO: make Function and Dataset metadata
+        //TODO: add this peek trick to the Function constructor for iterator?
         val pit = PeekIterator(samples)
         val (domain, range) = pit.peek match {case Sample(d,r) => (d,r)}
         Dataset(Function(domain, range, pit))
