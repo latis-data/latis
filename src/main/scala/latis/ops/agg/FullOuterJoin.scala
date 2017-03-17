@@ -93,28 +93,20 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
                     bs = bs.tail
                     noMoreData = true //let getNext know that we are on the last sample
                   }
-                  case (true, false) => as = pit1.next.toArray//; bs = bs.tail //TODO: tail not needed, interp will just match upper end; but we would have to deal with lack of b2 above
-                  case (false, true) => bs = pit2.next.toArray//; as = as.tail
+                  case (true, false) => as = pit1.next.toArray; bs = bs.tail
+                  case (false, true) => bs = pit2.next.toArray; as = as.tail
                   //note: because a2 = b2, the "next" for A will align a1 with the last B so we are not quite ready to start extrapolating yet
                 }
               }
               
               case i: Int if (i < 0) => { //a2 < b2
                 if (pit1.hasNext) as = pit1.next.toArray
-                else {
-                  if (pit2.hasNext) bs = pit2.next.toArray
-                  else {bs = bs.tail; noMoreData = true }//out of As and Bs
-                  extrapolationMode = "postA" //out of As, need to extrapolate
-                }
+                else as = as.tail
               }
               
               case i: Int if (i > 0) => { //a2 > b2
                 if (pit2.hasNext) bs = pit2.next.toArray
-                else {
-                  if (pit1.hasNext) as = pit1.next.toArray
-                  else {as = as.tail; noMoreData = true} //out of As and Bs
-                  extrapolationMode = "postB" //out of Bs, need to extrapolate
-                }
+                else bs = bs.tail
               }
             }
           }
@@ -145,13 +137,11 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
             else {
               bs = bs.tail
               noMoreData = true
-              println("postA no more data")
             }
           }
           
           //--- PostB extrapolation mode ---//
           case "postB" => {
-            println("postB")
             if (pit1.hasNext) as = pit1.next.toArray
             else {
               as = as.tail
@@ -169,6 +159,11 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
       //let's just assume a window of 2 for now
       if (noMoreData) null
       else {
+        //If we ran out of samples last time, set the etrapolation mode for this sample
+        //TODO: only tested with window size of 2
+        if (as.length < interpolationWindowSize) extrapolationMode = "postA"
+        if (bs.length < interpolationWindowSize) extrapolationMode = "postB"
+        
         //Populate the windows of samples (as, bs) for the next joined sample.
         loadNextWindows
         
@@ -304,4 +299,8 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
    *   assume even?
    * will sign just work
    */
+}
+
+object FullOuterJoin {
+  def apply() = new FullOuterJoin()
 }

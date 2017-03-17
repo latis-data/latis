@@ -31,10 +31,8 @@ class TestFullOuterJoin {
     val samples2 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
     val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1")) //.force
     val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2")) //.force
-    
     val op = new FullOuterJoin()
     val ds = op(ds1, ds2)
-    //AsciiWriter.write(ds)
     ds match {
       case Dataset(Function(it)) => {
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,2), (t,a,b))}
@@ -383,7 +381,7 @@ class TestFullOuterJoin {
     }
   }
   
-  @Test //TODO: broken, even 1st 2 lose sample at t=2
+  @Test
   def three_datasets = {
     val samples1 = List(1,2).map(i => Sample(Real(mdt, i), Real(mda, i)))
     val samples2 = List(1,3).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
@@ -392,9 +390,8 @@ class TestFullOuterJoin {
     val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
     val ds3 = Dataset(Function(samples3, Metadata("function3")), Metadata("dataset3"))
     val op = new FullOuterJoin()
-    val ds12 = op(ds1,ds2)
-    latis.writer.Writer.fromSuffix("asc").write(ds12)
-    val ds = op(ds12,ds3)
+    val ds = op(Seq(ds1,ds2,ds3))
+    //latis.writer.Writer.fromSuffix("asc").write(ds)
     ds match {
       case Dataset(Function(it)) => {
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b), Real(c)))) => assertEquals((1,1,2,0), (t,a,b,c))}
