@@ -18,6 +18,7 @@ import latis.util.iterator.PeekIterator
 class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
   //e.g. new FullOuterJoin with LinearInterpolation
   //TODO: diff interpolation for each dataset? from metadata
+  //TODO: would it be easier to have a single "interp" that does both interp and extrap? avoid extrapolationMode?
 
   private def makeSampleIterator(f1: Function, f2: Function) = new PeekIterator[Sample]() {
     //Define indices of the inner pair of samples in a sliding window.
@@ -37,105 +38,134 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
     var as: Array[Sample] = Array() //left dataset window (a)
     var bs: Array[Sample] = Array() //right dataset window (b)
     def firstPass = as.isEmpty  //both should be empty
-    //define extrapolation mode based on 'compare':
-    //  <0 if as are smaller (extrapolating bs)
-    //  >0 if bs are smaller (extrapolating as)
-    var extrapolationMode = 0 
-//TODO: can we turn extrapolationMode back on at the end?
-    //diff signs: just use <0 = left = as need extrap
-    //or generalize mode to include interp and done?
-    //use empty as,bs when done?
-    //allow partial window, use length of as,bs?
+    
+    /**
+     * Extrapolation mode:
+     * none
+     * preA
+     * preB
+     * postA
+     * postB
+     */
+    var extrapolationMode = "none"
     
     //Populate the next set of windows (as, bs), increment iterators as needed
     def loadNextWindows = {
-      //get first set of samples if we don't have them yet
+      //get first set of samples if we don't have them yet, and establish the extrapolation mode
       if (firstPass) {
         //note, if either is empty, it should have been taken care of by now as an empty dataset
+ //***TODO: empty Function not seen as empty dataset
         as = pit1.next.toArray
         bs = pit2.next.toArray
         //if the domain values aren't the same, start in extrapolation mode
         val a1 = as(lower).domain
         val b1 = bs(lower).domain
-        extrapolationMode = b1.compare(a1) // <0 if as need extrap...
-      } else { //not first pass
-        if (extrapolationMode == 0) { //we've been in normal interpolation mode
-          //increment based on upper end of region of interest
-          //a2, b2 are the basis of the next comparison
-     //TODO: can't assume a2 and b2 will be there with partial windows
-          //Note, this implies extrapolation at the end
-          if (as.length < upper + 1) { //partial window (without upper, thus extrapolation needed) near the end of dataset A
-            extrapolationMode = -1
-    //TODO: but still got an inperp to do in B at the last A, do we need to use window size in interp logic below?
-          }
-          val a2 = as(upper).domain
-          val b2 = bs(upper).domain
-//          if (a2 <= b2) {
-//            if (pit1.hasNext) as = pit1.next.toArray
-//   //TODO: consider partial windows
-//            else extrapolationMode = 
-//          }
+        extrapolationMode = a1.compare(b1) match { // <0 if Bs need extrap...
+          case 0 => "none"
+          case i: Int if (i < 0) => "preB"
+          case i: Int if (i > 0) => "preA"
+        }
+        
+      } else { 
+        //not first pass, prepare samples based on extrapolation mode
+        extrapolationMode match {
           
-          //if (a2 <= b2 && pit1.hasNext) as = pit1.next.toArray  //TODO: if !hasNext
-          //if (a2 >= b2 && pit2.hasNext) bs = pit2.next.toArray  //TODO: if !hasNext
-          if (a2 < b2)
-            if (pit1.hasNext) as = pit1.next.toArray
-            else extrapolationMode = -1 //out of As, need to extrapolate
-          else if (a2 > b2)
+          //--- Not in extrapolation mode ---//
+          case "none" => {
+            //we've been in normal interpolation mode
+            //increment based on upper end of region of interest
+            //The domain values of a2, b2 are the basis of the next comparison
+            val a2 = as(upper).domain
+            val b2 = bs(upper).domain
+            
+            a2.compare(b2) match {
+              case 0 => {
+                //need to advance both, deal with potential end of samples
+                (pit1.hasNext, pit2.hasNext) match {
+                  case (true, true) => {
+                    as = pit1.next.toArray
+                    bs = pit2.next.toArray
+                  }
+                  case (false, false) => {
+                    //both datasets end on the same sample
+                    //since there is no "next" get the same effect by dropping the first sample (while leaving a partial window)
+                    as = as.tail
+                    bs = bs.tail
+                    noMoreData = true //let getNext know that we are on the last sample
+                  }
+                  case (true, false) => as = pit1.next.toArray//; bs = bs.tail //TODO: tail not needed, interp will just match upper end; but we would have to deal with lack of b2 above
+                  case (false, true) => bs = pit2.next.toArray//; as = as.tail
+                  //note: because a2 = b2, the "next" for A will align a1 with the last B so we are not quite ready to start extrapolating yet
+                }
+              }
+              
+              case i: Int if (i < 0) => { //a2 < b2
+                if (pit1.hasNext) as = pit1.next.toArray
+                else {
+                  if (pit2.hasNext) bs = pit2.next.toArray
+                  else {bs = bs.tail; noMoreData = true }//out of As and Bs
+                  extrapolationMode = "postA" //out of As, need to extrapolate
+                }
+              }
+              
+              case i: Int if (i > 0) => { //a2 > b2
+                if (pit2.hasNext) bs = pit2.next.toArray
+                else {
+                  if (pit1.hasNext) as = pit1.next.toArray
+                  else {as = as.tail; noMoreData = true} //out of As and Bs
+                  extrapolationMode = "postB" //out of Bs, need to extrapolate
+                }
+              }
+            }
+          }
+          
+          //--- PreA extrapolation mode ---//
+          case "preA" => {
+            val a1 = as(lower).domain
+            val b2 = bs(upper).domain
+            a1.compare(b2) match {
+              case i: Int if (i > 0) => bs = pit2.next.toArray  //stay in preA mode
+              case _ => bs = pit2.next.toArray; extrapolationMode = "none" //no longer need to extrapolate, As caught up
+            }
+          }
+          
+          //--- PreB extrapolation mode ---//
+          case "preB" => {
+            val a2 = as(upper).domain
+            val b1 = bs(lower).domain
+            a2.compare(b1) match {
+              case i: Int if (i < 0) => as = pit1.next.toArray  //stay in preB mode
+              case _ => as = pit1.next.toArray; extrapolationMode = "none" //no longer need to extrapolate, As caught up
+            }
+          }
+          
+          //--- PostA extrapolation mode ---//
+          case "postA" => {
             if (pit2.hasNext) bs = pit2.next.toArray
-            else extrapolationMode = 1 //out of Bs, need to extrapolate
-          else //a2 = b2
-            //TODO: if one has more but the other doesn't: extrap
-            if (!pit1.hasNext && !pit2.hasNext) {
-              //if we are at the end, can we just use "tail" of array?
-              as = as.tail
+            else {
               bs = bs.tail
               noMoreData = true
+              println("postA no more data")
             }
-            else if (!pit1.hasNext) {
-              extrapolationMode = -1 //out of As, need to extrapolate
-            }
-            else if (!pit2.hasNext) {
-              extrapolationMode = 1 //out of Bs, need to extrapolate
-            }
-            else {
-              //both need to advance if the upper values match 
-              //note that interp is based on the lower values in the window
-              as = pit1.next.toArray
-              bs = pit2.next.toArray
-            }
-          
-        /*
-         * TODO: distinguish between front and end extrapolation
-         * modes: astart, bstart, aend, bend, none
-         * these are exclusive, can be in only one
-         * let's do a case for each
-         */
-          
-   //************TODO: this extrap logic applies to the start of the join, this will break when extrapolating at the end
-        } else if (extrapolationMode > 0) { //have been extrapolating Bs
-          val a2 = as(upper).domain
-          val b1 = bs(lower).domain
-          a2.compare(b1) match {
-            case 0 => as = pit1.next.toArray; extrapolationMode = 0  //TODO: if !hasNext, only first and last samples match, need to join them
-            case i: Int if (i < 0) => as = pit1.next.toArray //TODO: if !hasNext, no overlap between datasets, start extrapolating on the end of the other
-            case i: Int if (i > 0) => extrapolationMode = 0
           }
-        } else if (extrapolationMode < 0) { //extrap as
-          val b2 = bs(upper).domain
-          val a1 = as(lower).domain
-          b2.compare(a1) match {
-            case 0 => bs = pit2.next.toArray; extrapolationMode = 0 //TODO: if !hasNext, only first and last samples match, need to join them
-            case i: Int if (i < 0) => bs = pit2.next.toArray  //TODO: if !hasNext, no overlap between datasets, start extrapolating on the end of the other
-            case i: Int if (i > 0) => extrapolationMode = 0
+          
+          //--- PostB extrapolation mode ---//
+          case "postB" => {
+            println("postB")
+            if (pit1.hasNext) as = pit1.next.toArray
+            else {
+              as = as.tail
+              noMoreData = true
+            }
           }
         }
+        
       }
     }
     
     
     def getNext: Sample = {
-  //TODO: if noMoreData, we need to do interpolationWindowSize / 2 more samples
+      //TODO: if noMoreData, we need to do interpolationWindowSize / 2 more samples
       //let's just assume a window of 2 for now
       if (noMoreData) null
       else {
@@ -146,16 +176,7 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
 //println("as: " + as.map(_.domain.getNumberData.doubleValue).mkString(" "))
 //println("bs: " + bs.map(_.domain.getNumberData.doubleValue).mkString(" "))
 //println("extrap: " + extrapolationMode)  
-//        //If one dataset has no more samples, extrapolate
-//        val joinedSample = if (!pit1.hasNext) extrapolate(as, bs(lower).domain.asInstanceOf[Scalar]) match {
-//          case Some(sample) => joinSamples(sample, bs(lower))
-//          case None => ??? //TODO: fill
-//        } else if (!pit2.hasNext) extrapolate(bs, as(lower).domain.asInstanceOf[Scalar]) match {
-//          case Some(sample) => joinSamples(as(lower), sample)
-//          case None => ??? //TODO: fill
-//        }
-//        
-//        else 
+
         val joinedSample = {
           //Get the domain variable of the samples to compare
           //Assumes scalar domains, for now
@@ -163,12 +184,12 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
           var b1 = bs(lower).domain.asInstanceOf[Scalar]
           
           //Extrapolate a value for A
-          if (extrapolationMode < 0) extrapolate(as, b1) match {
+          if (extrapolationMode.endsWith("A")) extrapolate(as, b1) match {
             case Some(sample) => joinSamples(sample, bs(lower))
             case None => ??? //error?
           }
           //Extrapolate a value for B
-          else if (extrapolationMode > 0) extrapolate(bs, a1) match {
+          else if (extrapolationMode.endsWith("B")) extrapolate(bs, a1) match {
             case Some(sample) => joinSamples(as(lower), sample)
             case None => ??? //error?
           }
@@ -198,97 +219,6 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
     
   }
     
-
-
-//    //hang on to first domain variables so we know when we are done extrapolating
-//    var firsta1: Scalar = null
-//    var firstb1: Scalar = null
-//
-//    //trigger staging the first set of samples on the first pass
-//    var first = true
-//    //trigger using extrapolation before interpolation is possible
-//    var beforeFirstInterp = true
-//
-//    def hasNext = it1.hasNext || it2.hasNext
-//
-//    def next: Sample = {
-////TODO: premature to test hasNext since we end each iteration with a next
-//      val oSample: Option[Sample] = if (!it1.hasNext) {
-//        //no more samples in ds1, extrapolate
-//        bs = it2.next.toArray
-//        extrapolate(as, bs(lower).domain.asInstanceOf[Scalar]) match {
-//          case Some(sample) => joinSamples(sample, bs(lower))
-//          case None => ??? //fill
-//        }
-//      } else if (!it2.hasNext) {
-//        //no more samples in ds2, extrapolate
-//        as = it1.next.toArray
-//        extrapolate(bs, as(lower).domain.asInstanceOf[Scalar]) match {
-//          case Some(sample) => joinSamples(as(lower), sample)
-//          case None => ??? 
-//        }
-//
-//      } else {
-//        if (first) {
-//          //stage the first samples
-//          as = it1.next.toArray
-//          bs = it2.next.toArray
-//          //get 1st values for extrapolation logic
-//          firsta1 = as(lower).domain.asInstanceOf[Scalar]
-//          firstb1 = bs(lower).domain.asInstanceOf[Scalar]
-//          //done with the first pass
-//          first = false
-//        }
-//        //Get the domain variable of the samples to compare
-//        //Assumes scalar domains, for now
-//        var a1 = as(lower).domain.asInstanceOf[Scalar]
-//        var b1 = bs(lower).domain.asInstanceOf[Scalar]
-//        /*
-//               * TODO: if beforeFirst then preExtrapolate
-//               * how to know when to allow interp?
-//               * sign of a1,b1 compare changes or goes to 0
-//               * but neither needs to increment
-//               * a2 > b1
-//               * a2 = b1 need to inc a
-//               * use first samples from first block?
-//               */
-//        //TODO: Deal with extrapolation until both datasets overlap
-//        //if (beforeFirstInterp) 
-//        /*
-// * can we increment first then interp
-// * allow us to end block with a sample
-// * help with "first" logic?
-// * OR inc after all cases, should be same logic?
-// * but hasNext problem
-// * 
-// */
-//        val joinedSample = if (a1 < b1) interpolate(as, bs(lower).domain.asInstanceOf[Scalar]) match {
-//          case Some(sample) => joinSamples(sample, bs(lower))
-//          case None => ??? //fill
-//        }
-//        else if (a1 > b1) interpolate(bs, as(lower).domain.asInstanceOf[Scalar]) match {
-//          case Some(sample) => joinSamples(as(lower), sample)
-//          case None => ???
-//        }
-//        else joinSamples(as(lower), bs(lower))
-//
-//        //increment iterators as needed
-//        val a2 = as(upper).domain.asInstanceOf[Scalar]
-//        val b2 = bs(upper).domain.asInstanceOf[Scalar]
-//        //Note, a2, b2 are the basis of the next comparison
-//        if (a2 <= b2 && it1.hasNext) as = it1.next.toArray
-//        if (a2 >= b2 && it2.hasNext) bs = it2.next.toArray
-//
-//        joinedSample
-//      }
-//      
-//      oSample match {
-//        case Some(sample) => sample
-//        case None => ??? //TODO: next? but may not be a next - orig need for peekIterator
-//      }
-        
-//    }
-//  }
 
   def apply(ds1: Dataset, ds2: Dataset): Dataset = {
     //If one dataset is empty, just return the other
