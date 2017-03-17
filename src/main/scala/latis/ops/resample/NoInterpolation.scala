@@ -38,6 +38,7 @@ trait NoInterpolation extends Interpolation {
           case s: Scalar => Seq(s)
           case Tuple(vars) => vars
         }
+        
         val filledVars = temps.map(v => v match {
           case s: Scalar => s(Data(s.getFillValue))
           case _ => throw new UnsupportedOperationException("NoInterpolation supports only scalars and flat tuples of scalars in the range, for now.")
@@ -48,7 +49,7 @@ trait NoInterpolation extends Interpolation {
           case _ => Tuple(filledVars)
         }
       }
-      case index: Int => samples(index)
+      case index: Int => samples(index).range
     }
     
     Some(Sample(domain, range))
