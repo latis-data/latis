@@ -3,6 +3,7 @@ package latis.ops.resample
 import latis.dm.Sample
 import latis.dm.Scalar
 import latis.data.Data
+import latis.dm.Tuple
 
 trait NoExtrapolation extends Extrapolation {
   
@@ -15,7 +16,11 @@ trait NoExtrapolation extends Extrapolation {
     //copy range scalar with fill value
     val range = samples.head.range match {
       case s: Scalar => s(Data(s.getFillValue))
-      case _ => throw new UnsupportedOperationException("Extrapolation requires a Scalar domain for now.")
+      case Tuple(vs) => Tuple(vs.map(v => v match {
+        case s: Scalar => s(Data(s.getFillValue))
+        case _ => throw new UnsupportedOperationException("Extrapolation requires a flat Tuple range for now.")
+      }))
+      case _ => throw new UnsupportedOperationException("Extrapolation requires a Scalar or Tuple range for now.")
     }
     
     Some(Sample(domain, range))
