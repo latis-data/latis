@@ -35,7 +35,7 @@ class CatalogGenerator extends DatasetAccessor {
    * the "dataset.dir" as defined in latis.properties.
    */
   def getListOfDatasets: List[String] = {
-    val dsdir: String = LatisProperties.getOrElse("dataset.dir", "datasets")
+    val dsdir: String = LatisProperties.getOrElse("dataset.dir", "src/main/resources/datasets")
     val fileList = FileUtils.getListOfFiles(dsdir) 
     val fileNames = ArrayBuffer[String]()
     
