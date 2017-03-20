@@ -28,6 +28,8 @@ class CatalogGenerator extends DatasetAccessor {
   
   override def close = {}
   
+  def getDatasetNames = datasetNames
+  
   //---- Helper Functions ------------------------------------------------------------------------
   
   /*
@@ -45,8 +47,6 @@ class CatalogGenerator extends DatasetAccessor {
     
     fileNames.toList
   }
-  
-  def getDatasetNames = datasetNames
   
   /*
    * Convert a list of dataset names into
