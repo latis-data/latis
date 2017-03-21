@@ -33,7 +33,7 @@ class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "
    * The path of 'loc'
    */
   lazy val dir = URLDecoder.decode({
-    val uri = new URI(URLEncoder.encode(loc, "utf-8"))
+    lazy val uri = new URI(URLEncoder.encode(loc, "utf-8"))
     if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
     else if (loc.startsWith(File.separator)) new URL("file:" + loc) //absolute path
     else getClass.getResource("/"+loc) match { //relative path: try looking in the classpath
@@ -50,7 +50,7 @@ class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "
     //model a file as a catalog entry
     override def visitFile(path: Path, attrs: BasicFileAttributes) = {
       if(path.toString.endsWith(".tsml")) {
-        val name = path.toString.drop(dir.length + 1).stripSuffix(".tsml")
+        lazy val name = path.toString.drop(dir.length + 1).stripSuffix(".tsml")
         samples += Sample(Text(Metadata("name"), name), Tuple(Text(Metadata("description"), ""),
             Tuple(Text(Metadata("accessURL"),name), Metadata("distribution"))))
         FileVisitResult.CONTINUE
@@ -61,7 +61,7 @@ class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "
     override def preVisitDirectory(path: Path, attrs: BasicFileAttributes) = {
       if(path.toString != dir) {
         //recurse to created a nested function
-        val ds = CatalogReader(path.toString).getDataset
+        lazy val ds = CatalogReader(path.toString).getDataset
         ds match {
           case Dataset(Function(f)) if(f.isEmpty) => //drop empty catalogs
           case Dataset(v) => samples += Sample(Text(Metadata("name"), ds.getName.drop(dir.length + 1)), v)
@@ -76,10 +76,10 @@ class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "
   
   override def getDataset = {
     Files.walkFileTree(Paths.get(dir), new FileVisitDelegator)
-    val sorted = samples.sortBy(s => s.domain match {
+    lazy val sorted = samples.sortBy(s => s.domain match {
       case Text(str) => str
     })(Ordering.String)
-    val f = Function(sorted, Metadata("datasets"))
+    lazy val f = Function(sorted, Metadata("datasets"))
     Dataset(f, Metadata(loc))
   }
   
