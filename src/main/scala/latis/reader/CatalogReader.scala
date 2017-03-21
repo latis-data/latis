@@ -32,7 +32,7 @@ class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "
   /**
    * The path of 'loc'
    */
-  val dir = URLDecoder.decode({
+  lazy val dir = URLDecoder.decode({
     val uri = new URI(URLEncoder.encode(loc, "utf-8"))
     if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
     else if (loc.startsWith(File.separator)) new URL("file:" + loc) //absolute path
