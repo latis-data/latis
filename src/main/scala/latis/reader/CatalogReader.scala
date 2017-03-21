@@ -79,15 +79,16 @@ class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "
     }
   }
   
-  def getDataset(operations: Seq[Operation]) = getDataset
+  override def getDataset: Dataset = getDataset(Seq[Operation]())
   
-  override def getDataset = {
+  def getDataset(operations: Seq[Operation]): Dataset = {
     Files.walkFileTree(Paths.get(dir), new FileVisitDelegator)
     val sorted = samples.sortBy(s => s.domain match {
       case Text(str) => str
     })(Ordering.String)
     val f = Function(sorted, Metadata("datasets"))
-    Dataset(f, Metadata(loc))
+    val dataset = Dataset(f, Metadata(loc))
+    operations.foldLeft(dataset)((ds,op) => op(ds))
   }
   
   def close = {}
