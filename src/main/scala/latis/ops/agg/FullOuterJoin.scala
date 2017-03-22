@@ -57,6 +57,12 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
       if (firstPass) {
         //note, if either is empty, it should have been taken care of by now as an empty dataset
  //***TODO: empty Function not seen as empty dataset
+   //TODO: use noA and noB for mode to skip join?
+        //TODO: can we do the first pass above to avoid this firstPass logic yet still be lazy?
+        //TODO: can we use lengths here to determine post mode? a1=b1 will ignore mode
+        //  but single sample problem: can't be pre and post at same time
+        //  do we need special case for dataset with one sample? would like to think not
+        //  but partial window is problematic
         as = pit1.next.toArray
         bs = pit2.next.toArray
         //if the domain values aren't the same, start in extrapolation mode
@@ -96,8 +102,8 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
                     bs = bs.tail
                     noMoreData = true //let getNext know that we are on the last sample
                   }
-                  case (true, false) => as = pit1.next.toArray; bs = bs.tail
-                  case (false, true) => bs = pit2.next.toArray; as = as.tail
+                  case (true, false) => as = pit1.next.toArray; bs = bs.tail; extrapolationMode = "postB"
+                  case (false, true) => bs = pit2.next.toArray; as = as.tail; extrapolationMode = "postA"
                   //note: because a2 = b2, the "next" for A will align a1 with the last B so we are not quite ready to start extrapolating yet
                 }
               }
@@ -181,8 +187,8 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
       else {
         //If we ran out of samples last time, set the etrapolation mode for this sample
         //TODO: only tested with window size of 2
-        if (as.length < interpolationWindowSize) extrapolationMode = "postA"
-        if (bs.length < interpolationWindowSize) extrapolationMode = "postB"
+ //       if (as.length < interpolationWindowSize) extrapolationMode = "postA"
+ //       if (bs.length < interpolationWindowSize) extrapolationMode = "postB"
 
         //Populate the windows of samples (as, bs) for the next joined sample.
         loadNextWindows
@@ -199,6 +205,9 @@ println("more data: " + !noMoreData)
           var a1 = as(lower).domain.asInstanceOf[Scalar]
           var b1 = bs(lower).domain.asInstanceOf[Scalar]
           
+          
+          
+          
           //Domain values match
           //Do this first so we aren't impacted by extrapolation mode.
           if (a1 == b1) joinSamples(as(lower), bs(lower))
@@ -211,6 +220,9 @@ println("more data: " + !noMoreData)
    * can we determine extrap mode here based on As and Bs instead of setting it elsewhere?
    * loadNextWindows prepares A, B windows based on mode
    * this interp/extrap based on As, Bs; best place to define extrap mode
+   * but we already left the old position behind
+   *   we can't know if a1<b1 here needs extrap because we don't know if there was anything before a1
+   *   the "none" mode assumes no need to worry about lower values
    */
           //Extrapolate a value for A
           else if (extrapolationMode.endsWith("A")) extrapolate(as, b1) match {

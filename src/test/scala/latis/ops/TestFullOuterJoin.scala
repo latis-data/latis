@@ -302,6 +302,7 @@ class TestFullOuterJoin {
     val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
     val op = new FullOuterJoin()
     val ds = op(ds1, ds2)
+    latis.writer.Writer.fromSuffix("asc").write(ds)
     ds match {
       case Dataset(Function(it)) => {
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,2), (t,a,b))}
