@@ -9,6 +9,8 @@ import latis.dm.Scalar
 import scala.collection.mutable.ArrayBuffer
 import latis.ops.resample.NoExtrapolation
 import latis.util.iterator.PeekIterator
+import latis.dm.Number
+import latis.dm.TupleMatch
 
 /**
  * Given two Datasets that each contain a Function with the same domain Variable,
@@ -77,6 +79,7 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
             //The domain values of a2, b2 are the basis of the next comparison
             val a2 = as(upper).domain
             val b2 = bs(upper).domain
+  //TODO: should we deal with near the end here?
             
             a2.compare(b2) match {
               case 0 => {
@@ -117,7 +120,15 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
             val b2 = bs(upper).domain
             a1.compare(b2) match {
               case i: Int if (i > 0) => bs = pit2.next.toArray  //stay in preA mode
-              case _ => bs = pit2.next.toArray; extrapolationMode = "none" //no longer need to extrapolate, As caught up
+              case i: Int if (i < 0) => extrapolationMode = "none"  //ready to interpolate Bs to get a value for A
+              case 0 => {
+                extrapolationMode = "none" //advance b1 to b2; a1=b1 so join regardless of extrap mode
+                if (pit2.hasNext) bs = pit2.next.toArray
+                else {
+                  bs = bs.tail
+                  if (as.length < interpolationWindowSize) noMoreData = true //last of the As and Bs
+                }
+              }
             }
           }
           
@@ -125,9 +136,18 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
           case "preB" => {
             val a2 = as(upper).domain
             val b1 = bs(lower).domain
-            a2.compare(b1) match {
+            val z = a2.compare(b1) 
+            z match {
               case i: Int if (i < 0) => as = pit1.next.toArray  //stay in preB mode
-              case _ => as = pit1.next.toArray; extrapolationMode = "none" //no longer need to extrapolate, As caught up
+              case i: Int if (i > 0) => extrapolationMode = "none"  //ready to interpolate As to get a value for B
+              case 0 => {
+                extrapolationMode = "none" //advance a1 to a2; a1=b1 so join regardless of extrap mode
+                if (pit1.hasNext) as = pit1.next.toArray
+                else {
+                  as = as.tail
+                  if (bs.length < interpolationWindowSize) noMoreData = true //last of the As and Bs
+                }
+              }
             }
           }
           
@@ -163,14 +183,15 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
         //TODO: only tested with window size of 2
         if (as.length < interpolationWindowSize) extrapolationMode = "postA"
         if (bs.length < interpolationWindowSize) extrapolationMode = "postB"
-        
+
         //Populate the windows of samples (as, bs) for the next joined sample.
         loadNextWindows
         
-//println("getNext")
-//println("as: " + as.map(_.domain.getNumberData.doubleValue).mkString(" "))
-//println("bs: " + bs.map(_.domain.getNumberData.doubleValue).mkString(" "))
-//println("extrap: " + extrapolationMode)  
+println("getNext")
+println("as: " + as.map(_.domain.getNumberData.doubleValue).mkString(" "))
+println("bs: " + bs.map(_.domain.getNumberData.doubleValue).mkString(" "))
+println("extrap: " + extrapolationMode)  
+println("more data: " + !noMoreData)  
 
         val joinedSample = {
           //Get the domain variable of the samples to compare
@@ -178,8 +199,21 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
           var a1 = as(lower).domain.asInstanceOf[Scalar]
           var b1 = bs(lower).domain.asInstanceOf[Scalar]
           
+          //Domain values match
+          //Do this first so we aren't impacted by extrapolation mode.
+          if (a1 == b1) joinSamples(as(lower), bs(lower))
+  /*
+   * TODO: similar problem for one_sample_inside_first  
+   * a2     length test puts us in postB mode even though we can do an interp
+   *    b1  can't simply do after the interp because it can still get set in an earlier preB pass
+   * a1
+   * 
+   * can we determine extrap mode here based on As and Bs instead of setting it elsewhere?
+   * loadNextWindows prepares A, B windows based on mode
+   * this interp/extrap based on As, Bs; best place to define extrap mode
+   */
           //Extrapolate a value for A
-          if (extrapolationMode.endsWith("A")) extrapolate(as, b1) match {
+          else if (extrapolationMode.endsWith("A")) extrapolate(as, b1) match {
             case Some(sample) => joinSamples(sample, bs(lower))
             case None => ??? //error?
           }
@@ -196,13 +230,11 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
           }
           
           //Need to generate a "b" sample at the value of a1
-          else if (a1 > b1) interpolate(bs, a1) match {
+          //else if (a1 > b1) interpolate(bs, a1) match {
+          else interpolate(bs, a1) match {
             case Some(sample) => joinSamples(as(lower), sample)
             case None => ???
           }
-          
-          //Domain values match
-          else joinSamples(as(lower), bs(lower))
         }
         
         joinedSample match {

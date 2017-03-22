@@ -288,30 +288,124 @@ class TestFullOuterJoin {
     }
   }
   
+  @Test
+  def one_sample_at_start = {
+    /*
+     * a t1 t2  b
+     * 1  1  1  2
+     * 2  2 
+     * 3  3
+     */
+    val samples1 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mda, i)))
+    val samples2 = List(1).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
+    val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
+    val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
+    val op = new FullOuterJoin()
+    val ds = op(ds1, ds2)
+    ds match {
+      case Dataset(Function(it)) => {
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,2), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((2,2,0), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((3,3,0), (t,a,b))}
+        assert(!it.hasNext)
+      }
+    }
+  }
+  
   @Test //TODO: broken
+  def one_sample_inside_first = {
+    /*
+     * a t1 t2  b
+     * 1  1
+     *       2  4
+     * 3  3
+     * 4  4
+     */
+    val samples1 = List(1,3,4).map(i => Sample(Real(mdt, i), Real(mda, i)))
+    val samples2 = List(2).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
+    val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
+    val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
+    val op = new FullOuterJoin()
+    val ds = op(ds1, ds2)
+    latis.writer.Writer.fromSuffix("asc").write(ds)
+    ds match {
+      case Dataset(Function(it)) => {
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,0), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((2,0,4), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((3,3,0), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((4,4,0), (t,a,b))}
+        assert(!it.hasNext)
+      }
+    }
+  }
+  
+  @Test
   def one_sample_in_middle = {
     /*
      * a t1 t2  b
      * 1  1
-     * 2  2 
-     * 3  3  3  6
-     * 4  4  
-     * 5  5  
+     * 2  2  2  4
+     * 3  3
      */
-    val samples1 = List(1,2,3,4,5).map(i => Sample(Real(mdt, i), Real(mda, i)))
+    val samples1 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mda, i)))
+    val samples2 = List(2).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
+    val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
+    val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
+    val op = new FullOuterJoin()
+    val ds = op(ds1, ds2)
+    ds match {
+      case Dataset(Function(it)) => {
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,0), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((2,2,4), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((3,3,0), (t,a,b))}
+        assert(!it.hasNext)
+      }
+    }
+  }
+  
+  @Test
+  def one_sample_in_middle_or_first = {
+    /*
+     * a t1 t2  b
+     *       1  2
+     * 2  2  2  4
+     *       3  6
+     */
+    val samples1 = List(2).map(i => Sample(Real(mdt, i), Real(mda, i)))
+    val samples2 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
+    val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
+    val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
+    val op = new FullOuterJoin()
+    val ds = op(ds1, ds2)
+    ds match {
+      case Dataset(Function(it)) => {
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,0,2), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((2,2,4), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((3,0,6), (t,a,b))}
+        assert(!it.hasNext)
+      }
+    }
+  }
+  
+  @Test
+  def one_sample_at_end = {
+    /*
+     * a t1 t2  b
+     * 1  1
+     * 2  2
+     * 3  3  3  6
+     */
+    val samples1 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mda, i)))
     val samples2 = List(3).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
     val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
     val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
     val op = new FullOuterJoin()
     val ds = op(ds1, ds2)
-    AsciiWriter.write(ds)
     ds match {
       case Dataset(Function(it)) => {
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,0), (t,a,b))}
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((2,2,0), (t,a,b))}
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((3,3,6), (t,a,b))}
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((4,4,0), (t,a,b))}
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((5,5,0), (t,a,b))}
         assert(!it.hasNext)
       }
     }
