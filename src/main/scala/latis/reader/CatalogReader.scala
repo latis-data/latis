@@ -26,8 +26,7 @@ import latis.ops.Operation
  * Create a catalog from a given directory which defaults to the 'dataset.dir' property
  * which defaults to 'datasets'. Nested directories will be treated as nested catalogs.
  */
-class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "datasets")) 
-  extends DatasetAccessor {
+class CatalogReader(val loc: String) extends DatasetAccessor {
   
   /*
    * Default constructor to allow reflection to work
