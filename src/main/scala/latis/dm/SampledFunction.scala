@@ -177,6 +177,7 @@ object SampledFunction {
     }
     val sf = new SampledFunction(domain, range, metadata=metadata){
       override def iterator = PeekIterator(sit)
+      //TODO: this break isEmpty
     }
     sf
   }
