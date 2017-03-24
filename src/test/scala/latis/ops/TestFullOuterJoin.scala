@@ -44,6 +44,48 @@ class TestFullOuterJoin {
   }
   
   @Test
+  def one_matching_sample = {
+    /*
+     * a t1 t2  b
+     * 1  1  1  2
+     */
+    val samples1 = List(1).map(i => Sample(Real(mdt, i), Real(mda, i)))
+    val samples2 = List(1).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
+    val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1")) //.force
+    val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2")) //.force
+    val op = new FullOuterJoin()
+    val ds = op(ds1, ds2)
+    ds match {
+      case Dataset(Function(it)) => {
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,2), (t,a,b))}
+        assert(!it.hasNext)
+      }
+    }
+  }
+  
+  @Test
+  def one_different_sample = {
+    /*
+     * a t1 t2  b
+     * 1  1 
+     *       2  4
+     */
+    val samples1 = List(1).map(i => Sample(Real(mdt, i), Real(mda, i)))
+    val samples2 = List(2).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
+    val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1")) //.force
+    val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2")) //.force
+    val op = new FullOuterJoin()
+    val ds = op(ds1, ds2)
+    ds match {
+      case Dataset(Function(it)) => {
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,0), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((2,0,4), (t,a,b))}
+        assert(!it.hasNext)
+      }
+    }
+  }
+  
+  @Test
   def extra_in_second_in_middle = {
     /*
      * a t1 t2  b
@@ -230,7 +272,7 @@ class TestFullOuterJoin {
     }
   }
   
-  @Test //TODO: broken
+  @Test
   def no_overlap = {
     /*
      * a t1 t2  b
@@ -246,14 +288,13 @@ class TestFullOuterJoin {
     val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
     val op = new FullOuterJoin()
     val ds = op(ds1, ds2)
-    AsciiWriter.write(ds)
     ds match {
       case Dataset(Function(it)) => {
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,0), (t,a,b))}
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((2,2,0), (t,a,b))}
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((3,3,6), (t,a,b))}
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((4,4,8), (t,a,b))}
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((5,5,10), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((3,3,0), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((4,0,8), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((5,0,10), (t,a,b))}
         assert(!it.hasNext)
       }
     }
@@ -302,7 +343,6 @@ class TestFullOuterJoin {
     val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
     val op = new FullOuterJoin()
     val ds = op(ds1, ds2)
-    latis.writer.Writer.fromSuffix("asc").write(ds)
     ds match {
       case Dataset(Function(it)) => {
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,2), (t,a,b))}
@@ -313,7 +353,7 @@ class TestFullOuterJoin {
     }
   }
   
-  @Test //TODO: broken
+  @Test
   def one_sample_inside_first = {
     /*
      * a t1 t2  b
@@ -328,12 +368,37 @@ class TestFullOuterJoin {
     val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
     val op = new FullOuterJoin()
     val ds = op(ds1, ds2)
-    latis.writer.Writer.fromSuffix("asc").write(ds)
     ds match {
       case Dataset(Function(it)) => {
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,0), (t,a,b))}
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((2,0,4), (t,a,b))}
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((3,3,0), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((4,4,0), (t,a,b))}
+        assert(!it.hasNext)
+      }
+    }
+  }
+  
+  @Test
+  def one_sample_inside_last = {
+    /*
+     * a t1 t2  b
+     * 1  1
+     * 2  2
+     *       3  6
+     * 4  4
+     */
+    val samples1 = List(1,2,4).map(i => Sample(Real(mdt, i), Real(mda, i)))
+    val samples2 = List(3).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
+    val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
+    val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
+    val op = new FullOuterJoin()
+    val ds = op(ds1, ds2)
+    ds match {
+      case Dataset(Function(it)) => {
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,0), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((2,2,0), (t,a,b))}
+        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((3,0,6), (t,a,b))}
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((4,4,0), (t,a,b))}
         assert(!it.hasNext)
       }
@@ -365,7 +430,7 @@ class TestFullOuterJoin {
   }
   
   @Test
-  def one_sample_in_middle_or_first = {
+  def one_sample_in_middle_of_first = {
     /*
      * a t1 t2  b
      *       1  2
@@ -412,27 +477,25 @@ class TestFullOuterJoin {
     }
   }
   
-  @Test @Ignore //need to test for empty function
+  @Test
   def empty_second = {
     val samples1 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mda, i)))
-    val samples2 = List[Sample]()
     val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
     val ds2 = Dataset(Function(Real(mdt), Real(mdb), Iterator.empty, Metadata("function2")), Metadata("dataset2"))
     val op = new FullOuterJoin()
     val ds = op(ds1, ds2)
     ds match {
       case Dataset(Function(it)) => {
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,0), (t,a,b))}
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((2,2,0), (t,a,b))}
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((3,3,0), (t,a,b))}
+        it.next match {case Sample(Real(t), Real(a)) => assertEquals((1,1), (t,a))}
+        it.next match {case Sample(Real(t), Real(a)) => assertEquals((2,2), (t,a))}
+        it.next match {case Sample(Real(t), Real(a)) => assertEquals((3,3), (t,a))}
         assert(!it.hasNext)
       }
     }
   }
   
-  @Test  @Ignore //need to test for empty function
+  @Test @Ignore //need reliable test for empty function
   def empty_first = {
-    val samples1 = List[Sample]()
     val samples2 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
     val ds1 = Dataset(Function(Real(mdt), Real(mda), Iterator.empty, Metadata("function1")), Metadata("dataset1"))
     val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
@@ -440,12 +503,21 @@ class TestFullOuterJoin {
     val ds = op(ds1, ds2)
     ds match {
       case Dataset(Function(it)) => {
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,0,2), (t,a,b))}
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((2,0,4), (t,a,b))}
-        it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((3,0,6), (t,a,b))}
+        it.next match {case Sample(Real(t), Real(b)) => assertEquals((1,2), (t,b))}
+        it.next match {case Sample(Real(t), Real(b)) => assertEquals((2,4), (t,b))}
+        it.next match {case Sample(Real(t), Real(b)) => assertEquals((3,6), (t,b))}
         assert(!it.hasNext)
       }
     }
+  }
+  
+  @Test
+  def both_empty_functions = {
+    val ds1 = Dataset(Function(Real(mdt), Real(mda), Iterator.empty, Metadata("function1")), Metadata("dataset1"))
+    val ds2 = Dataset(Function(Real(mdt), Real(mdb), Iterator.empty, Metadata("function2")), Metadata("dataset2"))
+    val op = new FullOuterJoin()
+    val ds = op(ds1, ds2)
+    assertTrue(ds.isEmpty)
   }
   
   @Test(expected=classOf[UnsupportedOperationException])
@@ -458,7 +530,7 @@ class TestFullOuterJoin {
     val ds = op(ds1, ds2)
   }
   
-  @Test @Ignore //only supports scalar domain for now
+  @Test
   def tuple_codomains = {
     val samples1 = List(2,3).map(i => Sample(Real(mdt, i), Tuple(Real(mda, i), Real(mdc, i+2))))
     val samples2 = List(1,3).map(i => Sample(Real(mdt, i), Tuple(Real(mdb, i*2), Real(mdd, i*3))))
@@ -486,7 +558,6 @@ class TestFullOuterJoin {
     val ds3 = Dataset(Function(samples3, Metadata("function3")), Metadata("dataset3"))
     val op = new FullOuterJoin()
     val ds = op(Seq(ds1,ds2,ds3))
-    //latis.writer.Writer.fromSuffix("asc").write(ds)
     ds match {
       case Dataset(Function(it)) => {
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b), Real(c)))) => assertEquals((1,1,2,0), (t,a,b,c))}
@@ -496,9 +567,6 @@ class TestFullOuterJoin {
       }
     }
   }
-  
-  //TODO: test datasets that don't overlap
-  //TODO: gaps of 2 start, middle, end
   
   @Test @Ignore //TODO: deal with duplicate names in join
   def duplicate_codomain_variable = {
