@@ -67,7 +67,7 @@ class CatalogReader(val loc: String) extends DatasetAccessor {
     override def preVisitDirectory(path: Path, attrs: BasicFileAttributes) = {
       if(path.toString != dir) {
         //recurse to created a nested function
-        val ds = CatalogReader(path.toString).getDataset
+        val ds = CatalogReader(path.toString).getDataset()
         ds match {
           case Dataset(Function(f)) if(f.isEmpty) => //drop empty catalogs
           case Dataset(v) => samples += Sample(Text(Metadata("name"), ds.getName.drop(dir.length + 1)), v)
@@ -77,8 +77,6 @@ class CatalogReader(val loc: String) extends DatasetAccessor {
       } else FileVisitResult.CONTINUE
     }
   }
-  
-  override def getDataset: Dataset = getDataset(Seq[Operation]())
   
   def getDataset(operations: Seq[Operation]): Dataset = {
     Files.walkFileTree(Paths.get(dir), new FileVisitDelegator)
