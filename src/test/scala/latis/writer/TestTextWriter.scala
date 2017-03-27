@@ -237,4 +237,14 @@ class TestTextWriter extends WriterTest{
                     testSclr)
     }
   }
+  
+  @Test
+  def fill_value = {
+    //Note, empty space fill_value defined in latis.properties for txt writer.
+    val ds = Dataset(Tuple(Real(1), Real(Double.NaN), Real(3)))
+    //latis.writer.Writer.fromSuffix("txt").write(ds)
+    val output = new ByteArrayOutputStream()
+    Writer(output, "txt").write(ds)
+    assertTrue(output.toString().startsWith("1.0, , 3.0"))
+  }
 }

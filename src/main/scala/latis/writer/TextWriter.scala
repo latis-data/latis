@@ -103,29 +103,36 @@ class TextWriter extends Writer {
     case    tuple: Tuple    => makeTuple(tuple)
     case function: Function => makeFunction(function)
   }
-  
+
   /**
    * Convert Scalar value to a String.
    */
-  
+
   def makeScalar(scalar: Scalar): String = {
-    val form = (scalar.getMetadata("precision"), scalar.getMetadata("sigfigs")) 
-    (form, scalar) match {
-      // If precision or precision+sigfigs are specified
-      // Default to precision
-      case ((Some(prec), _), Real(d)) => ("%."+prec.toInt+"f").format(d)
-      case ((None, Some(sigf)), Real(d)) => ("%."+sigf.toInt+"g").format(d)
-      case ((None, None), Real(d)) => d.toString
-      // If precision is specified for an int, ignore it
-      // Only concerned if sigfigs is specified
-      case ((_, Some(sigf)), Integer(l)) => ("%."+sigf.toInt+"g").format(l.toFloat)
-      case ((_, _), Integer(l)) => l.toString
-      // Ignore for all other cases
-      case ((_, _), Index(i))   => i.toString
-      case ((_, _), Text(s))    => s.trim
-      case ((_, _), b: Binary)  => "blob" //TODO: uuencode?
-      //TODO: use Scalar.toStringValue?
-      //TODO: deal with Time format
+    //If a fill value is defined for this writer, use it for missing data.
+    //Note, this can only take the form of a string.
+    getProperty("fill_value") match {
+      case Some(s) if (scalar.isMissing) => s
+      case _ => {
+        val form = (scalar.getMetadata("precision"), scalar.getMetadata("sigfigs"))
+        (form, scalar) match {
+          // If precision or precision+sigfigs are specified
+          // Default to precision
+          case ((Some(prec), _), Real(d)) => ("%." + prec.toInt + "f").format(d)
+          case ((None, Some(sigf)), Real(d)) => ("%." + sigf.toInt + "g").format(d)
+          case ((None, None), Real(d)) => d.toString
+          // If precision is specified for an int, ignore it
+          // Only concerned if sigfigs is specified
+          case ((_, Some(sigf)), Integer(l)) => ("%." + sigf.toInt + "g").format(l.toFloat)
+          case ((_, _), Integer(l)) => l.toString
+          // Ignore for all other cases
+          case ((_, _), Index(i)) => i.toString
+          case ((_, _), Text(s)) => s.trim
+          case ((_, _), b: Binary) => "blob" //TODO: uuencode?
+          //TODO: use Scalar.toStringValue?
+          //TODO: deal with Time format
+        }
+      }
     }
   }
   
