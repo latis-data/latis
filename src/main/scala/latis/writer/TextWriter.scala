@@ -123,7 +123,7 @@ class TextWriter extends Writer {
       // Ignore for all other cases
       case ((_, _), Index(i))   => i.toString
       case ((_, _), Text(s))    => s.trim
-      case ((_, _), Binary(b))  => "blob" //TODO: uuencode?
+      case ((_, _), b: Binary)  => "blob" //TODO: uuencode?
       //TODO: use Scalar.toStringValue?
       //TODO: deal with Time format
     }
