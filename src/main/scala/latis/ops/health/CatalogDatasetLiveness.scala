@@ -25,11 +25,11 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
    * Apply this Operation to the given Dataset.
    * (Overriden to change the dataset's name)
    */
-  override def apply(dataset: Dataset): Dataset = dataset match {
+  override def apply(dataset: Dataset): Dataset = dataset match { //TODO: Is there an easier way to change ds's name?
     case Dataset(variable) => {
       val md = dataset.getMetadata
       applyToVariable(variable) match {
-        case Some(v) => Dataset(v, md+("name", "dataset_health"))
+        case Some(v) => Dataset(v, md+("name", "dataset_health")) 
         case None => Dataset.empty
       }
     }
