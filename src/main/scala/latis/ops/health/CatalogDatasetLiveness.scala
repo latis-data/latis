@@ -11,6 +11,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.InputStream
 import latis.ops.OperationFactory
+import scala.collection.mutable.ArrayBuffer
 
 /* TODO: Finalize this description/name of the class itself
  * 
@@ -20,12 +21,39 @@ import latis.ops.OperationFactory
  */
 class CatalogDatasetLiveness extends Operation with LazyLogging {
  
+  /**
+   * Apply this Operation to the given Dataset.
+   * (Overriden to change the dataset's name)
+   */
+  override def apply(dataset: Dataset): Dataset = dataset match {
+    case Dataset(variable) => {
+      val md = dataset.getMetadata
+      applyToVariable(variable) match {
+        case Some(v) => Dataset(v, md+("name", "dataset_health"))
+        case None => Dataset.empty
+      }
+    }
+    case _ => dataset
+  }
+  
   /*
    * Determine whether the datasets listed in 
    * this catalog are "alive" or not.
    */
-  override def applyToFunction(function: Function) = {
-    ???
+  override def applyToFunction(function: Function) = { 
+    function match {
+      case Function(it) => {
+        val samples = ArrayBuffer[Sample]() 
+        
+        it.foreach { sample => sample match {
+          case Sample(Text(name), _) => 
+            samples += Sample(Text(Metadata("ds_name"), name), 
+                         Text(Metadata("alive"), urlIsAlive(name + ".txt?&first()").toString())) 
+          }   
+        }
+        Some(Function(samples)) 
+      }
+    }
   }
   
   /*
@@ -38,22 +66,29 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
     val url = new URL(baseUrl + name)
     val con = url.openConnection.asInstanceOf[HttpURLConnection]
     logger.info("Testing url: " + url.toString)
+    val is = {
+      try {
+        con.getInputStream
+      }
+      catch {
+        case e: Exception => con.getErrorStream
+      }
+    }
     
-    var is: InputStream = null
     var br: BufferedReader = null
     
     try {
-      is = con.getInputStream
       br = new BufferedReader(new InputStreamReader(is))
       
       br.readLine match {
-        case "" => false
-        case "LaTiS Error: {" => false
-        case _ => true
+        case "" => logger.info("Empty data found for " + url); false
+        case "LaTiS Error: {" => logger.info("Dataset access failed for " + url + " with LaTiS Error: " + br.readLine); false
+        case _ => logger.info(url.toString + " passed"); true
       }
+      
     }
     catch {
-      case e: java.lang.Exception => false
+      case e: java.lang.Exception => logger.info("Dataset access failed for " + url + ". Unable to read from LaTiS: " + e.getMessage); false
     } 
     finally {
       try { is.close } catch {case _: Exception => }
