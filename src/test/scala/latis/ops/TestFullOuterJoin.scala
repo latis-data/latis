@@ -27,12 +27,18 @@ class TestFullOuterJoin {
      * 2  2  2  4
      * 3  3  3  6
      */
-    val samples1 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mda, i)))
-    val samples2 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
-    val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1")) //.force
-    val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2")) //.force
+    /*
+     * TODO: traversable once problem
+     * with iterators, we need "force"
+     * LATIS-569
+     */
+    val samples1 = List(1,2,3).iterator.map(i => Sample(Real(mdt, i), Real(mda, i)))
+    val samples2 = List(1,2,3).iterator.map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
+    val ds1 = Dataset(Function(Real(0), Real(0), samples1, Metadata("function1")), Metadata("dataset1")).force
+    val ds2 = Dataset(Function(Real(0), Real(0), samples2, Metadata("function2")), Metadata("dataset2")).force
     val op = new FullOuterJoin()
     val ds = op(ds1, ds2)
+    latis.writer.Writer.fromSuffix("asc").write(ds)
     ds match {
       case Dataset(Function(it)) => {
         it.next match {case Sample(Real(t), Tuple(Seq(Real(a), Real(b)))) => assertEquals((1,1,2), (t,a,b))}
