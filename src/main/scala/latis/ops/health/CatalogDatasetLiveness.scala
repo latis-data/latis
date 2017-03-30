@@ -15,7 +15,7 @@ import scala.collection.mutable.ArrayBuffer
 
 /* TODO: Finalize this description/name of the class itself
  * 
- * Given a catalog dataset (following the DCAT ontology?), describe 
+ * Given a catalog dataset ("following the DCAT ontology"?), describe 
  * whether the datasets in the catalog are "alive" or not.
  * This means checking to see if a dataset can return a first record. 
  */
@@ -45,10 +45,13 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
       case Function(it) => {
         val samples = ArrayBuffer[Sample]() 
         
-        it.foreach { sample => sample match {
+        it.foreach { s => s match {
           case Sample(Text(name), _) => 
             samples += Sample(Text(Metadata("ds_name"), name), 
-                         Text(Metadata("alive"), urlIsAlive(name + ".txt?&first()").toString())) 
+                         Text(Metadata("alive"), urlIsAlive(name + ".txt?&first()").toString)) 
+                         
+          case _ => samples += Sample(Text(Metadata("ds_name"), "[INVALID RECORD]"), 
+                                 Text(Metadata("alive"), "N/A"))              
           }   
         }
         Some(Function(samples)) 
@@ -58,7 +61,7 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
   
   /*
    * Given a dataset name, return true if that dataset serves a first record.
-   * Else, false. 
+   * Else, false, and log the error.  
    */
   def urlIsAlive(name: String): Boolean = {
     val baseUrl = "http://lasp.colorado.edu/lisird3/latis/" //TODO: generalize this 
