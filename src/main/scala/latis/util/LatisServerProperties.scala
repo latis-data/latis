@@ -29,8 +29,9 @@ class LatisServerProperties(config: ServletConfig) extends LatisProperties {
    * deployed code.
    */
   override def resolvePath(path: String): String = {
+    if (path.startsWith(File.separator)) path
     //try classpath
-    getClass.getResource(File.separator + path) match {
+    else getClass.getResource(File.separator + path) match {
       case url: URL => url.getPath
       //else try the servlet context
       case null => config.getServletContext().getRealPath(path)

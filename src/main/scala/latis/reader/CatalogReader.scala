@@ -26,13 +26,19 @@ import latis.ops.Operation
  * Create a catalog from a given directory which defaults to the 'dataset.dir' property
  * which defaults to 'datasets'. Nested directories will be treated as nested catalogs.
  */
-class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "datasets")) 
-  extends DatasetAccessor {
+class CatalogReader(val loc: String) extends DatasetAccessor {
+  
+  /*
+   * Default constructor to allow reflection to work
+   */
+  def this() = {
+    this(LatisProperties.getOrElse("dataset.dir", "datasets"))
+  }
   
   /**
    * The path of 'loc'
    */
-  val dir = URLDecoder.decode({
+  lazy val dir = URLDecoder.decode({
     val uri = new URI(URLEncoder.encode(loc, "utf-8"))
     if (uri.isAbsolute) uri.toURL //starts with "scheme:...", note this could be file, http, ...
     else if (loc.startsWith(File.separator)) new URL("file:" + loc) //absolute path
@@ -61,7 +67,7 @@ class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "
     override def preVisitDirectory(path: Path, attrs: BasicFileAttributes) = {
       if(path.toString != dir) {
         //recurse to created a nested function
-        val ds = CatalogReader(path.toString).getDataset
+        val ds = CatalogReader(path.toString).getDataset()
         ds match {
           case Dataset(Function(f)) if(f.isEmpty) => //drop empty catalogs
           case Dataset(v) => samples += Sample(Text(Metadata("name"), ds.getName.drop(dir.length + 1)), v)
@@ -72,15 +78,14 @@ class CatalogReader(val loc: String = LatisProperties.getOrElse("dataset.dir", "
     }
   }
   
-  def getDataset(operations: Seq[Operation]) = getDataset
-  
-  override def getDataset = {
+  def getDataset(operations: Seq[Operation]): Dataset = {
     Files.walkFileTree(Paths.get(dir), new FileVisitDelegator)
     val sorted = samples.sortBy(s => s.domain match {
       case Text(str) => str
     })(Ordering.String)
     val f = Function(sorted, Metadata("datasets"))
-    Dataset(f, Metadata(loc))
+    val dataset = Dataset(f, Metadata(loc))
+    operations.foldLeft(dataset)((ds,op) => op(ds))
   }
   
   def close = {}

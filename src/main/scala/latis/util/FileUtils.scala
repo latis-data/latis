@@ -66,4 +66,16 @@ object FileUtils {
     input.close
   }
   
+  /*
+   * Given a directory, return a list of files in that directory
+   */
+  def getListOfFiles(dir: String): List[File] = { 
+    val d = new File(dir)
+    if (d.exists && d.isDirectory) {
+      d.listFiles.filter(_.isFile).toList
+    } else {
+      List[File]()
+    }
+  }
+  
 }

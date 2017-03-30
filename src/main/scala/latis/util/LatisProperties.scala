@@ -74,10 +74,12 @@ class LatisProperties extends Properties with LazyLogging {
     
   /**
    * Return the full file system path for the given relative path.
+   * If the path is already fully resolved, just return it.
    */
   def resolvePath(path: String): String = {
+    if (path.startsWith(File.separator)) path
     //try classpath
-    getClass.getResource(File.separator + path) match {
+    else getClass.getResource(File.separator + path) match {
       case url: URL => url.getPath
       //else try the current working directory
       case null => scala.util.Properties.userDir + File.separator + path

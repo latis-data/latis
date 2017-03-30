@@ -435,6 +435,17 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   }
 
   /**
+   * Allow tsml to specify a "hint" property to add to the SQL between the "select" 
+   * and projection clause. Appropriate for Oracle, at least.
+   * For example: 
+   *   select /*+INDEX (TMDISCRETE TMDISCRETE_ALL_IDX)*/ * from TMDISCRETE ...
+   */
+  protected def makeHint: String = getProperty("hint") match {
+    case Some(hint) => hint + " " //add white space so it plays nice in makeQuery
+    case None => ""
+  }
+  
+  /**
    * Construct the SQL query.
    * Look for "sql" defined in the tsml, otherwise construct it.
    */
@@ -443,6 +454,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     case None => {
       //build query
       val sb = new StringBuffer("select ")
+      sb append makeHint //will include trailing space if not empty
       sb append makeProjectionClause
       sb append " from " + getTable
 
