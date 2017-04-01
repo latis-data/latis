@@ -41,18 +41,16 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
   override def applyToFunction(function: Function) = { 
     function match {
       case Function(it) => {
-        val samples = ArrayBuffer[Sample]() 
-        
-        it.foreach { s => s match {
+        val samples = it.map { s => s match {
           case Sample(Text(name), _) => 
-            samples += Sample(Text(Metadata("ds_name"), name), 
-                         Text(Metadata("alive"), dsIsAlive(name).toString)) 
+            Sample(Text(Metadata("ds_name"), name), 
+              Text(Metadata("alive"), dsIsAlive(name).toString)) 
                          
-          case _ => samples += Sample(Text(Metadata("ds_name"), "[INVALID RECORD]"), 
-                                 Text(Metadata("alive"), "N/A"))              
+          case _ => Sample(Text(Metadata("ds_name"), "[INVALID RECORD]"), 
+                      Text(Metadata("alive"), "N/A"))              
           }   
         }
-        Some(Function(samples)) 
+        Some(Function(samples.toSeq)) 
       }
     }
   }
@@ -65,7 +63,7 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
     try {
       val ds = DatasetAccessor.fromName(name).getDataset(Seq(FirstFilter()))
       ds match {
-        case Dataset(Function(it)) if (!it.isEmpty) => it.next match {
+        case Dataset(Function(it)) if it.hasNext => it.next match {
           case s: Sample => true
           case _ => false
         }
