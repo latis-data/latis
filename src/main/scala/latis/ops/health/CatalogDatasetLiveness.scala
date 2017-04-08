@@ -63,10 +63,7 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
     try {
       val ds = DatasetAccessor.fromName(name).getDataset(Seq(FirstFilter()))
       ds match {
-        case Dataset(Function(it)) if it.hasNext => it.next match {
-          case s: Sample => true
-          case _ => false
-        }
+        case Dataset(Function(it)) => it.hasNext
         case _ => false
       }
     } 
