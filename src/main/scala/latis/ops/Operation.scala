@@ -13,7 +13,7 @@ import latis.util.LatisProperties
 import latis.util.iterator.MappingIterator
 
 /**
- * Base type for operations that transform on Dataset into another.
+ * Base type for operations that transform one Dataset into another.
  */
 abstract class Operation {
   /*
