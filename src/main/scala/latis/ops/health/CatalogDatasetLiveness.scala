@@ -5,6 +5,7 @@ import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Sample
 import latis.dm.Text
+import latis.dm.Tuple
 import latis.metadata.Metadata
 import latis.ops.Operation
 import latis.ops.OperationFactory
@@ -42,12 +43,18 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
     function match {
       case Function(it) => {
         val samples = it.map { s => s match {
-          case Sample(Text(name), _) => 
+          case Sample(Text(name), _) => {
+            val results = getHealthResults(name)
+            
             Sample(Text(Metadata("ds_name"), name), 
-              Text(Metadata("alive"), dsIsAlive(name).toString)) 
-                         
+              Tuple(Seq(Text(Metadata("alive"), results._1),
+                Text(Metadata("access_time"), results._2),
+                Text(Metadata("memory_usage"), results._3))))
+          }
           case _ => Sample(Text(Metadata("ds_name"), "[INVALID RECORD]"), 
-                      Text(Metadata("alive"), "N/A"))              
+                      Tuple(Seq(Text(Metadata("alive"), "N/A"),
+                          Text(Metadata("access_time"), "N/A"),
+                          Text(Metadata("memory_usage"), "N/A"))))              
           }   
         }
         Some(Function(samples.toSeq)) 
@@ -56,12 +63,34 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
   }
   
   /*
+   * Given a dataset name, assess the health of that dataset and return a
+   * tuple of all the results (whether the ds is alive, how many seconds 
+   * it took to read the first sample, and how much memory it used).  
+   * This is all done concurrently to avoid duplicate operations. 
+   * Resulting tuple will take the form: (alive, time, memUsage) 
+   */
+  def getHealthResults(name: String): (String, String, String) = {
+    System.gc //Run the garbage collector to *greatly* improve accuracy of mem usage.
+              //This does not impart a noticable performance hit here.
+    
+    val startTime = System.nanoTime
+    val startFreeMem = Runtime.getRuntime.freeMemory
+    val isAlive = dsIsAlive(name)
+    val endFreeMem = Runtime.getRuntime.freeMemory
+    val endTime = System.nanoTime
+    val timeDiff = (endTime - startTime)/1e9 + "s" //converts nanoseconds to seconds
+    val memUsed = (startFreeMem - endFreeMem)/1e6 + "MB" //converts bytes to megabytes
+   
+    (isAlive.toString, timeDiff, memUsed)
+  }
+  
+  /*
    * Given a dataset name, return true if that dataset serves a first record.
    * Else, false.  
    */
   def dsIsAlive(name: String): Boolean = {
     try {
-      val ds = DatasetAccessor.fromName(name).getDataset(Seq(FirstFilter()))
+      val ds = DatasetAccessor.fromName(name).getDataset(Seq(FirstFilter())).force
       ds match {
         case Dataset(Function(it)) => it.hasNext
         case _ => false
@@ -72,6 +101,7 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
         logger.info("Dataset access failed for " + name + ". Unable to read from LaTiS: " + e.getMessage); false
     } 
   }
+  
   
 }
 
