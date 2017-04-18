@@ -16,10 +16,10 @@ import latis.reader.CatalogReader
 class TestCatalogDatasetHealth {
   
   def generateFakeCatalog(operations: Seq[Operation]) = {
-    //name=ascii_granule (dead)
     //name=ascii_float_as_int (alive)
-    val sampleAlive = Sample(Text(Metadata("ds_name"), "ascii_float_as_int"), Real(0))
-    val sampleDead = Sample(Text(Metadata("ds_name"), "ascii_granule"), Real(0))
+    //name=ascii_granule (dead)
+    val sampleAlive = Sample(Text(Metadata("name"), "ascii_float_as_int"), Real(0))
+    val sampleDead = Sample(Text(Metadata("name"), "ascii_granule"), Real(0))
     val samples = Seq(sampleAlive, sampleDead)
     
     val f = Function(samples, Metadata("datasets"))
@@ -32,7 +32,6 @@ class TestCatalogDatasetHealth {
   def check_health_dataset_creation = {
     val ops = ArrayBuffer[Operation]()
     ops += CatalogDatasetLiveness()
-    //val ds = CatalogReader().getDataset(ops)
     val ds = generateFakeCatalog(ops)
     
     ds match {
@@ -53,7 +52,6 @@ class TestCatalogDatasetHealth {
     val ops = ArrayBuffer[Operation]()
     ops += CatalogDatasetLiveness()
     ops += Selection("alive=false")
-    //val ds = CatalogReader().getDataset(ops)
     val ds = generateFakeCatalog(ops)
     
     ds match {
@@ -70,8 +68,9 @@ class TestCatalogDatasetHealth {
 //  def write_health_dataset = {
 //    val ops = ArrayBuffer[Operation]()
 //    ops += CatalogDatasetLiveness()
-//    val ds = CatalogReader().getDataset(ops)
-//    
+//    //val ds = CatalogReader().getDataset(ops)
+//    val ds = generateFakeCatalog(ops)
+//  
 //    latis.writer.AsciiWriter.write(ds)
 //  }    
   
@@ -80,8 +79,9 @@ class TestCatalogDatasetHealth {
 //    val ops = ArrayBuffer[Operation]()
 //    ops += CatalogDatasetLiveness()
 //    ops += Selection("alive=false")
-//    val ds = CatalogReader().getDataset(ops)
-//    
+//    //val ds = CatalogReader().getDataset(ops)
+//    val ds = generateFakeCatalog(ops)
+//  
 //    latis.writer.AsciiWriter.write(ds)
 //  }
   
