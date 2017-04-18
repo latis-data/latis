@@ -81,6 +81,8 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
     val timeDiff = (endTime - startTime)/1e9 + "s" //converts nanoseconds to seconds
     val memUsed = (startFreeMem - endFreeMem)/1e6 + "MB" //converts bytes to megabytes
    
+    logger.info("HEALTH: name=" + name + ", alive=" + isAlive + ", time=" + timeDiff + ", memoryUsed=" + memUsed)
+   
     (isAlive.toString, timeDiff, memUsed)
   }
   
