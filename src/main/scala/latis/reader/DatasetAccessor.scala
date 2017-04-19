@@ -73,6 +73,25 @@ abstract class DatasetAccessor {
 object DatasetAccessor extends LazyLogging {
   
   /**
+   * Return a Dataset with the given name and optional Seq of Operations applied to it.
+   * Memoize the data within the Dataset and release the source.
+   */
+  def readDataset(datasetName: String, ops: Seq[Operation] = Seq.empty): Dataset = {
+    //TODO: refactor to use FP idioms
+    var reader: DatasetAccessor = null
+    var ds: Dataset = null
+    try {
+      reader = DatasetAccessor.fromName(datasetName)
+      ds = reader.getDataset(ops).force //memoize so we can release resources
+    } catch {
+      case e: Exception => throw new RuntimeException(s"Failed to read dataset: $datasetName", e)
+    } finally {
+      try {reader.close} catch {case _: Exception =>} //close if we can but don't complain
+    }
+    ds
+  }
+  
+  /**
    * Construct a DatasetAccessor given the name of a Dataset.
    * This will first look for a "reader.dsName.class" property.
    * If not found, it will delegate to the TsmlResolver.
