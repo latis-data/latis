@@ -75,13 +75,14 @@ class FileJoinAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
    * Extract the file paths from a file list Dataset.
    */
   def getFilePaths(ds: Dataset): Iterator[String] = {
-    lazy val dir = ds.getMetadata.get("srcDir") match {
+    //TODO: could get srcDir from tsml, but also needed for ZipWriter?
+    lazy val dir = ds.getMetadata.get("srcDir") match { //TODO: consider "baseURL"
       case None => ""
       case Some(sd) => sd + File.separator
     }
     
     ds match {
-      case Dataset(Function(it)) => it.map(_.findVariableByName("file") match {
+      case Dataset(Function(it)) => it.map(_.findVariableByName("file") match { //TODO: consider "url"
         case Some(Text(file)) => dir + file
         case None => throw new Exception(s"No 'file' Variable found in Dataset '$ds'")
       })
@@ -142,11 +143,18 @@ class FileJoinAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
       //make a reader with the file location plugged into the template tsml
       val reader = TsmlReader(templateTsml.dataset.setLocation(file))
       readers += reader //keep a copy so we can close later
-      reader.getDataset //TODO: consider passing ops here?
+      reader.getDataset //TODO: consider passing ops here? Problem for "first"...
     })
     
+    //Make metadata for the joined dataset based on the tsml
+    val md = makeMetadata(tsml.dataset)
+    
     //Apply the join operation to the datasets
-    dss.reduceLeft(joinOperation(_,_))
+    if (dss.isEmpty) Dataset(null, md)
+    else dss.reduceLeft(joinOperation(_,_)) match {
+      case Dataset(v) => Dataset(v, md) //add metadata (e.g. dataset name) to the dataset
+      case _ => Dataset(null, md)
+    }
   }
   
   /**
