@@ -36,7 +36,7 @@ class TestCatalogDatasetHealth {
     
     ds match {
       case Dataset(Function(it)) => it.next match { 
-        case Sample(dsn: Text, a: Text) => {
+        case Sample(dsn: Text, TupleMatch(a: Text, _, _)) => {
           assertEquals("ds_name", dsn.getName)
           assertEquals("alive", a.getName)
           assertEquals("ascii_float_as_int", dsn.getValue)
@@ -57,7 +57,7 @@ class TestCatalogDatasetHealth {
     ds match {
       case Dataset(Function(it)) => it.foreach { 
         s => s match {
-          case Sample(_, Text(alive)) => assertEquals("false", alive) 
+          case Sample(_, TupleMatch(Text(alive), _, _)) => assertEquals("false", alive) 
         }
       }
     }
