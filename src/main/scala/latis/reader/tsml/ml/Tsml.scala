@@ -43,7 +43,7 @@ class Tsml(val xml: Elem) {
    * as a Seq of the type (target) and String value (proctext).
    */
   lazy val processingInstructions: Seq[(String,String)] = { 
-    val pis: Seq[ProcInstr] = xml.descendant.flatMap(_ match {
+    val pis: Seq[ProcInstr] = dataset.xml.descendant.flatMap(_ match {
       case pi: ProcInstr => Some(pi)
       case _ => None
     })

@@ -208,8 +208,7 @@ abstract class TsmlAdapter(val tsml: Tsml) extends LazyLogging {
     val ds = makeDataset(ods)
     
     //Apply PIs that the adapter didn't handle.
-    //Reverse because foldRight applies them in reverse order.
-    otherOps.reverse.foldRight(ds)(_(_)) 
+    otherOps.foldLeft(ds)((dataset, op) => op(dataset))
   }
   
   /**
