@@ -11,9 +11,9 @@ import latis.util.LatisProperties
  */
 object TsmlResolver {
   
-  def fromUrl(url: URL) = Tsml(url)
+  def fromUrl(url: URL): Tsml = Tsml(url)
     
-  def fromPath(path: String) = {
+  def fromPath(path: String): Tsml = {
     val url = if (path.contains(":")) path //already absolute with a scheme
     else if (path.startsWith(File.separator)) "file:" + path //absolute file path
     else getClass.getResource("/"+path) match { //try in the classpath (e.g. "resources")
@@ -31,7 +31,7 @@ object TsmlResolver {
     else throw new FileNotFoundException(s"Could not resolve path: '$path'.")
   }
 
-  def fromName(name: String) = {
+  def fromName(name: String): Tsml = {
     val path = LatisProperties.getOrElse("dataset.dir", "datasets") + 
                File.separator + name + ".tsml"
     fromPath(path)

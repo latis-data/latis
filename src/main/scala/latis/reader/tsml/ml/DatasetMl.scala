@@ -11,7 +11,7 @@ import scala.xml.transform.RuleTransformer
 /**
  * Wrapper for TSML that defines a Dataset.
  */
-class DatasetMl(xml: Node) extends TupleMl(xml) {
+class DatasetMl(val xml: Node) extends TupleMl(xml) {
   
 //TODO: Dataset is no longer a Tuple
 //TODO: deal with aggregation tsml
