@@ -30,3 +30,6 @@ node_modules
 
 # swp files
 *.swp
+
+# sbt
+target/
