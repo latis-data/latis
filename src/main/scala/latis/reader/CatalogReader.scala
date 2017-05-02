@@ -70,7 +70,7 @@ class CatalogReader(val loc: String) extends DatasetAccessor {
         val ds = CatalogReader(path.toString).getDataset()
         ds match {
           case Dataset(Function(f)) if(f.isEmpty) => //drop empty catalogs
-          case Dataset(v) => samples += Sample(Text(Metadata("name"), ds.getName.drop(dir.length + 1)), v)
+          case Dataset(v) => samples += Sample(Text(Metadata("name"), "foobar"/*ds.getName.drop(dir.length + 1)*/), v)
           case _ => //empty dataset? 
         }
         FileVisitResult.SKIP_SUBTREE
