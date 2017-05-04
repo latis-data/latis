@@ -311,6 +311,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       case Dataset(v) => v
       case _ => null
     }
+    //TODO: apply later, e.g. so projection and rename can be applied first
     val tvar = v.findVariableByName(vname) match {
       case Some(t: Time) => t
       case _ => throw new Error("Time variable not found in dataset.")
