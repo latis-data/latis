@@ -30,7 +30,7 @@ object FileUtils {
     
     def accumulateFiles(file: File, buffer: ArrayBuffer[String]) {
       if (file.isDirectory()) file.listFiles().foreach(accumulateFiles(_, buffer))
-      else buffer += file.getPath.drop(dir.length+1)+","+file.length
+      else buffer += file.getName+","+file.length
     }
     
     val buffer = ArrayBuffer[String]()
