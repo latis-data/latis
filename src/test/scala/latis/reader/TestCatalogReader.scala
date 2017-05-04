@@ -10,8 +10,10 @@ class TestCatalogReader {
   def flat {
     val ds = FlatCatalogReader().getDataset
     val data = ds.toStringMap
-    assertEquals("agg/agg", data("name")(0))
-    assertEquals("agg/agg", data("accessURL")(0))
+    //assertEquals("agg/agg", data("name")(0))
+    //assertEquals("agg/agg", data("accessURL")(0))
+    assertEquals("agg", data("name")(0))
+    assertEquals("agg", data("accessURL")(0))
   }
   
   @Test

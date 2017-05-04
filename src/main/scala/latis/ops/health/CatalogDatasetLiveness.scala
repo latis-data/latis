@@ -43,6 +43,7 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
     function match {
       case Function(it) => {
         val samples = it.map { s => s match {
+          //TODO: Consider matching sample's range as well
           case Sample(Text(name), _) => {
             val results = getHealthResults(name)
             
@@ -51,6 +52,7 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
                 Text(Metadata("access_time"), results._2),
                 Text(Metadata("memory_usage"), results._3))))
           }
+          //Case only matches when sample's domain is not Text 
           case _ => Sample(Text(Metadata("ds_name"), "[INVALID RECORD]"), 
                       Tuple(Seq(Text(Metadata("alive"), "N/A"),
                           Text(Metadata("access_time"), "N/A"),

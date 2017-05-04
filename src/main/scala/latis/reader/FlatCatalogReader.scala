@@ -47,7 +47,7 @@ class FlatCatalogReader extends DatasetAccessor {
 
     val dataMap = names.zip(accessUrls).map(p => Map("name" -> StringValue(p._1), 
                                                      "accessURL" -> StringValue(p._2),
-                                                     "description" -> StringValue("foobar")))
+                                                     "description" -> StringValue("")))
     val f = DataMapUtils.dataMapsToFunction(dataMap.iterator, template)
     Dataset(f, Metadata("catalog"))
   }
