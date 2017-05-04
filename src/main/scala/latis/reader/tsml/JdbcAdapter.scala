@@ -42,6 +42,7 @@ import latis.time.TimeFormat
 import latis.time.TimeScale
 import latis.util.DataUtils
 import latis.util.StringUtils
+import latis.dm.Tuple
 
 /* 
  * TODO: release connection as soon as possible?
@@ -471,7 +472,11 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
           case v: Variable => v match {
             //Note, shouldn't matter if we sort on original name
             case _: Scalar => sb append " ORDER BY " + v.getName + " " + order
-            case _ => ??? //TODO: generalize for n-D domains
+            case Tuple(vars) => {
+              //assume all are scalars, reasonable for a domain variable
+              val names = vars.map(_.getName).mkString(", ")
+              sb append " ORDER BY " + names + " " + order
+            }
           }
         }
         case _ => //no function so no domain variable to sort by
