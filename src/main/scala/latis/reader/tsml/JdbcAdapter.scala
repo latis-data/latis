@@ -210,6 +210,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
         //TODO: allow use of renamed variable? but sql where wants orig name
         case Some(v) if (v.isInstanceOf[Time]) => handleTimeSelection(name, op, value)
         case Some(v) if (getOrigScalarNames.contains(name)) => {
+          //TODO: enable use of aliases
           //add a selection to the sql, may need to change operation
           op match {
             case "==" => v match {
