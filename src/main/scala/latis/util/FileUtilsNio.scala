@@ -30,8 +30,8 @@ object FileUtilsNio {
   private class FileSizeAccumulatorVisitor(basePath: String, buffer: ArrayBuffer[String]) extends SimpleFileVisitor[Path] {
     override def visitFile(path: Path, attrs: BasicFileAttributes): FileVisitResult = {
       val file = new File(path.toString())
-      // buffer += file.getPath.drop(basePath.length+1)+","+attrs.size()
-      buffer += file.getPath.drop(basePath.length+1)+","+file.length()
+      // buffer += file.getPath.drop(basePath.length+1)+","+file.length()
+      buffer += file.getName+","+file.length()
       return FileVisitResult.CONTINUE;
       
     }
