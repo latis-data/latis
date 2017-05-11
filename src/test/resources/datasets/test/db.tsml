@@ -8,7 +8,9 @@
            user="" password=""
            table="test"/>
   
-  <time id="myTime" type="text"/>
+  <time id="myTime" type="text">
+    <metadata units="yyyy-MM-dd HH:mm:ss.SSS"/>
+  </time>
   <integer id="myInt"/>
   <real id="myReal"/>
   <text id="myText"/>

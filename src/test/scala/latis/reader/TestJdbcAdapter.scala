@@ -20,7 +20,7 @@ class TestJdbcAdapter extends AdapterTests {
   def request_by_time {
     val ops = List(Selection("time>1970-01-02T00:00:00"))
     val data = getDataset(ops).toStringMap
-    assertEquals("1970-01-03T00:00:00.000", data("myTime").head)
+    assertEquals("1970-01-03 00:00:00.000", data("myTime").head)
   }
   
   //@Test
@@ -28,7 +28,7 @@ class TestJdbcAdapter extends AdapterTests {
   def request_by_native_time {
     val ops = List(Selection("myTime>'1970-01-02 00:00:00'"))
     val data = getDataset(ops).toStringMap
-    assertEquals("1970-01-03T00:00:00.000", data("myTime").head)
+    assertEquals("1970-01-03 00:00:00.000", data("myTime").head)
   }
   
   //TODO: move rename tests to AdapterTests once it supports general variables
