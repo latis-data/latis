@@ -30,12 +30,24 @@ object FileUtils {
     
     def accumulateFiles(file: File, buffer: ArrayBuffer[String]) {
       if (file.isDirectory()) file.listFiles().foreach(accumulateFiles(_, buffer))
-      else buffer += file.getName+","+file.length
+      else buffer += getFileNameWithSubdirectory(dir, file) + "," + file.length
     }
     
     val buffer = ArrayBuffer[String]()
     accumulateFiles(new File(dir), buffer)
     buffer.sorted //sort lexically so the adapter doesn't have to (which it can't if it's Iterative)
+  }
+  
+  /*
+   * Remove the leading dir and '/' from the file path,
+   * or just dir if there is no '/'. Do not remove first
+   * char of file name or subdirectory path.
+   */
+  def getFileNameWithSubdirectory(dir: String, file: File): String = {
+    if (file.getPath.length > dir.length && file.getPath.charAt(dir.length) != '/') 
+      file.getPath.drop(dir.length) 
+    else 
+      file.getPath.drop(dir.length+1)
   }
   
   /**
