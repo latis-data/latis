@@ -124,7 +124,11 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
     case Dataset(v) => v match {
       case f: Function => f(value) match {
         case Some(result) => Dataset(result)
-        case None => throw new RuntimeException(s"Failed to evaluate Dataset with $value")
+        case None => {
+          //throw new RuntimeException(s"Failed to evaluate Dataset with $value")
+          //return empty Dataset with same Function type
+          Dataset(Function(f, Iterator.empty))
+        }
       }
       case _ => throw new UnsupportedOperationException("Can't evaluate a Dataset without a top level Function")
     }
