@@ -44,7 +44,7 @@ object FileUtils {
    * char of file name or subdirectory path.
    */
   def getFileNameWithSubdirectory(dir: String, file: File): String = {
-    if (file.getPath.length > dir.length && file.getPath.charAt(dir.length) != '/') 
+    if (file.getPath.length > dir.length && file.getPath.charAt(dir.length) != File.separatorChar) 
       file.getPath.drop(dir.length) 
     else 
       file.getPath.drop(dir.length+1)

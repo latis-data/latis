@@ -43,7 +43,7 @@ object FileUtilsNio {
    * char of file name or subdirectory path.
    */
   def getFileNameWithSubdirectory(basePath: String, file: File): String = {
-    if (file.getPath.length > basePath.length && file.getPath.charAt(basePath.length) != '/') 
+    if (file.getPath.length > basePath.length && file.getPath.charAt(basePath.length) != File.separatorChar) 
       file.getPath.drop(basePath.length) 
     else 
       file.getPath.drop(basePath.length+1)
