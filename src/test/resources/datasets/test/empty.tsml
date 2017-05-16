@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset id="empty">
+  <adapter class="latis.reader.tsml.EmptyDatasetAdapter"/>
+  
+  <time type="text">
+    <metadata name="myTime" units="yyyy/MM/dd"/>
+  </time>
+ 
+  <integer id="myInt"/>
+  <real    id="myReal"/>
+  <text    id="myText"/>
+  
+</dataset>
