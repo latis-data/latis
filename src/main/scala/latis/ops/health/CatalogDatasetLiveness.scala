@@ -1,6 +1,6 @@
 package latis.ops.health
 
-import scala.collection.mutable.ArrayBuffer
+import com.typesafe.scalalogging.LazyLogging
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Sample
@@ -11,7 +11,9 @@ import latis.ops.Operation
 import latis.ops.OperationFactory
 import latis.ops.filter.FirstFilter
 import latis.reader.DatasetAccessor
-import com.typesafe.scalalogging.LazyLogging
+import play.api.libs.json.JsObject
+import play.api.libs.json.Json
+import play.api.libs.json.Json.toJsFieldJsValueWrapper
 
 /* 
  * Given a catalog dataset following the DCAT ontology, describe 
@@ -83,8 +85,14 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
     val timeDiff = (endTime - startTime)/1e9 + "s" //converts nanoseconds to seconds
     val memUsed = (startFreeMem - endFreeMem)/1e6 + "MB" //converts bytes to megabytes
    
-    logger.info("HEALTH: name=" + name + ", alive=" + isAlive + ", time=" + timeDiff + ", memoryUsed=" + memUsed)
+    //TODO: Consider nesting health stats (alive, time, memoryUsed) in their own json.obj
+    val healthInfo: JsObject = Json.obj(
+                                 "HEALTH" -> Json.obj(
+                                   "name" -> name, "alive" -> isAlive, "time" -> timeDiff, "memoryUsed" -> memUsed)
+                               )                        
    
+    logger.info(healthInfo.toString)
+                         
     (isAlive.toString, timeDiff, memUsed)
   }
   
