@@ -70,7 +70,7 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
    * This is all done concurrently to avoid duplicate operations. 
    * Resulting tuple will take the form: (alive, time, memUsage) 
    */
-  def getHealthResults(name: String): (String, String, String) = {
+  def getHealthResults(name: String): (String, Double, Double) = {
     System.gc //Run the garbage collector to *greatly* improve accuracy of mem usage.
               //This does not impart a noticable performance hit here.
     
@@ -79,10 +79,10 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
     val isAlive = dsIsAlive(name)
     val endFreeMem = Runtime.getRuntime.freeMemory
     val endTime = System.nanoTime
-    val timeDiff = (endTime - startTime)/1e9 + "s" //converts nanoseconds to seconds
-    val memUsed = (startFreeMem - endFreeMem)/1e6 + "MB" //converts bytes to megabytes                  
+    val timeDiff = (endTime - startTime)/1e9 //converts nanoseconds to seconds
+    val memUsed = (startFreeMem - endFreeMem)/1e6 //converts bytes to megabytes                  
    
-    logger.info("HEALTH: name=" + name + ", alive=" + isAlive + ", time=" + timeDiff + ", memoryUsed=" + memUsed + " ")
+    logger.info("HEALTH: dsName=" + name + ", alive=" + isAlive + ", timeUsed(s)=" + timeDiff + ", memoryUsed(MB)=" + memUsed + " ")
                          
     (isAlive.toString, timeDiff, memUsed)
   }
