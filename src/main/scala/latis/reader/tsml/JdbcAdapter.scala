@@ -42,6 +42,7 @@ import latis.time.TimeFormat
 import latis.time.TimeScale
 import latis.util.DataUtils
 import latis.util.StringUtils
+import latis.dm.Tuple
 
 /* 
  * TODO: release connection as soon as possible?
@@ -87,7 +88,12 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       val gmtCalendar = Calendar.getInstance(TimeZone.getTimeZone("GMT")) //TODO: cache so we don't have to call for each sample?
       var time = resultSet.getTimestamp(name, gmtCalendar).getTime
       val s = if (resultSet.wasNull) v.getFillValue.asInstanceOf[String]
-      else TimeFormat.ISO.format(time) //default to ISO yyyy-MM-ddTHH:mm:ss.SSS
+      else {
+        v.getMetadata("units") match {
+          case Some(format) => TimeFormat(format).format(time)
+          case None => TimeFormat.ISO.format(time) //default to ISO yyyy-MM-ddTHH:mm:ss.SSS
+        }
+      }
       (name, Data(s))
     }
   }
@@ -209,6 +215,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
         //TODO: allow use of renamed variable? but sql where wants orig name
         case Some(v) if (v.isInstanceOf[Time]) => handleTimeSelection(name, op, value)
         case Some(v) if (getOrigScalarNames.contains(name)) => {
+          //TODO: enable use of aliases
           //add a selection to the sql, may need to change operation
           op match {
             case "==" => v match {
@@ -310,6 +317,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       case Dataset(v) => v
       case _ => null
     }
+    //TODO: apply later, e.g. so projection and rename can be applied first
     val tvar = v.findVariableByName(vname) match {
       case Some(t: Time) => t
       case _ => throw new Error("Time variable not found in dataset.")
@@ -331,7 +339,12 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
         //JDBC doesn't generally like the 'T' in the iso time. (e.g. Derby)
         //Parse value into a Time then format consistent with java.sql.Timestamp.toString: yyyy-mm-dd hh:mm:ss.fffffffff
         //This should also treat the time as GMT. (Timestamp has internal Gregorian$Date which has the local time zone.)
-        val time = Time.fromIso(value).format("yyyy-MM-dd HH:mm:ss.SSS")
+        val time = tvar.getMetadata("units") match {
+          case Some(format) => Time.fromIso(value).format(format)
+          case None => Time.fromIso(value).format("yyyy-MM-dd HH:mm:ss.SSS") //Default that seems to work for most databases, not Oracle
+          //TODO: too late, Time will add units if none are defined, defaulting to the ISO that doesn't generally work
+          //  require tsml to define other units
+        }
         selections += tvname + op + "'" + time + "'" //sql wants quotes around time value
         true
       }
@@ -471,7 +484,11 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
           case v: Variable => v match {
             //Note, shouldn't matter if we sort on original name
             case _: Scalar => sb append " ORDER BY " + v.getName + " " + order
-            case _ => ??? //TODO: generalize for n-D domains
+            case Tuple(vars) => {
+              //assume all are scalars, reasonable for a domain variable
+              val names = vars.map(_.getName).mkString(", ")
+              sb append " ORDER BY " + names + " " + order
+            }
           }
         }
         case _ => //no function so no domain variable to sort by

@@ -15,6 +15,7 @@ import latis.util.DataMapUtils
 import latis.util.FileUtilsNio
 import latis.util.LatisProperties
 import latis.ops.Operation
+import latis.util.FileUtils
 
 /**
  * Creates a catalog of the tsml's found in 'dataset.dir'.
@@ -38,10 +39,9 @@ class FlatCatalogReader extends DatasetAccessor {
   lazy val template = Function(Text(Metadata("name")), Tuple(Text(Metadata("description")),
       Tuple(Text(Metadata("accessURL")), Metadata("distribution"))))
   
-  def getDataset(operations: Seq[Operation]) = getDataset
-  
   override def getDataset = {
-    val files = FileUtilsNio.listAllFilesWithSize(dir).map(_.takeWhile(_ != ','))
+    //val files = FileUtilsNio.listAllFilesWithSize(dir).map(_.takeWhile(_ != ','))
+    val files = FileUtils.listAllFilesWithSize(dir).map(_.takeWhile(_ != ','))
     val names = files.filter(_.endsWith(".tsml")).map(_.stripSuffix(".tsml"))
     val accessUrls = names
 
@@ -50,6 +50,19 @@ class FlatCatalogReader extends DatasetAccessor {
                                                      "description" -> StringValue("")))
     val f = DataMapUtils.dataMapsToFunction(dataMap.iterator, template)
     Dataset(f, Metadata("catalog"))
+  }
+  
+  def getDataset(operations: Seq[Operation]): Dataset = {
+    val files = FileUtilsNio.listAllFilesWithSize(dir).map(_.takeWhile(_ != ','))
+    val names = files.filter(_.endsWith(".tsml")).map(_.stripSuffix(".tsml"))
+    val accessUrls = names
+
+    val dataMap = names.zip(accessUrls).map(p => Map("name" -> StringValue(p._1), 
+                                                     "accessURL" -> StringValue(p._2),
+                                                     "description" -> StringValue("")))
+    val f = DataMapUtils.dataMapsToFunction(dataMap.iterator, template)
+    val dataset = Dataset(f, Metadata("catalog"))
+    operations.foldLeft(dataset)((ds,op) => op(ds))
   }
   
   def close = {}

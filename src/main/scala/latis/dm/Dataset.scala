@@ -115,6 +115,26 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   //TODO: better name? getVariable? head? other monadic ways? use unapply? expose variable?
   //See how far we can get with pattern matching: Dataset(v)
   
+  /**
+   * Experimental "evaluation".
+   * Delegate to internal Function, for now.
+   * Eventually use Evaluation Operation?
+   */
+  def apply(value: Variable): Dataset = this match {
+    case Dataset(v) => v match {
+      case f: Function => f(value) match {
+        case Some(result) => Dataset(result)
+        case None => {
+          //throw new RuntimeException(s"Failed to evaluate Dataset with $value")
+          //return empty Dataset with same Function type
+          Dataset(Function(f, Iterator.empty))
+        }
+      }
+      case _ => throw new UnsupportedOperationException("Can't evaluate a Dataset without a top level Function")
+    }
+    case _ => Dataset.empty
+  }
+  
   override def equals(that: Any): Boolean = that match {
     case thatds: Dataset => (this.getMetadata == thatds.getMetadata) && (this.unwrap == thatds.unwrap)
     case _ => false

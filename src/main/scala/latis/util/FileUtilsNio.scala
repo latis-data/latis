@@ -30,11 +30,23 @@ object FileUtilsNio {
   private class FileSizeAccumulatorVisitor(basePath: String, buffer: ArrayBuffer[String]) extends SimpleFileVisitor[Path] {
     override def visitFile(path: Path, attrs: BasicFileAttributes): FileVisitResult = {
       val file = new File(path.toString())
-      // buffer += file.getPath.drop(basePath.length+1)+","+attrs.size()
-      buffer += file.getPath.drop(basePath.length+1)+","+file.length()
+      // buffer += file.getPath.drop(basePath.length+1) + "," + file.length()
+      buffer += getFileNameWithSubdirectory(basePath, file) + "," + file.length()
       return FileVisitResult.CONTINUE;
       
     }
+  }
+  
+  /*
+   * Remove the leading basePath and '/' from the file path,
+   * or just basePath if there is no '/'. Do not remove first
+   * char of file name or subdirectory path.
+   */
+  def getFileNameWithSubdirectory(basePath: String, file: File): String = {
+    if (file.getPath.length > basePath.length && file.getPath.charAt(basePath.length) != File.separatorChar) 
+      file.getPath.drop(basePath.length) 
+    else 
+      file.getPath.drop(basePath.length+1)
   }
   
   /**

@@ -75,7 +75,7 @@ object Factorization {
     
     case Tuple(vars) => {
       val vs = vars.map(_.toSeq).flatten
-      val (domain, range) = vs.partition(_.getName == name)
+      val (domain, range) = vs.partition(_.hasName(name))
       domain.length match {
         case 1 => domain.head match {
           case s: Scalar => {
