@@ -69,4 +69,4 @@ publishing {
 	}
 }
 
-task wrapper(type: Wrapper) { gradleVersion = '2.12' }
+task wrapper(type: Wrapper) { gradleVersion = '3.5' }
