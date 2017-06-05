@@ -14,5 +14,6 @@ lazy val latis = (project in file(".")).
       "junit"                       % "junit"           % "4.+"       % Test,
       "com.novocode"                % "junit-interface" % "0.11"      % Test,
       "org.apache.derby"            % "derby"           % "10.10.1.1" % Test
-    )
+    ),
+    parallelExecution in Test := false
   )
