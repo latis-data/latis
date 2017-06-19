@@ -68,6 +68,13 @@ abstract class VariableMl(xml: Node) {
     names.contains(name)
   }
   
+  def getName: String = {
+    val names = ((xml \ "@id").map(_.text)) ++ //id attribute
+      (((xml \ "metadata").flatMap(_ \ "@name")).map(_.text)) :+ //metadata element name
+      label //implicit names
+    names.head
+  }
+  
   /**
    * Find a VariableMl with the given name.
    */
