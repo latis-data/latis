@@ -98,6 +98,14 @@ class Selection(val vname: String, val operation: String, val value: String) ext
         case op if(op.contains(">")) =>
           // Make the upper end exclusive.
           Selection(vars(1).getName, ">", value).applyToFunction(f).asInstanceOf[Option[Function]]
+        case op if(op.contains("=")) =>
+          // Within both bounds.
+          Selection(vars(0).getName, "<=", value).applyToFunction(f) match {
+            case Some(f2: Function) =>
+              Selection(vars(1).getName, ">", value).applyToFunction(f2).asInstanceOf[Option[Function]]
+            case None => None
+          }
+          
       }
       case _ => super.applyToFunction(f)
     }
