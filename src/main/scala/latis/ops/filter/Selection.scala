@@ -88,12 +88,16 @@ class Selection(val vname: String, val operation: String, val value: String) ext
    * If we are selecting on the Function domain and we have bounds data 
    * in the range and the operation include ">" or "<", apply a new 
    * Selection using the bounds.
+   * Assumes ascending domain values.
    */
   override def applyToFunction(f: Function): Option[Function] = {
    (f.getDomain.hasName(vname), f.getRange.findVariableByName("bounds")) match {
       case (true, Some(Tuple(vars))) => operation match {
-        case op if(op.contains("<")) => Selection(vars(0).getName, operation, value).applyToFunction(f).asInstanceOf[Option[Function]]
-        case op if(op.contains(">")) => Selection(vars(1).getName, operation, value).applyToFunction(f).asInstanceOf[Option[Function]]
+        case op if(op.contains("<")) => 
+          Selection(vars(0).getName, operation, value).applyToFunction(f).asInstanceOf[Option[Function]]
+        case op if(op.contains(">")) =>
+          // Make the upper end exclusive.
+          Selection(vars(1).getName, ">", value).applyToFunction(f).asInstanceOf[Option[Function]]
       }
       case _ => super.applyToFunction(f)
     }
