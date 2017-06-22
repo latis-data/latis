@@ -1,12 +1,12 @@
 package latis.ops.resample
 
 /**
- * Interpolates a value to whichever given value it is closest to. 
- * If equidistant to two points, it will return the lower point. 
+ * Interpolates a value to whichever given value it is closest to.
+ * If equidistant to two points, it will return the lower point.
  */
 trait NearestNeighborInterpolation extends Interpolation {
-  
-  def interpolator(xs: Array[Double], ys: Array[Double]) = (x: Double) => {
+
+  def interpolator(xs: Array[Double], ys: Array[Double]): Double => Option[Double] = (x: Double) => {
     xs.find(_ > x) match { //find the upper bound
       case Some(ub) => {
         val i = xs.indexOf(ub)
@@ -20,5 +20,5 @@ trait NearestNeighborInterpolation extends Interpolation {
       case None => Some(ys.last) //greater than all x, use last y
     }
   }
-  
+
 }
