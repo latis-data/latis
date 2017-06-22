@@ -11,7 +11,7 @@ import latis.dm.Tuple
 class TileJoin extends Join { 
   //Intended to replace TileAggregation
   
-  def apply(ds1: Dataset, ds2: Dataset) = {
+  def apply(ds1: Dataset, ds2: Dataset): Dataset = {
     (ds1, ds2) match {
       case (Dataset(v1), Dataset(v2)) => (v1, v2) match {
         case (f1 @ Function(it1), f2 @ Function(it2)) => {
@@ -29,6 +29,6 @@ class TileJoin extends Join {
 }
 
 object TileJoin {
-  def apply() = new TileJoin()
-  def apply(ds1: Dataset, ds2: Dataset) = new TileJoin()(ds1, ds2)
+  def apply(): TileJoin = new TileJoin()
+  def apply(ds1: Dataset, ds2: Dataset): Dataset = new TileJoin()(ds1, ds2)
 }

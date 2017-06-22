@@ -88,12 +88,12 @@ class Projection(val names: Seq[String]) extends Operation with Idempotence {
   }
 
 
-  override def toString = names.mkString(",")
+  override def toString: String = names.mkString(",")
 }
 
 object Projection extends OperationFactory {
   
-  override def apply(names: Seq[String]) = new Projection(names)
+  override def apply(names: Seq[String]): Projection = new Projection(names)
     
   def apply(expression: String): Projection = expression.trim match {
     //case PROJECTION.r(names) => //Note, regex match will only expose first and last
@@ -102,6 +102,6 @@ object Projection extends OperationFactory {
   }
   
   //Extract the list of projected variable names
-  def unapply(proj: Projection) = Some(proj.names)
+  def unapply(proj: Projection): Option[Seq[String]] = Some(proj.names)
 
 }

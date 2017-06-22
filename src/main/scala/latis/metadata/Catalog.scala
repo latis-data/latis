@@ -13,9 +13,9 @@ object Catalog {
   private lazy val dsdir: String = LatisProperties.getOrElse("dataset.dir", "datasets")
   
   private def toUrl(path: String): URL = {
-    if (path.contains(":")) new URL(path)
-    else if(path.startsWith(File.separator)) new URL(s"file:$path")
-    else new URL("file:" + LatisProperties.resolvePath(path))
+    if (path.contains(":")) { new URL(path) }
+    else if(path.startsWith(File.separator)) { new URL(s"file:$path") }
+    else { new URL("file:" + LatisProperties.resolvePath(path)) }
   }
   
   private def getExtension(f: File): String = {

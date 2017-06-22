@@ -9,12 +9,12 @@ import latis.util.LatisProperties
  */
 class PropertiesAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
 
-  override def init = {
+  override def init: Unit = {
     getOrigScalarNames.map(vname => {
       val pval = LatisProperties.getOrElse(vname, "")
       appendToCache(vname, Data(pval))
     }) 
   }
   
-  def close = {}
+  def close: Unit = {}
 }

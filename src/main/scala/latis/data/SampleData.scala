@@ -7,8 +7,8 @@ import java.nio.ByteBuffer
  */
 case class SampleData(val domainData: Data, val rangeData: Data) extends Data {
 
-  def getByteBuffer = ByteBuffer.wrap(domainData.getBytes ++ rangeData.getBytes)
+  def getByteBuffer: ByteBuffer = ByteBuffer.wrap(domainData.getBytes ++ rangeData.getBytes)
   
-  def size = domainData.size + rangeData.size
+  def size: Int = domainData.size + rangeData.size
 }
 

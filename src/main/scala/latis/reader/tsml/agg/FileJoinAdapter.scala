@@ -160,7 +160,7 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   /**
    * Override to add logic to join the file datasets.
    */
-  override def getDataset(ops: Seq[Operation]) = {
+  override def getDataset(ops: Seq[Operation]): Dataset = {
     //TODO: consider how PIs are handled
     //could we use the super getDataset = joinDatasets? 
 
@@ -176,8 +176,6 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    * Since these don't get closed until the end of a LatisServer request,
    * there is risk of having too many files open.
    */
-  def close = {
-    readers.foreach(_.close)
-  }
+  def close: Unit = readers.foreach(_.close)
 
 }

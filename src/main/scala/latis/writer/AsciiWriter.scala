@@ -2,14 +2,13 @@ package latis.writer
 
 import latis.dm._
 import java.io.OutputStream
-import java.io.PrintWriter
 
 /**
  * Writer to present a Dataset in a way that reflects how it is modeled.
  */
 class AsciiWriter extends TextWriter {
    
-  override def makeHeader(dataset: Dataset) = dataset.toString + newLine
+  override def makeHeader(dataset: Dataset): String = dataset.toString + newLine
       
   override lazy val delimiter = " -> "
   /**
@@ -48,5 +47,5 @@ object AsciiWriter {
   
   def apply(): AsciiWriter = AsciiWriter(System.out)
   
-  def write(dataset: Dataset) = AsciiWriter().write(dataset)
+  def write(dataset: Dataset): Unit = AsciiWriter().write(dataset)
 }

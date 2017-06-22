@@ -24,7 +24,7 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   def aggregate(left: Dataset, right: Dataset): Dataset
   
   
-  override def getDataset(ops: Seq[Operation]) = {
+  override def getDataset(ops: Seq[Operation]): Dataset = {
     val (filter, others) = ops.partition(_.isInstanceOf[Filter])
     val dss = adapters.map(_.getDataset(filter))
     
@@ -56,5 +56,5 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   /**
    * Close all contributing adapters.
    */
-  def close = adapters.foreach(_.close)
+  def close: Unit = adapters.foreach(_.close)
 }

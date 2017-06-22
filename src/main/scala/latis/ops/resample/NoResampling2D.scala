@@ -14,10 +14,10 @@ import latis.ops.Split
 import latis.ops.agg.BasicJoin
 import latis.time.Time
 
-class NoResampling2D(domainSet: Iterable[Variable]) 
+class NoResampling2D(domainSet: Iterable[Variable])
   extends Resampling2D(domainSet) with NoInterpolation2D {
 
-  override def interpolator(domain: Array[Array[Double]], range: Array[Double]) =
+  override def interpolator(domain: Array[Array[Double]], range: Array[Double]): (Double, Double) => Option[Double] =
     super[NoInterpolation2D].interpolator(domain, range)
 
 }

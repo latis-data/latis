@@ -207,7 +207,7 @@ class MathExpressionDerivation(private val str: String) extends Operation {
         | floatingPointNumber                          ^^ {case n => NumExpr(n.toDouble)}
       )
       
-    def apply(str: String) = parseAll(expr, str)
+    def apply(str: String): MathParser.ParseResult[Expr] = parseAll(expr, str)
   }
 
 }
@@ -215,5 +215,5 @@ class MathExpressionDerivation(private val str: String) extends Operation {
 object MathExpressionDerivation extends OperationFactory {
   def apply(str: String): MathExpressionDerivation = new MathExpressionDerivation(str.filter(_ != ' '))
   
-  override def apply(args: Seq[String]) = MathExpressionDerivation(args.mkString(","))
+  override def apply(args: Seq[String]): MathExpressionDerivation = MathExpressionDerivation(args.mkString(","))
 }

@@ -14,7 +14,6 @@ import latis.dm.Variable
 import latis.util.FirstThenOther
 
 import java.io.PrintWriter
-import java.io.OutputStream
 
 /**
  * Generic writer for tabulated ASCII output.
@@ -39,12 +38,12 @@ class TextWriter extends Writer {
   /**
    * Write a header before writing data values.
    */
-  def writeHeader(dataset: Dataset) = printWriter.print(makeHeader(dataset)) //NOTE: just "print" w/o nl
+  def writeHeader(dataset: Dataset): Unit = printWriter.print(makeHeader(dataset)) //NOTE: just "print" w/o nl
   
   /**
    * Write a footer after writing data values.
    */
-  def writeFooter(dataset: Dataset) = printWriter.print(makeFooter(dataset)) //NOTE: just "print" w/o nl
+  def writeFooter(dataset: Dataset): Unit = printWriter.print(makeFooter(dataset)) //NOTE: just "print" w/o nl
   
   /**
    * Extension point to define a header.
@@ -59,7 +58,7 @@ class TextWriter extends Writer {
   /**
    * Main entry point for writing a Dataset.
    */
-  def write(dataset: Dataset) {
+  def write(dataset: Dataset): Unit = {
     writeHeader(dataset)
     dataset match {
       case Dataset(v) => writeVariable(v) //see JsonWriter for treating Dataset as a Tuple
@@ -85,7 +84,7 @@ class TextWriter extends Writer {
    * Designed for top level Functions so we can support arbitrarily large datasets.
    * Otherwise, use "makeFunction" to create a String.
    */
-  def writeFunction(function: Function) {
+  def writeFunction(function: Function): Unit = {
     val startThenDelim = FirstThenOther("", newLine)
     for (sample <- function.iterator) {
       val s = varToString(sample)

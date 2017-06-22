@@ -63,7 +63,7 @@ class BasicJoin extends Join {
     case None => None
   }
   
-  def makeSampleIterator(it1: PeekIterator[Sample], it2: PeekIterator[Sample]) = new PeekIterator[Sample] {
+  def makeSampleIterator(it1: PeekIterator[Sample], it2: PeekIterator[Sample]): PeekIterator[Sample] = new PeekIterator[Sample] {
     val (fill1, fill2) = (getFillSample(it1.peek), getFillSample(it2.peek))
     
     def getNextOption: Option[Sample] = {

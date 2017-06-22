@@ -7,7 +7,7 @@ import latis.ops.OperationFactory
 
 class TakeRightOperation(val n: Int) extends Filter {
 
-  override def applyToFunction(function: Function) = {
+  override def applyToFunction(function: Function): Option[Function] = {
     //Assume we can hold this all in memory.
 
     (n, function) match {

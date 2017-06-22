@@ -14,7 +14,6 @@ import latis.dm.Tuple
 import latis.dm.Variable
 import java.io.PrintWriter
 import latis.dm.TupleMatch
-import scala.annotation.meta.companionObject
 
 class CatalogOverviewWriter extends Writer {
   
@@ -25,7 +24,7 @@ class CatalogOverviewWriter extends Writer {
     s"<h$level>${variable.getName}</h$level>"
   }
   
-  def write(dataset: Dataset) {
+  def write(dataset: Dataset): Unit = {
     val v = dataset match {
       case Dataset(v) => v
       case _ => null
@@ -42,7 +41,7 @@ class CatalogOverviewWriter extends Writer {
     }
   }
   
-  private def writeFunction(f: Function) {
+  private def writeFunction(f: Function): Unit = {
     f.iterator.foreach(s => {
       val str = varToString(s)
       printer.println(str)
@@ -98,7 +97,7 @@ class CatalogOverviewWriter extends Writer {
 }
 
 object CatalogOverviewWriter {
-  def apply() = new CatalogOverviewWriter
+  def apply(): CatalogOverviewWriter = new CatalogOverviewWriter
   
   private val nestedTmpl = StringTemplate.fromResource("templates/overviewwriter/catalogNestedItem.html")
   private val leafTmpl = StringTemplate.fromResource("templates/overviewwriter/catalogLeafItem.html")

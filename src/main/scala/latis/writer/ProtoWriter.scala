@@ -7,20 +7,20 @@ import latis.dm._
  */
 class ProtoWriter extends TextWriter {
   
-  override def makeHeader(dataset: Dataset) = "message " + toCamelCase(dataset.getName) + " {" + newLine
+  override def makeHeader(dataset: Dataset): String = "message " + toCamelCase(dataset.getName) + " {" + newLine
     
-  override def makeFooter(dataset: Dataset) = "}"
+  override def makeFooter(dataset: Dataset): String = "}"
   
-  override def writeVariable(variable: Variable) = printWriter.print(varToString(variable))
+  override def writeVariable(variable: Variable): Unit = printWriter.print(varToString(variable))
   
-  override def varToString(variable: Variable) = {
+  override def varToString(variable: Variable): String = {
     makeMessage(variable) + makeOpLabel(variable)
   }
   
   /**
    * Provided for repeated variables in functions.
    */
-  def varToRepString(variable: Variable) = makeMessage(variable) + makeRepLabel(variable)
+  def varToRepString(variable: Variable): String = makeMessage(variable) + makeRepLabel(variable)
   
   /**
    * Matches each scalar type to an appropriate protobuf type:
@@ -29,7 +29,7 @@ class ProtoWriter extends TextWriter {
    *   Text -> string
    *   (Indexes are dropped)
    */
-  override def makeScalar(scalar: Scalar) = {
+  override def makeScalar(scalar: Scalar): String = {
     val name = scalar.getName
     scalar match{
       case _: Index   => ""
@@ -43,7 +43,7 @@ class ProtoWriter extends TextWriter {
   /**
    * Makes the label for a repeated scalar.
    */
-  def makeScalarRep(scalar: Scalar) = {
+  def makeScalarRep(scalar: Scalar): String = {
     val name = scalar.getName
     scalar match{
       case _: Index   => ""
@@ -57,7 +57,7 @@ class ProtoWriter extends TextWriter {
   /**
    * Ignores the sample and looks at the inner variables
    */
-  override def makeSample(sample: Sample) = {
+  override def makeSample(sample: Sample): String = {
     val temp = tag
     tag = 0
     val s = sample match {
@@ -71,7 +71,7 @@ class ProtoWriter extends TextWriter {
   /**
    * Makes a message of the tuple. 
    */
-  override def makeTuple(tuple: Tuple) = {
+  override def makeTuple(tuple: Tuple): String = {
     val temp = tag
     tag = 0
     count += indentSize
@@ -87,7 +87,7 @@ class ProtoWriter extends TextWriter {
  /**
   * Make a message from a function. 
   */
-  override def makeFunction(function: Function) = {
+  override def makeFunction(function: Function): String = {
     val temp = tag
     tag = 0
     count += indentSize
@@ -102,7 +102,7 @@ class ProtoWriter extends TextWriter {
   /**
    * Makes an optional label for a variable.
    */
-  def makeOpLabel(variable: Variable) = {
+  def makeOpLabel(variable: Variable): String = {
     tag += 1
     variable match {
       case s: Scalar => makeScalar(s)
@@ -115,7 +115,7 @@ class ProtoWriter extends TextWriter {
   /**
    * Makes a repeated label for a variable.
    */
-  def makeRepLabel(variable: Variable) = {
+  def makeRepLabel(variable: Variable): String = {
     tag += 1
     variable match {
       case s: Scalar => makeScalarRep(s)

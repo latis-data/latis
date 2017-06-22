@@ -1,16 +1,18 @@
 package latis.writer
 
+import scala.language.postfixOps
+
 import java.io.BufferedInputStream
 import java.io.File
+import java.io.InputStream
+import java.io.IOException
 import java.net.URL
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import latis.dm.Dataset
-import latis.dm.Function
-import latis.dm.Text
-import java.io.InputStream
+
 import com.typesafe.scalalogging.LazyLogging
-import java.io.IOException
+
+import latis.dm.Dataset
 
 /**
  * Write a zip file of the URLs contained in a URL list dataset.
@@ -19,7 +21,7 @@ import java.io.IOException
 class ZipWriter2 extends Writer with LazyLogging {
   //TODO: provide option to specify prefix for zip entries
   
-  def write(dataset: Dataset) = {
+  def write(dataset: Dataset): Unit = {
     
     lazy val baseUrl = dataset.getMetadata.get("baseUrl") match {
       case Some(b) => b + File.separator
@@ -58,6 +60,6 @@ class ZipWriter2 extends Writer with LazyLogging {
     }
   }
   
-  override def mimeType = "application/zip"
+  override def mimeType: String = "application/zip"
   
 }

@@ -91,36 +91,36 @@ class MinFilter(name: String) extends Filter with LazyLogging {
    * Apply Operation to a Scalar
    */
   override def applyToScalar(scalar: Scalar): Option[Scalar] = {
-		//If the filtering causes an exception, log a warning and return None.
-		try {
-			scalar match {
+    //If the filtering causes an exception, log a warning and return None.
+    try {
+      scalar match {
 
-			  case s: Scalar => if (scalar.hasName(name)) { 
-				  val comparison = s.compare(currentMin)
-						if (comparison < 0) {
-						  //Found a new min value, so update currentMin and forget old samples
-						  keepSamples.clear 
-						  currentMin = s
-						  Some(scalar) 
-					  }
-						else if (comparison == 0) {
-				      //Keep the sample
-				      Some(scalar)
-			      }
-			      else {
-				      //Trash this sample
-				      None
-			      }
-			    } else { 
-			        Some(scalar) //no-op
-			      }
-		    }
-		  } catch {
-		  case e: Exception => {
-		    logger.warn("Min filter threw an exception: " + e.getMessage)
-			  None
-		  }
-	  }
+        case s: Scalar => if (scalar.hasName(name)) {
+          val comparison = s.compare(currentMin)
+            if (comparison < 0) {
+              //Found a new min value, so update currentMin and forget old samples
+              keepSamples.clear
+              currentMin = s
+              Some(scalar)
+            }
+            else if (comparison == 0) {
+              //Keep the sample
+              Some(scalar)
+            }
+            else {
+              //Trash this sample
+              None
+            }
+          } else {
+              Some(scalar) //no-op
+            }
+        }
+      } catch {
+      case e: Exception => {
+        logger.warn("Min filter threw an exception: " + e.getMessage)
+        None
+      }
+    }
   }
 }
 

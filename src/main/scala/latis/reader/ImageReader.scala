@@ -54,7 +54,7 @@ class ImageReader extends DatasetAccessor {
     operations.foldLeft(dataset)((ds,op) => op(ds))
   }
 
-  def close {
+  def close: Unit = {
     try{ if (!url.isEmpty) inputStream.close() } catch {
       case _: Exception => 
     }
@@ -63,7 +63,7 @@ class ImageReader extends DatasetAccessor {
 
 object ImageReader {
   
-  def apply(location: String) = {
+  def apply(location: String): ImageReader = {
     val reader = new ImageReader()
     reader.url = Some(StringUtils.getUrl(location))
     reader

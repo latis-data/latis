@@ -26,7 +26,7 @@ class ReduceTuple extends Operation2  {
 
 object ReduceTuple {
 
-  def apply() = new ReduceTuple()
+  def apply(): ReduceTuple = new ReduceTuple()
   
   def reduce(dataset: Dataset): Dataset = {
     (new ReduceTuple)(dataset)

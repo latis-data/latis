@@ -21,7 +21,7 @@ import latis.ops.Operation
 
 class DapReader(baseUrl: String, query: String) extends DatasetAccessor {
   
-  override def close = {}
+  override def close: Unit = {}
   
   val codec: Codec = ISO8859
   
@@ -187,7 +187,7 @@ class DapReader(baseUrl: String, query: String) extends DatasetAccessor {
         }
       }
     }
-    def atomic_type = 
+    def atomic_type: Parser[String] =
       "Byte" | "Int16" | "UInt16" | "Int32" | "UInt32" | 
       "Float32" | "Float64" | "String" | "Url"
     
@@ -208,7 +208,7 @@ class DapReader(baseUrl: String, query: String) extends DatasetAccessor {
       "Structure" ~ "{" ~> structure_types.* ~ ("}" ~> ident <~ ";") ^^ {
       case vars ~ name => Tuple(vars, metadata.getOrElse(name, Metadata.empty))
     }
-    def structure_types = atomic_decl | /*array_decl |*/ structure_decl | sequence_decl //| grid_decl
+    def structure_types: Parser[Variable] = atomic_decl | /*array_decl |*/ structure_decl | sequence_decl //| grid_decl
     
     //function
     def sequence_decl: Parser[Function] = 
@@ -229,12 +229,12 @@ class DapReader(baseUrl: String, query: String) extends DatasetAccessor {
         }
       }
     }
-    def sequence_types = atomic_decl | /*array_decl |*/ structure_decl //| grid_decl
+    def sequence_types: Parser[Variable] = atomic_decl | /*array_decl |*/ structure_decl //| grid_decl
     
     //not yet supported
     //def grid_decl = "grid" ~ "{" ~ "array:" ~ array_decl ~ "maps:" ~ array_decl.* ~ "}" ~ ";"
     
-    def getOrigDataset = 
+    def getOrigDataset: Dataset =
       parse(dds_doc, dds).get
     
   }
@@ -243,7 +243,7 @@ class DapReader(baseUrl: String, query: String) extends DatasetAccessor {
 
     def das_doc: Parser[Unit]= "attributes {" ~ attribute_cont.* ~ "}" ^^ {case _ => }
 
-    def attribute_decl = attribute_cont | attribute
+    def attribute_decl: Parser[Any] = attribute_cont | attribute
     
     def attribute_cont: Parser[Unit] = (ident <~ "{") ~ (attribute_decl.* <~ "}") ^^ {
       case name ~ vals => {
@@ -260,7 +260,7 @@ class DapReader(baseUrl: String, query: String) extends DatasetAccessor {
       case name ~ str => (name -> str.stripPrefix("\"").stripSuffix("\""))
     }
     
-    def getOrigMetadata = parse(das_doc, das).get
+    def getOrigMetadata: Unit = parse(das_doc, das).get
   }
   
 }

@@ -9,8 +9,8 @@ import latis.dm.Tuple
 class ExcludeMissing extends Filter {
 
   override def applyToScalar(scalar: Scalar): Option[Variable] = {
-    if (scalar.isMissing) None
-    else Some(scalar)
+    if (scalar.isMissing) { None }
+    else { Some(scalar) }
   }
   
   /**
@@ -18,8 +18,8 @@ class ExcludeMissing extends Filter {
    */
   override def applyToTuple(tuple: Tuple): Option[Tuple] = {
     val vars = tuple.getVariables.flatMap(applyToVariable(_))
-    if (vars.length == tuple.getElementCount) Some(tuple)
-    else None
+    if (vars.length == tuple.getElementCount) { Some(tuple) }
+    else { None }
   }
   
 }

@@ -22,7 +22,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
   //Leap second considerations do not apply when going between the numeric and formatted form.
   //Whether TimeScale.JAVA considers leap seconds is based on the time.scale.type property.
   
-  def getUnits = timeScale
+  def getUnits: TimeScale = timeScale
   
   def convert(scale: TimeScale): Time = TimeConverter(this.timeScale, scale).convert(this)
   

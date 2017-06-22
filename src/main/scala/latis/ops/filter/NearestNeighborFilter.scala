@@ -45,13 +45,13 @@ class NearestNeighborFilter(domainName: String, value: String) extends Operation
          * compare1 is out of scope there
          */
         //if (compare1 < 0) true //before first sample
-        if (compare1 == 0) true //equals lower bound (Note, inclusive for lower bound only)
-        else if (sample2 == null) false  //ran out of samples
+        if (compare1 == 0) { true } //equals lower bound (Note, inclusive for lower bound only)
+        else if (sample2 == null) { false }  //ran out of samples
         else {
           val domain2 = sample2.domain.asInstanceOf[Scalar]
           val compare2 = domain2 compare value
-          if (compare1 * compare2 < 0) true //diff signs means we found the bounds
-          else false  //find will try the next pair of samples
+          if (compare1 * compare2 < 0) { true } //diff signs means we found the bounds
+          else { false }  //find will try the next pair of samples
         }
       })
       
@@ -62,8 +62,8 @@ class NearestNeighborFilter(domainName: String, value: String) extends Operation
       val dd1 = Math.abs(DataUtils.getDoubleValue(fit.current.domain) - d)
       
       //note, if we equal the last sample, peek will be null
-      val nearestSample: Sample = if (dd1 == 0.0) fit.current
-      else if (fit.peek == null) null //beyond last sample
+      val nearestSample: Sample = if (dd1 == 0.0) { fit.current }
+      else if (fit.peek == null) { null } //beyond last sample
       else {
         val dd2 = Math.abs(DataUtils.getDoubleValue(fit.peek.domain) - d)
         //get nearest sample, round 'up'
@@ -71,7 +71,7 @@ class NearestNeighborFilter(domainName: String, value: String) extends Operation
       }
       
       //note, no need to apply operation further since this function was the only thing that matters
-      if (nearestSample == null) None
+      if (nearestSample == null) { None }
       else {
         //set length metadata to 1
         val md = function.getMetadata + ("length" -> "1")

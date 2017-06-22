@@ -39,5 +39,5 @@ object ReplaceMissingOperation extends OperationFactory {
     ReplaceMissingOperation(v)
   }
   
-  def apply(value: ScalaNumericAnyConversions) = new ReplaceMissingOperation(value)
+  def apply(value: ScalaNumericAnyConversions): ReplaceMissingOperation = new ReplaceMissingOperation(value)
 }

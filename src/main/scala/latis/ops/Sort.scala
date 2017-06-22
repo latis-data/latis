@@ -4,7 +4,7 @@ import latis.dm.Function
 import latis.dm.Variable
 
 class Sort extends Operation {
-  override def applyToFunction(function: Function) = {
+  override def applyToFunction(function: Function): Option[Function] = {
 
     // get samples from function and sort them
     val samples: Seq[Variable] = function.iterator.toSeq

@@ -162,7 +162,7 @@ object Factorization {
   }
   
   //TODO: Dataset: def factorOut(factor: String): Dataset 
-  def apply(factor: String) = {
+  def apply(factor: String): Factorization = {
     val f = new Factorization
     f.factor = factor
     f

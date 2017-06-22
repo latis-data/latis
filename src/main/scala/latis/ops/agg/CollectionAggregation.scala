@@ -9,7 +9,7 @@ import latis.dm.Tuple
  */
 class CollectionAggregation extends Aggregation {
 
-  def aggregate(ds1: Dataset, ds2: Dataset) = (ds1, ds2) match {
+  def aggregate(ds1: Dataset, ds2: Dataset): Dataset = (ds1, ds2) match {
     //TODO: we should the variable of either or both. 
     //  It seems that we do this somewhere. 
     //  Let's punt since this will be deprecated in favor of Join.
@@ -20,6 +20,6 @@ class CollectionAggregation extends Aggregation {
 }
 
 object CollectionAggregation {
-  def apply() = new CollectionAggregation()
-  def apply(ds1: Dataset, ds2: Dataset) = new CollectionAggregation()(ds1, ds2)
+  def apply(): CollectionAggregation = new CollectionAggregation()
+  def apply(ds1: Dataset, ds2: Dataset): Dataset = new CollectionAggregation()(ds1, ds2)
 }

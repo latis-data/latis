@@ -7,7 +7,7 @@ import scala.xml.Node
  */
 class TimeMl(xml: Node) extends VariableMl(xml) {
   
-  def getType = getAttribute("type") match {
+  def getType: String = getAttribute("type") match {
     case Some(s) => s
     case None    => "real" //default to real times
   }

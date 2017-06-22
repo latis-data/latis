@@ -25,10 +25,10 @@ trait Metadata {
   
   def has(key: String): Boolean
   
-  def isEmpty = getProperties.isEmpty
-  def nonEmpty = getProperties.nonEmpty
+  def isEmpty: Boolean = getProperties.isEmpty
+  def nonEmpty: Boolean = getProperties.nonEmpty
    
-  override def toString() = getProperties.toString
+  override def toString(): String = getProperties.toString
 }
 
 

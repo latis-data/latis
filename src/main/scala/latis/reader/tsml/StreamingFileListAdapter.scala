@@ -23,7 +23,7 @@ class StreamingFileListAdapter(tsml: Tsml) extends RegexAdapter(tsml){
   /**
    * A record consists of the file name, file size.
    */
-  override def getRecordIterator = {
+  override def getRecordIterator: Iterator[String] = {
     val dir = Paths.get(getUrl.getPath) //assumes a file URL 
     val pit = pathsIterator(dir)
     pit.map(path => dir.relativize(path).toString + "," + Files.size(path))
@@ -41,7 +41,7 @@ class StreamingFileListAdapter(tsml: Tsml) extends RegexAdapter(tsml){
    * Override to add the file name (i.e. the data "record") itself as a data value.
    * Note, this assumes that the TSML has the file and file size variables defined last.
    */
-  override def extractValues(record: String) = {
+  override def extractValues(record: String): Seq[String] = {
     val chunks = record.split(',')
     val fileName = chunks(0)
     val size = if (getOrigScalarNames.contains("fileSize")) chunks(1)
@@ -217,7 +217,7 @@ class StreamingFileListAdapter(tsml: Tsml) extends RegexAdapter(tsml){
       return result
     }
     
-    def close() = {
+    def close(): Unit = {
       while (!dirStack.isEmpty) {
         popAndClose()
       }

@@ -77,7 +77,7 @@ class Reduction extends Operation  {
 
 object Reduction extends OperationFactory {
 
-  override def apply() = new Reduction()
+  override def apply(): Reduction = new Reduction()
   
   def reduce(dataset: Dataset): Dataset = {
     (new Reduction)(dataset)

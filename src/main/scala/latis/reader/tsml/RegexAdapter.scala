@@ -21,7 +21,7 @@ class RegexAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
    * this Adapter's regular expression pattern.
    * Return an empty List if the record does not match (i.e. does not contain valid data).
    */
-  override def extractValues(record: String) = {
+  override def extractValues(record: String): Seq[String] = {
     regex.findFirstMatchIn(record) match {
       case Some(m) => m.subgroups
       case None => List[String]()

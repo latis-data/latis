@@ -9,7 +9,7 @@ import latis.metadata.Metadata
  * Keep only the first sample of any outer Function in the Dataset.
  */
 class FirstFilter extends Filter {
-  override def applyToFunction(function: Function) = {
+  override def applyToFunction(function: Function): Option[Function] = {
     //get the first sample, or none if empty, as List
     val samples = function.iterator.take(1).toList //0 or 1
     

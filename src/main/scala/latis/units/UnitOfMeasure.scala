@@ -2,10 +2,10 @@ package latis.units
 
 class UnitOfMeasure(unit: String) {
 
-  override def toString = unit
+  override def toString: String = unit
 }
 
 object UnitOfMeasure {
   
-  def apply(unit: String) = new UnitOfMeasure(unit)
+  def apply(unit: String): UnitOfMeasure = new UnitOfMeasure(unit)
 }

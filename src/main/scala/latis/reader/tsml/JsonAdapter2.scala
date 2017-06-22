@@ -44,11 +44,11 @@ class JsonAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     source
   }
   
-  def close {
+  def close: Unit = {
     if (source != null) source.close
   }
   
-  def path = getUrl.getPath
+  def path: String = getUrl.getPath
   
 //  //try caching the data
 //  override def init = {
@@ -119,7 +119,7 @@ class JsonAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
       }
     }
   }
-  def getValue(field: (String, JsValue)) = (makeValue _).tupled(field)
+  def getValue(field: (String, JsValue)): Variable = (makeValue _).tupled(field)
   
   /**
    * make a Latis Scalar from a JsValue

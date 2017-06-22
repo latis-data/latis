@@ -132,6 +132,6 @@ class ColumnarBinaryAdapter(tsml: Tsml) extends IterativeAdapter2[Seq[Array[Byte
     }
   }
   
-  def close = {}
+  def close: Unit = {}
   
 }

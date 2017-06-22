@@ -28,7 +28,7 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
   /**
    * Get bin width via getter so it can be overridden.
    */
-  def getBinWidth = binWidth
+  def getBinWidth: Double = binWidth
   
   override def applyToFunction(f: Function): Option[Variable] = {
     val fit = PeekIterator(f.iterator)

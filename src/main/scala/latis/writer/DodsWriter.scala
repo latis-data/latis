@@ -3,7 +3,6 @@ package latis.writer
 import latis.dm._
 import java.nio.ByteBuffer
 import java.io.DataOutputStream
-import java.io.PrintWriter
 
 /**
  * Combines the DasWriter output with binary data.
@@ -22,7 +21,7 @@ class DodsWriter extends BinaryWriter {
    */
   final val END_OF_SEQUENCE: Array[Byte] = Array(0xA5.toByte, 0, 0, 0)
 
-  override def write(dataset: Dataset) {
+  override def write(dataset: Dataset): Unit = {
     writeHeader(dataset)
     val v = dataset match {
       case Dataset(v) => v
@@ -35,7 +34,7 @@ class DodsWriter extends BinaryWriter {
   /**
    * Header contains the DasWriter output of the dataset.
    */
-  def writeHeader(dataset: Dataset) = {
+  def writeHeader(dataset: Dataset): Unit = {
     val w = new DdsWriter()
     val v = dataset match {
       case Dataset(v) => w.varToString(v).mkString("")
@@ -45,7 +44,7 @@ class DodsWriter extends BinaryWriter {
     writer.write(s.getBytes)    
   }
 
-  override def writeVariable(variable: Variable) = {
+  override def writeVariable(variable: Variable): Unit = {
     writer.write(varToBytes(variable))
   }
   

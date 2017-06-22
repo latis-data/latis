@@ -13,7 +13,7 @@ import latis.dm.Dataset
  */
 class MetadataWriter extends JsonWriter {
   
-  override def makeHeader(dataset: Dataset) = {
+  override def makeHeader(dataset: Dataset): String = {
     //Hack in the dataset name. We lost this when treating dataset as a Tuple in JsonWriter
     //"{\"" + dataset.getName + "\": "
     
@@ -42,7 +42,7 @@ class MetadataWriter extends JsonWriter {
   /**
    * Write only the header and footer. No need to look at variables.
    */
-  override def write(dataset: Dataset) {
+  override def write(dataset: Dataset): Unit = {
     writeHeader(dataset)
     //dataset.getVariables.map(writeVariable(_))     
     writeFooter(dataset)

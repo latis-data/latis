@@ -50,7 +50,7 @@ class Tsml(val xml: Elem) {
     pis.map(pi => pi.target -> pi.proctext)
   }
   
-  def getVariableAttribute(vname: String, attribute: String) = dataset.findVariableMl(vname) match {
+  def getVariableAttribute(vname: String, attribute: String): String = dataset.findVariableMl(vname) match {
     case None => throw new Exception(s"Could not find VariableMl with name '$vname'")
     case Some(ml) => {
       val atts = ml.getAttributes ++ ml.getMetadataAttributes
@@ -81,7 +81,7 @@ class Tsml(val xml: Elem) {
     }
   }
 
-  override def toString = xml.toString
+  override def toString: String = xml.toString
 }
 
 object Tsml {

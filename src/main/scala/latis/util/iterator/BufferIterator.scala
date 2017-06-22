@@ -21,6 +21,6 @@ class BufferIterator(buffer: ByteBuffer, size: Int) extends PeekIterator[Array[B
 }
 
 object BufferIterator {
-  def apply(buffer: ByteBuffer, size: Int) = new BufferIterator(buffer, size)
-  def apply(buffer: ByteBuffer, v: Variable) = new BufferIterator(buffer, v.getSize)
+  def apply(buffer: ByteBuffer, size: Int): BufferIterator = new BufferIterator(buffer, size)
+  def apply(buffer: ByteBuffer, v: Variable): BufferIterator = new BufferIterator(buffer, v.getSize)
 }

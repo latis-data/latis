@@ -16,21 +16,21 @@ trait Function extends Variable {
   def getDomain: Variable
   def getRange: Variable
   def getSample: Sample
-  
+
   //TODO: only applies to SampledFunction
   def getLength: Int //TODO: long?
-  
+
   //TODO: only applicable to SampledFunction, need to replace lots of pattern matches...
   def iterator: Iterator[Sample]
   def getDataIterator: Iterator[SampleData]
-  
+
     /**
    * Returns true if iterator.isEmpty returns true,
    * else false. This method is preferred over the
    * other because implementations may be able to
    * make certain optimizations on this method that
    * would not be possible on the other.
-   * 
+   *
    * For example:
    * - calling Function.isEmpty instead of
    * calling Function.iterator.isEmpty may save
@@ -41,7 +41,7 @@ trait Function extends Variable {
    * This may be avoidable by calling Function.isEmpty
    */
   def isEmpty: Boolean
-  
+
 //  /**
 //   * Datasets from IterableAdapters tend to be "iterable once" in which case this
 //   * will return false. If the Data has been realized (memoized) within the dataset
@@ -53,12 +53,12 @@ trait Function extends Variable {
 //  private var _traversableAgain = false
 ////TODO: test how this works with SampledData
 //  //TODO: add this method to Dataset?
-  
+
   //evaluate
   def apply(arg: Variable): Option[Variable]
   def compose(g: Function): Function
 }
-  
+
   /*
    * TODO: ContinuousFunction:
    *   apply(domainVal: Variable) => range val
@@ -69,20 +69,20 @@ trait Function extends Variable {
 
 object Function {
   //TODO: make sure samples are sorted!
-  
-  def empty = Function(Naught(), Naught(), Iterator.empty)
-  
+
+  def empty: SampledFunction = Function(Naught(), Naught(), Iterator.empty)
+
   def apply(domain: Variable, range: Variable, md: Metadata = EmptyMetadata, data: SampledData = EmptyData): SampledFunction = {
     new SampledFunction(domain, range, md, data)
   }
-  
+
   /**
    * Construct a Function from the given template (e.g. model from tsml) and data.
    */
   def apply(template: Function, data: SampledData): SampledFunction = {
     Function(template.getDomain, template.getRange, template.getMetadata, data)
   }
-  
+
   /**
    * Construct from Iterator of Samples.
    */
@@ -95,7 +95,7 @@ object Function {
   def apply(template: Function, sampleIterator: Iterator[Sample]): SampledFunction = {
     Function(template.getDomain, template.getRange, sampleIterator, template.getMetadata)
   }
-  
+
   /**
    * Construct from Seq of Variable which are assumed to contain their own data.
    */
@@ -113,7 +113,7 @@ object Function {
 
   def apply(vs: Seq[Variable]): SampledFunction = Function(vs, EmptyMetadata)
   //TODO: accept Iterable?
-  
+
   /**
    * Construct from a Seq of domain Variables and a Seq of range Variables.
    */
@@ -121,7 +121,7 @@ object Function {
     if (ds.length != rs.length) throw new Error("Domain and range sequences must have the same length.")
     Function((ds zip rs).map(s => Sample(s._1, s._2)))
   }
-  
+
   /**
    * Construct from a 2D sequence of double values. Assume the first is for a 1D domain.
    */
@@ -134,7 +134,7 @@ object Function {
     //TODO: use metadata from Variables
     Function((ds zip rs).map(s => Sample(s._1, s._2)), md)
   }
-  
+
   /**
    * Construct from a sequence of double values and a sequence of range values for multiple variables.
    */
@@ -148,18 +148,14 @@ object Function {
 
     //get length for metadata
     val md = Metadata(Map("length" -> dvals.length.toString))
-    
+
     Function(domain, range, md, data)
   }
-  
+
   /**
    * Expose the Sample Iterator.
    */
   def unapply(f: SampledFunction): Option[Iterator[Sample]] = Some(f.iterator)
   //TODO: only applies to SampledFunction, define it there
-  
+
 }
-
-
-
-  
