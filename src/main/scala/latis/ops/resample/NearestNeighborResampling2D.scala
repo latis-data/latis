@@ -14,10 +14,9 @@ import latis.ops.Split
 import latis.ops.agg.BasicJoin
 import latis.time.Time
 
-class NearestNeighborResampling2D(domainSet: Iterable[Variable]) 
+class NearestNeighborResampling2D(domainSet: Iterable[Variable])
   extends Resampling2D(domainSet) with NearestNeighborInterpolation2D {
 
-  override def interpolator(domain: Array[Array[Double]], range: Array[Double]) =
+  override def interpolator(domain: Array[Array[Double]], range: Array[Double]): (Double, Double) => Option[Double] =
     super[NearestNeighborInterpolation2D].interpolator(domain, range)
-
 }

@@ -11,21 +11,21 @@ import latis.metadata.Metadata
  * Naught -> Naught)
  */
 class Naught extends Variable {
-  
+
   def findFunction: Option[latis.dm.Function] = None
-  
+
   def findVariableByName(name: String): Option[latis.dm.Variable] = None
-  def findAllVariablesByName(name: String) = Seq()
-  
+  def findAllVariablesByName(name: String): Seq[Variable] = Seq()
+
   def getData: Data = Data.empty
-  
+
   def getMetadata(): Metadata = Metadata.empty
-  
+
   def hasName(name: String): Boolean = false
   def getName: String = ""
-  
+
   def getSize: Int = 0
-  
+
   def toSeq: Seq[Scalar] = Seq.empty
 }
 

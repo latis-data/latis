@@ -10,10 +10,10 @@ import java.nio.ByteBuffer
  */
 case class StringValue(val value: String) extends AnyVal with TextData {
   //Note: beware, scala has a StringValue
-  
-  def size = 2 * value.length
-  
-  def stringValue = value
+
+  def size: Int = 2 * value.length
+
+  def stringValue: String = value
 
   def getByteBuffer: ByteBuffer = value.foldLeft(ByteBuffer.allocate(size))(_.putChar(_)).flip.asInstanceOf[ByteBuffer]
 
