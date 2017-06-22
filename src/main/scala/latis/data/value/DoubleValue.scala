@@ -10,15 +10,15 @@ import java.nio.ByteBuffer
 case class DoubleValue(val value: Double) extends AnyVal with NumberData {
   //TODO: test if we are getting the benefit of value classes
   //  http://docs.scala-lang.org/overviews/core/value-classes.html
-  
-  def size = 8
-  
+
+  def size: Int = 8
+
   //TODO: round or truncate?
-  def intValue = value.toInt
-  def longValue = value.toLong
-  def floatValue = value.toFloat
-  def doubleValue = value
-  
+  def intValue: Int = value.toInt
+  def longValue: Long = value.toLong
+  def floatValue: Float = value.toFloat
+  def doubleValue: Double = value
+
   def getByteBuffer: ByteBuffer = ByteBuffer.allocate(size).putDouble(value).rewind.asInstanceOf[ByteBuffer]
 
 }
