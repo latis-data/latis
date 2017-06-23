@@ -24,7 +24,7 @@ class DataSeq extends IterableData {
   def apply(index: Int): Data = datas(index)
   
   //def iterator = datas.iterator
-  def iterator = datas.toList.iterator  //test if this will behave better from a List, yep!?
+  def iterator: Iterator[Data] = datas.toList.iterator  //test if this will behave better from a List, yep!?
   
   def append(data: Data): DataSeq = {
     val bb = data.getByteBuffer

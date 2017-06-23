@@ -7,7 +7,7 @@ import latis.dm._
  */
 class HtmlWriter extends TextWriter {
   
-  override def write(dataset: Dataset) {
+  override def write(dataset: Dataset): Unit = {
     writeHeader(dataset)
     writeBody(dataset)
     printWriter.flush
@@ -34,7 +34,7 @@ class HtmlWriter extends TextWriter {
 
   val style = "\n<link rel=\"stylesheet\" type=\"text/css\" href=\"http://lasp.colorado.edu/lisird/tss/resources/tss.css\">"  
     
-  def writeBody(dataset: Dataset) = printWriter.print(makeBody(dataset))
+  def writeBody(dataset: Dataset): Unit = printWriter.print(makeBody(dataset))
   
   /**
    * The body includes a description of the data if available, 
@@ -138,7 +138,7 @@ class HtmlWriter extends TextWriter {
   /**
    * Makes a form for retrieval of data in any supported format.
    */
-  def queryForms(dataset: Dataset) = {
+  def queryForms(dataset: Dataset): String = {
     val sb = new StringBuilder
     val v = dataset match {
       case Dataset(v) => makeForm(v)

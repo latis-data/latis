@@ -1,15 +1,12 @@
 package latis.writer
 
 import latis.dm._
-import latis.data.value.LongValue
-import latis.data.value.DoubleValue
 import latis.time.Time
-import scala.collection.mutable.ArrayBuffer
 
 class JsonMetadataAndDataWriter extends JsonWriter {
   //TODO: refactor to reuse these pieces from Metadata and CompactJson Writers which are rapidly becoming obsolete
     
-  override def write(dataset: Dataset) = dataset match {
+  override def write(dataset: Dataset): Unit = dataset match {
     case Dataset(v) => super.write(dataset)
     case _ => {
       val name = dataset.getName
@@ -22,7 +19,7 @@ class JsonMetadataAndDataWriter extends JsonWriter {
   /**
    * Override to insert metadata.
    */
-  override def makeHeader(dataset: Dataset) = {
+  override def makeHeader(dataset: Dataset): String = {
     //Hack in the dataset name. We lost this when treating dataset as a Tuple in JsonWriter
     //"{\"" + dataset.getName + "\": "
     

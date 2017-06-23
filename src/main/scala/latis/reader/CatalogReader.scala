@@ -54,7 +54,7 @@ class CatalogReader(val loc: String) extends DatasetAccessor {
   private class FileVisitDelegator extends SimpleFileVisitor[Path] {
     
     //model a file as a catalog entry
-    override def visitFile(path: Path, attrs: BasicFileAttributes) = {
+    override def visitFile(path: Path, attrs: BasicFileAttributes): FileVisitResult = {
       if(path.toString.endsWith(".tsml")) {
         val name = path.toString.drop(dir.length + 1).stripSuffix(".tsml")
         samples += Sample(Text(Metadata("name"), name), Tuple(Text(Metadata("description"), ""),
@@ -64,7 +64,7 @@ class CatalogReader(val loc: String) extends DatasetAccessor {
     }
     
     //model a directory as a nested catalog
-    override def preVisitDirectory(path: Path, attrs: BasicFileAttributes) = {
+    override def preVisitDirectory(path: Path, attrs: BasicFileAttributes): FileVisitResult = {
       if(path.toString != dir) {
         //recurse to created a nested function
         val ds = CatalogReader(path.toString).getDataset()
@@ -88,13 +88,13 @@ class CatalogReader(val loc: String) extends DatasetAccessor {
     operations.foldLeft(dataset)((ds,op) => op(ds))
   }
   
-  def close = {}
+  def close: Unit = {}
   
 }
 
 object CatalogReader {
   
-  def apply() = new CatalogReader
+  def apply(): CatalogReader = new CatalogReader
   
-  def apply(path: String) = new CatalogReader(path)
+  def apply(path: String): CatalogReader = new CatalogReader(path)
 }

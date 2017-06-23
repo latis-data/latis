@@ -54,7 +54,7 @@ class BinAggregation(agg: Seq[Sample] => Sample, binWidth: Double) extends Opera
 }
 
 object BinAggregation {
-  def apply(agg: Seq[Sample] => Sample, binwidth: Double) = new BinAggregation(agg, binwidth)
+  def apply(agg: Seq[Sample] => Sample, binwidth: Double): BinAggregation = new BinAggregation(agg, binwidth)
   
   val SUM = (ss: Seq[Sample]) => ss.reduceLeft((s1,s2) => {
     ((s1.domain+s2.domain), (s1.range+s2.range)) match {

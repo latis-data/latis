@@ -25,5 +25,5 @@ class Split extends Operation {
 }
 
 object Split extends OperationFactory {
-  override def apply() = new Split()
+  override def apply(): Split = new Split()
 }

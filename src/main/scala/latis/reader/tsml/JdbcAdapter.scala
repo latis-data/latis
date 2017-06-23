@@ -603,7 +603,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   /**
    * Release the database resources.
    */
-  override def close() = {
+  override def close(): Unit = {
     //TODO: http://stackoverflow.com/questions/4507440/must-jdbc-resultsets-and-statements-be-closed-separately-although-the-connection
     if (hasConnection) {
       try { resultSet.close } catch { case e: Exception => }
@@ -625,21 +625,21 @@ object JdbcAdapter {
   class JdbcEmptyIterator() extends Iterator[JdbcAdapter.JdbcRecord] {
     private var _hasNext = false
     
-    def next() = null
-    def hasNext() = _hasNext
+    def next(): JdbcRecord = null
+    def hasNext(): Boolean = _hasNext
   }
 
   class JdbcRecordIterator(resultSet: ResultSet) extends Iterator[JdbcAdapter.JdbcRecord] {
     private var _didNext = false
     private var _hasNext = false
 
-    def next() = {
+    def next(): JdbcRecord = {
       if (!_didNext) resultSet.next
       _didNext = false
       JdbcRecord(resultSet)
     }
 
-    def hasNext() = {
+    def hasNext(): Boolean = {
       if (!_didNext) {
         _hasNext = resultSet.next
         _didNext = true

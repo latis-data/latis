@@ -35,17 +35,17 @@ class TsmlReader(tsml: Tsml) extends DatasetAccessor {
   /**
    * Clean up any resources that the reader used.
    */
-  def close = adapter.close
+  def close: Unit = adapter.close
   
 }
 
 object TsmlReader {
   
-  def apply(tsml: Tsml) = new TsmlReader(tsml)
+  def apply(tsml: Tsml): TsmlReader = new TsmlReader(tsml)
   
-  def apply(url: URL) = new TsmlReader(Tsml(url))
+  def apply(url: URL): TsmlReader = new TsmlReader(Tsml(url))
 
-  def apply(path: String) = new TsmlReader(Tsml(path))
+  def apply(path: String): TsmlReader = new TsmlReader(Tsml(path))
   
 }
 

@@ -93,7 +93,7 @@ abstract class TsmlAdapter(val tsml: Tsml) extends LazyLogging {
    * This will only include Data values that are defined in the TSML.
    */
   private lazy val origDataset: Dataset = makeOrigDataset
-  def getOrigDataset = origDataset
+  def getOrigDataset: Dataset = origDataset
   
   /**
    * Keep a list of the original Scalars.
@@ -104,13 +104,13 @@ abstract class TsmlAdapter(val tsml: Tsml) extends LazyLogging {
     case Dataset(v) => v.toSeq.filterNot(_.isInstanceOf[Index])
     case _ => Seq()
   }
-  def getOrigScalars = origScalars
+  def getOrigScalars: Seq[Scalar] = origScalars
   
   /**
    * Keep a list of the names of the original Scalars.
    */
   private lazy val origScalarNames = origScalars.map(_.getName)
-  def getOrigScalarNames = origScalarNames
+  def getOrigScalarNames: Seq[String] = origScalarNames
   
   /**
    * Construct the data model for this Dataset.

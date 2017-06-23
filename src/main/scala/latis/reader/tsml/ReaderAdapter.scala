@@ -5,6 +5,7 @@ import java.net.URL
 import latis.ops.Operation
 import latis.reader.DatasetAccessor
 import latis.reader.tsml.ml.Tsml
+import latis.dm.Dataset
 
 /**
  * Access a reader's dataset via an adapter. This class ignores everything defined
@@ -28,11 +29,10 @@ class ReaderAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     }
   }
   
-  override def getDataset = reader.getDataset
+  override def getDataset: Dataset = reader.getDataset
   
-  override def getDataset(ops: Seq[Operation]) = reader.getDataset(ops)
-  
-  
-  def close = reader.close
+  override def getDataset(ops: Seq[Operation]): Dataset = reader.getDataset(ops)
+
+  def close: Unit = reader.close
   
 }

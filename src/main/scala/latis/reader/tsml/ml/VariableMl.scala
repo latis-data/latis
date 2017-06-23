@@ -13,7 +13,7 @@ import scala.xml.NodeSeq.seqToNodeSeq
  */
 abstract class VariableMl(xml: Node) {
   
-  def label = xml.label
+  def label: String = xml.label
   
   /**
    * Get the value of this element's attribute with the given name.
@@ -84,12 +84,12 @@ abstract class VariableMl(xml: Node) {
     else (xml \ "_").flatMap(VariableMl(_).findVariableMl(name)).headOption
   }
 
-  override def toString = xml.toString
+  override def toString: String = xml.toString
 }
 
 object VariableMl {
    
-  def apply(xml: Node) = {
+  def apply(xml: Node): VariableMl = {
     xml.label match {
       case "tuple" => new TupleMl(xml)
       case "function" => new FunctionMl(xml)

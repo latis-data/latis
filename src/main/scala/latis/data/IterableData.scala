@@ -47,16 +47,16 @@ abstract class IterableData extends Data { //TODO: with Iterable[Data]? problem 
 
 object IterableData {
   
-  def apply(it: Iterator[Data], recSize: Int) = new IterableData {
+  def apply(it: Iterator[Data], recSize: Int): IterableData = new IterableData {
     //TODO: enforce that each sample is the same size?
     //TODO: get size from first sample? PeekIterator?
     def recordSize: Int = recSize
     def iterator: Iterator[Data] = it
   }  
   
-  def apply(datas: Seq[Data]) = DataSeq(datas)
+  def apply(datas: Seq[Data]): DataSeq = DataSeq(datas)
   
-  def empty = new IterableData {
+  def empty: IterableData = new IterableData {
     def recordSize: Int = 0
     def iterator: Iterator[Data] = Iterator.empty
   }

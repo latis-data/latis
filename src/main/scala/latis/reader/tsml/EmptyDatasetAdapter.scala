@@ -18,5 +18,5 @@ class EmptyDatasetAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   /**
    * Nothing to close.
    */
-  def close = {}
+  def close: Unit = {}
 }

@@ -68,7 +68,7 @@ object FileUtilsNio {
   /**
    * Download a file and save it locally.
    */
-  def downloadFile(url: URL, file: File) = {
+  def downloadFile(url: URL, file: File): Long = {
     //TODO: handle exceptions
     //TODO: create directories?
     var in: InputStream = null
@@ -89,6 +89,7 @@ object FileUtilsNio {
     val tmpDir = Files.createTempDirectory("latis").toString
     val path = FileSystems.getDefault().getPath(tmpDir, fileName)
     val file = path.toFile
+    // TODO: This returns a long.
     downloadFile(url, file)
     file
   }

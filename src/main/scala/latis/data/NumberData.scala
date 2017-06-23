@@ -19,5 +19,5 @@ trait NumberData extends Any with Data {
  * Object for pattern matching and exposing the data value as a Double.
  */
 object NumberData {
-  def unapply(num: NumberData) = Some(num.doubleValue)
+  def unapply(num: NumberData): Option[Double] = Some(num.doubleValue)
 }

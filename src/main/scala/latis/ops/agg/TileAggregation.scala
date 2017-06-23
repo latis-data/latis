@@ -20,7 +20,7 @@ class TileAggregation extends Aggregation {
    * convert to units of the first
    */
   
-  def aggregate(ds1: Dataset, ds2: Dataset) = {
+  def aggregate(ds1: Dataset, ds2: Dataset): Dataset = {
     val (f1, f2, it1, it2) = (ds1, ds2) match {
       case(Dataset(f1 @ Function(it1)), Dataset(f2 @ Function(it2))) => (f1, f2, it1, it2)
       case _ => throw new UnsupportedOperationException("TileAggregation expects a Function in each of the Datasets it aggregates.")
@@ -40,6 +40,6 @@ class TileAggregation extends Aggregation {
 }
 
 object TileAggregation {
-  def apply() = new TileAggregation()
-  def apply(ds1: Dataset, ds2: Dataset) = new TileAggregation()(ds1, ds2)
+  def apply(): TileAggregation = new TileAggregation()
+  def apply(ds1: Dataset, ds2: Dataset): Dataset = new TileAggregation()(ds1, ds2)
 }

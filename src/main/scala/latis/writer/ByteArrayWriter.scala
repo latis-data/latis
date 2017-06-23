@@ -1,13 +1,9 @@
 package latis.writer
 
-import java.io.OutputStream
-import java.io.DataOutputStream
-import latis.dm._
-import java.nio.ByteOrder
-import java.nio.ByteBuffer
-import java.nio.charset.Charset
-import latis.util.StringUtils
 import java.io.ByteArrayOutputStream
+import java.io.OutputStream
+
+import latis.dm._
 
 /**
  * Write data as binary to an in memory array of Bytes.
@@ -17,7 +13,7 @@ class ByteArrayWriter extends BinaryWriter {
   /**
    * Override to always write to a ByteArrayOutputStream.
    */
-  override def getOutputStream = _out
+  override def getOutputStream: OutputStream = _out
   private val _out = new ByteArrayOutputStream()
   
   /**

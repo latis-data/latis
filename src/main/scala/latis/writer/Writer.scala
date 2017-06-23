@@ -5,7 +5,6 @@ import latis.util.LatisProperties
 import java.io.File
 import java.io.OutputStream
 import scala.collection.immutable
-import scala.collection.mutable
 import java.io.FileOutputStream
 import latis.util.ReflectionUtils
 
@@ -58,7 +57,7 @@ abstract class Writer {
    * Return the outputStream if it exists. If we have a file instead,
    * return a FileOutputStream.
    */
-  def getOutputStream = outputStream match {
+  def getOutputStream: OutputStream = outputStream match {
     case null => file match {
       case null => ??? //TODO: error
       case _ => new FileOutputStream(file)

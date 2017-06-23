@@ -24,7 +24,7 @@ import latis.dm.Dataset
 class Selection(val vname: String, val operation: String, val value: String) extends Filter with LazyLogging {
   //TODO: if domain, delegate to DomainSet
 
-  override def apply(ds: Dataset) = ds match {
+  override def apply(ds: Dataset): Dataset = ds match {
     case Dataset(v) => ds.findVariableByName(vname) match {
       case None => throw new UnsupportedOperationException(s"Cannot select on unknown variable '$vname'")
       case _ => super.apply(ds)
@@ -40,8 +40,8 @@ class Selection(val vname: String, val operation: String, val value: String) ext
       // except Time which can be handled like any other Scalar.
       case text: Text if (! text.isInstanceOf[Time]) => applyToText(text)
       case s: Scalar => if (scalar.hasName(vname)) {
-        if (isValid(scalar.compare(value))) Some(scalar) else None
-        } else Some(scalar) //operation doesn't apply to this Scalar Variable, no-op
+        if (isValid(scalar.compare(value))) { Some(scalar) } else { None }
+        } else { Some(scalar) } //operation doesn't apply to this Scalar Variable, no-op
       }
     } catch {
       case e: Exception => {
@@ -121,7 +121,7 @@ class Selection(val vname: String, val operation: String, val value: String) ext
     }
   }
   
-  override def toString = vname + operation + value
+  override def toString: String = vname + operation + value
 }
 
 
@@ -134,16 +134,22 @@ object Selection extends OperationFactory {
   
   def apply(vname: String, operation: String, value: String): Operation = {
     //delegate to NearestNeighbor filter for '~' operator
-    if (operation == "~") NearestNeighborFilter(vname, value)
+    if (operation == "~") { NearestNeighborFilter(vname, value) }
     
     //validate time selections before they are applied to every Sample
-    else vname match {
-      case "time" => { 
-        if(Time.isValidIso(value) || StringUtils.isNumeric(value)) new Selection(vname, operation, value)
-        else throw new UnsupportedOperationException(
-          s"Invalid Selection: could not parse '$value' as a time string.")
+    else {
+      vname match {
+        case "time" => {
+          if (Time.isValidIso(value) || StringUtils.isNumeric(value)) {
+            new Selection(vname, operation, value)
+          }
+          else {
+            throw new UnsupportedOperationException(
+              s"Invalid Selection: could not parse '$value' as a time string.")
+          }
+        }
+        case _ => new Selection(vname, operation, value)
       }
-      case _ => new Selection(vname, operation, value)
     }
   }
   

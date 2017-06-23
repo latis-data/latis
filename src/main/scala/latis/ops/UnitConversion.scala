@@ -22,7 +22,7 @@ class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operatio
    * Override to get the unit converter set up before delegating to super
    * to apply the operation to the variables in the dataset.
    */
-  override def apply(dataset: Dataset) = {
+  override def apply(dataset: Dataset): Dataset = {
     dataset match { 
       case Dataset(v) => {
         converter = v.findVariableByName(variableName) match {
@@ -85,7 +85,7 @@ object UnitConversion extends OperationFactory {
     new UnitConversion(vname, uom)
   }
   
-  def apply(vname: String, unit: String) = {
+  def apply(vname: String, unit: String): UnitConversion = {
     //TODO: assuming Time for now
     val uom = TimeScale(unit)
     new UnitConversion(vname, uom)

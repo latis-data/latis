@@ -19,7 +19,7 @@ import latis.dm.Dataset
  * */
 class Stride2D(val stride1: Int, val stride2: Int) extends Filter {
   
-  override def applyToFunction(function: Function) = {
+  override def applyToFunction(function: Function): Option[Function] = {
     
     // First, we find the number of y values for each x value by finding the number of 
     // unique x values and dividing this into the total number of Samples in the function. 
@@ -56,8 +56,8 @@ class Stride2D(val stride1: Int, val stride2: Int) extends Filter {
       case None => function.getMetadata
       case Some("0") => function.getMetadata
       case Some(n) => {
-        val mdXNum = ((n.toInt/yNum - 1)/stride1)+1
-        val mdYNum = ((yNum - 1)/stride2)+1
+        val mdXNum = ((n.toInt/yNum - 1)/stride1) + 1
+        val mdYNum = ((yNum - 1)/stride2) + 1
         Metadata(function.getMetadata.getProperties + ("length" -> (mdXNum*mdYNum).toString))
       }
     }
@@ -70,8 +70,8 @@ class Stride2D(val stride1: Int, val stride2: Int) extends Filter {
 object Stride2D extends OperationFactory {
   
   override def apply(args: Seq[String]): Stride2D = {
-    if (args.length > 2) throw new UnsupportedOperationException("The Stride2D filter accepts only two arguments")
-    else if (args.length < 2) throw new UnsupportedOperationException("Stride2D takes two arguments; use StrideFilter for 1D datasets")
+    if (args.length > 2) { throw new UnsupportedOperationException("The Stride2D filter accepts only two arguments") }
+    else if (args.length < 2) { throw new UnsupportedOperationException("Stride2D takes two arguments; use StrideFilter for 1D datasets") }
     try {
       Stride2D(args.head.toInt, args.last.toInt)
     } catch {

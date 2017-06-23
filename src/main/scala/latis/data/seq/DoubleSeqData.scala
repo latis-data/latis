@@ -11,10 +11,10 @@ class DoubleSeqData(ds: immutable.Seq[Double]) extends IterableData {
   
   override def getByteBuffer: ByteBuffer = ds.foldLeft(ByteBuffer.allocate(size))(_.putDouble(_)).rewind.asInstanceOf[ByteBuffer]
   
-  override def length = ds.length
-  def recordSize = 8
+  override def length: Int = ds.length
+  def recordSize: Int = 8
   
-  def iterator = ds.iterator.map(DoubleValue(_))
+  def iterator: Iterator[DoubleValue] = ds.iterator.map(DoubleValue(_))
   
-  def apply(index: Int) = DoubleValue(ds(index))
+  def apply(index: Int): DoubleValue = DoubleValue(ds(index))
 }

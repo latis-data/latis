@@ -42,17 +42,17 @@ trait Data extends Any {
   /**
    * Are there any values represented by this Data object.
    */
-  def notEmpty = ! isEmpty
+  def notEmpty: Boolean = ! isEmpty
   
   /**
    * Concatenate the given Data onto the end of this Data.
    */
-  def concat(data: Data) = Data(this.getBytes ++ data.getBytes)
+  def concat(data: Data): Data = Data(this.getBytes ++ data.getBytes)
 
   /**
    * Debug method to see what values are in a Data object. Assumes doubles.
    */
-  def writeDoubles = {
+  def writeDoubles: Unit = {
     val bb = getByteBuffer.rewind.asInstanceOf[ByteBuffer]
     val db = bb.asDoubleBuffer
     val n = db.limit
@@ -69,12 +69,12 @@ trait Data extends Any {
    *   
    * Note: value classes cannot override equals, so our value data will not inherit this
    */
-  override def equals(that: Any) = that match {
+  override def equals(that: Any): Boolean = that match {
     case d: Data => d.getByteBuffer == getByteBuffer
     case _ => false
   }
   
-  override def hashCode = getByteBuffer.hashCode
+  override def hashCode: Int = getByteBuffer.hashCode
 }
 
 //-----------------------------------------------------------------------------

@@ -19,12 +19,12 @@ import latis.data.value.LongValue
  */
 class MockAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   
-  def close = {}
+  def close: Unit = {}
   
   /**
    * Put Data into the cache
    */
-  override def init = {
+  override def init: Unit = {
     val names = getOrigScalarNames
     val v = getOrigDataset match {
       case Dataset(v) => v
@@ -69,11 +69,11 @@ class MockAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     }
   }
   
-  def getIndexValues(length: Int) = {
+  def getIndexValues(length: Int): Seq[Double] = {
     Seq.range(0,length).map(_.toDouble)
   }
   
-  def getRandomValues(length: Int) = {
+  def getRandomValues(length: Int): Seq[Double] = {
     Seq.fill(length)(math.random)
   }
     

@@ -10,7 +10,7 @@ import latis.metadata.Metadata
  */
 class LastFilter extends Filter {
 
-  override def applyToFunction(function: Function) = {
+  override def applyToFunction(function: Function): Option[Function] = {
     //get the last sample, or none if empty, as List
     val samples = function.iterator match {
       case it: Iterator[Sample] if (it.nonEmpty) => List(it.reduceLeft((_,e) => e))  //keep last sample
@@ -29,5 +29,5 @@ class LastFilter extends Filter {
 }
 
 object LastFilter extends OperationFactory {
-  override def apply() = new LastFilter
+  override def apply(): LastFilter = new LastFilter
 }

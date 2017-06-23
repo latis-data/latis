@@ -28,7 +28,7 @@ object FileUtils {
     //TODO: performance concern, especially since we are sorting
     //TODO: consider new file io in Java7
     
-    def accumulateFiles(file: File, buffer: ArrayBuffer[String]) {
+    def accumulateFiles(file: File, buffer: ArrayBuffer[String]): Unit = {
       if (file.isDirectory()) file.listFiles().foreach(accumulateFiles(_, buffer))
       else buffer += getFileNameWithSubdirectory(dir, file) + "," + file.length
     }
@@ -53,7 +53,7 @@ object FileUtils {
   /**
    * Java's File.delete will only remove empty directories.
    */
-  def delete(file: File) {
+  def delete(file: File): Unit = {
     //TODO: deal with IOExceptions, permissions...
     if (file.isDirectory) {
       file.listFiles.map(delete(_))
@@ -65,7 +65,7 @@ object FileUtils {
   /**
    * Write a file to the given OutputStream.
    */
-  def streamFile(file: File, out: OutputStream) = {
+  def streamFile(file: File, out: OutputStream): Unit = {
     //TODO: benchmark
 //    val ch = new FileInputStream(fileName).getChannel
 //    val mbb = ch.map(FileChannel.MapMode.READ_ONLY, 0L, ch.size)

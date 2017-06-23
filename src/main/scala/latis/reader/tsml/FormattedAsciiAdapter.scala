@@ -2,6 +2,7 @@ package latis.reader.tsml
 
 import latis.reader.tsml.ml.Tsml
 import scala.util.matching.Regex.Match
+import scala.util.matching.Regex
 
 class FormattedAsciiAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
   
@@ -10,9 +11,9 @@ class FormattedAsciiAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
     case None => throw new RuntimeException("FormattedAsciiAdapter requires a format definition 'format'.")
   }
   
-  override lazy val regex = formatToRegex(format)
+  override lazy val regex: Regex = formatToRegex(format)
   
-  def formatToRegex(format: String) = {
+  def formatToRegex(format: String): Regex = {
     //eg: 3I2 => (?:[ \d]{2}){3}
     //matches "123456"
     val int = (s: String) => """(\d*)I(\d+),?""".r.
@@ -59,7 +60,7 @@ class FormattedAsciiAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
       
   }
   
-  override def extractValues(rec: String) = {
+  override def extractValues(rec: String): Seq[String] = {
     super.extractValues(rec).map(_.replace(' ', '0'))
   }
 

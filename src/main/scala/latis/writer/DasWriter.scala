@@ -15,7 +15,7 @@ class DasWriter extends TextWriter {
   
   val indentSize = 4
   
-  override def makeHeader(dataset: Dataset) = "attributes {" + newLine
+  override def makeHeader(dataset: Dataset): String = "attributes {" + newLine
 
   override def writeVariable(variable: Variable): Unit = {
     printWriter.print(varToString(variable))
@@ -69,7 +69,7 @@ class DasWriter extends TextWriter {
     label + s.mkString("","",indent(count)+"}\n")
   }
   
-  override def makeFooter(dataset: Dataset) = "}"
+  override def makeFooter(dataset: Dataset): String = "}"
 
   var count = indentSize
 

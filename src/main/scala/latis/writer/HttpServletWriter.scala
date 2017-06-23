@@ -38,7 +38,7 @@ class HttpServletWriter(writer: Writer, response: HttpServletResponse) extends W
 
 object HttpServletWriter {
   
-  def apply(response: HttpServletResponse, suffix: String) = {
+  def apply(response: HttpServletResponse, suffix: String): HttpServletWriter = {
     //Set the Content-Type HTTP header before we get the writer from the response.
     //TODO: but it seems to have been working, minus the character encoding
     //  could we go back to the cleaner design of passing output stream to writer constructor?

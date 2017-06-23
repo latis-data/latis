@@ -2,7 +2,7 @@ package latis.time
 
 class TimeUnit(val seconds: Double, val name: String) {
     
-  override def toString = name
+  override def toString: String = name
 }
 
 object TimeUnit {

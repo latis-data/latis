@@ -1,23 +1,23 @@
 package latis.writer
 
-import java.io.BufferedReader
+import scala.language.postfixOps
+
+import java.io.BufferedInputStream
 import java.io.File
-import java.io.FileOutputStream
+import java.io.FileInputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import scala.io.Source
+
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Text
-import java.io.BufferedInputStream
-import java.io.FileInputStream
 
 /**
  * Write a zip file of the files contained in a file list dataset.
  */
 class ZipWriter extends Writer {
   
-  def write(dataset: Dataset) = {
+  def write(dataset: Dataset): Unit = {
     
     lazy val dir = dataset.getMetadata.get("srcDir") match {
       case Some(sd) => sd + File.separator
@@ -57,6 +57,6 @@ class ZipWriter extends Writer {
     }
   }
   
-  override def mimeType = "application/zip"
+  override def mimeType: String = "application/zip"
   
 }

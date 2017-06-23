@@ -9,10 +9,10 @@ import scala.xml.Node
 class FunctionMl(xml: Node) extends VariableMl(xml) {
   
   private var _domain: VariableMl = null
-  def domain = _domain
+  def domain: VariableMl = _domain
   
   private var _range: VariableMl = null
-  def range = _range
+  def range: VariableMl = _range
   
   val kids = Tsml.getVariableNodes(xml)
   kids.partition(_.label == "domain") match {

@@ -56,7 +56,7 @@ class FileListGenerator2(tsml: Tsml) extends IterativeAdapter2[Double](tsml) {
   /**
    * Create 'time' and 'file' data for each record (i.e. time value).
    */
-  def parseRecord(rec: Double) = {
+  def parseRecord(rec: Double): Option[Map[String, Data]] = {
     val time = Time(units, rec).toDate
     val file = format.format(time)
 
@@ -64,5 +64,5 @@ class FileListGenerator2(tsml: Tsml) extends IterativeAdapter2[Double](tsml) {
     Some(map)
   }
 
-  def close = {}
+  def close: Unit = {}
 }

@@ -6,7 +6,6 @@ import java.nio.ByteOrder
 import java.nio.charset.Charset
 import java.io.DataOutputStream
 import scala.collection.mutable.ArrayBuilder
-import scala.collection.mutable.ArrayBuilder.ofByte
 
 /**
  * Writes the binary representation of the dataset corresponding to 
@@ -18,7 +17,7 @@ class ProtoBufWriter extends BinaryWriter {
   
   override lazy val charset = Charset.forName("utf-8")
   
-  override def writeVariable(variable: Variable) = writer.write(varToBytes(variable))
+  override def writeVariable(variable: Variable): Unit = writer.write(varToBytes(variable))
   
   /**
    * Each variable type is handled in a different way
@@ -97,7 +96,7 @@ class ProtoBufWriter extends BinaryWriter {
   /**
    * Make a key given a tag and a type
    */
-  def makeKey(tag: Int, wtype: Int) = {
+  def makeKey(tag: Int, wtype: Int): Array[Byte] = {
     makeVarint(((tag << 3) | wtype))
   }
   

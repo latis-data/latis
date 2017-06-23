@@ -58,7 +58,7 @@ object CacheManager {
   /**
    * Remove all entries from the cache.
    */
-  def clear = instance.cache.clear
+  def clear: Unit = instance.cache.clear
   
   /**
    * Remove a single dataset from the cache.

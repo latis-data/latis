@@ -4,10 +4,11 @@ import latis.dm._
 import latis.time._
 import latis.reader.tsml.ml.Tsml
 import latis.util.StringUtils
+import latis.data.Data
 
 class FileListGenerator(tsml: Tsml) extends IterativeAdapter2[Int](tsml) {
   
-  def close = {}
+  def close: Unit = {}
   
   val (start, stop, stride) = this.getProperty("range") match {
     case Some(s) => s.split(';') match {
@@ -17,11 +18,11 @@ class FileListGenerator(tsml: Tsml) extends IterativeAdapter2[Int](tsml) {
     case None => throw new RuntimeException("FileListGenerator requires a 'range' attribute.")
   }
   
-  def getRecordIterator = {
+  def getRecordIterator: Iterator[Int] = {
     Iterator.range(start, stop, stride)
   }
   
-  def parseRecord(rec: Int) = {
+  def parseRecord(rec: Int): Option[Map[String, Data]] = {
     val names = getOrigScalarNames
     //each scalar should have a "pattern" attribute that tells how to format the variable
     val formats = names.map(tsml.getVariableAttribute(_, "pattern"))

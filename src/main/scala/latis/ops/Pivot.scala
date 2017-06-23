@@ -21,7 +21,7 @@ import latis.util.iterator.PeekIterator
  */
 class Pivot(vname: String, l: Int) extends Operation {
   
-  override def applyToFunction(f: Function) = {
+  override def applyToFunction(f: Function): Option[Function] = {
     val pit = PeekIterator(f.iterator)
     
     val nit = PeekIterator( new Iterator[Sample] {
@@ -71,7 +71,7 @@ class Pivot(vname: String, l: Int) extends Operation {
 }
 
 object Pivot extends OperationFactory {
-  override def apply(args: Seq[String]) = new Pivot(args(0), args(1).toInt)
+  override def apply(args: Seq[String]): Pivot = new Pivot(args(0), args(1).toInt)
   
-  def apply(n: String, i: Int) = new Pivot(n, i)
+  def apply(n: String, i: Int): Pivot = new Pivot(n, i)
 }

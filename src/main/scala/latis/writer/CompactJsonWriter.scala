@@ -17,8 +17,8 @@ import latis.time.Time
  */
 class CompactJsonWriter extends JsonWriter {
 
-  override def makeHeader(dataset: Dataset) = ""
-  override def makeFooter(dataset: Dataset) = ""
+  override def makeHeader(dataset: Dataset): String = ""
+  override def makeFooter(dataset: Dataset): String = ""
   
   override def makeLabel(variable: Variable): String = ""
     
@@ -35,7 +35,7 @@ class CompactJsonWriter extends JsonWriter {
     }
   }
   
-  override def makeSample(sample: Sample) = makeSample(sample, List[String]()) //invoke with no prefix
+  override def makeSample(sample: Sample): String = makeSample(sample, List[String]()) //invoke with no prefix
   
   //use optional pre to duplicate leading values when we have a nested function
   //One element for each preceding variable as a String      
