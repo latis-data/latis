@@ -95,7 +95,12 @@ class MathExpressionDerivation(private val str: String) extends Operation {
    */
   override def applyToScalar(s: Scalar): Option[Scalar] = {
     if (s.hasName(varName)) s match {
-      case t: Time => Some(Time(t.getMetadata + ("units" -> "milliseconds since 1970"), deriveField))
+      case t: Time => 
+        val units = t.getMetadata("units") match {
+          case Some(u) if (!t.isInstanceOf[Text]) => u //preserve numeric units
+          case _ => "milliseconds since 1970"
+        }
+        Some(Time(t.getMetadata + ("units" -> units), deriveField))
       case i: Index => Some(Real(i.getMetadata, deriveField)) //replace Index with Real
       case i: Integer => Some(Integer(i.getMetadata, deriveField))
       case r: Real => Some(Real(r.getMetadata, deriveField))
