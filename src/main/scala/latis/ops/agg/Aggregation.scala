@@ -16,7 +16,7 @@ trait Aggregation extends Operation {
   
   def aggregate(ds1: Dataset, ds2: Dataset): Dataset
       
-  override def apply(dataset: Dataset) = dataset match {
+  override def apply(dataset: Dataset): Dataset = dataset match {
     //support for old usage
     case Dataset(Tuple(Seq(f1: Function, f2: Function))) => 
       aggregate(Dataset(f1), Dataset(f2)) match {
@@ -26,8 +26,8 @@ trait Aggregation extends Operation {
     case _ => throw new UnsupportedOperationException("An Aggregation can only be applied to two or more Datasets.")
   }
   
-  def apply(datasets: Seq[Dataset]) = datasets.reduceLeft(aggregate(_,_))
-  def apply(dataset1: Dataset, dataset2: Dataset, md: Metadata = EmptyMetadata) = aggregate(dataset1, dataset2) match {
+  def apply(datasets: Seq[Dataset]): Dataset = datasets.reduceLeft(aggregate(_,_))
+  def apply(dataset1: Dataset, dataset2: Dataset, md: Metadata = EmptyMetadata): Dataset = aggregate(dataset1, dataset2) match {
     case Dataset(v: Variable) => Dataset(v, md)
     case _ => throw new UnsupportedOperationException(s"Failed to aggregate datasets '$dataset1' and '$dataset2'")
   }

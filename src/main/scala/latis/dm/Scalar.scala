@@ -15,41 +15,41 @@ import latis.util.StringUtils
  * Base type for all Scalar Variables.
  */
 trait Scalar extends Variable {
-  
+
   //move to AbstractScalar since mixing in Time with Text means that anything here overrides Time?
   //note, we tried overriding this in subclasses but ran into inheritance trouble with "new Time with Real"
   def compare(that: String): Int
-  
+
   //come for free by extending Ordered trait
   //def > (that: Scalar): Boolean = this.compare(that) > 0
   //def < (that: Scalar): Boolean = this.compare(that) < 0
-  
+
 //TODO: test trim, nan
   def getValue: Any
-  def stringValue = getValue.toString
-  
+  def stringValue: String = getValue.toString
+
   def getFillValue: Any
   def getMissingValue: Any
-  
+
   def isMissing: Boolean
-  
+
   /**
    * Get a copy of this Scalar with the given metadata property added/replaced.
    */
-  def updatedMetadata(kv: (String,String)) = {
+  def updatedMetadata(kv: (String,String)): Scalar = {
     //"updated" like scala.Map, immutable, "update" implies mutable
     //make new Scalar with metadata with new name
     val md = getMetadata + kv //new metadata
     val vtype = getType
     val data = getData
-    
+
     this match {
       case _: Time => Time(vtype, md, data)
       case _ => Scalar(vtype, md, data)
     }
   }
   //TODO: updatedMetadata(md: Metadata)
-  
+
   //TODO: updatedValue instead of Variable.apply
   //TODO: use "copy" like Scala's case classes (LATIS-428)
   def updatedValue(s: String): Scalar = this match {
@@ -59,11 +59,11 @@ trait Scalar extends Variable {
     case _: Real    => Real(getMetadata, s)
     case _: Text    => Text(getMetadata, s)
   }
-  
+
 }
 
 object Scalar {
-  
+
   /**
    * Construct a Scalar of the appropriate type based on the type (e.g. as used in TSML).
    */
@@ -73,11 +73,11 @@ object Scalar {
     case "integer" => new AbstractScalar(metadata, data) with Integer
     case "text"    => new AbstractScalar(metadata, data) with Text
     case "binary"  => new AbstractScalar(metadata, data) with Binary
-    case "time"    => ??? //Time(metadata, data)  
-    //TODO: vtype = class name, dynamicly construct 
+    case "time"    => ??? //Time(metadata, data)
+    //TODO: vtype = class name, dynamicly construct
     case _ => throw new Error("No Scalar type defined for " + vtype)
   }
-  
+
   /**
    * Construct a Scalar of the appropriate type based on the type of the data value.
    */
@@ -91,7 +91,7 @@ object Scalar {
     case _ => throw new Error("Unable to make Scalar from value: " + value) //TODO: of type...
     //TODO: if serializable, make Binary?
   }
-  
+
   /**
    * Construct a Scalar of the appropriate type based on the type of the data value, with metadata.
    */
@@ -108,15 +108,12 @@ object Scalar {
     case lv: LongValue   => Integer(metadata, lv)
     case IndexValue(i)   => Index(i)
     case sv: StringValue => Text(metadata, sv)
-    
+
     case _ => throw new Error("Unable to make Scalar from value: " + value)
   }
-  
+
   /**
    * Expose the value represented by this Scalar.
    */
-  def unapply(s: Scalar) = Some(s.getValue)
+  def unapply(s: Scalar): Option[Any] = Some(s.getValue)
 }
-
-
-

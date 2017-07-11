@@ -16,9 +16,9 @@ class BinAverage(binWidth: Double) extends Operation {
       case Number(n) => n
     }
     val samples = ListBuffer[Sample]()
-    while(it.hasNext) {
+    while (it.hasNext) {
       val bin = makeBin(it, binStart)
-      if(bin.nonEmpty) samples += binToSample(bin)
+      if (bin.nonEmpty) samples += binToSample(bin)
       
       binStart += binWidth
     }
@@ -31,11 +31,11 @@ class BinAverage(binWidth: Double) extends Operation {
     def b = it.peek.domain match {
       case Number(n) => n < start + binWidth
     }
-    while(it.peek != null && b) lb += it.next
+    while (it.peek != null && b) lb += it.next
     lb.result
   }
 
-  def binToSample(bin: Seq[Sample]): Sample = {//should empty bins be allowed?
+  def binToSample(bin: Seq[Sample]): Sample = { //should empty bins be allowed?
     val count = bin.length
     val dom = bin(0).domain match {
       case t: Time => t match {
@@ -55,7 +55,7 @@ class BinAverage(binWidth: Double) extends Operation {
       
   //If the range is a tuple, just use the first element
   //TODO: could use some refactoring
-  def reduce(v: Variable) = v match {
+  def reduce(v: Variable): Variable = v match {
     case s: Scalar => s
     case Tuple(vars) => vars.head
     case _: Function => throw new Error("Can't perform a bin average over a nested Function.")

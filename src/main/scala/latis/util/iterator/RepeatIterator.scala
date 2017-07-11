@@ -5,7 +5,7 @@ package latis.util.iterator
  */
 class RepeatIterator[T >: Null](it: Iterator[T], rep: Int) extends PeekIterator[T] {
   var count = rep
-  def getNext = {
+  def getNext: T = {
     count += 1
     if(count < rep) current
     else {count = 0; if(it.hasNext) it.next else null }

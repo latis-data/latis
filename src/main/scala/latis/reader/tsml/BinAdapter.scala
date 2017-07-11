@@ -51,5 +51,5 @@ class BinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     Some(Function(template.domain, template.range, samples))
   }
   
-  override def close = reader.close
+  override def close: Unit = reader.close
 }

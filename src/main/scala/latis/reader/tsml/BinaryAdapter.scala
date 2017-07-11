@@ -67,7 +67,7 @@ class BinaryAdapter(tsml: Tsml) extends IterativeAdapter[ByteBuffer](tsml) {
     Some(builder.toMap[String, Data])
   }
   
-  def extractPair(buffer: ByteBuffer, scalar: Scalar) = scalar match{
+  def extractPair(buffer: ByteBuffer, scalar: Scalar): (String, Data) = scalar match {
     case _: Integer => (scalar.getName, Data(buffer.getLong))
     case _: Real => (scalar.getName, Data(buffer.getDouble))
     case t: Text => {

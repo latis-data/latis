@@ -15,7 +15,7 @@ class NoOpTimeConverter(from: TimeScale, to: TimeScale) extends TimeConverter(fr
 
 object NoOpTimeConverter {
   
-  def apply(from: TimeScale, to: TimeScale) = {
+  def apply(from: TimeScale, to: TimeScale): NoOpTimeConverter = {
     //TODO: allow construction without args?
     new NoOpTimeConverter(from, to)
   }

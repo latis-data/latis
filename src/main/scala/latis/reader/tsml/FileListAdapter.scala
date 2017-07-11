@@ -18,7 +18,7 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
   
   lazy val directory = URLDecoder.decode(getUrl.getPath, "utf-8").stripSuffix(File.separator) //assumes a file URL 
   
-  override def getDataset = {
+  override def getDataset: Dataset = {
     super.getDataset match {
       case ds @ Dataset(v) => Dataset(v, ds.getMetadata + ("srcDir" -> directory))
       case _ => Dataset.empty
@@ -28,7 +28,7 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
   /**
    * A record consists of a file name, file size.
    */
-  override def getRecordIterator = {
+  override def getRecordIterator: Iterator[String] = {
     //see StreamingFileListAdapter for an iterative version of this adapter.
     //TODO: support ftp...?
     FileUtils.listAllFilesWithSize(directory).iterator
@@ -38,7 +38,7 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
    * Override to add the file name (i.e. the data "record") itself as a data value.
    * Note, this assumes that the TSML has the file and file size variables defined last.
    */
-  override def extractValues(record: String) = {
+  override def extractValues(record: String): Seq[String] = {
     val fileName = record.split(',')(0)
     val size = record.split(',')(1)
     regex.findFirstMatchIn(fileName) match {

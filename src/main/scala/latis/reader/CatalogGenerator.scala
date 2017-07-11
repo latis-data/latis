@@ -26,9 +26,9 @@ class CatalogGenerator extends DatasetAccessor {
    */
   override def getDataset(ops: Seq[Operation]): Dataset = ops.reverse.foldRight(getDataset)(_(_))
   
-  override def close = {}
+  override def close: Unit = {}
   
-  def getDatasetNames = datasetNames
+  def getDatasetNames: List[String] = datasetNames
   
   //---- Helper Functions ------------------------------------------------------------------------
   
@@ -52,7 +52,7 @@ class CatalogGenerator extends DatasetAccessor {
    * Convert a list of dataset names into
    * a dataset of the form i -> ds_name
    */
-  def generateCatalogDataset = {
+  def generateCatalogDataset: Dataset = {
     val samples = datasetNames.map(n => {
       Sample(Index(), Text(Metadata("ds_name"), n))
     })

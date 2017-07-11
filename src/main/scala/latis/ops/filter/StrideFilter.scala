@@ -12,7 +12,7 @@ import latis.util.iterator.MappingIterator
  */
 class StrideFilter(val stride: Int) extends Filter {
   
-  override def applyToFunction(function: Function) = {
+  override def applyToFunction(function: Function): Option[Function] = {
     val it = new MappingIterator(function.iterator.grouped(stride).map(_(0)), (s: Sample) => Some(s))
     val md = function.getMetadata("length") match {
       case None => function.getMetadata
@@ -38,5 +38,5 @@ object StrideFilter extends OperationFactory {
     
   def apply(stride: Int): StrideFilter = new StrideFilter(stride)
   
-  def unapply(filter: StrideFilter) = Some(filter.stride)
+  def unapply(filter: StrideFilter): Option[Int] = Some(filter.stride)
 }

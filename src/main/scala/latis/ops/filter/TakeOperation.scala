@@ -6,7 +6,7 @@ import latis.ops.OperationFactory
 
 
 class TakeOperation(val n: Int) extends Filter {
-  override def applyToFunction(function: Function) = {
+  override def applyToFunction(function: Function): Option[Function] = {
     //Assume we can hold this all in memory.
     
     //get the first 'n' samples, or all if we had less

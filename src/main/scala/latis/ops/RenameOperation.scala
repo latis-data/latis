@@ -67,7 +67,7 @@ class RenameOperation(val origName: String, val newName: String) extends Operati
 
 object RenameOperation extends OperationFactory {
   
-  override def apply(args: Seq[String]) = RenameOperation(args(0), args(1))
+  override def apply(args: Seq[String]): RenameOperation = RenameOperation(args(0), args(1))
   //TODO: error handling
   
   def apply(expression: String): RenameOperation = {
@@ -78,5 +78,5 @@ object RenameOperation extends OperationFactory {
     
   def apply(name1: String, name2: String): RenameOperation = new RenameOperation(name1, name2)
   
-  def unapply(renameOp: RenameOperation) = Some(renameOp.origName, renameOp.newName)
+  def unapply(renameOp: RenameOperation): Option[(String, String)] = Some(renameOp.origName, renameOp.newName)
 }

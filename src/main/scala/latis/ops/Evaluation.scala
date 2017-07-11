@@ -49,5 +49,5 @@ class Evaluation(value: Variable) extends Operation {
 
 object Evaluation {
   
-  def apply(value: Variable) = new Evaluation(value)
+  def apply(value: Variable): Evaluation = new Evaluation(value)
 }

@@ -24,5 +24,5 @@ class RealSampledSet(values: immutable.Seq[Double]) extends DomainSet {
 
 object RealSampledSet {
   
-  def apply(ds: Seq[Double]) = new RealSampledSet(ds.toIndexedSeq)
+  def apply(ds: Seq[Double]): RealSampledSet = new RealSampledSet(ds.toIndexedSeq)
 }

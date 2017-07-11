@@ -19,9 +19,9 @@ class StringContains(name: String, value: String) extends Selection(name, "=~", 
 
 object StringContains extends OperationFactory {
   
-  def apply(name: String, value: String) = new StringContains(name, value)
+  def apply(name: String, value: String): StringContains = new StringContains(name, value)
   
-  override def apply(args: Seq[String]) = StringContains(args(0), args.tail.mkString(","))
+  override def apply(args: Seq[String]): StringContains = StringContains(args(0), args.tail.mkString(","))
   
   def unapply(sc: StringContains): Option[(String, String)] = Some((sc.vname, sc.value))
   

@@ -30,7 +30,7 @@ class MaxDeltaFilter(val name: String, val maxDelta: Double) extends Filter {
           currentValue = nextValue
           Some(scalar) //Acceptable delta, keep
         }
-      } else Some(scalar) 
+      } else { Some(scalar) }
     }
   }
   

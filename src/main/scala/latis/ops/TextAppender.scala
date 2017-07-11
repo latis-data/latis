@@ -10,7 +10,7 @@ class TextAppender(name: String, suffix: String) extends Operation() {
   /**
    * Append 'suffix' to any Text Variable named 'name'.
    */
-  override def applyToScalar(s: Scalar) = s.hasName(name) match {
+  override def applyToScalar(s: Scalar): Option[Variable] = s.hasName(name) match {
     case true => {
       val t = s match {
         case Text(str) => str + suffix
@@ -37,7 +37,7 @@ class TextAppender(name: String, suffix: String) extends Operation() {
 }
 
 object TextAppender extends OperationFactory {
-  override def apply(args: Seq[String]) = new TextAppender(args(0), args(1))
+  override def apply(args: Seq[String]): TextAppender = new TextAppender(args(0), args(1))
   
-  def apply(name: String, suffix: String) = new TextAppender(name, suffix)
+  def apply(name: String, suffix: String): TextAppender = new TextAppender(name, suffix)
 }

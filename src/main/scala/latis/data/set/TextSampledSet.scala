@@ -28,5 +28,5 @@ class TextSampledSet(values: immutable.Seq[String]) extends DomainSet {
 
 object TextSampledSet {
   
-  def apply(ds: Seq[String]) = new TextSampledSet(ds.toIndexedSeq)
+  def apply(ds: Seq[String]): TextSampledSet = new TextSampledSet(ds.toIndexedSeq)
 }

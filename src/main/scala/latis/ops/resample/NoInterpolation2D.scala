@@ -2,7 +2,7 @@ package latis.ops.resample
 
 trait NoInterpolation2D extends Interpolation2D {
 
-  def interpolator(domain: Array[Array[Double]], range: Array[Double]) = (x: Double, y: Double) => {
+  def interpolator(domain: Array[Array[Double]], range: Array[Double]): (Double, Double) => Option[Double] = (x: Double, y: Double) => {
     val xs = domain(0).distinct
     val ys = domain(1).distinct
 

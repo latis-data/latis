@@ -4,7 +4,7 @@ import latis.dm.Function
 import latis.metadata.Metadata
 
 class DropOperation(val n: Int) extends Operation {
-  override def applyToFunction(function: Function) = {
+  override def applyToFunction(function: Function): Option[Function] = {
     //Assume we can hold this all in memory.
     
     //get data without first n samples

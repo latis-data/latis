@@ -27,7 +27,7 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
     case Dataset(variable) => {
       val md = dataset.getMetadata
       applyToVariable(variable) match {
-        case Some(v) => Dataset(v, md+("name", "dataset_health")) 
+        case Some(v) => Dataset(v, md + ("name", "dataset_health"))
         case None => Dataset.empty
       }
     }
@@ -38,7 +38,7 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
    * Determine whether the datasets listed in 
    * this catalog are "alive" or not.
    */
-  override def applyToFunction(function: Function) = { 
+  override def applyToFunction(function: Function): Option[Function] = {
     function match {
       case Function(it) => {
         val samples = it.map { s => s match {

@@ -3,7 +3,6 @@ package latis.writer
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Index
-import latis.dm.Integer
 import latis.dm.Real
 import latis.dm.Sample
 import latis.dm.Scalar
@@ -34,10 +33,10 @@ class JsonWriter extends TextWriter {
 //  override def makeHeader(dataset: Dataset) = "{" //"{\"" + dataset.getName + "\": {\n"
 //  override def makeFooter(dataset: Dataset) = "}" //"}}"
     
-  override def makeHeader(dataset: Dataset) = "{\"" + dataset.getName + "\": {\n"
-  override def makeFooter(dataset: Dataset) = "}}\n"
+  override def makeHeader(dataset: Dataset): String = "{\"" + dataset.getName + "\": {\n"
+  override def makeFooter(dataset: Dataset): String = "}}\n"
 
-  override def writeFunction(function: Function) {
+  override def writeFunction(function: Function): Unit = {
     printWriter.print(makeLabel(function) + "[")
     val startThenDelim = FirstThenOther("", "," + newLine)
     //note, calling makeSample directly to avoid the label

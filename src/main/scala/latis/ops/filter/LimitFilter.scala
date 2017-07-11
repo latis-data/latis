@@ -12,7 +12,7 @@ import latis.util.iterator.MappingIterator
  */
 class LimitFilter(val limit: Int) extends Filter {
   
-  override def applyToFunction(function: Function) = {
+  override def applyToFunction(function: Function): Option[Function] = {
     //Assume we can hold this all in memory.
     
     //get the first 'limit' samples, or all if we had less

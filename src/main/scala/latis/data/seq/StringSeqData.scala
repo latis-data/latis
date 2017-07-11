@@ -19,13 +19,13 @@ case class StringSeqData(ss: immutable.Seq[String], textLength: Int) extends Ite
     bb
   }
   
-  override def length = ss.length //number of samples
+  override def length: Int = ss.length //number of samples
 
-  def recordSize = textLength * 2 //2 bytes per char
+  def recordSize: Int = textLength * 2 //2 bytes per char
   
-  def iterator = ss.iterator.map(s => StringValue(StringUtils.padOrTruncate(s, textLength)))
+  def iterator: Iterator[StringValue] = ss.iterator.map(s => StringValue(StringUtils.padOrTruncate(s, textLength)))
   
-  def apply(index: Int) = StringValue(ss(index))
+  def apply(index: Int): StringValue = StringValue(ss(index))
 }
 
 object StringSeqData {

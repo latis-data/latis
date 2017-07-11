@@ -102,6 +102,6 @@ class LeftOuterJoin extends Aggregation {
 
 object LeftOuterJoin {
   
-  def apply() = new LeftOuterJoin()
-  def apply(ds1: Dataset, ds2: Dataset, md: Metadata = EmptyMetadata) = new LeftOuterJoin()(ds1, ds2, md)
+  def apply(): LeftOuterJoin = new LeftOuterJoin()
+  def apply(ds1: Dataset, ds2: Dataset, md: Metadata = EmptyMetadata): Dataset = new LeftOuterJoin()(ds1, ds2, md)
 }

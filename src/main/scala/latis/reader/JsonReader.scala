@@ -40,7 +40,7 @@ class JsonReader(path: String) extends DatasetAccessor {
     source
   }
     
-  def close {
+  def close: Unit = {
     if (source != null) source.close
   }
   
@@ -128,8 +128,8 @@ class JsonReader(path: String) extends DatasetAccessor {
 
 object JsonReader {
   
-  def apply(url: URL) = if (url.getPath.contains(".json")) new JsonReader(url.toString) else throw new Exception("JsonReader can only read .json files")
+  def apply(url: URL): JsonReader = if (url.getPath.contains(".json")) new JsonReader(url.toString) else throw new Exception("JsonReader can only read .json files")
 
-  def apply(path: String) = if (path.contains(".json")) new JsonReader(path) else throw new Exception("JsonReader can only read .json files")
+  def apply(path: String): JsonReader = if (path.contains(".json")) new JsonReader(path) else throw new Exception("JsonReader can only read .json files")
   
 }

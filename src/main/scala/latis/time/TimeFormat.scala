@@ -40,7 +40,7 @@ class TimeFormat(format: String) {
     this
   }
 
-  override def toString = format
+  override def toString: String = format
 }
 
 object TimeFormat {

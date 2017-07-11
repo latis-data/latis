@@ -20,13 +20,13 @@ class JsonAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     source
   }
     
-  def close {
+  def close: Unit = {
     if (source != null) source.close
   }
   
   lazy val json = Json.parse(getDataSource.mkString)
   
-  override def init = {
+  override def init: Unit = {
     val vars = getOrigScalars
     val names = getOrigScalarNames
     names.foreach(name => {

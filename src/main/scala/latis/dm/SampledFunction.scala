@@ -19,7 +19,7 @@ import com.typesafe.scalalogging.LazyLogging
  * by Sample objects. Each Sample object represents a single mapping of a
  * domain value to a range value.
  */
-class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = EmptyMetadata, data: SampledData = EmptyData) 
+class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = EmptyMetadata, data: SampledData = EmptyData)
     extends AbstractVariable(metadata, data) with Function with LazyLogging {
 
   //expose domain and range via defs only so we can override
@@ -27,8 +27,8 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   def getDomain: Variable = domain
   def getRange: Variable = range
   def getSample: Sample = Sample(domain, range)
-  
-  
+
+
   //evaluate
   //TODO: use interpolation and extrapolation strategies
   def apply(arg: Variable): Option[Variable] = {
@@ -36,13 +36,13 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
       case (a: Scalar, b: Scalar) => a.compare(b) == 0
       case _ => throw new IllegalArgumentException("Cannot evaluate a Function with a non-Scalar domain.")
     })
-    
+
     x match {
       case Some(s: Sample) => Some(s.range)
       case None => None
     }
   }
-  
+
   /**
    * Compose two functions such that the resulting function has the domain of g
    * and the range of this.
@@ -52,23 +52,23 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
     val it = new MappingIterator(g.iterator, (s: Sample) => this(s.range) match {
       case Some(v) => Some(Sample(s.domain, v))
       case None => None
-    }) 
-    
+    })
+
     Function(g.getDomain, range, it, g.getMetadata + ("name" -> s"${this.getName} of ${g.getName}"))
   }
-  
-  
+
+
   /**
    * Return the number of samples represented by this SampledFunction.
    */
   def getLength: Int = { //TODO: long?
     //TODO: consider -n = unlimited but currently at n?
-    
+
     //try metadata
     getMetadata.get("length") match {
       case Some(l) => l.toInt
       case None => {
-        if(_iterable != null) _iterable.size 
+        if(_iterable != null) _iterable.size
         //try looking at data
         else if (data.notEmpty) {
           data.domainSet.length //may be undefined/unlimited = -1
@@ -81,15 +81,15 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
       }
     }
   }
-  
+
   /**
    * Internal Iterable so we can construct a SampledFunction from an Iterator of Samples.
    */
   private var _iterable: Iterable[Sample] = null
-  
+
   //counter for testing iterable once problems
   private var itcounter = 0
-  
+
   /**
    * If this SampledFunction was constructed with an Iterator, return it.
    * Wrap it as a PeekIterator if it isn't one already.
@@ -99,7 +99,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
     //test if we have tried to iterate more than once on this function
     itcounter += 1
 //    if (itcounter > 1) throw new Error("Iterating more than once on " + this)
-    
+
     _iterable match {
     case null => {
       logger.debug("Make Iterator from DataIterator: " + this)
@@ -115,11 +115,11 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
     }
     }
   }
-  
+
   /**
    * Returns true if iterator.isEmpty returns true,
    * else false
-   * 
+   *
    * The advantage of calling this method over
    * iterator.isEmpty (aside from being shorter) is
    * that since iterator returns a new PeekIterator wrapping
@@ -127,7 +127,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
    * will consume an element of _iterator. This
    * method will not consume any elements from
    * _iterator (it calls _iterator.hasNext directly)
-   * 
+   *
    * This problem manifests itself if you run code like this:
    * val isEmpty = myFunction.iterator.isEmpty
    * This causes a sample to be lost from myFunction._iterator
@@ -144,7 +144,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   else {
     getData.isEmpty
   }
-  
+
   /**
    * If this SampledFunction was constructed with SampledData, iterate on it.
    * Otherwise, try to use the sample iterator and map back to the data.
@@ -169,7 +169,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
 
 object SampledFunction {
   //TODO: redundant with Function constructors?
-  def apply(domain: Variable, range: Variable, samples: Iterator[Sample], metadata: Metadata = EmptyMetadata) = {
+  def apply(domain: Variable, range: Variable, samples: Iterator[Sample], metadata: Metadata = EmptyMetadata): SampledFunction = {
     if (samples == null) throw new Error("Can't construct a SampledFunction with a null Sample Iterator.")
     val sit = domain match {
       case i: Index => IndexSet().iterator.zip(samples).map(p => Sample(Index(i.getMetadata, p._1), p._2.range))
@@ -181,8 +181,8 @@ object SampledFunction {
     }
     sf
   }
-  
-  def apply(samples: Iterable[Sample], metadata: Metadata) = {
+
+  def apply(samples: Iterable[Sample], metadata: Metadata): SampledFunction = {
     if (samples == null) throw new Error("Can't construct a SampledFunction with a null Sample Iterable.")
     val template = samples.head
     val sit = template.domain match {

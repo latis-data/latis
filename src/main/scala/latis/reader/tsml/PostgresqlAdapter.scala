@@ -16,7 +16,7 @@ class PostgresqlAdapter(tsml: Tsml) extends JdbcAdapter(tsml) {
    * Override to apply the 'limit' property if it is set.
    * Limit, First, and Last Filters use this property.
    */
-  override def makeQuery = {
+  override def makeQuery: String = {
     //Delegate to the superclass to construct the main query.
     val sql = super.makeQuery
     

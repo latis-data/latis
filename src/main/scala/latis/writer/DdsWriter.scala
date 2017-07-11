@@ -20,7 +20,7 @@ class DdsWriter extends TextWriter {
   
   val indentSize = 4
   
-  override def makeHeader(dataset: Dataset) = "Dataset {\n"
+  override def makeHeader(dataset: Dataset): String = "Dataset {\n"
   
   override def writeVariable(variable: Variable): Unit = {
     printWriter.print(varToString(variable))
@@ -69,7 +69,7 @@ class DdsWriter extends TextWriter {
     s
   }
   
-  override def makeFooter(dataset: Dataset) = "} " + dataset.getName + ";"
+  override def makeFooter(dataset: Dataset): String = "} " + dataset.getName + ";"
   
   var count = indentSize
   

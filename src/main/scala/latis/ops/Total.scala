@@ -34,6 +34,6 @@ class Total extends Operation {
 }
 
 object Total extends OperationFactory{
-  override def apply() = new Total
+  override def apply(): Total = new Total
 }
 

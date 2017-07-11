@@ -31,5 +31,5 @@ class Memoization extends Operation {
 }
 
 object Memoization {
-  def apply() = new Memoization()
+  def apply(): Memoization = new Memoization()
 }

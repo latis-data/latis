@@ -21,7 +21,7 @@ class ProtoBufAdapter(tsml: Tsml) extends IterativeAdapter[Array[ByteBuffer]](ts
     source
   }
   
-  override def close {
+  override def close: Unit = {
     if (source != null) source.close
   }
   
@@ -42,7 +42,7 @@ class ProtoBufAdapter(tsml: Tsml) extends IterativeAdapter[Array[ByteBuffer]](ts
    * Break the ByteBuffer into Arrays.
    * Each Array represents one sample with each Variable in its own buffer.
    */
-  def bufToSeq(buffer: ByteBuffer) = {
+  def bufToSeq(buffer: ByteBuffer): Seq[Array[ByteBuffer]] = {
     var s = Seq[Array[ByteBuffer]]()
     parseKey(buffer)
     parseVarint(buffer)

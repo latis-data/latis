@@ -55,5 +55,5 @@ class CacheAccessor extends DatasetAccessor {
   /**
    * Release any resources that this accessor acquired.
    */
-  def close() = {}
+  def close(): Unit = {}
 }

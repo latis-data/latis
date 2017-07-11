@@ -25,7 +25,7 @@ class DomainBinner(knownValues: String, fillVal: String) extends Operation {
   /**
    * Returns a Tuple containing the bounds of this Variable
    */
-  override def applyToScalar(scalar: Scalar) = {
+  override def applyToScalar(scalar: Scalar): Option[Tuple] = {
     val name = scalar.getName
     knownValues match {
       case "start" => {
@@ -44,7 +44,7 @@ class DomainBinner(knownValues: String, fillVal: String) extends Operation {
     Some(Tuple(List(binStart, binStop), Metadata("bounds")))
   }
   
-  override def applyToSample(sample: Sample) = {
+  override def applyToSample(sample: Sample): Option[Sample] = {
     applyToVariable(sample.domain) match {
       case Some(t:Tuple) => sample.range match{
         case Tuple(vars) => Some(Sample(sample.domain, Tuple(vars :+ t)))
@@ -54,7 +54,7 @@ class DomainBinner(knownValues: String, fillVal: String) extends Operation {
     }
   }
   
-  override def applyToFunction(function: Function) = {
+  override def applyToFunction(function: Function): Option[Variable] = {
     val temp = function.getDomain
     val name = temp.getName
     pit = PeekIterator(function.iterator)
@@ -68,8 +68,8 @@ class DomainBinner(knownValues: String, fillVal: String) extends Operation {
 
 object DomainBinner extends OperationFactory {
   
-  def apply(knownValue: String, fillVal: String) = new DomainBinner(knownValue, fillVal)
+  def apply(knownValue: String, fillVal: String): DomainBinner = new DomainBinner(knownValue, fillVal)
   
-  override def apply(args: Seq[String]) = new DomainBinner(args(0), args(1))
+  override def apply(args: Seq[String]): DomainBinner = new DomainBinner(args(0), args(1))
   
 }

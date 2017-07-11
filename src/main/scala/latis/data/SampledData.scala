@@ -94,7 +94,7 @@ object SampledData {
     SampledData(dset, rdata)
   }
   
-  def fromValues(dvals: Seq[Double], vals: Seq[Double]*) ={
+  def fromValues(dvals: Seq[Double], vals: Seq[Double]*): SampledData = {
     //assert that all Seq are same length as the domain
     if (vals.exists(_.length != dvals.length)) throw new Error("Value sequences must be the same length.")
     

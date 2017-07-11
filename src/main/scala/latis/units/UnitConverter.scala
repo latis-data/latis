@@ -29,7 +29,7 @@ abstract class UnitConverter(from: UnitOfMeasure, to: UnitOfMeasure) {
 
 object UnitConverter {
   
-  def apply(from: UnitOfMeasure, to: UnitOfMeasure) = {
+  def apply(from: UnitOfMeasure, to: UnitOfMeasure): NoOpUnitConverter = {
     if (from == to) new NoOpUnitConverter(from, to)  //TODO: override equals?
     else throw new UnsupportedOperationException("There is no unit conversion support from " + from + " to " + to)
   }

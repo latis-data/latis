@@ -18,5 +18,5 @@ class FirstThenOther[T](first: T, other: T) {
 }
 
 object FirstThenOther {
-  def apply[T](first: T, other: T) = new FirstThenOther[T](first, other)
+  def apply[T](first: T, other: T): FirstThenOther[T] = new FirstThenOther[T](first, other)
 }

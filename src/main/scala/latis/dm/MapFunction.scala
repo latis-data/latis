@@ -9,14 +9,14 @@ import latis.util.iterator.PeekIterator
  * Experiment with holding Function data in a SortedMap.
  *   Text -> Text only, for now
  */
-//class MapFunction[D <: V, C <: V](domain: D, range: C, metadata: Metadata = EmptyMetadata, map: SortedMap[D,C]) 
+//class MapFunction[D <: V, C <: V](domain: D, range: C, metadata: Metadata = EmptyMetadata, map: SortedMap[D,C])
 class MapFunction(map: SortedMap[String, String]) extends SampledFunction(Text(""), Text("")) {
 
   override def apply(v: Variable): Option[Variable] = v match {
     case Text(s) => map.get(s).map(Text(_))
   }
 
-  override def iterator = PeekIterator(map.iterator.map(p => Sample(Text(p._1), Text(p._2))))
+  override def iterator: PeekIterator[Sample] = PeekIterator(map.iterator.map(p => Sample(Text(p._1), Text(p._2))))
 }
 
 object MapFunction {
@@ -27,7 +27,7 @@ object MapFunction {
         case Sample(Text(k), Text(v)) => k -> v
       }).toSeq
     }
-    
+
     new MapFunction(SortedMap(pairs: _*))
   }
 }

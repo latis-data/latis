@@ -395,5 +395,5 @@ class FullOuterJoin2 extends Join with NoInterpolation with NoExtrapolation {
 }
 
 object FullOuterJoin2 {
-  def apply() = new FullOuterJoin2()
+  def apply(): FullOuterJoin2 = new FullOuterJoin2()
 }

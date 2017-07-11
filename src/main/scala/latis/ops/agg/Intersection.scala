@@ -17,7 +17,7 @@ class Intersection extends Aggregation {
   //use case: x -> (a,b) intersect x -> (c,d) => x -> (a,b,c,d) 
   //  where only samples with x in both are kept
 
-  def aggregate(ds1: Dataset, ds2: Dataset) = {    
+  def aggregate(ds1: Dataset, ds2: Dataset): Dataset = {    
     val (f1, f2, it1, it2) = (ds1, ds2) match {
       case(Dataset(f1 @ Function(it1)), Dataset(f2 @ Function(it2))) => (f1, f2, it1, it2)
       case _ => throw new UnsupportedOperationException("Intersection expects a Function in each of the Datasets it aggregates.")
@@ -86,6 +86,6 @@ class Intersection extends Aggregation {
 
 object Intersection {
   
-  def apply() = new Intersection()
-  def apply(ds1: Dataset, ds2: Dataset, md: Metadata = EmptyMetadata) = new Intersection()(ds1, ds2, md)
+  def apply(): Intersection = new Intersection()
+  def apply(ds1: Dataset, ds2: Dataset, md: Metadata = EmptyMetadata): Dataset = new Intersection()(ds1, ds2, md)
 }

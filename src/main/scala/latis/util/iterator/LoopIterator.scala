@@ -6,7 +6,7 @@ package latis.util.iterator
  */
 class LoopIterator[T >: Null](iterator: Iterator[T]) extends PeekIterator[T] {
   private var it = iterator.duplicate
-  def getNext = {
+  def getNext: T = {
     if(it._1.hasNext) it._1.next
     else {
       it = it._2.duplicate

@@ -24,5 +24,5 @@ class IntegerSampledSet(values: immutable.Seq[Long]) extends DomainSet {
 
 object IntegerSampledSet {
   
-  def apply(ds: Seq[Long]) = new IntegerSampledSet(ds.toIndexedSeq)
+  def apply(ds: Seq[Long]): IntegerSampledSet = new IntegerSampledSet(ds.toIndexedSeq)
 }

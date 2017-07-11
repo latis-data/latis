@@ -39,7 +39,7 @@ class FlatCatalogReader extends DatasetAccessor {
   lazy val template = Function(Text(Metadata("name")), Tuple(Text(Metadata("description")),
       Tuple(Text(Metadata("accessURL")), Metadata("distribution"))))
   
-  override def getDataset = {
+  override def getDataset: Dataset = {
     //val files = FileUtilsNio.listAllFilesWithSize(dir).map(_.takeWhile(_ != ','))
     val files = FileUtils.listAllFilesWithSize(dir).map(_.takeWhile(_ != ','))
     val names = files.filter(_.endsWith(".tsml")).map(_.stripSuffix(".tsml"))
@@ -65,10 +65,10 @@ class FlatCatalogReader extends DatasetAccessor {
     operations.foldLeft(dataset)((ds,op) => op(ds))
   }
   
-  def close = {}
+  def close: Unit = {}
   
 }
 
 object FlatCatalogReader {
-  def apply() = new FlatCatalogReader
+  def apply(): FlatCatalogReader = new FlatCatalogReader
 }

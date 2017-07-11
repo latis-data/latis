@@ -17,7 +17,7 @@ class TimeScale(val epoch: Date, val unit: TimeUnit, val tsType: TimeScaleType) 
 
   private var format: TimeFormat = null
 
-  override def toString() = {
+  override def toString(): String = {
     if (format != null) format.toString
     else {
       val sb = new StringBuilder()
@@ -38,7 +38,7 @@ class TimeScale(val epoch: Date, val unit: TimeUnit, val tsType: TimeScaleType) 
 
 object TimeScale {
   //Note, using def instead of lazy val to support tests with varying default TimeScaleType.
-  def JAVA = new TimeScale(new Date(0), TimeUnit.MILLISECOND, TimeScaleType.default)
+  def JAVA: TimeScale = new TimeScale(new Date(0), TimeUnit.MILLISECOND, TimeScaleType.default)
 
   /**
    * Define a special case for Julian date: days since noon Jan 1, 4713 BC.
