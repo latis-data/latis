@@ -138,11 +138,12 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
    * object, both the PeekIterator and its cached value are
    * lost.
    */
-  def isEmpty: Boolean = if (_iterable != null) {
-    _iterable.isEmpty
-  }
-  else {
-    getData.isEmpty
+  def isEmpty: Boolean = {
+    if (_iterable != null) {
+      _iterable.isEmpty
+    } else {
+      getData.isEmpty
+    }
   }
 
   /**
@@ -175,10 +176,14 @@ object SampledFunction {
       case i: Index => IndexSet().iterator.zip(samples).map(p => Sample(Index(i.getMetadata, p._1), p._2.range))
       case _ => samples
     }
-    val sf = new SampledFunction(domain, range, metadata=metadata){
-      override def iterator = PeekIterator(sit)
-      //TODO: this break isEmpty
+    
+    val sf = new SampledFunction(domain, range, metadata=metadata)
+    // Note: {{override def iterator = PeekIterator(sit)}} breaks isEmpty.
+    sf._iterable = new Iterable[Sample]() {
+      def iterator: Iterator[Sample] = sit
+      override def isEmpty: Boolean = sit.isEmpty //may trigger data read
     }
+    
     sf
   }
 

@@ -293,7 +293,7 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
         (f1.isEmpty, f2.isEmpty) match {
         //(f1.iterator.hasNext, f2.iterator.hasNext) match { //TODO: can't call twice
           case (true, true) => Dataset.empty
-  //        case (true, false) => ds2 //TODO: the result of a join come up "empty" here: three_datasets
+          case (true, false) => ds2
           case (false, true) => ds1
 
           case _ => {
