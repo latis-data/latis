@@ -13,6 +13,7 @@ class PropertiesAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     getOrigScalarNames.map(vname => {
       val pval = LatisProperties.getOrElse(vname, "")
       appendToCache(vname, Data(pval))
+      //deprecate append, TODO: collect DataSeq then add to cache
     }) 
   }
   
