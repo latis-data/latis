@@ -48,7 +48,12 @@ case class Model(
     v: VariableType,  //top level variable
     metadata: Metadata = Metadata.empty,
     pis: Seq[ProcessingInstruction] = Seq.empty
-    )
+    ) {
+  
+  
+}
+//TODO: dataset joins
 //TODO: construct from model syntax: X -> (A, B)
     //TODO: name registry, guarantee unique names? 
     //  generate scalar1, scalar2...? uuid?
+
