@@ -51,11 +51,12 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
         it.foreach { s => s match {
           //TODO: Consider matching sample's range as well (to validate catalog's formatting)
           case Sample(Text(name), _) if name contains "ssi" => { 
-            val timeSeriesResults = getPerformanceResults(name, " (time series)")
+            val timeSeriesResults = getPerformanceResults(name, " (time series)") //" (time series)" gets added to ds name in logs
             samples += makeSampleFromResults(name, timeSeriesResults._1, timeSeriesResults._2, timeSeriesResults._3) 
             
-            val spectralResults = getPerformanceResults(name, " (spectrum)")
+            val spectralResults = getPerformanceResults(name, " (spectrum)") //" (spectrum)" gets added to ds name in logs
             samples += makeSampleFromResults(name, spectralResults._1, spectralResults._2, spectralResults._3)
+            ssiSingleTimeDs = None //clear the shortened global ds since we're moving on to another ds now
           }
           //TODO: Consider matching sample's range as well (to validate catalog's formatting)
           case Sample(Text(name), _) => {
@@ -114,7 +115,7 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
   def requestWholeDataset(name: String, op: String): Boolean = {
     try {
       op match {
-        case " (time_series)" => {
+        case " (time series)" => {
           val dsTime = DatasetAccessor.fromName(name).getDataset(Seq(LastFilter())).force
           dsTime match {
             case Dataset(Function(it)) if it.hasNext => {
@@ -124,8 +125,8 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
             case _ => false
           }
         }
-        case " (spectrum)" => {
-          //try to be clever and get a wavelength from dsTime, which is dramatically smaller, to select on
+        case " (spectrum)" => { 
+          //try to be clever and get a wavelength from ssiSingleTimeDs, which is dramatically smaller, to select on
           ssiSingleTimeDs match {
             case Some(dsSSI) => {
               val selection = Seq(Selection("wavelength~" + getFirstWavelength(dsSSI))) 
@@ -136,8 +137,9 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
               }
             }
             case None => { 
-              //TODO: Find a way to avoid hardcoding and/or decide if there's a better wavelength than 400
-              val dsWavelength = DatasetAccessor.fromName(name).getDataset(Seq(Selection("wavelength~400"))).force
+              //TODO: Find a way to avoid guessing a wavelength and/or decide if there's a better one than 121.5
+              //TODO: Maybe warn in logs that a wavelength value was hard coded?
+              val dsWavelength = DatasetAccessor.fromName(name).getDataset(Seq(Selection("wavelength~121.5"))).force
               dsWavelength match {
                 case Dataset(Function(it)) => it.hasNext
                 case _ => false
@@ -174,15 +176,6 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
       }
     }
   }
-  
-//  /*
-//   * 
-//   */
-//  def getMaxWavelength(ssiDsName: String): Double = {
-//    //possibly like: ssi.txt?last()&max(wavelength)
-//    //val w = 
-//    ???
-//  }
   
   
 }
