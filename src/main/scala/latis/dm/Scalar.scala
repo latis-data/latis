@@ -10,6 +10,8 @@ import latis.metadata.EmptyMetadata
 import latis.metadata.Metadata
 import latis.time.Time
 import latis.util.StringUtils
+import java.nio.ByteBuffer
+import latis.util.DataUtils
 
 /**
  * Base type for all Scalar Variables.
@@ -112,6 +114,33 @@ object Scalar {
     case _ => throw new Error("Unable to make Scalar from value: " + value)
   }
 
+  /**
+   * Smart constructor used by Adapter.
+   */
+  //TODO: fromByteBuffer?
+  def apply(stype: ScalarType, bb: ByteBuffer): Scalar = {
+    val data = stype.getType match {
+      //TODO: support other types?
+      case "integer" => Data(bb.getLong)
+      case "real"    => Data(bb.getDouble)
+      case "text"    => 
+        //TODO: Text Time gets length from units; 
+        //  orig dataset does this but not model, 
+        //  require it for now
+        val n = stype.getMetadata("length") match {
+          case Some(l) => l.toInt //TODO: handle error
+          case None => Text.DEFAULT_LENGTH //4 chars (8 bytes)
+        }
+        Data(DataUtils.bufferToString(bb, n))
+      case "boolean" => ???
+      case "binary" => ???
+      case _ => ???
+    }
+    
+    if (stype.hasName("time")) Time(stype.getType, stype.metadata, data)
+    else Scalar(stype.getType, stype.metadata, data)
+  }
+  
   /**
    * Expose the value represented by this Scalar.
    */
