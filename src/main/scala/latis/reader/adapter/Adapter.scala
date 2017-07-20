@@ -46,6 +46,7 @@ import latis.dm.VariableType
 import latis.dm.TupleType
 import latis.dm.ScalarType
 import java.nio.ByteBuffer
+import latis.util.iterator.PeekIterator
 
 
 /**
@@ -81,17 +82,22 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
     // Allow subclasses to handle user Operations.
     val otherOps: Seq[Operation] = operations.filterNot(handleOperation(_))
       
-    // Traverse the Model and construct the Dataset.
-    val dataset = makeVariable(model.v) match {
-      case Some(v) => Dataset(v, model.metadata)
-      case None    => Dataset(null, model.metadata)
-    }
-    
+    // Construct the Dataset
+    val dataset = makeDataset(model)
+
     // Apply remaining processing instructions and user Operations.
     val piOps = otherPIs.map(pi => Operation(pi.name, pi.args.split(',').map(_.trim)))
     //TODO: deal with PIs targeted for specific var 
     (piOps ++ otherOps).foldLeft(dataset)((ds, op) => op(ds))
     //TODO: compose (and optimize) Operations (as functions V => V) then apply to dataset
+  }
+  
+  /**
+   * Traverse the Model and construct the Dataset.
+   */
+  def makeDataset(model: Model): Dataset = makeVariable(model.variable) match {
+    case Some(v) => Dataset(v, model.metadata)
+    case None    => Dataset(null, model.metadata)
   }
   
   //---- Construct Variables --------------------------------------------------
@@ -108,47 +114,28 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
   }
   
   /**
-   * Build a Scalar from the model by adding Data.
-   * This will look to see if data for this variable has been cached.
-   * Note, this will not be called for Scalars within a Function when using the default makeFunction.
+   * Build a Scalar from the model by adding Data from the cache.
    */
-  protected def makeScalar(scalar: ScalarType): Option[Scalar] = getCachedData(scalar.id) match {
-    /*
-     * TODO: get value from cache, update cursor
-     * override to directly manage data read data
-     * or replace cache with each record read?
-     * we shouldn't need data utils if we pull out data as needed
-     * manage cache as id -> byteBuffer; add Data (can't append?) 
-     */
-    case Some(bb) => scalar.metadata.get("type") match {
-      case Some("real") => Some(Scalar(scalar.metadata, Data(bb.getDouble)))
+  protected def makeScalar(scalar: ScalarType): Option[Scalar] = {
+    //getCachedData(scalar.id).map(Scalar(scalar, _))
+    //TODO: error if None? no data in cache
+    getCachedData(scalar.id) match {
+      case Some(bb) => 
+        //TODO: error if no bytes remaining, instead of the dreaded buffer underflow
+        // Hack for nested Function domain: If we are at the end of a buffer, rewind it
+        if (scalar.hasName("wavelength") && ! bb.hasRemaining) bb.rewind
+        Option(Scalar(scalar, bb))
+      case None => 
+        throw new RuntimeException(s"No data found for scalar: $scalar.id")
     }
-    case None => ??? //TODO: error since this means no data in cache?
   }
-  
-//  /**
-//   * Build a Sample Variable from the domain and range components.
-//   * This will replace the domain with an Index as a placeholder if it is needed.
-//   */
-//  protected def makeSample(sample: TupleType): Option[Sample] = {
-//    //Note that a Sample has no metadata
-//    val domain = makeVariable(sample.vars(0))
-//    val range  = makeVariable(sample.vars(1))
-//    //TODO: how does the type changing get reflected in Function?
-//    (domain, range) match {
-//      case (Some(d), Some(r)) => Some(Sample(d,r))
-//      case (None, Some(r))    => Some(Sample(Index(), r)) //no domain, so replace with Index. 
-//      case (Some(d), None)    => Some(Sample(Index(), d)) //no range, so make domain the range of an index function
-//      case (None, None)       => None //nothing projected
-//    }
-//  }
-  
+
   /**
    * Build a Tuple.
    */
   protected def makeTuple(tuple: TupleType): Option[Tuple] = {
     val md = tuple.metadata
-    val vars = tuple.vars.flatMap(makeVariable(_)) 
+    val vars = tuple.variables.flatMap(makeVariable(_)) 
     vars.length match {
       case 0 => None
       case n => Some(Tuple(vars, md))
@@ -159,64 +146,36 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
   /**
    * Build a Function.
    * This approach assumes that the Adapter subclass has put Data
-   * into the cache. In this case, the other "makeVariable" methods
-   * defined here will not be used.
-   * Note, many Adapters are IterativeAdapters which override makeFunction.
+   * into the cache. 
    */
   protected def makeFunction(f: FunctionType): Option[Function] = {
- /*
-  * TODO: this requires that data has been read before Dataset construction is complete!
-  * should we try the iterative approach by default?
-  * put data into Scalars?
-  * even IterativeAdapter2 parses data into a Data Map
-  * immediate use case is netcdf which uses cache (LISIRDIII-922)
-  * 
-  */
-    //TODO: Make Iterator of Samples
-    //assume length of function is specified for now
-    //TODO: consider nested functions, should just work if we don't reset BB
-    val n = f.metadata.get("length") match {
-      case Some(s) => s.toInt
-    }
-    val samples = (0 until n).flatMap { i => 
-      for {
-        d <- makeVariable(f.domain);
-        r <- makeVariable(f.codomain)
-      } yield Sample(d, r)
+
+    val samples = new PeekIterator[Sample]() {
+      private var index = -1
+      private val n = f.metadata.get("length") match {
+        case Some(s) => s.toInt
+        case None    => -1 //unlimited
+      }
+      
+      def getNext: Sample = {
+        index += 1
+        if (n >= 0 && index >= n) null
+        else {
+          val os = for {
+            d <- makeVariable(f.domain);
+            r <- makeVariable(f.codomain)
+          } yield Sample(d, r) 
+          os match {
+            case Some(s) => s
+            case None => getNext //skip bad sample
+          }
+        }
+      }
     }
     
-    Option(SampledFunction(samples, f.metadata))
+    val smp = samples.peek
+    Option(SampledFunction(smp.domain, smp.range, samples, f.metadata))
   }
-  
-
-  
-//  //---- Adapter properties from TSML -----------------------------------------
-//  
-//  /**
-//   * Store XML attributes for this Adapter definition as a properties Map.
-//   */
-//  private var properties: Map[String,String] = tsml.dataset.getAdapterAttributes()
-//
-//  /**
-//   * Return Some property value or None if property does not exist.
-//   */
-//  def getProperty(name: String): Option[String] = properties.get(name)
-//  
-//  /**
-//   * Return property value or default if property does not exist.
-//   */
-//  def getProperty(name: String, default: String): String = getProperty(name) match {
-//    case Some(v) => v
-//    case None => default
-//  }
-//  
-//  /**
-//   * Allow adapters to manipulate their properties.
-//   */
-//  protected def setProperty(name: String, value: String): Unit = {
-//    properties = properties + (name -> value)
-//  }
-  
   
   //---- Caching --------------------------------------------------------------
   
@@ -321,7 +280,9 @@ object Adapter {
       case Some(class_name) =>
         try {
           val cls = Class.forName(class_name)
-          val ctor = cls.getConstructor(model.getClass(), properties.getClass)
+          val cs = cls.getConstructors
+          val ctor = cs.head
+          //val ctor = cls.getConstructor(model.getClass(), properties.getClass)
           ctor.newInstance(model, properties).asInstanceOf[Adapter]
         } catch {
           case e: Exception =>
