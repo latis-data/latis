@@ -10,6 +10,9 @@ import latis.data.value.DoubleValue
 import latis.data.seq.DataSeq
 import latis.metadata.Metadata
 import latis.ops.Operation
+import latis.reader.tsml.TsmlReader2
+import java.net.URL
+import latis.ops.filter.FirstFilter
 
 class MockAdapter(m: Model, properties: Map[String, String] = Map.empty) 
   extends Adapter(m, properties) {
@@ -32,11 +35,12 @@ class TestAdapter {
   
   @Test
   def test = {
-    //val props: Map[String, String] = Map("class" -> "latis.reader.MockAdapter")
-    //val a = Adapter(model, props)
-    val a = new MockAdapter(model)
+    val props: Map[String, String] = Map("class" -> "latis.reader.MockAdapter")
+    val a = Adapter(model, props)
+    //val a = new MockAdapter(model)
     val ops = scala.collection.mutable.ArrayBuffer[Operation]()
     val ds = a.getDataset(ops)
-    latis.writer.Writer.fromSuffix("asc").write(ds)
+    //latis.writer.Writer.fromSuffix("asc").write(ds)
+    assertEquals(10, ds.getLength)
   }
 }
