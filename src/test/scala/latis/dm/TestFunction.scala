@@ -85,6 +85,12 @@ class TestFunction {
     assertEquals(11.0, data(0)(1), 0.0)
   }
   
+  @Test
+  def empty = {
+    val f = TestFunction.empty_function
+    assertTrue(f.isEmpty)
+  }
+  
   
 //  @Test(expected = classOf[Error])
 //  def iterate_twice_error {
@@ -146,7 +152,7 @@ object TestFunction {
     Function(samples)
   }
   
-  def empty_function = Dataset(Function(Real(Metadata("domain")), Real(Metadata("range")), Iterator.empty))
+  def empty_function = Function(Real(Metadata("domain")), Real(Metadata("range")), Iterator.empty)
   
   //def index_function = Dataset(Function(List(Text("msg", "Hi"), Text("msg", "Bye")), "myIndexFunction"), "indexFunctionDS")
   def index_function = Function(List(Integer(1), Integer(2)))

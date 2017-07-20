@@ -69,7 +69,7 @@ class TestExcludeMissing {
   @Test
   def exclude_missing_from_empty_dataset {
     val op = Operation("exclude_missing")
-    val ds = TestFunction.empty_function
+    val ds = TestDataset.empty_function
     val ds2 = op(ds)
     //Writer.fromSuffix("jsond").write(ds2)
     val data = ds2.toStringMap
