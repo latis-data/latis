@@ -28,8 +28,13 @@ class TsmlReader2(url: URL) extends DatasetAccessor {
    * Do this eagerly so it fails fast.
    */
   val model: Model = {
-    Model(varMlToVarType(tsml.dataset.getVariableMl))
+    val dsml = tsml.dataset
+    val vtype = varMlToVarType(dsml.getVariableMl)
+    val md = makeMetadata(dsml)
+    val pis = tsml.processingInstructions.map(p => ProcessingInstruction(p._1, p._2))
+    Model(vtype, md, pis)
   }
+  
   
   /**
    * Recursive function to build VariableType graph 
@@ -41,23 +46,78 @@ class TsmlReader2(url: URL) extends DatasetAccessor {
     //TODO: deal with undefined name?
     case ml: ScalarMl =>
       val id = ml.getName
-      val md = Metadata(ml.getMetadataAttributes)
+      val md = makeMetadata(ml)
       ScalarType(id, md)
-    //TODO: TimeMl, adds default type of "real"
+    case ml: TimeMl => 
+      val id = ml.getName
+      val md = makeMetadata(ml)
+      //add default type of "real"
+      val md2 = if (! md.has("type")) md + ("type" -> "real") else md
+      ScalarType(id, md2)
     case ml: TupleMl =>
       val vs = ml.variables.map(varMlToVarType(_))
       val id = ml.getName
-      val md = Metadata(ml.getMetadataAttributes)
+      val md = makeMetadata(ml)
       TupleType(vs, id, md)
     case ml: FunctionMl =>
       val domain   = varMlToVarType(ml.domain)
       val codomain = varMlToVarType(ml.range)
       val id = ml.getName
-      val md = Metadata(ml.getMetadataAttributes)
+      val md = makeMetadata(ml)
       FunctionType(domain, codomain, id, md)
   }
   
-  
+  // Don't implicitly name more than one "time" variable.
+  var timeUnused = true
+    
+  private def makeMetadata(vml: VariableMl): Metadata = {
+    if (vml.hasName("time")) timeUnused = false
+    /*
+     * Combine tsml variable element label (type), attributes,
+     *   and metadata attributes.
+     * Note that some of these may need to become PIs.
+     * 
+     */
+    val atts = scala.collection.mutable.Map[String, String]()
+    atts ++=  vml.getAttributes
+    atts ++= vml.getMetadataAttributes
+
+ //TODO: review implicit naming...
+    
+    // if id = time, look for other "type" def or use "real"
+    val typ = vml.label match {
+      case "time" => atts.get("type") match {
+        case Some(t) => t
+        case None => "real"
+      }
+      case s => s
+    }
+    atts += "type" -> typ
+    
+    //internal helper method to add default name for special variable types
+    def addImplicitName(name: String) = {
+      //If the Variable already has a name, add the given name as an alias
+      if (atts.contains("name")) atts.get("alias") match {
+        case Some(a) => atts += ("alias" -> (s"a,$name")) //append to list of existing aliases
+        case None    => atts += ("alias" -> name) //add new alias
+      } 
+      else atts += ("name" -> name) //no 'name' attribute, so set it
+    }
+    
+    // Add implicit names
+    if (! atts.contains("name")) {
+      // Use "id" for "name" metadata
+      vml.getAttribute("id").foreach(id => atts += ("name" -> id))
+      //don't add alias if we already have a 'time'
+      if (timeUnused && vml.label == "time") {
+        addImplicitName("time") 
+        timeUnused = false
+      }
+      if (vml.label == "index") addImplicitName("index")
+    }
+    
+    Metadata(atts)
+  }
   
   /**
    * The adapter as defined in the TSML for reading the Dataset.
@@ -89,48 +149,7 @@ class TsmlReader2(url: URL) extends DatasetAccessor {
    */
   //TODO: don't construct adapter just to close it
   def close: Unit = adapter.close
-  
-//TODO: deal with implicit metadata...  
-//  /**
-//   * Create Metadata from "metadata" elements or Variable element's attributes
-//   * in the given Variable XML.
-//   */
-//  protected def makeMetadata(vml: VariableMl): Metadata = {
-//    //Note, not recursive, each Variable's metadata is independent
-//    
-//    //attributes from the metadata element
-//    var atts = vml.getMetadataAttributes
-//    
-//    if (!atts.contains("name")) vml.getAttribute("id") match {
-//      case Some(id) => atts += "name" -> id
-//      case None => 
-//    }
-//    
-//    vml.getAttribute("length") match {
-//      case Some(l) => atts += "length" -> l
-//      case None => 
-//    }
-//        
-//    //internal helper method to add default name for special variable types
-//    def addImplicitName(name: String) = {
-//      //If the Variable already has a name, add the given name as an alias
-//      if (atts.contains("name")) atts.get("alias") match {
-//        case Some(a) => atts = atts + ("alias" -> (a+","+name)) //append to list of existing aliases
-//        case None => atts = atts + ("alias" -> name) //add alias
-//      } 
-//      else atts = atts + ("name" -> name) //no 'name' attribute, so use it
-//    }
-// 
-//    if(atts.values.toList.contains("time")) timeUnused = false
-//    //Add implicit metadata for "time" and "index" variables.
-//    //TODO: consider uniqueness
-//    if (timeUnused && vml.label == "time") {addImplicitName("time"); timeUnused = false} //don't add alias if we already have a 'time'
-//    if (vml.label == "index") addImplicitName("index")
-//    
-//
-//    Metadata(atts)
-//  }
-  
+
 }
 
 object TsmlReader2 {
