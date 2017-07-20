@@ -10,7 +10,7 @@ import latis.ops.Operation
 import latis.util.DataUtils
 import latis.util.iterator.PeekIterator
 
-class NearestNeighborFilter(domainName: String, value: String) extends Operation {
+class NearestNeighborFilter(val domainName: String, val value: String) extends Operation {
   //TODO: any nD domain
   //TODO: if domain type is Integer but value is double
   
@@ -94,5 +94,7 @@ object NearestNeighborFilter {
   def apply(vname: String, value: AnyVal): NearestNeighborFilter = NearestNeighborFilter(vname, value.toString)
   
   def apply(vname: String, value: String): NearestNeighborFilter = new NearestNeighborFilter(vname, value)
-  
+
+  def unapply(x: NearestNeighborFilter): Option[(String, String)] =
+    Option((x.domainName, x.value))
 }
