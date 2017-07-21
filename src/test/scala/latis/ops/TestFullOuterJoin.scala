@@ -500,7 +500,7 @@ class TestFullOuterJoin {
     }
   }
   
-  @Test @Ignore //need reliable test for empty function
+  @Test
   def empty_first = {
     val samples2 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
     val ds1 = Dataset(Function(Real(mdt), Real(mda), Iterator.empty, Metadata("function1")), Metadata("dataset1"))
