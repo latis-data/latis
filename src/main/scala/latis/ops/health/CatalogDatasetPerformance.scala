@@ -50,12 +50,12 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
         val samples = ArrayBuffer[Sample]()
         it.foreach { s => s match {
           //TODO: Consider matching sample's range as well (to validate catalog's formatting)
-          case Sample(Text(name), _) if name contains "ssi" => { 
+          case Sample(Text(name), _) if name contains "ssi" => {
             val timeSeriesResults = getPerformanceResults(name, " (time series)") //" (time series)" gets added to ds name in logs
-            samples += makeSampleFromResults(name, timeSeriesResults._1, timeSeriesResults._2, timeSeriesResults._3) 
+            samples += makeSampleFromResults(name+" (time series)", timeSeriesResults._1, timeSeriesResults._2, timeSeriesResults._3) 
             
             val spectralResults = getPerformanceResults(name, " (spectrum)") //" (spectrum)" gets added to ds name in logs
-            samples += makeSampleFromResults(name, spectralResults._1, spectralResults._2, spectralResults._3)
+            samples += makeSampleFromResults(name+" (spectrum)", spectralResults._1, spectralResults._2, spectralResults._3)
             ssiSingleTimeDs = None //clear the shortened global ds since we're moving on to another ds now
           }
           //TODO: Consider matching sample's range as well (to validate catalog's formatting)
