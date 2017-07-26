@@ -174,17 +174,17 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
       case 0 => Array[Double]()
       case 1 => rs(0) match {
         case Empty     => Array[Double]()
-        case All       => readData1D(vname, Bounds(0, origLength(vname)))
+        case All       => readData1D(vname, Bounds(0, origLength(vname) - 1))
         case r: Bounds => readData1D(vname, r)
       }
       case 2 => (rs(0), rs(1)) match {
         case (Empty, _) | (_, Empty) => Array[Double]()
         case (All, r) =>
-          val len = origLength.toSeq(0)._2
+          val len = origLength.toSeq(0)._2 - 1
           val r2 = Bounds(0, len)
           readData(vname, Seq(r2, r))
         case (r, All) =>
-          val len = origLength.toSeq(1)._2
+          val len = origLength.toSeq(1)._2 - 1
           val r2 = Bounds(0, len)
           readData(vname, Seq(r, r2))
         case (r1: Bounds, r2: Bounds) =>
