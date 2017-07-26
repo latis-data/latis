@@ -52,7 +52,7 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     val zero = mutable.LinkedHashMap[String, Int]()
     domainVars.foldLeft(zero) { (m, v) =>
       val vname = v.getName
-      m += vname -> ((getFileLength(vname)/8) - 1)
+      m += vname -> (getFileLength(vname)/8)
     }
   }
 
