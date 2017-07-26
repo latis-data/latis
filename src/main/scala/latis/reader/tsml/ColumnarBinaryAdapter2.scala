@@ -13,6 +13,7 @@ import latis.data.Data
 import latis.data.seq.DataSeq
 import latis.dm._
 import latis.ops.Operation
+import latis.ops.filter.NearestNeighborFilter
 import latis.ops.filter.Selection
 import latis.reader.tsml.ml._
 import latis.time._
@@ -70,13 +71,23 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
 
   override def handleOperation(op: Operation): Boolean =
     op match {
-      case s @ Selection(vname, _, v) if isDomainVar(vname) =>
-        val op = if (vname == "time" && !StringUtils.isNumeric(v)) {
-          convertTime(s)
+      case Selection(vname, o, v) if isDomainVar(vname) =>
+        val newOp = if (vname == "time" && !StringUtils.isNumeric(v)) {
+          val nt = convertTime(vname, v)
+          new Selection(vname, o, nt)
         } else {
-          s
+          op
         }
-        operations += op
+        operations += newOp
+        true
+      case NearestNeighborFilter(vname, v) if isDomainVar(vname) =>
+        val newOp = if (vname == "time" && !StringUtils.isNumeric(v)) {
+          val nt = convertTime(vname, v)
+          new NearestNeighborFilter(vname, nt)
+        } else {
+          op
+        }
+        operations += newOp
         true
       case _ => false
     }
@@ -84,21 +95,15 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
   private def isDomainVar(vname: String): Boolean =
     domainVars.exists(_.hasName(vname))
 
-  private def convertTime(s: Selection): Selection =
-    s match {
-      case Selection(vname, o, v) =>
-        // We are making the assumption that the Selection is one we
-        // chose to handle in handleOperation and thus is selecting on
-        // a domain variable.
-        val domainVar = domainVars.find(_.hasName(vname)).get
-        val units = domainVar.getMetadataAttributes.get("units").getOrElse {
-          val msg = "Time variable must have units."
-          throw new UnsupportedOperationException(msg)
-        }
-        val ts = TimeScale(units)
-        val nt = Time.fromIso(v).convert(ts).getValue.toString
-        new Selection(vname, o, nt)
+  private def convertTime(vname: String, value: String): String = {
+    val domainVar = domainVars.find(_.hasName(vname)).get
+    val units = domainVar.getMetadataAttributes.get("units").getOrElse {
+      val msg = "Time variable must have units."
+      throw new UnsupportedOperationException(msg)
     }
+    val ts = TimeScale(units)
+    Time.fromIso(value).convert(ts).getValue.toString
+  }
 
   private def buildIndex(vname: String): Unit =
     indexMap += vname -> readData(vname)
@@ -113,6 +118,17 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
            * allowed are ones with names that come from the set of
            * domain variables used for these keys) but we can't
            * statically prove this.
+           */
+          ranges += vname -> range.intersect(ranges(vname))
+        }
+      case NearestNeighborFilter(vname, value) =>
+        indexMap.get(vname).foreach { index =>
+          val range = queryIndex(index, "~", value.toDouble)
+          /*
+           * This lookup should never fail (the only
+           * NearestNeighborFilters allowed are ones with names that
+           * come from the set of domain variables used for these
+           * keys) but we can't statically prove this.
            */
           ranges += vname -> range.intersect(ranges(vname))
         }
@@ -131,7 +147,8 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     // Build indices for domain variables that have some sort of
     // selection on them.
     operations.collect {
-      case Selection(vname, _, _) => vname
+      case Selection(vname, _, _)          => vname
+      case NearestNeighborFilter(vname, _) => vname
     }.distinct.foreach(buildIndex(_))
 
     applyOperations
