@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<!-- Obsolete but used for health test -->
 <dataset id="ascii_granule">
   <adapter class="latis.reader.tsml.GranuleAsciiAdapter"
            delimiter="\s+"
