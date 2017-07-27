@@ -86,7 +86,7 @@ object StringUtils {
   }
   
   /**
-   * construct Data from a String by matching a Variable template
+   * Construct Data from a String by matching a Variable template
    */
   //TODO: support regex property for each variable
   def parseStringValue(value: String, variableTemplate: Variable): Data = variableTemplate match {
@@ -97,6 +97,19 @@ object StringUtils {
       else Data(variableTemplate.asInstanceOf[Real].getFillValue.asInstanceOf[Double])
       
     case t: Text    => Data(StringUtils.padOrTruncate(value, t.length)) //enforce length
+  }
+  
+  /**
+   * Construct Data from a String by matching a variable type string.
+   */
+  def parseStringValue(value: String, vtype: String): Data = vtype match {
+    case "integer" => if(isNumeric(value)) Data(toDouble(value).toLong)
+      else Data.empty //TODO: Data(variableTemplate.asInstanceOf[Integer].getFillValue.asInstanceOf[Long])
+      
+    case "real" => if(isNumeric(value)) Data(toDouble(value))
+      else Data.empty //TODO: Data(variableTemplate.asInstanceOf[Real].getFillValue.asInstanceOf[Double])
+      
+    case "text" => Data(StringUtils.padOrTruncate(value, value.length)) //TODO: enforce max length
   }
   
   def getUrl(loc: String): URL = {
