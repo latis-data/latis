@@ -1,51 +1,34 @@
 package latis.reader.adapter
 
-import latis.dm._
-
 import java.io.File
-import java.net.URI
 import java.net.URL
 import java.net.URLDecoder
-import java.net.URLEncoder
+import java.nio.ByteBuffer
+
 import scala.Option.option2Iterable
 import scala.collection.Map
 import scala.collection.Seq
-import scala.collection.immutable
 import scala.collection.mutable
-import latis.data.Data
-import latis.data.seq.DataSeq
 
-import latis.metadata.Metadata
-import latis.ops.DomainBinner
-import latis.ops.MathExpressionDerivation
-import latis.ops.Operation
-import latis.ops.Projection
-import latis.ops.RenameOperation
-import latis.ops.UnitConversion
-import latis.ops.filter.Selection
-import latis.reader.tsml.ml.FunctionMl
-import latis.reader.tsml.ml.ScalarMl
-import latis.reader.tsml.ml.TimeMl
-import latis.reader.tsml.ml.Tsml
-import latis.reader.tsml.ml.TupleMl
-import latis.reader.tsml.ml.VariableMl
-import latis.time.Time
-import latis.util.DataUtils
-import latis.ops.filter.Selection
-import java.net.MalformedURLException
-import latis.util.StringUtils
-import scala.collection.mutable.ArrayBuffer
-import latis.ops.TimeFormatter
-import latis.ops.ReplaceMissingOperation
-import latis.ops.Pivot
-import latis.ops.TimeTupleToTime
 import com.typesafe.scalalogging.LazyLogging
+
+import latis.data.Data
+import latis.dm.Dataset
+import latis.dm.Function
+import latis.dm.FunctionType
 import latis.dm.Model
 import latis.dm.ProcessingInstruction
-import latis.dm.VariableType
-import latis.dm.TupleType
+import latis.dm.Sample
+import latis.dm.SampledFunction
+import latis.dm.Scalar
 import latis.dm.ScalarType
-import java.nio.ByteBuffer
+import latis.dm.Tuple
+import latis.dm.TupleType
+import latis.dm.Variable
+import latis.dm.VariableType
+import latis.ops.Operation
+import latis.ops.filter.Selection
+import latis.util.StringUtils
 import latis.util.iterator.PeekIterator
 
 
@@ -147,6 +130,7 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
    * Build a Function.
    * This approach assumes that the Adapter subclass has put Data
    * into the cache. 
+   * The preferred IterativeAdapter2 overrides this.
    */
   protected def makeFunction(f: FunctionType): Option[Function] = {
 
@@ -165,6 +149,7 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
             d <- makeVariable(f.domain);
             r <- makeVariable(f.codomain)
           } yield Sample(d, r) 
+          //TODO: need makeSample to deal with Index logic?
           os match {
             case Some(s) => s
             case None => getNext //skip bad sample
@@ -176,6 +161,12 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
     val smp = samples.peek
     Option(SampledFunction(smp.domain, smp.range, samples, f.metadata))
   }
+  
+  //---- Property Methods -----------------------------------------------------
+  
+  def getProperty(name: String): Option[String] = properties.get(name)
+  
+  def getProperty(name: String, default: String): String = properties.getOrElse(name, default)
   
   //---- Caching --------------------------------------------------------------
   
@@ -216,6 +207,7 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
   }
   //TODO: if None throw new Error("No data found in cache for Variable: " + variableName)? or return empty Data?
 
+  protected def clearCache: Unit = dataCache.clear
   
   //---------------------------------------------------------------------------
 
