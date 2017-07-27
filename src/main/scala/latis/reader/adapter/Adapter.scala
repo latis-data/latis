@@ -147,6 +147,7 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
    * Build a Function.
    * This approach assumes that the Adapter subclass has put Data
    * into the cache. 
+   * The preferred IterativeAdapter2 overrides this.
    */
   protected def makeFunction(f: FunctionType): Option[Function] = {
 
@@ -165,6 +166,8 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
             d <- makeVariable(f.domain);
             r <- makeVariable(f.codomain)
           } yield Sample(d, r) 
+
+          //TODO: need makeSample to deal with Index logic?
           os match {
             case Some(s) => s
             case None => getNext //skip bad sample
@@ -176,6 +179,12 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
     val smp = samples.peek
     Option(SampledFunction(smp.domain, smp.range, samples, f.metadata))
   }
+  
+  //---- Property Methods -----------------------------------------------------
+  
+  def getProperty(name: String): Option[String] = properties.get(name)
+  
+  def getProperty(name: String, default: String): String = properties.getOrElse(name, default)
   
   //---- Caching --------------------------------------------------------------
   
@@ -216,6 +225,7 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
   }
   //TODO: if None throw new Error("No data found in cache for Variable: " + variableName)? or return empty Data?
 
+  protected def clearCache: Unit = dataCache.clear
   
   //---------------------------------------------------------------------------
 

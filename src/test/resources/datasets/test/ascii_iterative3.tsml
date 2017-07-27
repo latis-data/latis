@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Obsolete but used for health test -->
-<dataset id="ascii_granule">
-  <adapter class="latis.reader.tsml.GranuleAsciiAdapter"
+
+<dataset id="ascii_iterative3">
+  <adapter class="latis.reader.tsml.AsciiAdapter2"
            delimiter="\s+"
            commentCharacter="#"
            location="datasets/test/mixed.txt" />
   
-  <time type="text" length="10">
+  <time id="time" type="text" length="10">
     <metadata name="myTime" units="yyyy/MM/dd"/>
   </time>
  
   <integer id="myInt"/>
   <real    id="myReal"/>
-  <text    id="myText"/>
+  <text    id="myText" length="1"/>
   
 </dataset>
