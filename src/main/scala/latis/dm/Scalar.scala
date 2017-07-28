@@ -136,7 +136,7 @@ object Scalar {
       case "binary" => ???
       case _ => ???
     }
-    
+  //TODO: need something better than a name match for time vars
     if (stype.hasName("time")) Time(stype.getType, stype.metadata, data)
     else Scalar(stype.getType, stype.metadata, data)
   }
