@@ -62,6 +62,14 @@ object StringUtils {
   }
   
   /**
+   * Make sure the given string is surrounded in quotes.
+   */
+  def quoteStringValue(s: String): String = {
+    //don't add if it is already quoted
+    "'" + s.replaceAll("^['\"]","").replaceAll("['\"]$","") + "'"
+  }
+  
+  /**
    * Can this string be converted to a Double.
    */
   def isNumeric(s: String): Boolean = {
