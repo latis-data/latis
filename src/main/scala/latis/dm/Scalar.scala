@@ -134,6 +134,7 @@ object Scalar {
         Data(DataUtils.bufferToString(bb, n))
       case "boolean" => ???
       case "binary" => ???
+      case "index" => Data.empty
       case _ => ???
     }
   //TODO: need something better than a name match for time vars
