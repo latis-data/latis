@@ -23,6 +23,8 @@ import latis.dm.Dataset
  */
 class Selection(val vname: String, val operation: String, val value: String) extends Filter with LazyLogging {
   //TODO: if domain, delegate to DomainSet
+  //TODO: operation -> operator
+  //TODO: change "=" to "==" since these are boolean predicates
 
   override def apply(ds: Dataset): Dataset = ds match {
     case Dataset(v) => ds.findVariableByName(vname) match {
