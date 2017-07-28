@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset>
+  <metadata name="db" long_name="Database Test"/>
+  <adapter class="latis.reader.adapter.JdbcAdapter2"
+           location="jdbc:derby:memory:testDB" 
+           driver="org.apache.derby.jdbc.EmbeddedDriver"
+           user="" password=""
+           table="test"/>
+  
+  <index/>
+  <!--time id="myTime" type="text">
+    <metadata units="yyyy-MM-dd HH:mm:ss.SSS"/>
+  </time-->
+  <integer id="myInt"/>
+  <real id="myReal"/>
+  <text id="myText" length="4"/>
+  
+  <!--?select myReal>2?-->
+  <!--?project myInt,myText?-->
+  
+</dataset>

@@ -12,6 +12,8 @@ import latis.dm._
 import latis.writer.Writer
 import javax.naming.NameNotFoundException
 import javax.naming.NoInitialContextException
+import latis.reader.tsml.TsmlReader2
+import java.net.URL
 
 class TestJdbcAdapter extends AdapterTests {
   def datasetName = "db"
@@ -258,6 +260,13 @@ class TestJdbcAdapter extends AdapterTests {
     ds match {
       case Dataset(Function(it)) => assertEquals(expected, it.length)
     }
+  }
+  
+  //@Test
+  def iterative3 = {
+    val ops = scala.collection.mutable.ArrayBuffer[Operation]()
+    val ds = TsmlReader2(new URL("file:/home/lindholm/git/latis/src/test/resources/datasets/test/db3.tsml")).getDataset(ops)
+    latis.writer.Writer.fromSuffix("asc").write(ds)
   }
 }
 
