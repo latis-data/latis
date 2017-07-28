@@ -1,10 +1,6 @@
 package latis.reader.adapter
 
-import latis.data.Data
-import latis.dm.Function
-import latis.dm.Model
-import latis.reader.adapter.Adapter
-import latis.dm.FunctionType
+import latis.data._
 import latis.dm._
 import scala.collection._
 
