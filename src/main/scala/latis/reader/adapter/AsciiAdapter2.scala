@@ -1,8 +1,6 @@
-package latis.reader.tsml
+package latis.reader.adapter
 
-import com.typesafe.scalalogging.LazyLogging
 import latis.data.Data
-import latis.reader.tsml.ml.Tsml
 import latis.util.StringUtils
 import java.security.cert.X509Certificate
 import scala.io.Source
@@ -12,6 +10,7 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
 import javax.net.ssl.X509TrustManager
 import latis.dm.Model
+import latis.reader.adapter.IterativeAdapter3
 
 class AsciiAdapter2[R](model: Model, properties: Map[String, String]) 
   extends IterativeAdapter3[String](model, properties) {

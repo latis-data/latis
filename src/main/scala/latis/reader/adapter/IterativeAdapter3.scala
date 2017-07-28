@@ -1,13 +1,12 @@
-package latis.reader.tsml
+package latis.reader.adapter
 
 import latis.data.Data
 import latis.dm.Function
-import latis.reader.tsml.ml.Tsml
-import latis.util.DataMapUtils
 import latis.dm.Model
 import latis.reader.adapter.Adapter
 import latis.dm.FunctionType
 import latis.dm._
+import scala.collection._
 
 /**
  * Base class for Adapters for data sources that have 'record' semantics.
