@@ -50,7 +50,7 @@ class TestAsciiAdapter  {
     //ops += FirstFilter()
     //ops += Projection("myTime")
     //ops += TimeFormatter("yyyy-MMM-dd")
-    val ds = TsmlReader2(new URL("file:/home/lindholm/git/latis/src/test/resources/datasets/test/ascii_iterative3.tsml")).getDataset(ops)
+    val ds = TsmlReader2.fromName("ascii_iterative3").getDataset(ops)
     AsciiWriter.write(ds)
   }
 

@@ -11,6 +11,9 @@ import latis.reader.adapter.Adapter
 import scala.xml.XML
 import latis.reader.tsml.ml._
 import latis.metadata.Metadata
+import java.io.File
+import java.nio.file.Path
+import latis.util.LatisProperties
 
 /**
  * A Reader for a Dataset defined as a tsml file.
@@ -154,10 +157,24 @@ class TsmlReader2(url: URL) extends DatasetAccessor {
 
 object TsmlReader2 {
   
-  def apply(url: URL): TsmlReader2 = new TsmlReader2(url)
+  def fromURL(url: URL): TsmlReader2 = new TsmlReader2(url)
 
-  //def apply(path: String): TsmlReader = new TsmlReader2(path)
-  //TODO: replicate TsmlResolver, FileUtil?
+  def fromPath(path: String): TsmlReader2 = {
+    val url = if (path.contains(":")) new URL(path) //already absolute with a scheme
+    else {
+      val file = LatisProperties.resolvePath(path)
+      if (new File(file).exists) new URL("file:" + file)
+      else throw new RuntimeException(s"TsmlReader unable to resolve path: $path")
+    }
+    fromURL(url)
+  }
+  
+  def fromName(name: String): TsmlReader2 = {
+    //TODO: search dataset.path?
+    val path = LatisProperties.getOrElse("dataset.dir", "datasets") + 
+               File.separator + name + ".tsml"
+    fromPath(path)
+  }
   
 }
 

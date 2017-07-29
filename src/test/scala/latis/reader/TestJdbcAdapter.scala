@@ -265,7 +265,7 @@ class TestJdbcAdapter extends AdapterTests {
   //@Test
   def iterative3 = {
     val ops = scala.collection.mutable.ArrayBuffer[Operation]()
-    val ds = TsmlReader2(new URL("file:/home/lindholm/git/latis/src/test/resources/datasets/test/db3.tsml")).getDataset(ops)
+    val ds = TsmlReader2.fromName("db3").getDataset(ops)
     latis.writer.Writer.fromSuffix("asc").write(ds)
   }
 }
