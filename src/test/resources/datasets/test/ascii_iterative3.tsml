@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <dataset id="ascii_iterative3">
-  <adapter class="latis.reader.tsml.AsciiAdapter2"
+  <adapter class="latis.reader.adapter.AsciiAdapter2"
            delimiter="\s+"
            commentCharacter="#"
            location="datasets/test/mixed.txt" />
