@@ -125,10 +125,10 @@ class TsmlReader2(url: URL) extends DatasetAccessor {
   /**
    * The adapter as defined in the TSML for reading the Dataset.
    */
-  lazy val adapter: Adapter = Adapter(model, tsml.dataset.getAdapterAttributes)
+  private var _adapter: Adapter = null
   
   /**
-   * Singleton instance of Dataset.
+   * Singleton instance of Dataset in case the user calls getDataset more than once.
    * Note that we use an empty Dataset instead of None.
    * Thus, additional calls to getDataset will try again
    * if the original result was empty.
@@ -142,7 +142,10 @@ class TsmlReader2(url: URL) extends DatasetAccessor {
    * given Operations applied.
    */
   def getDataset(operations: Seq[Operation]): Dataset = {
-    if (_dataset.isEmpty) _dataset = adapter.getDataset(operations)
+    if (_dataset.isEmpty) _dataset = {
+      _adapter = Adapter(model, tsml.dataset.getAdapterAttributes)
+      _adapter.getDataset(operations)
+    }
     else _dataset
     _dataset
   }
@@ -150,8 +153,7 @@ class TsmlReader2(url: URL) extends DatasetAccessor {
   /**
    * Clean up any resources that the adapter used.
    */
-  //TODO: don't construct adapter just to close it
-  def close: Unit = adapter.close
+  def close: Unit = if (_adapter != null) _adapter.close
 
 }
 
