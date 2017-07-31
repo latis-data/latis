@@ -69,122 +69,103 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
    */
   def parseRecord(record: JdbcAdapter2.JdbcRecord): Option[Map[String, Data]] = {
     val pairs: Seq[(String,Data)] = model.getScalars.map { vt =>
-      val name = getVariableName(vt)
-      val optVal = vt.getType match {
-/*
- * TODO: how do we know if we have time
- * not type, class?
- * consider other subclasses
- * dynamically construct from "class"?
- *   which could override for smart clients
- *   but still have the built-in types
- * delegate more to the Variable(Type?) class?
- */
-        case "index"   => Some(Map.empty)
-        case "real"    => record.getDouble(name)
-        case "integer" => record.getLong(name)
-        case "text"    => 
-          val s = record.getString(name) 
- //TODO: clean up; add method to vt; "length" overloaded
-          val l = vt.getMetadata("length") match { 
-            case Some(s) => s.toInt
-            case None => 4
-          }
-          Some(StringUtils.padOrTruncate(s.get, l)) //fix length, default to 4
-        case "binary"  => ??? //TODO: see below
-      } 
-      (name, Data(optVal.get))
-//TODO: deal with fill value
-//      optVal match {
-//        case Some(v) => (name, Data(v))
-//        case None => (name, makeFillData(vt))
-//      }
+      val name = getVariableName(vt) //accounts for rename
+      //Special handling for time; use name/alias for now
+      val optData = if (vt.hasName("time")) parseTime(record, vt)
+      else vt.getType match {
+//TODO: need to skip index earlier        case "index"   => None
+        case "integer" => parseInteger(record, vt)
+        case "real"    => parseReal(record, vt)
+        case "text"    => parseText(record, vt)
+        case "binary"  => parseBinary(record, vt)
+        case _ => ??? //TODO: error, unknown type
+      }
+      optData match {
+        case Some(d) => (name, d)
+        case None    => ??? //TODO: (name, makeFillData(vt))
+      }
     }
-
-    Some(pairs.toMap)
+    Option(pairs.toMap)
   }
 
+  protected def parseInteger(record: JdbcAdapter2.JdbcRecord, vt: VariableType): Option[Data] = {
+    val name = getVariableName(vt) //accounts for rename
+    record.getLong(name).map(Data(_))
+  }
+
+  protected def parseReal(record: JdbcAdapter2.JdbcRecord, vt: VariableType): Option[Data] = {
+    val name = getVariableName(vt) //accounts for rename
+    record.getDouble(name).map(Data(_))
+  }
+    
+  protected def parseText(record: JdbcAdapter2.JdbcRecord, vt: VariableType): Option[Data] = {
+    val name = getVariableName(vt) //accounts for rename
+    record.getString(name) match {
+      case Some(v) =>
+        //pad to max length, default to 4 characters
+        //TODO: don't need consistent length if this Text is part of a simple record
+        val length = vt.getMetadata("length") match { 
+          case Some(s) => s.toInt
+          case None => 4
+        }
+        Option(Data(StringUtils.padOrTruncate(v, length)))
+      case None => None
+    }
+  }
+    
+  protected def parseBinary(record: JdbcAdapter2.JdbcRecord, vt: VariableType): Option[Data] = {
+    val name = getVariableName(vt) //accounts for rename
+    record.getBytes(name) map { v =>
+      val length = vt.getMetadata("length") match { 
+        case Some(s) => s.toInt
+        case None => ??? //TODO: error? default?
+      }
+      val bytes = if (v.length > length) {
+        val msg = s"JdbcAdapter found ${v.length} bytes which is longer than the max size: ${length}. The data will be truncated."
+        logger.warn(msg)
+        v.take(length) //truncate so we don't get buffer overflow
+      } else v
+      
+      //TODO: do we need to enforce consistent length? consider poda use case
+      //TODO: do we need the nullMark?
+      val bb = ByteBuffer.allocate(length) //allocate a ByteBuffer for the max length
+      bb.put(bytes) //add the data
+      bb.put(DataUtils.nullMark) //add termination mark
+      //Set the "limit" to the end of the data and rewind the position to the start.
+      //Note, the capacity will remain at the max length.
+      bb.flip
+      //TODO: constructor will do the flip, could it do more?
+      Data(bb)
+    }
+  }
+  
+  protected def parseTime(record: JdbcAdapter2.JdbcRecord, vt: VariableType): Option[Data] = {
+    val name = getVariableName(vt) //accounts for rename
+    //special handling for Timestamp
+    dbTypes.get(name) match {
+      case Some(java.sql.Types.TIMESTAMP) =>
+        record.getTimestamp(name) map { time =>
+//TODO: allow text time (formatted units) constructed from java time (ms since 1970)
+//  allow any units as specified in the model
+//          vt.getMetadata("units") match {
+//            case Some(format) => TimeFormat(format).format(time)
+//            case None => TimeFormat.ISO.format(time) //default to ISO yyyy-MM-ddTHH:mm:ss.SSS
+//          }
+          Data(time)
+        }
+    }
+  }
+
+
   /**
-   * Lazily create a map of column name to SQL type.
+   * Lazily create a map of actual column name (or rename) to SQL type.
    * This is used to identify times using TIMESTAMP.
    */
   private lazy val dbTypes: Map[String,Int] = {
     val md = resultSet.getMetaData
     (0 until md.getColumnCount).map(i => (md.getCatalogName(i), i)).toMap
   }
-
-
-//
-//  /**
-//   * Experiment with overriding just one case using PartialFunctions.
-//   * Couldn't just delegate to function due to the "if' guard.
-//   */
-//  protected val parseTime: PartialFunction[(VariableType, Int), (String, Data)] = {
-//    //Note, need dbtype for filter but can't do anything outside the case
-//    case (v: Time, dbtype: Int) if (dbtype == java.sql.Types.TIMESTAMP) => {
-//      val name = getVariableName(v)
-//      val gmtCalendar = Calendar.getInstance(TimeZone.getTimeZone("GMT")) //TODO: cache so we don't have to call for each sample?
-//      var time = resultSet.getTimestamp(name, gmtCalendar).getTime
-//      val s = if (resultSet.wasNull) v.getFillValue.asInstanceOf[String]
-// //TODO: can we avoid using Text? 
-//      else {
-//        v.getMetadata("units") match {
-//          case Some(format) => TimeFormat(format).format(time)
-//          case None => TimeFormat.ISO.format(time) //default to ISO yyyy-MM-ddTHH:mm:ss.SSS
-//        }
-//      }
-//      (name, Data(s))
-//    }
-//  }
-
-//  protected val parseBinary: PartialFunction[(VariableType, Int), (String, Data)] = {
-//    case (v: Binary, _) => {
-//      val name = getVariableName(v)
-//      var bytes = resultSet.getBytes(name)
-//      val max_length = v.getSize //will look for "length" in metadata, error if not defined
-//      if (bytes.length > max_length) {
-//        val msg = s"JdbcAdapter found ${bytes.length} bytes which is longer than the max size: ${max_length}. The data will be truncated."
-//        logger.warn(msg)
-//        bytes = bytes.take(max_length) //truncate so we don't get buffer overflow
-//      }
-//      
-//      //allocate a ByteBuffer for the max length
-//      val bb = ByteBuffer.allocate(max_length)
-//      //add the data
-//      bb.put(bytes)
-//      //add termination mark
-//      bb.put(DataUtils.nullMark)
-//      
-//      //Set the "limit" to the end of the data and rewind the position to the start.
-//      //Note, the capacity will remain at the max length.
-//      bb.flip
-//      
-//      (name, Data(bb))
-//    }
-//  }
-
-//  /**
-//   * Pairs of projected Variables (Scalars) and their database types.
-//   * Note, this will honor the order of the variables in the projection clause.
-//   */
-//  lazy val varsWithTypes: Seq[(VariableType, Int)] = {
-//    //Get list of projected Scalars in projection order paired with their database type.
-//    //Saves us having to get the type for every sample.
-//    //Note, uses original variable names which are replaced for a rename operation as needed.
-//    //TODO: projections shouldn't change orig order of variables
-//    val vars: Seq[VariableType] = if (projectedVariableNames.isEmpty) model.getScalars
-//    else projectedVariableNames.flatMap(model.findVariableByName(_))
-//
-//    //TODO: Consider case where PI does rename. User should never see orig names so should be able to use new name.
-//
-//    //Get the types of these variables in the database.
-//    //Note, ResultSet columns should have new names from rename.
-//    val md = resultSet.getMetaData
-//    val dbtypes = vars.map(v => md.getColumnType(resultSet.findColumn(v.getId)))
-//
-//    //Combine the variables with their database types in a Seq of pairs.
-//    vars zip dbtypes
-//  }
+  
 
   //Handle the Projection and Selection Operation-s.
   //Project all if there is no projection defined.
@@ -192,8 +173,10 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
   //Support aliases for variables in the model.
 /*
  * TODO: how does rename affect this? 
- * consider order
- * should we use getVariableName instead of getId?
+ * consider order: rename after selection
+ * these need to be the original col names for rename to work with predicate munging
+ * note, this requires that the variable id is the col name
+ * //TODO: consider "origName" in metadata like netcdf adapter?
  */
   private var projectedVariableNames = Seq[String]()
   protected def getProjectedVariableNames: Seq[String] = {
@@ -211,6 +194,8 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
 
   /**
    * Use this to get the name of a Variable so we can apply rename.
+   * This should be the name that appears in the ResultSet metadata,
+   * either the original column name or the rename.
    */
   protected def getVariableName(v: VariableType): String = renameMap.get(v.getId) match {
     case Some(newName) => newName
@@ -239,8 +224,13 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
     case s: Selection  => handleSelection(s)
 
     case Projection(names) =>
-      //only names that are found in the original dataset are included in the search query
-      projectedVariableNames = names.filter(s => model.getScalars.exists(_.hasName(s))) //TODO: or match id?
+      //TODO: we could have multiple projections (but can we preserve order of operation?)
+      //TODO: support compound names
+      //These names need to match the db col names which should be the variable IDs (unless we add "origName").
+      //Match variables by alias, but keep their ID.
+      val scalars = model.getScalars
+      val projectedVariables = names.flatMap(s => scalars.find(_.hasName(s)))
+      projectedVariableNames = projectedVariables.map(_.getId)
       false //the default Projection Operation will also be applied after derived fields are created.
 
     case _: FirstFilter =>
@@ -278,9 +268,9 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
   
   def handleSelection(selection: Selection): Boolean = selection match {
     case Selection(name, op, value) => 
-      model.getScalars.find(_.hasName(name)) match { //TODO: should we match id?
+      model.getScalars.find(_.hasName(name)) match { //TODO: should we match id?, consider rename
         //TODO: require that vars are projected to be consistent with other adapters? order now matters
- //TODO: case Some(v) if (v.isInstanceOf[Time]) => handleTimeSelection(name, op, value)
+        case Some(vt) if (vt.hasName("time")) => handleTimeSelection(name, op, value)
         case Some(vt) =>
           //add a selection to the sql, may need to change operation
           op match {
@@ -312,7 +302,7 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
     val tvar = model.getScalars.find(_.hasName(vname)).get //Note, we wouldn't be here if this wasn't a Time variable.
     val tvname = getVariableName(tvar) //potentially renamed variable name
     
-    dbTypes(tvar.getId) match {
+    dbTypes(tvname) match {
       case java.sql.Types.TIMESTAMP =>
         // Format the time consistent with java.sql.Timestamp.toString: 
         //   yyyy-mm-dd hh:mm:ss.fffffffff
@@ -360,7 +350,7 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
 //   */
 //  override def makeScalar(s: ScalarType): Option[Scalar] = {
 //    //TODO: deal with composite names for nested vars
-////TODO: can we say "false" on the rename op ans let latis apply it?
+////TODO: can we say "false" on the rename op and let latis apply it?
 //    getProjectedVariableNames.find(s.hasName(_)) match { //account for aliases
 //      case Some(_) => { //projected, see if it needs to be renamed
 //        val tmpScalar = renameMap.get(s.getName) match {
