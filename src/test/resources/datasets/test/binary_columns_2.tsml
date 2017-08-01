@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset id="binary_columns_2">
+  <adapter class="latis.reader.tsml.ColumnarBinaryAdapter2"
+           location="${java.io.tmpdir}"/>
+
+  <time>
+    <metadata units="days since 1991-09-15"/>
+  </time>
+  <function id="spectrum" length="5">
+    <real id="wavelength"/>
+    <real id="irradiance"/>
+  </function>
+
+</dataset>

@@ -36,7 +36,7 @@ dependencies {
 	//Support for logging
 	compile 'com.typesafe.scala-logging:scala-logging_2.11:3.4.0'
 	compile 'ch.qos.logback:logback-classic:1.1.7'
-	compile 'org.codehaus.groovy:groovy-all:2.4.4' 
+	compile 'org.codehaus.groovy:groovy-all:2.4.10' 
 	//this groovy version needs to match the version used by gradle
 	//logging failed when not set
 
