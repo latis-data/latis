@@ -57,6 +57,7 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
   with LazyLogging {
   //TODO: catch exceptions and close connections
   //TODO: make model from ResultSetMetaData to make a Reader
+  //TODO: consider "origName" in metadata like netcdf adapter?
 
   def getRecordIterator: Iterator[JdbcAdapter2.JdbcRecord] = getProperty("limit") match {
     case Some(lim) if (lim.toInt == 0) => new JdbcAdapter2.JdbcEmptyIterator()
@@ -70,7 +71,8 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
   def parseRecord(record: JdbcAdapter2.JdbcRecord): Option[Map[String, Data]] = {
     //TODO: use Try
     val map = mutable.Map[String, Data]()
-    val ss = model.getScalars.toList //TODO: doesn't work without "toList"!!!!!!!!!!!!!
+    //val ss = model.getScalars.toList //TODO: doesn't work without "toList"!!!!!!!!!!!!!
+    val ss = getProjectedVariables.toList
     ss.map { vt =>
       val name = getVariableName(vt) //accounts for rename
       //TODO: support AimTelemetryAdapter to override for any time, or build into unit conversions?
@@ -179,24 +181,23 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
   }
   
 
-  //Handle the Projection and Selection Operation-s.
-  //Project all if there is no projection defined.
-  //Preserve the order of variables in the model.
-  //Support aliases for variables in the model.
 /*
- * TODO: how does rename affect this? 
- * consider order: rename after selection
- * these need to be the original col names for rename to work with predicate munging
- * note, this requires that the variable id is the col name
- * //TODO: consider "origName" in metadata like netcdf adapter?
+ * Handle the Projection Operation.
+ * Project all if there is no projection defined.
+ * Preserve the order of variables in the model. (Like relational algebra, unlike sql.)
+ * Support aliases for variables in the model.
+ * Selection/projection order doesn't matter here unlike general LaTiS algebra.
+ * These need to be the original col names for rename to work with predicate munging.
+ * Note, this requires that the variable id is the col name.
  */
   private var projectedVariableNames = Seq[String]()
-  protected def getProjectedVariableNames: Seq[String] = {
-    val allScalars = model.getScalars.filter(_.getType != "index")
-    val ss =
-      if (projectedVariableNames.isEmpty) allScalars
-      else allScalars.filter(s => projectedVariableNames.exists(s.hasName(_)))
-    ss.map(_.getId)
+  protected def getProjectedVariableNames: Seq[String] =
+    getProjectedVariables.map(_.getId) //need original column name here, consider "origName"
+  
+  def getProjectedVariables: Seq[ScalarType] = {
+    val allScalarsButIndex = model.getScalars.toList.filter(_.getType != "index")
+    if (projectedVariableNames.isEmpty) allScalarsButIndex
+    else allScalarsButIndex.filter(s => projectedVariableNames.exists(s.hasName(_)))
   }
 
   protected val selections = ArrayBuffer[String]()
@@ -368,42 +369,21 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
   }
 
   /**
-   * Override to apply rename
+   * Override to apply projection and rename.
    */
   override def makeScalar(s: ScalarType): Option[Scalar] = {
-    //TODO: allow rename from alias?
     val id = s.getId
-    renameMap.get(id) match {
-      case Some(name) => 
-        val md = s.metadata.setName(name)
-        super.makeScalar(ScalarType(id, md))
-      case None => super.makeScalar(s)
-    }
+    val z = getProjectedVariables.map(_.getId)
+    if (getProjectedVariables.map(_.getId).contains(id)) {
+      //If this scalar has been renamed, update the metadata
+      renameMap.get(id) match {
+        case Some(name) =>
+          val md = s.metadata.setName(name)
+          super.makeScalar(ScalarType(id, md))
+        case None => super.makeScalar(s)
+      }
+    } else None //not projected
   }
-  
-//  /**
-//   * Override to apply projection. Exclude Variables not listed in the projection.
-//   * Only works for Scalars, for now.
-//   * If the rename operation needs to be applied, a new temporary Scalar will be created
-//   * with a copy of the original's metadata with the 'name' changed.
-//   */
-//  override def makeScalar(s: ScalarType): Option[Scalar] = {
-//    //TODO: deal with composite names for nested vars
-////TODO: can we say "false" on the rename op and let latis apply it?
-//    getProjectedVariableNames.find(s.hasName(_)) match { //account for aliases
-//      case Some(_) => { //projected, see if it needs to be renamed
-//        val tmpScalar = renameMap.get(s.getName) match {
-//          case Some(newName) => s.getMetadata("alias") match { //keep the old name as an alias to allow later projection. 
-//            case Some(a) => s.updatedMetadata("alias" -> (a + "," + s.getName)).updatedMetadata("name" -> newName)
-//            case None => s.updatedMetadata("alias" -> s.getName).updatedMetadata("name" -> newName)
-//          }
-//          case None => s
-//        }
-//        super.makeScalar(tmpScalar)
-//      }
-//      case None => None //not projected
-//    }
-//  }
 
   //---- Database Stuff -------------------------------------------------------
 
