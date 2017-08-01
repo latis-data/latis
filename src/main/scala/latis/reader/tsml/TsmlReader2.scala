@@ -69,13 +69,8 @@ class TsmlReader2(url: URL) extends DatasetAccessor {
       val md = makeMetadata(ml)
       FunctionType(domain, codomain, id, md)
   }
-  
-  // Don't implicitly name more than one "time" variable.
-  //var timeUnused = true
-  //Note: use hasName("time") to know that we have a time variable, for now.
     
   private def makeMetadata(vml: VariableMl): Metadata = {
-    //if (vml.hasName("time")) timeUnused = false
     /*
      * Combine tsml variable element label (type), attributes,
      *   and metadata attributes.
@@ -112,11 +107,7 @@ class TsmlReader2(url: URL) extends DatasetAccessor {
     if (! atts.contains("name")) {
       // Use "id" for "name" metadata
       vml.getAttribute("id").foreach(id => atts += ("name" -> id))
-      //don't add alias if we already have a 'time'
-      //if (timeUnused && vml.label == "time") {
-        addImplicitName("time") 
-      //  timeUnused = false
-      //}
+      if (vml.label == "time") addImplicitName("time")
       if (vml.label == "index") addImplicitName("index")
     }
     
