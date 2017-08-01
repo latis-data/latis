@@ -25,6 +25,24 @@ trait Metadata {
   
   def has(key: String): Boolean
   
+  /**
+   * If the Metadata does not have a "name" property, set it.
+   * Otherwise, add an "alias".
+   */
+  def addName(name: String): Metadata = get("name") match {
+    //Note, this does not prevent duplicates, which shouldn't hurt.
+    case Some(_) => get("alias") match {
+      case Some(a) => this + ("alias" -> s"$a,$name") //append to list of aliases
+      case None    => this + ("alias" -> name)        //add alias
+    }
+    case None => this + ("name" -> name)
+  }
+  
+  /**
+   * Replace name.
+   */
+  def setName(name: String): Metadata = this + ("name" -> name)
+  
   def isEmpty: Boolean = getProperties.isEmpty
   def nonEmpty: Boolean = getProperties.nonEmpty
    
