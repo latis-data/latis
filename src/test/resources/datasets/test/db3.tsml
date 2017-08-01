@@ -8,14 +8,13 @@
            user="" password=""
            table="test"/>
   
-  <index/>
-  <!--time id="myTime" type="text">
-    <metadata units="yyyy-MM-dd HH:mm:ss.SSS"/>
-  </time-->
-  <integer id="myInt"/>
-  <real id="myReal"/>
-  <text id="myText" length="4"/>
+  <time id="MYTIME"/>
+  <integer id="MYINT"/>
+  <real id="MYREAL"/>
+  <text id="MYTEXT" length="4"/>
   
+  <?rename MYTIME,myTime?>
+  <?rename MYINT,myInt?>
   <!--?select myReal>2?-->
   <!--?project myInt,myText?-->
   

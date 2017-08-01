@@ -265,6 +265,10 @@ class TestJdbcAdapter extends AdapterTests {
   //@Test
   def iterative3 = {
     val ops = scala.collection.mutable.ArrayBuffer[Operation]()
+    //ops += Selection("myTime >= 1970-01-02")
+    //ops += Projection("myInt,MYTIME")
+    ops += Selection("myInt > 2")
+    ops += TimeFormatter("yyyy-MM-dd")
     val ds = TsmlReader2.fromName("db3").getDataset(ops)
     latis.writer.Writer.fromSuffix("asc").write(ds)
   }

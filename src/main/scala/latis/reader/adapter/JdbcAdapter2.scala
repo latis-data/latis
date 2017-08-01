@@ -45,7 +45,6 @@ import latis.util.StringUtils
 import latis.dm.Tuple
 import latis.dm._
 import scala.collection.mutable.ArrayBuffer
-import latis.reader.adapter.IterativeAdapter3
 import java.lang.Integer
 import latis.ops.filter.TakeOperation
 
@@ -66,26 +65,42 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
   
   /**
    * Parse the data based on the Variable type (and the database column type, for time).
+   * Map the variable id (not name) to the Data.
    */
   def parseRecord(record: JdbcAdapter2.JdbcRecord): Option[Map[String, Data]] = {
-    val pairs: Seq[(String,Data)] = model.getScalars.map { vt =>
+    //TODO: use Try
+    val map = mutable.Map[String, Data]()
+    val ss = model.getScalars.toList //TODO: doesn't work without "toList"!!!!!!!!!!!!!
+    ss.map { vt =>
       val name = getVariableName(vt) //accounts for rename
-      //Special handling for time; use name/alias for now
-      val optData = if (vt.hasName("time")) parseTime(record, vt)
+      //TODO: support AimTelemetryAdapter to override for any time, or build into unit conversions?
+      if (dbTypes.get(name).contains(java.sql.Types.TIMESTAMP)) parseTimestamp(record, vt) match {
+        case Some(d) => map += (vt.id -> d)
+//        case None    => map += (vt.id -> makeFillData(vt))
+      }
       else vt.getType match {
-//TODO: need to skip index earlier        case "index"   => None
-        case "integer" => parseInteger(record, vt)
-        case "real"    => parseReal(record, vt)
-        case "text"    => parseText(record, vt)
-        case "binary"  => parseBinary(record, vt)
+        case "index"   => //placeholder, no data to parse
+        case "integer" => parseInteger(record, vt) match {
+          case Some(d) => map += (vt.id -> d)
+//          case None    => map += (vt.id -> makeFillData(vt))
+        }
+        case "real"    => parseReal(record, vt) match {
+          case Some(d) => map += (vt.id -> d)
+//          case None    => map += (vt.id -> makeFillData(vt))
+        }
+        case "text"    => parseText(record, vt) match {
+          case Some(d) => map += (vt.id -> d)
+//          case None    => map += (vt.id -> makeFillData(vt))
+        }
+        case "binary"  => parseBinary(record, vt) match {
+          case Some(d) => map += (vt.id -> d)
+//          case None    => map += (vt.id -> makeFillData(vt))
+        }
         case _ => ??? //TODO: error, unknown type
       }
-      optData match {
-        case Some(d) => (name, d)
-        case None    => ??? //TODO: (name, makeFillData(vt))
-      }
     }
-    Option(pairs.toMap)
+    
+    Option(map.toMap)
   }
 
   protected def parseInteger(record: JdbcAdapter2.JdbcRecord, vt: VariableType): Option[Data] = {
@@ -139,20 +154,15 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
     }
   }
   
-  protected def parseTime(record: JdbcAdapter2.JdbcRecord, vt: VariableType): Option[Data] = {
+  protected def parseTimestamp(record: JdbcAdapter2.JdbcRecord, vt: VariableType): Option[Data] = {
     val name = getVariableName(vt) //accounts for rename
-    //special handling for Timestamp
-    dbTypes.get(name) match {
-      case Some(java.sql.Types.TIMESTAMP) =>
-        record.getTimestamp(name) map { time =>
-//TODO: allow text time (formatted units) constructed from java time (ms since 1970)
-//  allow any units as specified in the model
-//          vt.getMetadata("units") match {
-//            case Some(format) => TimeFormat(format).format(time)
-//            case None => TimeFormat.ISO.format(time) //default to ISO yyyy-MM-ddTHH:mm:ss.SSS
-//          }
-          Data(time)
-        }
+    record.getTimestamp(name) map { time => //ms since 1970
+      //Note that we use default units for Timestamp data.
+      vt.getType match {
+        case "integer" => Data(time)
+        case "real"    => Data(time.toDouble)
+        case "text"    => Data(Time.javaToIso(time)) //TODO: need to set length
+      }
     }
   }
 
@@ -163,7 +173,9 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
    */
   private lazy val dbTypes: Map[String,Int] = {
     val md = resultSet.getMetaData
-    (0 until md.getColumnCount).map(i => (md.getCatalogName(i), i)).toMap
+    (1 to md.getColumnCount).map { i =>
+      (md.getColumnName(i), md.getColumnType(i))
+    }.toMap
   }
   
 
@@ -202,6 +214,15 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
     case None => v.getId
   }
 
+  def findVariableWithName(name: String): Option[VariableType] = {
+    //Use the original name if this is a rename.
+    val origName = renameMap.find(p => p._2 == name) match {
+      case Some((n,_)) => n
+      case None        => name
+    }
+    model.getScalars.find(_.hasName(origName))
+  }
+
   /**
    * Limit the number of rows returned.
    * This can be defined as an adapter property or from other operations.
@@ -213,6 +234,12 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
   
   //Define sorting order.
   private var order = "ASC"
+  
+  
+  override def handlePI(pi: ProcessingInstruction): Boolean = {
+    val op = Operation(pi.name, pi.args.split(',').map(_.trim))
+    handleOperation(op)
+  }
 
   /**
    * Handle the operations if we can so we can reduce the data volume at the source
@@ -227,9 +254,8 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
       //TODO: we could have multiple projections (but can we preserve order of operation?)
       //TODO: support compound names
       //These names need to match the db col names which should be the variable IDs (unless we add "origName").
-      //Match variables by alias, but keep their ID.
-      val scalars = model.getScalars
-      val projectedVariables = names.flatMap(s => scalars.find(_.hasName(s)))
+      //Match variables by alias or rename, but keep their ID.
+      val projectedVariables = names.flatMap(findVariableWithName(_))
       projectedVariableNames = projectedVariables.map(_.getId)
       false //the default Projection Operation will also be applied after derived fields are created.
 
@@ -253,7 +279,7 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
       // If limit is already defined, make sure we don't increase it.
       if (l < limit) limit = l
       true //true either way
-      
+
     //Rename operation: apply in projection clause of sql: 'select origName as newName'
     case RenameOperation(origName, newName) =>
       renameMap += (origName -> newName)
@@ -264,11 +290,10 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
 
     case _ => false //not an operation that we can handle
   }
-
   
   def handleSelection(selection: Selection): Boolean = selection match {
-    case Selection(name, op, value) => 
-      model.getScalars.find(_.hasName(name)) match { //TODO: should we match id?, consider rename
+    case Selection(name, op, value) =>
+      findVariableWithName(name) match { //TODO: should we match id?, consider rename
         //TODO: require that vars are projected to be consistent with other adapters? order now matters
         case Some(vt) if (vt.hasName("time")) => handleTimeSelection(name, op, value)
         case Some(vt) =>
@@ -295,15 +320,15 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
    * Special handling for a time selection since there are various formatting issues.
    * Value may be native numeric units or an ISO string.
    */
-  def handleTimeSelection(vname: String, op: String, value: String): Boolean = {
+  def handleTimeSelection(name: String, op: String, value: String): Boolean = {
     //Get the Time variable with the given name
     //TODO: consider rename and projection issues
     
-    val tvar = model.getScalars.find(_.hasName(vname)).get //Note, we wouldn't be here if this wasn't a Time variable.
+    val tvar = findVariableWithName(name).get //Note, we wouldn't be here if this wasn't a Time variable.
     val tvname = getVariableName(tvar) //potentially renamed variable name
     
     dbTypes(tvname) match {
-      case java.sql.Types.TIMESTAMP =>
+      case java.sql.Types.TIMESTAMP => ???
         // Format the time consistent with java.sql.Timestamp.toString: 
         //   yyyy-mm-dd hh:mm:ss.fffffffff
       // Not for Oracle! webtcad-mms SpacecraftEvents.tsml
@@ -342,6 +367,20 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
     }
   }
 
+  /**
+   * Override to apply rename
+   */
+  override def makeScalar(s: ScalarType): Option[Scalar] = {
+    //TODO: allow rename from alias?
+    val id = s.getId
+    renameMap.get(id) match {
+      case Some(name) => 
+        val md = s.metadata.setName(name)
+        super.makeScalar(ScalarType(id, md))
+      case None => super.makeScalar(s)
+    }
+  }
+  
 //  /**
 //   * Override to apply projection. Exclude Variables not listed in the projection.
 //   * Only works for Scalars, for now.
@@ -443,21 +482,15 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
       val p = makePredicate
       if (p.nonEmpty) sb append " where " + p
       
-
       //Sort by domain variable.
-      //assume domain is scalar, for now
-      //Note 'dataset' should be the original before ops
       model.variable match {
-        case f: Function => f.getDomain match {
-          case i: Index => //implicit placeholder, use natural order
-          case v: Variable => v match {
-            //Note, shouldn't matter if we sort on original name
-            case _: Scalar => sb append " ORDER BY " + v.getName + " " + order
-            case Tuple(vars) => {
-              //assume all are scalars, reasonable for a domain variable
-              val names = vars.map(_.getName).mkString(", ")
-              sb append " ORDER BY " + names + " " + order
-            }
+        case FunctionType(d,c,_,_) => d match {
+          case vt if (vt.getType == "index") => //implicit placeholder, use natural order
+          case vt: ScalarType => sb append " ORDER BY " + getVariableName(vt) + " " + order
+          case TupleType(vars,_,_) => {
+            //assume all are scalars, reasonable for a domain variable
+            val names = vars.map(getVariableName(_)).mkString(", ")
+            sb append " ORDER BY " + names + " " + order
           }
         }
         case _ => //no function so no domain variable to sort by
