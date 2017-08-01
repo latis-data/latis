@@ -122,11 +122,12 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
     getCachedData(scalar.id) match {
       case Some(bb) => 
         //TODO: error if no bytes remaining, instead of the dreaded buffer underflow
-        // Hack for nested Function domain: If we are at the end of a buffer, rewind it
-        if (scalar.hasName("wavelength") && ! bb.hasRemaining) bb.rewind
+// Hack for nested Function domain: If we are at the end of a buffer, rewind it
+if (scalar.hasName("wavelength") && ! bb.hasRemaining) bb.rewind
         Option(Scalar(scalar, bb))
       case None => 
-        throw new RuntimeException(s"No data found for scalar: $scalar.id")
+        if (scalar.getType == "index") Option(Scalar(scalar, null))
+        else throw new RuntimeException(s"No data found for scalar: $scalar")
     }
   }
 
@@ -187,6 +188,8 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
   def getProperty(name: String, default: String): String = properties.getOrElse(name, default)
   
   //---- Caching --------------------------------------------------------------
+  
+  // Use id in dataCache since name can be changed.
   
   /**
    * Cache the Data as a Map from the Variable name to a ByteBuffer.
