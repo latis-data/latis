@@ -78,10 +78,8 @@ class TsmlReader2(url: URL) extends DatasetAccessor {
      * 
      */
     val atts = scala.collection.mutable.Map[String, String]()
-    atts ++=  vml.getAttributes
+    atts ++= vml.getAttributes
     atts ++= vml.getMetadataAttributes
-
- //TODO: review implicit naming...
     
     // if id = time, look for other "type" def or use "real"
     val typ = vml.label match {
@@ -93,25 +91,15 @@ class TsmlReader2(url: URL) extends DatasetAccessor {
     }
     atts += "type" -> typ
     
-    //internal helper method to add default name for special variable types
-    def addImplicitName(name: String) = {
-      //If the Variable already has a name, add the given name as an alias
-      if (atts.contains("name")) atts.get("alias") match {
-        case Some(a) => atts += ("alias" -> (s"a,$name")) //append to list of existing aliases
-        case None    => atts += ("alias" -> name) //add new alias
-      } 
-      else atts += ("name" -> name) //no 'name' attribute, so set it
-    }
+    var md = Metadata(atts)
     
     // Add implicit names
-    if (! atts.contains("name")) {
-      // Use "id" for "name" metadata
-      vml.getAttribute("id").foreach(id => atts += ("name" -> id))
-      if (vml.label == "time") addImplicitName("time")
-      if (vml.label == "index") addImplicitName("index")
-    }
+    // Use "id" for "name" metadata
+    if (! md.has("name")) vml.getAttribute("id").foreach(id => md = md + ("name" -> id))
+    if (vml.label == "time") md = md.addName("time")
+    if (vml.label == "index") md = md.addName("index")
     
-    Metadata(atts)
+    md
   }
   
   /**
