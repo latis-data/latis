@@ -48,8 +48,9 @@ class TestAsciiAdapter  {
   def iterative_adapter3 = {
     val ops = scala.collection.mutable.ArrayBuffer[Operation]()
     //ops += FirstFilter()
-    //ops += Projection("myTime")
-    //ops += TimeFormatter("yyyy-MMM-dd")
+    ops += Selection("time ~ 1970-01-02T13")
+    ops += Projection("myTime")
+    ops += TimeFormatter("yyyy-MMM-dd")
     val ds = TsmlReader2.fromName("ascii_iterative3").getDataset(ops)
     AsciiWriter.write(ds)
   }

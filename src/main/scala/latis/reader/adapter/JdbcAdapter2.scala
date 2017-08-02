@@ -76,7 +76,7 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
     ss.map { vt =>
       val name = getVariableName(vt) //accounts for rename
       //TODO: support AimTelemetryAdapter to override for any time, or build into unit conversions?
-      if (dbTypes.get(name).contains(java.sql.Types.TIMESTAMP)) parseTimestamp(record, vt) match {
+      if (vt.getMetadata("dbType").contains("timestamp")) parseTimestamp(record, vt) match {
         case Some(d) => map += (vt.id -> d)
 //        case None    => map += (vt.id -> makeFillData(vt))
       }
@@ -169,16 +169,17 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
   }
 
 
-  /**
-   * Lazily create a map of actual column name (or rename) to SQL type.
-   * This is used to identify times using TIMESTAMP.
-   */
-  private lazy val dbTypes: Map[String,Int] = {
-    val md = resultSet.getMetaData
-    (1 to md.getColumnCount).map { i =>
-      (md.getColumnName(i), md.getColumnType(i))
-    }.toMap
-  }
+//  /**
+//   * Lazily create a map of actual column name (or rename) to SQL type.
+//   * This is used to identify times using TIMESTAMP.
+//   */
+//  private lazy val dbTypes: Map[String,Int] = {
+//    val md = resultSet.getMetaData
+//    (1 to md.getColumnCount).map { i =>
+// println(md.getColumnTypeName(i))
+//      (md.getColumnName(i), md.getColumnType(i))
+//    }.toMap
+//  }
   
 
 /*
@@ -327,29 +328,28 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
     
     val tvar = findVariableWithName(name).get //Note, we wouldn't be here if this wasn't a Time variable.
     val tvname = getVariableName(tvar) //potentially renamed variable name
-    
-    dbTypes(tvname) match {
-      case java.sql.Types.TIMESTAMP => ???
+
+    tvar.getMetadata("dbType") match {
+      case Some("timestamp") =>
         // Format the time consistent with java.sql.Timestamp.toString: 
         //   yyyy-mm-dd hh:mm:ss.fffffffff
-      // Not for Oracle! webtcad-mms SpacecraftEvents.tsml
         // JDBC doesn't generally like the 'T' in the iso time. (e.g. Derby)
         // Assumes GMT.
-//          val time = tvar.getMetadata("units") match {
-//          case Some(format) => Time.fromIso(value).format(format)
-//          case None => Time.fromIso(value).format("yyyy-MM-dd HH:mm:ss.SSS") //Default that seems to work for most databases, not Oracle
-//          //TODO: too late, Time will add units if none are defined, defaulting to the ISO that doesn't generally work
-//          //  require tsml to define other units
-//        }
-//        selections += tvname + op + "'" + time + "'" //sql wants quotes around time value
-//        true
-        false
+        // For those that don't support this forat (Oracle webtcad-mms SpacecraftEvents.tsml), use "format metaata/PI
+        val format = tvar.getMetadata("format") match {
+          case Some(f) => f
+          case None    => "yyyy-MM-dd HH:mm:ss.SSS"
+        }
+        //Assume value is an ISO string
+        val time = Time.fromIso(value).format(format)
+        selections += tvname + op + "'" + time + "'" //sql wants quotes around time value
+        true
       
       case _ =>
         //So, we have a numeric time variable but need to figure out if the selection value is
         //  a numeric time (in native units) or an ISO time that needs to be converted.
         if (StringUtils.isNumeric(value)) {
-          this.selections += tvname + op + value
+          selections += tvname + op + value
           true
         } else tvar.getMetadata("units") match {
           //Assumes selection value is an ISO 8601 formatted string
@@ -358,7 +358,7 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
             //convert ISO time selection value to dataset units
             try {
               val t = Time.fromIso(value).convert(TimeScale(units)).getValue
-              this.selections += tvname + op + t
+              selections += tvname + op + t
               true
             } catch {
               case iae: IllegalArgumentException => throw new Error("The time value is not in a supported ISO format: " + value)

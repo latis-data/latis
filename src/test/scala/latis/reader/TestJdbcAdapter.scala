@@ -265,9 +265,9 @@ class TestJdbcAdapter extends AdapterTests {
   //@Test
   def iterative3 = {
     val ops = scala.collection.mutable.ArrayBuffer[Operation]()
-  //TODO: still broken  ops += Selection("myTime >= 1970-01-02")
+    ops += Selection("time >= 1979-01-02")
     ops += Projection("myInt,myTime")
-    ops += Selection("MYREAL > 2")
+    //ops += Selection("MYREAL > 2")
     //ops += Selection("myInt > 2")
     //ops += TimeFormatter("yyyy-MM-dd")
     val ds = TsmlReader2.fromName("db3").getDataset(ops)
