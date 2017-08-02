@@ -40,9 +40,11 @@ abstract class IterativeAdapter3[R](model: Model, properties: Map[String, String
      */
     //make BufferedIterator so we can peek at the first sample
     //TODO: may initiate data reading
-    val bufferedSamples = samples.buffered
-    val smp = bufferedSamples.head
-    Option(SampledFunction(smp.domain, smp.range, bufferedSamples, f.metadata))
+    if (samples.hasNext) {
+      val bufferedSamples = samples.buffered
+      val smp = bufferedSamples.head
+      Option(SampledFunction(smp.domain, smp.range, bufferedSamples, f.metadata))
+    } else None
   }
   
 }
