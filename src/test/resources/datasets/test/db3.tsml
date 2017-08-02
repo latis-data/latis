@@ -8,7 +8,7 @@
            user="" password=""
            table="test"/>
   
-  <time id="MYTIME"/>
+  <time id="MYTIME" dbType="timestamp"/>
   <integer id="MYINT"/>
   <real id="MYREAL"/>
   <text id="MYTEXT" length="4"/>
