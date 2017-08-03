@@ -21,7 +21,7 @@ sealed abstract class VariableType(id: String, metadata: Metadata) {
   def hasName(name: String): Boolean = {
     //TODO: consider long, qualified name
     //TODO: support wildcard, regex?
-    id == name || hasAlias(name)
+    id == name || metadata.get("name").exists(_ == name) || hasAlias(name)
   }
 
   /**
