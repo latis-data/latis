@@ -82,6 +82,9 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
     // Allow subclasses to handle user Operations.
     val otherOps: Seq[Operation] = operations.filterNot(handleOperation(_))
       
+    // Hook for subclasses to do some things before making the Dataset.
+    preMakeDataset
+    
     // Construct the Dataset
     val dataset = makeDataset(model)
 
@@ -91,6 +94,8 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
     (piOps ++ otherOps).foldLeft(dataset)((ds, op) => op(ds))
     //TODO: compose (and optimize) Operations (as functions V => V) then apply to dataset
   }
+  
+  def preMakeDataset: Unit = {}
   
   /**
    * Traverse the Model and construct the Dataset.
