@@ -9,6 +9,7 @@ import org.junit.Assert._
 
 import latis.dm._
 import latis.ops.filter.Selection
+import latis.ops.filter.FirstFilter
 import latis.util.FileUtils
 
 // Can't subclass AdapterTests here because this adapter does not
@@ -127,6 +128,21 @@ class TestColumnarBinaryAdapter2 {
             // There should be a single wavelength.
             assertFalse(it.hasNext)
         }
+    }
+  }
+
+  @Test
+  def firstFilter: Unit = {
+    val ops = Seq(FirstFilter())
+
+    val ds = DatasetAccessor.fromName("binary_columns_2").getDataset(ops)
+    ds match {
+      case Dataset(Function(it)) =>
+        it.next match {
+          case Sample(Real(t), _) => assertEquals(0.0, t, 0.0)
+        }
+
+        assertFalse(it.hasNext)
     }
   }
 }
