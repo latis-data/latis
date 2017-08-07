@@ -13,8 +13,7 @@ import latis.data.Data
 import latis.data.seq.DataSeq
 import latis.dm._
 import latis.ops.Operation
-import latis.ops.filter.NearestNeighborFilter
-import latis.ops.filter.Selection
+import latis.ops.filter._
 import latis.reader.tsml.ml._
 import latis.time._
 import latis.util.StringUtils
@@ -89,6 +88,9 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
         }
         operations += newOp
         true
+      case _: FirstFilter =>
+        operations += op
+        true
       case _ => false
     }
 
@@ -132,6 +134,10 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
            */
           ranges += vname -> range.intersect(ranges(vname))
         }
+      case _: FirstFilter =>
+        val range = Bounds(0, 0)
+        val vname = ranges.head._1
+        ranges += vname -> ranges(vname).compose(range)
     }
 
   /*
@@ -379,6 +385,20 @@ object ColumnarBinaryAdapter2 {
       case (All, r2)  => r2
       case (Bounds(l1, u1), Bounds(l2, u2)) =>
         Bounds(Math.max(l1, l2), Math.min(u1, u2))
+    }
+
+    def compose(r2: Range): Range = (this, r2) match {
+      case (Empty, _) => Empty
+      case (_, Empty) => Empty
+      case (r1, All)  => r1
+      case (All, r2)  => r2
+      case (Bounds(l1, u1), Bounds(l2, u2)) =>
+        val vec = Vector.range(l1, u1 + 1).slice(l2, u2 + 1)
+        if (vec.length > 0) {
+          Bounds(vec.head, vec.last)
+        } else {
+          Empty
+        }
     }
   }
 
