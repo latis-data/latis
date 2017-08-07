@@ -63,7 +63,13 @@ case class TupleType(
     metadata: Metadata = Metadata.empty
 ) extends VariableType(id, metadata) {
   
-  override def toString: String = variables.mkString("$id: (", ", ", ")")
+  override def toString: String = {
+    val name = id match {
+      case "" => ""
+      case _  => s"$id:"
+    }
+    variables.mkString(s"$name(", ", ", ")")
+  }
 }
 //TODO: allow anonymous tuple? no name in metadata, 
 //    but is id still required? "" or auto?
