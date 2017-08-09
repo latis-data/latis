@@ -12,7 +12,7 @@ import javax.net.ssl.X509TrustManager
 import latis.dm.Model
 import latis.reader.adapter.IterativeAdapter3
 
-class AsciiAdapter2[R](model: Model, properties: Map[String, String]) 
+class AsciiAdapter2(model: Model, properties: Map[String, String]) 
   extends IterativeAdapter3[String](model, properties) {
   
   //---- Manage data source ---------------------------------------------------
