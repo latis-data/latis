@@ -60,7 +60,10 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
    */
   def close: Unit
   
-  
+  /**
+   * Offer an Adapter the chance to handle a processing instruction.
+   * It should return true to prevent the default application.
+   */
   def handlePI(pi: ProcessingInstruction): Boolean = false
     
   /**
@@ -73,34 +76,38 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
   def handleOperation(op: Operation): Boolean = false
   
   /**
-   * Main entry point for Reader to request the Dataset.
+   * Main entry point for the Reader to request the Dataset
+   * with the given sequence of operation applied.
    */
   def getDataset(operations: Seq[Operation]): Dataset = {
     // Allow subclasses to handle ProcessingInstructions.
-    val otherPIs: Seq[ProcessingInstruction] = model.pis.filterNot(handlePI(_))
+    val unhandledPIs: Seq[ProcessingInstruction] = model.pis.filterNot(handlePI(_))
     
     // Allow subclasses to handle user Operations.
-    val otherOps: Seq[Operation] = operations.filterNot(handleOperation(_))
+    val unhandledOps: Seq[Operation] = operations.filterNot(handleOperation(_))
       
     // Hook for subclasses to do some things before making the Dataset.
     preMakeDataset
     
-    // Construct the Dataset
+    // Construct the Dataset based on the Model.
     val dataset = makeDataset(model)
 
     // Apply remaining processing instructions and user Operations.
-    val piOps = otherPIs.map(pi => Operation(pi.name, pi.args.split(',').map(_.trim)))
+    val piOps = unhandledPIs.map(pi => Operation(pi.name, pi.args.split(',').map(_.trim)))
     //TODO: deal with PIs targeted for specific var 
-    (piOps ++ otherOps).foldLeft(dataset)((ds, op) => op(ds))
+    (piOps ++ unhandledOps).foldLeft(dataset)((ds, op) => op(ds))
     //TODO: compose (and optimize) Operations (as functions V => V) then apply to dataset
   }
   
+  /**
+   * Hook for subclasses to do some things before making the Dataset.
+   */
   def preMakeDataset: Unit = {}
   
   /**
    * Traverse the Model and construct the Dataset.
    */
-  def makeDataset(model: Model): Dataset = makeVariable(model.variable) match {
+  protected def makeDataset(model: Model): Dataset = makeVariable(model.variable) match {
     case Some(v) => Dataset(v, model.metadata)
     case None    => Dataset(null, model.metadata)
   }
@@ -122,8 +129,6 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
    * Build a Scalar from the model by adding Data from the cache.
    */
   protected def makeScalar(scalar: ScalarType): Option[Scalar] = {
-    //getCachedData(scalar.id).map(Scalar(scalar, _))
-    //TODO: error if None? no data in cache
     getCachedData(scalar.id) match {
       case Some(bb) => 
         //TODO: error if no bytes remaining, instead of the dreaded buffer underflow
@@ -169,7 +174,7 @@ if (scalar.hasName("wavelength") && ! bb.hasRemaining) bb.rewind
         if (n >= 0 && index >= n) null
         else {
           val os = for {
-            d <- makeVariable(f.domain);
+            d <- makeVariable(f.domain)
             r <- makeVariable(f.codomain)
           } yield Sample(d, r) 
 
