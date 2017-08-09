@@ -7,12 +7,6 @@ import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable.Stack
 import scala.collection.mutable.ArrayBuffer
 
-/*
- * New representation of information in a tsml file.
- * Created after a first pass in an adapter.
- */
-
-
 sealed abstract class VariableType(id: String, metadata: Metadata) {
 
   /**
@@ -148,11 +142,7 @@ case class Model(
 //      generate scalar1, scalar2...? uuid?
 
 object Model {
-  
-/*
- * TODO: Use implicit CanBildFrom to get a Model back from Traversable methods
- * assumes depth first traversal
- */
+
   def fromSeq(vts: Seq[VariableType]): Model = {
     def go(vts: Stack[VariableType]): VariableType = {
       if (vts.nonEmpty) vts.pop match {
