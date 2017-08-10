@@ -13,7 +13,7 @@ import latis.data.Data
 import latis.data.seq.DataSeq
 import latis.dm._
 import latis.ops.Operation
-import latis.ops.filter.Selection
+import latis.ops.filter._
 import latis.reader.tsml.ml._
 import latis.time._
 import latis.util.StringUtils
@@ -52,7 +52,7 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     val zero = mutable.LinkedHashMap[String, Int]()
     domainVars.foldLeft(zero) { (m, v) =>
       val vname = v.getName
-      m += vname -> ((getFileLength(vname)/8) - 1)
+      m += vname -> (getFileLength(vname)/8)
     }
   }
 
@@ -70,12 +70,25 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
 
   override def handleOperation(op: Operation): Boolean =
     op match {
-      case s @ Selection(vname, _, v) if isDomainVar(vname) =>
-        val op = if (vname == "time" && !StringUtils.isNumeric(v)) {
-          convertTime(s)
+      case Selection(vname, o, v) if isDomainVar(vname) =>
+        val newOp = if (vname == "time" && !StringUtils.isNumeric(v)) {
+          val nt = convertTime(vname, v)
+          new Selection(vname, o, nt)
         } else {
-          s
+          op
         }
+        operations += newOp
+        true
+      case NearestNeighborFilter(vname, v) if isDomainVar(vname) =>
+        val newOp = if (vname == "time" && !StringUtils.isNumeric(v)) {
+          val nt = convertTime(vname, v)
+          new NearestNeighborFilter(vname, nt)
+        } else {
+          op
+        }
+        operations += newOp
+        true
+      case _: FirstFilter =>
         operations += op
         true
       case _ => false
@@ -84,21 +97,15 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
   private def isDomainVar(vname: String): Boolean =
     domainVars.exists(_.hasName(vname))
 
-  private def convertTime(s: Selection): Selection =
-    s match {
-      case Selection(vname, o, v) =>
-        // We are making the assumption that the Selection is one we
-        // chose to handle in handleOperation and thus is selecting on
-        // a domain variable.
-        val domainVar = domainVars.find(_.hasName(vname)).get
-        val units = domainVar.getMetadataAttributes.get("units").getOrElse {
-          val msg = "Time variable must have units."
-          throw new UnsupportedOperationException(msg)
-        }
-        val ts = TimeScale(units)
-        val nt = Time.fromIso(v).convert(ts).getValue.toString
-        new Selection(vname, o, nt)
+  private def convertTime(vname: String, value: String): String = {
+    val domainVar = domainVars.find(_.hasName(vname)).get
+    val units = domainVar.getMetadataAttributes.get("units").getOrElse {
+      val msg = "Time variable must have units."
+      throw new UnsupportedOperationException(msg)
     }
+    val ts = TimeScale(units)
+    Time.fromIso(value).convert(ts).getValue.toString
+  }
 
   private def buildIndex(vname: String): Unit =
     indexMap += vname -> readData(vname)
@@ -116,6 +123,21 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
            */
           ranges += vname -> range.intersect(ranges(vname))
         }
+      case NearestNeighborFilter(vname, value) =>
+        indexMap.get(vname).foreach { index =>
+          val range = queryIndex(index, "~", value.toDouble)
+          /*
+           * This lookup should never fail (the only
+           * NearestNeighborFilters allowed are ones with names that
+           * come from the set of domain variables used for these
+           * keys) but we can't statically prove this.
+           */
+          ranges += vname -> range.intersect(ranges(vname))
+        }
+      case _: FirstFilter =>
+        val range = Bounds(0, 0)
+        val vname = ranges.head._1
+        ranges += vname -> ranges(vname).compose(range)
     }
 
   /*
@@ -131,7 +153,8 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     // Build indices for domain variables that have some sort of
     // selection on them.
     operations.collect {
-      case Selection(vname, _, _) => vname
+      case Selection(vname, _, _)          => vname
+      case NearestNeighborFilter(vname, _) => vname
     }.distinct.foreach(buildIndex(_))
 
     applyOperations
@@ -174,17 +197,17 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
       case 0 => Array[Double]()
       case 1 => rs(0) match {
         case Empty     => Array[Double]()
-        case All       => readData1D(vname, Bounds(0, origLength(vname)))
+        case All       => readData1D(vname, Bounds(0, origLength(vname) - 1))
         case r: Bounds => readData1D(vname, r)
       }
       case 2 => (rs(0), rs(1)) match {
         case (Empty, _) | (_, Empty) => Array[Double]()
         case (All, r) =>
-          val len = origLength.toSeq(0)._2
+          val len = origLength.toSeq(0)._2 - 1
           val r2 = Bounds(0, len)
           readData(vname, Seq(r2, r))
         case (r, All) =>
-          val len = origLength.toSeq(1)._2
+          val len = origLength.toSeq(1)._2 - 1
           val r2 = Bounds(0, len)
           readData(vname, Seq(r, r2))
         case (r1: Bounds, r2: Bounds) =>
@@ -362,6 +385,20 @@ object ColumnarBinaryAdapter2 {
       case (All, r2)  => r2
       case (Bounds(l1, u1), Bounds(l2, u2)) =>
         Bounds(Math.max(l1, l2), Math.min(u1, u2))
+    }
+
+    def compose(r2: Range): Range = (this, r2) match {
+      case (Empty, _) => Empty
+      case (_, Empty) => Empty
+      case (r1, All)  => r1
+      case (All, r2)  => r2
+      case (Bounds(l1, u1), Bounds(l2, u2)) =>
+        val vec = Vector.range(l1, u1 + 1).slice(l2, u2 + 1)
+        if (vec.length > 0) {
+          Bounds(vec.head, vec.last)
+        } else {
+          Empty
+        }
     }
   }
 
