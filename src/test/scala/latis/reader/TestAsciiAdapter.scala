@@ -30,7 +30,6 @@ class TestAsciiAdapter  {
   @Test
   def nested {
     val ds = TsmlReader("nested_function.tsml").getDataset
-    println(ds.getLength)
     val data = ds.toDoubleMap
     assertEquals(1.1, data("myReal")(0), 0.0)
     assertEquals(3, data("myTime").length)
