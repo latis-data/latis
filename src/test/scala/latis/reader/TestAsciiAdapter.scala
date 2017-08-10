@@ -6,8 +6,13 @@ import Assert._
 import latis.reader.tsml.TsmlReader
 import latis.writer.AsciiWriter
 import latis.writer.Writer
+import latis.reader.tsml.TsmlReader2
+import java.net.URL
+import latis.ops._
+import latis.ops.filter._
 
 class TestAsciiAdapter  {
+  //See also, TestIterativeAsciiAdapter
   
   @Test
   def test_data_file_is_readable = {
@@ -25,6 +30,7 @@ class TestAsciiAdapter  {
   @Test
   def nested {
     val ds = TsmlReader("nested_function.tsml").getDataset
+    println(ds.getLength)
     val data = ds.toDoubleMap
     assertEquals(1.1, data("myReal")(0), 0.0)
     assertEquals(3, data("myTime").length)
@@ -35,6 +41,17 @@ class TestAsciiAdapter  {
   //@Test
   def ascii_ssi = {
     val ds = TsmlReader("datasets/test/ascii_ssi.tsml").getDataset
+    AsciiWriter.write(ds)
+  }
+  
+  //@Test
+  def iterative_adapter3 = {
+    val ops = scala.collection.mutable.ArrayBuffer[Operation]()
+    //ops += FirstFilter()
+    ops += Selection("time ~ 1970-01-02T13")
+    ops += Projection("myTime")
+    ops += TimeFormatter("yyyy-MMM-dd")
+    val ds = TsmlReader2.fromName("ascii_iterative3").getDataset(ops)
     AsciiWriter.write(ds)
   }
 

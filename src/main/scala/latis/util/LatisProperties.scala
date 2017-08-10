@@ -83,6 +83,7 @@ class LatisProperties extends Properties with LazyLogging {
       case url: URL => url.getPath
       //else try the current working directory
       case null => scala.util.Properties.userDir + File.separator + path
+      //TODO: make sure it exists, return Option?
     }
   }
   
