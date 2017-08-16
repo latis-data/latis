@@ -9,6 +9,7 @@ import latis.util.ReflectionUtils
 import latis.reader.tsml.TsmlReader
 import latis.util.CacheManager
 import java.net.URL
+import latis.reader.tsml.TsmlReader2
 
 /**
  * Base class that provide data access for a Dataset.
@@ -106,18 +107,21 @@ object DatasetAccessor extends LazyLogging {
           case Some(s) => ReflectionUtils.constructClassByName(s).asInstanceOf[DatasetAccessor]
           case None => {
             //Try TsmlResolver
-            val tsml = TsmlResolver.fromName(datasetName)
-            logger.debug("Reading dataset from TSML")
-            TsmlReader(tsml)
+            TsmlResolver.fromName(datasetName) match {
+              case Some(t) => TsmlReader(t)
+              case None => 
+                //Try tsml2
+                TsmlReader2.fromName(datasetName)
+                //throw new RuntimeException(s"Unable to find dataset: $datasetName")
+            }
           }
         }
       }
     }
     
     //Add properties from latis.properties
-    reader.properties = {
+    reader.properties =
       LatisProperties.getPropertiesWithRoot("reader." + datasetName) + ("name" -> datasetName)
-    }
     reader
   }
   

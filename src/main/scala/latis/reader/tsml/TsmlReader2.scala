@@ -154,7 +154,7 @@ object TsmlReader2 {
   def fromName(name: String): TsmlReader2 = {
     //TODO: search dataset.path?
     val path = LatisProperties.getOrElse("dataset.dir", "datasets") + 
-               File.separator + name + ".tsml"
+               File.separator + name + ".tsml2"
     fromPath(path)
   }
   
