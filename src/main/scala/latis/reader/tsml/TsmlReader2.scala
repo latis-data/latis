@@ -14,6 +14,7 @@ import latis.metadata.Metadata
 import java.io.File
 import java.nio.file.Path
 import latis.util.LatisProperties
+import latis.reader.adapter.ProcessingInstruction
 
 /**
  * A Reader for a Dataset defined as a tsml file.

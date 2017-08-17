@@ -41,7 +41,6 @@ import latis.ops.Pivot
 import latis.ops.TimeTupleToTime
 import com.typesafe.scalalogging.LazyLogging
 import latis.dm.Model
-import latis.dm.ProcessingInstruction
 import latis.dm.VariableType
 import latis.dm.TupleType
 import latis.dm.ScalarType
@@ -81,7 +80,7 @@ abstract class Adapter(model: Model, properties: Map[String, String]) extends La
    */
   def getDataset(operations: Seq[Operation]): Dataset = {
     // Allow subclasses to handle ProcessingInstructions.
-    val unhandledPIs: Seq[ProcessingInstruction] = model.pis.filterNot(handlePI(_))
+    val unhandledPIs: Seq[ProcessingInstruction] = Seq.empty //model.pis.filterNot(handlePI(_))
     
     // Allow subclasses to handle user Operations.
     val unhandledOps: Seq[Operation] = operations.filterNot(handleOperation(_))

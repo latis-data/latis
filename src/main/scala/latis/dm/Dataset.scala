@@ -85,6 +85,21 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
   def toStringMap: Map[String, Array[String]] = DataMap.toStringMap(this)
   def toStrings: Array[Array[String]]         = DataMap.toStrings(this)
 
+  def getScalars: Seq[Scalar] = {
+    def go(v: Variable, acc: Seq[Scalar]): Seq[Scalar] = v match {
+      case s: Scalar => acc :+ s
+      case Tuple(vars) => vars.flatMap(go(_, acc))
+      case f: Function =>
+        go(f.getDomain, acc)
+        go(f.getRange, acc)
+    }
+    
+    this match {
+      case Dataset(v) => go(v, Seq())
+      case _ => Seq()
+    }
+  }
+  
   def groupBy(name: String): Dataset = {
     val v = Factorization.groupVariableBy(variable, name)
     Dataset(v) //TODO: metadata

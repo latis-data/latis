@@ -6,7 +6,11 @@ import scala.collection.mutable.Builder
 import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable.Stack
 import scala.collection.mutable.ArrayBuffer
+import latis.reader.adapter.ProcessingInstruction
 
+/**
+ * This is a toy for experimenting with version 3 ideas.
+ */
 sealed abstract class VariableType(id: String, metadata: Metadata) {
 
   /**
@@ -80,11 +84,11 @@ case class FunctionType(
 }
 
 
-case class ProcessingInstruction(
-    name: String,
-    args: String,
-    targetVariable: String = "" //apply to dataset if ""
-)
+//case class ProcessingInstruction(
+//    name: String,
+//    args: String,
+//    targetVariable: String = "" //apply to dataset if ""
+//)
 
 
 case class Model(
