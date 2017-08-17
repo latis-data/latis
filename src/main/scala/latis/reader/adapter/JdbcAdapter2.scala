@@ -53,7 +53,7 @@ import latis.ops.filter.TakeOperation
  * Assumes one row per record.
  */
 class JdbcAdapter2(model: Model, properties: Map[String, String]) 
-  extends IterativeAdapter3[JdbcAdapter2.JdbcRecord](model, properties)
+  extends IterativeAdapter2_5[JdbcAdapter2.JdbcRecord](model, properties)
   with LazyLogging {
   //TODO: catch exceptions and close connections
   //TODO: make model from ResultSetMetaData to make a Reader

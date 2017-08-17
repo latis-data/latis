@@ -13,7 +13,7 @@ import latis.dm.Model
 import latis.reader.adapter.IterativeAdapter3
 
 class AsciiAdapter2(model: Model, properties: Map[String, String]) 
-  extends IterativeAdapter3[String](model, properties) {
+  extends IterativeAdapter2_5[String](model, properties) {
   
   //---- Manage data source ---------------------------------------------------
   
