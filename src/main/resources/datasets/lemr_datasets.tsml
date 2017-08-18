@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset>
+  <metadata name="lemr_datasets"/> 
+  <adapter class="latis.reader.tsml.SparqlAdapter"
+           location="http://lemr-dev:3030/VIVO/sparql" 
+           query="PREFIX dcat:&#60;http://www.w3.org/ns/dcat#&#62; PREFIX dcterms:&#60;http://purl.org/dc/terms/&#62; SELECT ?s?p?o WHERE{?s a dcat:Dataset.?s?p?o}"
+           />
+           <!-- Note, in UTF-8 "&#60;" means '<' and "&#62;" means '>' -->
+           
+  <function>
+    <index/>
+    <text length="256">
+      <metadata name="subject"/>
+    </text>
+    <text length="256">
+      <metadata name="predicate"/>
+    </text>
+    <text length="256">
+      <metadata name="object"/>
+    </text>
+  </function>
+ 
+</dataset>
