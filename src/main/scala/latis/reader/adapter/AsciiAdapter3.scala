@@ -1,6 +1,7 @@
 package latis.reader.adapter
 
 import latis.data._
+import latis.metadata._
 import latis.util.StringUtils
 import java.security.cert.X509Certificate
 import scala.io.Source
@@ -11,8 +12,8 @@ import javax.net.ssl.SSLSession
 import javax.net.ssl.X509TrustManager
 import latis.dm._
 
-class AsciiAdapter3(model: Dataset3, config: AdapterConfig) 
-  extends IterativeAdapter3[String](model, config) {
+class AsciiAdapter3(metadata: Metadata3, config: AdapterConfig) 
+  extends IterativeAdapter3[String](metadata, config) {
   
   //---- Manage data source ---------------------------------------------------
   
@@ -59,13 +60,6 @@ class AsciiAdapter3(model: Dataset3, config: AdapterConfig)
     case Some(s) => s.toInt
     case None => 0
   }
-  
-  /**
-   * Return a list of Scalar variable names represented in the original data.
-   * Note, this will not account for Projections or other operations that
-   * the adapter may apply.
-   */
-  def getVariableNames: Seq[String] = model.getScalars.map(_.getId)
 
   /**
    * Get the String used as the data marker from tsml file.
@@ -142,19 +136,18 @@ class AsciiAdapter3(model: Dataset3, config: AdapterConfig)
      */
     
     //assume one value per scalar per record
-    val vars = model.getScalars
+    val vnames = getVariableNames
     val values = extractValues(record)
     
     //If we don't parse as many values as expected, assume we have an invalid record and skip it.
-    if (vars.length != values.length) {
+    if (vnames.length != values.length) {
       //Note, There are many cases where datasets have invalid records "by design" 
       //(e.g. future timestamps without data values) so we don't want to log warnings.
       //logger.debug("Invalid record: " + values.length + " values found for " + vars.length + " variables")
       None
     } else {
-      val vnames: Seq[String] = vars.map(_.getId)
-      val datas: Seq[Data] = (values zip vars).map(p => {
-        val value = model.findVariableAttribute(p._2.getId, "regex") match { //look for regex as tsml attribute
+      val datas: Seq[Data] = (values zip vnames).map(p => {
+        val value = metadata.findVariableProperty(p._2, "regex") match { //look for regex as tsml attribute
           case Some(s) => s.r.findFirstIn(p._1) match { //try to match the value with the regex
             case Some(m) => m  //use the matching part
  //           case None => p._2.getFillValue.toString  //use a fill value since this doesn't match
@@ -162,7 +155,7 @@ class AsciiAdapter3(model: Dataset3, config: AdapterConfig)
           case None => p._1  //no regex pattern to match so use the original value
         }
         //convert the data values to Data objects using the Variable as a template
-        val vtype = model.findVariableAttribute(p._2.getId, "type").get
+        val vtype = metadata.findVariableProperty(p._2, "type").get
         StringUtils.parseStringValue(value, vtype)
       })
       

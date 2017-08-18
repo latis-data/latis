@@ -11,29 +11,30 @@ import latis.writer.AsciiWriter
 import java.nio.ByteBuffer
 import latis.data.value.DoubleValue
 import latis.reader.tsml.TsmlReader
+import latis.metadata.ScalarMetadata
 
 class TestDataset3 {
 
-  val dataset = {
-    val a = Scalar3("A")
-    val b = Scalar3("B")
-    val x = Scalar3("X")
-    val v = Function3("", Metadata.empty, x, Tuple3(a,b))
-    Dataset3("foo", v)
-  }
-  
-  @Test
-  def print = {
-    println(dataset)
-  }
-
-  @Test
-  def toSeq = {
-    dataset.toSeq.foreach(println)
-  }
-
-  @Test
-  def scalars = {
-    dataset.getScalars.foreach(println)
-  }
+//  val dataset = {
+//    val a = Scalar3()(ScalarMetadata(Map("id" -> "A")))
+//    val b = Scalar3()(ScalarMetadata(Map("id" -> "B")))
+//    val x = Scalar3()(ScalarMetadata(Map("id" -> "X")))
+//    val v = Function3(x, Tuple3(Seq(a,b))())
+//    Dataset3("foo", v)
+//  }
+//  
+//  @Test
+//  def print = {
+//    println(dataset)
+//  }
+//
+//  @Test
+//  def toSeq = {
+//    dataset.toSeq.foreach(println)
+//  }
+//
+//  @Test
+//  def scalars = {
+//    dataset.getScalars.foreach(println)
+//  }
 }

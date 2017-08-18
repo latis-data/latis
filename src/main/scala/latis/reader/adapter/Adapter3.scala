@@ -1,6 +1,7 @@
 package latis.reader.adapter
 
 import latis.dm._
+import latis.metadata._
 import latis.ops._
 import latis.data.Data
 import scala.collection._
@@ -9,7 +10,7 @@ import latis.util.DataUtils
 import latis.util.StringUtils
 import java.net.URL
 
-abstract class Adapter3(model: Dataset3, config: AdapterConfig) {
+abstract class Adapter3(metadata: Metadata3, config: AdapterConfig) {
   
   /**
    * Abstract method to remind subclasses that they need 
@@ -47,7 +48,7 @@ abstract class Adapter3(model: Dataset3, config: AdapterConfig) {
     //preMakeDataset
     
     // Construct the Dataset based on the Model.
-    val dataset = makeDataset(model)
+    val dataset = makeDataset(metadata)
 
     //TODO: need Operation3
 //    // Apply remaining processing instructions and user Operations.
@@ -60,29 +61,36 @@ abstract class Adapter3(model: Dataset3, config: AdapterConfig) {
   
   //---- Construct Dataset ----------------------------------------------------
 
-  def makeDataset(model: Dataset3): Dataset3 = makeVariable(model.variable) match {
-    case Some(v) => Dataset3(model.id, v, model.metadata)
-    case None    => Dataset3(model.id, null, model.metadata)
+  /*
+   * TODO: can we map over metadata?
+   * VariableMetadata3 => Variable
+   * but would get Metadata3[Variable]
+   * foreach?
+   */
+  
+  def makeDataset(metadata: Metadata3): Dataset3 = makeVariable(metadata.metadata) match {
+    case Some(v) => Dataset3(v)(metadata)
+    case None    => Dataset3(null)(metadata)
   }
   
-  def makeVariable(variable: Variable3): Option[Variable3] = variable match {
-    case s: Scalar3   => makeScalar(s)
-    case t: Tuple3    => makeTuple(t)
-    case f: Function3 => makeFunction(f)
+  def makeVariable(variable: VariableMetadata3): Option[Variable3] = variable match {
+    case s: ScalarMetadata   => makeScalar(s)
+    case t: TupleMetadata    => makeTuple(t)
+    case f: FunctionMetadata => makeFunction(f)
   }
   
-  def makeScalar(scalar: Scalar3): Option[Scalar3] = Option {
-    val f = () => getNextData(scalar)
-    scalar.copy(get = f)
+  def makeScalar(smd: ScalarMetadata): Option[Scalar3] = Option {
+    val f = () => getNextData(smd)
+    Scalar3(f)(smd)
   }
   
-  def makeTuple(tuple: Tuple3): Option[Tuple3] = Option {
-    val vars = tuple match {
+  def makeTuple(tmd: TupleMetadata): Option[Tuple3] = Option {
+    val vars = tmd match {
       //TODO: reduce tuple of 0 or 1?
-      case Tuple3(_,_,vs) => vs.flatMap(makeVariable(_))
+      case TupleMetadata(vs) => vs.flatMap(makeVariable(_))
     }
     //tuple.copy(variables = vars: _*) //TODO: varargs breaks copy?
-    Tuple3(tuple.id, tuple.metadata, vars)
+    Tuple3(vars)(tmd)
   }
   
   /**
@@ -98,19 +106,21 @@ abstract class Adapter3(model: Dataset3, config: AdapterConfig) {
    * It is generally preferred to make subclasses of the IterativeAdapter
    * which overrides makeFunction.
    */
-  def makeFunction(function: Function3): Option[Function3] = Option {
-    val sample = makeSample(function.domain, function.codomain)
-    //TODO: if sample is None
+  def makeFunction(fmd: FunctionMetadata): Option[Function3] = Option {
+    val sample = makeSample(fmd.domain, fmd.codomain) match {
+      case Some(s) => s
+      case None => ??? //TODO empty Function?
+    }
     
-    new Function3(function.id, function.metadata, function.domain, function.codomain)
+    new Function3(sample._1, sample._2)(fmd)
     with SampledFunction3 {
-      val length = function.getMetadata("length") match {
+      val length = fmd.get("length") match {
         case Some(n) => n.toLong //TODO: handle error
-        case None    => ??? //TODO: error for now while testing java.lang.Long.MAX_VALUE
+        case None    => ??? //TODO: error for now while testing; java.lang.Long.MAX_VALUE
       }
       def iterator: Iterator[(Variable3, Variable3)] = {
-        (0l until length).iterator.flatMap(i => sample)
-        //TODO: Iterator[Option[A]].flatMap will auto drop Nones.
+        (0l until length).iterator.map(i => sample)
+        //Note, Iterator[Option[A]].flatMap will auto drop Nones.
       }
     }
   }
@@ -118,12 +128,12 @@ abstract class Adapter3(model: Dataset3, config: AdapterConfig) {
   /**
    * Given the use of the cache, we only need to make one sample.
    */
-  def makeSample(domain: Variable3, codomain: Variable3): Option[(Variable3, Variable3)] = {
+  def makeSample(domain: VariableMetadata3, codomain: VariableMetadata3): Option[(Variable3, Variable3)] = {
     //TODO: if only one is None, replace with Index
     for {
-      domain   <- makeVariable(domain)
-      codomain <- makeVariable(codomain)
-    } yield (domain, codomain)
+      d <- makeVariable(domain)
+      c <- makeVariable(codomain)
+    } yield (d, c)
   }
 
   
@@ -161,25 +171,27 @@ abstract class Adapter3(model: Dataset3, config: AdapterConfig) {
   /**
    * Return the next chunk of Bytes as Data for the given Scalar.
    */
-  def getNextData(scalar: Scalar3): Data = {
-    getCachedData(scalar.id) match {
+  def getNextData(smd: ScalarMetadata): Data = {
+    val id = smd.get("id").get //TODO: require "id" in metadata
+    val vtype = smd.get("type").get //TODO: require "type" in metadata
+    getCachedData(id) match { 
       case Some(bb) => 
         //TODO: error if no bytes remaining, instead of the dreaded buffer underflow
 // Hack for nested Function domain: If we are at the end of a buffer, rewind it
-if (scalar.hasName("wavelength") && ! bb.hasRemaining) bb.rewind
-        scalar.getType match {
+//if (scalar.hasName("wavelength") && ! bb.hasRemaining) bb.rewind
+         vtype match { 
           case "integer" => Data(bb.getLong)
           case "real"    => Data(bb.getDouble)
           case "text"    => 
-            val n = scalar.getMetadata("length") match {
+            val n = smd.get("length") match {
               case Some(l) => l.toInt //TODO: handle error
               case None => Text.DEFAULT_LENGTH //4 chars (8 bytes)
             }
             Data(StringUtils.byteBufferToString(bb, n))
         }
       case None => 
-        if (scalar.getType == "index") Data.empty
-        else throw new RuntimeException(s"No data found for scalar: $scalar")
+        if (vtype == "index") Data.empty
+        else throw new RuntimeException(s"No data found for scalar: $id")
     }
   }
   
@@ -188,9 +200,19 @@ if (scalar.hasName("wavelength") && ! bb.hasRemaining) bb.rewind
   
   def getProperty(name: String): Option[String] = config.properties.get(name)
   
-  def getProperty(name: String, default: String): String = config.properties.getOrElse(name, default)
+  def getProperty(name: String, default: => String): String = 
+    config.properties.getOrElse(name, default)
   
   //---------------------------------------------------------------------------
+  
+  /**
+   * Return a list of Scalar variable names represented in the original data.
+   * Note, this will not account for Projections or other operations that
+   * the adapter may apply.
+   */
+  def getVariableNames: Seq[String] = metadata.toSeq.collect {
+    case smd: ScalarMetadata => smd.get("id").get
+  }
   
   /**
    * Get the URL of the data source from this adapter's configuration.
@@ -206,15 +228,14 @@ object Adapter3 {
    * Construct an instance of a Adapter with the given properties
    * that will build a Dataset as defined in the Model.
    */
-  def apply(model: Dataset3, config: AdapterConfig): Adapter3 = {
+  def apply(metadata: Metadata3, config: AdapterConfig): Adapter3 = {
     config.properties.get("class") match {
       case Some(class_name) =>
         try {
           val cls = Class.forName(class_name)
           val cs = cls.getConstructors
-          val ctor = cs.head
-          //val ctor = cls.getConstructor(model.getClass(), properties.getClass)
-          ctor.newInstance(model, config).asInstanceOf[Adapter3]
+          val ctor = cs.head //assume only one constructor
+          ctor.newInstance(metadata, config).asInstanceOf[Adapter3]
         } catch {
           case e: Exception =>
             throw new Error("Failed to construct Adapter: " + class_name, e)

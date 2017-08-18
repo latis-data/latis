@@ -1,89 +1,55 @@
 package latis.dm
 
-import latis.metadata.Metadata
+import latis.metadata._
 import latis.data.Data
+import java.util.UUID
 
-sealed abstract class Variable3(id: String, metadata: Metadata) {
-  /**
-   * Does this Variable have the given name or alias.
-   */
-  def hasName(name: String): Boolean = {
-    id == name || metadata.get("name").exists(_ == name) || hasAlias(name)
-  }
-
-  /**
-   * Does this Variable have an alias that matches the given name.
-   */
-  def hasAlias(alias: String): Boolean = {
-    metadata.get("alias") match {
-      case Some(s) => s.split(",").contains(alias)
-      case None => false
-    }
-  }
+sealed abstract class Variable3(metadata: VariableMetadata3) {
 
   def getMetadata(name: String): Option[String] = metadata.get(name)
   
   def getType: String = metadata.getOrElse("type", "undefined") //TODO: require type?
   
-  def getId: String = id
+  lazy val getId: String = getMetadata("id") match {
+    case Some(id) => id
+    case None => UUID.randomUUID.toString.take(8)
+    //TODO: what about the orig id in the metadata!?
+    //  move to smart constructor
+  }
+  
+  def hasName(name: String): Boolean = metadata.hasName(name)
+  
 }
 
+//---- Scalar -----------------------------------------------------------------
 
-case class Scalar3(
-    id: String, 
-    metadata: Metadata = Metadata.empty, 
-    get: () => Data = () => Data.empty)
-  extends Variable3(id, metadata) {
+case class Scalar3(get: () => Data = () => Data.empty)
+  (metadata: ScalarMetadata)     
+  extends Variable3(metadata) {
   
-//  /**
-//   * Return the size in bytes needed to store one data value for this Scalar.
-//   */
-//  def getSize: Int = getType match {
-//    case "integer" => 8  //Long
-//    case "real"    => 8  //Double
-//    case "text"    => getMetadata("length") match {
-//      // 2 bytes per character
-//      case Some(n) => n.toInt * 2
-//      case None    => Text.DEFAULT_LENGTH * 2
-//    }
-//  }
-  
-  override def toString: String = id
+  override def toString: String = s"$getId:${getType.capitalize}"
 }
 
-/*
- * varargs too nuch trouble
- * Pattern match with varargs to get Seq[Variable]: Tuple(_,_, vs @ _*)
- * Construct with Seq: Tuple(id, md, vs: _*)
- * Apparently lost ability to copy.
- */
-//case class Tuple3(id: String, metadata: Metadata, variables: Variable3*)
-case class Tuple3(
-    id: String = "", 
-    metadata: Metadata = Metadata.empty, 
-    variables: Seq[Variable3])
-  extends Variable3(id, metadata) {
+//---- Tuple ------------------------------------------------------------------
+
+case class Tuple3(variables: Seq[Variable3])
+  (metadata: TupleMetadata)
+  extends Variable3(metadata) {
   
   lazy val arity = variables.length
   
-  override def toString: String = {
-    val name = id match {
-      case "" => ""
-      case _  => s"$id:"
-    }
-    variables.mkString(s"$name(", ", ", ")")
-  }
+  override def toString: String = variables.mkString(s"$getId:(", ", ", ")")
 }
-object Tuple3 {
-  def apply(vars: Variable3*): Tuple3 = Tuple3("", Metadata.empty, vars.toSeq)
-}
+
+//---- Function ---------------------------------------------------------------
 
 //case class Function3(domain: Variable3, codomain: Variable3)(id: String, metadata: Metadata)
 //  only extracts d,c but can't use copy(md = md)...
-case class Function3(id: String, metadata: Metadata, domain: Variable3, codomain: Variable3)
-  extends Variable3(id, metadata) {
+case class Function3(domain: Variable3, codomain: Variable3)
+  (metadata: FunctionMetadata)
+  extends Variable3(metadata) {
   
-  override def toString: String = s"$domain -> $codomain"
+  override def toString: String = s"$getId:($domain -> $codomain)"
 }
 
 trait SampledFunction3 { this: Function3 =>

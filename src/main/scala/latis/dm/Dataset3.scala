@@ -1,16 +1,17 @@
 package latis.dm
 
-import latis.metadata.Metadata
+import latis.metadata._
 import scala.collection._
 import scala.collection.mutable.Stack
 import scala.collection.mutable.Builder
 import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable.ArrayBuffer
 
-case class Dataset3(id: String, variable: Variable3, metadata: Metadata = Metadata.empty)
+case class Dataset3(variable: Variable3)(metadata: Metadata3)
   extends Traversable[Variable3] with TraversableLike[Variable3, Dataset3]{
   //This implementation should not contain any data. It should be plugged in
   // by the adapter via the Scalar.unapply.
+  //TODO: common trait so Dataset and Variables can share metadata methods?
   
   import Dataset3._
   override protected[this] def newBuilder: Builder[Variable3, Dataset3] = Dataset3.newBuilder
@@ -22,9 +23,13 @@ case class Dataset3(id: String, variable: Variable3, metadata: Metadata = Metada
     def go(v: Variable3): Unit = {
       //recurse
       v match {
-        case _: Scalar3          => //end of this branch
-        case Tuple3(_,_,vs) => vs.map(go(_))
-        case Function3(_,_,d,c)  => go(d); go(c)
+        case _: Scalar3     => //end of this branch
+        case Tuple3(vs)     => vs.map(go(_))
+        case SampledFunction3(it) => it foreach { sample =>
+          //traverse over samples
+          go(sample._1)
+          go(sample._2)
+        }
       }
       //apply function after taking care of kids = depth first
       f(v)
@@ -43,7 +48,9 @@ case class Dataset3(id: String, variable: Variable3, metadata: Metadata = Metada
     findVariableByName(vname).flatMap(_.getMetadata(attribute))
   }
   
-  override def toString: String = s"$id: ($variable)"
+  def getId = metadata.properties.get("id").get //TODO: error if not defined
+  
+  override def toString: String = s"$getId: ($variable)"
   
 //See how far Traversable gets us
 //  /**
@@ -106,6 +113,7 @@ case class Dataset3(id: String, variable: Variable3, metadata: Metadata = Metada
    * 
    * Traversable vs Functor (map):
    * need diff traversals: map, mapData
+   *   but we need the "foreach" (e.g. for writer)
    * Variable vs Dataset
    *   we have 2 diff traversals: model, data
    *   can we use Dataset and Variable to handle those separately?
@@ -121,6 +129,24 @@ case class Dataset3(id: String, variable: Variable3, metadata: Metadata = Metada
    *   D.map(V => V)
    *   D.filter(V => Boolean)
    * Traversable doesn't allow us to preserve Dataset metadata  
+   * ***Does 2 diff traversals call for 2 diff structures?
+   *   Model and Dataset?
+   *   encapsulate model with metadata
+   *   put the model traversal on Metadata
+   *     start the traversal in Dataset so it can replace the orig
+   *   is "metadata" the right abstration?
+   *     the thing from tsml or lemr,... seems OK
+   *   Do Variables need their own metadata?
+   *     convenient
+   *     var has no parentage to get to dataset's md
+   *       but it is in scope because we are within the context of the Dataset
+   *       ...
+   *     could just point to the part from the DS metadata
+   *   Will help us write metadata without reading data 
+   *   Note that spark has a "type" in the field definitions
+   *     they also have metadata
+   *   Do we need Metadata(VariableMetadata) wrapper? only way I could get Traversable to work
+   *     Traversable becomes a Seq[A] but the thing is an A itself
    * 
    * Extractors:
    * can we use primitives instead of Data? 
@@ -185,24 +211,25 @@ object Dataset3 {
 //  }
   
   def fromSeq(vars: Seq[Variable3]): Dataset3 = {
-    def go(vs: Seq[Variable3], hold: Stack[Variable3]): Variable3 = {
-      vs.headOption match {
-        case Some(s: Scalar3) => 
-          go(vs.tail, hold.push(s)) //put on the stack then do the rest
-        case Some(t: Tuple3) => 
-          val n = t.arity
-          val t2 = t.copy(variables = (0 until n).map(_ => hold.pop).reverse)
-          go(vs.tail, hold.push(t2))
-        case Some(f: Function3) => 
-          val c = hold.pop
-          val d = hold.pop
-          val f2 = f.copy(domain = d, codomain = c)
-          go(vs.tail, hold.push(f2))
-        case None => hold.pop //TODO: test that the stack is empty now
-      }
-    }
-    //Note, this doesn't preserve dataset metadata
-    Dataset3("", go(vars, Stack()))
+    ??? //TODO: traverse over data samples
+//    def go(vs: Seq[Variable3], hold: Stack[Variable3]): Variable3 = {
+//      vs.headOption match {
+//        case Some(s: Scalar3) => 
+//          go(vs.tail, hold.push(s)) //put on the stack then do the rest
+//        case Some(t: Tuple3) => 
+//          val n = t.arity
+//          val t2 = t.copy(variables = (0 until n).map(_ => hold.pop).reverse)
+//          go(vs.tail, hold.push(t2))
+//        case Some(f: Function3) => 
+//          val c = hold.pop
+//          val d = hold.pop
+//          val f2 = f.copy(domain = d, codomain = c)
+//          go(vs.tail, hold.push(f2))
+//        case None => hold.pop //TODO: test that the stack is empty now
+//      }
+//    }
+//    //Note, this doesn't preserve dataset metadata
+//    Dataset3(go(vars, Stack()))(Metadata3.empty)
   }
   
   def newBuilder: Builder[Variable3, Dataset3] = new ArrayBuffer mapResult fromSeq

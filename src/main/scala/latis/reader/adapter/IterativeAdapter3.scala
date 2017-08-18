@@ -2,6 +2,7 @@ package latis.reader.adapter
 
 import latis.data._
 import latis.dm._
+import latis.metadata._
 import scala.collection._
 
 /**
@@ -11,22 +12,25 @@ import scala.collection._
  * iterate over.
  * This will not work with nested Functions, for now.
  */
-abstract class IterativeAdapter3[R](model: Dataset3, config: AdapterConfig) 
-  extends Adapter3(model, config) {
+abstract class IterativeAdapter3[R](metadata: Metadata3, config: AdapterConfig) 
+  extends Adapter3(metadata, config) {
   
   def getRecordIterator: Iterator[R] 
   
   def parseRecord(record: R): Option[Map[String, Data]]
   
-  override def makeFunction(function: Function3): Option[Function3] = Option {
+  override def makeFunction(fmd: FunctionMetadata): Option[Function3] = Option {
     // Given the cache usage, we can reuse the same sample instance.
-    val sample = makeSample(function.domain, function.codomain)
-    //TODO: if sample is None
+    val sample = makeSample(fmd.domain, fmd.codomain) match {
+      case Some(s) => s
+      case None => ??? //TODO empty Function?
+    }
     
-    new Function3(function.id, function.metadata, function.domain, function.codomain)
+    new Function3(sample._1, sample._2)(fmd)
+    //new Function3(function.id, function.metadata, function.domain, function.codomain)
     with SampledFunction3 {
       def iterator: Iterator[(Variable3, Variable3)] = getRecordIterator.flatMap { record =>
-        parseRecord(record).flatMap { dataMap =>
+        parseRecord(record).map { dataMap =>
           clearCache
           cache(dataMap)
           sample

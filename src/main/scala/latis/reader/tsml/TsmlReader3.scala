@@ -1,14 +1,14 @@
 package latis.reader.tsml
 
 import latis.dm._
-import latis.metadata.Metadata
+import latis.metadata._
 import latis.ops.Operation
 import latis.reader.DatasetAccessor
 import latis.reader.adapter._
 import latis.reader.tsml.ml._
 import latis.util.LatisProperties
 
-import scala.collection.Seq
+import scala.collection._
 import scala.xml.XML
 import java.io.File
 import java.nio.file.Path
@@ -25,79 +25,86 @@ class TsmlReader3(url: URL) { //TODO: extends DatasetSource {
   val tsml = Tsml(url)
     
   /**
-   * Construct a Model from the tsml file.
+   * Construct Metadata from the tsml file.
    * Use the Tsml classes to parse the tsml, for now.
    * Do this eagerly so it fails fast.
    */
-  val model: Dataset3 = {
+  val metadata: Metadata3 = {
     val dsml = tsml.dataset
-    val variable = varMlToVariable(dsml.getVariableMl)
-    val md = makeMetadata(dsml)
-    Dataset3(dsml.getName, variable, md)
+    val vmd = varMlToVariableMetadata(dsml.getVariableMl)
+    val props = makeProperties(dsml)
+    Metadata3(vmd)(props)
   }
-  
   
   /**
    * Recursive function to build VariableType graph 
    * from VariableMl graph.
    */
-  private def varMlToVariable(vml: VariableMl): Variable3 = vml match {
+  private def varMlToVariableMetadata(vml: VariableMl): VariableMetadata3 = vml match {
     //TODO: put label in md as type?
     //TODO: put element atts into PIs and/or metadata?
     //TODO: deal with undefined name?
     case ml: ScalarMl =>
-      val id = ml.getName
-      val md = makeMetadata(ml)
-      Scalar3(id, md)
+      val props = makeProperties(ml)
+      ScalarMetadata(props)
     case ml: TimeMl => 
-      val id = ml.getName
-      val md = makeMetadata(ml)
+      val props = makeProperties(ml)
       //add default type of "real"
-      val md2 = if (! md.has("type")) md + ("type" -> "real") else md
-      Scalar3(id, md2)
+      val props2 = if (! props.contains("type")) props + ("type" -> "real") else props
+      ScalarMetadata(props2)
     case ml: TupleMl =>
-      val vs = ml.variables.map(varMlToVariable(_))
-      val id = ml.getName
-      val md = makeMetadata(ml)
-      Tuple3(id, md, vs)
+      val vs = ml.variables.map(varMlToVariableMetadata(_))
+      val props = makeProperties(ml)
+      TupleMetadata(vs)(props)
     case ml: FunctionMl =>
-      val domain   = varMlToVariable(ml.domain)
-      val codomain = varMlToVariable(ml.range)
-      val id = ml.getName
-      val md = makeMetadata(ml)
-      Function3(id, md, domain, codomain)
+      val domain   = varMlToVariableMetadata(ml.domain)
+      val codomain = varMlToVariableMetadata(ml.range)
+      val props = makeProperties(ml)
+      FunctionMetadata(domain, codomain)(props)
   }
     
-  private def makeMetadata(vml: VariableMl): Metadata = {
+  private def makeProperties(vml: VariableMl): immutable.Map[String, String] = {
     /*
      * Combine tsml variable element label (type), attributes,
      *   and metadata attributes.
      * Note that some of these may need to become PIs.
      * 
      */
-    val atts = scala.collection.mutable.Map[String, String]()
-    atts ++= vml.getAttributes
-    atts ++= vml.getMetadataAttributes
+    val props = mutable.Map[String, String]()
+    props ++= vml.getAttributes
+    props ++= vml.getMetadataAttributes
     
     // if id = time, look for other "type" def or use "real"
     val typ = vml.label match {
-      case "time" => atts.get("type") match {
+      case "time" => props.get("type") match {
         case Some(t) => t
         case None => "real"
       }
       case s => s
     }
-    atts += "type" -> typ
+    props += "type" -> typ
     
-    var md = Metadata(atts)
-    
-    // Add implicit names
     // Use "id" for "name" metadata
-    if (! md.has("name")) vml.getAttribute("id").foreach(id => md = md + ("name" -> id))
-    if (vml.label == "time") md = md.addName("time")
-    if (vml.label == "index") md = md.addName("index")
+    if (! props.contains("name")) vml.getAttribute("id").foreach(id => props += ("name" -> id))
+    // Add implicit names to aliases
+    if (vml.label == "time") addName(props, "time")
+    if (vml.label == "index") addName(props, "index")
     
-    md
+    props.toMap //return immutable Map
+  }
+    
+  /**
+   * If the Map does not have a "name" property, set it.
+   * Otherwise, add an "alias".
+   */
+  private def addName(props: mutable.Map[String, String], name: String): Unit = 
+    props.get("name") match {
+      //Note, this does not prevent duplicates, which shouldn't hurt.
+      case Some(_) => props.get("alias") match {
+        case Some(a) => props += ("alias" -> s"$a,$name") //append to list of aliases
+        case None    => props += ("alias" -> name)        //add alias
+      }
+      case None => props += ("name" -> name)
   }
   
   /**
@@ -127,7 +134,7 @@ class TsmlReader3(url: URL) { //TODO: extends DatasetSource {
    */
   def getDataset(operations: Seq[Operation]): Dataset3 = {
     if (_dataset == null) _dataset = {
-      _adapter = Adapter3(model, makeAdapterConfig)
+      _adapter = Adapter3(metadata, makeAdapterConfig)
       _adapter.getDataset(operations)
     }
     else _dataset

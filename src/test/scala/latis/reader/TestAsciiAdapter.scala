@@ -10,6 +10,8 @@ import latis.reader.tsml.TsmlReader2
 import java.net.URL
 import latis.ops._
 import latis.ops.filter._
+import latis.reader.tsml.TsmlReader3
+import latis.writer.Writer3
 
 class TestAsciiAdapter  {
   //See also, TestIterativeAsciiAdapter
@@ -47,11 +49,14 @@ class TestAsciiAdapter  {
   def iterative_adapter3 = {
     val ops = scala.collection.mutable.ArrayBuffer[Operation]()
     //ops += FirstFilter()
-    ops += Selection("time ~ 1970-01-02T13")
-    ops += Projection("myTime")
-    ops += TimeFormatter("yyyy-MMM-dd")
-    val ds = TsmlReader2.fromName("ascii_iterative3").getDataset(ops)
-    AsciiWriter.write(ds)
+    //ops += Selection("time ~ 1970-01-02T13")
+    //ops += Projection("myTime")
+    //ops += TimeFormatter("yyyy-MMM-dd")
+    val ds = TsmlReader3.fromName("ascii_iterative").getDataset(ops)
+    //println(ds)
+    //ds.foreach(println)
+    val w = new Writer3()
+    w.write(ds)
   }
 
 }
