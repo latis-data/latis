@@ -29,15 +29,42 @@ sealed abstract class Variable3(id: String, metadata: Metadata) {
 }
 
 
-case class Scalar3(id: String, metadata: Metadata, get: () => Data)
+case class Scalar3(
+    id: String, 
+    metadata: Metadata = Metadata.empty, 
+    get: () => Data = () => Data.empty)
   extends Variable3(id, metadata) {
+  
+//  /**
+//   * Return the size in bytes needed to store one data value for this Scalar.
+//   */
+//  def getSize: Int = getType match {
+//    case "integer" => 8  //Long
+//    case "real"    => 8  //Double
+//    case "text"    => getMetadata("length") match {
+//      // 2 bytes per character
+//      case Some(n) => n.toInt * 2
+//      case None    => Text.DEFAULT_LENGTH * 2
+//    }
+//  }
   
   override def toString: String = id
 }
 
-
-case class Tuple3(id: String, metadata: Metadata, variables: Variable3*)
+/*
+ * varargs too nuch trouble
+ * Pattern match with varargs to get Seq[Variable]: Tuple(_,_, vs @ _*)
+ * Construct with Seq: Tuple(id, md, vs: _*)
+ * Apparently lost ability to copy.
+ */
+//case class Tuple3(id: String, metadata: Metadata, variables: Variable3*)
+case class Tuple3(
+    id: String = "", 
+    metadata: Metadata = Metadata.empty, 
+    variables: Seq[Variable3])
   extends Variable3(id, metadata) {
+  
+  lazy val arity = variables.length
   
   override def toString: String = {
     val name = id match {
@@ -47,7 +74,9 @@ case class Tuple3(id: String, metadata: Metadata, variables: Variable3*)
     variables.mkString(s"$name(", ", ", ")")
   }
 }
-
+object Tuple3 {
+  def apply(vars: Variable3*): Tuple3 = Tuple3("", Metadata.empty, vars.toSeq)
+}
 
 //case class Function3(domain: Variable3, codomain: Variable3)(id: String, metadata: Metadata)
 //  only extracts d,c but can't use copy(md = md)...
@@ -57,9 +86,13 @@ case class Function3(id: String, metadata: Metadata, domain: Variable3, codomain
   override def toString: String = s"$domain -> $codomain"
 }
 
-trait SampledFunction3 { //TODO: self type of Function?
+trait SampledFunction3 { this: Function3 =>
   def iterator: Iterator[(Variable3, Variable3)]
 }
 object SampledFunction3 {
+//  def apply(id: String, metadata: Metadata, domain: Variable3, codomain: Variable3): SampledFunction3 =
+//    new Function3(id, metadata, domain, codomain) with SampledFunction3 {
+//      def iterator: Iterator[(Variable3, Variable3)] = ???
+//    }    
   def unapply(f: SampledFunction3) = Option(f.iterator)
 }

@@ -8,6 +8,7 @@ import latis.dm.Variable
 import java.net.URL
 import java.io.File
 import java.net.URLEncoder
+import java.nio.ByteBuffer
 
 /**
  * Utility methods for manipulating Strings.
@@ -94,6 +95,17 @@ object StringUtils {
   }
   
   /**
+   * Convert the first nchar * 2 bytes from the given ByteBuffer into a String
+   * of nchar characters. The factor of 2 is needed because a char is 2 bytes in Java.
+   */
+  def byteBufferToString(bb: ByteBuffer, nchar: Int): String = {
+    val cs = new Array[Char](nchar)      //allocate an array of chars just big enough for our String
+    bb.asCharBuffer.get(cs)              //load the array (cs) with nchar*2 bytes
+    bb.position(bb.position + nchar * 2) //advance position in underlying buffer
+    new String(cs)                       //make a String out of our array
+  }
+  
+  /**
    * Construct Data from a String by matching a Variable template
    */
   //TODO: support regex property for each variable
@@ -120,6 +132,7 @@ object StringUtils {
     case "text" => Data(StringUtils.padOrTruncate(value, value.length)) //TODO: enforce max length
   }
   
+  //TODO: find a better home, See (LATIS-619)
   def getUrl(loc: String): URL = {
     if(loc.matches("""\w+:.+""")) new URL(loc) //absolute
     else if (loc.startsWith(File.separator)) new URL("file:" + loc) 
