@@ -126,7 +126,7 @@ class TsmlReader3(url: URL) { //TODO: extends DatasetSource {
    * given Operations applied.
    */
   def getDataset(operations: Seq[Operation]): Dataset3 = {
-    if (_dataset != null) _dataset = {
+    if (_dataset == null) _dataset = {
       _adapter = Adapter3(model, makeAdapterConfig)
       _adapter.getDataset(operations)
     }
@@ -158,7 +158,7 @@ object TsmlReader3 {
   def fromName(name: String): TsmlReader3 = {
     //TODO: search dataset.path?
     val path = LatisProperties.getOrElse("dataset.dir", "datasets") + 
-               File.separator + name + ".tsml2"
+               File.separator + name + ".tsml3"
     fromPath(path)
   }
   
