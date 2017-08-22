@@ -26,17 +26,15 @@ abstract class IterativeAdapter3[R](metadata: Metadata3, config: AdapterConfig)
       case None => ??? //TODO empty Function?
     }
     
-    new Function3(sample._1, sample._2)(fmd)
-    //new Function3(function.id, function.metadata, function.domain, function.codomain)
-    with SampledFunction3 {
-      def iterator: Iterator[(Variable3, Variable3)] = getRecordIterator.flatMap { record =>
-        parseRecord(record).map { dataMap =>
-          clearCache
-          cache(dataMap)
-          sample
-        }
+    val samples = getRecordIterator.flatMap { record =>
+      parseRecord(record).map { dataMap =>
+        clearCache
+        cache(dataMap)
+        sample
       }
     }
+
+    SampledFunction3(samples)(fmd)
   }
   
 }

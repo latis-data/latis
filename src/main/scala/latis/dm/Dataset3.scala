@@ -7,50 +7,36 @@ import scala.collection.mutable.Builder
 import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable.ArrayBuffer
 
-case class Dataset3(variable: Variable3)(metadata: Metadata3)
-  extends Traversable[Variable3] with TraversableLike[Variable3, Dataset3]{
+case class Dataset3(function: SampledFunction3)(metadata: Metadata3)
+  extends Traversable[Sample3] with TraversableLike[Sample3, Dataset3]{
   //This implementation should not contain any data. It should be plugged in
   // by the adapter via the Scalar.unapply.
   //TODO: common trait so Dataset and Variables can share metadata methods?
   
   import Dataset3._
-  override protected[this] def newBuilder: Builder[Variable3, Dataset3] = Dataset3.newBuilder
+  override protected[this] def newBuilder: Builder[Sample3, Dataset3] = Dataset3.newBuilder
   
   /**
    * Implement Traversable so we can use filter....
    */
-  def foreach[U](f: Variable3 => U): Unit = {
-    def go(v: Variable3): Unit = {
-      //recurse
-      v match {
-        case _: Scalar3     => //end of this branch
-        case Tuple3(vs)     => vs.map(go(_))
-        case SampledFunction3(it) => it foreach { sample =>
-          //traverse over samples
-          go(sample._1)
-          go(sample._2)
-        }
-      }
-      //apply function after taking care of kids = depth first
-      f(v)
-    }
-    go(variable)
+  def foreach[U](f: Sample3 => U): Unit = {
+    function.iterator.foreach(f)
   }
 
-  def getScalars: Seq[Scalar3] = toSeq.collect { case s: Scalar3 => s }
-  
-  def findVariableByName(vname: String): Option[Variable3] = {
-    //TODO: support "." in vname, see AbstractVariable
-    find(_.hasName(vname))
-  }
-  
-  def findVariableAttribute(vname: String, attribute: String): Option[String] = {
-    findVariableByName(vname).flatMap(_.getMetadata(attribute))
-  }
+//  //def getScalars: Seq[Scalar3] = toSeq.collect { case s: Scalar3 => s }
+//  
+//  def findVariableByName(vname: String): Option[Variable3] = {
+//    //TODO: support "." in vname, see AbstractVariable
+//    find(_.hasName(vname))
+//  }
+//  
+//  def findVariableAttribute(vname: String, attribute: String): Option[String] = {
+//    findVariableByName(vname).flatMap(_.getMetadata(attribute))
+//  }
   
   def getId = metadata.properties.get("id").get //TODO: error if not defined
   
-  override def toString: String = s"$getId: ($variable)"
+  override def toString: String = s"$getId: (${metadata.metadata})"
   
 //See how far Traversable gets us
 //  /**
@@ -147,6 +133,11 @@ case class Dataset3(variable: Variable3)(metadata: Metadata3)
    *     they also have metadata
    *   Do we need Metadata(VariableMetadata) wrapper? only way I could get Traversable to work
    *     Traversable becomes a Seq[A] but the thing is an A itself
+   * Should Dataset be a traversable of Samples
+   *   then should operations be f: Sample=>Sample
+   *   obvious place for Left,Right
+   *   can use metadata to traverse the sample?
+   *   maps well to spark Dataset[Row]
    * 
    * Extractors:
    * can we use primitives instead of Data? 
@@ -170,74 +161,38 @@ case class Dataset3(variable: Variable3)(metadata: Metadata3)
    *   since we wouldn't be imited to name,value pairs we could encode a Seq of PIs
    * How might this affect joins, file joins,...
    * 
-   * 
+   * Data:
+   * always use value class?
+   * with base class with asSting, asDouble, asLong,...
    * 
    * Operations:
    * pure function: Variable => Variable
    *   or Variable => Option[Variable]?
    *   or diff types, e.g. filter: Variable => Boolean
    * Where can an operation update Dataset metadata?
+   * 
+   * Time:
+   * 
    */
 }
 
 object Dataset3 {
   
-//  def fromSeq(vars: Seq[Option[V]]): Model = {
-//    def go(vs: Seq[Option[V]], hold: Stack[Option[V]]): Option[V] = {
-//      vs.headOption match {
-//        case Some(s: Option[S]) => go(vs.tail, hold :+ s)
-//        case Some(ot: Option[T])  => ot match {
-//          case Some(t) =>
-//            val n1 = t.variables.length
-//            val tvs = hold.take(n1).flatten //drop Nones
-//            val n2 = tvs.length
-//            val newT = if (n2 == 0) None
-//              else if (n2 == 1) Option(tvs.head)
-//              else Option(TupleType(tvs))
-//            go(vs.tail, hold.drop(n1).push(newT))
-//          case None => ot
-//        }
-//       // case
-//        case None => hold.pop //done
-//      }
-//      
-//      ???
-//    }
-//    
-//    go(vars, Stack[Option[V]]()) match {
-//      case Some(v) => Model(v)
-//      //case None    => Model() //TODO: empty model
-//    }
-//  }
-  
-  def fromSeq(vars: Seq[Variable3]): Dataset3 = {
-    ??? //TODO: traverse over data samples
-//    def go(vs: Seq[Variable3], hold: Stack[Variable3]): Variable3 = {
-//      vs.headOption match {
-//        case Some(s: Scalar3) => 
-//          go(vs.tail, hold.push(s)) //put on the stack then do the rest
-//        case Some(t: Tuple3) => 
-//          val n = t.arity
-//          val t2 = t.copy(variables = (0 until n).map(_ => hold.pop).reverse)
-//          go(vs.tail, hold.push(t2))
-//        case Some(f: Function3) => 
-//          val c = hold.pop
-//          val d = hold.pop
-//          val f2 = f.copy(domain = d, codomain = c)
-//          go(vs.tail, hold.push(f2))
-//        case None => hold.pop //TODO: test that the stack is empty now
-//      }
-//    }
-//    //Note, this doesn't preserve dataset metadata
-//    Dataset3(go(vars, Stack()))(Metadata3.empty)
+  def fromSeq(samples: Seq[Sample3]): Dataset3 = {
+    val (dmd, cmd) = samples.head match {
+      case Sample3(d, c) => (d.metadata, c.metadata)
+    }
+    val props = Seq(("length" -> samples.length.toString)).toMap
+    val fmd = FunctionMetadata(dmd, cmd)(props)
+    Dataset3(SampledFunction3(samples.iterator)(fmd))(Metadata3.empty)
   }
   
-  def newBuilder: Builder[Variable3, Dataset3] = new ArrayBuffer mapResult fromSeq
+  def newBuilder: Builder[Sample3, Dataset3] = new ArrayBuffer mapResult fromSeq
 
-  implicit def canBuildFrom: CanBuildFrom[Dataset3, Variable3, Dataset3] =
-    new CanBuildFrom[Dataset3, Variable3, Dataset3] {
-      def apply(): Builder[Variable3, Dataset3] = newBuilder
-      def apply(from: Dataset3): Builder[Variable3, Dataset3] = newBuilder
+  implicit def canBuildFrom: CanBuildFrom[Dataset3, Sample3, Dataset3] =
+    new CanBuildFrom[Dataset3, Sample3, Dataset3] {
+      def apply(): Builder[Sample3, Dataset3] = newBuilder
+      def apply(from: Dataset3): Builder[Sample3, Dataset3] = newBuilder
     }
 
 }

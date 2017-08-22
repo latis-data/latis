@@ -45,6 +45,8 @@ class TestAsciiAdapter  {
     AsciiWriter.write(ds)
   }
   
+  //---- AsciiAdapter3 ------------------
+  
   //@Test
   def iterative_adapter3 = {
     val ops = scala.collection.mutable.ArrayBuffer[Operation]()

@@ -61,15 +61,15 @@ abstract class Adapter3(metadata: Metadata3, config: AdapterConfig) {
   
   //---- Construct Dataset ----------------------------------------------------
 
-  /*
-   * TODO: can we map over metadata?
-   * VariableMetadata3 => Variable
-   * but would get Metadata3[Variable]
-   * foreach?
-   */
-  
   def makeDataset(metadata: Metadata3): Dataset3 = makeVariable(metadata.metadata) match {
-    case Some(v) => Dataset3(v)(metadata)
+    case Some(v: SampledFunction3) => Dataset3(v)(metadata)
+    case Some(v) => 
+      // Wrap variable as SampledFunction of Index with one sample.
+      val domain = Index3().asInstanceOf[Scalar3] //TODO: can we avoid this cast?
+      val samples = Seq(Sample3(domain, v)).iterator  //TODO: should we require iterator?
+      val md = v.metadata.asInstanceOf[FunctionMetadata] //TODO: eew
+      val sf = SampledFunction3(samples)(md)
+      Dataset3(sf)(metadata)
     case None    => Dataset3(null)(metadata)
   }
   
@@ -112,28 +112,24 @@ abstract class Adapter3(metadata: Metadata3, config: AdapterConfig) {
       case None => ??? //TODO empty Function?
     }
     
-    new Function3(sample._1, sample._2)(fmd)
-    with SampledFunction3 {
-      val length = fmd.get("length") match {
-        case Some(n) => n.toLong //TODO: handle error
-        case None    => ??? //TODO: error for now while testing; java.lang.Long.MAX_VALUE
-      }
-      def iterator: Iterator[(Variable3, Variable3)] = {
-        (0l until length).iterator.map(i => sample)
-        //Note, Iterator[Option[A]].flatMap will auto drop Nones.
-      }
+    val length = fmd.get("length") match {
+      case Some(n) => n.toLong //TODO: handle error
+      case None    => ??? //TODO: error for now while testing; java.lang.Long.MAX_VALUE
     }
+    val samples = (0l until length).iterator.map(i => sample)
+    
+    SampledFunction3(samples)(fmd)
   }
 
   /**
    * Given the use of the cache, we only need to make one sample.
    */
-  def makeSample(domain: VariableMetadata3, codomain: VariableMetadata3): Option[(Variable3, Variable3)] = {
+  def makeSample(domain: VariableMetadata3, codomain: VariableMetadata3): Option[Sample3] = {
     //TODO: if only one is None, replace with Index
     for {
       d <- makeVariable(domain)
       c <- makeVariable(codomain)
-    } yield (d, c)
+    } yield Sample3(d, c)
   }
 
   
