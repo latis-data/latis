@@ -6,6 +6,8 @@ import Assert._
 import latis.writer.AsciiWriter
 import java.net.URL
 import latis.ops._
+import latis.dm._
+import latis.metadata.Metadata
 
 class TestLisirdLEMRCatalogGenerator {
   
@@ -13,8 +15,18 @@ class TestLisirdLEMRCatalogGenerator {
   def check_lemr_catalog = {
     val ds = LisirdLemrCatalogGenerator().getDataset 
 
-    AsciiWriter.write(ds)
-    assertEquals(39, ds.getLength) //This number could change if LEMR changes
+    //AsciiWriter.write(ds)
+    ds match {
+      case Dataset(Function(it)) if it.hasNext => it.next match {
+        case Sample(Text(name), TupleMatch(Text(description), TupleMatch(Text(accessURL)))) => {
+          assertEquals("cak", name)
+          assertEquals("", description)
+          assertEquals("cak", accessURL)
+        }
+        case _ => fail
+      }
+      case _ => fail
+    }
   }
   
   
