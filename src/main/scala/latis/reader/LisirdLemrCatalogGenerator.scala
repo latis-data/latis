@@ -41,7 +41,7 @@ class LisirdLemrCatalogGenerator extends DatasetAccessor {
     
     val ops = ArrayBuffer[Operation]()
     ops += Selection("predicate", "=~", ".*(identifier$|lisirdRender$)") //looking for predicates with "identifier" or "lisirdRender"
-    val lemrDs = TsmlReader("lemr_datasets.tsml").getDataset(ops) //the Sparql query is defined in this tsml
+    val lemrDs = DatasetAccessor.fromName("lemr_datasets").getDataset(ops) //the Sparql query is defined in this tsml
     
     lemrDs match {
       case Dataset(Function(it)) if it.hasNext => {
