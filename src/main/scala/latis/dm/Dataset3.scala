@@ -143,6 +143,8 @@ case class Dataset3(function: SampledFunction3)(metadata: Metadata3)
    * can we use primitives instead of Data? 
    *   value classes should be ok
    *   but if we have functions of Double => Double ...
+   * instead of ()=>Double in Scalar, allow f to take args?
+   *   e.g. cursor info so adapter doesn't have to manage cursor?
    * 
    * Metadata:
    * in all vars or just Dataset?
