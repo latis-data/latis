@@ -4,9 +4,9 @@
   <metadata name="lemr_datasets"/> 
   <adapter class="latis.reader.tsml.SparqlAdapter"
            location="http://lemr-dev:3030/VIVO/sparql" 
-           query="PREFIX dcat:&#60;http://www.w3.org/ns/dcat#&#62; PREFIX dcterms:&#60;http://purl.org/dc/terms/&#62; SELECT ?s?p?o WHERE{?s a dcat:Dataset.?s?p?o}"
+           query="PREFIX dcat:&lt;http://www.w3.org/ns/dcat#&gt; PREFIX dcterms:&lt;http://purl.org/dc/terms/&gt; SELECT ?s?p?o WHERE{?s a dcat:Dataset.?s?p?o}"
            />
-           <!-- Note, in UTF-8 "&#60;" means '<' and "&#62;" means '>' -->
+           <!-- Note, in the above query, "&lt;" means '<' and "&gt;" means '>' -->
            
   <function>
     <index/>
