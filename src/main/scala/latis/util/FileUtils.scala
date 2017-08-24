@@ -7,6 +7,8 @@ import java.io.OutputStream
 
 import scala.Array.canBuildFrom
 import scala.collection.mutable.ArrayBuffer
+import java.net.URL
+import java.net.URLDecoder
 
 /**
  * Utility methods for working with files.
@@ -87,6 +89,21 @@ object FileUtils {
       d.listFiles.filter(_.isFile).toList
     } else {
       List[File]()
+    }
+  }
+  
+  /**
+   * If this URL is a "file" URL determine if it exists.
+   * Decode the URL encoding.
+   * Assume "true" for other URL protocols, for now.
+   */
+  def exists(url: URL): Boolean = {
+    url.getProtocol match {
+      case "file" => 
+        val path = URLDecoder.decode(url.getPath, "UTF-8")
+        new File(path).exists
+      case _ => true
+      //TODO: test http URL by requesting "HEAD"
     }
   }
   

@@ -5,6 +5,7 @@ import java.io.FileNotFoundException
 import java.net.URL
 
 import latis.util.LatisProperties
+import latis.util.FileUtils
 
 /**
  * Provides access to a tsml from a url, path, or name. 
@@ -19,8 +20,8 @@ object TsmlResolver {
     else if (path.startsWith(File.separator)) new URL("file:" + path) //absolute file path
     else getClass.getResource("/"+path) match { //try in the classpath (e.g. "resources")
       case url: URL => 
-        //test if this resolves
-        if (new File(url.getPath).exists) url
+        //Test if this resolves. Note that this only checks file URLs, for now.
+        if (FileUtils.exists(url)) url
         else null
       case null => {
         //Try looking in the working directory.
