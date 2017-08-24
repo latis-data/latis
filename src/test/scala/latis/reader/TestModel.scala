@@ -40,6 +40,7 @@ class TestModel {
   def find = {
     model.findVariableByName("b") match {
       case Some(s: ScalarType) => assertEquals("b", s.getId)
+      case _ => fail
     }
   }
   

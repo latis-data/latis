@@ -236,6 +236,7 @@ object Adapter3 {
           case e: Exception =>
             throw new Error("Failed to construct Adapter: " + class_name, e)
         }
+      case None => throw new RuntimeException("No 'class' defined for Adapter.")
     }
   }
   

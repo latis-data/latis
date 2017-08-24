@@ -78,25 +78,25 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
       //TODO: support AimTelemetryAdapter to override for any time, or build into unit conversions?
       if (vt.getMetadata("dbType").contains("timestamp")) parseTimestamp(record, vt) match {
         case Some(d) => map += (vt.id -> d)
-//        case None    => map += (vt.id -> makeFillData(vt))
+        case None    => ??? //map += (vt.id -> makeFillData(vt))
       }
       else vt.getType match {
         case "index"   => //placeholder, no data to parse
         case "integer" => parseInteger(record, vt) match {
           case Some(d) => map += (vt.id -> d)
-//          case None    => map += (vt.id -> makeFillData(vt))
+          case None    => ??? //map += (vt.id -> makeFillData(vt))
         }
         case "real"    => parseReal(record, vt) match {
           case Some(d) => map += (vt.id -> d)
-//          case None    => map += (vt.id -> makeFillData(vt))
+          case None    => ??? //map += (vt.id -> makeFillData(vt))
         }
         case "text"    => parseText(record, vt) match {
           case Some(d) => map += (vt.id -> d)
-//          case None    => map += (vt.id -> makeFillData(vt))
+          case None    => ??? //map += (vt.id -> makeFillData(vt))
         }
         case "binary"  => parseBinary(record, vt) match {
           case Some(d) => map += (vt.id -> d)
-//          case None    => map += (vt.id -> makeFillData(vt))
+          case None    => ??? //map += (vt.id -> makeFillData(vt))
         }
         case _ => ??? //TODO: error, unknown type
       }

@@ -150,7 +150,7 @@ class AsciiAdapter3(metadata: Metadata3, config: AdapterConfig)
         val value = metadata.findVariableProperty(p._2, "regex") match { //look for regex as tsml attribute
           case Some(s) => s.r.findFirstIn(p._1) match { //try to match the value with the regex
             case Some(m) => m  //use the matching part
- //           case None => p._2.getFillValue.toString  //use a fill value since this doesn't match
+            case None => ??? //p._2.getFillValue.toString  //use a fill value since this doesn't match
           }
           case None => p._1  //no regex pattern to match so use the original value
         }

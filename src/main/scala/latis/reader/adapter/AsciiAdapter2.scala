@@ -10,7 +10,6 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
 import javax.net.ssl.X509TrustManager
 import latis.dm.Model
-import latis.reader.adapter.IterativeAdapter3
 
 class AsciiAdapter2(model: Model, properties: Map[String, String]) 
   extends IterativeAdapter2_5[String](model, properties) {
@@ -223,7 +222,7 @@ class AsciiAdapter2(model: Model, properties: Map[String, String])
         val value = model.findVariableAttribute(p._2.getId, "regex") match { //look for regex as tsml attribute
           case Some(s) => s.r.findFirstIn(p._1) match { //try to match the value with the regex
             case Some(m) => m  //use the matching part
- //           case None => p._2.getFillValue.toString  //use a fill value since this doesn't match
+            case None => ??? //p._2.getFillValue.toString  //use a fill value since this doesn't match
           }
           case None => p._1  //no regex pattern to match so use the original value
         }

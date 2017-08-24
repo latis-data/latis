@@ -105,6 +105,7 @@ class Selection(val vname: String, val operation: String, val value: String) ext
           Selection(vars(0).getName, "<=", value).applyToFunction(f) match {
             case Some(f2: Function) =>
               Selection(vars(1).getName, ">", value).applyToFunction(f2).asInstanceOf[Option[Function]]
+            case Some(v) => ???
             case None => None
           }
           
