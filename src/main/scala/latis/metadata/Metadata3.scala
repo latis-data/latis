@@ -5,6 +5,7 @@ import scala.collection.mutable.Builder
 import scala.collection.mutable.Stack
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.generic.CanBuildFrom
+import java.util.UUID
 
 case class Metadata3(metadata: VariableMetadata3)(val properties: Map[String, String])
   extends Traversable[VariableMetadata3] with TraversableLike[VariableMetadata3, Metadata3] {
@@ -38,6 +39,11 @@ case class Metadata3(metadata: VariableMetadata3)(val properties: Map[String, St
     
   def findVariableProperty(name: String, key: String): Option[String] =
     findVariableByName(name).flatMap(_.get(key))
+    
+  def getScalarMetadata: Seq[ScalarMetadata] = toSeq.collect {
+    case md: ScalarMetadata => md
+  }
+
 }
 
 //=============================================================================
@@ -47,6 +53,14 @@ sealed abstract class VariableMetadata3(properties: Map[String, String]) {
   def get(key: String): Option[String] = properties.get(key)
   def getOrElse(key: String, default: => String): String = 
     properties.getOrElse(key, default)
+    
+  def getType: String = properties.getOrElse("type", "undefined") //TODO: require type?
+  
+  lazy val getId: String = properties.get("id") match {
+    case Some(id) => id
+    case None => UUID.randomUUID.toString.take(8)
+    //TODO: what about the orig id in the metadata!? move to smart constructor
+  }
     
   /**
    * Does this Variable have the given name or alias.
@@ -65,15 +79,24 @@ sealed abstract class VariableMetadata3(properties: Map[String, String]) {
 }
   
 case class ScalarMetadata(properties: Map[String, String]) 
-  extends VariableMetadata3(properties)
+  extends VariableMetadata3(properties) {
+  
+  override def toString: String = s"$getId:${getType.capitalize}"
+}
 
 case class TupleMetadata(members: Seq[VariableMetadata3])
   (val properties: Map[String, String])
-  extends VariableMetadata3(properties)
+  extends VariableMetadata3(properties) {
+  
+  override def toString: String = members.mkString(s"$getId:(", ", ", ")")
+}
 
 case class FunctionMetadata(domain: VariableMetadata3, codomain: VariableMetadata3)
   (val properties: Map[String, String])
-  extends VariableMetadata3(properties)
+  extends VariableMetadata3(properties) {
+  
+  override def toString: String = s"$getId:(${domain} -> ${codomain})"
+}
 
 //=============================================================================
 

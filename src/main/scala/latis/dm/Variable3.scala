@@ -3,21 +3,22 @@ package latis.dm
 import latis.metadata._
 import latis.data.Data
 import java.util.UUID
+import latis.data.value._
 
 sealed abstract class Variable3(val metadata: VariableMetadata3) {
 
-  def getMetadata(name: String): Option[String] = metadata.get(name)
-  
-  def getType: String = metadata.getOrElse("type", "undefined") //TODO: require type?
-  
-  lazy val getId: String = getMetadata("id") match {
-    case Some(id) => id
-    case None => UUID.randomUUID.toString.take(8)
-    //TODO: what about the orig id in the metadata!?
-    //  move to smart constructor
-  }
-  
-  def hasName(name: String): Boolean = metadata.hasName(name)
+//  def getMetadata(name: String): Option[String] = metadata.get(name)
+//  
+//  def getType: String = metadata.getOrElse("type", "undefined") //TODO: require type?
+//  
+//  lazy val getId: String = getMetadata("id") match {
+//    case Some(id) => id
+//    case None => UUID.randomUUID.toString.take(8)
+//    //TODO: what about the orig id in the metadata!?
+//    //  move to smart constructor
+//  }
+//  
+//  def hasName(name: String): Boolean = metadata.hasName(name)
   
 }
 
@@ -25,9 +26,46 @@ sealed abstract class Variable3(val metadata: VariableMetadata3) {
 
 case class Scalar3(get: () => Data = () => Data.empty)
   (metadata: ScalarMetadata)     
-  extends Variable3(metadata) {
-  
-  override def toString: String = s"$getId:${getType.capitalize}"
+  extends Variable3(metadata) 
+
+trait Integer3 { this: Scalar3 => }
+object Integer3 {
+  def apply(l: Long): Integer3 = {
+    val f = () => LongValue(l)
+    val md = ScalarMetadata(Map.empty)
+    new Scalar3(f)(md) with Integer3
+  }
+  def unapply(s: Scalar3): Option[Long] = s.get() match {
+/*
+ * TODO: convert type from native form
+ * e.g. AsciiAdapter might still have it as a string
+ * use a pattern match in Scalar that uses type from md?
+ * construct as one of these types (based on md type)
+ *   even if it returns other type
+ *   e.g. Interger3(StringValue("1"))
+ * Note, the only thing that knows the native type is the Data
+ *   so we can't drop Data and just use Any
+ *   
+ */
+    case LongValue(l) => Some(l)
+    case _ => None
+  }
+}
+
+trait Real3 { this: Scalar3 => }
+object Real3 {
+  def unapply(s: Scalar3): Option[Double] = s.get() match {
+    case DoubleValue(d) => Some(d)
+    case _ => None
+  }
+}
+
+trait Text3 { this: Scalar3 => }
+object Text3 {
+  def unapply(s: Scalar3): Option[String] = s.get() match {
+    case StringValue(s) => Some(s)
+    case _ => None
+  }
 }
 
 trait Index3 { this: Scalar3 => }
@@ -52,7 +90,6 @@ case class Tuple3(variables: Seq[Variable3])
   
   lazy val arity = variables.length
   
-  override def toString: String = variables.mkString(s"$getId:(", ", ", ")")
 }
 
 //---- Function ---------------------------------------------------------------
@@ -64,7 +101,6 @@ case class Function3(f: Variable3 => Variable3)
   
   def apply(arg: Variable3): Variable3 = f(arg)
   
-  override def toString: String = s"$getId:(${metadata.domain} -> ${metadata.codomain})"
 }
 
 trait SampledFunction3 { this: Function3 =>

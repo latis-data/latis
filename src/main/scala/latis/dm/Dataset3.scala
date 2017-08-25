@@ -7,7 +7,7 @@ import scala.collection.mutable.Builder
 import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable.ArrayBuffer
 
-case class Dataset3(function: SampledFunction3)(metadata: Metadata3)
+case class Dataset3(function: SampledFunction3)(val metadata: Metadata3)
   extends Traversable[Sample3] with TraversableLike[Sample3, Dataset3]{
   //This implementation should not contain any data. It should be plugged in
   // by the adapter via the Scalar.unapply.
@@ -166,6 +166,8 @@ case class Dataset3(function: SampledFunction3)(metadata: Metadata3)
    * Data:
    * always use value class?
    * with base class with asSting, asDouble, asLong,...
+   * should we just use primitive? use type from metadata to interpret?
+   *   Any is good enough for Spark
    * 
    * Operations:
    * pure function: Variable => Variable
