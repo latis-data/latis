@@ -4,6 +4,7 @@ import java.io.File
 import java.net.URL
 
 import javax.servlet.ServletConfig
+import java.net.URLDecoder
 
 /**
  * Subclass of LatisProperties that uses the ServletConfig in a server configuration
@@ -32,7 +33,7 @@ class LatisServerProperties(config: ServletConfig) extends LatisProperties {
     if (path.startsWith(File.separator)) path
     //try classpath
     else getClass.getResource(File.separator + path) match {
-      case url: URL => url.getPath
+      case url: URL => URLDecoder.decode(url.getPath, "UTF-8")
       //else try the servlet context
       case null => config.getServletContext().getRealPath(path)
     }

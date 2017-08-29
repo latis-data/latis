@@ -92,6 +92,7 @@ object Data {
     
     case buffer: Buffer     => fromBuffer(buffer)
     case bytes: Array[Byte] => fromBuffer(ByteBuffer.wrap(bytes))
+    case _ => Data.empty //TODO: warn
   }
 
   /**

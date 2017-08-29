@@ -80,9 +80,10 @@ class LatisProperties extends Properties with LazyLogging {
     if (path.startsWith(File.separator)) path
     //try classpath
     else getClass.getResource(File.separator + path) match {
-      case url: URL => url.getPath
+      case url: URL => URLDecoder.decode(url.getPath, "UTF-8")
       //else try the current working directory
       case null => scala.util.Properties.userDir + File.separator + path
+      //TODO: make sure it exists, return Option?
     }
   }
   
