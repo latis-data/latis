@@ -13,6 +13,7 @@ import latis.util.LatisServerProperties
 import latis.writer.HttpServletWriter
 import latis.writer.OverviewWriter
 import latis.reader.DatasetAccessor
+import latis.util.CacheManager
 
 class LatisServer extends HttpServlet with LazyLogging {
 
@@ -63,6 +64,29 @@ class LatisServer extends HttpServlet with LazyLogging {
       val suffix = if(index < 0) "html" else path.substring(index + 1); //suffix for Writer
       val dsname = if(index < 0) path.substring(1) else path.substring(1, index); //dataset name, drop leading "/"
 
+      //Remove dataset from cache if older than header's "Cache-Control: max-age"
+      //TODO: make sure another request isn't using it?
+      request.getHeader("Cache-Control") match {
+        case null => //no-op
+        case cc => cc.split("=") match {
+          case Array("max-age", s) =>
+            val maxage = s.toDouble //seconds
+            CacheManager.getDataset(dsname)
+                        .map(_.getMetadata("creation_time")) match {
+                //TODO: what if "creation_time" is not defined, whack?
+                //      have the CacheManager add the metadata?
+                case Some(s) =>
+                  val age = (System.currentTimeMillis - s.toLong).toDouble / 1000 //seconds
+                  if (age > maxage) {
+                    logger.info("Clearing cache for dataset: " + dsname)
+                    CacheManager.removeDataset(dsname)
+                  }
+                case None => //dataset not cached
+              }
+          case _ => //not a header we deal with
+        }
+      }
+      
       //Get the DatasetAccessor for the requested dataset.
       logger.debug("Locating dataset accessor: " + dsname)
       
