@@ -3,7 +3,7 @@ package latis.reader.tsml
 import latis.dm._
 import latis.metadata._
 import latis.ops.Operation
-import latis.reader.DatasetAccessor
+import latis.reader._
 import latis.reader.adapter._
 import latis.reader.tsml.ml._
 import latis.util.LatisProperties
@@ -19,7 +19,7 @@ import java.net.URL
  * This will construct a Dataset model from the tsml (without data) 
  * and an Adapter to generate the Dataset.
  */
-class TsmlReader3(url: URL) { //TODO: extends DatasetSource {
+class TsmlReader3(url: URL) extends DatasetSource {
   //TODO: dataset joins, nested datasets in tsml
   
   val tsml = Tsml(url)
