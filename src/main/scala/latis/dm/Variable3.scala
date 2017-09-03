@@ -5,7 +5,13 @@ import latis.data.Data
 import java.util.UUID
 import latis.data.value._
 
-sealed abstract class Variable3(val metadata: VariableMetadata3) {
+trait Variable3 {
+  def metadata: VariableMetadata3
+}
+
+abstract class AVariable3(md: VariableMetadata3) extends Variable3 {
+
+  def metadata: VariableMetadata3 = md
 
 //  def getMetadata(name: String): Option[String] = metadata.get(name)
 //  
@@ -24,18 +30,47 @@ sealed abstract class Variable3(val metadata: VariableMetadata3) {
 
 //---- Scalar -----------------------------------------------------------------
 
-case class Scalar3(get: () => Data = () => Data.empty)
-  (metadata: ScalarMetadata)     
-  extends Variable3(metadata) 
+trait Scalar3[T] extends Variable3 {
+  def value: T
+}
 
-trait Integer3 { this: Scalar3 => }
-object Integer3 {
-  def apply(l: Long): Integer3 = {
-    val f = () => LongValue(l)
-    val md = ScalarMetadata(Map.empty)
-    new Scalar3(f)(md) with Integer3
+//value can be lazy val or def
+abstract class AScalar3[T](_value: => T)(metadata: ScalarMetadata)     
+  extends AVariable3(metadata) with Scalar3[T] {
+  
+  //hang onto value after first eval
+  def value: T = v
+  private lazy val v = _value
+}
+
+object Scalar3 {
+  
+  //Ambiguous due to type erasure Function0[T]
+//  def apply(_value: => Long)(md: ScalarMetadata): Integer3 = new Scalar3(_value)(md) with Integer3
+//  def apply(_value: => Double)(md: ScalarMetadata): Real3 = new Scalar3(_value)(md) with Real3
+//  def apply(_value: => String)(md: ScalarMetadata): Text3 = new Scalar3(_value)(md) with Text3
+  
+  def apply[T](value: => T)(md: ScalarMetadata) = md.getType match {
+  //def apply(value: Any)(md: ScalarMetadata) = md.getType match {
+    //TODO: implicit evidence for Long...?
+    case "integer" => new AScalar3(value.asInstanceOf[Long])(md) with Integer3
+    case "real" => new AScalar3(value.asInstanceOf[Double])(md) with Real3
+    case "text" => new AScalar3(value.asInstanceOf[String])(md) with Text3
+    case _ => ???
   }
-  def unapply(s: Scalar3): Option[Long] = s.get() match {
+  
+  //matching specific type is preferred, avoid cast
+  //def unapply(s: Scalar3[_]): Option[Any] = Option(s.value)
+}
+
+trait Integer3 extends Scalar3[Long]
+object Integer3 {
+//  def apply(l: Long): Integer3 = {
+//    val props = Seq("id" -> "unknown", "type" -> "integer").toMap
+//    val md = ScalarMetadata(props)
+//    new Scalar3(l)(md) with Integer3
+//  }
+  def unapply(s: Integer3): Option[Long] = Option(s.value)
 /*
  * TODO: convert type from native form
  * e.g. AsciiAdapter might still have it as a string
@@ -45,78 +80,121 @@ object Integer3 {
  *   e.g. Interger3(StringValue("1"))
  * Note, the only thing that knows the native type is the Data
  *   so we can't drop Data and just use Any
- *   
+ *   or should the extraction function include the conversion?
+ * Do we even need Data?
+ *   Spark uses Any (but specifies types in schema)
+ * 
+ * How will this work with Time
+ * still need Real... as traits
+ * 
+ * With lazy value arg we will need a new instance of Sample3 for each sample
+ *   otherwise all samples will end up with the same value
+ *   what is the cost of wrapping all samples?
+ * The earlier approach of using a function would work
+ *   but that adds complications to operations
+ *   if backed by "getNext" in adapter, we can call only once
+ *     but it does seem dicey to reuse the same Sample instance
+ *   getNext could be wrapped by another lazy function in some cases
+ *   cases where it can't?
+ *     sliding iterator for interpolation?
+ *       each element becomes a List[Sample]
+ *     parallelization
+ *   would a distinction between inner and outer Functions help?
+ *     the inner is expected to be memoized (for now, at least)
+ *   live with new Sample instances for now
+ *     no worse than before  
+ *     
+ * Should we be able to read then write ascii (string) without parsing values?
+ *   writer would ask for the format it wants
+ *   just like binary writer wants bytes
+ *   match Scalar then call getString or getBytes...?
+ *   otherwise it would match on Integer, Real,...
+ *   would only work if no ops
+ *   seems like an optimization to save for later
  */
-    case LongValue(l) => Some(l)
-    case _ => None
-  }
 }
 
-trait Real3 { this: Scalar3 => }
+//TODO: is it worth trying this approach?
+//trait Real3 { this: Scalar3[Double] => }
+trait Real3 extends Scalar3[Double]
 object Real3 {
-  def unapply(s: Scalar3): Option[Double] = s.get() match {
-    case DoubleValue(d) => Some(d)
-    case _ => None
-  }
+  def unapply(s: Real3): Option[Double] = Option(s.value)
 }
 
-trait Text3 { this: Scalar3 => }
+trait Text3 extends Scalar3[String]
 object Text3 {
-  def unapply(s: Scalar3): Option[String] = s.get() match {
-    case StringValue(s) => Some(s)
-    case _ => None
-  }
+  //def unapply(s: Scalar3[_]): Option[String] = Option(s.value.asInstanceOf[String])
+  def unapply(s: Text3): Option[String] = Option(s.value)
 }
 
-trait Index3 { this: Scalar3 => }
+trait Index3 extends Scalar3[Int]
 object Index3 {
   def apply(): Index3 = {
     var index = -1
-    val f = () => {
+    def f: Int = {
       index += 1
-      Data(index)
+      index
     }
-    val props = Seq("id" -> "index").toMap
+    val props = Seq("id" -> "index", "type" -> "index").toMap
     val md = ScalarMetadata(props)
-    new Scalar3(f)(md) with Index3
+    new AScalar3[Int](f)(md) with Index3
   }
+  def unapply(s: Index3): Option[Int] = Option(s.value)
 }
 
 //---- Tuple ------------------------------------------------------------------
 
-case class Tuple3(variables: Seq[Variable3])
+class Tuple3(val variables: Seq[Variable3])
   (metadata: TupleMetadata)
-  extends Variable3(metadata) {
+  extends AVariable3(metadata) {
   
   lazy val arity = variables.length
-  
+}
+
+object Tuple3 {
+  def apply(variables: Seq[Variable3])(properties: Map[String,String] = Map.empty) = {
+    val md = TupleMetadata(variables.map(_.metadata))(properties)
+    new Tuple3(variables)(md)
+  }
+  def unapplySeq(tuple: Tuple3): Option[Seq[Variable3]] = Option(tuple.variables)
 }
 
 //---- Function ---------------------------------------------------------------
 
-//continuous function
-case class Function3(f: Variable3 => Variable3)
-  (metadata: FunctionMetadata)
-  extends Variable3(metadata) {
+//TODO: continuous function
+//class Function3(f: Variable3 => Variable3)
+abstract class Function3(metadata: FunctionMetadata)
+  extends AVariable3(metadata) {
   
-  def apply(arg: Variable3): Variable3 = f(arg)
-  
+  //def apply(arg: Variable3): Variable3 = f(arg)
 }
 
-trait SampledFunction3 { this: Function3 =>
+//trait SampledFunction3 { this: Function3 =>
+//class SampledFunction3(f: Variable3 => Variable3)
+//TODO: implicit Interpolation, or encapsulate in "f"?
+class SampledFunction3(iterable: Iterable[Sample3])
+  (metadata: FunctionMetadata)
+  extends Function3(metadata) {
   
-  def iterator: Iterator[Sample3]
-  
-  override def apply(arg: Variable3): Variable3 = ??? //TODO: interpolate, or encapsulate in "f"?
+  def iterator: Iterator[Sample3] = iterable.iterator
 }
+/*
+ * TODO: consider inner SampledFunction
+ *   no need for iterator?
+ *   avoid traversable once problem?
+ */
 
 object SampledFunction3 {
   
+  def apply(samples: Iterable[Sample3])(metadata: FunctionMetadata) = {
+    new SampledFunction3(samples)(metadata)
+  }
+  
   def apply(samples: Iterator[Sample3])(metadata: FunctionMetadata) = {
-    val f: Variable3 => Variable3 = (arg: Variable3) => ??? //TODO: encapsulate interp here, or just override apply?
-    new Function3(f)(metadata) with SampledFunction3 {
-      def iterator: Iterator[Sample3] = samples
+    val it = new Iterable[Sample3]() {
+      def iterator = samples
     }
+    new SampledFunction3(it)(metadata)
   }
 
   def unapply(f: SampledFunction3) = Option(f.iterator)
