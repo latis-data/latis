@@ -35,23 +35,20 @@ class Writer3 {
   }
   
   def varToString(variable: Variable3): String = variable match {
-    case s: Scalar3   => scalarToString(s)
-    case t: Tuple3    => tupleToString(t)
-    case f: Function3 => functionToString(f)
+    case s: Scalar3[_] => scalarToString(s)
+    case t: Tuple3     => tupleToString(t)
+    case f: Function3  => functionToString(f)
   }
   
-  def scalarToString(scalar: Scalar3): String = scalar match {
-    case Scalar3(d) => d() match {
-      case StringValue(v) => v
-      case LongValue(v) => v.toString
-      case DoubleValue(v) => v.toString
-      //TODO: have all extend DataValue with a toString,...?
-    }
-    case _ => ""
+  def scalarToString(scalar: Scalar3[_]): String = scalar match {
+    case Text3(v)     => v
+    case Integer3(v) => v.toString
+    case Real3(v)    => v.toString
+    case _           => ""
   }
   
   def tupleToString(tuple: Tuple3): String = tuple match {
-    case Tuple3(vs) => vs.map(varToString(_)).mkString("(", ", ", ")")
+    case Tuple3(vs @ _*) => vs.map(varToString(_)).mkString("(", ", ", ")")
     case _ => ""
   }
   

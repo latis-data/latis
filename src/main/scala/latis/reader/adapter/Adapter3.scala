@@ -9,6 +9,7 @@ import java.nio.ByteBuffer
 import latis.util.DataUtils
 import latis.util.StringUtils
 import java.net.URL
+import latis.data.value._
 
 abstract class Adapter3(metadata: Metadata3, config: AdapterConfig) {
   
@@ -65,12 +66,13 @@ abstract class Adapter3(metadata: Metadata3, config: AdapterConfig) {
     case Some(v: SampledFunction3) => Dataset3(v)(metadata)
     case Some(v) => 
       // Wrap variable as SampledFunction of Index with one sample.
-      val domain = Index3().asInstanceOf[Scalar3] //TODO: can we avoid this cast?
-      val samples = Seq(Sample3(domain, v)).iterator  //TODO: should we require iterator?
-      val md = v.metadata.asInstanceOf[FunctionMetadata] //TODO: eew
+      val domain = Index3().asInstanceOf[Scalar3[Int]] //TODO: can we avoid this cast?
+      val samples = Seq(Sample3(domain, v))
+      //TODO: Dataset3.fromSeq(samples)(metadata)?
+      val md = FunctionMetadata(domain.metadata, v.metadata)(Map.empty) //TODO: smart constructor for no md
       val sf = SampledFunction3(samples)(md)
       Dataset3(sf)(metadata)
-    case None    => Dataset3(null)(metadata)
+    case None => Dataset3(null)(metadata)
   }
   
   def makeVariable(variable: VariableMetadata3): Option[Variable3] = variable match {
@@ -79,8 +81,12 @@ abstract class Adapter3(metadata: Metadata3, config: AdapterConfig) {
     case f: FunctionMetadata => makeFunction(f)
   }
   
-  def makeScalar(smd: ScalarMetadata): Option[Scalar3] = Option {
-    val f = () => getNextData(smd)
+  def makeScalar(smd: ScalarMetadata): Option[Scalar3[_]] = Option {
+    def f = getNextData(smd) match {
+      case LongValue(l)   => l
+      case DoubleValue(d) => d
+      case StringValue(s) => s
+    }
     Scalar3(f)(smd)
   }
   
@@ -90,7 +96,7 @@ abstract class Adapter3(metadata: Metadata3, config: AdapterConfig) {
       case TupleMetadata(vs) => vs.flatMap(makeVariable(_))
     }
     //tuple.copy(variables = vars: _*) //TODO: varargs breaks copy?
-    Tuple3(vars)(tmd)
+    Tuple3(vars)(tmd.properties)
   }
   
   /**
@@ -206,7 +212,7 @@ abstract class Adapter3(metadata: Metadata3, config: AdapterConfig) {
    * Note, this will not account for Projections or other operations that
    * the adapter may apply.
    */
-  def getVariableNames: Seq[String] = metadata.toSeq.collect {
+  def getScalarNames: Seq[String] = metadata.toSeq.collect {
     case smd: ScalarMetadata => smd.get("id").get
   }
   

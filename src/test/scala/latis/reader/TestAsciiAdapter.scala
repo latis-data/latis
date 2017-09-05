@@ -60,5 +60,4 @@ class TestAsciiAdapter  {
     val w = new Writer3()
     w.write(ds)
   }
-
 }

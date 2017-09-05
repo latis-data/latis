@@ -128,7 +128,7 @@ class AsciiAdapter3(metadata: Metadata3, config: AdapterConfig)
   /**
    * Return Map with Variable name to value(s) as Data.
    */
-  def parseRecord(record: String): Option[Map[String,Data]] = {
+  def parseRecord(record: String): Option[Map[String,Any]] = {
     /*
      * TODO: consider nested functions
      * if not flattened, lines per record will be length of inner Function (assume cartesian?)
@@ -136,31 +136,19 @@ class AsciiAdapter3(metadata: Metadata3, config: AdapterConfig)
      */
     
     //assume one value per scalar per record
-    val vnames = getVariableNames
+    val vnames = getScalarNames
     val values = extractValues(record)
     
-    //If we don't parse as many values as expected, assume we have an invalid record and skip it.
-    if (vnames.length != values.length) {
-      //Note, There are many cases where datasets have invalid records "by design" 
-      //(e.g. future timestamps without data values) so we don't want to log warnings.
-      //logger.debug("Invalid record: " + values.length + " values found for " + vars.length + " variables")
-      None
-    } else {
-      val datas: Seq[Data] = (values zip vnames).map(p => {
-        val value = metadata.findVariableProperty(p._2, "regex") match { //look for regex as tsml attribute
-          case Some(s) => s.r.findFirstIn(p._1) match { //try to match the value with the regex
-            case Some(m) => m  //use the matching part
-            case None => ??? //p._2.getFillValue.toString  //use a fill value since this doesn't match
-          }
-          case None => p._1  //no regex pattern to match so use the original value
-        }
-        //convert the data values to Data objects using the Variable as a template
-        val vtype = metadata.findVariableProperty(p._2, "type").get
-        StringUtils.parseStringValue(value, vtype)
-      })
-      
-      Some((vnames zip datas).toMap)
+    val datas: Seq[Any] = (values zip vnames) map { p =>
+      metadata.findVariableProperty(p._2, "type") match {
+        //TODO: handle conversion errors
+        case Some("integer") => p._1.toLong
+        case Some("real") => p._1.toDouble
+        case Some("text") => p._1
+      }
     }
+      
+    Some((vnames zip datas).toMap)
   }
   
   /**

@@ -1,20 +1,39 @@
 package latis.dm
 
-import latis.dm.implicits._
+//import latis.dm.implicits._
 import org.junit._
 import Assert._
-import com.typesafe.scalalogging.LazyLogging
 import latis.dm._
-import latis.metadata.Metadata
+import latis.metadata._
 import latis.time.Time
-import latis.writer.AsciiWriter
-import java.nio.ByteBuffer
-import latis.data.value.DoubleValue
-import latis.reader.tsml.TsmlReader
-import latis.metadata.ScalarMetadata
+import latis.writer._
+
 
 class TestDataset3 {
 
+  //@Test
+  def lazy_scalar = {
+    case class S(b: Boolean)(q: => Int) {
+      def f = if (b) println(q)
+    }
+    def x: Int = {println("x"); 3}
+    val y: Int = {println("y"); 3}
+    lazy val z: Int = {println("z"); 3}
+    
+    val s = S(true)(z)
+    println("call 1")
+    s.f
+    println("call 2")
+    s.f
+  }
+  
+//  @Test
+//  def scalar_with_value_from_function = {
+//    def f = 3
+//    val s = Integer3(f)
+//    s match { case Integer3(v) => assertEquals(3l, v) }
+//  }
+  
 //  val dataset = {
 //    val a = Scalar3()(ScalarMetadata(Map("id" -> "A")))
 //    val b = Scalar3()(ScalarMetadata(Map("id" -> "B")))
