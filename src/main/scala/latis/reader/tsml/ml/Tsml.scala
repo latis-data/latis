@@ -32,7 +32,7 @@ class Tsml(val xml: Elem) {
       case Empty => throw new Exception("Tsml does not define an adpater or a name for this dataset.")
       case e => {
         if(new URI(e.text).isAbsolute) TsmlResolver.fromUrl(new URL(e.text)).get.dataset
-        else TsmlResolver.fromName(e.text).get.dataset
+        else TsmlResolver.fromName(e.text).get.dataset //TODO: handle error
       }
     }
     case e => new DatasetMl(xml) //assumes only one "dataset" element
