@@ -30,7 +30,7 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     
     val ds = collect(dss)
     
-    ops.foldLeft(ds)((dataset, op) => op(dataset)) //doesn't handle any Operations
+    (piOps ++ ops).foldLeft(ds)((dataset, op) => op(dataset)) //doesn't handle any Operations
   }
   
   override protected def makeDataset(ds: Dataset): Dataset = {

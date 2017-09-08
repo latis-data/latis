@@ -1,19 +1,28 @@
 package latis.ops.agg
 
-import latis.dm.Dataset
-import latis.ops.BinaryOperation
-import latis.dm.Sample
-import latis.dm.Tuple
-import latis.dm.Scalar
-import latis.dm.Variable
+import latis.dm._
+import latis.ops._
 
 /**
  * Base type for Operations that join (combine) Datasets.
  */
-trait Join extends BinaryOperation {
+class Join extends BinaryOperation {
   //Designed to replace Aggregation. See LATIS-325
   
-  def apply(ds1: Dataset, ds2: Dataset): Dataset
+  def apply(ds1: Dataset, ds2: Dataset): Dataset = {
+    (ds1, ds2) match {
+      case (Dataset(v1), Dataset(v2)) => (v1, v2) match {
+        case (f1 @ Function(it1), f2 @ Function(it2)) => {
+          val samples = (it1 zip it2).flatMap(p => joinSamples(p._1, p._2))
+          Dataset(Function(f1.getDomain, f1.getRange, samples, f1.getMetadata))
+        }
+        case _ => throw new UnsupportedOperationException("Join expects a Function in each of the Datasets it joins.")
+      }
+      case (Dataset(_), _) => ds1 //ds2 empty
+      case (_, Dataset(_)) => ds2 //ds2 empty
+      case _ => Dataset.empty //both datasets empty
+    }
+  }
       
   def joinVariables(v1: Variable, v2: Variable): Option[Variable] = (v1,v2) match {
     //TODO: preserve named tuple namespace
@@ -31,6 +40,7 @@ trait Join extends BinaryOperation {
     val domain1 = sample1.domain.asInstanceOf[Scalar]
     val domain2 = sample2.domain.asInstanceOf[Scalar]
     if (domain1.compare(domain2) != 0 ) None
+      //TODO: be clever about skipping gap in one dataset
       //val msg = "Samples must have matching domain variables to be joined."
       //TODO: log? throw new UnsupportedOperationException(msg)
     else joinVariables(sample1.range, sample2.range) match {
@@ -39,4 +49,9 @@ trait Join extends BinaryOperation {
     }
   }
   
+}
+
+object Join {
+  def apply(): Join = new Join
+  def apply(ds1: Dataset, ds2: Dataset): Dataset = new Join()(ds1, ds2)
 }

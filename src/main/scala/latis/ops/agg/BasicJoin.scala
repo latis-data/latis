@@ -104,7 +104,7 @@ class BasicJoin extends Join {
     
   }
   
-  def apply(ds1: Dataset, ds2: Dataset): Dataset = {
+  override def apply(ds1: Dataset, ds2: Dataset): Dataset = {
     if (ds1.isEmpty) ds2
     else if (ds2.isEmpty) ds1
     else (ds1, ds2) match {
