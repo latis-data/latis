@@ -114,7 +114,7 @@ class TsmlReader3(url: URL) extends DatasetSource {
   
   def makeAdapterConfig: AdapterConfig = {
     val props = tsml.dataset.getAdapterAttributes
-    val pis = tsml.processingInstructions.map(p => ProcessingInstruction(p._1, p._2))
+    val pis = tsml.dataset.processingInstructions.map(p => ProcessingInstruction(p._1, p._2))
     AdapterConfig(props, pis)
   }
   

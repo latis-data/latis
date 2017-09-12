@@ -35,7 +35,7 @@ class TsmlReader2(url: URL) extends DatasetAccessor {
     val dsml = tsml.dataset
     val vtype = varMlToVarType(dsml.getVariableMl)
     val md = makeMetadata(dsml)
-    val pis = tsml.processingInstructions.map(p => ProcessingInstruction(p._1, p._2))
+    val pis = tsml.dataset.processingInstructions.map(p => ProcessingInstruction(p._1, p._2))
     Model(vtype, md, pis)
   }
   
