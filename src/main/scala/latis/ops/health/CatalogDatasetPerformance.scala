@@ -113,10 +113,12 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
    * Only load a single time and a single wavelength from SSI datasets.
    */    
   def requestWholeDataset(name: String, op: String): Boolean = {
+    var reader: DatasetAccessor = null //needed to "close" after the read
     try {
       op match {
         case " (time series)" => {
-          val dsTime = DatasetAccessor.fromName(name).getDataset(Seq(LastFilter())).force
+          reader = DatasetAccessor.fromName(name)
+          val dsTime = reader.getDataset(Seq(LastFilter())).force
           dsTime match {
             case Dataset(Function(it)) if it.hasNext => {
               ssiSingleTimeDs = Some(dsTime)
@@ -130,7 +132,8 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
           ssiSingleTimeDs match {
             case Some(dsSSI) => {
               val selection = Seq(Selection("wavelength~" + getFirstWavelength(dsSSI))) 
-              val dsWavelength = DatasetAccessor.fromName(name).getDataset(selection).force
+              reader = DatasetAccessor.fromName(name)
+              val dsWavelength = reader.getDataset(selection).force
               dsWavelength match {
                 case Dataset(Function(it)) => it.hasNext
                 case _ => false
@@ -139,7 +142,8 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
             case None => { 
               //TODO: Find a way to avoid guessing a wavelength and/or decide if there's a better one than 121.5
               //TODO: Maybe warn in logs that a wavelength value was hard coded?
-              val dsWavelength = DatasetAccessor.fromName(name).getDataset(Seq(Selection("wavelength~121.5"))).force
+              reader = DatasetAccessor.fromName(name)
+              val dsWavelength = reader.getDataset(Seq(Selection("wavelength~121.5"))).force
               dsWavelength match {
                 case Dataset(Function(it)) => it.hasNext
                 case _ => false
@@ -155,11 +159,12 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
           }
         }
       }
-    } 
-    catch {
+    } catch {
       case e: Throwable => 
         logger.info("Dataset access failed for " + name + ". Unable to read from LaTiS: " + e.getMessage); false
-    } 
+    } finally {
+      try { reader.close } catch { case _: Exception => } //try to close, but if we can't, don't complain
+    }
   }
   
   /*
