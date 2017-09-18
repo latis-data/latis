@@ -18,13 +18,14 @@ class Writer3 {
    * Output the given Dataset in the desired form.
    */
   def write(dataset: Dataset3): Unit = {
-    println(dataset) //TODO: header
+    printWriter.println(dataset) //TODO: header
     val f = (s: Sample3) => writeSample(s)
     dataset.foreach(f)
+    printWriter.flush()
   }
   
   def writeSample(sample: Sample3): Unit = {
-    println(sampleToString(sample))
+    printWriter.println(sampleToString(sample))
   }
   
   def sampleToString(sample: Sample3): String = sample match {
