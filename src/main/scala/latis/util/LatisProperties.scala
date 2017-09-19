@@ -8,6 +8,7 @@ import com.typesafe.scalalogging.LazyLogging
 import scala.collection.JavaConversions
 import java.net.URLDecoder
 import java.util.TimeZone
+import java.io.InputStream
 
 /**
  * Singleton for access to properties with the following precedence:
@@ -16,24 +17,26 @@ import java.util.TimeZone
  * 3) Environment variable
  */
 class LatisProperties extends Properties with LazyLogging {
-  
-  /**
-   * The name of the properties file.
-   */
-  val file = getPropertyFileName()
 
   /**
    * Load the properties when singleton is constructed.
-   */
+   * If the property file is not found, look for latis.properties
+   * in the classpath.
+   * latis.properties is traditionally managed in src/main/resources/
+   * which gets deployed to the classpath.
+   */  
   try {
-    logger.debug("Loading properties file: " + file)
-    val in = new FileInputStream(file)
-    load(in)
-    in.close
+    val in: InputStream = findPropertyFile match {
+      case Some(file) => new FileInputStream(file)
+      case None => getClass.getResourceAsStream("/latis.properties")
+    }
+    if (in != null) {
+      load(in)
+      in.close
+    } else throw new RuntimeException("Unable to find latis.properties.")
   } catch {
     case e: Exception => {
-      //logger.warn("Unable to load properties file: " + file)
-      throw new RuntimeException("Unable to load properties file: " + file, e)
+      throw new RuntimeException("Unable to load properties file", e)
     }
   }
 
@@ -53,24 +56,28 @@ class LatisProperties extends Properties with LazyLogging {
    * Find the property file with the following precedence:
    * 1) latis.config system property
    * 2) latis.properties file in LATIS_HOME (environment variable) directory
-   * 3) latis.properties file in the classpath
-   * latis.properties is traditionally managed in src/main/resources/
-   * which gets deployed to the classpath.
    */
-  def getPropertyFileName(): String = {
-    System.getProperty("latis.config") match { //try system property
-      case s: String => s
-      case null => System.getenv("LATIS_HOME") match { //try under LATIS_HOME
-        case s: String => s + File.separator + "latis.properties"
-        case null => getClass.getResource("/latis.properties") match { //try in the classpath
-          //Decode URL. Needed for jenkins job. The workspace is the name of the project with spaces.
-          //TODO: should we allow loading of properties file from any URL?
-          case url: URL => URLDecoder.decode(url.getPath, "UTF-8")
-          case null => throw new RuntimeException("Unable to locate property file.")
-        }
-      }
-    }
+  def findPropertyFile: Option[File] = {
+    getPropertyFileFromSystemProperty orElse 
+    getPropertyFileFromEnvironmentVar
   }
+  
+  private def getPropertyFileFromSystemProperty: Option[File] = 
+    getPropertyFileFrom(System.getProperty("latis.config"))
+  
+  private def getPropertyFileFromEnvironmentVar: Option[File] = 
+    System.getenv("LATIS_HOME") match {
+      case s: String => getPropertyFileFrom(s + File.separator + "latis.properties")
+      case _ => None
+    }
+  
+  protected def getPropertyFileFrom(path: String): Option[File] =
+    if (path == null) None
+    else {
+      val file = new File(path)
+      if (file.exists) Some(file)
+      else None
+    }
     
   /**
    * Return the full file system path for the given relative path.
