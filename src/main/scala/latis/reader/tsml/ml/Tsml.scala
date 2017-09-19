@@ -38,18 +38,6 @@ class Tsml(val xml: Elem) {
     case e => new DatasetMl(xml) //assumes only one "dataset" element
   }
   
-  /**
-   * Get all the processing instructions (ProcInstr) for the Dataset
-   * as a Seq of the type (target) and String value (proctext).
-   */
-  lazy val processingInstructions: Seq[(String,String)] = { 
-    val pis: Seq[ProcInstr] = dataset.xml.descendant.flatMap(_ match {
-      case pi: ProcInstr => Some(pi)
-      case _ => None
-    })
-    pis.map(pi => pi.target -> pi.proctext)
-  }
-  
   def getVariableAttribute(vname: String, attribute: String): String = dataset.findVariableMl(vname) match {
     case None => throw new Exception(s"Could not find VariableMl with name '$vname'")
     case Some(ml) => {

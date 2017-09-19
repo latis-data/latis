@@ -408,7 +408,7 @@ abstract class TsmlAdapter(val tsml: Tsml) extends LazyLogging {
    * in the processing instruction.
    */
   def piOps: Seq[Operation] = {
-    tsml.processingInstructions.map(pi => Operation(pi._1, pi._2.split(',').map(_.trim)))
+    tsml.dataset.processingInstructions.map(pi => Operation(pi._1, pi._2.split(',').map(_.trim)))
   }
   
   /**

@@ -7,6 +7,7 @@ import scala.xml.Null
 import scala.xml.transform.RewriteRule
 import scala.xml.Elem
 import scala.xml.transform.RuleTransformer
+import scala.xml.ProcInstr
 
 /**
  * Wrapper for TSML that defines a Dataset.
@@ -35,6 +36,17 @@ class DatasetMl(val xml: Node) extends TupleMl(xml) {
     if (label == "index" || label == "time") wrapWithImplicitFunction(es.head, es.tail)
     else VariableMl(es.head)
 
+  }
+  
+  /**
+   * Get all the processing instructions (ProcInstr) for the Dataset
+   * as a Seq of the type (target) and String value (proctext).
+   */
+  lazy val processingInstructions: Seq[(String,String)] = { 
+    val pis: Seq[ProcInstr] = xml.child.collect {
+      case pi: ProcInstr => pi
+    }
+    pis.map(pi => pi.target -> pi.proctext)
   }
   
   /**
