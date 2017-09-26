@@ -1,12 +1,9 @@
 package latis.writer
 
 import latis.dm._
-import latis.util.LatisProperties
-import java.io.File
-import java.io.OutputStream
-import scala.collection.immutable
-import java.io.FileOutputStream
-import latis.util.ReflectionUtils
+import latis.util._
+import java.io._
+import scala.collection._
 import latis.data.value._
 
 /**
@@ -14,19 +11,21 @@ import latis.data.value._
  */
 class Writer3 {
   
-  //---- Define abstract write method -----------------------------------------
+  private var outputStream: OutputStream = null
+  private lazy val printWriter = new PrintWriter(outputStream)
   
   /**
    * Output the given Dataset in the desired form.
    */
   def write(dataset: Dataset3): Unit = {
-    println(dataset) //TODO: header
+    printWriter.println(dataset) //TODO: header
     val f = (s: Sample3) => writeSample(s)
     dataset.foreach(f)
+    printWriter.flush()
   }
   
   def writeSample(sample: Sample3): Unit = {
-    println(sampleToString(sample))
+    printWriter.println(sampleToString(sample))
   }
   
   def sampleToString(sample: Sample3): String = sample match {
@@ -73,4 +72,11 @@ class Writer3 {
 
 object Writer3 {
   
+  def apply(): Writer3 = Writer3(System.out)
+  
+  def apply(out: OutputStream): Writer3 = {
+    val writer = new Writer3
+    writer.outputStream = out
+    writer
+  }
 }

@@ -92,17 +92,20 @@ class CatalogDatasetLiveness extends Operation with LazyLogging {
    * Else, false.  
    */
   def dsIsAlive(name: String): Boolean = {
+    var reader: DatasetAccessor = null //needed to "close" after the read
     try {
-      val ds = DatasetAccessor.fromName(name).getDataset(Seq(FirstFilter())).force
+      reader = DatasetAccessor.fromName(name)
+      val ds = reader.getDataset(Seq(FirstFilter())).force
       ds match {
         case Dataset(Function(it)) => it.hasNext
         case _ => false
       }
-    } 
-    catch {
+    } catch {
       case e: Throwable => 
         logger.info("Dataset access failed for " + name + ". Unable to read from LaTiS: " + e.getMessage); false
-    } 
+    } finally {
+      try { reader.close } catch { case _: Exception => } //try to close, but if we can't, don't complain
+    }
   }
   
   

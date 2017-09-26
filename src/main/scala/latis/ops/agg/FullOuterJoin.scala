@@ -283,7 +283,7 @@ class FullOuterJoin extends Join with NoInterpolation with NoExtrapolation {
    * TODO: look for matching Functions not just at the top
    * 
    */
-  def apply(ds1: Dataset, ds2: Dataset): Dataset = {
+  override def apply(ds1: Dataset, ds2: Dataset): Dataset = {
     //If one dataset is empty, just return the other
     if (ds1.isEmpty) ds2 //only if no variable
     else if (ds2.isEmpty) ds1

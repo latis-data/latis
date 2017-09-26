@@ -102,7 +102,7 @@ class FullOuterJoin2 extends Join with NoInterpolation with NoExtrapolation {
     domainSet
   }
   
-  def apply(ds1: Dataset, ds2: Dataset): Dataset = {
+  override def apply(ds1: Dataset, ds2: Dataset): Dataset = {
     //If one dataset is empty, just return the other
     if (ds1.isEmpty) ds2
     else if (ds2.isEmpty) ds1

@@ -57,7 +57,7 @@ class TestAsciiAdapter  {
     val ds = TsmlReader3.fromName("ascii_iterative").getDataset(ops)
     //println(ds)
     //ds.foreach(println)
-    val w = new Writer3()
+    val w = Writer3()
     w.write(ds)
   }
 }

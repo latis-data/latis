@@ -32,22 +32,10 @@ class Tsml(val xml: Elem) {
       case Empty => throw new Exception("Tsml does not define an adpater or a name for this dataset.")
       case e => {
         if(new URI(e.text).isAbsolute) TsmlResolver.fromUrl(new URL(e.text)).get.dataset
-        else TsmlResolver.fromName(e.text).get.dataset
+        else TsmlResolver.fromName(e.text).get.dataset //TODO: handle error
       }
     }
     case e => new DatasetMl(xml) //assumes only one "dataset" element
-  }
-  
-  /**
-   * Get all the processing instructions (ProcInstr) for the Dataset
-   * as a Seq of the type (target) and String value (proctext).
-   */
-  lazy val processingInstructions: Seq[(String,String)] = { 
-    val pis: Seq[ProcInstr] = dataset.xml.descendant.flatMap(_ match {
-      case pi: ProcInstr => Some(pi)
-      case _ => None
-    })
-    pis.map(pi => pi.target -> pi.proctext)
   }
   
   def getVariableAttribute(vname: String, attribute: String): String = dataset.findVariableMl(vname) match {

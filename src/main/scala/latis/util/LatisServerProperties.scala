@@ -16,12 +16,9 @@ class LatisServerProperties(config: ServletConfig) extends LatisProperties {
    * Find the property file. Extend parent by looking for a Servlet init parameter
    * (defined in web.xml) which takes precedence.
    */
-  override def getPropertyFileName(): String = {
-    //Try the init parameters in the web.xml before delegating to super.
-    config.getInitParameter("config") match {
-      case s: String => s
-      case null => super.getPropertyFileName() //delegate to super
-    }
+  override def findPropertyFile: Option[File] = {
+    getPropertyFileFrom(config.getInitParameter("config")) orElse
+    super.findPropertyFile
   }
       
   /**

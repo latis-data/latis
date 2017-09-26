@@ -178,6 +178,90 @@ case class Dataset3(function: SampledFunction3)(val metadata: Metadata3)
    * Time:
    * 
    */
+  
+  /*
+   * Another look at the model impl
+   * metadata and data symetry
+   * avoid separate Metadata and Dataset structures?
+   * or combine them in one?
+   *   Dataset(Metadata, Data)
+   *   Variable as VariableMetadata vs VariableData?
+   * Or back to Variable(Metadata, Data)?
+   *   VariableData as node of Dataset Data, like Metadata?
+   *   
+   * Consider use case: ds.map(foo + 1)
+   *   data traversal
+   *   scalar.hasName("foo")
+   *     can we do this once at the metadata traversal level?
+   *     get ID for name..., could also resolve long name of nested tuples
+   *   or add operation to Seq attached to "metadata" model
+   *     apply at end of world - only time we can traverse data
+   *     treat like we would processing instructions
+   *   define operation once per variable, not for each sample
+   *   attach operations to the Variable it acts on instead of the entire dataset?
+   *     Op: V -> V
+   *     what about provenance?
+   *     still need to traverse and build new Dataset (model/metadata) to add Operation
+   *     can compose operations before adding them to the dataset
+   *     compile, optimize
+   *   complicated by laziness
+   *     many approaches seem equivalent
+   *     don't be in a big hurry to "apply" operations - wait until write
+   *   should Sample be pair of Variables or just data?
+   *     we don't want to have to apply logic to every sample if we don't have to
+   *       e.g. hasName("foo")
+   *   now: scalar extractor returns value, can lazily wrap in another function
+   *     at the value type level, not Variable
+   *     function can encapsulate unit conversion, generate f once
+   *   Ops at Dataset level [Variable]
+   *     inside Dataset use functions of T?
+   *     dsOps: if v.hasName("foo")...  makeUnitConversion
+   *     fooOps: v * s + o + 1
+   *     minimize work to do for each sample
+   *     
+   * Consider DSL as replacement for tsml
+   * xml element => constructor
+   * macros?
+   * named parameters so we can use few of many
+   *   some required: id, units...
+   *   or just property Map?
+   *   Metadata class to encapsulate
+   * implicit conversions?
+   * refs and joins?
+   * Adapter with inlined data?
+   *   implicitly wrap data structure
+   * inlined data for one var? e.g. wavelength
+   * problem if Dataset has Adapter but Adapter makes the Dataset
+   *   thus it makes sense to have a separate "model" to give the adapter
+   *   but adapter would be within that definition of the model
+   *   adapter could be an arg after the Function
+   *   it's all in scope in the context of the dataset
+   * package/namespace for dataset descriptors?
+   *   currently would be "datasets"
+   * need reflection to convert dataset path in URL to package
+   *   as opposed to path to tsml file
+   *   can easily construct full class name
+   * special Reader for the DSL descriptors?
+   *   static member of object?
+   *   object my_dataset { val dataset = Dataset(...)}
+   * be lazy about linking in data - applying adapter
+   *   end of the universe traversal when writing
+   *   don't even open data source until then
+   * 
+   * dataset traversal, map
+   *   only traverse the model (e.g. applying ops) until the end
+   *     just for those targeting a specific scalar?
+   *     vs apply f to sample
+   *     f, from Op only needs to be defined once
+   *     but if it has to search the sample for the target scala each time...
+   *     apply targeted op to scalar: f applied to extractor
+   *     transform vs filter
+   *   Dataset as a stream of Samples
+   *   mapSample: apply to Samples?
+   *   iterator of Samples handy for many ops: sliding...
+   *   writer: always one sample at a time? 
+   *     foreachSample
+   */
 }
 
 object Dataset3 {
