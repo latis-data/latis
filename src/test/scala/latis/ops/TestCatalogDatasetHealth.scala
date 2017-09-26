@@ -12,6 +12,7 @@ import latis.writer.AsciiWriter
 import scala.collection.mutable.ArrayBuffer
 import latis.util.FileUtils
 import latis.reader.CatalogReader
+import org.junit.Ignore
  
 class TestCatalogDatasetHealth {
   
@@ -28,7 +29,7 @@ class TestCatalogDatasetHealth {
   }
   
   
-  @Test
+  @Test @Ignore //LATIS-633 
   def check_health_dataset_creation = {
     val ops = ArrayBuffer[Operation]()
     ops += CatalogDatasetLiveness()
@@ -47,7 +48,7 @@ class TestCatalogDatasetHealth {
     }
   } 
   
-  @Test
+  @Test @Ignore //LATIS-633 
   def check_only_dead_datasets = {
     val ops = ArrayBuffer[Operation]()
     ops += CatalogDatasetLiveness()
