@@ -56,7 +56,6 @@ lazy val latis = (project in file(".")).
       "org.apache.derby"            % "derby"           % "10.10.1.1" % Test
     ),
     parallelExecution in Test := false
-    webappWebInfClasses := true
   )
   enablePlugins(JettyPlugin, ReleasePlugin, GitPlugin)
 
