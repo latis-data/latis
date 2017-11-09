@@ -18,9 +18,9 @@ class TestCatalogDatasetHealth {
   
   def generateFakeCatalog(operations: Seq[Operation]) = {
     //name=ascii_float_as_int (alive)
-    //name=ascii_granule (dead)
+    //name=empty (dead)
     val sampleAlive = Sample(Text(Metadata("name"), "ascii_float_as_int"), Real(0))
-    val sampleDead = Sample(Text(Metadata("name"), "ascii_granule"), Real(0))
+    val sampleDead = Sample(Text(Metadata("name"), "empty"), Real(0))
     val samples = Seq(sampleAlive, sampleDead)
     
     val f = Function(samples, Metadata("datasets"))
@@ -28,8 +28,7 @@ class TestCatalogDatasetHealth {
     operations.foldLeft(dataset)((ds,op) => op(ds))
   }
   
-  
-  @Test @Ignore //LATIS-633 
+  @Test  
   def check_health_dataset_creation = {
     val ops = ArrayBuffer[Operation]()
     ops += CatalogDatasetLiveness()
@@ -47,8 +46,8 @@ class TestCatalogDatasetHealth {
       }
     }
   } 
-  
-  @Test @Ignore //LATIS-633 
+
+  @Test 
   def check_only_dead_datasets = {
     val ops = ArrayBuffer[Operation]()
     ops += CatalogDatasetLiveness()

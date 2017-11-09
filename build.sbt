@@ -1,7 +1,47 @@
+import ReleaseTransformations._
+
 lazy val latis = (project in file(".")).
   settings(
     name         := "latis",
+    releaseIgnoreUntrackedFiles := true,
     scalaVersion := "2.11.8",
+    
+    // Determines Artifactory repo based on the current git branch
+    publishTo := {
+      if(git.gitCurrentBranch.value == "master")
+        Some("Artifactory Realm" at "http://int-web-03:8081/artifactory/sbt-prod-local")
+      else if(git.gitCurrentBranch.value == "dev")
+        Some("Artifactory Realm" at "http://int-web-03:8081/artifactory/sbt-dev-local")
+      else
+        throw sys.error("Trying to deploy from invalid branch")
+    },
+    
+    // Determines the release version based on the current git branch
+    releaseVersion := {
+      if (git.gitCurrentBranch.value == "master")
+        // Current version name without '-SNAPSHOT'
+        { ver =>  sbtrelease.Version(ver).map(_.withoutQualifier.string).getOrElse(sbtrelease.versionFormatError) }
+      else if (git.gitCurrentBranch.value == "dev")
+        // Current version name with '-SNAPSHOT'
+        { ver =>  sbtrelease.Version(ver).map(_.asSnapshot.string).getOrElse(sbtrelease.versionFormatError) }
+      else
+        throw sys.error("Trying to deploy from invalid branch")
+    },
+    
+    // Point to the credentials file (ask product owner for this)
+    credentials += Credentials(Path.userHome / ".artifactorycredentials"),
+    
+    // Define custom sbt-release process (skip version increment, skip create tag, etc.)
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runClean,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      publishArtifacts
+    ),
+    
     libraryDependencies ++= Seq(
       "javax.servlet"               % "servlet-api"     % "2.5",
       "org.scala-lang"              % "scala-parser-combinators" % "2.11.0-M4",
@@ -17,3 +57,5 @@ lazy val latis = (project in file(".")).
     ),
     parallelExecution in Test := false
   )
+  enablePlugins(JettyPlugin, ReleasePlugin, GitPlugin)
+
