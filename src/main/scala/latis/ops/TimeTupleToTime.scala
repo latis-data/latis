@@ -25,29 +25,25 @@ class TimeTupleToTime extends Operation {
   
   /**
    * If the Tuple has the name "time", combine the string values and units
-   * to make a new Time of type Text.
+   * to make a new Time of type Text. Otherwise, check the members of the Tuple.
    */
-  override def applyToTuple(tuple: Tuple): Option[Variable] = {
-    tuple.getName match {
-      case "time" => tuple match {
-        case Tuple(vars) => {
-          //extract text values and join with space
-          //TODO: join with delimiter, problem when we use regex
-          val value = vars.map(_ match {case Text(s) => s}).mkString(" ")
-          //build up format string
-          val format = vars.map(_.getMetadata("units") match {
-            case Some(units) => units
-            case None => throw new Error("A time Tuple must have units defined for each element.")
-          }).mkString(" ")
-          
-          //make the Time variable
-          val metadata = Metadata(Map("name" -> "time", "units" -> format))
-          val time = Time("text", metadata, StringValue(value))
-          Some(time)
-        }
-      }
-      case _ => Some(tuple)  //do nothing
-    }
+  override def applyToTuple(tuple: Tuple): Option[Variable] = tuple match {
+    case Tuple(vars) if tuple.getName == "time" =>
+      //extract text values and join with space
+      //TODO: join with delimiter, problem when we use regex
+      val value = vars.map(_ match {case Text(s) => s}).mkString(" ")
+      //build up format string
+      val format = vars.map(_.getMetadata("units") match {
+        case Some(units) => units
+        case None => throw new Error("A time Tuple must have units defined for each element.")
+      }).mkString(" ")
+
+      //make the Time variable
+      val metadata = Metadata(Map("name" -> "time", "units" -> format))
+      val time = Time("text", metadata, StringValue(value))
+      Some(time)
+    case Tuple(vars) =>
+      Option(Tuple(vars.flatMap(applyToVariable(_))))
   }
 }
 

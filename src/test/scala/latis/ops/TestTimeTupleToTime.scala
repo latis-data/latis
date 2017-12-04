@@ -52,4 +52,25 @@ class TestTimeTupleToTime {
       }
     }
   }
+
+  // Test that a "time" Tuple nested within another Tuple is handled.
+  @Test
+  def nested_tuple = {
+    val ds = {
+      val time = {
+        val ymd = Text(Metadata("units" -> "yyyy MM dd"), "2017 01 01")
+        val tod = Text(Metadata("units" -> "HHmm"), "0300")
+        Tuple(List(ymd, tod), Metadata("time"))
+      }
+      Dataset(Function(List(Sample(Index(), Tuple(time, Real(3.14))))))
+    }
+
+    val op = TimeTupleToTime()
+    op(ds) match {
+      case Dataset(Function(it)) => it.next match {
+        case Sample(_, TupleMatch(t: Time, _)) =>
+          assertEquals(1483239600000l, t.getJavaTime)
+      }
+    }
+  }
 }
