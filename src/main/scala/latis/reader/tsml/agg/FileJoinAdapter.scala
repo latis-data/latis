@@ -96,28 +96,37 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   val fileListOps = ArrayBuffer[Operation]()
   
   /**
-   * Manage how operations will be applied (e.g. to file list and/or joined data).
-   * Selections will be applied if the dataset (file list or template) has a 
-   * parameter of that name. First and Last filters will always be applied to
-   * the file list.
+   * Operations to be passed to getDataset for each granule Dataset.
+   */
+  val granuleOps = ArrayBuffer[Operation]()
+  
+  /**
+   * Manage how operations will be applied (e.g. to file list, granules and/or joined data).
+   * Selections will be offered for the template Adapter to handle for each granule.
+   * Selections not handled, though applicable (granule has the parameter name),
+   * will be applied to the joined data (later) by returning "false" here.
+   * Selections will be applied to the file list dataset if applicable.
+   * First and Last filters will always be applied to the file list but not to granules.
    */
   override def handleOperation(op: Operation): Boolean = op match {
     case s @ Selection(name, _, _) => {
-      fileListAdapter.getOrigDataset.findVariableByName(name) match {
-        case None => false //file list dataset does not have this parameter to select on
-        case Some(_) => {
-          fileListOps += s //add this to the list of ops to apply to the file list reading
-          //Determine if we should also apply this selection to the joined data
-          TsmlAdapter(templateTsml).getOrigDataset.findVariableByName(name) match {
-            case None => true //if file template does not have this parameter then consider this operation handled;
-              //it might be here only for the file list dataset
-            case Some(_) => false //allow the operation to be applied to the joined data
-          }
-        }
-      }
+      val tmpAdapter = TsmlAdapter(templateTsml)
+      val granHandled = tmpAdapter.handleOperation(op)
+      val granHasName = tmpAdapter.getOrigScalarNames.contains(name)
+      try { tmpAdapter.close } catch { case e: Exception => }
+      val flistHasName = fileListAdapter.getOrigScalarNames.contains(name)
+      
+      if (flistHasName) fileListOps += s
+      if (granHandled)  granuleOps  += s
+      
+      // If the granule has the selected variable 
+      // and it is not handled by the adapter
+      // then we need to apply it later to the joined data 
+      // so return "false" indicating that it has not yet been applied.
+      !(granHasName && !granHandled)
     }
     
-    //Apply some operations to both the file list and the joined files.
+    //Apply first and last operations to both the file list and the joined files.
     //Note the return of "false" to tell getDataset to apply them to the result.
     case ff: FirstFilter => fileListOps += ff; false
     case lf: LastFilter => fileListOps += lf; false
@@ -143,7 +152,7 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
       //make a reader with the file location plugged into the template tsml
       val reader = TsmlReader(templateTsml.dataset.setLocation(file))
       readers += reader //keep a copy so we can close later
-      reader.getDataset //TODO: consider passing ops here? Problem for "first"...
+      reader.getDataset(granuleOps)
     })
     
     //Make metadata for the joined dataset based on the tsml
