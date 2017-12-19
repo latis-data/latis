@@ -112,9 +112,9 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     case s @ Selection(name, _, _) => {
       val tmpAdapter = TsmlAdapter(templateTsml)
       val granHandled = tmpAdapter.handleOperation(op)
-      val granHasName = tmpAdapter.getOrigScalars.find(_.hasName(name)).nonEmpty
+      val granHasName = tmpAdapter.getOrigScalars.exists(_.hasName(name))
       try { tmpAdapter.close } catch { case e: Exception => }
-      val flistHasName = fileListAdapter.getOrigScalars.find(_.hasName(name)).nonEmpty
+      val flistHasName = fileListAdapter.getOrigScalars.exists(_.hasName(name))
       
       if (flistHasName) fileListOps += s
       if (granHandled)  granuleOps  += s
