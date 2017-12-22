@@ -48,6 +48,7 @@ lazy val latis = (project in file(".")).
       "org.scala-lang.modules"     %% "scala-xml"       % "1.0.4",
       "com.typesafe.scala-logging" %% "scala-logging"   % "3.4.0",
       "com.typesafe.play"          %% "play-json"       % "2.3.10",
+      "com.lihaoyi"                %% "scalatags"       % "0.6.7",
       "ch.qos.logback"              % "logback-classic" % "1.1.7",
       "org.apache.commons"          % "commons-math3"   % "3.5",
       "net.sf.ehcache"              % "ehcache"         % "2.9.0",
