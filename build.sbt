@@ -1,62 +1,72 @@
-import ReleaseTransformations._
+ThisBuild / organization := "io.latis-data"
+ThisBuild / scalaVersion := "2.11.8"
 
-lazy val latis = (project in file(".")).
-  settings(
-    name         := "latis",
-    releaseIgnoreUntrackedFiles := true,
-    scalaVersion := "2.11.8",
-    
-    // Determines Artifactory repo based on the current git branch
-    publishTo := {
-      if(git.gitCurrentBranch.value == "master")
-        Some("Artifactory Realm" at "http://int-web-03:8081/artifactory/sbt-prod-local")
-      else if(git.gitCurrentBranch.value == "dev")
-        Some("Artifactory Realm" at "http://int-web-03:8081/artifactory/sbt-dev-local")
-      else
-        throw sys.error("Trying to deploy from invalid branch")
-    },
-    
-    // Determines the release version based on the current git branch
-    releaseVersion := {
-      if (git.gitCurrentBranch.value == "master")
-        // Current version name without '-SNAPSHOT'
-        { ver =>  sbtrelease.Version(ver).map(_.withoutQualifier.string).getOrElse(sbtrelease.versionFormatError) }
-      else if (git.gitCurrentBranch.value == "dev")
-        // Current version name with '-SNAPSHOT'
-        { ver =>  sbtrelease.Version(ver).map(_.asSnapshot.string).getOrElse(sbtrelease.versionFormatError) }
-      else
-        throw sys.error("Trying to deploy from invalid branch")
-    },
-    
-    // Point to the credentials file (ask product owner for this)
-    credentials += Credentials(Path.userHome / ".artifactorycredentials"),
-    
-    // Define custom sbt-release process (skip version increment, skip create tag, etc.)
-    releaseProcess := Seq[ReleaseStep](
-      checkSnapshotDependencies,
-      inquireVersions,
-      runClean,
-      runTest,
-      setReleaseVersion,
-      commitReleaseVersion,
-      publishArtifacts
-    ),
-    
+val artifactory = "http://web-artifacts.lasp.colorado.edu/artifactory/"
+
+lazy val root = (project in file("."))
+  .settings(commonSettings)
+  .settings(publishSettings)
+  .settings(
+    name := "latis",
     libraryDependencies ++= Seq(
-      "javax.servlet"               % "servlet-api"     % "2.5",
-      "org.scala-lang"              % "scala-parser-combinators" % "2.11.0-M4",
+      "javax.servlet"              %  "servlet-api"     % "2.5",
+      "org.scala-lang"             %  "scala-parser-combinators" % "2.11.0-M4",
       "org.scala-lang.modules"     %% "scala-xml"       % "1.0.4",
       "com.typesafe.scala-logging" %% "scala-logging"   % "3.4.0",
       "com.typesafe.play"          %% "play-json"       % "2.3.10",
       "com.lihaoyi"                %% "scalatags"       % "0.6.7",
-      "ch.qos.logback"              % "logback-classic" % "1.1.7",
-      "org.apache.commons"          % "commons-math3"   % "3.5",
-      "net.sf.ehcache"              % "ehcache"         % "2.9.0",
-      "junit"                       % "junit"           % "4.+"       % Test,
-      "com.novocode"                % "junit-interface" % "0.11"      % Test,
-      "org.apache.derby"            % "derby"           % "10.10.1.1" % Test
+      "ch.qos.logback"             %  "logback-classic" % "1.1.7",
+      "org.apache.commons"         %  "commons-math3"   % "3.5",
+      "net.sf.ehcache"             %  "ehcache"         % "2.9.0"
     ),
-    parallelExecution in Test := false
+    // Some tests fail unless we set this.
+    Test / parallelExecution := false
   )
-  enablePlugins(JettyPlugin, ReleasePlugin, GitPlugin)
 
+lazy val commonSettings = compilerFlags ++ Seq(
+  Compile / compile / wartremoverWarnings ++= Warts.allBut(
+    Wart.Any,         // false positives
+    Wart.Nothing,     // false positives
+    Wart.Product,     // false positives
+    Wart.Serializable // false positives
+  ),
+  // Test suite dependencies
+  libraryDependencies ++= Seq(
+    "junit"            % "junit"           % "4.12"      % Test,
+    "com.novocode"     % "junit-interface" % "0.11"      % Test,
+    "org.apache.derby" % "derby"           % "10.10.1.1" % Test
+  ),
+  // Resolvers for our Artifactory repos
+  resolvers ++= Seq(
+    "Artifactory Release" at artifactory + "sbt-release",
+    "Artifactory Snapshot" at artifactory + "sbt-snapshot"
+  )
+)
+
+lazy val compilerFlags = Seq(
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-encoding", "utf-8",
+    "-feature",
+  ),
+  Compile / compile / scalacOptions ++= Seq(
+    "-unchecked",
+    "-Xlint",
+    "-Ywarn-dead-code",
+    "-Ywarn-numeric-widen",
+    "-Ywarn-value-discard"
+  )
+)
+
+lazy val publishSettings = Seq(
+  publishTo := {
+    if (isSnapshot.value) {
+      Some("snapshots" at artifactory + "sbt-snapshot")
+    } else {
+      Some("releases" at artifactory + "sbt-release")
+    }
+  },
+  credentials ++= Seq(
+    Path.userHome / ".artifactorycredentials"
+  ).filter(_.exists).map(Credentials(_))
+)
