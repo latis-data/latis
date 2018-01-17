@@ -84,6 +84,7 @@ class TestFileJoinAdapter {
     //2015-07-16T10:11:12.136 -> (INFO, 3.1, 3.1, 3.1)
     //2015-07-18T10:11:12.136 -> (INFO, 3.2, 3.2, 3.2)
     val ops = ArrayBuffer[Operation]()
+    //ops += Selection(s"time ~ 2015-06-19")
     ops += Selection(s"time ~ 2015-07-01")
     val ds = DatasetAccessor.fromName("log/log_join").getDataset(ops)
     //latis.writer.Writer.fromSuffix("asc").write(ds)

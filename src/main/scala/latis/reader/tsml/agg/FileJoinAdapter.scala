@@ -121,13 +121,16 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     case lf: LastFilter => fileListOps += lf; false
     
     // Apply Nearest Neighbor Operation to granules (but not file list).
+    // This is not applicable to the file list.
     // Note, if the bounding pair is not found in the same granule,
     //   this will find the one closest end-point in each file
     //   greatly reducing the size of the joined dataset and minimizing 
     //   the final application without risk of losing the appropriate sample.
     case NearestNeighborFilter(name, _) => 
-      handleGranuleOp(name, op)
-      false //always need to be applied to the joined data
+      var handled = handleGranuleOp(name, op)
+      // If this is for the outer domain, also apply to the joined dataset
+      if (outerDomainHasName(name)) handled = false
+      handled
    
     case _ => false //apply any other ops to the joined data
   }
@@ -140,8 +143,21 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   }
   
   /**
+   * Does the domain Variable of the outer Function have the given name.
+   */
+  private def outerDomainHasName(name: String): Boolean = {
+    val tmpAdapter = TsmlAdapter(templateTsml)
+    val hasName = tmpAdapter.getOrigDataset match {
+      case Dataset(f: Function) => f.getDomain.hasName(name)
+      case _ => false
+    }
+    try { tmpAdapter.close } catch { case e: Exception => }
+    hasName
+  }
+  
+  /**
    * Operations that are targeted for a specific Variable may be applicable to
-   * the granule datasets.
+   * the granule datasets. 
    */
   private def handleGranuleOp(name: String, op: Operation): Boolean = {
     val tmpAdapter = TsmlAdapter(templateTsml)
