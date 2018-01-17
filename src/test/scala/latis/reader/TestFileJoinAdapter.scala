@@ -10,6 +10,7 @@ import latis.ops.filter.FirstFilter
 import latis.ops.filter.LastFilter
 import latis.ops.filter.Selection
 import latis.reader.tsml.TsmlReader
+import latis.dm._
 
 class TestFileJoinAdapter {
   
@@ -70,5 +71,26 @@ class TestFileJoinAdapter {
     val data = ds.toStrings
     assertEquals(3, data(0).length)
     assertEquals("1.2", data.last.head)
+  }
+  
+  @Test
+  def nearest_at_file_boundary = {
+    //2015-06-16T10:11:12.136 -> (INFO, 1.1, 1.1, 1.1)
+    //2015-06-18T10:11:12.136 -> (INFO, 1.2, 1.2, 1.2)
+    //------------------------------------------------
+    //2015-07-01T10:11:12.136 -> (INFO, 2.1, 2.1, 2.1)
+    //2015-07-12T10:11:12.136 -> (INFO, 2.2, 2.2, 2.2)
+    //------------------------------------------------
+    //2015-07-16T10:11:12.136 -> (INFO, 3.1, 3.1, 3.1)
+    //2015-07-18T10:11:12.136 -> (INFO, 3.2, 3.2, 3.2)
+    val ops = ArrayBuffer[Operation]()
+    ops += Selection(s"time ~ 2015-07-01")
+    val ds = DatasetAccessor.fromName("log/log_join").getDataset(ops)
+    //latis.writer.Writer.fromSuffix("asc").write(ds)
+    ds match {
+      case Dataset(Function(it)) => it.next match {
+        case Sample(Text(t), _) => assertEquals("2015-07-01T10:11:12.136", t)
+      }
+    }
   }
 }
