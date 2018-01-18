@@ -16,6 +16,7 @@ import latis.ops.filter.Selection
 import latis.reader.tsml.TsmlAdapter
 import latis.reader.tsml.TsmlReader
 import latis.reader.tsml.ml.Tsml
+import latis.ops.filter.NearestNeighborFilter
 
 /**
  * A TsmlAdapter that reads data from each file in a file list 
@@ -101,37 +102,76 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   val granuleOps = ArrayBuffer[Operation]()
   
   /**
-   * Manage how operations will be applied (e.g. to file list, granules and/or joined data).
-   * Selections will be offered for the template Adapter to handle for each granule.
-   * Selections not handled, though applicable (granule has the parameter name),
-   * will be applied to the joined data (later) by returning "false" here.
-   * Selections will be applied to the file list dataset if applicable.
-   * First and Last filters will always be applied to the file list but not to granules.
+   * Manage how operations will be applied (e.g. to file list, granules and/or 
+   * joined data). Selections (including NearestNeighbor) will be offered for 
+   * the template Adapter to handle for each granule. Selections not handled, 
+   * though applicable (granule has the parameter name), will be applied to the
+   * joined data (later) by returning "false" here. Selections will be applied 
+   * to the file list dataset if applicable. First and Last filters will always
+   * be applied to the file list but not to granules.
    */
   override def handleOperation(op: Operation): Boolean = op match {
-    case s @ Selection(name, _, _) => {
-      val tmpAdapter = TsmlAdapter(templateTsml)
-      val granHandled = tmpAdapter.handleOperation(op)
-      val granHasName = tmpAdapter.getOrigDataset.findVariableByName(name).nonEmpty
-      try { tmpAdapter.close } catch { case e: Exception => }
-      val flistHasName = fileListAdapter.getOrigDataset.findVariableByName(name).nonEmpty
-      
-      if (flistHasName) fileListOps += s
-      if (granHandled)  granuleOps  += s
-      
-      // If the granule has the selected variable 
-      // and it is not handled by the adapter
-      // then we need to apply it later to the joined data 
-      // so return "false" indicating that it has not yet been applied.
-      !(granHasName && !granHandled)
-    }
+    case Selection(name, _, _) => 
+      if (fileListHasName(name)) fileListOps += op //apply to file list dataset
+      handleGranuleOp(name, op)
     
     //Apply first and last operations to both the file list and the joined files.
     //Note the return of "false" to tell getDataset to apply them to the result.
     case ff: FirstFilter => fileListOps += ff; false
     case lf: LastFilter => fileListOps += lf; false
+    
+    // Apply Nearest Neighbor Operation to granules (but not file list).
+    // This is not applicable to the file list.
+    // Note, if the bounding pair is not found in the same granule,
+    //   this will find the one closest end-point in each file
+    //   greatly reducing the size of the joined dataset and minimizing 
+    //   the final application without risk of losing the appropriate sample.
+    case NearestNeighborFilter(name, _) => 
+      var handled = handleGranuleOp(name, op)
+      // If this is for the outer domain, also apply to the joined dataset
+      if (outerDomainHasName(name)) handled = false
+      handled
    
     case _ => false //apply any other ops to the joined data
+  }
+
+  /**
+   * Does the file list dataset have a variable with the given name.
+   */
+  private def fileListHasName(name: String): Boolean = {
+    fileListAdapter.getOrigDataset.findVariableByName(name).nonEmpty
+  }
+  
+  /**
+   * Does the domain Variable of the outer Function have the given name.
+   */
+  private def outerDomainHasName(name: String): Boolean = {
+    val tmpAdapter = TsmlAdapter(templateTsml)
+    val hasName = tmpAdapter.getOrigDataset match {
+      case Dataset(f: Function) => f.getDomain.hasName(name)
+      case _ => false
+    }
+    try { tmpAdapter.close } catch { case e: Exception => }
+    hasName
+  }
+  
+  /**
+   * Operations that are targeted for a specific Variable may be applicable to
+   * the granule datasets. 
+   */
+  private def handleGranuleOp(name: String, op: Operation): Boolean = {
+    val tmpAdapter = TsmlAdapter(templateTsml)
+    val granHandled = tmpAdapter.handleOperation(op)
+    val granHasName = tmpAdapter.getOrigDataset.findVariableByName(name).nonEmpty
+    try { tmpAdapter.close } catch { case e: Exception => }
+
+    if (granHandled) granuleOps += op
+
+    // If the granule has the selected variable 
+    // and it is not handled by the adapter
+    // then we need to apply it later to the joined data 
+    // so return "false" indicating that it has not yet been applied.
+    !(granHasName && !granHandled)
   }
   
   /**
