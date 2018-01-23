@@ -366,7 +366,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
               true
             } catch {
               case iae: IllegalArgumentException => throw new Error("The time value is not in a supported ISO format: " + value)
-              case e: Exception => throw new Error("Unable to parse time selection: " + value)
+              case e: Exception => throw new Error("Unable to parse time selection: " + value, e)
             }
           }
         }

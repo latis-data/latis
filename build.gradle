@@ -52,6 +52,9 @@ dependencies {
 	//ehcache
 	compile 'net.sf.ehcache:ehcache:2.9.0'
 
+        // scalatags
+        compile 'com.lihaoyi:scalatags_2.11:0.6.7'
+
 }
 
 lasp.utils.enableIncrementalCompilation(project)
