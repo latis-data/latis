@@ -68,5 +68,6 @@ lazy val publishSettings = Seq(
   },
   credentials ++= Seq(
     Path.userHome / ".artifactorycredentials"
-  ).filter(_.exists).map(Credentials(_))
+  ).filter(_.exists).map(Credentials(_)),
+  releaseVersionBump := sbtrelease.Version.Bump.Minor
 )
