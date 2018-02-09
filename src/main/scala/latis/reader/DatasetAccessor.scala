@@ -98,25 +98,28 @@ object DatasetAccessor extends LazyLogging {
    * If not found, it will delegate to the TsmlResolver.
    */
   def fromName(datasetName: String): DatasetAccessor = {
-    //See if the dataset is cached.
-    val reader = CacheManager.getDataset(datasetName) match {
-      case Some(ds) => DatasetAccessor(ds)
-      case None => {
-        //Look for a matching "reader" property.
-        LatisProperties.get(s"reader.${datasetName}.class") match {
-          case Some(s) => ReflectionUtils.constructClassByName(s).asInstanceOf[DatasetAccessor]
-          case None => {
-            //Try TsmlResolver
-            TsmlResolver.fromName(datasetName) match {
-              case Some(t) => TsmlReader(t)
-              case None => 
-                //Try tsml2
-                TsmlReader2.fromName(datasetName)
-                //throw new RuntimeException(s"Unable to find dataset: $datasetName")
+    var reader: DatasetAccessor = null
+
+    try {
+      //See if the dataset is cached.
+      reader = CacheManager.getDataset(datasetName) match {
+        case Some(ds) => DatasetAccessor(ds)
+        case None => {
+          //Look for a matching "reader" property.
+          LatisProperties.get(s"reader.${datasetName}.class") match {
+            case Some(s) => ReflectionUtils.constructClassByName(s).asInstanceOf[DatasetAccessor]
+            case None => {
+              //Try TsmlResolver
+              TsmlResolver.fromName(datasetName) match {
+                case Some(t) => TsmlReader(t)
+                case None    => TsmlReader2.fromName(datasetName)
+              }
             }
           }
         }
       }
+    } catch {
+      case e: Exception => throw new RuntimeException(s"Unable to find dataset: $datasetName", e)
     }
     
     //Add properties from latis.properties
