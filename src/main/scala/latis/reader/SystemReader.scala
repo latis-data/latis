@@ -10,7 +10,7 @@ import latis.dm.Variable
    * Construct a Dataset by querying the JVM.
    *   (free, used, total, percentUsed, max)
    * Where
-   *   free:				 is the current amount of memory in Mb available
+   *   free:        is the current amount of memory in Mb available
    *   used:        is the amount of memory in Mb computed from total - free.
    *   total:       the current memory in Mb allocated on the heap
    *   percentUsed: the ratio of used / total in percent
@@ -18,25 +18,28 @@ import latis.dm.Variable
    */
 class SystemReader private() extends DatasetAccessor { 
   
-  private val Mb = 1024 * 1024
+  private val MiB = 1024 * 1024
   private val metaData =  Metadata("memoryProperties")
   private lazy val jvm = Runtime.getRuntime
   
   override def getDataset(): Dataset = Dataset(Tuple(getFree, getUsed, getTotal, getPercentUsed, getMax), metaData)
   
-  def getDataset(operations: Seq[Operation]): Dataset = getDataset
+  def getDataset(operations: Seq[Operation]): Dataset = {
+    val dataset = getDataset
+    operations.foldLeft(dataset)((ds,op) => op(ds))
+  }
   
   def close: Unit = {}
   
-  def getFree: Integer = Integer(jvm.freeMemory / Mb)
+  def getFree: Integer = Integer(jvm.freeMemory / MiB)
   
-  def getUsed: Integer = Integer((jvm.totalMemory() - jvm.freeMemory) / Mb)
+  def getUsed: Integer = Integer((jvm.totalMemory() - jvm.freeMemory) / MiB)
   
-  def getTotal: Integer = Integer(jvm.totalMemory() / Mb)
+  def getTotal: Integer = Integer(jvm.totalMemory() / MiB)
   
   def getPercentUsed: Integer = Integer(100 * (jvm.totalMemory() - jvm.freeMemory) / jvm.totalMemory())
   
-  def getMax: Integer = Integer(jvm.maxMemory() / Mb)
+  def getMax: Integer = Integer(jvm.maxMemory() / MiB)
   
 }
 
