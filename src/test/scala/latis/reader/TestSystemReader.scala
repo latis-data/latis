@@ -8,7 +8,7 @@ import latis.ops.Projection
 import latis.writer.AsciiWriter
 
 class TestSystemReader {
-  val sr = SystemReader.apply
+  val sr = SystemReader()
   
   @Test
   def free: Unit = {   
