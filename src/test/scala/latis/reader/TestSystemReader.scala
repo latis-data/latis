@@ -16,22 +16,31 @@ class TestSystemReader {
     val freeMemory = sr.getFree
     
     assertTrue(totalMemory > freeMemory)
+    assertEquals(totalMemory.getMetadata("name").get, "totalMemory")
+    assertEquals(totalMemory.getMetadata("units").get, "MiB")
+    assertEquals(freeMemory.getMetadata("name").get, "freeMemory")
+    assertEquals(freeMemory.getMetadata("units").get, "MiB")
   }
   
   @Test
   def used: Unit = {   
     val totalMemory = sr.getTotal
-    val used = sr.getUsed
+    val usedMemory = sr.getUsed
     
-    assertTrue(totalMemory >= used)
+    assertTrue(totalMemory >= usedMemory)
+    assertEquals(usedMemory.getMetadata("name").get, "usedMemory")
+    assertEquals(usedMemory.getMetadata("units").get, "MiB")
+    
   }
   
   @Test
   def total: Unit = {   
     val totalMemory = sr.getTotal
-    val max = sr.getMax
+    val maxMemory = sr.getMax
     
-    assertTrue(max >= totalMemory)
+    assertTrue(maxMemory >= totalMemory)
+    assertEquals(maxMemory.getMetadata("name").get, "maxMemory")
+    assertEquals(maxMemory.getMetadata("units").get, "MiB")
   }
   
   @Test
@@ -40,6 +49,8 @@ class TestSystemReader {
     
     assertTrue(percentUsed >= Integer(0))
     assertTrue(percentUsed <= Integer(100))
+    assertEquals(percentUsed.getMetadata("name").get, "percentUsed")
+    assertEquals(percentUsed.getMetadata("units").get, "percent")
   }
   
   @Test
@@ -59,12 +70,11 @@ class TestSystemReader {
   }
     
   @Test
-  @Ignore
+  //@Ignore
   def dataset_with_projections: Unit = {  
     val ops = scala.collection.mutable.ArrayBuffer[Operation]()
     ops += Projection("percentUsed")
     val ds = sr.getDataset(ops)
-    AsciiWriter.write(ds)
     ds match {
       case Dataset(percentUsed: Integer) => {
         assertEquals(percentUsed, sr.getPercentUsed)
