@@ -70,7 +70,6 @@ class TestSystemReader {
   }
     
   @Test
-  //@Ignore
   def dataset_with_projections: Unit = {  
     val ops = scala.collection.mutable.ArrayBuffer[Operation]()
     ops += Projection("percentUsed")
