@@ -146,9 +146,9 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
                   reader = DatasetAccessor.fromName(name)
                   val dsEnergy = reader.getDataset(selection).force
                   dsEnergy match {
-                  case Dataset(Function(it)) => it.hasNext
-                  case _ => false
-                }
+                    case Dataset(Function(it)) => it.hasNext
+                    case _ => false
+                  }
                 }
               }
             }
