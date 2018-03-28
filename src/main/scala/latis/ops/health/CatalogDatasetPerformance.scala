@@ -131,22 +131,47 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
           //try to be clever and get a wavelength from ssiSingleTimeDs, which is dramatically smaller, to select on
           ssiSingleTimeDs match {
             case Some(dsSSI) => {
-              val selection = Seq(Selection("wavelength~" + getFirstWavelength(dsSSI))) 
-              reader = DatasetAccessor.fromName(name)
-              val dsWavelength = reader.getDataset(selection).force
-              dsWavelength match {
-                case Dataset(Function(it)) => it.hasNext
-                case _ => false
+              try {
+                val selection = Seq(Selection("wavelength~" + getFirstWavelength(dsSSI))) 
+                reader = DatasetAccessor.fromName(name)
+                val dsWavelength = reader.getDataset(selection).force
+                dsWavelength match {
+                  case Dataset(Function(it)) => it.hasNext
+                  case _ => false
+                }
+              } catch {
+                case e: Throwable => {
+                  //Try selecting on "energy" instead of "wavelength" before giving up
+                  val selection = Seq(Selection("energy~" + getFirstEnergy(dsSSI))) 
+                  reader = DatasetAccessor.fromName(name)
+                  val dsEnergy = reader.getDataset(selection).force
+                  dsEnergy match {
+                    case Dataset(Function(it)) => it.hasNext
+                    case _ => false
+                  }
+                }
               }
             }
             case None => { 
-              //TODO: Find a way to avoid guessing a wavelength and/or decide if there's a better one than 121.5
+              //TODO: Find a way to avoid guessing a wavelength/energy and/or decide if there's a better one than 121.5
               //TODO: Maybe warn in logs that a wavelength value was hard coded?
-              reader = DatasetAccessor.fromName(name)
-              val dsWavelength = reader.getDataset(Seq(Selection("wavelength~121.5"))).force
-              dsWavelength match {
-                case Dataset(Function(it)) => it.hasNext
-                case _ => false
+              try {
+                reader = DatasetAccessor.fromName(name)
+                val dsWavelength = reader.getDataset(Seq(Selection("wavelength~121.5"))).force
+                dsWavelength match {
+                  case Dataset(Function(it)) => it.hasNext
+                  case _ => false
+                }
+              } catch {
+                case e: Throwable => {
+                  //Try selecting on "energy" instead of "wavelength" before giving up
+                  reader = DatasetAccessor.fromName(name)
+                  val dsEnergy = reader.getDataset(Seq(Selection("energy~121.5"))).force
+                  dsEnergy match {
+                    case Dataset(Function(it)) => it.hasNext
+                    case _ => false
+                  }
+                }
               }
             }
           }
@@ -177,6 +202,21 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
         case Sample(d, r) => { //r should be: wavelength -> ssi
           val wavelength = r.findAllVariablesByName("wavelength")(0).getNumberData.doubleValue
           wavelength
+        }
+      }
+    }
+  }
+  
+  /*
+   * Given a SSI dataset of the form (time -> energy -> ssi),
+   * return the first value stored for wavelength.
+   */
+  def getFirstEnergy(dsSSI: Dataset): Double = {
+    dsSSI match {
+      case Dataset(Function(it)) => it.next match {
+        case Sample(d, r) => { //r should be: energy -> ssi
+          val energy = r.findAllVariablesByName("energy")(0).getNumberData.doubleValue
+          energy
         }
       }
     }
