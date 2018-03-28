@@ -3,7 +3,7 @@ ThisBuild / scalaVersion := "2.11.8"
 
 val artifactory = "http://web-artifacts.lasp.colorado.edu/artifactory/"
 
-lazy val root = (project in file("."))
+lazy val latis = (project in file("."))
   .settings(commonSettings)
   .settings(publishSettings)
   .settings(
