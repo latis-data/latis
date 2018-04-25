@@ -1,5 +1,5 @@
 ThisBuild / organization := "io.latis-data"
-ThisBuild / scalaVersion := "2.11.8"
+ThisBuild / scalaVersion := "2.12.6"
 
 val artifactory = "http://web-artifacts.lasp.colorado.edu/artifactory/"
 
@@ -9,11 +9,11 @@ lazy val latis = (project in file("."))
   .settings(
     name := "latis",
     libraryDependencies ++= Seq(
-      "javax.servlet"              %  "javax.servlet-api"        % "3.1.0" % "provided", 
-      "org.scala-lang"             %  "scala-parser-combinators" % "2.11.0-M4",
-      "org.scala-lang.modules"     %% "scala-xml"       % "1.0.4",
-      "com.typesafe.scala-logging" %% "scala-logging"   % "3.4.0",
-      "com.typesafe.play"          %% "play-json"       % "2.3.10",
+      "javax.servlet"              %  "javax.servlet-api"        % "3.1.0" % "provided",
+      "org.scala-lang.modules"     %% "scala-parser-combinators" % "1.1.0",
+      "org.scala-lang.modules"     %% "scala-xml"       % "1.1.0",
+      "com.typesafe.scala-logging" %% "scala-logging"   % "3.9.0",
+      "com.typesafe.play"          %% "play-json"       % "2.6.9",
       "com.lihaoyi"                %% "scalatags"       % "0.6.7",
       "ch.qos.logback"             %  "logback-classic" % "1.1.7",
       "org.apache.commons"         %  "commons-math3"   % "3.5",
@@ -41,7 +41,8 @@ lazy val commonSettings = compilerFlags ++ Seq(
   resolvers ++= Seq(
     "Artifactory Release" at artifactory + "sbt-release",
     "Artifactory Snapshot" at artifactory + "sbt-snapshot"
-  )
+  ),
+  crossScalaVersions := Seq("2.11.8", scalaVersion.value)
 )
 
 lazy val compilerFlags = Seq(
@@ -70,5 +71,6 @@ lazy val publishSettings = Seq(
   credentials ++= Seq(
     Path.userHome / ".artifactorycredentials"
   ).filter(_.exists).map(Credentials(_)),
-  releaseVersionBump := sbtrelease.Version.Bump.Minor
+  releaseVersionBump := sbtrelease.Version.Bump.Minor,
+  releaseCrossBuild := true
 )
