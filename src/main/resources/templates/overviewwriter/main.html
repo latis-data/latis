@@ -5,8 +5,12 @@
         <style>
             html, body {
                 margin: 0 auto;
-                padding: 0;
-                max-width: 800px;
+                padding: 8px 16px 8px 16px;
+                /* LISIRD-themed font */
+                font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    			font-size: 14px;
+    			line-height: 1.42857143;
+    			color: #333;
             }
             
             dt {
@@ -59,6 +63,72 @@
             .collapsible.collapsed + dd {
             	display: none;
             }
+            /* ---------- Styles from LISIRD ---------------*/
+            .md-card {
+    			background-color: rgba(256,256,256,0.95);
+    			padding: 16px;
+    			/*flex-direction: column;*/
+    			margin: 8px;
+    			border-radius: 2px;
+    			box-shadow: 0 1px 3px 0 rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 2px 1px -1px rgba(0,0,0,.12);
+			}
+			
+			a {
+    			text-decoration: none;
+    			color: #428bca;
+			}
+
+			a:hover, footer a:hover, a:focus {
+			    color: #ee8800;
+			    text-decoration: none;
+			}
+
+			cite {
+			    font-family: Arial, Helvetica, sans-serif;
+			    font-size: 11px;
+			    font-style: italic;
+			}
+			
+			h1, h2, h3, h4, h5 {
+			    color: #ee8800;
+			    font-family: inherit;
+			    font-weight: 500;
+			    line-height: 1.1;
+			}
+			
+			h1 {
+				font-size: 34px;
+ 				font-weight: 400;
+			    font-variant: small-caps;
+			}
+			
+			h2 {
+			    font-size: 1.4em;
+			    font-weight: 400;
+			    padding: 0;
+			    margin-top: 0;
+			    font-variant: small-caps;
+			}
+			
+			h3 {
+			    font-size: 18px;
+			}
+			
+			h4 {
+			    font-size: 1em;
+			}
+			
+			dt {
+			    font-weight: 400;
+			}
+			
+			dd {
+			    margin-bottom: 0.8em;
+			}
+			
+			.center.md-caption {
+			    display: block;
+			} 
         </style>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -104,28 +174,34 @@
             </p>
         </div>
         
-        <h2 id="datasets">Available Datasets</h2>
-        <div class="section-content">
-            <p>Click to Expand</p>
-        	<dl>{{catalog-html}}</dl>
+        <div class="md-card">
+	        <h2 id="datasets">Available Datasets</h2>
+	        <div class="section-content">
+	            <p>Click to Expand</p>
+	        	<dl>{{catalog-html}}</dl>
+	        </div>
         </div>
         
-        <h2 id="suffixes">Output Options (suffix)</h2>
-        <div class="section-content">
-        	<p>
-        		These suffixes can be appended to the dataset name (as in dataset.json)
-        		to specify the output format for the data.
-       		</p>
-        	<dl>{{output-options-html}}</dl>
+        <div class="md-card">
+	        <h2 id="suffixes">Output Options (suffix)</h2>
+	        <div class="section-content">
+	        	<p>
+	        		These suffixes can be appended to the dataset name (as in dataset.json)
+	        		to specify the output format for the data.
+	       		</p>
+	        	<dl>{{output-options-html}}</dl>
+	       	</div>
        	</div>
         
-        <h2 id="filters">Filter Options (Operations)</h2>
-        <div class="section-content">
-        	<p>
-        		These filter options (operations) can be added to the query string
-        		to affect what data is returned
-       		</p>
-        	<dl>{{filter-options-html}}</dl>
+        <div class="md-card">
+	        <h2 id="filters">Filter Options (Operations)</h2>
+	        <div class="section-content">
+	        	<p>
+	        		These filter options (operations) can be added to the query string
+	        		to affect what data is returned
+	       		</p>
+	        	<dl>{{filter-options-html}}</dl>
+	        </div>
         </div>
     </body>
 </html>
