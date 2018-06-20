@@ -188,7 +188,7 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     val fileDataset = fileListAdapter.getDataset(fileListOps)
     val files = getFilePaths(fileDataset)
     //make ds from template for each file
-    val dss: Iterator[Dataset] = files.flatMap(file => { 
+    val dss: Iterator[Dataset] = files.flatMap { file => { 
       //make a reader with the file location plugged into the template tsml
       val reader = TsmlReader(templateTsml.dataset.setLocation(file))
       readers += reader //keep a copy so we can close later
@@ -196,9 +196,9 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
         Some(reader.getDataset(granuleOps))
       }
       catch {
-        case _: Throwable => None //skip invalid files
+        case _: Exception => None //skip invalid files
       }
-    })
+    }}
     
     //Make metadata for the joined dataset based on the tsml
     val md = makeMetadata(tsml.dataset)
