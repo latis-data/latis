@@ -14,6 +14,11 @@ import latis.reader.DatasetAccessor
 import scala.collection.mutable.ArrayBuffer
 import latis.ops.filter.LastFilter
 import latis.ops.filter.Selection
+import latis.time._
+import java.util.Calendar
+import java.util.Date
+import java.util.TimeZone
+import java.text._
 
 /* 
  * Given a catalog dataset following the DCAT ontology, describe 
@@ -23,6 +28,13 @@ import latis.ops.filter.Selection
 class CatalogDatasetPerformance extends Operation with LazyLogging {
   
   var ssiSingleTimeDs: Option[Dataset] = None //Used to optimize finding a valid wavelength in large SSI datasets
+  
+  //Hack to account for large datasets that don't have "ssi" in their names
+  //TODO: Rework this entire CatalogDatasetPerfromance class using metadata from LEMR
+  //      because really, we need more info about datasets than just their names to do the right things.
+  //      (WEBAPP-993)
+  val ssiNames: List[String] = List("musil_see", "musil_sim")
+  val oneDayNames: List[String] = List("sdo_eve_bands_l2b", "sdo_eve_diodes_l2b", "sdo_eve_lines_l2b")
  
   /**
    * Apply this Operation to the given Dataset
@@ -40,7 +52,7 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
   }
   
   /*
-   * Aquire performance statistics from the datasets listed in 
+   * Acquire performance statistics from the datasets listed in 
    * this catalog.
    * Test time and wavelength separately for SSI datasets.
    */
@@ -127,7 +139,7 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
             case _ => false
           }
         }
-        case " (spectrum)" => { 
+        case " (spectrum)" | _ if ssiNames.contains(name) => { 
           //try to be clever and get a wavelength from ssiSingleTimeDs, which is dramatically smaller, to select on
           ssiSingleTimeDs match {
             case Some(dsSSI) => {
@@ -176,6 +188,16 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
             }
           }
         }
+        case _ if oneDayNames.contains(name) => {
+          val (day1, day2): (String, String) = getFirstAndSecondDays(name)
+          val ops = List(Selection("time >= "+day1), Selection("time < "+day2)) //TODO: consider if doing time<[two days after] is better than time<=[one day after], given that the latter seems to return only one sample sometimes
+          
+          val ds = DatasetAccessor.fromName(name).getDataset(ops).force
+          ds match {
+            case Dataset(Function(it)) => it.hasNext
+            case _ => false
+          }
+        }
         case _ => {
           val ds = DatasetAccessor.fromName(name).getDataset.force
           ds match {
@@ -190,6 +212,31 @@ class CatalogDatasetPerformance extends Operation with LazyLogging {
     } finally {
       try { reader.close } catch { case _: Exception => } //try to close, but if we can't, don't complain
     }
+  }
+  
+  /*
+   * Given the name of a dataset, return the ISO-formatted date Strings
+   * of the first and second day in it.
+   */
+  def getFirstAndSecondDays(name: String): (String, String) = {
+    val day1: Time = DatasetAccessor.fromName(name).getDataset(Seq(FirstFilter())) match {
+      case Dataset(Function(it)) => it.next match {
+        case Sample(t: Time, _) => t
+      }
+    }
+    val day1ISO = day1.toIso + 'Z'
+  
+    val c: Calendar = Calendar.getInstance();
+    c.setTime(day1.toDate);
+    c.add(Calendar.DATE, 2); //same as c.add(Calendar.DAY_OF_MONTH, 2); //TODO: consider if doing time<[two days after] is better than time<=[one day after], given that the latter seems to return only one sample sometimes
+    val day2: Date = c.getTime();
+    val tz = TimeZone.getTimeZone("UTC");
+    val df: DateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"); 
+    df.setTimeZone(tz);
+    
+    val day2ISO = df.format(day2);
+
+    (day1ISO, day2ISO)
   }
   
   /*
