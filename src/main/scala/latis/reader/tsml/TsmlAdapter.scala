@@ -208,7 +208,14 @@ abstract class TsmlAdapter(val tsml: Tsml) extends LazyLogging {
     val ds = makeDataset(ods)
     
     //Apply PIs that the adapter didn't handle.
-    otherOps.foldLeft(ds)((dataset, op) => op(dataset))
+    val ds2 = otherOps.foldLeft(ds)((dataset, op) => op(dataset))
+    
+    //Cache the dataset if requested
+    //Note, this requires that the dataset id in the tsml matches the tsml file name
+    getProperty("cache") match {
+      case Some("memory") => ds2.cache
+      case _ => ds2
+    }
   }
   
   /**
