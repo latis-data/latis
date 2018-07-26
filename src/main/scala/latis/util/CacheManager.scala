@@ -37,9 +37,13 @@ object CacheManager {
    * It is expected that the Dataset has Metadata that defines the name.
    */
   def cacheDataset(dataset: Dataset): Dataset = {
+    //Add creation time to metadata for cache invalidation
+    val md = dataset.getMetadata + ("creation_time" -> System.currentTimeMillis.toString)
     //Make sure dataset is memoized (all the Data loaded)
-    val ds = dataset.force
-    instance.cache += dataset.getName -> ds
+    val ds = dataset.force match {
+      case Dataset(v) => Dataset(v, md) //update metadata
+    }
+    instance.cache += dataset.getName -> ds //add to cache
     ds
   }
   
