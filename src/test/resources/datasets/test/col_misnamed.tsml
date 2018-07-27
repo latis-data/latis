@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset id="misnamed">
+  <metadata long_name="Columnar Test"/>
+  <adapter class="latis.reader.tsml.ColumnarAdapter"
+           columns="0,1,2;5;3;4"
+           delimiter="\s+"
+           commentCharacter="#"
+           location="datasets/test/col.txt" />
+  
+  <time type="text"> <!--Note, columns will be concat'd with space-->
+    <metadata name="myTime" units="yyyy MM dd"/>
+  </time>
+  
+  <integer id="myInt"/>
+  <real    id="myReal"/>
+  <text    id="myText"/>
+  
+</dataset>
+

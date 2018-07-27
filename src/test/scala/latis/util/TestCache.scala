@@ -14,48 +14,91 @@ class TestCache {
   
   @Test
   def read_cache_dataset = {
-    //Add 2 datasets to the cache (both same size) and check the size in the 
-    // "cache" dataset
-    val ds1 = DatasetAccessor.fromName("ascii_iterative").getDataset
-    val ds2 = DatasetAccessor.fromName("col").getDataset
-    CacheManager.cacheDataset(ds1)
-    CacheManager.cacheDataset(ds2)
-    val ds3 = DatasetAccessor.fromName("cache").getDataset
-    CacheManager.clear //clean up for other tests
-    
-    ds3 match {
-      case Dataset(Function(it)) => it.next match {
-        case Sample(_,Tuple(vars)) => vars(1) match {case Integer(n) => assertEquals(132l, n)}
-      }
-    }
-  }  
-  
-  @Test
-  def read_cache_dataset_with_ops = {
-    //Add 2 datasets to the cache (both same size) and check the size in the 
-    // "cache" dataset
-    val ds1 = DatasetAccessor.fromName("ascii_iterative").getDataset match {
-      case ds @ Dataset(v) => Dataset(v, ds.getMetadata + ("creation_time" -> System.currentTimeMillis.toString))
-    }
-    val ds2 = DatasetAccessor.fromName("col").getDataset match {
-      case ds @ Dataset(v) => Dataset(v, ds.getMetadata + ("creation_time" -> System.currentTimeMillis.toString))
-    }
-    
-    CacheManager.cacheDataset(ds1)
-    CacheManager.cacheDataset(ds2)
-    
     val ops = ArrayBuffer[Operation]()
     ops += Selection("name=col")
-    //ops += Projection("name")
-    //ops += FirstFilter()
     
     val ds = DatasetAccessor.fromName("cache").getDataset(ops)
-    CacheManager.clear //clean up for other tests
-    
     ds match {
       case Dataset(Function(it)) => it.next match {
-        case Sample(_,Tuple(vars)) => vars(1) match {case Integer(l) => assertEquals(132, l)}
+        case Sample(_, TupleMatch(_, Integer(n))) => assertEquals(132l, n)
       }
     }
+  }
+  
+  @Test
+  def read_cached_dataset = {
+    val ds = DatasetAccessor.fromName("col").getDataset()
+    //Note, we can write it twice so no TraversableOnce issue
+    ds match {
+      case Dataset(Function(it)) => assertEquals(3, it.length)
+    }
+  }
+  
+  @Test
+  def read_cached_dataset_by_tsml_id = {
+    //We otherwise assume the dataset id in the tsml matches the tsml file name.
+    //Note, this also shows that we are definitely getting the dataset from the cache.
+    val ds = DatasetAccessor.fromName("misnamed").getDataset()
+    ds match {
+      case Dataset(Function(it)) => assertEquals(3, it.length)
+    }
+  }
+  
+  @Test
+  def read_cached_dataset_with_ops = {
+    val ops = ArrayBuffer[Operation]()
+    ops += FirstFilter()
+    val ds = DatasetAccessor.fromName("col").getDataset(ops)
+    ds match {
+      case Dataset(Function(it)) => it.next match {
+        case Sample(_, TupleMatch(Integer(n), _, _)) => assertEquals(1, n)
+      }
+    }
+  }
+  
+  @Test
+  def idempotent_ops = {
+    //Assert ops don't change cached data
+    val ops = ArrayBuffer[Operation]()
+    ops += FirstFilter()
+    val ds0 = DatasetAccessor.fromName("col").getDataset(ops)
+    val ds = DatasetAccessor.fromName("col").getDataset
+    ds match {
+      case Dataset(Function(it)) => assertEquals(3, it.length)
+    }
+  }
+  
+  @Test
+  def tsml_cache = {
+    //cache defined in tsml, not pre-cached
+    //Entire dataset should be cached despite ops
+    val ops = ArrayBuffer[Operation]()
+    ops += FirstFilter()
+    
+    //original read/caching, ops applied after caching
+    DatasetAccessor.fromName("col_cached").getDataset(ops) match {
+      case Dataset(Function(it)) => assertEquals(1, it.length)
+    }
+    
+    //read from cache, should get entire dataset
+    DatasetAccessor.fromName("col_cached").getDataset() match {
+      case Dataset(Function(it)) => assertEquals(3, it.length)
+    }
+  }
+}
+
+object TestCache {
+  
+  @BeforeClass
+  def loadCache(): Unit = {
+    DatasetAccessor.fromName("ascii_iterative").getDataset.cache
+    DatasetAccessor.fromName("col").getDataset.cache
+    DatasetAccessor.fromName("col_misnamed").getDataset.cache
+    ()
+  }
+  
+  @AfterClass
+  def clearCache(): Unit = {
+    CacheManager.clear
   }
 }
