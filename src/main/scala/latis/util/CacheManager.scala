@@ -40,11 +40,13 @@ object CacheManager {
     //Add creation time to metadata for cache invalidation
     val md = dataset.getMetadata + ("creation_time" -> System.currentTimeMillis.toString)
     //Make sure dataset is memoized (all the Data loaded)
-    val ds = dataset.force match {
-      case Dataset(v) => Dataset(v, md) //update metadata
+    dataset.force match {
+      case Dataset(v) =>
+        val ds = Dataset(v, md) //update metadata
+        instance.cache += dataset.getName -> ds //add to cache
+        ds
+      case _ => dataset //empty Dataset, don't cache
     }
-    instance.cache += dataset.getName -> ds //add to cache
-    ds
   }
   
   /**
