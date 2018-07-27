@@ -40,7 +40,8 @@ object ServerMetadata {
           Some(OperationDescription(
               name,
               LatisProperties(key).split('.').last,
-              LatisProperties.getOrElse(key.replace(".class", ".description"), null)
+              LatisProperties.getOrElse(key.replace(".class", ".description"), null),
+              LatisProperties.getOrElse(key.replace(".class", ".usage"), null)
           ))
         }
         case _ => None
