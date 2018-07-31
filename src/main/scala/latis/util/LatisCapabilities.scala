@@ -11,7 +11,7 @@ import latis.reader.DatasetAccessor
 import latis.util.FileUtils.getListOfFiles
 
 /**
- * Return a Dataset of LaTiS capabilities:
+ * Construct a Dataset of LaTiS capabilities:
  * Datasets served, output options, and filter options.
  */
 class LatisCapabilities extends DatasetAccessor {
@@ -28,43 +28,42 @@ class LatisCapabilities extends DatasetAccessor {
    * pulled from the "datasets" directory and the latis.properties file.
    */
   def getCapabilities: Dataset = {
-    val datasets: List[Text] = {
+    val datasets: Function = {
       val dir = LatisProperties.getOrElse("dataset.dir", "src/main/resources/datasets") //TODO: confirm how to make this work in prod and dev
-      getListOfFiles(dir).map(f => {
+      Function(
+        getListOfFiles(dir).map(f => {
         val n = f.getName
         val name = n.substring(0, n.lastIndexOf('.')) //drop the file extension
-        val md: Metadata = Metadata().addName("dataset_name") //TODO: give a name to all Scalars: output suffixes, descriptions, filter names, descriptions, usages (to remove "unknown"s)
+        val md: Metadata = Metadata().addName("dataset_name") 
         Text(md, name)
-      })
+        })
+      )
     }
     
-    val outputOptions: List[Tuple] = { 
-      ServerMetadata.availableSuffixes.
+    val outputOptions: Function = {
+      val md1: Metadata = Metadata().addName("output_option")
+      val md2: Metadata = Metadata().addName("output_description") //TODO: is there a cleaner way to name these scalars than using "md1", "md2"?
+      Function(
+        ServerMetadata.availableSuffixes.
         sortBy(suffixInfo => suffixInfo.suffix). //put in alphabetical order
-        map(suffixInfo => (Tuple(Text(suffixInfo.suffix), Text(suffixInfo.description)))). //TODO: breaks if value is null; temporarily changed ServerMetadata to "getOrElse" "" instead of null
-        toList
+        map(suffixInfo => (Tuple(Text(md1, suffixInfo.suffix), Text(md2, suffixInfo.description)))) //TODO: breaks if a value is null; I changed ServerMetadata to "getOrElse" "" instead of null. Was that okay?
+      )
     }
     
-    val filterOptions: List[(Tuple)] = { 
-      ServerMetadata.availableOperations.
+    val filterOptions: Function = { 
+      val md1: Metadata = Metadata().addName("operation_option")
+      val md2: Metadata = Metadata().addName("operation_description")
+      val md3: Metadata = Metadata().addName("operation_usage") //TODO: is there a cleaner way to name these scalars than using "md1", "md2", "md3"?
+      Function(  
+        ServerMetadata.availableOperations.
         sortBy(opInfo => opInfo.name). //put in alphabetical order
-        map(opInfo => (Tuple(Text(opInfo.name), Text(opInfo.description), Text(opInfo.usage)))). //TODO: breaks if value is null; temporarily changed ServerMetadata to "getOrElse" "" instead of null
-        toList
+        map(opInfo => (Tuple(Text(md1, opInfo.name), Text(md2, opInfo.description), Text(md3, opInfo.usage)))) //TODO: breaks if a value is null; I changed ServerMetadata to "getOrElse" "" instead of null. Was that okay?
+      )
     } 
     
-    //TODO: build Functions in the anonymous functions, not here
-    val datasetsFunc: Function = Function(datasets)
-    val outputFunc: Function = Function(outputOptions)
-    val filterFunc: Function = Function(filterOptions)
-    
-    val capabilitiesTup: Tuple = Tuple(datasetsFunc, outputFunc, filterFunc)
+    val capabilities: Tuple = Tuple(datasets, outputOptions, filterOptions)
     val md = Metadata().addName("latis_capabilities")
-    val ds = Dataset(capabilitiesTup, md)
-    
-//    println("Datasets: " + datasets)
-//    println("Output Options: " + outputOptions)
-//    println("Filter Options: " + filterOptions)
-   
+    val ds = Dataset(capabilities, md)
     ds
   }
   
