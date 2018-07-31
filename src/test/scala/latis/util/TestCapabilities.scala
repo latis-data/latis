@@ -18,7 +18,7 @@ class TestCapabilities {
   @After
   def resetProperties = LatisProperties.reset
   
-  /*
+  /**
    * Assert that the Capabilities Dataset is formatted correctly
    * and contains correct entries from the latis project's
    * main latis.properties file.
