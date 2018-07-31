@@ -33,7 +33,7 @@ class LatisCapabilities extends DatasetAccessor {
       getListOfFiles(dir).map(f => {
         val n = f.getName
         val name = n.substring(0, n.lastIndexOf('.')) //drop the file extension
-        val md: Metadata = Metadata().addName("dataset_name")
+        val md: Metadata = Metadata().addName("dataset_name") //TODO: give a name to all Scalars: output suffixes, descriptions, filter names, descriptions, usages (to remove "unknown"s)
         Text(md, name)
       })
     }
