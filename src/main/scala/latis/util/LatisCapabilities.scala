@@ -12,7 +12,7 @@ import latis.util.FileUtils.getListOfFiles
 
 /**
  * Construct a Dataset of LaTiS capabilities:
- * Datasets served, output options, and filter options.
+ * Available datasets, output options, and filter options.
  */
 class LatisCapabilities extends DatasetAccessor {
   
