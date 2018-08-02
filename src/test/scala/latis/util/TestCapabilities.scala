@@ -21,7 +21,7 @@ class TestCapabilities {
   /**
    * Assert that the Capabilities Dataset is formatted correctly
    * and contains correct entries from the latis project's
-   * main latis.properties file.
+   * test latis.properties file.
    */
   @Test
   def capabilities_dataset = {
@@ -31,9 +31,9 @@ class TestCapabilities {
     
     ds match {
       case Dataset(TupleMatch(Function(itDs), Function(itOut), Function(itOp))) => {
-        itDs.next match {
+        itDs.next match { 
           case Sample(Index(i), Text(dsName)) => {
-            assertEquals(0, i)
+            assertEquals(0, i) //TODO: this currently fails because the code can't find anything in datasets/test/
             assertEquals("leap_seconds", dsName)
           }
         }

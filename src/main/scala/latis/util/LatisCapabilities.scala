@@ -29,7 +29,7 @@ class LatisCapabilities extends DatasetAccessor {
    */
   def getCapabilities: Dataset = {
     val datasets: Function = {
-      val dir = LatisProperties.getOrElse("dataset.dir", "src/main/resources/datasets") //TODO: this is intended to always read from the main latis.properties, but sometimes it uses the test one, which is a problem.
+      val dir = LatisProperties.getOrElse("dataset.dir", "src/main/resources/datasets") //TODO: make sure this works in dev and prod
       Function(
         getListOfFiles(dir).map { f => 
           val n = f.getName
