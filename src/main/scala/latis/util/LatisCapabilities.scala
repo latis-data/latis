@@ -13,7 +13,7 @@ import latis.reader.DatasetAccessor
 
 /**
  * Construct a Dataset of LaTiS capabilities:
- * Available datasets, output options, and filter options.
+ * available datasets, output options, and filter options.
  */
 class LatisCapabilities extends DatasetAccessor {
   
@@ -26,7 +26,7 @@ class LatisCapabilities extends DatasetAccessor {
   
   /**
    * Return the Dataset of LaTiS capabilities,
-   * pulled from the "datasets" directory and the latis.properties file.
+   * pulled from the "catalog" and the latis.properties file.
    */
   def getCapabilities: Dataset = {
     val datasets: Function = {
