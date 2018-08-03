@@ -24,7 +24,7 @@ object ServerMetadata {
           Some(WriterDescription(
             suffix,
             LatisProperties.getOrElse(key, "[Unknown Class]").split("\\.").last,
-            LatisProperties.getOrElse(key.replace(".class", ".description"), null)
+            LatisProperties.getOrElse(key.replace(".class", ".description"), "")
           ))
         }
         case _ => None
@@ -40,7 +40,8 @@ object ServerMetadata {
           Some(OperationDescription(
               name,
               LatisProperties(key).split('.').last,
-              LatisProperties.getOrElse(key.replace(".class", ".description"), null)
+              LatisProperties.getOrElse(key.replace(".class", ".description"), ""),
+              LatisProperties.getOrElse(key.replace(".class", ".usage"), "")
           ))
         }
         case _ => None
