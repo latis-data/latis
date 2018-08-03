@@ -2,16 +2,14 @@ package latis.util
 
 import latis.dm.Dataset
 import latis.dm.Function
+import latis.dm.Sample
 import latis.dm.Text
 import latis.dm.Tuple
-import latis.dm._
 import latis.metadata.Metadata
 import latis.metadata.ServerMetadata
 import latis.ops.Operation
-import latis.ops.Projection
+import latis.reader.CatalogReader
 import latis.reader.DatasetAccessor
-import latis.util.FileUtils.getListOfFiles
-//TODO: organize imports
 
 /**
  * Construct a Dataset of LaTiS capabilities:
@@ -32,14 +30,12 @@ class LatisCapabilities extends DatasetAccessor {
    */
   def getCapabilities: Dataset = {
     val datasets: Function = {
-      val catalogDs = DatasetAccessor.fromName("catalog").getDataset() //TODO: this doesn't seem to actually get the catalog dataset
-    
+      val catalogDs = CatalogReader().getDataset().rename("name", "dataset_name")
       catalogDs match {
         case Dataset(Function(it)) => {
-          val md: Metadata = Metadata().addName("dataset_name") 
           Function(
             it.toSeq.map { 
-              case Sample(name, _) => Text(md, name) //TODO: make sure this works...
+              case Sample(name, _) => name 
             }
           )
         }

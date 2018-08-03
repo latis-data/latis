@@ -33,8 +33,8 @@ class TestCapabilities {
       case Dataset(TupleMatch(Function(itDs), Function(itOut), Function(itOp))) => {
         itDs.next match { 
           case Sample(Index(i), Text(dsName)) => {
-            assertEquals(0, i) //TODO: this currently fails because the code can't find anything in datasets/test/
-            assertEquals("leap_seconds", dsName)
+            assertEquals(0, i) 
+            assertEquals("agg", dsName)
           }
         }
         
