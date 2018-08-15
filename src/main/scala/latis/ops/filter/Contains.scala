@@ -41,7 +41,7 @@ class Contains(val vname: String, val values: Seq[String]) extends Filter with L
       }
     } catch {
       case e: Exception => {
-        logger.warn("Contains filter threw an exception: " + e.getMessage)
+        logger.warn("Contains filter threw an exception: " + e.getMessage) //TODO: this breaks when invalid "values" exists
         None
       }
     }
@@ -65,13 +65,14 @@ class Contains(val vname: String, val values: Seq[String]) extends Filter with L
   
   private def isValid(comparison: Int): Boolean = comparison == 0 //TODO: make sure this is doing scalar==scalar(value) correctly
   
-  override def toString: String = { //TODO: Refactor this toString?
-    var str: String = s"$vname={" 
+  override def toString: String = { 
+    var str = s"$vname={" 
     for (v <- values) {
-      str = str + s"$v,"
+      str += s"$v,"
     }
     str.dropRight(1) + "}"
   }
+  
 }
 
 
