@@ -36,12 +36,12 @@ class Contains(val vname: String, val values: Seq[String]) extends Filter with L
     try {
       scalar match {
       case s: Scalar => if (scalar.hasName(vname)) {
-        if (values.exists(v => isValid(scalar.compare(v)))) Some(scalar) else None //TODO: make sure this line works
+        if (values.exists(v => isValid(scalar.compare(v)))) Some(scalar) else None //TODO: this throws an exception when invalid "values" exist... "compare" seems to be the culprit
         } else Some(scalar) //operation doesn't apply to this Scalar Variable, no-op
       }
     } catch {
       case e: Exception => {
-        logger.warn("Contains filter threw an exception: " + e.getMessage) //TODO: this breaks when invalid "values" exists
+        logger.warn("Contains filter threw an exception: " + e.getMessage) 
         None
       }
     }

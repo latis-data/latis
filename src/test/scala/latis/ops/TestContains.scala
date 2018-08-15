@@ -76,6 +76,19 @@ class TestContains {
   }
   
   @Test
+  def contains_invalid_nonexistent_values = {
+    val ops = ArrayBuffer[Operation]() 
+    ops += new Contains("B", Seq("x", "y", "z")) //TODO: reformat without "new" after companion object exists
+    val ds = DatasetAccessor.fromName("agg/scalar_ts_3col_10to19").getDataset(ops)
+    
+    //latis.writer.AsciiWriter.write(ds)
+    
+    ds match {
+      case Dataset(Function(it)) => assertFalse(it.hasNext)
+    }
+  }
+  
+  @Test
   def contains_some_invalid_values = {
     val ops = ArrayBuffer[Operation]() 
     ops += new Contains("B", Seq("11", "invalid", "13")) //TODO: reformat without "new" after companion object exists
