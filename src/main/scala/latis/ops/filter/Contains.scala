@@ -63,7 +63,7 @@ class Contains(val vname: String, val values: Seq[String]) extends Filter with L
     }
   }
   
-  private def isValid(comparison: Int): Boolean = comparison == 0 //TODO: make sure this is doing scalar==scalar(value) correctly
+  private def isValid(comparison: Int): Boolean = comparison == 0 //TODO: make sure this is facilitating scalar==scalar(value) correctly
   
   override def toString: String = { 
     var str = s"$vname={" 
