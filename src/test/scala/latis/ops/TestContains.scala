@@ -304,7 +304,7 @@ class TestContains {
   }
   
   @Test
-  def contains_invalid_nonexistent_text = { //TODO: is this a dumb test? Maybe just a dumb name?
+  def contains_invalid_nonexistent_text = { 
     val ops = ArrayBuffer[Operation]() 
     ops += new Contains("myText", Seq("1", "2.2", "")) //TODO: reformat without "new" after companion object exists
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
