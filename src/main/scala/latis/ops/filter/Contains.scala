@@ -21,53 +21,52 @@ class Contains(val vname: String, val values: Seq[String]) extends Filter with L
     }
     case _ => ds
   }
-  
+
   override def applyToScalar(scalar: Scalar): Option[Scalar] = {
     try {
       scalar match {
-      case s: Scalar => if (scalar.hasName(vname)) {
-        if (values.exists { v => 
+        case s: Scalar => if (scalar.hasName(vname)) {
+          if (values.exists { v =>
             //swallow exceptions thrown by impossible comparisons to avoid short circuiting the "exists" search
-            val cmp: Int = try { scalar.compare(v) } catch { case _: Throwable => -1 } 
+            val cmp: Int = try { scalar.compare(v) } catch { case _: Throwable => -1 }
             isValid(cmp)
-          }
-        ) Some(scalar) else None 
+          }) Some(scalar) else None
         } else Some(scalar) //operation doesn't apply to this Scalar Variable, no-op
       }
     } catch {
       case e: Exception => {
-        logger.warn("Contains filter threw an exception: " + e.getMessage) 
+        logger.warn("Contains filter threw an exception: " + e.getMessage)
         None
       }
     }
   }
-  
+
   override def applyToSample(sample: Sample): Option[Sample] = {
     val x = sample.getVariables.map(applyToVariable(_))
-    x.find(_.isEmpty) match{
+    x.find(_.isEmpty) match {
       case Some(_) => None //found an invalid variable, exclude the entire sample
       case None => Some(Sample(x(0).get, x(1).get))
     }
   }
-  
+
   override def applyToTuple(tuple: Tuple): Option[Tuple] = {
     val x = tuple.getVariables.map(applyToVariable(_))
-    x.find(_.isEmpty) match{
+    x.find(_.isEmpty) match {
       case Some(_) => None //found an invalid variable, exclude the entire tuple
       case None => Some(Tuple(x.map(_.get), tuple.getMetadata))
     }
   }
-  
-  private def isValid(comparison: Int): Boolean = comparison == 0 
-  
-  override def toString: String = { 
-    var str = s"$vname={" 
+
+  private def isValid(comparison: Int): Boolean = comparison == 0
+
+  override def toString: String = {
+    var str = s"$vname={"
     for (v <- values) {
       str += s"$v,"
     }
     str.dropRight(1) + "}"
   }
-  
+
 }
 
 //TODO: Companion object (LATIS-726)
