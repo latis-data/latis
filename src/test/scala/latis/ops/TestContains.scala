@@ -215,8 +215,7 @@ class TestContains {
     ops += new Contains("B", Seq("11", "invalid", "13")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("agg/scalar_ts_3col_10to19").getDataset(ops)
     
-    println("LOOK!")
-    latis.writer.AsciiWriter.write(ds)
+    //latis.writer.AsciiWriter.write(ds)
     
     ds match {
       case Dataset(Function(it)) => it.next match {
@@ -239,8 +238,8 @@ class TestContains {
     ops += new Contains("myReal", Seq("1.1", "invalid", "3.3")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
-    println("LOOK!")
-    latis.writer.AsciiWriter.write(ds)
+    //println("LOOK!")
+    //latis.writer.AsciiWriter.write(ds)
     
     ds match {
       case Dataset(Function(it)) => it.next match {
