@@ -129,8 +129,6 @@ class TestContains {
     ops += new Contains("myTime", Seq("2018-05-01", "2018-05-02", "2018-05-04T00:00:00.000Z")) 
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
-    //latis.writer.AsciiWriter.write(ds)
-    
     ds match {
       case Dataset(Function(it)) => assertFalse(it.hasNext)   
     }
@@ -141,8 +139,6 @@ class TestContains {
     val ops = ArrayBuffer[Operation]() 
     ops += new Contains("C", Seq("110", "120", "130")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("agg/scalar_ts_3col_10to19").getDataset(ops)
-    
-    //latis.writer.AsciiWriter.write(ds)
     
     ds match {
       case Dataset(Function(it)) => assertFalse(it.hasNext)
@@ -155,8 +151,6 @@ class TestContains {
     ops += new Contains("myReal", Seq("100.01", "2000.002")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
-    //latis.writer.AsciiWriter.write(ds)
-    
     ds match {
       case Dataset(Function(it)) => assertFalse(it.hasNext)
     }
@@ -167,8 +161,6 @@ class TestContains {
     val ops = ArrayBuffer[Operation]()
     ops += new Contains("myText", Seq("X", "Y", "Z")) 
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
-    
-    //latis.writer.AsciiWriter.write(ds)
     
     ds match {
       case Dataset(Function(it)) => assertFalse(it.hasNext)
@@ -222,7 +214,7 @@ class TestContains {
         case Sample(_, TupleMatch(Integer(b), Integer(c))) => {
           assertEquals(11, b)
         }
-        it.next match { //TODO: as Contains is currently written, an exception stops this sample from making it
+        it.next match { 
           case Sample(_, TupleMatch(Integer(b), Integer(c))) => {
             assertEquals(13, b)
           }
@@ -238,7 +230,6 @@ class TestContains {
     ops += new Contains("myReal", Seq("1.1", "invalid", "3.3")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
-    //println("LOOK!")
     //latis.writer.AsciiWriter.write(ds)
     
     ds match {
@@ -248,7 +239,7 @@ class TestContains {
             assertEquals(1.1, r, 0)
           }
         }
-        it.next match { //TODO: as Contains is currently written, an exception stops this sample from making it
+        it.next match { 
           case Sample(_, Tuple(vars)) => vars match { 
             case Vector(Integer(i), Real(r), Text(t)) => {
               assertEquals(3.3, r, 0)
@@ -284,8 +275,6 @@ class TestContains {
     ops += new Contains("B", Seq("x", "y", "z")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("agg/scalar_ts_3col_10to19").getDataset(ops)
     
-    //latis.writer.AsciiWriter.write(ds)
-    
     ds match {
       case Dataset(Function(it)) => assertFalse(it.hasNext)
     }
@@ -312,7 +301,5 @@ class TestContains {
       case Dataset(Function(it)) => assertFalse(it.hasNext)
     }
   }
-  
-  
   
 }
