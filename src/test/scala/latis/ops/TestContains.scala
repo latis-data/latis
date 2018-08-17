@@ -19,9 +19,9 @@ import latis.reader.DatasetAccessor
 class TestContains {
   
   @Test 
-  def contains_valid_extant_time = {
+  def contains_valid_existent_time = {
     val ops = ArrayBuffer[Operation]()
-    ops += new Contains("myTime", Seq("1970-01-02", "1970-01-03")) //TODO: reformat without "new" after companion object exists
+    ops += new Contains("myTime", Seq("1970-01-02", "1970-01-03")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
     //latis.writer.AsciiWriter.write(ds)
@@ -42,9 +42,9 @@ class TestContains {
   }
   
   @Test
-  def contains_valid_extant_integers = {
+  def contains_valid_existent_integers = {
     val ops = ArrayBuffer[Operation]() 
-    ops += new Contains("B", Seq("11", "12", "13")) //TODO: reformat without "new" after companion object exists
+    ops += new Contains("B", Seq("11", "12", "13")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("agg/scalar_ts_3col_10to19").getDataset(ops)
     
     //latis.writer.AsciiWriter.write(ds)
@@ -70,9 +70,9 @@ class TestContains {
   }
   
   @Test 
-  def contains_valid_extant_reals = {
+  def contains_valid_existent_reals = {
     val ops = ArrayBuffer[Operation]()
-    ops += new Contains("myReal", Seq("3.3", "1.1")) //TODO: reformat without "new" after companion object exists
+    ops += new Contains("myReal", Seq("3.3", "1.1")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
     //latis.writer.AsciiWriter.write(ds)
@@ -101,9 +101,9 @@ class TestContains {
   }
   
   @Test 
-  def contains_valid_extant_text = {
+  def contains_valid_existent_text = {
     val ops = ArrayBuffer[Operation]()
-    ops += new Contains("myText", Seq("B", "C")) //TODO: reformat without "new" after companion object exists
+    ops += new Contains("myText", Seq("B", "C")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
     //latis.writer.AsciiWriter.write(ds)
@@ -139,7 +139,7 @@ class TestContains {
   @Test
   def contains_valid_nonexistent_integers = {
     val ops = ArrayBuffer[Operation]() 
-    ops += new Contains("C", Seq("110", "120", "130")) //TODO: reformat without "new" after companion object exists
+    ops += new Contains("C", Seq("110", "120", "130")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("agg/scalar_ts_3col_10to19").getDataset(ops)
     
     //latis.writer.AsciiWriter.write(ds)
@@ -152,7 +152,7 @@ class TestContains {
   @Test 
   def contains_valid_nonexistent_reals = {
     val ops = ArrayBuffer[Operation]()
-    ops += new Contains("myReal", Seq("100.01", "2000.002")) //TODO: reformat without "new" after companion object exists
+    ops += new Contains("myReal", Seq("100.01", "2000.002")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
     //latis.writer.AsciiWriter.write(ds)
@@ -178,8 +178,8 @@ class TestContains {
   @Test 
   def multiple_contains_ops = {
     val ops = ArrayBuffer[Operation]()
-    ops += new Contains("myReal", Seq("3.3", "1.1")) //TODO: reformat without "new" after companion object exists
-    ops += new Contains("myText", Seq("C"))          //TODO: reformat without "new" after companion object exists
+    ops += new Contains("myReal", Seq("3.3", "1.1")) //TODO: reformat without "new" once companion object exists (LATIS-726)
+    ops += new Contains("myText", Seq("C"))          //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
     //latis.writer.AsciiWriter.write(ds)
@@ -212,7 +212,7 @@ class TestContains {
   @Test
   def contains_invalid_integer = {
     val ops = ArrayBuffer[Operation]() 
-    ops += new Contains("B", Seq("11", "invalid", "13")) //TODO: reformat without "new" after companion object exists
+    ops += new Contains("B", Seq("11", "invalid", "13")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("agg/scalar_ts_3col_10to19").getDataset(ops)
     
     println("LOOK!")
@@ -236,7 +236,7 @@ class TestContains {
   @Test
   def contains_invalid_real = {
     val ops = ArrayBuffer[Operation]() 
-    ops += new Contains("myReal", Seq("1.1", "invalid", "3.3")) //TODO: reformat without "new" after companion object exists
+    ops += new Contains("myReal", Seq("1.1", "invalid", "3.3")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
     println("LOOK!")
@@ -264,7 +264,7 @@ class TestContains {
   @Test 
   def contains_invalid_text = {
     val ops = ArrayBuffer[Operation]()
-    ops += new Contains("myText", Seq("1", "", "C")) //TODO: reformat without "new" after companion object exists
+    ops += new Contains("myText", Seq("1", "", "C")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
     //latis.writer.AsciiWriter.write(ds)
@@ -282,7 +282,7 @@ class TestContains {
   @Test
   def contains_invalid_nonexistent_integers = { 
     val ops = ArrayBuffer[Operation]() 
-    ops += new Contains("B", Seq("x", "y", "z")) //TODO: reformat without "new" after companion object exists
+    ops += new Contains("B", Seq("x", "y", "z")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("agg/scalar_ts_3col_10to19").getDataset(ops)
     
     //latis.writer.AsciiWriter.write(ds)
@@ -295,7 +295,7 @@ class TestContains {
   @Test
   def contains_invalid_nonexistent_reals = { 
     val ops = ArrayBuffer[Operation]() 
-    ops += new Contains("myReal", Seq("x", "one", "z")) //TODO: reformat without "new" after companion object exists
+    ops += new Contains("myReal", Seq("x", "one", "z")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
     ds match {
@@ -306,7 +306,7 @@ class TestContains {
   @Test
   def contains_invalid_nonexistent_text = { 
     val ops = ArrayBuffer[Operation]() 
-    ops += new Contains("myText", Seq("1", "2.2", "")) //TODO: reformat without "new" after companion object exists
+    ops += new Contains("myText", Seq("1", "2.2", "")) //TODO: reformat without "new" once companion object exists (LATIS-726)
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
     ds match {
@@ -317,7 +317,3 @@ class TestContains {
   
   
 }
-
-
-
-
