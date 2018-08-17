@@ -1,6 +1,7 @@
 package latis.ops
 
 import scala.collection.mutable.ArrayBuffer
+
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
