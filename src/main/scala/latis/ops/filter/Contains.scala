@@ -5,8 +5,6 @@ import latis.dm.Dataset
 import latis.dm.Sample
 import latis.dm.Scalar
 import latis.dm.Tuple
-import latis.ops.Operation
-import latis.ops.OperationFactory
 
 /**
  * Filter based on a constraint expression of the form
@@ -28,7 +26,7 @@ class Contains(val vname: String, val values: Seq[String]) extends Filter with L
         case s: Scalar => if (scalar.hasName(vname)) {
           if (values.exists { v =>
             //swallow exceptions thrown by impossible comparisons to avoid short circuiting the "exists" search
-            val cmp: Int = try { scalar.compare(v) } catch { case _: Throwable => -1 }
+            val cmp: Int = try { scalar.compare(v) } catch { case _: NumberFormatException => -1 }
             isValid(cmp)
           }) Some(scalar) else None
         } else Some(scalar) //operation doesn't apply to this Scalar Variable, no-op
