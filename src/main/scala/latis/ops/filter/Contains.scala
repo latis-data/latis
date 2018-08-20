@@ -27,7 +27,7 @@ class Contains(val vname: String, val values: Seq[String]) extends Filter with L
           if (values.exists { v =>
             //swallow exceptions thrown by impossible comparisons to avoid short circuiting the "exists" search
             val cmp: Int = try { scalar.compare(v) } catch { case _: NumberFormatException => -1 }
-            isValid(cmp)
+            cmp == 0
           }) Some(scalar) else None
         } else Some(scalar) //operation doesn't apply to this Scalar Variable, no-op
       }
@@ -55,16 +55,8 @@ class Contains(val vname: String, val values: Seq[String]) extends Filter with L
     }
   }
 
-  private def isValid(comparison: Int): Boolean = comparison == 0
-
-  override def toString: String = {
-    var str = s"$vname={"
-    for (v <- values) {
-      str += s"$v,"
-    }
-    str.dropRight(1) + "}"
-  }
+  override def toString: String = values.mkString(s"$vname={", ",", "}")
 
 }
 
-//TODO: Companion object (LATIS-726)
+//TODO: companion object (LATIS-726)
