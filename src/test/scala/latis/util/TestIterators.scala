@@ -4,6 +4,7 @@ import org.junit._
 import Assert._
 import latis.util.iterator.MappingIterator
 import latis.util.iterator.PeekIterator
+import java.io.IOException
 
 class TestIterators {
 
@@ -140,5 +141,22 @@ class TestIterators {
     pit.peek
     assert(hasNextCalled)
     assertEquals(1, counter) 
+  }
+  
+  @Test(expected=classOf[RuntimeException])
+  def abort_mapping_iterator = {
+    //Make iterator that throws IOException
+    val it = new Iterator[Int] {
+      var n = 0
+      def hasNext: Boolean = true
+      def next: Int = {
+        n = n + 1
+        if (n > 5) throw new IOException("Test exception.")
+        n
+      }
+    }
+    
+    val mit = new MappingIterator(it, (x: Int) => Some(x))
+    val l = mit.toList //trigger MappingIterator to deal with IOException
   }
 }

@@ -2,6 +2,8 @@ package latis.util.iterator
 
 import scala.annotation.tailrec
 import com.typesafe.scalalogging.LazyLogging
+import java.sql.SQLException
+import java.io.IOException
 
 /**
  * An Iterator that looks ahead and caches the next sample.
@@ -31,11 +33,14 @@ class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) ext
       val result = try {
         f(iterator.next)
       } catch {
-        case e: Exception => {
+        case iox @ (_: IOException | _: SQLException) =>
+          //Assume that we lost our data stream and abort.
+          val msg = "MappingIterator lost the data stream. Aborting."
+          throw new RuntimeException(msg, iox)
+        case e: Exception =>
           logger.warn("Sample dropped. MappingIterator got Exception trying to get next sample: " + e.getMessage)
           logger.debug("Sample dropped. MappingIterator got Exception trying to get next sample.", e)
           None
-        }
       }
       
       result match {
