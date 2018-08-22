@@ -29,7 +29,7 @@ class LatisCapabilities extends DatasetAccessor {
    * pulled from the "catalog" and the latis.properties file.
    */
   def getCapabilities: Dataset = {
-    val datasets: Function = { //TODO: give names to Functions
+    val datasets: Function = {
       val catalogDs = CatalogReader().getDataset().rename("name", "dataset_name")
       catalogDs match {
         case Dataset(Function(it)) => {
