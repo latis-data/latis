@@ -29,43 +29,50 @@ class LatisCapabilities extends DatasetAccessor {
    * pulled from the "catalog" and the latis.properties file.
    */
   def getCapabilities: Dataset = {
-    val datasets: Function = {
+    val datasets: Function = { //TODO: give names to Functions
       val catalogDs = CatalogReader().getDataset().rename("name", "dataset_name")
       catalogDs match {
         case Dataset(Function(it)) => {
+          val md: Metadata = Metadata().addName("datasets")
           Function(
             it.toSeq.map { 
               case Sample(name, _) => name 
-            }
+            },
+            md
           )
         }
       }
     }
     
     val outputOptions: Function = {
+      val md: Metadata = Metadata().addName("outputs")
       val md1: Metadata = Metadata().addName("output_option")
       val md2: Metadata = Metadata().addName("output_description") 
       Function(
         ServerMetadata.availableSuffixes.
         sortBy(suffixInfo => suffixInfo.suffix). //put in alphabetical order
-        map(suffixInfo => (Tuple(Text(md1, suffixInfo.suffix), Text(md2, suffixInfo.description)))) 
+        map(suffixInfo => (Tuple(Text(md1, suffixInfo.suffix), Text(md2, suffixInfo.description)))),
+        md
       )
     }
     
     val filterOptions: Function = { 
+      val md: Metadata = Metadata().addName("operations")
       val md1: Metadata = Metadata().addName("operation_option")
       val md2: Metadata = Metadata().addName("operation_description")
       val md3: Metadata = Metadata().addName("operation_usage") 
       Function(  
         ServerMetadata.availableOperations.
         sortBy(opInfo => opInfo.name). //put in alphabetical order
-        map(opInfo => (Tuple(Text(md1, opInfo.name), Text(md2, opInfo.description), Text(md3, opInfo.usage))))
+        map(opInfo => (Tuple(Text(md1, opInfo.name), Text(md2, opInfo.description), Text(md3, opInfo.usage)))),
+        md
       )
     } 
     
-    val capabilities: Tuple = Tuple(datasets, outputOptions, filterOptions)
-    val md = Metadata().addName("latis_capabilities")
-    val ds = Dataset(capabilities, md)
+    val mdTup: Metadata = Metadata().addName("capabilities")
+    val capabilities: Tuple = Tuple(Seq(datasets, outputOptions, filterOptions), mdTup)
+    val mdDs = Metadata().addName("latis_capabilities")
+    val ds = Dataset(capabilities, mdDs)
     ds
   }
   
