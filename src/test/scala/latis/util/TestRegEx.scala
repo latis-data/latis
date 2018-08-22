@@ -157,6 +157,9 @@ class TestRegEx {
   }
   @Test def dont_extract_bad_selection = assertEquals(0, getMatchingGroups(RegEx.SELECTION, "foo=`bar").length)
 
+  //Contains expressions
+  @Test def match_contains_no_whitespace = assertTrue("a={1,2,3,4}" matches RegEx.CONTAINS)
+  
   //Projection expression
   @Test def match_projection_of_one = assertTrue("foo" matches RegEx.PROJECTION)
   @Test def match_projection_of_two = assertTrue("foo,bar" matches RegEx.PROJECTION)
