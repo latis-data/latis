@@ -62,6 +62,7 @@ class Contains(val vname: String, val values: Seq[String]) extends Filter with L
 
 }
 
+
 object Contains extends OperationFactory {
   
   override def apply(args: Seq[String]): Operation = {
