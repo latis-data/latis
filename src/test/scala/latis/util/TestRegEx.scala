@@ -163,7 +163,7 @@ class TestRegEx {
   @Test def match_contains_whitespace_around_equals = assertTrue("foo = {1,2,3,4}" matches RegEx.CONTAINS)
   @Test def match_contains_whitespace_between_values = assertTrue("foo={1, 2,3,  4}" matches RegEx.CONTAINS)
   @Test def match_contains_whitespace_all_over = assertTrue("a = { 1, 2, 3, flux }" matches RegEx.CONTAINS)
-  @Test def match_contains_space_delimited = assertTrue("a = { 1, 2.0, flux }" matches RegEx.CONTAINS)
+  @Test def match_contains_multiple_types = assertTrue("a={1, 2.0, flux}" matches RegEx.CONTAINS)
   @Test def match_contains_time = assertTrue("time={ 12/30/1994, 2018-12-30, 'December 30 1994' }" matches RegEx.CONTAINS)
   @Test def match_contains_missing_curly = assertFalse("foo={1,2.0,flux" matches RegEx.CONTAINS)
   @Test def match_contains_wrong_curly = assertFalse("foo=[1,2.0,flux]" matches RegEx.CONTAINS)
