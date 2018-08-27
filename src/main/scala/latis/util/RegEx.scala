@@ -71,9 +71,9 @@ object RegEx {
     
     /**
      * Contains clause. Match variable name and values (e.g. a={1,2,3}).
-     * Allow white space around equals sign and after commas.
+     * Allow white space around equals sign and after delimiters.
      */
-    lazy val CONTAINS = s"($VARIABLE)\\s*=\\s*{($VALUE|'$VALUE')}"
+    lazy val CONTAINS = s"($VARIABLE)\\s*=\\s*\\{\\s*($VALUE(?:(?:$DELIMITER)$VALUE)*)\\s*\\}"
     
     /**
      * Projection clause. Match comma and/or space delimited list of variable names.
