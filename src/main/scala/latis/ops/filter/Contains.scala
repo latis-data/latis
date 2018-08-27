@@ -76,7 +76,7 @@ object Contains extends OperationFactory {
   
   def apply(expression: String): Operation = expression.trim match {
     case CONTAINS.r(name, vals) => {
-      val values = vals.split(""",\s*""").toSeq
+      val values = vals.split(""",\s*""").toSeq //Note, same delimiter used in CONTAINS def
       Contains(name, values) 
     }
     case _ => throw new Error("Failed to make a Contains selection from the expression: " + expression)
