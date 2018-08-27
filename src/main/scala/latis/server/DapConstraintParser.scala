@@ -3,12 +3,13 @@ package latis.server
 import scala.collection.Seq
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-
 import javax.xml.ws.http.HTTPException
 import latis.ops.Operation
 import latis.ops.Projection
 import latis.ops.NoOp
+import latis.ops.filter.Contains
 import latis.ops.filter.Selection
+import latis.util.RegEx.CONTAINS
 import latis.util.RegEx.PROJECTION
 import latis.util.RegEx.OPERATION
 import latis.util.RegEx.SELECTION
@@ -43,6 +44,7 @@ class DapConstraintParser {
     expression match {
       case PROJECTION.r(name) => Projection(name)
       case SELECTION.r(name, op, value) => Selection(name, op, value)
+      case CONTAINS.r(name, values) => Contains(name, values.split(""",\s*""").toSeq) //Note, same delimiter used in CONTAINS def
       case OPERATION.r(name, args) => (name,args) match {
         //for testing handling of http errors
         case ("httpError", s: String) => throw new HTTPException(s.toInt) 
