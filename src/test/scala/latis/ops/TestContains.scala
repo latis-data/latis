@@ -227,7 +227,7 @@ class TestContains {
   @Test
   def contains_invalid_real = {
     val ops = ArrayBuffer[Operation]() 
-    ops += new Contains("myReal", Seq("1.1", "invalid", "3.3")) //TODO: reformat without "new" once companion object exists (LATIS-726)
+    ops += Contains("myReal  =  {1.1, invalid,3.3}")
     val ds = DatasetAccessor.fromName("dap2").getDataset(ops)
     
     //latis.writer.AsciiWriter.write(ds)
@@ -299,6 +299,17 @@ class TestContains {
     
     ds match {
       case Dataset(Function(it)) => assertFalse(it.hasNext)
+    }
+  }
+  
+  @Test
+  def unapply_contains = {
+    val contains = Contains("a = {1,2.2,three}")
+    contains match {
+      case Contains(vname, values) => {
+        assertEquals("a", vname)
+        assertEquals(Seq("1", "2.2", "three"), values)
+      }
     }
   }
   

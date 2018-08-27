@@ -5,6 +5,9 @@ import latis.dm.Dataset
 import latis.dm.Sample
 import latis.dm.Scalar
 import latis.dm.Tuple
+import latis.ops.Operation
+import latis.ops.OperationFactory
+import latis.util.RegEx.CONTAINS
 
 /**
  * Filter based on a constraint expression of the form
@@ -59,4 +62,25 @@ class Contains(val vname: String, val values: Seq[String]) extends Filter with L
 
 }
 
-//TODO: companion object (LATIS-726)
+object Contains extends OperationFactory {
+  
+  override def apply(args: Seq[String]): Operation = {
+    //should be only one arg: expression
+    Contains(args.head)
+  }
+  
+  def apply(vname: String, values: Seq[String]): Operation = {
+    new Contains(vname, values)
+  }
+  
+  def apply(expression: String): Operation = expression.trim match {
+    case CONTAINS.r(name, vals) => {
+      val values = vals.split(""",\s*""").toSeq
+      Contains(name, values) 
+    }
+    case _ => throw new Error("Failed to make a Contains selection from the expression: " + expression)
+  }
+  
+  //Extract the contains selection 
+  def unapply(contains: Contains): Option[(String, Seq[String])] = Some((contains.vname, contains.values))
+}
