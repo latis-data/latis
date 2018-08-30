@@ -70,6 +70,12 @@ object RegEx {
     lazy val SELECTION = s"($VARIABLE)\\s*($SELECTION_OPERATOR)\\s*($VALUE|'$VALUE')"
     
     /**
+     * Contains clause. Match variable name and values (e.g. a={1,2,3}).
+     * Allow white space around equals sign and after delimiters.
+     */
+    lazy val CONTAINS = s"($VARIABLE)\\s*=\\s*\\{\\s*($VALUE(?:(?:$DELIMITER)$VALUE)*)\\s*\\}"
+    
+    /**
      * Projection clause. Match comma and/or space delimited list of variable names.
      * Don't try to match groups since we have a variable number of groups and this
      * would only capture the first and last elements.

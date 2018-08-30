@@ -5,6 +5,7 @@ import Assert._
 import latis.ops.filter.Selection
 import latis.ops.Projection
 import latis.ops.filter.FirstFilter
+import latis.ops.filter.Contains
 import latis.ops.filter.LastFilter
 import java.net.URLEncoder
 import java.net.URLDecoder
@@ -12,14 +13,14 @@ import java.net.URLDecoder
 class TestDapConstraintParser {
 
   @Test
-  def no_constraints {
+  def no_constraints = {
     val args = "".split("&")
     val ops = (new DapConstraintParser).parseArgs(args)
     assertEquals(0, ops.length)
   }
 
   @Test
-  def selection {
+  def selection = {
     val args = "&time>0".split("&")
     val ops = (new DapConstraintParser).parseArgs(args)
     assertEquals(1, ops.length)
@@ -27,7 +28,7 @@ class TestDapConstraintParser {
   }
   
   @Test
-  def selection_with_no_projection_no_leading_and {
+  def selection_with_no_projection_no_leading_and = {
     val args = "time>0".split("&")
     val ops = (new DapConstraintParser).parseArgs(args)
     assertEquals(1, ops.length)
@@ -35,7 +36,7 @@ class TestDapConstraintParser {
   }
 
   @Test
-  def two_selections {
+  def two_selections = {
     val args = "&time>0&time<10".split("&")
     val ops = (new DapConstraintParser).parseArgs(args)
     assertEquals(2, ops.length)
@@ -44,7 +45,7 @@ class TestDapConstraintParser {
   }
   
   @Test
-  def two_selections_with_no_projection_no_leading_and {
+  def two_selections_with_no_projection_no_leading_and = {
     val args = "time>0&time<10".split("&")
     val ops = (new DapConstraintParser).parseArgs(args)
     assertEquals(2, ops.length)
@@ -53,7 +54,7 @@ class TestDapConstraintParser {
   }
 
   @Test
-  def projection {
+  def projection = {
     val args = "time".split("&")
     val ops = (new DapConstraintParser).parseArgs(args)
     assertEquals(1, ops.length)
@@ -61,7 +62,7 @@ class TestDapConstraintParser {
   }
 
   @Test
-  def two_projections {
+  def two_projections = {
     val args = "time,value".split("&")
     val ops = (new DapConstraintParser).parseArgs(args)
     assertEquals(1, ops.length) //still treated as one operation
@@ -69,7 +70,15 @@ class TestDapConstraintParser {
   }
   
   @Test
-  def filter {
+  def contains = {
+    val args = "foo={1,2,3}".split("&")
+    val ops = (new DapConstraintParser).parseArgs(args)
+    assertEquals(1, ops.length) //still treated as one operation
+    assertTrue(ops.head.isInstanceOf[Contains])
+  }
+  
+  @Test
+  def filter = {
     val args = "&first()".split("&")
     val ops = (new DapConstraintParser).parseArgs(args)
     assertEquals(1, ops.length) 
@@ -77,7 +86,7 @@ class TestDapConstraintParser {
   }
   
   @Test
-  def two_filters {
+  def two_filters = {
     val args = "&first()&last()".split("&")
     val ops = (new DapConstraintParser).parseArgs(args)
     assertEquals(2, ops.length) 
@@ -86,7 +95,7 @@ class TestDapConstraintParser {
   }
   
   @Test
-  def projection_selection_filter {
+  def projection_selection_filter = {
     val args = "time&time<10&last()".split("&")
     val ops = (new DapConstraintParser).parseArgs(args)
     assertEquals(3, ops.length)
@@ -96,7 +105,7 @@ class TestDapConstraintParser {
   }
 
   @Test
-  def projection_filter_projection {
+  def projection_filter_projection = {
     val args = "time&time<10&last".split("&")
     val ops = (new DapConstraintParser).parseArgs(args)
     assertEquals(3, ops.length)

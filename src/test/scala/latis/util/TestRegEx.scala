@@ -157,6 +157,37 @@ class TestRegEx {
   }
   @Test def dont_extract_bad_selection = assertEquals(0, getMatchingGroups(RegEx.SELECTION, "foo=`bar").length)
 
+  //Contains expression
+  @Test def match_contains_no_whitespace = assertTrue("a={1,2,3,4}" matches RegEx.CONTAINS)
+  @Test def match_contains_whitespace_single_value = assertTrue("a= {  2 }" matches RegEx.CONTAINS)
+  @Test def match_contains_whitespace_around_equals = assertTrue("a = {1,2,3,4}" matches RegEx.CONTAINS)
+  @Test def match_contains_whitespace_between_values = assertTrue("a={1, 2,3,  4}" matches RegEx.CONTAINS)
+  @Test def match_contains_whitespace_all_over = assertTrue("a = { 1, 2, 3, flux }" matches RegEx.CONTAINS)
+  @Test def match_contains_multiple_types = assertTrue("foo={1, 2.0, flux}" matches RegEx.CONTAINS)
+  @Test def match_contains_time = assertTrue("time={ 12/30/1994, 2018-12-30, 'December 30 1994' }" matches RegEx.CONTAINS)
+  @Test def match_contains_missing_curly = assertFalse("foo={1,2.0,flux" matches RegEx.CONTAINS)
+  @Test def match_contains_wrong_curly = assertFalse("foo=[1,2.0,flux]" matches RegEx.CONTAINS)
+  @Test
+  def contains_three_value_group_matches {
+    val r = RegEx.CONTAINS
+    val s = "foo = {1, 2, 3}"
+    val gs = getMatchingGroups(r,s)
+    
+    assertEquals(2, gs.length)
+    assertEquals("foo", gs.head)
+    assertEquals(List("1, 2, 3"), gs.tail)
+  }
+  @Test
+  def contains_two_value_group_matches {
+    val r = RegEx.CONTAINS
+    val s = "foo={bar baz}"
+    val gs = getMatchingGroups(r,s)
+    
+    assertEquals(2, gs.length)
+    assertEquals("foo", gs.head)
+    assertEquals(List("bar baz"), gs.tail)
+  }
+  
   //Projection expression
   @Test def match_projection_of_one = assertTrue("foo" matches RegEx.PROJECTION)
   @Test def match_projection_of_two = assertTrue("foo,bar" matches RegEx.PROJECTION)
