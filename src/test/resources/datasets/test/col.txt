@@ -1,4 +1,5 @@
 #year mon day real text int
 1970 1 1  1.1 A 1
 1970 1 2  2.2 B 2
+1970 1 2  2.5 B
 1970 1 3  3.3 C 3
