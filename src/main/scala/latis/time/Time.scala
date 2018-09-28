@@ -73,7 +73,7 @@ class Time(timeScale: TimeScale = TimeScale.JAVA, metadata: Metadata = EmptyMeta
       }
     }
     case Number(d) => doubleValue.compare(d)  //compare numerical value, ignoring units
-    case _ => throw new Error("Can't compare " + this + " with " + that)
+    case _ => throw new RuntimeException("Can't compare " + this + " with " + that)
   }
   
   /**
@@ -191,7 +191,7 @@ object Time {
     val scale = md.get("units") match {
       case Some(u) => TimeScale(u)
       case None => {
-        throw new Error("Time can only be constructed without units from an iso time string.")
+        throw new RuntimeException("Time can only be constructed without units from an iso time string.")
       }
     }
     new Time(scale, metadata)
@@ -208,7 +208,7 @@ object Time {
       case Some(u) => TimeScale(u)
       case None => {
         val unit = if(isValidIso(value.toString)) TimeFormat.fromIsoValue(value.toString).toString
-          else throw new Error("Time can only be constructed without units from an iso time string.")
+          else throw new RuntimeException("Time can only be constructed without units from an iso time string.")
         metadata = md + ("units" -> unit)
         TimeScale.apply(unit)
       }
@@ -237,7 +237,7 @@ object Time {
 
   def apply(value: String): Time = {
     if(isValidIso(value)) fromIso(value)
-    else throw new Error("Time can only be constructed without units from an iso time string.")
+    else throw new RuntimeException("Time can only be constructed without units from an iso time string.")
   }
   
   def apply(value: AnyVal): Time = Time(TimeScale.JAVA, value)

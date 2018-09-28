@@ -35,7 +35,7 @@ class TimeTupleToTime extends Operation {
       //build up format string
       val format = vars.map(_.getMetadata("units") match {
         case Some(units) => units
-        case None => throw new Error("A time Tuple must have units defined for each element.")
+        case None => throw new RuntimeException("A time Tuple must have units defined for each element.")
       }).mkString(" ")
 
       //make the Time variable

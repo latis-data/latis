@@ -49,7 +49,7 @@ class MathExpressionDerivation(private val str: String) extends Operation {
         case _ => unOps.get(op) match {
           case Some(f) if(dl.length == 1)=> f(eval(dl(0), values))
           //If we get here, we probably have the wrong number of parameters for the operation
-          case _ => throw new Error(s"Could not evaluate $op with parameters: ${dl.map(eval(_,values))}")
+          case _ => throw new RuntimeException(s"Could not evaluate $op with parameters: ${dl.map(eval(_,values))}")
         }
       }
     }
@@ -104,7 +104,7 @@ class MathExpressionDerivation(private val str: String) extends Operation {
       case i: Index => Some(Real(i.getMetadata, deriveField)) //replace Index with Real
       case i: Integer => Some(Integer(i.getMetadata, deriveField))
       case r: Real => Some(Real(r.getMetadata, deriveField))
-      case Text(s) => throw new Error("MathExpressionDerivation cannot be applied to Text Variables.")
+      case Text(s) => throw new RuntimeException("MathExpressionDerivation cannot be applied to Text Variables.")
     } else Some(s)
   }
   

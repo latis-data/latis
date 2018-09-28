@@ -79,7 +79,7 @@ object PeekIterator {
    * Don't wrap if it is already a PeekIterator.
    */
   def apply[T >: Null](iterator: Iterator[T]): PeekIterator[T] = {
-    if (iterator == null) throw new Error("PeekIterator can't wrap a null Iterator.")
+    if (iterator == null) throw new RuntimeException("PeekIterator can't wrap a null Iterator.")
     if (iterator.isInstanceOf[PeekIterator[T]]) iterator.asInstanceOf[PeekIterator[T]]
     else new PeekIterator[T] {
       def getNext = {

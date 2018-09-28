@@ -28,7 +28,7 @@ class SparqlAdapter(tsml: Tsml) extends AsciiAdapter(tsml) {
    */
   override def getUrl(): URL = getProperty("location") match {
     case Some(s) => new URL(s + "?query=" + query + "&output=csv")
-    case None => throw new Error("No 'location' found for SparqlAdapter.")
+    case None => throw new RuntimeException("No 'location' found for SparqlAdapter.")
   }
 
   /**

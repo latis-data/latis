@@ -166,7 +166,7 @@ abstract class Adapter3(metadata: Metadata3, config: AdapterConfig) {
    */
   def getCachedData(vid: String): Option[ByteBuffer] =
     dataCache.get(vid)
-  //TODO: if None throw new Error("No data found in cache for Variable: " + variableName)? or return empty Data?
+  //TODO: if None throw new RuntimeException("No data found in cache for Variable: " + variableName)? or return empty Data?
 
   protected def clearCache: Unit = dataCache.clear
   
@@ -240,7 +240,7 @@ object Adapter3 {
           ctor.newInstance(metadata, config).asInstanceOf[Adapter3]
         } catch {
           case e: Exception =>
-            throw new Error("Failed to construct Adapter: " + class_name, e)
+            throw new RuntimeException("Failed to construct Adapter: " + class_name, e)
         }
       case None => throw new RuntimeException("No 'class' defined for Adapter.")
     }

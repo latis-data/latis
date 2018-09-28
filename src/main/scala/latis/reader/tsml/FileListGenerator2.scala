@@ -22,7 +22,7 @@ class FileListGenerator2(tsml: Tsml) extends IterativeAdapter2[Double](tsml) {
    */
   lazy val units: TimeScale = getOrigScalars.find(_.hasName("time")) match {
     case Some(time: Time) => time.getUnits
-    case _ => throw new Error("No time variable defined.")
+    case _ => throw new RuntimeException("No time variable defined.")
   }
   
   /**
@@ -33,7 +33,7 @@ class FileListGenerator2(tsml: Tsml) extends IterativeAdapter2[Double](tsml) {
       case Some(c) => c.toDouble //TODO: parse error
       case None => 1.0
     }
-    case _ => throw new Error("No time variable defined.")
+    case _ => throw new RuntimeException("No time variable defined.")
   }
   
   /**

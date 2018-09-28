@@ -98,7 +98,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
   def iterator: PeekIterator[Sample] = {
     //test if we have tried to iterate more than once on this function
     itcounter += 1
-//    if (itcounter > 1) throw new Error("Iterating more than once on " + this)
+//    if (itcounter > 1) throw new RuntimeException("Iterating more than once on " + this)
 
     _iterable match {
     case null => {
@@ -171,7 +171,7 @@ class SampledFunction(domain: Variable, range: Variable, metadata: Metadata = Em
 object SampledFunction {
   //TODO: redundant with Function constructors?
   def apply(domain: Variable, range: Variable, samples: Iterator[Sample], metadata: Metadata = EmptyMetadata): SampledFunction = {
-    if (samples == null) throw new Error("Can't construct a SampledFunction with a null Sample Iterator.")
+    if (samples == null) throw new RuntimeException("Can't construct a SampledFunction with a null Sample Iterator.")
     val sit = domain match {
       case i: Index => IndexSet().iterator.zip(samples).map(p => Sample(Index(i.getMetadata, p._1), p._2.range))
       case _ => samples
@@ -188,7 +188,7 @@ object SampledFunction {
   }
 
   def apply(samples: Iterable[Sample], metadata: Metadata): SampledFunction = {
-    if (samples == null) throw new Error("Can't construct a SampledFunction with a null Sample Iterable.")
+    if (samples == null) throw new RuntimeException("Can't construct a SampledFunction with a null Sample Iterable.")
     val template = samples.head
     val sit = template.domain match {
       case i: Index => Iterable.range(0,samples.size).zip(samples).map(p => Sample(Index(i.getMetadata, p._1), p._2.range))

@@ -23,7 +23,7 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
   //TODO: deal with missing values
   //TODO: take domain var arg so we can bin nested functions, akin to integration
   
-  if (binWidth <= 0) throw new Error("Bin average must have a positive bin width.")
+  if (binWidth <= 0) throw new RuntimeException("Bin average must have a positive bin width.")
   
   /**
    * Get bin width via getter so it can be overridden.
@@ -117,7 +117,7 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
   private def getDomainValue(sample: Sample): Double = sample.domain match {
     case Number(d) => d
     case t: Time => t.getJavaTime.toDouble
-    case _ => throw new Error("BinAverage supports only one dimensional numeric domains.")
+    case _ => throw new RuntimeException("BinAverage supports only one dimensional numeric domains.")
   }
   
   private def computeStatistics(samples: Seq[Sample]): Option[Tuple] = {
@@ -178,7 +178,7 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
   private def reduce(v: Variable): Scalar = v match {
     case s: Scalar => s
     case Tuple(vars) => reduce(vars.head)
-    case _: Function => throw new Error("Can't perform a bin average over a nested Function.")
+    case _: Function => throw new RuntimeException("Can't perform a bin average over a nested Function.")
   }
   
   private def samplesToDoubleMap(samples: Seq[Sample]): Map[String, Array[Double]] = {

@@ -35,7 +35,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
           } catch {
             case e: javax.net.ssl.SSLHandshakeException => {
               logger.error(s"HTTPS certificate not recognized. To ignore this, the property 'trustAllHTTPS=true' can be added to your tsml configuration.")
-              throw new Error("HTTPS certificate not recognized.")
+              throw new RuntimeException("HTTPS certificate not recognized.")
             }
           }
         }

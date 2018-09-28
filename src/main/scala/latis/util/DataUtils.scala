@@ -309,7 +309,7 @@ object DataUtils {
             for (i <- 0 until n) accumulateData(sample)
           }
           case _: Scalar => {
-            throw new Error("No data found for " + v.getName)
+            throw new RuntimeException("No data found for " + v.getName)
           }
         }
       }
@@ -363,7 +363,7 @@ object DataUtils {
 
           case _: Index => ??? //bb.putInt(index)  //handle Index which should not have a value in the dataMap
           case _: Scalar => {
-            throw new Error("No data found for " + v.getName)
+            throw new RuntimeException("No data found for " + v.getName)
           }
         }
       }
@@ -489,11 +489,11 @@ object DataUtils {
       //Require that length of nested Function be specified in metadata. It likely doesn't contain its own data so can't iterate to get length.
       val n = f.getMetadata("length") match {
         case Some(s) => s.toInt
-        case None => throw new Error("Nested Function must have 'length' defined.")
+        case None => throw new RuntimeException("Nested Function must have 'length' defined.")
       }
 
       val smp = Sample(f.getDomain, f.getRange)
-      if (n < 0) throw new Error("Function length not defined") //TODO: consider "-n" as unlimited but currently has n
+      if (n < 0) throw new RuntimeException("Function length not defined") //TODO: consider "-n" as unlimited but currently has n
       //TODO: warn if 0?
       else {
         val samples = (0 until n).map(i => buildVarFromBuffer(bb, smp))

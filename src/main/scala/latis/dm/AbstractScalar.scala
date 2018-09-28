@@ -73,7 +73,7 @@ abstract class AbstractScalar(metadata: Metadata = EmptyMetadata, data: Data = E
       case _: Real => Double.NaN
       case _: Integer => java.lang.Integer.MIN_VALUE
       case _: Text => ""
-      case _ => throw new Error("No default missing value for " + getName) //TODO: getType?
+      case _ => throw new RuntimeException("No default missing value for " + getName) //TODO: getType?
     }
   }
 

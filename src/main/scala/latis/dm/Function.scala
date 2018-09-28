@@ -118,7 +118,7 @@ object Function {
    * Construct from a Seq of domain Variables and a Seq of range Variables.
    */
   def apply(ds: Seq[Variable], rs: Seq[Variable]): SampledFunction = {
-    if (ds.length != rs.length) throw new Error("Domain and range sequences must have the same length.")
+    if (ds.length != rs.length) throw new RuntimeException("Domain and range sequences must have the same length.")
     Function((ds zip rs).map(s => Sample(s._1, s._2)))
   }
 

@@ -38,15 +38,15 @@ class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operatio
                  */
                 TimeConverter(origUnit, unit.asInstanceOf[TimeScale])
               }
-              case None => throw new Error("UnitConversion: Variable has no units: " + variableName)
+              case None => throw new RuntimeException("UnitConversion: Variable has no units: " + variableName)
             }
-            case _ => throw new Error("UnitConversion: Variable is not a Scalar: " + variableName)
+            case _ => throw new RuntimeException("UnitConversion: Variable is not a Scalar: " + variableName)
           }
-          case None => throw new Error("UnitConversion: Could not find variable: " + variableName)
+          case None => throw new RuntimeException("UnitConversion: Could not find variable: " + variableName)
         }
       }
       // there is no data, so no units to convert. throw an error?
-      case _ => throw new Error("Dataset contains no variables")
+      case _ => throw new RuntimeException("Dataset contains no variables")
     }
     super.apply(dataset)
   }

@@ -26,7 +26,7 @@ class BinAggregation(agg: Seq[Sample] => Sample, binWidth: Double) extends Opera
 	  private def getDomainValue(sample: Sample): Double = sample.domain match {
 	    //TODO: only if type Text? user would need to know/use native units
 	    case Number(d) => d
-	    case _ => throw new Error("BinAggregation supports only one dimensional numeric domains.")
+	    case _ => throw new RuntimeException("BinAggregation supports only one dimensional numeric domains.")
 	  }
 	  var stopVal = getDomainValue(it.peek)
 	  def hasNext = it.hasNext

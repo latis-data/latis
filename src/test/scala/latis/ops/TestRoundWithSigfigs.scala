@@ -64,7 +64,7 @@ class TestRoundWithSigfigs {
       assertEquals("Error Checking Failed", 0, 1)
     }
     catch {
-      case e: Error => assertEquals("Sigfigs must be greater than zero", e.getMessage)
+      case e: RuntimeException => assertEquals("Sigfigs must be greater than zero", e.getMessage)
     }
   }
 }

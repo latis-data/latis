@@ -40,7 +40,7 @@ object RoundWithSigfigs extends OperationFactory {
   
   def apply(n: String, d: Int): RoundWithSigfigs = {
     if (d <= 0) {
-      throw new Error("Sigfigs must be greater than zero")
+      throw new RuntimeException("Sigfigs must be greater than zero")
     }
     else {
       new RoundWithSigfigs(n, d)

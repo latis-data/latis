@@ -58,7 +58,7 @@ class BinAverage(binWidth: Double) extends Operation {
   def reduce(v: Variable): Variable = v match {
     case s: Scalar => s
     case Tuple(vars) => vars.head
-    case _: Function => throw new Error("Can't perform a bin average over a nested Function.")
+    case _: Function => throw new RuntimeException("Can't perform a bin average over a nested Function.")
   }
 }
 

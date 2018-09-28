@@ -77,7 +77,7 @@ object Scalar {
     case "binary"  => new AbstractScalar(metadata, data) with Binary
     case "time"    => ??? //Time(metadata, data)
     //TODO: vtype = class name, dynamicly construct
-    case _ => throw new Error("No Scalar type defined for " + vtype)
+    case _ => throw new RuntimeException("No Scalar type defined for " + vtype)
   }
 
   /**
@@ -90,7 +90,7 @@ object Scalar {
     case l: Long   => Integer(l)
     case i: Int    => Integer(i)
     case b: Boolean => Text(b)
-    case _ => throw new Error("Unable to make Scalar from value: " + value) //TODO: of type...
+    case _ => throw new RuntimeException("Unable to make Scalar from value: " + value) //TODO: of type...
     //TODO: if serializable, make Binary?
   }
 
@@ -111,7 +111,7 @@ object Scalar {
     case IndexValue(i)   => Index(i)
     case sv: StringValue => Text(metadata, sv)
 
-    case _ => throw new Error("Unable to make Scalar from value: " + value)
+    case _ => throw new RuntimeException("Unable to make Scalar from value: " + value)
   }
 
   /**

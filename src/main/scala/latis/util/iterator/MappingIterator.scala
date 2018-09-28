@@ -18,7 +18,7 @@ class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) ext
   //Note, the bound on Null allows us to return null for generic type T.
   //TODO: could we do it.flatMap(f)? but would no longer be a PeekIterator? unless we do CanBuildFrom...?
 
-  if (iterator == null) throw new Error("Can't construct a MappingIterator with a null Iterator.")
+  if (iterator == null) throw new RuntimeException("Can't construct a MappingIterator with a null Iterator.")
   
   /**
    * Responsible for getting the next transformed item 

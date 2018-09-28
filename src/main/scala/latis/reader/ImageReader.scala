@@ -23,7 +23,7 @@ class ImageReader extends DatasetAccessor {
   private var url: Option[URL] = None
   lazy private val inputStream: InputStream = url match {
     case Some(u) => u.openStream()
-    case None => throw new Error("No URL defined for ImageReader.")
+    case None => throw new RuntimeException("No URL defined for ImageReader.")
   }
   
   def getDataset(operations: Seq[Operation]): Dataset = {

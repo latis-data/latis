@@ -119,7 +119,7 @@ abstract class TsmlAdapter(val tsml: Tsml) extends LazyLogging {
     val md = makeMetadata(tsml.dataset)
     makeOrigVariable(tsml.dataset.getVariableMl) match {
       case Some(v) => Dataset(v, md)
-      case None => throw new Error("No variables made for original dataset.")
+      case None => throw new RuntimeException("No variables made for original dataset.")
     }
   } 
   
@@ -400,7 +400,7 @@ abstract class TsmlAdapter(val tsml: Tsml) extends LazyLogging {
    * Get the Data that has been cached for the given variable.
    */
   def getCachedData(variableName: String): Option[DataSeq] = dataCache.get(variableName)
-  //TODO: if None throw new Error("No data found in cache for Variable: " + variableName)? or return empty Data?
+  //TODO: if None throw new RuntimeException("No data found in cache for Variable: " + variableName)? or return empty Data?
   
 //  def getCachedData(variableName: String): Option[DataSeq] = {
 //    try Some(dataCache.get(variableName).getObjectValue.asInstanceOf[DataSeq])
@@ -483,7 +483,7 @@ object TsmlAdapter {
     } catch {
       case e: Exception => {
         //e.printStackTrace()
-        throw new Error("Failed to construct Adapter: " + class_name, e)
+        throw new RuntimeException("Failed to construct Adapter: " + class_name, e)
       }
     }
   }

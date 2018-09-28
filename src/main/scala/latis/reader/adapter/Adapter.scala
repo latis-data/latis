@@ -235,7 +235,7 @@ if (scalar.hasName("wavelength") && ! bb.hasRemaining) bb.rewind
   def getCachedData(variableName: String): Option[ByteBuffer] = {
     dataCache.get(variableName)
   }
-  //TODO: if None throw new Error("No data found in cache for Variable: " + variableName)? or return empty Data?
+  //TODO: if None throw new RuntimeException("No data found in cache for Variable: " + variableName)? or return empty Data?
 
   protected def clearCache: Unit = dataCache.clear
   
@@ -308,7 +308,7 @@ object Adapter {
           ctor.newInstance(model, properties).asInstanceOf[Adapter]
         } catch {
           case e: Exception =>
-            throw new Error("Failed to construct Adapter: " + class_name, e)
+            throw new RuntimeException("Failed to construct Adapter: " + class_name, e)
         }
       case None => throw new RuntimeException("No 'class' defined for Adapter.")
     }

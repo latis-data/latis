@@ -48,7 +48,7 @@ class TestRoundWithPrecision {
       assertEquals("Error Checking Failed", 0, 1)
     }
     catch {
-      case e: Error => assertEquals("Precision must be a postive integer", e.getMessage)
+      case e: RuntimeException => assertEquals("Precision must be a postive integer", e.getMessage)
     }
   }
 }

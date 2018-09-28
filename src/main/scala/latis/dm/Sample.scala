@@ -11,7 +11,7 @@ object Sample {
   def apply(domain: Variable, range: Variable): Sample = new Sample(domain, range)
 
   def apply(vars: Seq[Variable]): Sample = {
-    if (vars.length != 2) throw new Error("Sample must be constructed from two Variables")
+    if (vars.length != 2) throw new RuntimeException("Sample must be constructed from two Variables")
     new Sample(vars(0), vars(1))
   }
 

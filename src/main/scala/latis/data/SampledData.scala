@@ -96,7 +96,7 @@ object SampledData {
   
   def fromValues(dvals: Seq[Double], vals: Seq[Double]*): SampledData = {
     //assert that all Seq are same length as the domain
-    if (vals.exists(_.length != dvals.length)) throw new Error("Value sequences must be the same length.")
+    if (vals.exists(_.length != dvals.length)) throw new RuntimeException("Value sequences must be the same length.")
     
     val dset = RealSampledSet(dvals)
     //DataSeq(ds.map(DoubleValue(_)))

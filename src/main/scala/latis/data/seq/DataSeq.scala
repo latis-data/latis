@@ -32,7 +32,7 @@ class DataSeq extends IterableData {
     
     //all samples must have same size as the first
     if (recordSize < 0) _recordSize = size
-    else if (recordSize != size) throw new Error("IterableData requires that each Data record has the same size.")
+    else if (recordSize != size) throw new RuntimeException("IterableData requires that each Data record has the same size.")
     
     datas += data //append to collection
     this
@@ -43,7 +43,7 @@ class DataSeq extends IterableData {
   }
   
   def zip(that: DataSeq): DataSeq = {
-    if (that.length != this.length) throw new Error("zip requires both DataSeq-s to be the same length")
+    if (that.length != this.length) throw new RuntimeException("zip requires both DataSeq-s to be the same length")
     DataSeq((this.datas zip that.datas).map(p => p._1.concat(p._2)))
   }
   

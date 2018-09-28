@@ -24,7 +24,7 @@ class ReaderAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
       ctor.newInstance(getUrl).asInstanceOf[DatasetAccessor]
     } catch {
       case e: Exception => {
-        throw new Error("Failed to construct Reader: " + reader_name, e)
+        throw new RuntimeException("Failed to construct Reader: " + reader_name, e)
       }
     }
   }

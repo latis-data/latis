@@ -46,8 +46,8 @@ class Factorization extends Operation {
      */
     case Tuple(vars) => {
       val (dvars, rvars) = vars.partition(_.hasName(factor))
-      if (dvars.length == 0) throw new Error("Factor not found in Tuple.")
-      if (dvars.length > 1) throw new Error("Factor found more than once in Tuple.")
+      if (dvars.length == 0) throw new RuntimeException("Factor not found in Tuple.")
+      if (dvars.length > 1) throw new RuntimeException("Factor found more than once in Tuple.")
       val dvar = dvars.head
       
       rvars.length match {
@@ -82,10 +82,10 @@ object Factorization {
             val sample = Sample(s, Tuple(range))  //TODO: metadata
             Function(List(sample))
           }
-          case _ => throw new Error("Can only group by Scalar variables, for now.")
+          case _ => throw new RuntimeException("Can only group by Scalar variables, for now.")
         }
-        case 0 => throw new Error("groupBy failed to find variable: " + name)
-        case n: Int => throw new Error("groupBy found more than one Variable named: " + name)
+        case 0 => throw new RuntimeException("groupBy failed to find variable: " + name)
+        case n: Int => throw new RuntimeException("groupBy found more than one Variable named: " + name)
       }
     }
     

@@ -62,7 +62,7 @@ object DataMap {
     //case _: Index => //don't include Index
     case s: Scalar => {
       val name = v.getName
-      if (name == "unknown") throw new Error("Scalar Variables must have names to be put into a data Map.")
+      if (name == "unknown") throw new RuntimeException("Scalar Variables must have names to be put into a data Map.")
       //get the buffer for this scalar, make a new one if it doesn't exist
       val buffer = m.get(name) match {
         case Some(ab) => ab
@@ -126,7 +126,7 @@ object DataMap {
     //case _: Index => //don't include Index
     case s: Scalar => {
       val name = v.getName
-      if (name == "unknown") throw new Error("Scalar Variables must have names to be put into a data Map.")
+      if (name == "unknown") throw new RuntimeException("Scalar Variables must have names to be put into a data Map.")
       //get the buffer for this scalar, make a new one if it doesn't exist
       val buffer = m.get(name) match {
         case Some(ab) => ab

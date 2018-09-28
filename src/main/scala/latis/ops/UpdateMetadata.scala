@@ -19,7 +19,7 @@ class UpdateMetadata(vname: String, update: (String, String)) extends Operation 
       val v = dataset match {
         case Dataset(v) => applyToVariable(v) match {
           case Some(v) => v
-          case None => throw new Error("No variable found with name: " + vname)
+          case None => throw new RuntimeException("No variable found with name: " + vname)
           //TODO: error or no-op?
         }
         case _ => null

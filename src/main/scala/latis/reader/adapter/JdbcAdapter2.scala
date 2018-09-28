@@ -353,7 +353,7 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
           true
         } else tvar.getMetadata("units") match {
           //Assumes selection value is an ISO 8601 formatted string
-          case None => throw new Error("The dataset does not have time units defined for: " + tvname)
+          case None => throw new RuntimeException("The dataset does not have time units defined for: " + tvname)
           case Some(units) =>
             //convert ISO time selection value to dataset units
             try {
@@ -361,8 +361,8 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
               selections += tvname + op + t
               true
             } catch {
-              case iae: IllegalArgumentException => throw new Error("The time value is not in a supported ISO format: " + value)
-              case e: Exception => throw new Error("Unable to parse time selection: " + value)
+              case iae: IllegalArgumentException => throw new RuntimeException("The time value is not in a supported ISO format: " + value)
+              case e: Exception => throw new RuntimeException("Unable to parse time selection: " + value)
             }
         }
     }
@@ -415,7 +415,7 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
    */
   def getTable: String = getProperty("table") match {
     case Some(s) => s
-    case None => throw new Error("JdbcAdapter needs to have a 'table' defined.")
+    case None => throw new RuntimeException("JdbcAdapter needs to have a 'table' defined.")
   }
 
   /**
@@ -551,7 +551,7 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
     try {
       ds = initCtx.lookup(jndiName).asInstanceOf[DataSource]
     } catch {
-      case e: NameNotFoundException => throw new Error("JdbcAdapter failed to locate JNDI resource: " + jndiName)
+      case e: NameNotFoundException => throw new RuntimeException("JdbcAdapter failed to locate JNDI resource: " + jndiName)
     }
 
     ds.getConnection()
@@ -560,19 +560,19 @@ class JdbcAdapter2(model: Model, properties: Map[String, String])
   private def getConnectionViaJdbc: Connection = {
     val driver = getProperty("driver") match {
       case Some(s) => s
-      case None => throw new Error("JdbcAdapter needs to have a JDBC 'driver' defined.")
+      case None => throw new RuntimeException("JdbcAdapter needs to have a JDBC 'driver' defined.")
     }
     val url = getProperty("location") match {
       case Some(s) => s
-      case None => throw new Error("JdbcAdapter needs to have a JDBC 'url' defined.")
+      case None => throw new RuntimeException("JdbcAdapter needs to have a JDBC 'url' defined.")
     }
     val user = getProperty("user") match {
       case Some(s) => s
-      case None => throw new Error("JdbcAdapter needs to have a 'user' defined.")
+      case None => throw new RuntimeException("JdbcAdapter needs to have a 'user' defined.")
     }
     val passwd = getProperty("password") match {
       case Some(s) => s
-      case None => throw new Error("JdbcAdapter needs to have a 'password' defined.")
+      case None => throw new RuntimeException("JdbcAdapter needs to have a 'password' defined.")
     }
 
     //Load the JDBC driver 

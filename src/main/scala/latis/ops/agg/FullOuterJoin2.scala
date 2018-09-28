@@ -74,7 +74,7 @@ class FullOuterJoin2 extends Join with NoInterpolation with NoExtrapolation {
       //join the results
       val range = joinVariables(range1, range2) match {
         case Some(v) => v
-        case None => throw new Error("Failed to join datasets.")
+        case None => throw new RuntimeException("Failed to join datasets.")
       }
       
       //construct the resulting sample
@@ -89,7 +89,7 @@ class FullOuterJoin2 extends Join with NoInterpolation with NoExtrapolation {
   private def fillMissing(variable: Variable): Variable = variable match {
     case s: Scalar => Scalar(s.getMetadata, s.getFillValue) //TODO: use copy
     case Tuple(vars) => Tuple(vars.map(fillMissing(_))) //recursive
-    case _ => throw new Error("Can't fill missing for Functions.")
+    case _ => throw new RuntimeException("Can't fill missing for Functions.")
   }
   
   private def getDomainSet(f1: Function, f2: Function) = {
@@ -121,7 +121,7 @@ class FullOuterJoin2 extends Join with NoInterpolation with NoExtrapolation {
 
         joinFunctions(f1, f2) match {
           case Some(v) => Dataset(v)
-          case None => throw new Error("Failed to join datasets.")
+          case None => throw new RuntimeException("Failed to join datasets.")
         }
       }
     }

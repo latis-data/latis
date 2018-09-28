@@ -320,7 +320,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     //TODO: apply later, e.g. so projection and rename can be applied first
     val tvar = v.findVariableByName(vname) match {
       case Some(t: Time) => t
-      case _ => throw new Error("Time variable not found in dataset.")
+      case _ => throw new RuntimeException("Time variable not found in dataset.")
     }
     val tvname = getVariableName(tvar)
     
@@ -356,7 +356,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
           true
         } else tvar.getMetadata("units") match {
           //Assumes selection value is an ISO 8601 formatted string
-          case None => throw new Error("The dataset does not have time units defined for: " + tvname)
+          case None => throw new RuntimeException("The dataset does not have time units defined for: " + tvname)
           case Some(units) => {
             //convert ISO time selection value to dataset units
             //TODO: generalize for all unit conversions
@@ -365,8 +365,8 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
               this.selections += tvname + op + t
               true
             } catch {
-              case iae: IllegalArgumentException => throw new Error("The time value is not in a supported ISO format: " + value)
-              case e: Exception => throw new Error("Unable to parse time selection: " + value, e)
+              case iae: IllegalArgumentException => throw new RuntimeException("The time value is not in a supported ISO format: " + value)
+              case e: Exception => throw new RuntimeException("Unable to parse time selection: " + value, e)
             }
           }
         }
@@ -427,7 +427,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    */
   def getTable: String = getProperty("table") match {
     case Some(s) => s
-    case None => throw new Error("JdbcAdapter needs to have a 'table' defined.")
+    case None => throw new RuntimeException("JdbcAdapter needs to have a 'table' defined.")
   }
 
   /**
@@ -569,7 +569,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     try {
       ds = initCtx.lookup(jndiName).asInstanceOf[DataSource]
     } catch {
-      case e: NameNotFoundException => throw new Error("JdbcAdapter failed to locate JNDI resource: " + jndiName)
+      case e: NameNotFoundException => throw new RuntimeException("JdbcAdapter failed to locate JNDI resource: " + jndiName)
     }
 
     ds.getConnection()
@@ -578,19 +578,19 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   private def getConnectionViaJdbc: Connection = {
     val driver = getProperty("driver") match {
       case Some(s) => s
-      case None => throw new Error("JdbcAdapter needs to have a JDBC 'driver' defined.")
+      case None => throw new RuntimeException("JdbcAdapter needs to have a JDBC 'driver' defined.")
     }
     val url = getProperty("location") match {
       case Some(s) => s
-      case None => throw new Error("JdbcAdapter needs to have a JDBC 'url' defined.")
+      case None => throw new RuntimeException("JdbcAdapter needs to have a JDBC 'url' defined.")
     }
     val user = getProperty("user") match {
       case Some(s) => s
-      case None => throw new Error("JdbcAdapter needs to have a 'user' defined.")
+      case None => throw new RuntimeException("JdbcAdapter needs to have a 'user' defined.")
     }
     val passwd = getProperty("password") match {
       case Some(s) => s
-      case None => throw new Error("JdbcAdapter needs to have a 'password' defined.")
+      case None => throw new RuntimeException("JdbcAdapter needs to have a 'password' defined.")
     }
 
     //Load the JDBC driver 

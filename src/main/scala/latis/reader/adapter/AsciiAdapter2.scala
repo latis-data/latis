@@ -34,7 +34,7 @@ class AsciiAdapter2(model: Model, properties: Map[String, String])
           } catch {
             case e: javax.net.ssl.SSLHandshakeException => {
               logger.error(s"HTTPS certificate not recognized. To ignore this, the property 'trustAllHTTPS=true' can be added to your tsml configuration.")
-              throw new Error("HTTPS certificate not recognized.")
+              throw new RuntimeException("HTTPS certificate not recognized.")
             }
           }
         }

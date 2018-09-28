@@ -41,7 +41,7 @@ object RoundWithPrecision extends OperationFactory {
   
   def apply(n: String, d: Int): RoundWithPrecision = {
     if (d <= 0) {
-      throw new Error("Precision must be a postive integer")
+      throw new RuntimeException("Precision must be a postive integer")
     }
     else {
       new RoundWithPrecision(n, d)
