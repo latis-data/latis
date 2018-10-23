@@ -59,7 +59,7 @@ abstract class Writer {
    */
   def getOutputStream: OutputStream = outputStream match {
     case null => file match {
-      case null => ??? //TODO: error
+      case null => null // circuitous route for FileWriter to make it's own file name
       case _ => new FileOutputStream(file)
     }
     case _ => outputStream
