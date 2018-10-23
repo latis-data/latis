@@ -90,8 +90,7 @@ class Dataset(variable: Variable, metadata: Metadata = EmptyMetadata) extends Ba
       case s: Scalar => acc :+ s
       case Tuple(vars) => vars.flatMap(go(_, acc))
       case f: Function =>
-        go(f.getDomain, acc)
-        go(f.getRange, acc)
+        go(f.getDomain, acc) ++ go(f.getRange, acc)
     }
     
     this match {

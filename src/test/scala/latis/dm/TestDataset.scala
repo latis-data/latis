@@ -11,6 +11,7 @@ import latis.writer.AsciiWriter
 import java.nio.ByteBuffer
 import latis.data.value.DoubleValue
 import latis.reader.tsml.TsmlReader
+import sun.awt.resources.awt
 
 class TestDataset {
 
@@ -75,6 +76,13 @@ class TestDataset {
         )
       })
     })
+  }
+  
+  @Test
+  def get_scalars = {
+    val ds = TestDataset.function_of_named_scalar
+    val ss = ds.getScalars
+    assertEquals(2, ss.length)
   }
 }
 
