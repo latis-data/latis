@@ -88,7 +88,7 @@ class JsonReader(path: String) extends DatasetAccessor {
         if(num.isValidLong) Scalar(Metadata(name), num.longValue)
         else Scalar(Metadata(name), num.doubleValue)
       }
-      case t: JsString => if(Time.isValidIso(t.value)) Time.fromIso(t.value)
+      case t: JsString => if(Time.isValidIso(t.value)) Time.fromIso(t.value) //TODO: Time as Text with orig name
         else Scalar(Metadata(name), t.value)
       case b: JsBoolean => Scalar(Metadata(name), b.toString)
       case JsNull => Scalar(Metadata(name), "null")
@@ -128,8 +128,8 @@ class JsonReader(path: String) extends DatasetAccessor {
 
 object JsonReader {
   
-  def apply(url: URL): JsonReader = if (url.getPath.contains(".json")) new JsonReader(url.toString) else throw new Exception("JsonReader can only read .json files")
+  def apply(url: URL): JsonReader = new JsonReader(url.toString)
 
-  def apply(path: String): JsonReader = if (path.contains(".json")) new JsonReader(path) else throw new Exception("JsonReader can only read .json files")
+  def apply(path: String): JsonReader = new JsonReader(path)
   
 }
