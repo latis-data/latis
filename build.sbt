@@ -43,13 +43,16 @@ lazy val compilerFlags = Seq(
     "-deprecation",
     "-encoding", "utf-8",
     "-feature",
-  ),
-  Compile / compile / scalacOptions ++= Seq(
     "-unchecked",
-    "-Xlint",
+    "-Xfuture",
+    "-Xlint:-unused,_",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
+    "-Ywarn-unused",
     "-Ywarn-value-discard"
+  ),
+  Compile / console / scalacOptions --= Seq(
+    "-Ywarn-unused"
   )
 )
 
