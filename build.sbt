@@ -35,8 +35,7 @@ lazy val commonSettings = compilerFlags ++ Seq(
   resolvers ++= Seq(
     "Artifactory Release" at artifactory + "sbt-release",
     "Artifactory Snapshot" at artifactory + "sbt-snapshot"
-  ),
-  crossScalaVersions := Seq("2.11.8", scalaVersion.value)
+  )
 )
 
 lazy val compilerFlags = Seq(
@@ -65,6 +64,5 @@ lazy val publishSettings = Seq(
   credentials ++= Seq(
     Path.userHome / ".artifactorycredentials"
   ).filter(_.exists).map(Credentials(_)),
-  releaseVersionBump := sbtrelease.Version.Bump.Minor,
-  releaseCrossBuild := true
+  releaseVersionBump := sbtrelease.Version.Bump.Minor
 )
