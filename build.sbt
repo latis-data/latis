@@ -25,12 +25,6 @@ lazy val latis = (project in file("."))
   )
 
 lazy val commonSettings = compilerFlags ++ Seq(
-  Compile / compile / wartremoverWarnings ++= Warts.allBut(
-    Wart.Any,         // false positives
-    Wart.Nothing,     // false positives
-    Wart.Product,     // false positives
-    Wart.Serializable // false positives
-  ),
   // Test suite dependencies
   libraryDependencies ++= Seq(
     "junit"            % "junit"           % "4.12"      % Test,
