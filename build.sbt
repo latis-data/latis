@@ -1,5 +1,5 @@
 ThisBuild / organization := "io.latis-data"
-ThisBuild / scalaVersion := "2.12.6"
+ThisBuild / scalaVersion := "2.12.8"
 
 val artifactory = "http://web-artifacts.lasp.colorado.edu/artifactory/"
 
@@ -25,12 +25,6 @@ lazy val latis = (project in file("."))
   )
 
 lazy val commonSettings = compilerFlags ++ Seq(
-  Compile / compile / wartremoverWarnings ++= Warts.allBut(
-    Wart.Any,         // false positives
-    Wart.Nothing,     // false positives
-    Wart.Product,     // false positives
-    Wart.Serializable // false positives
-  ),
   // Test suite dependencies
   libraryDependencies ++= Seq(
     "junit"            % "junit"           % "4.12"      % Test,
@@ -41,8 +35,7 @@ lazy val commonSettings = compilerFlags ++ Seq(
   resolvers ++= Seq(
     "Artifactory Release" at artifactory + "sbt-release",
     "Artifactory Snapshot" at artifactory + "sbt-snapshot"
-  ),
-  crossScalaVersions := Seq("2.11.8", scalaVersion.value)
+  )
 )
 
 lazy val compilerFlags = Seq(
@@ -50,13 +43,16 @@ lazy val compilerFlags = Seq(
     "-deprecation",
     "-encoding", "utf-8",
     "-feature",
-  ),
-  Compile / compile / scalacOptions ++= Seq(
     "-unchecked",
-    "-Xlint",
+    "-Xfuture",
+    "-Xlint:-unused,_",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
+    "-Ywarn-unused",
     "-Ywarn-value-discard"
+  ),
+  Compile / console / scalacOptions --= Seq(
+    "-Ywarn-unused"
   )
 )
 
@@ -71,6 +67,5 @@ lazy val publishSettings = Seq(
   credentials ++= Seq(
     Path.userHome / ".artifactorycredentials"
   ).filter(_.exists).map(Credentials(_)),
-  releaseVersionBump := sbtrelease.Version.Bump.Minor,
-  releaseCrossBuild := true
+  releaseVersionBump := sbtrelease.Version.Bump.Minor
 )
