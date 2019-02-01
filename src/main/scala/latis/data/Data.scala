@@ -55,7 +55,7 @@ trait Data extends Any {
   def writeDoubles: Unit = {
     val bb = getByteBuffer.rewind.asInstanceOf[ByteBuffer]
     val db = bb.asDoubleBuffer
-    val n = db.limit
+    val n = db.limit()
     for (i <- 0 until n) println(db.get(i))
   }
   

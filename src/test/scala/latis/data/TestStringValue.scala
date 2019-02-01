@@ -14,7 +14,7 @@ class TestStringValue {
   @Test
   def byte_buffer {
     val bb = data.getByteBuffer
-    assertEquals(10, bb.limit)
+    assertEquals(10, bb.limit())
     assertEquals("hello", bb.asCharBuffer.toString)
   }
   

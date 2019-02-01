@@ -1,7 +1,5 @@
 package latis.writer
 
-import sun.misc.IOUtils
-import scala.io.Source
 import latis.dm._
 
 

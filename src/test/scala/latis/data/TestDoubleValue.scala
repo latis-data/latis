@@ -18,7 +18,7 @@ class TestDoubleValue {
   @Test
   def byte_buffer {
     val bb = data.getByteBuffer
-    assertEquals(8, bb.limit)
+    assertEquals(8, bb.limit())
     assertEquals(3.14, bb.getDouble, 0.0)
   }
   

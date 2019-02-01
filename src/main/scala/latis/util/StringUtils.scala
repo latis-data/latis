@@ -101,7 +101,7 @@ object StringUtils {
   def byteBufferToString(bb: ByteBuffer, nchar: Int): String = {
     val cs = new Array[Char](nchar)      //allocate an array of chars just big enough for our String
     bb.asCharBuffer.get(cs)              //load the array (cs) with nchar*2 bytes
-    bb.position(bb.position + nchar * 2) //advance position in underlying buffer
+    bb.position(bb.position() + nchar * 2) //advance position in underlying buffer
     new String(cs)                       //make a String out of our array
   }
   

@@ -21,7 +21,7 @@ object Binary {
   def apply(buffer: ByteBuffer): Binary = {
     //If the position is not 0, assume that the buffer hasn't had its limit set.
     //Set the limit and rewind.
-    if (buffer.position > 0) buffer.flip
+    if (buffer.position() > 0) buffer.flip
     
     //define length in metadata
     //Note: assume bytes already have termination marker
@@ -68,7 +68,7 @@ object Binary {
   def apply(md: Metadata, buffer: ByteBuffer): Binary = {
     //If the position is not 0, assume that the buffer hasn't had its limit set.
     //Set the limit and rewind.
-    if (buffer.position > 0) buffer.flip
+    if (buffer.position() > 0) buffer.flip
     
     new AbstractScalar(md, Data(buffer)) with Binary
   }

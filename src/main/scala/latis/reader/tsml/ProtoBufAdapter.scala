@@ -129,7 +129,7 @@ class ProtoBufAdapter(tsml: Tsml) extends IterativeAdapter[Array[ByteBuffer]](ts
   def parseVarint(buf: ByteBuffer): Int = {
     var count = 0 
     var num = 0
-    val position = buf.position
+    val position = buf.position()
     while(position + count < buf.capacity && buf.get(position + count)<0) {
       num += (buf.get & 0x7F)<<(7*count)
       count+=1

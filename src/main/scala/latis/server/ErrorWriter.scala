@@ -2,14 +2,14 @@ package latis.server
 
 import javax.servlet.http.HttpServletResponse
 import java.io.PrintWriter
-import javax.xml.ws.http.HTTPException
+//import javax.xml.ws.http.HTTPException
 
 class ErrorWriter(response: HttpServletResponse) {
 
   def write(e: Throwable): Unit = e match {
 
     //pass along http errors we receive
-    case httpe: HTTPException => response.sendError(httpe.getStatusCode, httpe.getMessage)
+    //case httpe: HTTPException => response.sendError(httpe.getStatusCode, httpe.getMessage)
 
     case _ => {
       response.reset //TODO: what are the side effects?

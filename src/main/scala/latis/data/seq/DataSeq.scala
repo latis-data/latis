@@ -28,7 +28,7 @@ class DataSeq extends IterableData {
   
   def append(data: Data): DataSeq = {
     val bb = data.getByteBuffer
-    val size = bb.limit
+    val size = bb.limit()
     
     //all samples must have same size as the first
     if (recordSize < 0) _recordSize = size

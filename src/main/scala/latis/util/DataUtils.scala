@@ -93,7 +93,7 @@ object DataUtils {
   private def writeBufferAsDoubles(bb: ByteBuffer) = {
     //val bb = getByteBuffer.rewind.asInstanceOf[ByteBuffer]
     val db = bb.rewind.asInstanceOf[ByteBuffer].asDoubleBuffer
-    val n = db.limit
+    val n = db.limit()
     for (i <- 0 until n) println(db.get(i))
   }
   
@@ -439,7 +439,7 @@ object DataUtils {
   def bufferToString(bb: ByteBuffer, nchar: Int): String = {
     val cs = new Array[Char](nchar)      //allocate an array of chars just big enough for our String
     bb.asCharBuffer.get(cs)              //load the array (cs) with nchar*2 bytes
-    bb.position(bb.position + nchar * 2) //advance position in underlying buffer
+    bb.position(bb.position() + nchar * 2) //advance position in underlying buffer
     new String(cs)                       //make a String out of our array
   }
 
@@ -567,7 +567,7 @@ object DataUtils {
    * part of a Binary variable without updating the 'length' metadata.
    */
   def terminateBytes(buffer: ByteBuffer): ByteBuffer = {
-    val limit = buffer.limit
+    val limit = buffer.limit()
     val capacity = buffer.capacity
 
     val bytes = buffer.array //actual backing array, mutable

@@ -3,7 +3,7 @@ package latis.server
 import scala.collection.Seq
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import javax.xml.ws.http.HTTPException
+//import javax.xml.ws.http.HTTPException
 import latis.ops.Operation
 import latis.ops.Projection
 import latis.ops.NoOp
@@ -47,7 +47,7 @@ class DapConstraintParser {
       case CONTAINS.r(name, values) => Contains(name, values.split(""",\s*""").toSeq) //Note, same delimiter used in CONTAINS def
       case OPERATION.r(name, args) => (name,args) match {
         //for testing handling of http errors
-        case ("httpError", s: String) => throw new HTTPException(s.toInt) 
+        //case ("httpError", s: String) => throw new HTTPException(s.toInt) 
         
         case (_, s: String) => Operation(name, s.split(","))
         //args will be null if there are none, e.g. first()

@@ -34,7 +34,7 @@ class TestEmptyData {
   def empty_iterator = assertTrue(EmptyData.iterator.toList.isEmpty)
   
   @Test
-  def empty_byte_buffer = assertEquals(0, EmptyData.getByteBuffer.limit)
+  def empty_byte_buffer = assertEquals(0, EmptyData.getByteBuffer.limit())
 
 //  @Test
 //  def access_by_index = {
