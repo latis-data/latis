@@ -26,15 +26,16 @@ object FileUtils {
   def getTmpFile: File = File.createTempFile("latis", null, getTmpDir)
   //TODO: use deleteOnExit?
 
-  def listAllFilesWithSize(dir: String): Seq[String] = {  
-    //TODO: performance concern, especially since we are sorting
-    //TODO: consider new file io in Java7
-    
-    def accumulateFiles(file: File, buffer: ArrayBuffer[String]): Unit = {
-      if (file.isDirectory()) file.listFiles().foreach(accumulateFiles(_, buffer))
-      else buffer += getFileNameWithSubdirectory(dir, file) + "," + file.length
-    }
-    
+  def listAllFiles(dir: String, getSize: Boolean): Seq[String] = {
+    def accumulateFiles(file: File, buffer: ArrayBuffer[String]): Unit =
+      if (file.isDirectory()) {
+        file.listFiles().foreach(accumulateFiles(_, buffer))
+      } else {
+        val path = getFileNameWithSubdirectory(dir, file)
+        val record = if (getSize) s"$path,${file.length}" else path
+        buffer += record
+      }
+
     val buffer = ArrayBuffer[String]()
     accumulateFiles(new File(dir), buffer)
     buffer.sorted //sort lexically so the adapter doesn't have to (which it can't if it's Iterative)

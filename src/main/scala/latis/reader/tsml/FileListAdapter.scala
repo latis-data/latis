@@ -31,7 +31,8 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
   override def getRecordIterator: Iterator[String] = {
     //see StreamingFileListAdapter for an iterative version of this adapter.
     //TODO: support ftp...?
-    FileUtils.listAllFilesWithSize(directory).iterator
+    val getSize = getOrigScalarNames.contains("fileSize")
+    FileUtils.listAllFiles(directory, getSize).iterator
   }
   
   /**
@@ -39,15 +40,11 @@ class FileListAdapter(tsml: Tsml) extends RegexAdapter(tsml) {
    * Note, this assumes that the TSML has the file and file size variables defined last.
    */
   override def extractValues(record: String): Seq[String] = {
-    val fileName = record.split(',')(0)
-    val size = record.split(',')(1)
-    regex.findFirstMatchIn(fileName) match {
-      case Some(m) => {
-        if (getOrigScalarNames.contains("fileSize")) (m.subgroups :+ fileName) :+  size 
-          else (m.subgroups :+ fileName)
-      } //add the file name
-      case None => List[String]()
-    }
+    val name :: rest = record.split(',').toList
+
+    regex.findFirstMatchIn(name).map { m =>
+      m.subgroups ++ (name :: rest)
+    }.getOrElse(List.empty[String])
   }
 
 }
