@@ -41,7 +41,7 @@ class FlatCatalogReader extends DatasetAccessor {
   
   override def getDataset: Dataset = {
     //val files = FileUtilsNio.listAllFilesWithSize(dir).map(_.takeWhile(_ != ','))
-    val files = FileUtils.listAllFilesWithSize(dir).map(_.takeWhile(_ != ','))
+    val files = FileUtils.listAllFiles(dir, true).map(_.takeWhile(_ != ','))
     val names = files.filter(_.endsWith(".tsml")).map(_.stripSuffix(".tsml"))
     val accessUrls = names
 
@@ -53,7 +53,7 @@ class FlatCatalogReader extends DatasetAccessor {
   }
   
   def getDataset(operations: Seq[Operation]): Dataset = {
-    val files = FileUtilsNio.listAllFilesWithSize(dir).map(_.takeWhile(_ != ','))
+    val files = FileUtilsNio.listAllFiles(dir, true).map(_.takeWhile(_ != ','))
     val names = files.filter(_.endsWith(".tsml")).map(_.stripSuffix(".tsml"))
     val accessUrls = names
 

@@ -25,13 +25,19 @@ import java.nio.file.FileSystems
 object FileUtilsNio {
   
   /**
-   * Private inner class used by listAllFilesWithSize
+   * Private inner class used by listAllFiles
    */
-  private class FileSizeAccumulatorVisitor(basePath: String, buffer: ArrayBuffer[String]) extends SimpleFileVisitor[Path] {
+  private class FileAccumulatorVisitor(
+    basePath: String,
+    buffer: ArrayBuffer[String],
+    getSize: Boolean
+  ) extends SimpleFileVisitor[Path] {
     override def visitFile(path: Path, attrs: BasicFileAttributes): FileVisitResult = {
       val file = new File(path.toString())
       // buffer += file.getPath.drop(basePath.length+1) + "," + file.length()
-      buffer += getFileNameWithSubdirectory(basePath, file) + "," + file.length()
+      val p = getFileNameWithSubdirectory(basePath, file)
+      val record = if (getSize) s"$p,${file.length}" else p
+      buffer +=  record
       return FileVisitResult.CONTINUE;
       
     }
@@ -50,7 +56,7 @@ object FileUtilsNio {
   }
   
   /**
-   * Analog of FileUtils.listAllFilesWithSize. Returns the same result, but
+   * Analog of FileUtils.listAllFiles. Returns the same result, but
    * uses Java7's java.nio.file.Files.walkFileTree method internally. In my
    * tests this appears to be about 10% faster than the old method.
    * 
@@ -58,9 +64,9 @@ object FileUtilsNio {
    * so for file systems where you expect n>1m you should use the StreamingFileListAdapter
    * (which is also dependent on Java7's nio package).
    */
-  def listAllFilesWithSize(dir: String): Seq[String] = {
+  def listAllFiles(dir: String, getSize: Boolean): Seq[String] = {
     val buffer = ArrayBuffer[String]()
-    Files.walkFileTree(Paths.get(dir), new FileSizeAccumulatorVisitor(dir, buffer))
+    Files.walkFileTree(Paths.get(dir), new FileAccumulatorVisitor(dir, buffer, getSize))
     buffer.sorted
   }
   

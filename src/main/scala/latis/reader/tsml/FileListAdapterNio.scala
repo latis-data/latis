@@ -1,7 +1,6 @@
 package latis.reader.tsml
 
 import latis.reader.tsml.ml.Tsml
-import latis.util.FileUtils
 import latis.util.FileUtilsNio
 
 /**
@@ -35,8 +34,9 @@ class FileListAdapterNio(tsml: Tsml) extends RegexAdapter(tsml) {
    */
   override def getRecordIterator: Iterator[String] = {
     //TODO: support ftp...?
-    val dir = getUrl.getPath //assumes a file URL 
-    FileUtilsNio.listAllFilesWithSize(dir).iterator
+    val dir = getUrl.getPath //assumes a file URL
+    val getSize = getOrigScalarNames.contains("fileSize")
+    FileUtilsNio.listAllFiles(dir, getSize).iterator
   }
   
   /**
@@ -44,13 +44,11 @@ class FileListAdapterNio(tsml: Tsml) extends RegexAdapter(tsml) {
    * Note, this assumes that the TSML has the file and file size variables defined last.
    */
   override def extractValues(record: String): Seq[String] = {
-    val fileName = record.split(',')(0)
-    val size = if (getOrigScalarNames.contains("fileSize")) record.split(',')(1)
-      else ""
-    regex.findFirstMatchIn(fileName) match {
-      case Some(m) => (m.subgroups :+ fileName) :+ size //add the file name
-      case None => List[String]()
-    }
+    val name :: rest = record.split(',').toList
+
+    regex.findFirstMatchIn(name).map { m =>
+      m.subgroups ++ (name :: rest)
+    }.getOrElse(List.empty[String])
   }
 
 }
