@@ -24,6 +24,11 @@ lazy val latis = (project in file("."))
     Test / parallelExecution := false
   )
 
+lazy val bench = project
+  .dependsOn(latis)
+  .enablePlugins(JmhPlugin)
+  .settings(compilerFlags)
+
 lazy val commonSettings = compilerFlags ++ Seq(
   // Test suite dependencies
   libraryDependencies ++= Seq(
