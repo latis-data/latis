@@ -4,6 +4,7 @@ ThisBuild / scalaVersion := "2.12.8"
 val artifactory = "http://web-artifacts.lasp.colorado.edu/artifactory/"
 
 lazy val latis = (project in file("."))
+  .enablePlugins(BuildInfoPlugin)
   .settings(commonSettings)
   .settings(publishSettings)
   .settings(
@@ -21,7 +22,9 @@ lazy val latis = (project in file("."))
       "org.codehaus.groovy"        %  "groovy-all"      % "2.4.10" % Runtime
     ),
     // Some tests fail unless we set this.
-    Test / parallelExecution := false
+    Test / parallelExecution := false,
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "latis.util.sbtbuildinfo"
   )
 
 lazy val bench = project
