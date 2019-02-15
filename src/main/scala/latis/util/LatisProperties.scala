@@ -117,7 +117,7 @@ object LatisProperties {
   
   private var _instance: LatisProperties = null
   
-  def instance: LatisProperties= {
+  def instance: LatisProperties = {
     if (_instance == null) _instance = new LatisProperties
     _instance
   }
@@ -146,18 +146,22 @@ object LatisProperties {
    * Get the property as an Option. 
    * Resolve nested properties (in latis.properties) of the form "${prop}".
    * Order of precedence:
-   * 1) System properties (e.g. so "-Dprop=value" at command line can override)
-   * 2) LaTiS properties file
-   * 3) Environment variable
+   * 1) BuildInfo object (only for the "version" property)
+   * 2) System properties (e.g. so "-Dprop=value" at command line can override)
+   * 3) LaTiS properties file
+   * 4) Environment variable
    */
   def get(property: String): Option[String] = {
-    System.getProperty(property) match {
-      case s: String => Some(s)
-      case _ => instance.getProperty(property) match {
+    property match {
+      case "version" => Some(BuildInfo.version)
+      case _ => System.getProperty(property) match {
         case s: String => Some(s)
-        case _ => System.getenv(javaPropertyNameToEnvVar(property)) match {
+        case _ => instance.getProperty(property) match {
           case s: String => Some(s)
-          case _ => None
+          case _ => System.getenv(javaPropertyNameToEnvVar(property)) match {
+            case s: String => Some(s)
+            case _ => None
+          }
         }
       }
     }
