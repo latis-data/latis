@@ -118,7 +118,7 @@ object LatisProperties {
   
   private var _instance: LatisProperties = null
   
-  def instance: LatisProperties= {
+  def instance: LatisProperties = {
     if (_instance == null) _instance = new LatisProperties
     _instance
   }
@@ -175,7 +175,7 @@ object LatisProperties {
    * so it doesn't have to know the name that maps to it.
    * e.g. "writer.foo.delimiter" becomes "delimiter"
    */
-  def getPropertiesWithRoot(root: String): Map[String, String] = {
+  def getPropertiesW2ithRoot(root: String): Map[String, String] = {
     //e.g. "writer.foo"
     val props = scala.collection.mutable.Map[String, String]()
     val keyPrefix = root + "."
