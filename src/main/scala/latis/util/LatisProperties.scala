@@ -9,7 +9,6 @@ import scala.collection.JavaConversions
 import java.net.URLDecoder
 import java.util.TimeZone
 import java.io.InputStream
-import sbtbuildinfo._
 
 /**
  * Singleton for access to properties with the following precedence:

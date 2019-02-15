@@ -24,7 +24,7 @@ lazy val latis = (project in file("."))
     // Some tests fail unless we set this.
     Test / parallelExecution := false,
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-    buildInfoPackage := "latis.util.sbtbuildinfo"
+    buildInfoPackage := "latis.util"
   )
 
 lazy val bench = project
