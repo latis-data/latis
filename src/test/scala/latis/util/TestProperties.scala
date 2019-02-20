@@ -23,7 +23,7 @@ class TestProperties {
   @Test
   def build_info_version = {
     val sbtVersion = getSbtVersion
-    val version = latis.util.BuildInfo.version
+    val version = BuildInfo.version
     assertEquals(version, sbtVersion) 
   }
   
