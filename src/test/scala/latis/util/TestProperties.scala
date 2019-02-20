@@ -24,7 +24,10 @@ class TestProperties {
   def build_info_version = {
     val sbtVersion = getSbtVersion
     val version = BuildInfo.version
+    val versionProp = LatisProperties.getOrElse("version", "Not Found")
     assertEquals(version, sbtVersion) 
+    assertEquals(versionProp, sbtVersion)
+    assertEquals(versionProp, version)
   }
   
   @Test
