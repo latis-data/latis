@@ -11,12 +11,12 @@ import latis.writer.AsciiWriter
 class TestPropertiesAdapter {
   
   @Test
-  def test {
+  def test = {
     val ops = ArrayBuffer[Operation]()
-    ops += Projection("version")
+    ops += Projection("dataset.dir")
     val ds = TsmlReader("datasets/test/properties.tsml").getDataset(ops)
     
-    assertEquals("test", ds.toStringMap("version").head)
+    assertEquals("datasets/test", ds.toStringMap("dataset.dir").head)
     
     //AsciiWriter.write(ds)
   }

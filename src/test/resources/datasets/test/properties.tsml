@@ -7,6 +7,7 @@
   <tuple>   
     <text id="version" length="8"/>
     <text id="user.dir" length="8"/>
+    <text id="dataset.dir" length="64"/>
     <text id="log.file" length="64"/>
   </tuple>
   
