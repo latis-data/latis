@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset id="regex_col">
+  <adapter class="latis.reader.tsml.RegexAdapter"
+           pattern="(\S+)\s+(\S+)\s+(\S+)\s+(\S+)"
+           commentCharacter="#"
+           columns="0;3;2;1"
+           location="datasets/test/mixed.txt" />
+
+  <time type="text">
+    <metadata name="myTime" units="yyyy/MM/dd"/>
+  </time>
+
+  <text    id="myText"/>
+  <real    id="myReal"/>
+  <integer id="myInt"/>
+
+</dataset>
