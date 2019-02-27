@@ -48,7 +48,6 @@ lazy val commonSettings = compilerFlags ++ Seq(
 
 lazy val compilerFlags = Seq(
   scalacOptions ++= Seq(
-    "-target:jvm-1.8",
     "-deprecation",
     "-encoding", "utf-8",
     "-feature",
