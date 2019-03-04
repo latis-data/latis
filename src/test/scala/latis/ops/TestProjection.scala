@@ -256,6 +256,14 @@ class TestProjection {
     assert(ds.isEmpty)
   }
   
+  @Test
+  def project_alias = {
+    val r = Real(Metadata("a") + ("alias" -> "A"))
+    val proj = new Projection(List("A"))
+    val z = proj.applyToVariable(r)
+    assert(z.nonEmpty)
+  }
+  
   
   //TODO: def project_scalar_in_function_scalar_range_without_domain => IndexFunction
   //TODO: domain only
