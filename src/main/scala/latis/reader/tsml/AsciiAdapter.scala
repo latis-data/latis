@@ -6,11 +6,13 @@ import latis.reader.tsml.ml.Tsml
 import latis.util.StringUtils
 import java.security.cert.X509Certificate
 import scala.io.Source
+import java.net.URL
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
 import javax.net.ssl.X509TrustManager
+import org.apache.commons.net.ftp.FTPClient
 
 
 class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with LazyLogging {
@@ -18,7 +20,8 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
   //---- Manage data source ---------------------------------------------------
   
   private var source: Source = null
-  
+  private var ftpClient: FTPClient = null
+
   /**
    * Get the Source from which we will read data.
    */
@@ -26,23 +29,31 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
     if (source == null) source = {
       val url = getUrl
       logger.debug(s"Getting ASCII data source from $url")
-      
-      getProperty("trustAllHTTPS") match {
-        case Some(x) if x.equalsIgnoreCase("true") => getUnsecuredHTTPSDataSource
-        case _ => {
-          try {
-            Source.fromURL(url)
-          } catch {
-            case e: javax.net.ssl.SSLHandshakeException => {
-              logger.error(s"HTTPS certificate not recognized. To ignore this, the property 'trustAllHTTPS=true' can be added to your tsml configuration.")
-              throw new RuntimeException("HTTPS certificate not recognized.")
+
+      val trustAllHTTPS: Boolean =
+        getProperty("trustAllHTTPS").map(_.toLowerCase).map {
+          case "true"  => true
+          case "false" => false
+        }.getOrElse(false)
+
+      url.getProtocol() match {
+        case "ftp" => getFtpSource(url)
+        case _     =>
+          if (trustAllHTTPS) {
+            getUnsecuredHTTPSDataSource
+          } else {
+            try {
+              Source.fromURL(url)
+            } catch {
+              case _: javax.net.ssl.SSLHandshakeException =>
+                logger.error(s"HTTPS certificate not recognized. To ignore this, the property 'trustAllHTTPS=true' can be added to your tsml configuration.")
+                throw new RuntimeException("HTTPS certificate not recognized.")
             }
           }
-        }
       }
     }
     source
-  } 
+  }
   
   /*
    * SECURITY WORKAROUND TO TRUST ALL DATA SERVED BY HTTPS
@@ -82,8 +93,35 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
     source
   }
   
-  override def close {
+  def getFtpSource(url: URL): Source = {
+    ftpClient = new FTPClient()
+
+    val host = url.getHost()
+    val port = if (url.getPort() == -1) {
+      url.getDefaultPort()
+    } else {
+      url.getPort()
+    }
+    val path = url.getPath()
+
+    ftpClient.connect(host, port)
+    ftpClient.enterLocalPassiveMode()
+    ftpClient.login("anonymous", "anonymous")
+
+    Source.fromInputStream(
+      ftpClient.retrieveFileStream(path)
+    )
+  }
+
+  override def close: Unit = {
     if (source != null) source.close
+
+    // If we used FTP, clean up those resources.
+    if (ftpClient != null) {
+      ftpClient.completePendingCommand()
+      ftpClient.logout()
+      ftpClient.disconnect()
+    }
   }
   
   //---- Adapter Properties ---------------------------------------------------
