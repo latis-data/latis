@@ -119,7 +119,8 @@ class JsonReader(path: String) extends DatasetAccessor {
    * make Latis Tuple from a JsObject
    */
   def makeTuple(obj: JsObject): Tuple = {
-    val name = obj.keys.head
+    val name = obj.keys.head //BUG: uses name of first element as tuple name
+                             //Candidate replacement in latis-swp.
     val vars = obj.fields.map(f => makeVariable(JsObject(Seq(f))))
         
     Tuple(vars, Metadata(name))
