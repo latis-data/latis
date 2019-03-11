@@ -29,8 +29,9 @@ class ReplaceValueOperation(v1: Scalar, s2: String) extends Operation {
   }
 }
 
-object ReplaceValueOperation {
-  //TODO: extend OperationFactory so we can construct from expression: replace(v1,v2)
+object ReplaceValueOperation extends OperationFactory {
+
+  override def apply(args: Seq[String]): ReplaceValueOperation = ReplaceValueOperation(args(0), args(1))
   
   def apply(v1: Scalar, s2: String): ReplaceValueOperation = new ReplaceValueOperation(v1, s2)
   
