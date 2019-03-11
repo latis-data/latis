@@ -1,6 +1,5 @@
 package latis.writer
 
-import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Index
 import latis.dm.Real
@@ -12,16 +11,19 @@ import latis.dm.Variable
 import latis.util.FirstThenOther
 
 /**
- * Write a Dataset as JSON. This is designed to be verbose with all the Metadata.
- * If you just need data values, consider the CompactJsonWriter.
+ * Write a Dataset as JSON. 
+ * This is designed to capture the data only (no metadata) 
+ * with verbose labeling.
+ * Unlike the JsonWriter, this does not include an outer object
+ * representing the dataset itself.
+ * This is designed to support round-trips with the JsonReader2
+ * in latis-swp for catalogs.
+ * The intent of the refactoring below is unclear but may be
+ * related to the need to support nested Functions.
+ * See LATIS-153 about reconciling the various JSON readers/writers.
  */
 class JsonWriter2 extends TextWriter {
-  //TODO: Include metadata in this long form with objects
-  //TODO: assumes only one top level var, need to add delim
   
-  override def makeHeader(dataset: Dataset): String = "{\"" + dataset.getName + "\": {\n"
-  override def makeFooter(dataset: Dataset): String = "}}"
-
   override def writeFunction(function: Function): Unit = {
     printWriter.print(makeLabel(function) + "[")
     val startThenDelim = FirstThenOther("", "," + newLine)
@@ -35,8 +37,11 @@ class JsonWriter2 extends TextWriter {
   /**
    * Make a label for the given Variable.
    */
-  def makeLabel(variable: Variable): String = "\"" + variable.getName + "\": "
-
+  def makeLabel(variable: Variable): String = variable.getName match {
+    case ""   => ""
+    case name => "\"" + name + "\": "
+  }
+    
   
   /**
    * Override to add label before each variable.
