@@ -18,6 +18,7 @@ lazy val latis = (project in file("."))
       "com.lihaoyi"                %% "scalatags"       % "0.6.7",
       "ch.qos.logback"             %  "logback-classic" % "1.1.7",
       "org.apache.commons"         %  "commons-math3"   % "3.5",
+      "commons-net"                %  "commons-net"     % "3.5",
       "net.sf.ehcache"             %  "ehcache"         % "2.9.0",
       "org.codehaus.groovy"        %  "groovy-all"      % "2.4.10" % Runtime
     ),
