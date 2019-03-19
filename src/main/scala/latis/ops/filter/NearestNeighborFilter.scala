@@ -44,8 +44,7 @@ class NearestNeighborFilter(val domainName: String, val value: String) extends O
          * would need special logic after to return None
          * compare1 is out of scope there
          */
-        //if (compare1 < 0) true //before first sample
-        if (compare1 == 0) { true } //equals lower bound (Note, inclusive for lower bound only)
+        if (compare1 >= 0) true //before or on first sample
         else if (sample2 == null) { false }  //ran out of samples
         else {
           val domain2 = sample2.domain.asInstanceOf[Scalar]
@@ -63,7 +62,7 @@ class NearestNeighborFilter(val domainName: String, val value: String) extends O
       
       //note, if we equal the last sample, peek will be null
       val nearestSample: Sample = if (dd1 == 0.0) { fit.current }
-      else if (fit.peek == null) { null } //beyond last sample
+      else if (fit.peek == null) { fit.current } //beyond last sample
       else {
         val dd2 = Math.abs(DataUtils.getDoubleValue(fit.peek.domain) - d)
         //get nearest sample, round 'up'

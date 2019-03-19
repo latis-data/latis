@@ -333,8 +333,7 @@ class TestSelection {
     val ds2 = op(ds)
     //AsciiWriter.write(ds2)
     val data = ds2.toDoubleMap
-    //TODO: ds2 function's sampled data still has domain set with requested sample, which is used by ds.getLength
-    assert(data.isEmpty)
+    assertEquals(0.0, data("t")(0), 0.0)
   }
   
   @Test
@@ -343,7 +342,7 @@ class TestSelection {
     val op = NearestNeighborFilter("t", 4.5)
     val ds2 = op(ds)
     val data = ds2.toDoubleMap
-    assert(data.isEmpty)
+    assertEquals(2.0, data("t")(0), 0.0)
   }
   
   @Test
