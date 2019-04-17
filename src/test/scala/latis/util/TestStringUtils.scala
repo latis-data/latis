@@ -23,8 +23,8 @@ class TestStringUtils {
   
   @Test
   def resolve_string_with_environment_variable {
-    val s = StringUtils.resolveParameterizedString("Hi ${USER}!")
-    val a = "Hi " + System.getenv("USER") + "!"
+    val s = StringUtils.resolveParameterizedString("There's no place like ${HOME}.")
+    val a = s"There's no place like ${System.getenv("HOME")}."
     assertEquals(a, s)
   }
   
