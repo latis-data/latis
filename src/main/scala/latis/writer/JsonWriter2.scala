@@ -21,11 +21,22 @@ import latis.util.FirstThenOther
  * The intent of the refactoring below is unclear but may be
  * related to the need to support nested Functions.
  * See LATIS-153 about reconciling the various JSON readers/writers.
+ * Note that we haven't adpted a JSON API since we want to be able 
+ * to stream function samples.
  */
 class JsonWriter2 extends TextWriter {
-  
+  //TODO: If first element has a name/label, then add "{}" header/footer ?
+    
+  /**
+   * Override to avoid adding label to first element.
+   */
+  override def writeVariable(variable: Variable): Unit = variable match {
+    case f: Function => writeFunction(f)
+    case _ => printWriter.println(super.varToString(variable))
+  }
+    
   override def writeFunction(function: Function): Unit = {
-    printWriter.print(makeLabel(function) + "[")
+    printWriter.print("[")
     val startThenDelim = FirstThenOther("", "," + newLine)
     //note, calling makeSample directly to avoid the label
     for (sample <- function.iterator) printWriter.print(startThenDelim.value + makeSample(sample))

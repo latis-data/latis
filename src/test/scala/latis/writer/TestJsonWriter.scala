@@ -6,6 +6,7 @@ import latis.dm._
 import latis.metadata.Metadata
 import latis.data.SampledData
 import java.io.ByteArrayOutputStream
+import latis.reader.DatasetAccessor
 
 class TestJsonWriter extends WriterTest {
 
@@ -115,5 +116,15 @@ class TestJsonWriter extends WriterTest {
       case Some(_) => fail("improper properties filter; '.class' should not have been created")
       case None => { /* do nothing: pass */ }
     }
+  }
+  
+  @Test // LATIS-787 bug fix
+  def json2_starts_without_label = {
+    val ds = DatasetAccessor.fromName("properties").getDataset()
+    val writer = new JsonWriter2
+    var baos = new ByteArrayOutputStream()
+    writer.setOutputStream(baos)
+    writer.write(ds)
+    assertTrue(baos.toString.startsWith("{"))
   }
 }
