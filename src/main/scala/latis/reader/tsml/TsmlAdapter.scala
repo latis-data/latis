@@ -44,6 +44,7 @@ import latis.ops.ReplaceMissingOperation
 import latis.ops.Pivot
 import latis.ops.TimeTupleToTime
 import com.typesafe.scalalogging.LazyLogging
+import latis.util.OperationsValidator
 
 
 /**
@@ -231,12 +232,23 @@ abstract class TsmlAdapter(val tsml: Tsml) extends LazyLogging {
   def getDataset(ops: Seq[Operation]): Dataset = {
     //TODO: consider implications of calling twice
     
+    // Throw an error if the request exceeds a time range limit.
+    validateTimeRange(ops)
+    
     //Give the adapter the opportunity to handle operations.
     val otherOps = ops.filterNot(handleOperation(_))
     
     //Apply operations that the adapter didn't handle.
     //This should be the first use of the lazy 'dataset' so it may trigger its final construction.
     otherOps.foldLeft(getDataset)((dataset, op) => op(dataset))
+  }
+  
+  /**
+   * Convenience method to validate the time range.
+   */
+  protected def validateTimeRange(ops: Seq[Operation]): Unit = getProperty("limitTimeRange") match {
+    case Some(limit) => OperationsValidator.validateTimeRange(ops, limit.toLong) //TODO: handle parse error
+    case _ =>
   }
   
   /**
