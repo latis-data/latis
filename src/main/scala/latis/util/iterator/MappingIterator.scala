@@ -36,6 +36,10 @@ class MappingIterator[S,T >: Null](iterator: Iterator[S], f: S => Option[T]) ext
         case iox @ (_: IOException | _: SQLException) =>
           //Assume that we lost our data stream and abort.
           val msg = "MappingIterator lost the data stream. Aborting."
+          //TODO: There is evidence that this does not actually abort.
+          //  We have seen this message wrapped in a "Sample dropped" error below
+          //  indicating that it got swallowed and kept on processing samples
+          //  and ending up here repeatedly.
           throw new RuntimeException(msg, iox)
         case e: Exception =>
           logger.warn("Sample dropped. MappingIterator got Exception trying to get next sample: " + e.getMessage)
