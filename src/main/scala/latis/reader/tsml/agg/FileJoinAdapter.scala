@@ -83,9 +83,12 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     }
     
     ds match {
-      case Dataset(Function(it)) => it.map(_.findVariableByName("file") match { //TODO: consider "url"
+      case Dataset(Function(it)) => it.map(sample => sample.findVariableByName("file") match {
         case Some(Text(file)) => dir + file
-        case None => throw new Exception(s"No 'file' Variable found in Dataset '$ds'")
+        case None => sample.findVariableByName("url") match {
+          case Some(Text(url)) => url
+          case None => throw new Exception(s"No 'file' or 'url' Variable found in Dataset '$ds'")
+        }
       })
       case _ => Iterator.empty
     }
