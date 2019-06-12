@@ -8,11 +8,10 @@ import latis.data.value.StringValue
 
 /**
  * Generate a time series of URLs based on the tsml definitions.
- * See latis-noms gfsanl_wind_urls.tsml
- * @deprecated Copied to UrlListGenerator
+ * The generated URLs with have the identifier "url".
+ * candidate to replace FileListGenerator2.
  */
-class FileListGenerator2(tsml: Tsml) extends IterativeAdapter2[Double](tsml) {
-  //NOTE: we need to use "file" (as opposed to "url") for the ZipWriter2 to work with this
+class UrlListGenerator(tsml: Tsml) extends IterativeAdapter2[Double](tsml) {
   //TODO: reconcile with FileListGenerator (integer years)
   //TODO: allow timeRange property in tsml
   
@@ -38,7 +37,7 @@ class FileListGenerator2(tsml: Tsml) extends IterativeAdapter2[Double](tsml) {
   /**
    * Format string for URL.
    */
-  lazy val format: String = tsml.getVariableAttribute("file", "pattern") //TODO: error
+  lazy val format: String = tsml.getVariableAttribute("url", "pattern") //TODO: error
   
   /**
    * Create Iterator of times in numeric units from 0 to now
@@ -53,13 +52,13 @@ class FileListGenerator2(tsml: Tsml) extends IterativeAdapter2[Double](tsml) {
   }
   
   /**
-   * Create 'time' and 'file' data for each record (i.e. time value).
+   * Create 'time' and 'url' data for each record (i.e. time value).
    */
   def parseRecord(rec: Double): Option[Map[String, Data]] = {
     val time = Time(units, rec).toDate
-    val file = format.format(time)
+    val url = format.format(time)
 
-    val map = Map("time" -> DoubleValue(rec), "file" -> StringValue(file))
+    val map = Map("time" -> DoubleValue(rec), "url" -> StringValue(url))
     Some(map)
   }
 
