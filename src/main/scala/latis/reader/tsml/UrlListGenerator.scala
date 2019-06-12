@@ -8,7 +8,7 @@ import latis.data.value.StringValue
 
 /**
  * Generate a time series of URLs based on the tsml definitions.
- * The generated URLs with have the identifier "url".
+ * The generated URLs will have the identifier "url".
  * candidate to replace FileListGenerator2.
  */
 class UrlListGenerator(tsml: Tsml) extends IterativeAdapter2[Double](tsml) {
