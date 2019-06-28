@@ -143,7 +143,7 @@ class TestIterators {
     assertEquals(1, counter) 
   }
   
-  @Test(expected=classOf[RuntimeException])
+  @Test(expected=classOf[Error])
   def abort_mapping_iterator = {
     //Make iterator that throws IOException
     val it = new Iterator[Int] {
