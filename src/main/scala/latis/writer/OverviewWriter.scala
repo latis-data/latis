@@ -37,9 +37,10 @@ class OverviewWriter(servletConfig: ServletConfig) {
       if (isDefaultPort) { httpRequest.getServerName }
       else { httpRequest.getServerName + ":" + port }
     val contextRoot = servletConfig.getServletContext.getContextPath
+    val latisMapping = LatisProperties.getOrElse("latis.mapping", "dap")
     
     val values: Map[String, String] = Map(
-        "context-root" -> s"$scheme://$host$contextRoot/latis",
+        "context-root" -> s"$scheme://$host$contextRoot/$latisMapping",
         "dataset-name" -> catalog.getName,
         "catalog-html" -> catalogHtml(),
         "output-options-html" -> outputOptionsHtml(),
