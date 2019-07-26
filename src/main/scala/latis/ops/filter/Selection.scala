@@ -158,7 +158,7 @@ object Selection extends OperationFactory {
   
   def apply(expression: String): Operation = expression.trim match {
     case SELECTION.r(name, op, value) => Selection(name, op, value)
-    case _ => throw new RuntimeException("Failed to make a Selection from the expression: " + expression)
+    case _ => throw new UnsupportedOperationException("Failed to make a Selection from the expression: " + expression)
   }
   
   //Extract the selection as a triple
