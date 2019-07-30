@@ -10,27 +10,37 @@ class ErrorWriter(response: HttpServletResponse) {
 
     //pass along http errors we receive
     //case httpe: HTTPException => response.sendError(httpe.getStatusCode, httpe.getMessage)
-
+    
+    case uoe: UnsupportedOperationException => {
+      writeWithStatusCode(uoe, HttpServletResponse.SC_INTERNAL_SERVER_ERROR) //500 (will change to 400 in LATIS-802)
+    }
     case _ => {
-      response.reset //TODO: what are the side effects?
-      //Note, must set status before getting output stream?
-      //TODO: consider more specific errors, this is always 500
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-      response.setContentType("text/plain")
-
-      val errorType = e.getClass.getSimpleName
-      val rawMsg = e.getMessage
-      val errorMsg = if (rawMsg == null) "" else rawMsg
-
-      val writer = new PrintWriter(response.getOutputStream)
-      writer.println("LaTiS Error: {")
-      writer.println(s"""  $errorType: "$errorMsg"""") // hello world
-      writer.println("}")
-      writer.flush()
-      response.flushBuffer()
+      writeWithStatusCode(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR) //500
     }
 
   }
+  
+  /**
+   * Allows writing the error with specific HTTP status codes (400, 500, etc.)
+   */
+  def writeWithStatusCode(e: Throwable, code: Int): Unit = {
+    response.reset //TODO: what are the side effects?
+    //Note, must set status before getting output stream?
+    response.setStatus(code)
+    response.setContentType("text/plain")
+
+    val errorType = e.getClass.getSimpleName
+    val rawMsg = e.getMessage
+    val errorMsg = if (rawMsg == null) "" else rawMsg
+
+    val writer = new PrintWriter(response.getOutputStream)
+    writer.println("LaTiS Error: {")
+    writer.println(s"""  $errorType: "$errorMsg"""") // hello world
+    writer.println("}")
+    writer.flush()
+    response.flushBuffer()
+  }
+  
 }
 
 object ErrorWriter {

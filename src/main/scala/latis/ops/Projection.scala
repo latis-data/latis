@@ -98,7 +98,7 @@ object Projection extends OperationFactory {
   def apply(expression: String): Projection = expression.trim match {
     //case PROJECTION.r(names) => //Note, regex match will only expose first and last
     case s: String if (s matches PROJECTION) => Projection(s.split(""",\s*""")) //Note, same delimiter used in PROJECTION def
-    case _ => throw new RuntimeException("Failed to make a Projection from the expression: " + expression)
+    case _ => throw new UnsupportedOperationException("Failed to make a Projection from the expression: " + expression)
   }
   
   //Extract the list of projected variable names

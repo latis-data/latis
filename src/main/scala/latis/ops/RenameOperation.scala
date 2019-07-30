@@ -25,7 +25,7 @@ class RenameOperation(val origName: String, val newName: String) extends Operati
       val v = dataset match {
         case Dataset(v) => applyToVariable(v) match {
           case Some(v) => v
-          case None => throw new RuntimeException("No variable found with name: " + origName)
+          case None => throw new UnsupportedOperationException("No variable found with name: " + origName)
           //TODO: error or no-op?
         }
         case _ => null
