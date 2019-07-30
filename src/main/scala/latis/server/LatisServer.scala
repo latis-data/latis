@@ -126,7 +126,7 @@ class LatisServer extends HttpServlet with LazyLogging {
 //        logger.warn("ClientAbortException: " + cae.getMessage)
 //      }
       case uoe: UnsupportedOperationException => {
-        logger.warn("Exception in LatisServer: " + uoe.getMessage, uoe)
+        logger.warn("UnsupportedOperationException in LatisServer: " + uoe.getMessage, uoe)
         
         handleError(response, uoe)
       }
