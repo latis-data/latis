@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse
 import latis.dm.Dataset
 import latis.reader.tsml.TsmlReader
 import latis.reader.tsml.ml.TsmlResolver
+import latis.util.LatisServerException
 import latis.util.LatisProperties
 import latis.util.LatisServerProperties
 import latis.writer.HttpServletWriter
@@ -125,9 +126,12 @@ class LatisServer extends HttpServlet with LazyLogging {
 //      case cae: org.apache.catalina.connector.ClientAbortException => {
 //        logger.warn("ClientAbortException: " + cae.getMessage)
 //      }
+      case lse: LatisServerException => {
+        logger.warn("LatisServerException in LatisServer: " + lse.getMessage, lse)
+        handleError(response, lse)
+      }
       case uoe: UnsupportedOperationException => {
         logger.warn("UnsupportedOperationException in LatisServer: " + uoe.getMessage, uoe)
-        
         handleError(response, uoe)
       }
       case e: Throwable => {
@@ -136,7 +140,6 @@ class LatisServer extends HttpServlet with LazyLogging {
         //  if OOM, try to free some resources so we can at least serve an error message?
         
         logger.error("Exception in LatisServer: " + e.getMessage, e)
-
         handleError(response, e)
       }
       
