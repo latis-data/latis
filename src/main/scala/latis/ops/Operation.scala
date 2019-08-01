@@ -9,6 +9,7 @@ import latis.dm.Sample
 import latis.dm.Scalar
 import latis.dm.Tuple
 import latis.dm.Variable
+import latis.util.LatisServerException
 import latis.util.LatisProperties
 import latis.util.iterator.MappingIterator
 
@@ -124,7 +125,7 @@ object Operation {
   private def getClassFromOpName(opName: String) = {
     LatisProperties.get("operation." + opName + ".class") match {
       case Some(cname) => Class.forName(cname) //TODO: handle ClassNotFoundException?
-      case None => throw new UnsupportedOperationException("No Operation class defined for: " + opName)
+      case None => throw new LatisServerException("No Operation class defined for: " + opName)
     }
   }
     
