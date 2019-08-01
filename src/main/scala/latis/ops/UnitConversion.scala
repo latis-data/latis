@@ -42,7 +42,7 @@ class UnitConversion(variableName: String, unit: UnitOfMeasure) extends Operatio
             }
             case _ => throw new RuntimeException("UnitConversion: Variable is not a Scalar: " + variableName)
           }
-          case None => throw new RuntimeException("UnitConversion: Could not find variable: " + variableName)
+          case None => throw new UnsupportedOperationException("UnitConversion: Could not find variable: " + variableName)
         }
       }
       // there is no data, so no units to convert. throw an error?

@@ -125,6 +125,11 @@ class LatisServer extends HttpServlet with LazyLogging {
 //      case cae: org.apache.catalina.connector.ClientAbortException => {
 //        logger.warn("ClientAbortException: " + cae.getMessage)
 //      }
+      case uoe: UnsupportedOperationException => {
+        logger.warn("UnsupportedOperationException in LatisServer: " + uoe.getMessage, uoe)
+        
+        handleError(response, uoe)
+      }
       case e: Throwable => {
         //TODO: throw internal and external exceptions with messages to print here
         //TODO: safe to catch Thowable? e.g. get out of memory errors, we are on our way out anyway
@@ -132,19 +137,7 @@ class LatisServer extends HttpServlet with LazyLogging {
         
         logger.error("Exception in LatisServer: " + e.getMessage, e)
 
-        // If the response is "committed" (i.e. if the headers have already
-        // been sent to the client and we've started writing the response),
-        // then we can't use the ErrorWriter because it needs to set the
-        // HTTP Status Code and a few extra headers, and you can't do that
-        // once you've started writing the response.
-        if(!response.isCommitted()) {
-          //Return an error response.
-          //TODO: Use the Writer mapped with the "error" suffix in the latis properties?       
-          //TODO: deal with exceptions thrown after writing starts
-          val writer = ErrorWriter(response)
-          writer.write(e)
-        }
-        
+        handleError(response, e)
       }
       
     } finally {
@@ -152,6 +145,21 @@ class LatisServer extends HttpServlet with LazyLogging {
       try{ reader.close } catch { case e: Exception => }
     }
 
+  }
+  
+  def handleError(r: HttpServletResponse, e: Throwable) {
+    // If the response is "committed" (i.e. if the headers have already
+    // been sent to the client and we've started writing the response),
+    // then we can't use the ErrorWriter because it needs to set the
+    // HTTP Status Code and a few extra headers, and you can't do that
+    // once you've started writing the response.
+    if (!r.isCommitted()) {
+      //Return an error response.
+      //TODO: Use the Writer mapped with the "error" suffix in the latis properties?       
+      //TODO: deal with exceptions thrown after writing starts
+      val writer = ErrorWriter(r)
+      writer.write(e)
+    }
   }
 
 }

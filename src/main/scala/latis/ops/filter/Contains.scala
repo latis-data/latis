@@ -79,7 +79,7 @@ object Contains extends OperationFactory {
       val values = vals.split(""",\s*""").toSeq //Note, same delimiter used in CONTAINS def
       Contains(name, values) 
     }
-    case _ => throw new RuntimeException("Failed to make a Contains selection from the expression: " + expression)
+    case _ => throw new UnsupportedOperationException("Failed to make a Contains selection from the expression: " + expression)
   }
   
   //Extract the contains selection 

@@ -136,7 +136,7 @@ object Writer {
         writer.outputStream = System.out  //default to standard out
         writer
       }
-      case None => throw new RuntimeException("Unsupported Writer suffix: " + suffix)
+      case None => throw new UnsupportedOperationException("Unsupported Writer suffix: " + suffix)
     }
   }
   
