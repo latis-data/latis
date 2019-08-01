@@ -15,7 +15,6 @@ import latis.reader.tsml.TsmlReader
 import java.io.ByteArrayOutputStream
 import java.io.FileNotFoundException
 import latis.reader.CatalogReader
-import latis.reader.FlatCatalogReader
 
 class OverviewWriter(servletConfig: ServletConfig) {
   
