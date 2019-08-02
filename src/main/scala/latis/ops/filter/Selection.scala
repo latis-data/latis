@@ -29,7 +29,7 @@ class Selection(val vname: String, val operation: String, val value: String) ext
 
   override def apply(ds: Dataset): Dataset = ds match {
     case Dataset(v) => ds.findVariableByName(vname) match {
-      case None => throw new UnsupportedOperationException(s"Cannot select on unknown variable '$vname'")
+      case None => throw new LatisServerException(s"Cannot select on unknown variable '$vname'")
       case _ => super.apply(ds)
     }
     case _ => ds
