@@ -4,6 +4,7 @@ import latis.dm.Scalar
 import scala.math.ScalaNumericAnyConversions
 import latis.dm.Integer
 import latis.dm.Real
+import latis.util.LatisServerException
 
 /**
  * Operation to replace any missing value in a Dataset with another.
@@ -26,7 +27,7 @@ class ReplaceMissingOperation(value: ScalaNumericAnyConversions) extends Operati
 object ReplaceMissingOperation extends OperationFactory {
   
   override def apply(args: Seq[String]): ReplaceMissingOperation = {
-    if (args.length != 1) throw new UnsupportedOperationException("The ReplaceMissingOperation requires one argument.")
+    if (args.length != 1) throw new LatisServerException("The ReplaceMissingOperation requires one argument.")
     val v: ScalaNumericAnyConversions = args.headOption match  {
       case Some(s) => {
         if (s == "NaN") Double.NaN
