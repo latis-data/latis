@@ -16,6 +16,7 @@ import latis.ops.Operation
 import latis.ops.filter._
 import latis.reader.tsml.ml._
 import latis.time._
+import latis.util.LatisServerException
 import latis.util.StringUtils
 
 import ColumnarBinaryAdapter2._
@@ -170,8 +171,8 @@ class ColumnarBinaryAdapter2(tsml: Tsml) extends TsmlAdapter(tsml) {
     // dataset.
     getProperty("limit").foreach { limit =>
       if (rs.product > limit.toInt) {
-        throw new RuntimeException(
-          s"Limit exceeded: requested ${rs.product}, allowed ${limit.toInt}"
+        throw new LatisServerException(
+          s"Limit exceeded: requested ${rs.product} samples, allowed ${limit.toInt}"
         )
       }
     }
