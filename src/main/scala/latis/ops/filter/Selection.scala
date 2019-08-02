@@ -13,6 +13,7 @@ import latis.dm.WrappedFunction
 import latis.dm.Tuple
 import latis.ops.Operation
 import latis.ops.resample.NearestNeighbor
+import latis.util.LatisServerException
 import latis.util.StringUtils
 import latis.ops.OperationFactory
 import latis.dm.Dataset
@@ -147,7 +148,7 @@ object Selection extends OperationFactory {
             new Selection(vname, operation, value)
           }
           else {
-            throw new UnsupportedOperationException(
+            throw new LatisServerException(
               s"Invalid Selection: could not parse '$value' as a time string.")
           }
         }
