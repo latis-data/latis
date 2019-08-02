@@ -6,6 +6,7 @@ import latis.dm.Sample
 import latis.metadata.Metadata
 import latis.dm.WrappedFunction
 import latis.util.iterator.MappingIterator
+import latis.util.LatisServerException
 
 /**
  * Keep only the first 'limit' samples of any outer Function in the Dataset.
@@ -32,11 +33,11 @@ class LimitFilter(val limit: Int) extends Filter {
 object LimitFilter extends OperationFactory {
   
   override def apply(args: Seq[String]): LimitFilter = {
-    if (args.length > 1) throw new UnsupportedOperationException("The LimitFilter accepts only one argument")
+    if (args.length > 1) throw new LatisServerException("The LimitFilter accepts only one argument")
     try {
       LimitFilter(args.head.toInt)
     } catch {
-      case e: NumberFormatException => throw new UnsupportedOperationException("The LimitFilter requires an integer argument")
+      case e: NumberFormatException => throw new LatisServerException("The LimitFilter requires an integer argument")
     }
   }
     
