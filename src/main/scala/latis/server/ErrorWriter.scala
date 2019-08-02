@@ -14,6 +14,9 @@ class ErrorWriter(response: HttpServletResponse) {
     case lse: LatisServerException => {
       writeWithStatusCode(lse, HttpServletResponse.SC_BAD_REQUEST) //400
     }
+    case iae: IllegalArgumentException => {
+      writeWithStatusCode(iae, HttpServletResponse.SC_BAD_REQUEST) //400
+    }
     case uoe: UnsupportedOperationException => {
       writeWithStatusCode(uoe, HttpServletResponse.SC_INTERNAL_SERVER_ERROR) //500
     }

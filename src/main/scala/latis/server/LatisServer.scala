@@ -130,6 +130,10 @@ class LatisServer extends HttpServlet with LazyLogging {
         logger.warn("LatisServerException in LatisServer: " + lse.getMessage, lse)
         handleError(response, lse)
       }
+      case iae: IllegalArgumentException => {
+        logger.warn("IllegalArgumentException in LatisServer: " + iae.getMessage, iae)
+        handleError(response, iae)
+      }
       case uoe: UnsupportedOperationException => {
         logger.warn("UnsupportedOperationException in LatisServer: " + uoe.getMessage, uoe)
         handleError(response, uoe)
