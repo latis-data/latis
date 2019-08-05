@@ -2,6 +2,7 @@ package latis.ops
 
 import latis.dm.Function
 import latis.metadata.Metadata
+import latis.util.LatisServiceException
 
 class DropOperation(val n: Int) extends Operation {
   override def applyToFunction(function: Function): Option[Function] = {
@@ -24,11 +25,11 @@ class DropOperation(val n: Int) extends Operation {
 object DropOperation extends OperationFactory {
   
   override def apply(args: Seq[String]): DropOperation = {
-    if (args.length > 1) throw new UnsupportedOperationException("The DropOperation accepts only one argument")
+    if (args.length > 1) throw new LatisServiceException("The DropOperation accepts only one argument")
     try {
       DropOperation(args.head.toInt)
     } catch {
-      case e: NumberFormatException => throw new UnsupportedOperationException("The DropOperation requires an integer argument")
+      case e: NumberFormatException => throw new LatisServiceException("The DropOperation requires an integer argument")
     }
   }
     
