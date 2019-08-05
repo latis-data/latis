@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse
 import latis.dm.Dataset
 import latis.reader.tsml.TsmlReader
 import latis.reader.tsml.ml.TsmlResolver
-import latis.util.LatisServerException
+import latis.util.LatisServiceException
 import latis.util.LatisProperties
 import latis.util.LatisServerProperties
 import latis.writer.HttpServletWriter
@@ -126,8 +126,8 @@ class LatisServer extends HttpServlet with LazyLogging {
 //      case cae: org.apache.catalina.connector.ClientAbortException => {
 //        logger.warn("ClientAbortException: " + cae.getMessage)
 //      }
-      case lse: LatisServerException => {
-        logger.warn("LatisServerException in LatisServer: " + lse.getMessage, lse)
+      case lse: LatisServiceException => {
+        logger.warn("LatisServiceException in LatisServer: " + lse.getMessage, lse)
         handleError(response, lse)
       }
       case iae: IllegalArgumentException => {

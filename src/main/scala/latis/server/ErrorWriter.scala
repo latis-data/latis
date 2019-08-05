@@ -2,7 +2,7 @@ package latis.server
 
 import javax.servlet.http.HttpServletResponse
 import java.io.PrintWriter
-import latis.util.LatisServerException
+import latis.util.LatisServiceException
 //import javax.xml.ws.http.HTTPException
 
 class ErrorWriter(response: HttpServletResponse) {
@@ -11,7 +11,7 @@ class ErrorWriter(response: HttpServletResponse) {
 
     //pass along http errors we receive
     //case httpe: HTTPException => response.sendError(httpe.getStatusCode, httpe.getMessage)
-    case lse: LatisServerException => {
+    case lse: LatisServiceException => {
       writeWithStatusCode(lse, HttpServletResponse.SC_BAD_REQUEST) //400
     }
     case iae: IllegalArgumentException => {
