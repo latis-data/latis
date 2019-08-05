@@ -14,6 +14,7 @@ import latis.metadata.Metadata
 import latis.ops.filter.NearestNeighborFilter
 import latis.ops.filter.Selection
 import latis.reader.tsml.TsmlReader
+import latis.util.LatisServiceException
 import latis.writer.AsciiWriter
 
 class TestSelection {
@@ -356,7 +357,7 @@ class TestSelection {
     assertEquals(2, data("x")(1), 0)
   }
   
-  @Test(expected=classOf[UnsupportedOperationException])
+  @Test(expected=classOf[LatisServiceException])
   def invalid_time_selection {
     val ds = TestDataset.time_series
     val op = Selection("time>=1970/01")
