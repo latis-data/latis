@@ -138,8 +138,8 @@ class TestJsonWriter extends WriterTest {
     writer.write(ds)
     val rows = baos.toString.split("\n")
     assertEquals(rows(0), "{\"datasets\": [{\"dataset_name\": \"agg\"},")
-    assertNotEquals(-1, rows.indexOf("{\"output_option\": \"bin\", \"output_description\": \"Binary stream in network byte order (big-endian)\"},"))
-    assertNotEquals(-1, rows.indexOf("{\"operation_option\": \"contains\", \"operation_description\": \"Return samples where the given variable has one of the given values\", \"operation_usage\": \"contains(name, v1, v2, ...)\"},"))
+    assertNotEquals(-1, rows.indexOf("{\"output_option\": \"bin\", \"output_description\": \"IEEE 64-bit floats, little-endian\"},"))
+    assertNotEquals(-1, rows.indexOf("{\"operation_option\": \"convert\", \"operation_description\": \"\", \"operation_usage\": \"\"},"))
   }
   
 }
