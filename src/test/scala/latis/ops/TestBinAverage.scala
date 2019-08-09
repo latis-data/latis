@@ -12,6 +12,7 @@ import latis.server.DapConstraintParser
 import scala.collection.mutable.ArrayBuffer
 import latis.ops.math.MathOperation
 import latis.ops.filter.Selection
+import latis.util.LatisServiceException
 
 class TestBinAverage {
   
@@ -167,7 +168,7 @@ class TestBinAverage {
       //AsciiWriter.write(ds)
       val data = ds.toDoubleMap
     } catch {
-      case e: UnsupportedOperationException =>  thrown = true
+      case e: LatisServiceException =>  thrown = true
     }
      
     assertEquals(true, thrown)
@@ -191,7 +192,7 @@ class TestBinAverage {
       //AsciiWriter.write(ds)
       val data = ds.toDoubleMap
     } catch {
-      case e: UnsupportedOperationException =>  thrown = true
+      case e: LatisServiceException =>  thrown = true
     }
 
     assertEquals(true, thrown)
@@ -213,7 +214,7 @@ class TestBinAverage {
       //AsciiWriter.write(ds)
       val data = ds.toDoubleMap
     } catch {
-      case e: UnsupportedOperationException =>  thrown = true
+      case e: LatisServiceException =>  thrown = true
     }
 
     assertEquals(true, thrown)

@@ -2,6 +2,7 @@ package latis.ops
 
 import latis.dm._
 import latis.util.iterator.MappingIterator
+import latis.util.LatisServiceException
 import scala.collection.Map
 import scala.collection.mutable.ListBuffer
 import scala.math._
@@ -23,7 +24,7 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
   //TODO: deal with missing values
   //TODO: take domain var arg so we can bin nested functions, akin to integration
   
-  if (binWidth <= 0) throw new RuntimeException("Bin average must have a positive bin width.")
+  if (binWidth <= 0) throw new LatisServiceException("Bin average must have a positive bin width.")
   
   /**
    * Get bin width via getter so it can be overridden.
@@ -41,7 +42,7 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
       val firstSampleTime = getDomainValue(fit.peek)
       val startValue = if (!startVal.isNaN && startVal <= firstSampleTime) startVal      
                        else if (!startVal.isNaN && startVal > firstSampleTime) {
-                         throw new UnsupportedOperationException("Requested start value should not be after the start of data")
+                         throw new LatisServiceException("Requested start value should not be after the start of data")
                        }
                        else firstSampleTime                     
  
@@ -117,7 +118,7 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
   private def getDomainValue(sample: Sample): Double = sample.domain match {
     case Number(d) => d
     case t: Time => t.getJavaTime.toDouble
-    case _ => throw new RuntimeException("BinAverage supports only one dimensional numeric domains.")
+    case _ => throw new LatisServiceException("BinAverage supports only one dimensional numeric domains.")
   }
   
   private def computeStatistics(samples: Seq[Sample]): Option[Tuple] = {
@@ -178,7 +179,7 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
   private def reduce(v: Variable): Scalar = v match {
     case s: Scalar => s
     case Tuple(vars) => reduce(vars.head)
-    case _: Function => throw new RuntimeException("Can't perform a bin average over a nested Function.")
+    case _: Function => throw new LatisServiceException("Can't perform a bin average over a nested Function.")
   }
   
   private def samplesToDoubleMap(samples: Seq[Sample]): Map[String, Array[Double]] = {
@@ -196,11 +197,11 @@ class BinAverageByWidth(binWidth: Double, startVal: Double = Double.NaN) extends
 object BinAverageByWidth extends OperationFactory {
   
   override def apply(args: Seq[String]): BinAverageByWidth = {
-    if (args.length > 2) throw new UnsupportedOperationException("The BinAverage operation only accepts up to two arguments")
+    if (args.length > 2) throw new LatisServiceException("The BinAverage operation only accepts up to two arguments")
     try {
       BinAverageByWidth(args.head.toDouble)
     } catch {
-      case e: NumberFormatException => throw new UnsupportedOperationException("The BinAverage requires numeric arguments")
+      case e: NumberFormatException => throw new LatisServiceException("The BinAverage operation requires numeric arguments")
     }
   }
     

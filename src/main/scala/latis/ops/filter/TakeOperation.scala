@@ -3,6 +3,7 @@ package latis.ops.filter
 import latis.dm.Function
 import latis.metadata.Metadata
 import latis.ops.OperationFactory
+import latis.util.LatisServiceException
 
 
 class TakeOperation(val n: Int) extends Filter {
@@ -26,11 +27,11 @@ class TakeOperation(val n: Int) extends Filter {
 object TakeOperation extends OperationFactory {
   
   override def apply(args: Seq[String]): TakeOperation = {
-    if (args.length > 1) throw new UnsupportedOperationException("The TakeOperation accepts only one argument")
+    if (args.length > 1) throw new LatisServiceException("The TakeOperation accepts only one argument")
     try {
       TakeOperation(args.head.toInt)
     } catch {
-      case e: NumberFormatException => throw new UnsupportedOperationException("The TakeOperation requires an integer argument")
+      case e: NumberFormatException => throw new LatisServiceException("The TakeOperation requires an integer argument")
     }
   }
     

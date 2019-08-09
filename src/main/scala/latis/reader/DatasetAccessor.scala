@@ -119,7 +119,7 @@ object DatasetAccessor extends LazyLogging {
         }
       }
     } catch {
-      case e: Exception => throw new RuntimeException(s"Unable to find dataset: $datasetName", e)
+      case e: Exception => throw new DatasetNotFoundException(s"Unable to find dataset: $datasetName", e)
     }
     
     //Add properties from latis.properties

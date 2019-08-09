@@ -2,6 +2,8 @@ package latis.server
 
 import javax.servlet.http.HttpServletResponse
 import java.io.PrintWriter
+import latis.util.LatisServiceException
+import latis.util.DatasetNotFoundException
 //import javax.xml.ws.http.HTTPException
 
 class ErrorWriter(response: HttpServletResponse) {
@@ -10,9 +12,17 @@ class ErrorWriter(response: HttpServletResponse) {
 
     //pass along http errors we receive
     //case httpe: HTTPException => response.sendError(httpe.getStatusCode, httpe.getMessage)
-    
+    case dnfe: DatasetNotFoundException => {
+      writeWithStatusCode(dnfe, HttpServletResponse.SC_NOT_FOUND) //404
+    }
+    case iae: IllegalArgumentException => {
+      writeWithStatusCode(iae, HttpServletResponse.SC_BAD_REQUEST) //400
+    }
+    case lse: LatisServiceException => {
+      writeWithStatusCode(lse, HttpServletResponse.SC_BAD_REQUEST) //400
+    }
     case uoe: UnsupportedOperationException => {
-      writeWithStatusCode(uoe, HttpServletResponse.SC_INTERNAL_SERVER_ERROR) //500 (will change to 400 in LATIS-802)
+      writeWithStatusCode(uoe, HttpServletResponse.SC_INTERNAL_SERVER_ERROR) //500
     }
     case _ => {
       writeWithStatusCode(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR) //500

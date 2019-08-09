@@ -13,6 +13,7 @@ import latis.dm.WrappedFunction
 import latis.dm.Tuple
 import latis.ops.Operation
 import latis.ops.resample.NearestNeighbor
+import latis.util.LatisServiceException
 import latis.util.StringUtils
 import latis.ops.OperationFactory
 import latis.dm.Dataset
@@ -28,7 +29,7 @@ class Selection(val vname: String, val operation: String, val value: String) ext
 
   override def apply(ds: Dataset): Dataset = ds match {
     case Dataset(v) => ds.findVariableByName(vname) match {
-      case None => throw new UnsupportedOperationException(s"Cannot select on unknown variable '$vname'")
+      case None => throw new LatisServiceException(s"Cannot select on unknown variable '$vname'")
       case _ => super.apply(ds)
     }
     case _ => ds
@@ -147,7 +148,7 @@ object Selection extends OperationFactory {
             new Selection(vname, operation, value)
           }
           else {
-            throw new UnsupportedOperationException(
+            throw new LatisServiceException(
               s"Invalid Selection: could not parse '$value' as a time string.")
           }
         }

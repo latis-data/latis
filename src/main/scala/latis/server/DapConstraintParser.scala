@@ -9,6 +9,7 @@ import latis.ops.Projection
 import latis.ops.NoOp
 import latis.ops.filter.Contains
 import latis.ops.filter.Selection
+import latis.util.LatisServiceException
 import latis.util.RegEx.CONTAINS
 import latis.util.RegEx.PROJECTION
 import latis.util.RegEx.OPERATION
@@ -53,7 +54,7 @@ class DapConstraintParser {
         //args will be null if there are none, e.g. first()
         case (_, null) => Operation(name)
       }
-      case _ => throw new UnsupportedOperationException("Failed to parse expression: '" + expression + "'")
+      case _ => throw new LatisServiceException("Failed to parse expression: '" + expression + "'")
       //TODO: log and return None? probably should return error
     }
   }

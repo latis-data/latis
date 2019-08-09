@@ -4,6 +4,7 @@ import latis.dm._
 import latis.dm.Scalar
 import latis.dm.Text
 import latis.util.iterator.MappingIterator
+import latis.util.LatisServiceException
 
 class TextAppender(name: String, suffix: String) extends Operation() {
   
@@ -14,7 +15,7 @@ class TextAppender(name: String, suffix: String) extends Operation() {
     case true => {
       val t = s match {
         case Text(str) => str + suffix
-        case _ => throw new UnsupportedOperationException("Can only append to a Text Variable.")
+        case _ => throw new LatisServiceException("Can only append to a Text Variable.")
       }
       val md = s.getMetadata + ("length", t.length.toString)
       Some(Text(md, t))

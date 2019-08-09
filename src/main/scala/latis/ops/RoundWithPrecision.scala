@@ -2,6 +2,7 @@ package latis.ops
 
 import latis.data.NumberData
 import latis.dm._
+import latis.util.LatisServiceException
 import latis.util.StringUtils
 
 import scala.math.BigDecimal.RoundingMode
@@ -36,12 +37,12 @@ object RoundWithPrecision extends OperationFactory {
 
   override def apply(args: Seq[String]): RoundWithPrecision = args match {
     case Seq(n: String, d: String) if StringUtils.isNumeric(d) => apply(n, d.toInt)
-    case _ => throw new UnsupportedOperationException("Invalid arguments")
+    case _ => throw new LatisServiceException("Invalid arguments")
   }
   
   def apply(n: String, d: Int): RoundWithPrecision = {
     if (d <= 0) {
-      throw new RuntimeException("Precision must be a postive integer")
+      throw new LatisServiceException("Precision must be a postive integer")
     }
     else {
       new RoundWithPrecision(n, d)

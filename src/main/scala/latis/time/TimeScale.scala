@@ -2,6 +2,7 @@ package latis.time
 
 import latis.time.TimeScaleType.TimeScaleType
 import latis.units.UnitOfMeasure
+import latis.util.LatisServiceException
 import latis.util.RegEx
 
 import java.util.Date
@@ -82,7 +83,7 @@ object TimeScale {
       case Array(s, epoch) => s.split("""\s""") match {
         case Array(tstype, unit) => TimeScale(epoch, TimeUnit.withName(unit.toLowerCase), TimeScaleType.withName(tstype.toUpperCase))
         case Array(unit) => TimeScale(epoch, TimeUnit.withName(unit.toLowerCase), TimeScaleType.NATIVE)
-        case _ => throw new UnsupportedOperationException("Time unit has more than 2 components before the 'since': " + scale)
+        case _ => throw new LatisServiceException("Time unit has more than 2 components before the 'since': " + scale)
       }
       case Array(s) => s match {
         case s: String if (s.toLowerCase.startsWith("julian")) => JULIAN_DATE //TODO: can we interpret JD as UTC?
@@ -94,7 +95,7 @@ object TimeScale {
           ts
         }
       }
-      case _ => throw new UnsupportedOperationException("Time unit contains 'since' more than once: " + scale)
+      case _ => throw new LatisServiceException("Time unit contains 'since' more than once: " + scale)
     }
   }
 }
