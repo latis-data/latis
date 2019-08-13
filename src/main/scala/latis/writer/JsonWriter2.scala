@@ -76,6 +76,7 @@ class JsonWriter2 extends TextWriter {
   override def makeSample(sample: Sample): String = sample match {
     case Sample(_: Index, r) => r match {
       case tup: Tuple => makeTuple(tup) //no label, for now //TODO: include label if tuple has name
+      case _: Scalar => "{" + varToString(r) + "}"
       case _ => varToString(r)
     }
     case Sample(d, r) => "{" + varToString(d) + ", " + varToString(r) + "}" //no label for sample

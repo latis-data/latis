@@ -7,6 +7,7 @@ import latis.metadata.Metadata
 import latis.data.SampledData
 import java.io.ByteArrayOutputStream
 import latis.reader.DatasetAccessor
+import latis.util.LatisCapabilities
 
 class TestJsonWriter extends WriterTest {
 
@@ -127,4 +128,18 @@ class TestJsonWriter extends WriterTest {
     writer.write(ds)
     assertTrue(baos.toString.startsWith("{"))
   }
+  
+  @Test // SWP-375 bug fix
+  def json2_capabilities = {
+    val ds = LatisCapabilities().getDataset 
+    val writer = new JsonWriter2
+    var baos = new ByteArrayOutputStream()
+    writer.setOutputStream(baos)
+    writer.write(ds)
+    val rows = baos.toString.split("\n")
+    assertEquals(rows(0), "{\"datasets\": [{\"dataset_name\": \"agg\"},")
+    assertNotEquals(-1, rows.indexOf("{\"output_option\": \"bin\", \"output_description\": \"IEEE 64-bit floats, little-endian\"},"))
+    assertNotEquals(-1, rows.indexOf("{\"operation_option\": \"convert\", \"operation_description\": \"\", \"operation_usage\": \"\"},"))
+  }
+  
 }
