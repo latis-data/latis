@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset id="tsi_with_time_of_day">
+  <adapter class="latis.reader.tsml.AsciiAdapter"
+    	   delimiter="\s+"
+           location="datasets/tsi.txt" />
+             
+  <function length="403">
+    <time> 
+      <metadata name="time" 
+                units="hours since 2000-01-01" 
+                long_name="Time of day"/>
+    </time>
+  
+    <real>
+      <metadata name="tsi"
+                units="W/m^2"
+                long_name="Total Solar Irradiance"/>
+    </real>
+  </function>
+
+</dataset>
