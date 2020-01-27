@@ -71,7 +71,7 @@ abstract class AbstractScalar(metadata: Metadata = EmptyMetadata, data: Data = E
     case Some(s) => _stringToValue(s) //TODO: handle parsing exception
     case None => this match {
       case _: Real => Double.NaN
-      case _: Integer => java.lang.Integer.MIN_VALUE
+      case _: Integer => java.lang.Long.MIN_VALUE
       case _: Text => ""
       case _ => throw new RuntimeException("No default missing value for " + getName) //TODO: getType?
     }
