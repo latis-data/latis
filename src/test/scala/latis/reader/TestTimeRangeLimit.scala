@@ -24,4 +24,22 @@ class TestTimeRangeLimit {
     val ds = DatasetAccessor.fromName("ascii_with_limit").getDataset(ops)
     assertEquals(2, ds.getLength)
   }
+  
+  @Test(expected = classOf[UnsupportedOperationException])
+  def default_max_exceeds_limit = {
+    val ops = scala.collection.mutable.ArrayBuffer[Operation]()
+    ops += Selection("time > 1970-01-02")
+    //Data ends on 1970/01/03 but validation assumes the present date
+    val ds = DatasetAccessor.fromName("ascii_with_limit").getDataset(ops)
+    assertEquals(1, ds.getLength)
+  }
+  
+  @Test
+  def time_range_with_max = {
+    val ops = scala.collection.mutable.ArrayBuffer[Operation]()
+    ops += Selection("time > 1970-01-02")
+    //Data ends on 1970/01/03 which is specified in the TSML
+    val ds = DatasetAccessor.fromName("ascii_with_limit_and_max").getDataset(ops)
+    assertEquals(1, ds.getLength)
+  }
 }
