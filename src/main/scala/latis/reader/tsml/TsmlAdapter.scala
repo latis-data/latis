@@ -247,7 +247,7 @@ abstract class TsmlAdapter(val tsml: Tsml) extends LazyLogging {
    * Convenience method to validate the time range.
    */
   protected def validateTimeRange(ops: Seq[Operation]): Unit = getProperty("limitTimeRange") match {
-    case Some(limit) => OperationsValidator.validateTimeRange(ops, limit.toLong) //TODO: handle parse error
+    case Some(limit) => OperationsValidator.validateTimeRange(ops, limit.toLong, getProperty("maxIsoTime")) //TODO: handle parse error
     case _ =>
   }
   

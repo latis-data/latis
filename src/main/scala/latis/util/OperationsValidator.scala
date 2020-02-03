@@ -5,7 +5,7 @@ import latis.ops.filter.Selection
 import latis.ops.filter.FirstFilter
 import latis.ops.filter.LastFilter
 import java.util.Date
-import latis.time.Time
+import latis.time.Time.isoToJava
 
 object OperationsValidator {
   
@@ -13,17 +13,17 @@ object OperationsValidator {
    * Throw an exception if the given Operations don't constrain the time range
    * to the given limit (in milliseconds).
    */
-  def validateTimeRange(ops: Seq[Operation], maxTimeRange: Long): Unit = {
+  def validateTimeRange(ops: Seq[Operation], maxTimeRange: Long, maxIsoTime: Option[String]): Unit = {
     //TODO: make sure min < max, valid format, ...?
     
     var min: Option[Long] = None
-    var max: Long = new Date().getTime  //default to now
+    var max: Long = maxIsoTime.map(isoToJava(_)).getOrElse(new Date().getTime) //default to now
     var validated: Boolean = false
     
     ops foreach {
       case Selection("time", op, time) => 
-        if (op.contains(">")) min = Some(Time.isoToJava(time))
-        if (op.contains("<")) max = Time.isoToJava(time)
+        if (op.contains(">")) min = Some(isoToJava(time))
+        if (op.contains("<")) max = isoToJava(time)
       case _: FirstFilter => validated = true
       case _: LastFilter => validated = true
       case _ =>
