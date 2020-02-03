@@ -3,7 +3,7 @@ package latis.reader
 import org.junit._
 import Assert._
 import latis.ops.Operation
-import latis.ops.filter.Selection
+import latis.ops.filter.{Selection,FirstFilter,LastFilter}
 
 class TestTimeRangeLimit {
   
@@ -30,6 +30,24 @@ class TestTimeRangeLimit {
     val ops = scala.collection.mutable.ArrayBuffer[Operation]()
     ops += Selection("time > 1970-01-02")
     //Data ends on 1970/01/03 but validation assumes the present date
+    val ds = DatasetAccessor.fromName("ascii_with_limit").getDataset(ops)
+    assertEquals(1, ds.getLength)
+  }
+  
+  @Test
+  def valid_because_of_first_filter = {
+    val ops = scala.collection.mutable.ArrayBuffer[Operation]()
+    ops += Selection("time > 1970-01-02")
+    ops += FirstFilter()
+    val ds = DatasetAccessor.fromName("ascii_with_limit").getDataset(ops)
+    assertEquals(1, ds.getLength)
+  }
+  
+  @Test
+  def valid_because_of_last_filter = {
+    val ops = scala.collection.mutable.ArrayBuffer[Operation]()
+    ops += Selection("time > 1970-01-02")
+    ops += LastFilter()
     val ds = DatasetAccessor.fromName("ascii_with_limit").getDataset(ops)
     assertEquals(1, ds.getLength)
   }
