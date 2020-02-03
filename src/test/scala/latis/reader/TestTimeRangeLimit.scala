@@ -1,9 +1,13 @@
 package latis.reader
 
-import org.junit._
-import Assert._
+import org.junit.Assert.assertEquals
+import org.junit.Test
 import latis.ops.Operation
-import latis.ops.filter.{Selection,FirstFilter,LastFilter}
+import latis.ops.filter.FirstFilter
+import latis.ops.filter.LastFilter
+import latis.ops.filter.Selection
+import latis.ops.filter.TakeOperation
+import latis.ops.filter.TakeRightOperation
 
 class TestTimeRangeLimit {
   
@@ -50,6 +54,42 @@ class TestTimeRangeLimit {
     ops += LastFilter()
     val ds = DatasetAccessor.fromName("ascii_with_limit").getDataset(ops)
     assertEquals(1, ds.getLength)
+  }
+  
+  @Test
+  def valid_because_of_take_filter = {
+    val ops = scala.collection.mutable.ArrayBuffer[Operation]()
+    ops += Selection("time > 1970-01-02")
+    ops += TakeOperation(1)
+    val ds = DatasetAccessor.fromName("ascii_with_limit").getDataset(ops)
+    assertEquals(1, ds.getLength)
+  }
+  
+  @Test
+  def valid_because_of_takeRight_filter = {
+    val ops = scala.collection.mutable.ArrayBuffer[Operation]()
+    ops += Selection("time > 1970-01-02")
+    ops += TakeRightOperation(1)
+    val ds = DatasetAccessor.fromName("ascii_with_limit").getDataset(ops)
+    assertEquals(1, ds.getLength)
+  }
+  
+  @Test(expected = classOf[UnsupportedOperationException])
+  def take_more_than_1 = {
+    val ops = scala.collection.mutable.ArrayBuffer[Operation]()
+    ops += Selection("time >= 1970-01-02")
+    ops += TakeOperation(2)
+    val ds = DatasetAccessor.fromName("ascii_with_limit").getDataset(ops)
+    assertEquals(2, ds.getLength)
+  }
+  
+  @Test(expected = classOf[UnsupportedOperationException])
+  def takeRight_more_than_1 = {
+    val ops = scala.collection.mutable.ArrayBuffer[Operation]()
+    ops += Selection("time >= 1970-01-02")
+    ops += TakeRightOperation(2)
+    val ds = DatasetAccessor.fromName("ascii_with_limit").getDataset(ops)
+    assertEquals(2, ds.getLength)
   }
   
   @Test
