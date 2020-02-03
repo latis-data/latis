@@ -53,7 +53,7 @@ class TestTimeRangeLimit {
   }
   
   @Test
-  def time_range_with_max = {
+  def valid_because_of_tsml_max = {
     val ops = scala.collection.mutable.ArrayBuffer[Operation]()
     ops += Selection("time > 1970-01-02")
     //Data ends on 1970/01/03 which is specified in the TSML
