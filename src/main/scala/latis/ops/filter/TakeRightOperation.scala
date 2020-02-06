@@ -41,4 +41,6 @@ object TakeRightOperation extends OperationFactory {
   }
     
   def apply(n: Int): TakeRightOperation = new TakeRightOperation(n)
+  
+  def unapply(takeRight: TakeRightOperation): Option[Int] = Some((takeRight.n))
 }
