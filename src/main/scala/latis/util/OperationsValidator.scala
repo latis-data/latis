@@ -15,11 +15,11 @@ object OperationsValidator {
    * Throw an exception if the given Operations don't constrain the time range
    * to the given limit (in milliseconds).
    */
-  def validateTimeRange(ops: Seq[Operation], maxTimeRange: Long, maxTime: Option[String]): Unit = {
+  def validateTimeRange(ops: Seq[Operation], maxTimeRange: Long, maxExtent: Option[String]): Unit = {
     //TODO: make sure min < max, valid format, ...?
     
     var min: Option[Long] = None
-    var max: Long = maxTime.map(isoToJava(_)).getOrElse(new Date().getTime) //default to now
+    var max: Long = maxExtent.map(isoToJava(_)).getOrElse(new Date().getTime) //default to now
     var validated: Boolean = false
     
     ops foreach {

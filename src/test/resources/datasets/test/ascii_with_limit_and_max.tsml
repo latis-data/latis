@@ -5,7 +5,7 @@
            delimiter="\s+"
            commentCharacter="#"
            limitTimeRange="172800000"
-           maxTime="1970-01-03"
+           maxExtent="1970-01-03"
            location="datasets/test/mixed.txt" />
   
   <time type="text" length="10">
