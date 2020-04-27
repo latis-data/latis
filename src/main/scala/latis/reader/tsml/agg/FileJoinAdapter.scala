@@ -6,7 +6,11 @@ import scala.collection.mutable.ArrayBuffer
 
 import latis.dm.Dataset
 import latis.dm.Function
+import latis.dm.Sample
+import latis.dm.Scalar
 import latis.dm.Text
+import latis.dm.Tuple
+import latis.dm.TupleMatch
 import latis.ops.Operation
 import latis.ops.agg.Join
 import latis.ops.agg.TileJoin
@@ -73,28 +77,6 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   val templateTsml = Tsml((tsml.xml \ "dataset").last)
   
   /**
-   * Extract the file paths from a file list Dataset.
-   */
-  def getFilePaths(ds: Dataset): Iterator[String] = {
-    //TODO: could get srcDir from tsml, but also needed for ZipWriter?
-    lazy val dir = ds.getMetadata.get("srcDir") match { //TODO: consider "baseURL"
-      case None => ""
-      case Some(sd) => sd + File.separator
-    }
-    
-    ds match {
-      case Dataset(Function(it)) => it.map(sample => sample.findVariableByName("file") match {
-        case Some(Text(file)) => dir + file
-        case None => sample.findVariableByName("url") match {
-          case Some(Text(url)) => url
-          case None => throw new Exception(s"No 'file' or 'url' Variable found in Dataset '$ds'")
-        }
-      })
-      case _ => Iterator.empty
-    }
-  }
-  
-  /**
    * Operations to be passed to getDataset for file list.
    */
   val fileListOps = ArrayBuffer[Operation]()
@@ -104,6 +86,10 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    */
   val granuleOps = ArrayBuffer[Operation]()
   
+
+  /** Function that determines which granules are read when joining. */
+  private var fileListFilter: Option[Iterator[Sample] => Iterator[Sample]] = None
+
   /**
    * Manage how operations will be applied (e.g. to file list, granules and/or 
    * joined data). Selections (including NearestNeighbor) will be offered for 
@@ -123,19 +109,112 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     case ff: FirstFilter => fileListOps += ff; false
     case lf: LastFilter => fileListOps += lf; false
     
-    // Apply Nearest Neighbor Operation to granules (but not file list).
-    // This is not applicable to the file list.
-    // Note, if the bounding pair is not found in the same granule,
-    //   this will find the one closest end-point in each file
-    //   greatly reducing the size of the joined dataset and minimizing 
-    //   the final application without risk of losing the appropriate sample.
-    case NearestNeighborFilter(name, _) => 
-      var handled = handleGranuleOp(name, op)
+    case NearestNeighborFilter(name, value) =>
+      // The file list will be filtered to include only the granules
+      // that the nearest sample might be in when filtering on the
+      // domain variable of the file list.
+      //
+      // We are assuming a single nearest neighbor filter on the
+      // domain variable of the file list (typically time). If
+      // multiple filters are given, the first one handled here will
+      // be the one applied to the file list. The others may still be
+      // applied in other places.
+      if (outerDomainHasName(fileListAdapter, name) && fileListFilter.isEmpty) {
+        fileListFilter = Option(makeFileListFilter(value))
+      }
+
+      val handled = handleGranuleOp(name, op)
       // If this is for the outer domain, also apply to the joined dataset
-      if (outerDomainHasName(name)) handled = false
-      handled
+      val adapter = TsmlAdapter(templateTsml)
+      if (outerDomainHasName(adapter, name)) false else handled
    
     case _ => false //apply any other ops to the joined data
+  }
+
+  /**
+   * Creates a filter selecting the set of granules required for a
+   * join with a nearest neighbor filter applied.
+   */
+  private def makeFileListFilter(
+    value: String
+  ): Iterator[Sample] => Iterator[Sample] = { it =>
+    // Pair each granule in the file list with the bounds of the bin
+    // it represents, silently dropping samples that do not have
+    // bounds. This simplifies the logic later.
+    val withBounds: Iterator[(Sample, (Scalar, Scalar))] =
+      it.flatMap(s => fileListBounds(s).map((s, _)))
+
+    // If the file list is empty, we'll just keep it empty. Otherwise,
+    // we will fold over the iterator to find the granules nearest to
+    // our search value.
+    if (! withBounds.hasNext) Iterator.empty else withBounds.next() match {
+      case first @ (s, (b1, _)) =>
+        val v = Scalar(b1.getMetadata(), value)
+
+        if (v.compare(b1) < 0) {
+          // If the search value falls before the start of the first
+          // granule, we're already done.
+          Iterator(s)
+        } else {
+          // The following fold over the iterator will construct a new
+          // file list (an iterator of samples) containing only the
+          // granules we need to read in order to find the sample
+          // nearest our search value.
+          //
+          // The type of 'z' is what we're building in this fold:
+          // Either[(Sample, (Scalar, Scalar)), (Sample, Sample)]
+          //
+          // Recall that Either[A, B] means that something is A or B.
+          //
+          // This type is useful because we have two cases to consider
+          // during the fold:
+          //
+          // 1. We haven't found the search value yet.
+          //
+          // 2. The search value is bounded by two granules.
+          //
+          // The Right type (a pair of Samples) covers case two. Once
+          // we've hit this case we no longer need to look for the
+          // search value, so we can just return the accumulator for
+          // the rest of the fold.
+          //
+          // The Left type (a pair of a Sample and a pair of Scalars)
+          // covers case one. This type is used to carry the last
+          // sample we looked at so we can determine whether it and
+          // the current sample cover the search value. If we reach
+          // the end of the fold and we're still carrying the Left
+          // type, that means the search value falls after the last
+          // granule.
+          val z: Either[(Sample, (Scalar, Scalar)), (Sample, Sample)] =
+            Left(first)
+
+          withBounds.foldLeft(z) {
+            case (acc @ Right(_), _) => acc
+            case (Left((s1, (b1, _))), cur @ (s2, (_, b2))) =>
+              if (v.compare(b1) >= 0 && v.compare(b2) < 0) {
+                // Our search value is either in s1 or s2, so return
+                // both.
+                Right((s1, s2))
+              } else {
+                // Our search value comes after the granules we've
+                // looked at so far, so we need to continue the fold.
+                Left(cur)
+              }
+          } match {
+            case Left((s, _))    => Iterator(s)
+            case Right((s1, s2)) => Iterator(s1, s2)
+          }
+        }
+    }
+  }
+
+  /** Extracts bounds added to file list datasets by DomainBinner. */
+  private def fileListBounds(s: Sample): Option[(Scalar, Scalar)] = s match {
+    case Sample(_, Tuple(vs)) => vs.lastOption.flatMap {
+      case TupleMatch(s: Scalar, e: Scalar) => Option((s, e))
+      case _ => None
+    }
+    case _ => None
   }
 
   /**
@@ -148,13 +227,12 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   /**
    * Does the domain Variable of the outer Function have the given name.
    */
-  private def outerDomainHasName(name: String): Boolean = {
-    val tmpAdapter = TsmlAdapter(templateTsml)
-    val hasName = tmpAdapter.getOrigDataset match {
+  private def outerDomainHasName(adapter: TsmlAdapter, name: String): Boolean = {
+    val hasName = adapter.getOrigDataset match {
       case Dataset(f: Function) => f.getDomain.hasName(name)
       case _ => false
     }
-    try { tmpAdapter.close } catch { case e: Exception => }
+    try { adapter.close } catch { case e: Exception => }
     hasName
   }
   
@@ -189,19 +267,7 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
    */
   def joinDatasets: Dataset = {
     val fileDataset = fileListAdapter.getDataset(fileListOps)
-    val files = getFilePaths(fileDataset)
-    //make ds from template for each file
-    val dss: Iterator[Dataset] = files.flatMap { file =>  
-      //make a reader with the file location plugged into the template tsml
-      val reader = TsmlReader(templateTsml.dataset.setLocation(file))
-      readers += reader //keep a copy so we can close later
-      try {
-        Some(reader.getDataset(granuleOps))
-      }
-      catch {
-        case _: Exception => None //skip invalid files
-      }
-    }
+    val dss: Iterator[Dataset] = fileListToGranules(fileDataset)
     
     //Make metadata for the joined dataset based on the tsml
     val md = makeMetadata(tsml.dataset)
@@ -214,6 +280,40 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     }
   }
   
+  /** Creates a Dataset for each granule in a file list. */
+  private def fileListToGranules(fs: Dataset): Iterator[Dataset] = fs match {
+    case Dataset(Function(it)) =>
+      //TODO: could get srcDir from tsml, but also needed for ZipWriter?
+      //TODO: consider "baseURL"
+      val dir = fs.getMetadata.get("srcDir").fold("")(_ + File.separator)
+
+      val filter: Iterator[Sample] => Iterator[Sample] =
+        fileListFilter.getOrElse(identity)
+
+      filter(it).flatMap { file: Sample =>
+        val path = file.findVariableByName("file").map {
+          case Text(file) => dir + file
+        }.orElse {
+          file.findVariableByName("url").map {
+            case Text(url) => url
+          }
+        }.getOrElse {
+          throw new Exception(s"No 'file' or 'url' Variable found in Dataset '$fs'")
+        }
+
+        //make a reader with the file location plugged into the template tsml
+        val reader = TsmlReader(templateTsml.dataset.setLocation(path))
+        readers += reader //keep a copy so we can close later
+
+        try {
+          Option(reader.getDataset(granuleOps))
+        } catch {
+          case _: Exception => None //skip invalid files
+        }
+      }
+    case _ => Iterator.empty
+  }
+
   /**
    * Override to add logic to join the file datasets.
    */
