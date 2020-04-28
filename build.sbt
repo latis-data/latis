@@ -1,7 +1,7 @@
 ThisBuild / organization := "io.latis-data"
 ThisBuild / scalaVersion := "2.12.8"
 
-val artifactory = "http://web-artifacts.lasp.colorado.edu/artifactory/"
+val artifactory = "https://web-artifacts.lasp.colorado.edu/artifactory/"
 
 lazy val latis = (project in file("."))
   .enablePlugins(BuildInfoPlugin)
