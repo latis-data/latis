@@ -4,6 +4,7 @@ import latis.ops.Operation
 import latis.ops.filter.Selection
 import latis.ops.filter.FirstFilter
 import latis.ops.filter.LastFilter
+import latis.ops.filter.NearestNeighborFilter
 import latis.ops.filter.TakeOperation
 import latis.ops.filter.TakeRightOperation
 import java.util.Date
@@ -26,9 +27,11 @@ object OperationsValidator {
       case Selection("time", op, time) => 
         if (op.contains(">")) min = Some(isoToJava(time))
         if (op.contains("<")) max = isoToJava(time)
-      case TakeOperation(1) | TakeRightOperation(1) => validated = true
-      case _: FirstFilter => validated = true
-      case _: LastFilter => validated = true
+      case _: FirstFilter =>                   validated = true
+      case _: LastFilter =>                    validated = true
+      case NearestNeighborFilter("time", _) => validated = true
+      case TakeOperation(1) =>                 validated = true
+      case TakeRightOperation(1) =>            validated = true
       case _ =>
     }
     
