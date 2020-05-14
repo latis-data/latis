@@ -17,8 +17,6 @@ import latis.ops.agg.TileJoin
 import latis.ops.filter.FirstFilter
 import latis.ops.filter.LastFilter
 import latis.ops.filter.Selection
-import latis.ops.filter.TakeOperation
-import latis.ops.filter.TakeRightOperation
 import latis.reader.tsml.TsmlAdapter
 import latis.reader.tsml.TsmlReader
 import latis.reader.tsml.ml.Tsml
@@ -110,10 +108,7 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     //Note the return of "false" to tell getDataset to apply them to the result.
     case ff: FirstFilter => fileListOps += ff; false
     case lf: LastFilter => fileListOps += lf; false
-
-    case TakeOperation(value) => fileListOps += TakeOperation(value); false
-    case TakeRightOperation(value) => fileListOps += TakeRightOperation(value); false
-
+    
     case NearestNeighborFilter(name, value) =>
       // The file list will be filtered to include only the granules
       // that the nearest sample might be in when filtering on the
@@ -127,8 +122,6 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
       if (outerDomainHasName(fileListAdapter, name) && fileListFilter.isEmpty) {
         fileListFilter = Option(makeFileListFilter(value))
       }
-
-      fileListOps += NearestNeighborFilter(name, value)
 
       val handled = handleGranuleOp(name, op)
       // If this is for the outer domain, also apply to the joined dataset
@@ -327,6 +320,9 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
   override def getDataset(ops: Seq[Operation]): Dataset = {
     //TODO: consider how PIs are handled
     //could we use the super getDataset = joinDatasets? 
+
+    // Throw an error if the request exceeds a time range limit.
+    validateTimeRange(ops)
 
     val otherOps = ops.filterNot(handleOperation(_))
     
