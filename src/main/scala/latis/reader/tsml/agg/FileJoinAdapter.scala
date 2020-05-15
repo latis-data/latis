@@ -321,6 +321,9 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     //TODO: consider how PIs are handled
     //could we use the super getDataset = joinDatasets? 
 
+    // Throw an error if the request exceeds a time range limit.
+    validateTimeRange(ops)
+
     val otherOps = ops.filterNot(handleOperation(_))
     
     val ds = joinDatasets
