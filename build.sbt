@@ -1,7 +1,8 @@
 ThisBuild / organization := "io.latis-data"
 ThisBuild / scalaVersion := "2.12.8"
 
-val artifactory = "https://web-artifacts.lasp.colorado.edu/artifactory/"
+//val artifactory = "https://web-artifacts.lasp.colorado.edu/artifactory/" //TODO: delete me
+val nexus = "https://artifacts.pdmz.lasp.colorado.edu/repository/"
 
 lazy val latis = (project in file("."))
   .enablePlugins(BuildInfoPlugin)
@@ -42,8 +43,8 @@ lazy val commonSettings = compilerFlags ++ Seq(
   ),
   // Resolvers for our Artifactory repos
   resolvers ++= Seq(
-    "Artifactory Release" at artifactory + "sbt-release",
-    "Artifactory Snapshot" at artifactory + "sbt-snapshot"
+    "Nexus Release" at nexus + "web-releases",
+    "Nexus Snapshot" at nexus + "web-snapshots" //TODO: are we resolving dependencies from here?
   )
 )
 
@@ -68,13 +69,13 @@ lazy val compilerFlags = Seq(
 lazy val publishSettings = Seq(
   publishTo := {
     if (isSnapshot.value) {
-      Some("snapshots" at artifactory + "sbt-snapshot")
+      Some("snapshots" at nexus + "web-snapshots")
     } else {
-      Some("releases" at artifactory + "sbt-release")
+      Some("releases" at nexus + "web-releases")
     }
   },
   credentials ++= Seq(
-    Path.userHome / ".artifactorycredentials"
+    Path.userHome / ".sbt" / ".credentials"
   ).filter(_.exists).map(Credentials(_)),
   releaseVersionBump := sbtrelease.Version.Bump.Minor
 )
