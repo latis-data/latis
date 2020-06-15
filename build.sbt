@@ -1,7 +1,6 @@
 ThisBuild / organization := "io.latis-data"
 ThisBuild / scalaVersion := "2.12.8"
 
-//val artifactory = "https://web-artifacts.lasp.colorado.edu/artifactory/" //TODO: delete me
 val nexus = "https://artifacts.pdmz.lasp.colorado.edu/repository/"
 
 lazy val latis = (project in file("."))
@@ -44,7 +43,7 @@ lazy val commonSettings = compilerFlags ++ Seq(
   // Resolvers for our Nexus repos
   resolvers ++= Seq(
     "Nexus Release" at nexus + "web-releases",
-    "Nexus Snapshot" at nexus + "web-snapshots" //TODO: are we resolving dependencies from here?
+    "Nexus Snapshot" at nexus + "web-snapshots"
   )
 )
 
