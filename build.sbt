@@ -41,7 +41,7 @@ lazy val commonSettings = compilerFlags ++ Seq(
     "com.novocode"     % "junit-interface" % "0.11"      % Test,
     "org.apache.derby" % "derby"           % "10.10.1.1" % Test
   ),
-  // Resolvers for our Artifactory repos
+  // Resolvers for our Nexus repos
   resolvers ++= Seq(
     "Nexus Release" at nexus + "web-releases",
     "Nexus Snapshot" at nexus + "web-snapshots" //TODO: are we resolving dependencies from here?
