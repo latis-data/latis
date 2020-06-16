@@ -76,5 +76,6 @@ lazy val publishSettings = Seq(
   credentials ++= Seq(
     Path.userHome / ".sbt" / ".credentials"
   ).filter(_.exists).map(Credentials(_)),
-  releaseVersionBump := sbtrelease.Version.Bump.Minor
+  releaseVersionBump := sbtrelease.Version.Bump.Minor,
+  updateOptions := updateOptions.value.withGigahorse(false)
 )
