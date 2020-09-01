@@ -1,5 +1,7 @@
 package latis.reader.tsml.ml
 
+import latis.util.StringUtils
+
 import scala.collection.Map
 import scala.collection.Seq
 import scala.collection.mutable
@@ -57,7 +59,10 @@ abstract class VariableMl(xml: Node) {
   def getMetadataAttributes: Map[String, String] = {
     //Gather the XML attributes from the "metadata" element for this Variable.
     val map = mutable.HashMap[String,String]()
-    val seq = for (e <- xml \ "metadata"; att <- e.attributes) yield (att.key, att.value.text)
+    val seq = for {
+      e <- xml \ "metadata"
+      att <- e.attributes
+    } yield (att.key, StringUtils.resolveParameterizedString(att.value.text))
     Map[String, String](seq: _*)
   }
   
