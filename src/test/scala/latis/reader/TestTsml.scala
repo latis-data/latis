@@ -68,5 +68,11 @@ class TestTsml  {
     val t2 = tsml.dataset.setLocation("bar")
     assert(t2.toString.contains("""location="bar""""))
   }
-  
+
+  @Test
+  def parameterized_metadata_property = {
+    System.setProperty("my.param", "foo")
+    val tsml = Tsml(<dataset><metadata prop="${my.param}/bar"/><adapter/></dataset>)
+    assertEquals(Some("foo/bar"), tsml.dataset.getMetadataAttributes.get("prop"))
+  }
 }
