@@ -30,7 +30,14 @@ abstract class AggregationAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     
     val ds = collect(dss)
     
-    (piOps ++ ops).foldLeft(ds)((dataset, op) => op(dataset)) //doesn't handle any Operations
+    val ds2 = (piOps ++ ops).foldLeft(ds)((dataset, op) => op(dataset)) //doesn't handle any Operations
+
+    //Cache the dataset if requested
+    //Note, this requires that the dataset id in the tsml matches the tsml file name
+    getProperty("cache") match {
+      case Some("memory") => ds2.cache
+      case _ => ds2
+    }
   }
   
   override protected def makeDataset(ds: Dataset): Dataset = {
