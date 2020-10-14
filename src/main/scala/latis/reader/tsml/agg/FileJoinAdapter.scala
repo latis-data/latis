@@ -328,7 +328,14 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     
     val ds = joinDatasets
     
-    otherOps.foldLeft(ds)((dataset, op) => op(dataset)) 
+    val ds2 = otherOps.foldLeft(ds)((dataset, op) => op(dataset))
+
+    //Cache the dataset if requested
+    //Note, this requires that the dataset id in the tsml matches the tsml file name
+    getProperty("cache") match {
+      case Some("memory") => ds2.cache
+      case _ => ds2
+    }
   }
   
   /**
