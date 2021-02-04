@@ -10,7 +10,7 @@ lazy val latis = (project in file("."))
   .settings(
     name := "latis",
     libraryDependencies ++= Seq(
-      "javax.servlet"              %  "javax.servlet-api"        % "4.0.1" % "provided",
+      "javax.servlet"              %  "javax.servlet-api"        % "3.1.0" % "provided",
       "org.scala-lang.modules"     %% "scala-parser-combinators" % "1.1.2",
       "org.scala-lang.modules"     %% "scala-xml"       % "1.3.0",
       "com.typesafe.scala-logging" %% "scala-logging"   % "3.9.2",
