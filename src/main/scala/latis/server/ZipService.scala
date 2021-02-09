@@ -40,7 +40,7 @@ class ZipService extends HttpServlet with LazyLogging {
       val config = new LatisServerProperties(getServletConfig).config
       config.getServletContext().getContextPath()
     }
-    val requestStr = Source.fromInputStream(request.getInputStream)
+    val requestStr = Source.fromInputStream(request.getInputStream) //Note: storing request so it can be read twice
       .getLines
       .mkString(sys.props("line.separator"))
 
