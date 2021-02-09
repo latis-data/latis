@@ -16,6 +16,10 @@ class TestZipService {
   val json = """[{"url": "http://lasp.colorado.edu/lisird/latis/dap/tsis_tsi_24hr.txt?time>2019-01-01&take(10)"},
                  {"url": "http://lasp.colorado.edu/lisird/latis/dap/sorce_tsi_24hr_l3.asc?time>2019-01-01&take(10)"},
                  {"url": "http://lasp.colorado.edu/lisird/latis/dap/tcte_tsi_24hr.json?time>2019-01-01&take(10)"}]"""
+
+  val badJson = """[{"url": "http://lasp.colorado.edu/lisird/latis/dap/tsis_tsi_24hr.txt?time>2019-01-01&take(10)"},
+                    {"url": "http://lasp.colorado.edu/sensitive_data.txt)"},
+                    {"url": "https://my.sensitive.data.edu/everything.csv"}]"""
   
   //@Test
   def test = {
@@ -49,8 +53,13 @@ class TestZipService {
     assertFalse(ZipService.validateUrl(url3, ctxPath))
   }
 
-//  @Test
-//  def validateRequest: Unit = {
-//    ZipService.validateRequest("lisird")
-//  }
+  @Test
+  def validRequest: Unit = {
+    ZipService.validateRequest(json, "lisird")
+  }
+
+  @Test(expected=classOf[UnsupportedOperationException])
+  def invalidRequest: Unit = {
+    ZipService.validateRequest(badJson, "lisird")
+  }
 }
