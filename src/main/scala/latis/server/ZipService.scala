@@ -76,9 +76,12 @@ object ZipService {
     }
     urls.filter(!validateUrl(_, contextPath)) match {
       case Seq() => //validated
-      case Seq(url) => throw new UnsupportedOperationException(s"Cannot validate request with invalid URL: $url")
+      case Seq(url) =>
+        val msg = s"ZipService cannot validate request with invalid URL: $url"
+        throw new UnsupportedOperationException(msg)
       case us: Seq[String] =>
-        throw new UnsupportedOperationException(s"Cannot validate request with invalid URLs: ${us.mkString("\n")}")
+        val msg = s"ZipService cannot validate request with invalid URLs: ${us.mkString("\n")}"
+        throw new UnsupportedOperationException(msg)
     }
   }
 }
