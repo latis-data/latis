@@ -1,15 +1,20 @@
 package latis.server
 
 import java.io.PrintWriter
-
+import java.io.ByteArrayInputStream
 import com.typesafe.scalalogging.LazyLogging
 import javax.servlet.http._
 import latis.reader.JsonReader3
-import latis.writer.{HttpServletWriter, ZipWriter3}
+import latis.server.ZipService.validateRequest
+import latis.util.LatisServerProperties
+import latis.writer.HttpServletWriter
+import latis.writer.ZipWriter3
+import play.api.libs.json.Json
+import scala.io.Source
 
 class ZipService extends HttpServlet with LazyLogging {
   
-  override def doGet(request: HttpServletRequest, response: HttpServletResponse) = {
+  override def doGet(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     //TODO: return error response
     //TODO: write instructions
     val msg = "The ZipService requires a POST."
@@ -29,12 +34,51 @@ class ZipService extends HttpServlet with LazyLogging {
      */
     
     logger.info(s"Processing request: zip")
-      
-    val ds = JsonReader3(request.getInputStream).getDataset()
+
+    //Determine LaTiS service location and validate request
+    val ctxPath = {
+      val config = new LatisServerProperties(getServletConfig).config
+      config.getServletContext().getContextPath()
+    }
+    val requestStr = Source.fromInputStream(request.getInputStream)
+      .getLines
+      .mkString(sys.props("line.separator"))
+
+    validateRequest(requestStr, ctxPath)
+
+    val ds = {
+      val is = new ByteArrayInputStream(requestStr.getBytes())
+      JsonReader3(is).getDataset()
+    }
     
     //Note: needs ZipWriter3 to get content via URL
     HttpServletWriter(response, "zip3").write(ds)
       
     logger.info("Request complete.")
+  }
+}
+
+object ZipService {
+
+  /**
+   * Validate the given URL by returning whether it contains the given context path.
+   * TODO: include "/latis/"? Anything else?
+   */
+  def validateUrl(url: String, contextPath: String): Boolean = url.contains(contextPath)
+
+  /**
+   * Validate the given (stringified) HTTP servlet request by validating any URLs it contains.
+   */
+  def validateRequest(requestStr: String, contextPath: String): Unit = {
+    val urls: Seq[String] = {
+      val json = Json.parse(requestStr)
+      (json \\ "url").map(_.toString) //assumes the key for every URL value is "url"
+    }
+    urls.filter(!validateUrl(_, contextPath)) match {
+      case Seq() => //validated
+      case Seq(url) => throw new UnsupportedOperationException(s"Cannot validate request with invalid URL: $url")
+      case us: Seq[String] =>
+        throw new UnsupportedOperationException(s"Cannot validate request with invalid URLs: ${us.mkString("\n")}")
+    }
   }
 }
