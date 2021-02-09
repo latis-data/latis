@@ -10,7 +10,7 @@ import java.net.URLDecoder
  * Subclass of LatisProperties that uses the ServletConfig in a server configuration
  * to locate the property file and resolve paths.
  */
-class LatisServerProperties(val config: ServletConfig) extends LatisProperties {
+class LatisServerProperties(config: ServletConfig) extends LatisProperties {
 
   /**
    * Find the property file. Extend parent by looking for a Servlet init parameter
