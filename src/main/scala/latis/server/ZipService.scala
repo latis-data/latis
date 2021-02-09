@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream
 import com.typesafe.scalalogging.LazyLogging
 import javax.servlet.http._
 import latis.reader.JsonReader3
+import latis.server.ErrorWriter
 import latis.server.ZipService.validateRequest
 import latis.util.LatisServerProperties
 import latis.writer.HttpServletWriter
@@ -35,22 +36,26 @@ class ZipService extends HttpServlet with LazyLogging {
     
     logger.info(s"Processing request: zip")
 
-    //Determine LaTiS service location and validate request
-    val ctxPath = getServletConfig.getServletContext().getContextPath()
-    val requestStr = Source.fromInputStream(request.getInputStream) //Note: storing request so it can be read twice
-      .getLines
-      .mkString(sys.props("line.separator"))
+    try {
+      //Determine LaTiS service location and validate request
+      val ctxPath = getServletConfig.getServletContext().getContextPath()
+      val requestStr = Source.fromInputStream(request.getInputStream) //Note: storing request so it can be read twice
+        .getLines
+        .mkString(sys.props("line.separator"))
 
-    validateRequest(requestStr, ctxPath)
+      validateRequest(requestStr, ctxPath)
 
-    val ds = {
-      val is = new ByteArrayInputStream(requestStr.getBytes())
-      JsonReader3(is).getDataset()
+      val ds = {
+        val is = new ByteArrayInputStream(requestStr.getBytes())
+        JsonReader3(is).getDataset()
+      }
+
+      //Note: needs ZipWriter3 to get content via URL
+      HttpServletWriter(response, "zip3").write(ds)
+    } catch {
+      case e: Throwable => ErrorWriter(response).write(e)
     }
-    
-    //Note: needs ZipWriter3 to get content via URL
-    HttpServletWriter(response, "zip3").write(ds)
-      
+
     logger.info("Request complete.")
   }
 }
