@@ -2,21 +2,29 @@ package latis.server
 
 import java.io.FileOutputStream
 import org.junit._
-
+import org.junit.Assert._
 import latis.dm._
 import latis.metadata.Metadata
+import latis.reader.JsonReader3
 import latis.writer.ZipWriter3
+
+import javax.servlet.http.HttpServletRequest
+import scala.io.Source
 
 class TestZipService {
   
   val json = """[{"url": "http://lasp.colorado.edu/lisird/latis/dap/tsis_tsi_24hr.txt?time>2019-01-01&take(10)"},
                  {"url": "http://lasp.colorado.edu/lisird/latis/dap/sorce_tsi_24hr_l3.asc?time>2019-01-01&take(10)"},
                  {"url": "http://lasp.colorado.edu/lisird/latis/dap/tcte_tsi_24hr.json?time>2019-01-01&take(10)"}]"""
+
+  val badJson = """[{"url": "http://lasp.colorado.edu/lisird/latis/dap/tsis_tsi_24hr.txt?time>2019-01-01&take(10)"},
+                    {"url": "http://lasp.colorado.edu/sensitive_data.txt)"},
+                    {"url": "https://my.sensitive.data.edu/everything.csv"}]"""
   
   //@Test
   def test = {
     //val source = Source.fromString(json)
-    //val ds = JsonReader(source).getDataset()
+    //val ds = JsonReader3(source).getDataset()
     val ds = Dataset(
       Function(Seq(
         Text(Metadata("url"), "http://lasp.colorado.edu/lisird/latis/dap/tsis_tsi_24hr.txt?time>2019-01-01&take(10)"),
@@ -31,5 +39,27 @@ class TestZipService {
     val writer = ZipWriter3(out)
     writer.write(ds)
 
+  }
+
+  @Test
+  def validateUrls: Unit = {
+    val url1 = "http://lasp.colorado.edu/lisird/latis/dap/tsis_tsi_24hr.txt?time>2019-01-01&take(10)"
+    val url2 = "http://lasp.colorado.edu/sensitive_data.txt"
+    val url3 = "https://my.sensitive.data.edu/everything.csv"
+    val ctxPath = "lisird"
+
+    assertTrue(ZipService.validateUrl(url1, ctxPath))
+    assertFalse(ZipService.validateUrl(url2, ctxPath))
+    assertFalse(ZipService.validateUrl(url3, ctxPath))
+  }
+
+  @Test
+  def validRequest: Unit = {
+    ZipService.validateRequest(json, "lisird")
+  }
+
+  @Test(expected=classOf[UnsupportedOperationException])
+  def invalidRequest: Unit = {
+    ZipService.validateRequest(badJson, "lisird")
   }
 }
