@@ -1,10 +1,11 @@
 package latis.writer
 
-import latis.dm._
+import java.io._
 import java.net._
 import java.util.zip._
-import java.io._
+
 import com.typesafe.scalalogging.LazyLogging
+import latis.dm._
 import latis.ops.FileListToZipList
 import latis.ops.UrlListToZipList
 
@@ -13,8 +14,13 @@ import latis.ops.UrlListToZipList
  * Use operations to transform "file" or "url" list datasets into
  * a "zip list" dataset: zipEntry -> url which this writer writes.
  * The Operations deal with the different logic for each type.
+ *
+ * Duplicate zip entries will be disambiguated by appending
+ * a counter with an underscore (e.g. "_1").
  */
 class ZipWriter3 extends Writer with LazyLogging {
+  //TODO: add manifest
+  //TODO: add disambiguating "_1" before file extension
 
   def write(dataset: Dataset): Unit = {
     // Translate to "zip list" dataset based on url vs file variable
@@ -42,7 +48,7 @@ class ZipWriter3 extends Writer with LazyLogging {
 
             // Write the zip entry
             try {
-              zip.putNextEntry(new ZipEntry(zipEntry))
+              zip.putNextEntry(new ZipEntry(disambiguate(zipEntry)))
               Stream.continually(bis.read).takeWhile(_ != -1).foreach(zip.write(_))
             } catch {
               case e: IOException =>
@@ -77,6 +83,26 @@ class ZipWriter3 extends Writer with LazyLogging {
           url.substring(0, index+1) + qs.map(URLEncoder.encode(_, "UTF-8")).mkString("&")
       }
     } else url
+  }
+
+  /**
+   * Keeps a counter so we can disambiguate duplicate zip entry names.
+   * We do it this way so we can stream samples.
+   */
+  private val counter = scala.collection.mutable.Map[String, Int]()
+
+  /**
+   * Makes sure that we don't duplicate zip entry names.
+   * This will append "_n" for names that have already been used
+   * where "n" is a counter starting at 1. A novel name will be unchanged.
+   */
+  private def disambiguate(name: String): String = counter.get(name) match {
+    case Some(n) =>
+      counter += ((name, n + 1))
+      name + "_" + n
+    case None =>
+      counter += ((name, 1))
+      name
   }
 
   override def mimeType: String = "application/zip"

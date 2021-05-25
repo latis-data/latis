@@ -1,17 +1,15 @@
 package latis.writer
 
-import org.junit.{Test,Ignore}
-import latis.reader.tsml.TsmlReader
-import org.junit.rules.TemporaryFolder
-import java.io.File
-import org.junit.Assert.assertEquals
-import java.util.zip.ZipFile
-import latis.dm.Sample
-import latis.dm.Integer
-import latis.dm.Text
-import latis.dm.Dataset
-import latis.dm.Function
+import latis.dm._
 import latis.metadata.Metadata
+import latis.ops.UrlListToZipList
+import latis.reader.tsml.TsmlReader
+import org.junit.Assert.assertEquals
+import org.junit.Ignore
+import org.junit.Test
+
+import java.io.{File, FileOutputStream}
+import java.util.zip.ZipFile
 
 
 class TestZipWriter {
@@ -52,5 +50,38 @@ class TestZipWriter {
     
     assertEquals(3, 3)
   }
-  
+
+  @Test
+  def zip_entry_from_url_ignoring_query(): Unit = {
+    val url = "http://example.com/foo/bar.jar?who=dat"
+    val name = new UrlListToZipList().makeNameUrlPair(url)._1
+    assertEquals("bar.jar", name)
+  }
+
+  @Test
+  def zip_entry_from_url_with_ending_slash(): Unit = {
+    val url = "http://example.com/foo/bar/?who=dat"
+    val name = new UrlListToZipList().makeNameUrlPair(url)._1
+    assertEquals("bar", name)
+  }
+
+  @Test
+  def disambiguate_duplicate_entry_names(): Unit = {
+    //Note, only supported for ZipWriter3
+    val samples = List(
+      Sample(Integer(0), Text(Metadata("url"),"https://placekitten.com/200/200")),
+      Sample(Integer(1), Text(Metadata("url"),"https://placekitten.com/200/200")),
+      Sample(Integer(2), Text(Metadata("url"),"https://placekitten.com/200/200")),
+    )
+    val ds = Dataset(Function(samples), Metadata("test"))
+    //AsciiWriter.write(ds)
+    val file = new File("/tmp/disambiguate_duplicate_entry_names.zip")
+    val fos = new FileOutputStream(file)
+    ZipWriter3(fos).write(ds)
+
+    import collection.JavaConverters._
+    val entries = new ZipFile(file).entries.asScala.map(_.getName).toList
+    assertEquals(List("200", "200_1", "200_2"), entries)
+    file.delete
+  }
 }
