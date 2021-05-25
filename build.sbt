@@ -36,8 +36,8 @@ lazy val bench = project
 lazy val commonSettings = compilerFlags ++ Seq(
   // Test suite dependencies
   libraryDependencies ++= Seq(
-    "junit"            % "junit"           % "4.13.1"    % Test,
-    "com.novocode"     % "junit-interface" % "0.11"      % Test,
+    "junit"            % "junit"           % "4.13.2"    % Test,
+    "com.github.sbt"   % "junit-interface" % "0.13.2"    % Test,
     "org.apache.derby" % "derby"           % "10.10.1.1" % Test
   ),
   // Resolvers for our Nexus repos
