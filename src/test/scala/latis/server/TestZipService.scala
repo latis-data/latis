@@ -13,9 +13,9 @@ import scala.io.Source
 
 class TestZipService {
   
-  val json = """[{"url": "http://lasp.colorado.edu/lisird/latis/dap/tsis_tsi_24hr.txt?time>2019-01-01&take(10)"},
-                 {"url": "http://lasp.colorado.edu/lisird/latis/dap/sorce_tsi_24hr_l3.asc?time>2019-01-01&take(10)"},
-                 {"url": "http://lasp.colorado.edu/lisird/latis/dap/tcte_tsi_24hr.json?time>2019-01-01&take(10)"}]"""
+  val json = """[{"url": "https://lasp.colorado.edu/lisird/latis/dap/tsis_tsi_24hr.txt?time>2019-01-01&take(10)"},
+                 {"url": "https://lasp.colorado.edu/lisird/latis/dap/sorce_tsi_24hr_l3.asc?time>=2019-01-01&take(10)"},
+                 {"url": "https://lasp.colorado.edu/lisird/latis/dap/tcte_tsi_24hr.json?time%3E2019-01-01&take(10)"}]"""
 
   val badJson = """[{"url": "http://lasp.colorado.edu/lisird/latis/dap/tsis_tsi_24hr.txt?time>2019-01-01&take(10)"},
                     {"url": "http://lasp.colorado.edu/sensitive_data.txt)"},
@@ -23,16 +23,17 @@ class TestZipService {
   
   //@Test
   def test = {
-    //val source = Source.fromString(json)
-    //val ds = JsonReader3(source).getDataset()
-    val ds = Dataset(
-      Function(Seq(
-        Text(Metadata("url"), "http://lasp.colorado.edu/lisird/latis/dap/tsis_tsi_24hr.txt?time>2019-01-01&take(10)"),
-        Text(Metadata("url"), "http://lasp.colorado.edu/lisird/latis/dap/sorce_tsi_24hr_l3.asc?time%3E2019-01-01&take(10)"),
-        Text(Metadata("url"), "http://lasp.colorado.edu/lisird/latis/dap/tcte_tsi_24hr.json?time%3E2019-01-01&take(10)"),
-      )),
-      //Metadata("baseUrl" -> "http://lasp.colorado.edu/lisird/latis/dap/")
-    )
+    val source = Source.fromString(json)
+    val ds = JsonReader3(source).getDataset()
+    //test baseUrl, not yet supported
+//    val ds = Dataset(
+//      Function(Seq(
+//        Text(Metadata("url"), "tsis_tsi_24hr.txt?time>2019-01-01&take(10)"),
+//        Text(Metadata("url"), "sorce_tsi_24hr_l3.asc?time>=2019-01-01&take(10)"),
+//        Text(Metadata("url"), "tcte_tsi_24hr.json?time%3E2019-01-01&take(10)"),
+//      )),
+//      //Metadata("baseUrl" -> "https://lasp.colorado.edu/lisird/latis/dap/")
+//    )
     
     //latis.writer.Writer.fromSuffix("asc").write(ds)
     val out = new FileOutputStream("/data/tmp/zipService.zip")
