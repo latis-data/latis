@@ -35,11 +35,9 @@ class ZipWriter3 extends Writer with LazyLogging {
       zds match {
         case DatasetSamples(it) => it foreach {
           case Sample(Text(zipEntry), Text(url)) =>
-            val encodedURL = ensureURLEncoded(url)
-
             // Open the URL input stream
             val bis: InputStream = try {
-              new BufferedInputStream(new URL(encodedURL).openStream())
+              new BufferedInputStream(new URL(url).openStream())
             } catch {
               case e: Exception =>
                 val msg = s"Failed to open the URL: $url"
@@ -67,22 +65,6 @@ class ZipWriter3 extends Writer with LazyLogging {
     } finally {
       zip.close
     }
-  }
-
-  //TODO: net util
-  /**
-   * Return a URL based on the given URL that has the query encoded.
-   * If the URL contains a "%" this assumes that it is already encoded.
-   */
-  def ensureURLEncoded(url: String): String = {
-    if (!url.contains('%')) {
-      url.indexOf("?") match {
-        case -1    => url  //no query
-        case index =>
-          val qs = url.substring(index+1).split("&")
-          url.substring(0, index+1) + qs.map(URLEncoder.encode(_, "UTF-8")).mkString("&")
-      }
-    } else url
   }
 
   /**
