@@ -20,6 +20,7 @@ lazy val latis = (project in file("."))
       "org.apache.commons"         %  "commons-math3"   % "3.6.1",
       "commons-net"                %  "commons-net"     % "3.7.2",
       "net.sf.ehcache"             %  "ehcache"         % "2.10.6",
+      "com.lihaoyi"                %% "requests"        % "0.6.5",
       "org.codehaus.groovy"        %  "groovy-all"      % "3.0.7" % Runtime
     ),
     // Some tests fail unless we set this.
