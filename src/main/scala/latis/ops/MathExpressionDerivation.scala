@@ -79,7 +79,7 @@ class MathExpressionDerivation(private val str: String) extends Operation {
       case Dataset(v) => v.toSeq.map(_.getName) ++ values.keySet
       case _ => values.keySet.toSeq //constants
     }
-    if(canEval(parsedExpr, names)) super.apply(ds)
+    if(canEval(parsedExpr, names)) super.apply(ReplaceMissingOperation(List("NaN"))(ds))
     else ds //can't apply derivation, so return original dataset
   }
    
@@ -122,7 +122,7 @@ class MathExpressionDerivation(private val str: String) extends Operation {
     })
     sample.range.findFunction match {
       case None if (!values.keySet.contains(varName)) => {
-        val r = Real(Metadata(varName), deriveField)
+        val r = Real(Metadata("name" -> varName, "missing_value" -> "NaN"), deriveField)
         Some(Sample(sample.domain, Tuple(sample.range.toSeq :+ r)))
       } 
       case _ => {
