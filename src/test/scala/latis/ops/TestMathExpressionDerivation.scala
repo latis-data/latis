@@ -336,12 +336,12 @@ class TestMathExpressionDerivation {
       }
     }
 
-    val ds = MathExpressionDerivation("A=1+2*3+4/5")(missingValueDataset)
+    val ds = MathExpressionDerivation("A=scalar+1")(missingValueDataset)
     ds match {
       case Dataset(Function(it)) => it.drop(1).next match {
         case Sample(_, TupleMatch(Real(s), Real(a))) =>
           assertTrue(s.isNaN) //missing value replaced
-          assertEquals(7.8, a, 0.0)
+          assertTrue(a.isNaN) //missing value replaced before derivation
       }
     }
   }
