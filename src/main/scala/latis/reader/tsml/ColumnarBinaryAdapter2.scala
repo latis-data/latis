@@ -351,9 +351,9 @@ object ColumnarBinaryAdapter2 {
               // a < v < b
 
               // If v is equidistant from a and b (v - a = b - v), we
-              // will round down. This is to be consistent with the
+              // will round up. This is to be consistent with the
               // NearestNeighborInterpolation strategy.
-              if (v - a <= b - v) {
+              if (v - a < b - v) {
                 Bounds(i-1, i-1)
               } else {
                 Bounds(i, i)
