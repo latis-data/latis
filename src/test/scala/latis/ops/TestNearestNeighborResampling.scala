@@ -43,7 +43,7 @@ class TestNearestNeighborResampling {
     val ds = op(TestDataset.canonical)
     val data = ds.toStrings
     assertEquals("1", data(1)(0))
-    assertEquals("1", data(1)(1))
+    assertEquals("2", data(1)(1))
     assertEquals("2", data(1)(2))
   }
   

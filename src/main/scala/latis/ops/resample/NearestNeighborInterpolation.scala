@@ -2,7 +2,7 @@ package latis.ops.resample
 
 /**
  * Interpolates a value to whichever given value it is closest to.
- * If equidistant to two points, it will return the lower point.
+ * If equidistant to two points, it will return the higher point.
  */
 trait NearestNeighborInterpolation extends Interpolation {
 
@@ -13,8 +13,8 @@ trait NearestNeighborInterpolation extends Interpolation {
         if (i == 0) Some(ys.head) //less than all x, use first y
         else {
           val lb = xs(i - 1)
-          if((x - lb) <= (ub - x)) Some(ys(i - 1)) //closer to lower bound (or in exact middle)
-          else Some(ys(i)) //closer to upper bound
+          if((x - lb) < (ub - x)) Some(ys(i - 1)) //closer to lower bound
+          else Some(ys(i)) //closer to upper bound (or in exact middle)
         }
       }
       case None => Some(ys.last) //greater than all x, use last y
