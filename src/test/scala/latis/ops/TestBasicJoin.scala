@@ -63,7 +63,7 @@ class TestBasicJoin {
     val ds = op(ds1, ds2)
     //AsciiWriter.write(ds)
     val header = new AsciiWriter().makeHeader(ds)
-    assertEquals(header, "(t -> (a, b))\n")
+    assertEquals("(t -> (a, b))\n", header)
   }
   
   //@Test
