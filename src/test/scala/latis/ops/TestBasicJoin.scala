@@ -45,6 +45,26 @@ class TestBasicJoin {
       }
     }
   }
+
+  @Test
+  def variables_in_metadata = {
+    /*
+     * a t1 t2  b
+     * 1  1  1  2
+     * 2  2  2  4
+     * 3  3  3  6
+     */
+    val samples1 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mda, i)))
+    val samples2 = List(1,2,3).map(i => Sample(Real(mdt, i), Real(mdb, i*2)))
+    val ds1 = Dataset(Function(samples1, Metadata("function1")), Metadata("dataset1"))
+    val ds2 = Dataset(Function(samples2, Metadata("function2")), Metadata("dataset2"))
+
+    val op = new BasicJoin()
+    val ds = op(ds1, ds2)
+    //AsciiWriter.write(ds)
+    val header = new AsciiWriter().makeHeader(ds)
+    assertEquals("(t -> (a, b))\n", header)
+  }
   
   //@Test
   def extra_in_second_in_middle = {
