@@ -27,7 +27,7 @@ object OperationsValidator {
       case Selection("time", op, time) => 
         if (op.contains(">")) min = Some(isoToJava(time))
         if (op.contains("<")) max = isoToJava(time)
-        if (op.contains("=")) validated = true
+        if (op == "=") validated = true
       case _: FirstFilter =>                   validated = true
       case _: LastFilter =>                    validated = true
       case NearestNeighborFilter("time", _) => validated = true
