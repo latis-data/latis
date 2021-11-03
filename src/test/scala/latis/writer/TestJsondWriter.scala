@@ -4,7 +4,7 @@ import org.junit._
 import Assert._
 import latis.dm._
 import latis.metadata.Metadata
-import latis.data.SampledData
+import latis.time.Time
 import java.io.ByteArrayOutputStream
 
 class TestJsondWriter extends WriterTest {
@@ -78,6 +78,33 @@ class TestJsondWriter extends WriterTest {
     }
     
     assertEquals("canonical", dsname)
+  }
+
+  @Test
+  def nested_tuple = {
+    val t = Time(Metadata(Map("units" -> "milliseconds since 1970-01-01", "name" -> "time")), 946800000)
+    val a = Real(Metadata("a"), 3.14)
+    val b = Integer(Metadata("b"), 2)
+    val c = Integer(Metadata("c"), 1)
+    val nestedTup = Tuple(List(a, Tuple(List(b, c))))
+    val samples = List(Sample(t, nestedTup)).toIterator
+    val func = Function(t, nestedTup, samples)
+
+    val ds = Dataset(func, Metadata("nested_tuple"))
+
+    val out = new ByteArrayOutputStream()
+    Writer(out, "jsond").write(ds)
+    val s = out.toString().replace('\n', ' ')
+    
+    val regex = """\[\[(\d+),(\d.\d+),(\d),(\d)\]\] }} """.r //no nested array for nested tuple
+    s.split("\"data\": ")(1) match {
+      case regex(t,a,b,c) =>
+        assertEquals("946800000", t)
+        assertEquals("3.14", a)
+        assertEquals("2", b)
+        assertEquals("1", c)
+      case _ => fail
+    }
   }
   
   //@Test
