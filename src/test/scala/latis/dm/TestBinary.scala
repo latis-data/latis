@@ -69,7 +69,14 @@ class TestBinary {
     assertEquals(3.14, bb2.getDouble, 0.0) //data value is preserved
     assertEquals(42, bb2.getInt, 0.0) //data value is preserved
   }
-  
+
+  @Test
+  def is_missing: Unit = {
+    val bb = ByteBuffer.allocate(8)
+    bb.putDouble(3.14)
+    val bv = Binary(bb)
+    assertFalse(bv.isMissing)
+  }
   
   /*
    * TODO: test overfilled buffer, but only the JdbcAdapter applies that now 

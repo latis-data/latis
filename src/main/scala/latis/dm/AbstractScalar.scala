@@ -1,6 +1,7 @@
 package latis.dm
 
 import latis.data._
+import latis.data.buffer.ByteBufferData
 import latis.data.value._
 import latis.metadata._
 
@@ -24,6 +25,7 @@ abstract class AbstractScalar(metadata: Metadata = EmptyMetadata, data: Data = E
     case LongValue(l) => l
     case IndexValue(i) => i
     case StringValue(s) => s.trim //TODO: match any TextData?
+    case bbd: ByteBufferData => bbd.buffer
   }
 
 
