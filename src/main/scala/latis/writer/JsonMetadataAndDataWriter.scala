@@ -148,7 +148,7 @@ class JsonMetadataAndDataWriter extends JsonWriter {
         str
       }
       case t: Tuple => if(t.getArity > 1) {
-        val vars = (d.toSeq ++ t.getVariables).filterNot(_.isInstanceOf[Index])
+        val vars = (d.toSeq ++ t.toSeq).filterNot(_.isInstanceOf[Index])
         val vs = vars.map(varToString(_))
         (prepend ++ vs).mkString("[", ",", "]") 
       } else makeSample(Sample(d, t.getVariables.head))
