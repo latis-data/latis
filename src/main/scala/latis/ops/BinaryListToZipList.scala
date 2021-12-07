@@ -14,12 +14,6 @@ class BinaryListToZipList extends Operation {
   override def apply(dataset: Dataset): Dataset = {
     dsName = dataset.getName
     super.apply(dataset)
-//    dataset match {
-//      case ds @ DatasetSamples(it) =>
-//        val samples = it.toList.flatMap(applyToSample(_))
-//        Dataset(Function(samples), ds.getMetadata)
-//      case _ => ??? //TODO: empty dataset?
-//    }
   }
 
   /**
