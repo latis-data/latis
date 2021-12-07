@@ -27,55 +27,16 @@ class ZipWriter3 extends Writer with LazyLogging {
   //TODO: add disambiguating "_1" before file extension
 
   def write(dataset: Dataset): Unit = {
-    // Translate to "zip list" dataset based on binary vs url vs file variable.
-    // TODO: refactor to function "toZipListDs"?
-    val zds: Dataset = if (findBinaryVariable(dataset).isDefined)
-      new BinaryListToZipList()(dataset)
-    else if (dataset.findVariableByName("url").nonEmpty)
-      new UrlListToZipList()(dataset)
-    else if (dataset.findVariableByName("file").nonEmpty)
-      new FileListToZipList()(dataset)
-    else throw new RuntimeException("No 'url', 'file', nor binary variable found in dataset.") 
+    val zds: Dataset = toZipListDs(dataset)
 
     val zip = new ZipOutputStream(getOutputStream)
     try {
       zds match {
         case DatasetSamples(it) => it foreach {
-          case Sample(Text(zipEntry), Binary(bytes)) => //TODO: refactor to function "zipFromBytes"?
-            // Write the zip entry
-            try {
-              zip.putNextEntry(new ZipEntry(disambiguate(zipEntry)))
-              zip.write(bytes)
-            } catch {
-              case e: IOException =>
-                // Log a warning, leave empty entry 
-                val msg = "Failed to write bytes for zip entry."
-                logger.warn(msg, e)
-            } 
-            zip.closeEntry //finalize the zip entry
-          case Sample(Text(zipEntry), Text(url)) => //TODO: refactor to function "zipFromUrl"
-            // Open the URL input stream
-            val bis: InputStream = try {
-              new BufferedInputStream(new URL(url).openStream())
-            } catch {
-              case e: Exception =>
-                val msg = s"Failed to open the URL: $url"
-                throw new RuntimeException(msg, e)
-            }
-
-            // Write the zip entry
-            try {
-              zip.putNextEntry(new ZipEntry(disambiguate(zipEntry)))
-              Stream.continually(bis.read).takeWhile(_ != -1).foreach(zip.write(_))
-            } catch {
-              case e: IOException =>
-                // Log a warning, leave empty entry //TODO: add error message to entry?
-                val msg = s"Failed to read the URL: $url"
-                logger.warn(msg, e)
-            } finally {
-              bis.close //make sure we release the file resource
-            }
-            zip.closeEntry //finalize the zip entry
+          case Sample(Text(zipEntry), Binary(bytes)) =>
+            zipFromBytes(zip, disambiguate(zipEntry), bytes)
+          case Sample(Text(zipEntry), Text(url)) =>
+            zipFromUrl(zip, disambiguate(zipEntry), url)
           case _ => throw new RuntimeException("Not a valid zip dataset")
         }
         case _ => throw new RuntimeException("Empty dataset")
@@ -87,20 +48,85 @@ class ZipWriter3 extends Writer with LazyLogging {
   }
 
   /**
+   * Translate to "zip list" dataset based on binary vs url vs file variable.
+   */
+  def toZipListDs(ds: Dataset): Dataset = 
+    if (findBinaryVariable(ds).isDefined)
+      new BinaryListToZipList()(ds)
+    else if (ds.findVariableByName("url").nonEmpty)
+      new UrlListToZipList()(ds)
+    else if (ds.findVariableByName("file").nonEmpty)
+      new FileListToZipList()(ds)
+    else throw new RuntimeException("No 'url', 'file', nor binary variable found in dataset.")
+  
+
+  /**
+   * Adds an entry to the ZipOutputStream with the given bytes.
+   */
+  def zipFromBytes(zip: ZipOutputStream, name: String, bytes: Array[Byte]): Unit = {
+    try {
+      zip.putNextEntry(new ZipEntry(name))
+      zip.write(bytes)
+    } catch {
+      case e: IOException =>
+        // Log a warning, leave empty entry 
+        val msg = "Failed to write bytes to the zip entry."
+        logger.warn(msg, e)
+    }
+    zip.closeEntry //finalize the zip entry
+  }
+
+  /**
+   * Adds an entry to the ZipOutputStream by reading the bytes from the url.
+   */
+  def zipFromUrl(zip: ZipOutputStream, name: String, url: String): Unit = {
+    // Open the URL input stream
+    val bis: InputStream = try {
+      new BufferedInputStream(new URL(url).openStream())
+    } catch {
+      case e: Exception =>
+        val msg = s"Failed to open the URL: $url"
+        throw new RuntimeException(msg, e)
+    }
+
+    // Write the zip entry
+    try {
+      zip.putNextEntry(new ZipEntry(name))
+      Stream.continually(bis.read).takeWhile(_ != -1).foreach(zip.write(_))
+    } catch {
+      case e: IOException =>
+        // Log a warning, leave empty entry //TODO: add error message to entry?
+        val msg = s"Failed to read the URL: $url"
+        logger.warn(msg, e)
+    } finally {
+      bis.close //make sure we release the file resource
+    }
+    zip.closeEntry //finalize the zip entry
+  }
+
+  /**
+   * Returns the first binary variable found in the dataset, if there is one.
+   */
+  private def findBinaryVariable(ds: Dataset): Option[Variable] = ds.getScalars.find {
+    case Binary(_) => true
+    case _ => false
+  }
+
+  /**
    * Keeps a counter so we can disambiguate duplicate zip entry names.
    * We do it this way so we can stream samples.
    */
-  private val counter = scala.collection.mutable.Map[String, Int]()
+  private val counter = scala.collection.mutable.Map[String, Int]() //TODO: will need to be Map[String, String]
 
   /**
    * Makes sure that we don't duplicate zip entry names.
-   * This will append "_n" for names that have already been used
-   * where "n" is a counter starting at 1. A novel name will be unchanged.
+   * This will append "_d" for names that have already been used
+   * where "d" is the stringified form of the given domain value.
    * 
-   * TODO: disambiguate with Times. If Text (formatted) time, preserve that formatting, else .toIso. 
-   * If domain isn't Time, slap .toString, if it's a Tuple, .mkString somehow... (a function to Stringify any domain would be nice, factor it out into a separate function in this file and prepend with "_")
+   * TODO: Can't access domain variable because we get rid of it in *ListToZipList ops. 
+   *       Will have to refactor "zip list" datasets to: domain -> (zipEntry, serializable).
    */
-  private def disambiguate(name: String): String = counter.get(name) match {
+  private def disambiguate(name: String/*, domain: Variable*/): String = counter.get(name) match {
     case Some(n) =>
       counter += ((name, n + 1))
       name + "_" + n
@@ -110,7 +136,7 @@ class ZipWriter3 extends Writer with LazyLogging {
   }
 
   /**
-   * Returns a String representation of a domain Variable
+   * Returns a String representation of a domain variable
    * that is acceptable as a zip entry name.
    */
   private def domainToString(domain: Variable): String = domain match {
@@ -120,14 +146,6 @@ class ZipWriter3 extends Writer with LazyLogging {
     }
     case tup: Tuple => tup.getVariables.map(domainToString(_)).mkString("_")
     case _ => domain.toString
-  }
-
-  /**
-   * Returns the first Binary Variable found in the Dataset, if there is one.
-   */
-  private def findBinaryVariable(ds: Dataset): Option[Variable] = ds.getScalars.find {
-    case Binary(_) => true
-    case _ => false
   }
 
   override def mimeType: String = "application/zip"
