@@ -9,6 +9,7 @@ import latis.dm._
 import latis.ops.BinaryListToZipList
 import latis.ops.FileListToZipList
 import latis.ops.UrlListToZipList
+import latis.time.Time
 
 /**
  * Proposed replacement for ZipWriter1 and ZipWriter2 (LATIS-476).
@@ -40,7 +41,7 @@ class ZipWriter3 extends Writer with LazyLogging {
     try {
       zds match {
         case DatasetSamples(it) => it foreach {
-          case Sample(Text(zipEntry), Binary(bytes)) => // TODO: refactor to function "zipFromBytes"?
+          case Sample(Text(zipEntry), Binary(bytes)) => //TODO: refactor to function "zipFromBytes"?
             // Write the zip entry
             try {
               zip.putNextEntry(new ZipEntry(disambiguate(zipEntry)))
@@ -52,7 +53,7 @@ class ZipWriter3 extends Writer with LazyLogging {
                 logger.warn(msg, e)
             } 
             zip.closeEntry //finalize the zip entry
-          case Sample(Text(zipEntry), Text(url)) => // TODO: refactor to function "zipFromUrl"
+          case Sample(Text(zipEntry), Text(url)) => //TODO: refactor to function "zipFromUrl"
             // Open the URL input stream
             val bis: InputStream = try {
               new BufferedInputStream(new URL(url).openStream())
@@ -109,9 +110,22 @@ class ZipWriter3 extends Writer with LazyLogging {
   }
 
   /**
+   * Returns a String representation of a domain Variable
+   * that is acceptable as a zip entry name.
+   */
+  private def domainToString(domain: Variable): String = domain match {
+    case time: Time => time match {
+      case Text(t) => t //keep formatting
+      case _: Number => time.toIso //TODO: consider stripping special characters like '-' and ':'
+    }
+    case tup: Tuple => tup.getVariables.map(domainToString(_)).mkString("_")
+    case _ => domain.toString
+  }
+
+  /**
    * Returns the first Binary Variable found in the Dataset, if there is one.
    */
-  def findBinaryVariable(ds: Dataset): Option[Variable] = ds.getScalars.find {
+  private def findBinaryVariable(ds: Dataset): Option[Variable] = ds.getScalars.find {
     case Binary(_) => true
     case _ => false
   }
