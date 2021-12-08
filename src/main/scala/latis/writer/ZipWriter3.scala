@@ -20,7 +20,7 @@ import latis.time.Time
  * Datasets will be searched for a Binary variable first, then a "url" variable, 
  * then a "file" one. The first variable found will be used. The Operations deal 
  * with the different logic for each type.
- * 
+ *
  * Duplicate zip entries will be disambiguated by appending
  * domain values with an underscore (e.g. "_2001-01-01"). 
  */
@@ -51,7 +51,7 @@ class ZipWriter3 extends Writer with LazyLogging {
   /**
    * Translate to "zip list" dataset based on binary vs url vs file variable.
    */
-  def toZipListDs(ds: Dataset): Dataset = 
+  def toZipListDs(ds: Dataset): Dataset =
     if (findBinaryVariable(ds).isDefined)
       new BinaryListToZipList()(ds)
     else if (ds.findVariableByName("url").nonEmpty)
@@ -59,7 +59,7 @@ class ZipWriter3 extends Writer with LazyLogging {
     else if (ds.findVariableByName("file").nonEmpty)
       new FileListToZipList()(ds)
     else throw new RuntimeException("No binary, 'url', nor 'file' variable found in dataset")
-  
+
 
   /**
    * Adds an entry to the ZipOutputStream with the given bytes.
@@ -124,30 +124,26 @@ class ZipWriter3 extends Writer with LazyLogging {
    * where "d" is the stringified form of the given domain value.
    */
   private def disambiguate(name: String, domain: Variable): String = entries.find(_ == name) match {
-    case Some(_) => 
+    case Some(_) =>
       name + "_" + domainToString(domain)
-    case None => 
+    case None =>
       entries += name
       name
   }
-  
+
   /**
    * Returns a String representation of a domain variable
    * that is acceptable to disambiguate a zip entry.
    */
   private def domainToString(domain: Variable): String = domain match {
     case time: Time => time match {
-      case Text(t) => t //keep formatting
+      case Text(t)   => t //keep formatting
       case _: Number => time.toIso //TODO: consider stripping special characters like '-' and ':'
     }
     case tup: Tuple => tup.getVariables.map(domainToString(_)).mkString("_")
-    case _ => domain.getData match {
-      case StringValue(s) => s
-      case DoubleValue(d) => d.toString
-      case LongValue(l) => l.toString
-      case IndexValue(i) => i.toString
-      case _ => throw new UnsupportedOperationException(s"Unsupported data type for domain variable '$domain'")
-    }
+    case d: Scalar  => d.stringValue
+    case _ => throw new UnsupportedOperationException(s"Unsupported data type for domain variable '$domain'")
+    
   }
 
   override def mimeType: String = "application/zip"
