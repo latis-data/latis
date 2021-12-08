@@ -17,7 +17,7 @@ class UrlListToZipList extends Operation {
 
   override def applyToSample(sample: Sample): Option[Sample] = sample match {
     case Sample(domain, _) => sample.findVariableByName("url") match {
-      case Text(resource) => makeNameUrlPair(resource) match {
+      case Some(Text(resource)) => makeNameUrlPair(resource) match {
         case (name, url) =>
           Some(Sample(domain, Tuple(List(Text(Metadata("zipEntry"), name),
             Text(Metadata("url"), url)))))
