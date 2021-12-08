@@ -7,7 +7,7 @@ import latis.metadata.Metadata
 
 /**
  * Convert a Dataset with a "file" variable into a Dataset
- * specialized for writing to a zip file: zipEntry -> url.
+ * specialized for writing to a zip file: domain -> (zipEntry, url).
  */
 class FileListToZipList extends Operation {
   //TODO: support other file separators in paths
@@ -19,19 +19,17 @@ class FileListToZipList extends Operation {
   
   override def apply(dataset: Dataset): Dataset = {
     _dataset = dataset
-    dataset.project("file") match { //TODO: super GranuleList?
-      case ds @ DatasetSamples(it) =>
-        val samples = it.toList.flatMap(applyToSample(_))
-        Dataset(Function(samples), ds.getMetadata)
-      case _ => ??? //TODO: empty, possibly due to lack of "file" variable
-    }
+    super.apply(dataset)
   }
   
   override def applyToSample(sample: Sample): Option[Sample] = sample match {
-    case Sample(_, Text(resource)) => makeNameUrlPair(resource) match {
-      case (name, url) => 
-        Some(Sample(Text(Metadata("zipEntry"), name),
-                    Text(Metadata("url"), url)))
+    case Sample(domain, _) => sample.findVariableByName("file") match {
+      case Text(resource) => makeNameUrlPair(resource) match {
+        case (name, url) =>
+          Some(Sample(domain, Tuple(List(Text(Metadata("zipEntry"), name),
+            Text(Metadata("url"), url)))))
+      }
+      case _ => throw new UnsupportedOperationException("No 'file' variable found in sample")
     }
   }
   
