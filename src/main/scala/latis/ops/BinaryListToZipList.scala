@@ -21,7 +21,7 @@ class BinaryListToZipList extends Operation {
    * if it has a Binary Variable. 
    */
   override def applyToSample(sample: Sample): Option[Sample] = sample match {
-    case Sample(domain, _) => sample.getVariables.find {
+    case Sample(domain, _) => sample.getVariables.find { //TODO: major bug: doesn't look inside tuples
       case Binary(_) => true
       case _ => false
     } match {
