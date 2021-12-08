@@ -5,6 +5,8 @@ import java.net._
 import java.util.zip._
 
 import com.typesafe.scalalogging.LazyLogging
+
+import latis.data.value._
 import latis.dm._
 import latis.ops.BinaryListToZipList
 import latis.ops.FileListToZipList
@@ -139,7 +141,13 @@ class ZipWriter3 extends Writer with LazyLogging {
       case _: Number => time.toIso //TODO: consider stripping special characters like '-' and ':'
     }
     case tup: Tuple => tup.getVariables.map(domainToString(_)).mkString("_")
-    case _ => domain.toString
+    case _ => domain.getData match {
+      case StringValue(s) => s
+      case DoubleValue(d) => d.toString
+      case LongValue(l) => l.toString
+      case IndexValue(i) => i.toString
+      case _ => throw new UnsupportedOperationException(s"Unsupported data type for domain variable '$domain'")
+    }
   }
 
   override def mimeType: String = "application/zip"
