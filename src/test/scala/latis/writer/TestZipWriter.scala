@@ -84,7 +84,7 @@ class TestZipWriter {
     )
     val ds = Dataset(Function(samples), Metadata("test"))
     //AsciiWriter.write(ds)
-    val file = new File("/tmp/disambiguate_duplicate_entry_names.zip")
+    val file = new File("/tmp/disambiguate_duplicate_entry_names_1.zip")
     val fos = new FileOutputStream(file)
     ZipWriter3(fos).write(ds)
     
@@ -111,7 +111,7 @@ class TestZipWriter {
       )
     )
     val ds = Dataset(Function(samples), Metadata("test"))
-    val file = new File("/tmp/disambiguate_duplicate_entry_names.zip")
+    val file = new File("/tmp/disambiguate_duplicate_entry_names_2.zip")
     val fos = new FileOutputStream(file)
     ZipWriter3(fos).write(ds)
     
@@ -139,7 +139,7 @@ class TestZipWriter {
       )
     )
     val ds = Dataset(Function(samples), Metadata("test"))
-    val file = new File("/tmp/disambiguate_duplicate_entry_names.zip")
+    val file = new File("/tmp/disambiguate_duplicate_entry_names_3.zip")
     val fos = new FileOutputStream(file)
     ZipWriter3(fos).write(ds)
     
@@ -166,7 +166,7 @@ class TestZipWriter {
       )
     )
     val ds = Dataset(Function(samples), Metadata("test"))
-    val file = new File("/tmp/disambiguate_duplicate_entry_names.zip")
+    val file = new File("/tmp/disambiguate_duplicate_entry_names_4.zip")
     val fos = new FileOutputStream(file)
     ZipWriter3(fos).write(ds)
     
