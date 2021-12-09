@@ -1,5 +1,7 @@
 package latis.writer
 
+import collection.JavaConverters._
+
 import latis.data.value.DoubleValue
 import latis.data.value.StringValue
 import latis.dm._
@@ -12,7 +14,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Ignore
 import org.junit.Test
 
-import java.io.{File, FileOutputStream}
+import java.io.File
+import java.io.FileOutputStream
 import java.util.zip.ZipFile
 
 
@@ -69,8 +72,10 @@ class TestZipWriter {
     assertEquals("bar", name)
   }
 
+  def binary_string = Binary(Metadata("binary_str"), DataUtils.terminateBytes(StringValue("Hello").getByteBuffer))
+
   @Test
-  def disambiguate_duplicate_entry_names_url_int(): Unit = { //TODO: this would pass if we disambiguated with domain values but only because the lucky domain values 0,1,2; should change those to not "_n" (e.g. 1,2,3)
+  def disambiguate_duplicate_entry_names_int_url(): Unit = {
     //Note, only supported for ZipWriter3
     val samples = List(
       Sample(Integer(1), Text(Metadata("url"),"https://placekitten.com/200/200")),
@@ -82,45 +87,91 @@ class TestZipWriter {
     val file = new File("/tmp/disambiguate_duplicate_entry_names.zip")
     val fos = new FileOutputStream(file)
     ZipWriter3(fos).write(ds)
-
-    import collection.JavaConverters._
+    
     val entries = new ZipFile(file).entries.asScala.map(_.getName).toList
     assertEquals(List("200", "200_2", "200_3"), entries)
     file.delete
   }
 
   @Test
-  def disambiguate_duplicate_entry_names_binary_text_time(): Unit = {
+  def disambiguate_duplicate_entry_names_tuple_url(): Unit = {
     //Note, only supported for ZipWriter3
     val samples = List(
       Sample(
-        Time("text", Metadata(Map("units" -> "yyyy-MM-dd")), StringValue("2001-01-01")), 
-        Tuple(List(Text(Metadata("url"),"https://placekitten.com/200/200"), binary_string, binary_double))
+        Tuple(List(Text("a"), Real(1.1))),
+        Text(Metadata("url"),"https://placekitten.com/200/200")
       ),
       Sample(
-        Time("text", Metadata(Map("units" -> "yyyy-MM-dd")), StringValue("2001-01-02")), 
-        Tuple(List(Text(Metadata("url"),"https://placekitten.com/200/200"), binary_string, binary_double))
+        Tuple(List(Text("b"), Real(2.2))),
+        Text(Metadata("url"),"https://placekitten.com/200/200")
       ),
       Sample(
-        Time("text", Metadata(Map("units" -> "yyyy-MM-dd")), StringValue("2001-01-03")), 
-        Tuple(List(Text(Metadata("url"),"https://placekitten.com/200/200"), binary_string, binary_double))
+        Tuple(List(Text("c"), Real(3.3))),
+        Text(Metadata("url"),"https://placekitten.com/200/200")
       )
     )
     val ds = Dataset(Function(samples), Metadata("test"))
-    //AsciiWriter.write(ds)
     val file = new File("/tmp/disambiguate_duplicate_entry_names.zip")
     val fos = new FileOutputStream(file)
     ZipWriter3(fos).write(ds)
+    
+    val entries = new ZipFile(file).entries.asScala.map(_.getName).toList
+    assertEquals(List("200", "200_b_2.2", "200_c_3.3"), entries)
+    file.delete
+  }
 
-    import collection.JavaConverters._
+  @Test
+  def disambiguate_duplicate_entry_names_text_time_binary(): Unit = {
+    //Note, only supported for ZipWriter3
+    //Note, the Binary variable gets found first so "url" is ignored
+    val samples = List(
+      Sample(
+        Time("text", Metadata(Map("units" -> "yyyy-MM-dd")), StringValue("2001-01-01")), 
+        Tuple(List(Text(Metadata("url"),"https://placekitten.com/200/200"), binary_string))
+      ),
+      Sample(
+        Time("text", Metadata(Map("units" -> "yyyy-MM-dd")), StringValue("2001-01-02")), 
+        Tuple(List(Text(Metadata("url"),"https://placekitten.com/200/200"), binary_string))
+      ),
+      Sample(
+        Time("text", Metadata(Map("units" -> "yyyy-MM-dd")), StringValue("2001-01-03")), 
+        Tuple(List(Text(Metadata("url"),"https://placekitten.com/200/200"), binary_string))
+      )
+    )
+    val ds = Dataset(Function(samples), Metadata("test"))
+    val file = new File("/tmp/disambiguate_duplicate_entry_names.zip")
+    val fos = new FileOutputStream(file)
+    ZipWriter3(fos).write(ds)
+    
     val entries = new ZipFile(file).entries.asScala.map(_.getName).toList
     assertEquals(List("test", "test_2001-01-02", "test_2001-01-03"), entries)
     file.delete
   }
-  //TODO: disambiguation of Binary dataset (text time domain, number time domain, tuple domain) (Integer is already tested above, but Text and Real aren't!)
-  //--------------------------------------------------------------------------------------------------------------------
 
-  def binary_double = Binary(Metadata("binary_dub"), DataUtils.terminateBytes(DoubleValue(3.14).getByteBuffer))
-  def binary_string = Binary(Metadata("binary_str"), DataUtils.terminateBytes(StringValue("Hello").getByteBuffer))
-  
+  @Test
+  def disambiguate_duplicate_entry_names_number_time_binary(): Unit = {
+    //Note, only supported for ZipWriter3
+    val samples = List(
+      Sample(
+        Time("real", Metadata(Map("units" -> "years since 2000-01-01")), DoubleValue(1.5)),
+        binary_string
+      ),
+      Sample(
+        Time("real", Metadata(Map("units" -> "years since 2000-01-01")), DoubleValue(2)),
+        binary_string
+      ),
+      Sample(
+        Time("real", Metadata(Map("units" -> "years since 2000-01-01")), DoubleValue(2.5)),
+        binary_string
+      )
+    )
+    val ds = Dataset(Function(samples), Metadata("test"))
+    val file = new File("/tmp/disambiguate_duplicate_entry_names.zip")
+    val fos = new FileOutputStream(file)
+    ZipWriter3(fos).write(ds)
+    
+    val entries = new ZipFile(file).entries.asScala.map(_.getName).toList
+    assertEquals(List("test", "test_2001-12-31T00:00:00.000", "test_2002-07-01T12:00:00.000"), entries)
+    file.delete
+  }
 }
