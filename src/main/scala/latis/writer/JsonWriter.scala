@@ -1,5 +1,6 @@
 package latis.writer
 
+import latis.dm.Binary
 import latis.dm.Dataset
 import latis.dm.Function
 import latis.dm.Index
@@ -64,7 +65,8 @@ class JsonWriter extends TextWriter {
    */
   override def makeScalar(scalar: Scalar): String = scalar match {
     case Real(d) if (d.isNaN) => "null"
-    case Text(s) => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters      
+    case Text(s) => "\"" + escape(s.trim) + "\"" //put quotes around text data, escape strings and control characters   
+    case Binary(_) => "\"blob\"" //put quotes around "blob"
     case _ => super.makeScalar(scalar)
   }
   
