@@ -52,7 +52,7 @@ class ZipWriter3 extends Writer with LazyLogging {
    * Translate to "zip list" dataset based on binary vs url vs file variable.
    */
   def toZipListDs(ds: Dataset): Dataset =
-    if (findBinaryVariable(ds).isDefined)
+    if (ds.getScalars.exists(_.isInstanceOf[Binary]))
       new BinaryListToZipList()(ds)
     else if (ds.findVariableByName("url").nonEmpty)
       new UrlListToZipList()(ds)
@@ -105,14 +105,6 @@ class ZipWriter3 extends Writer with LazyLogging {
   }
 
   /**
-   * Returns the first binary variable found in the dataset, if there is one.
-   */
-  private def findBinaryVariable(ds: Dataset): Option[Variable] = ds.getScalars.find {
-    case Binary(_) => true
-    case _ => false
-  }
-
-  /**
    * Keeps a list of names so we can disambiguate duplicate zip entry names.
    * We do it this way so we can stream samples.
    */
@@ -140,7 +132,7 @@ class ZipWriter3 extends Writer with LazyLogging {
       case Text(t)   => t //keep formatting
       case _: Number => time.toIso //TODO: consider stripping special characters like '-' and ':'
     }
-    case tup: Tuple => tup.getVariables.map(domainToString(_)).mkString("_")
+    case tup: Tuple => tup.getVariables.map(domainToString).mkString("_")
     case d: Scalar  => d.stringValue
     case _ => throw new UnsupportedOperationException(s"Unsupported data type for domain variable '$domain'")
     
