@@ -20,10 +20,7 @@ class BinaryListToZipList extends Operation {
    * Turns the Sample into a zip entry of the form: domain -> (dsName, binary),
    * if it has a Binary Variable. 
    */
-  override def applyToSample(sample: Sample): Option[Sample] = sample.toSeq.find {
-    case Binary(_) => true
-    case _ => false
-  } match {
+  override def applyToSample(sample: Sample): Option[Sample] = sample.toSeq.find(_.isInstanceOf[Binary]) match {
     case Some(bv) =>
       Some(Sample(sample.domain, Tuple(List(Text(Metadata("zipEntry"), dsName), bv))))
     case _ => throw new UnsupportedOperationException("No Binary variable found in sample")
