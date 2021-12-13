@@ -115,12 +115,11 @@ class ZipWriter3 extends Writer with LazyLogging {
    * This will append "_d" for names that have already been used
    * where "d" is the stringified form of the given domain value.
    */
-  private def disambiguate(name: String, domain: Variable): String = entries.find(_ == name) match {
-    case Some(_) =>
-      name + "_" + domainToString(domain)
-    case None =>
-      entries += name
-      name
+  private def disambiguate(name: String, domain: Variable): String = if (entries.contains(name))
+    name + "_" + domainToString(domain)
+  else {
+    entries += name
+    name
   }
 
   /**
