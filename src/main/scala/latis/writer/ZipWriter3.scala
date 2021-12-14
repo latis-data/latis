@@ -123,7 +123,7 @@ class ZipWriter3 extends Writer with LazyLogging {
       counter += ((name, 1))
       name
   }
-  
+
   override def mimeType: String = "application/zip"
 }
 
