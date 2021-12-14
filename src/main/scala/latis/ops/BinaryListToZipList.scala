@@ -7,6 +7,9 @@ import latis.time.Time
 /**
  * Convert a Dataset with a binary variable into a Dataset 
  * specialized for writing to a zip file: zipEntry -> binary.
+ * 
+ * Zip entry names will be the name of the dataset with 
+ * domain values appended for disambiguation.
  */
 class BinaryListToZipList extends Operation {
   
