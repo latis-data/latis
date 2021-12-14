@@ -78,7 +78,7 @@ class ZipWriter3 extends Writer with LazyLogging {
   }
 
   /**
-   * Adds an entry to the ZipOutputStream by reading the bytes from the url.
+   * Adds an entry to the ZipOutputStream by reading bytes from the url.
    */
   def zipFromUrl(zip: ZipOutputStream, name: String, url: String): Unit = {
     // Open the URL input stream
