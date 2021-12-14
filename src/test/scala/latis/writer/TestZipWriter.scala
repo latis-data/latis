@@ -83,13 +83,30 @@ class TestZipWriter {
       Sample(Integer(3), Text(Metadata("url"),"https://placekitten.com/200/200")),
     )
     val ds = Dataset(Function(samples), Metadata("test"))
-    //AsciiWriter.write(ds)
     val file = new File("/tmp/disambiguate_duplicate_entry_names_1.zip")
     val fos = new FileOutputStream(file)
     ZipWriter3(fos).write(ds)
     
     val entries = new ZipFile(file).entries.asScala.map(_.getName).toList
-    assertEquals(List("200", "200_2", "200_3"), entries)
+    assertEquals(List("200", "200_1", "200_2"), entries)
+    file.delete
+  }
+
+  @Test
+  def disambiguate_duplicate_entry_names_int_binary(): Unit = {
+    //Note, only supported for ZipWriter3
+    val samples = List(
+      Sample(Integer(1), binary_string),
+      Sample(Integer(2), binary_string),
+      Sample(Integer(3), binary_string),
+    )
+    val ds = Dataset(Function(samples), Metadata("test"))
+    val file = new File("/tmp/disambiguate_duplicate_entry_names_2.zip")
+    val fos = new FileOutputStream(file)
+    ZipWriter3(fos).write(ds)
+
+    val entries = new ZipFile(file).entries.asScala.map(_.getName).toList
+    assertEquals(List("test_1", "test_2", "test_3"), entries)
     file.delete
   }
 
@@ -111,12 +128,30 @@ class TestZipWriter {
       )
     )
     val ds = Dataset(Function(samples), Metadata("test"))
-    val file = new File("/tmp/disambiguate_duplicate_entry_names_2.zip")
+    val file = new File("/tmp/disambiguate_duplicate_entry_names_3.zip")
     val fos = new FileOutputStream(file)
     ZipWriter3(fos).write(ds)
     
     val entries = new ZipFile(file).entries.asScala.map(_.getName).toList
-    assertEquals(List("200", "200_b_2.2", "200_c_3.3"), entries)
+    assertEquals(List("200", "200_1", "200_2"), entries)
+    file.delete
+  }
+
+  @Test
+  def disambiguate_duplicate_entry_names_tuple_binary(): Unit = {
+    //Note, only supported for ZipWriter3
+    val samples = List(
+      Sample(Tuple(List(Text("a"), Real(1.1))), binary_string),
+      Sample(Tuple(List(Text("b"), Real(2.2))), binary_string),
+      Sample(Tuple(List(Text("c"), Real(3.3))), binary_string)
+    )
+    val ds = Dataset(Function(samples), Metadata("test"))
+    val file = new File("/tmp/disambiguate_duplicate_entry_names_4.zip")
+    val fos = new FileOutputStream(file)
+    ZipWriter3(fos).write(ds)
+
+    val entries = new ZipFile(file).entries.asScala.map(_.getName).toList
+    assertEquals(List("test_a_1.1", "test_b_2.2", "test_c_3.3"), entries)
     file.delete
   }
 
@@ -139,12 +174,12 @@ class TestZipWriter {
       )
     )
     val ds = Dataset(Function(samples), Metadata("test"))
-    val file = new File("/tmp/disambiguate_duplicate_entry_names_3.zip")
+    val file = new File("/tmp/disambiguate_duplicate_entry_names_5.zip")
     val fos = new FileOutputStream(file)
     ZipWriter3(fos).write(ds)
     
     val entries = new ZipFile(file).entries.asScala.map(_.getName).toList
-    assertEquals(List("test", "test_2001-01-02", "test_2001-01-03"), entries)
+    assertEquals(List("test_2001-01-01", "test_2001-01-02", "test_2001-01-03"), entries)
     file.delete
   }
 
@@ -166,12 +201,12 @@ class TestZipWriter {
       )
     )
     val ds = Dataset(Function(samples), Metadata("test"))
-    val file = new File("/tmp/disambiguate_duplicate_entry_names_4.zip")
+    val file = new File("/tmp/disambiguate_duplicate_entry_names_6.zip")
     val fos = new FileOutputStream(file)
     ZipWriter3(fos).write(ds)
     
     val entries = new ZipFile(file).entries.asScala.map(_.getName).toList
-    assertEquals(List("test", "test_2001-12-31T00:00:00.000", "test_2002-07-01T12:00:00.000"), entries)
+    assertEquals(List("test_2001-07-01T12:00:00.000", "test_2001-12-31T00:00:00.000", "test_2002-07-01T12:00:00.000"), entries)
     file.delete
   }
 }

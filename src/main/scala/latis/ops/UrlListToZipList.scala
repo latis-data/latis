@@ -7,7 +7,7 @@ import latis.metadata.Metadata
 
 /**
  * Convert a Dataset with a "url" variable into a Dataset
- * specialized for writing to a zip file: domain -> (zipEntry, url).
+ * specialized for writing to a zip file: zipEntry -> url.
  *
  * This assumes that the url is absolute.
  */
@@ -15,17 +15,23 @@ class UrlListToZipList extends Operation {
   //TODO: support baseUrl
   //TODO: option for zip entry prefix or replace at specific level
 
-  override def applyToSample(sample: Sample): Option[Sample] = sample match {
-    case Sample(domain, _) => sample.findVariableByName("url") match {
-      case Some(Text(resource)) => makeNameUrlPair(resource) match {
-        case (name, url) =>
-          Some(Sample(domain, Tuple(List(Text(Metadata("zipEntry"), name),
-            Text(Metadata("url"), url)))))
-      }
-      case _ => throw new UnsupportedOperationException("No 'url' variable found in sample")
+  override def apply(dataset: Dataset): Dataset = {
+    dataset.project("url") match { //TODO: super GranuleList?
+      case ds @ DatasetSamples(it) =>
+        val samples = it.toList.flatMap(applyToSample(_))
+        Dataset(Function(samples), ds.getMetadata)
+      case _ => ??? //TODO: empty, possibly due to lack of "file" variable
     }
   }
-  
+
+  override def applyToSample(sample: Sample): Option[Sample] = sample match {
+    case Sample(_, Text(resource)) => makeNameUrlPair(resource) match {
+      case (name, url) =>
+        Some(Sample(Text(Metadata("zipEntry"), name),
+          Text(Metadata("url"), url)))
+    }
+  }
+
   /**
    * Makes a zip entry for the given URL.
    *
