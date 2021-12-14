@@ -31,7 +31,7 @@ class BinaryListToZipList extends Operation {
   }
 
   /**
-   * Appends "_d" to zip entry names, where "d" is the stringified form of the given domain value.
+   * Appends "_d" to zip entry names, where "d" is the stringified form of the given domain variable.
    */
   private def disambiguate(name: String, domain: Variable): String = name + "_" + domainToString(domain)
 
