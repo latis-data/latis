@@ -49,7 +49,7 @@ class ZipWriter3 extends Writer with LazyLogging {
   }
 
   /**
-   * Translate to "zip list" dataset based on binary vs url vs file variable.
+   * Translates to "zip list" dataset based on binary vs url vs file variable.
    */
   def toZipListDs(ds: Dataset): Dataset =
     if (ds.getScalars.exists(_.isInstanceOf[Binary]))
