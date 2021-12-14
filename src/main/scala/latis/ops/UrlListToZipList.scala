@@ -14,7 +14,7 @@ import latis.metadata.Metadata
 class UrlListToZipList extends Operation {
   //TODO: support baseUrl
   //TODO: option for zip entry prefix or replace at specific level
-
+  
   override def apply(dataset: Dataset): Dataset = {
     dataset.project("url") match { //TODO: super GranuleList?
       case ds @ DatasetSamples(it) =>
@@ -26,12 +26,12 @@ class UrlListToZipList extends Operation {
 
   override def applyToSample(sample: Sample): Option[Sample] = sample match {
     case Sample(_, Text(resource)) => makeNameUrlPair(resource) match {
-      case (name, url) =>
+      case (name, url) => 
         Some(Sample(Text(Metadata("zipEntry"), name),
-          Text(Metadata("url"), url)))
+                    Text(Metadata("url"), url)))
     }
   }
-
+  
   /**
    * Makes a zip entry for the given URL.
    *
