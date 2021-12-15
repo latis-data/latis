@@ -5,58 +5,39 @@ import java.net._
 import java.util.zip._
 
 import com.typesafe.scalalogging.LazyLogging
+
+import latis.data.value._
 import latis.dm._
+import latis.ops.BinaryListToZipList
 import latis.ops.FileListToZipList
 import latis.ops.UrlListToZipList
+import latis.time.Time
 
 /**
  * Proposed replacement for ZipWriter1 and ZipWriter2 (LATIS-476).
- * Use operations to transform "file" or "url" list datasets into
- * a "zip list" dataset: zipEntry -> url which this writer writes.
- * The Operations deal with the different logic for each type.
+ * Use operations to transform binary, "file", or "url" list datasets into
+ * "zip list" datasets (zipEntry -> resource) which this writer writes. 
+ * Datasets will be searched for a Binary variable first, then a "url" variable, 
+ * then a "file" one. The first variable found will be used. The Operations deal 
+ * with the different logic for each type.
  *
  * Duplicate zip entries will be disambiguated by appending
  * a counter with an underscore (e.g. "_1").
  */
 class ZipWriter3 extends Writer with LazyLogging {
   //TODO: add manifest
-  //TODO: add disambiguating "_1" before file extension
+  //TODO: add file extension
 
   def write(dataset: Dataset): Unit = {
-    // Translate to "zip list" dataset based on url vs file variable
-    val zds: Dataset = if (dataset.findVariableByName("url").nonEmpty)
-      new UrlListToZipList()(dataset)
-    else if (dataset.findVariableByName("file").nonEmpty)
-      new FileListToZipList()(dataset)
-    else throw new RuntimeException("No 'url' or 'file' variable found in dataset.")
-
+    val zds: Dataset = toZipListDs(dataset) //zipEntry -> resource
     val zip = new ZipOutputStream(getOutputStream)
     try {
       zds match {
         case DatasetSamples(it) => it foreach {
+          case Sample(Text(zipEntry), Binary(bytes)) =>
+            zipFromBytes(zip, zipEntry, bytes) //zipEntry already disambiguated
           case Sample(Text(zipEntry), Text(url)) =>
-            // Open the URL input stream
-            val bis: InputStream = try {
-              new BufferedInputStream(new URL(url).openStream())
-            } catch {
-              case e: Exception =>
-                val msg = s"Failed to open the URL: $url"
-                throw new RuntimeException(msg, e)
-            }
-
-            // Write the zip entry
-            try {
-              zip.putNextEntry(new ZipEntry(disambiguate(zipEntry)))
-              Stream.continually(bis.read).takeWhile(_ != -1).foreach(zip.write(_))
-            } catch {
-              case e: IOException =>
-                // Log a warning, leave empty entry //TODO: add error message to entry?
-                val msg = s"Failed to read the URL: $url"
-                logger.warn(msg, e)
-            } finally {
-              bis.close //make sure we release the file resource
-            }
-            zip.closeEntry //finalize the zip entry
+            zipFromUrl(zip, disambiguate(zipEntry), url)
           case _ => throw new RuntimeException("Not a valid zip dataset")
         }
         case _ => throw new RuntimeException("Empty dataset")
@@ -65,6 +46,62 @@ class ZipWriter3 extends Writer with LazyLogging {
     } finally {
       zip.close
     }
+  }
+
+  /**
+   * Translates to "zip list" dataset based on binary vs url vs file variable.
+   */
+  def toZipListDs(ds: Dataset): Dataset =
+    if (ds.getScalars.exists(_.isInstanceOf[Binary]))
+      new BinaryListToZipList()(ds)
+    else if (ds.findVariableByName("url").nonEmpty)
+      new UrlListToZipList()(ds)
+    else if (ds.findVariableByName("file").nonEmpty)
+      new FileListToZipList()(ds)
+    else throw new RuntimeException("No binary, 'url', nor 'file' variable found in dataset")
+
+
+  /**
+   * Adds an entry to the ZipOutputStream with the given bytes.
+   */
+  def zipFromBytes(zip: ZipOutputStream, name: String, bytes: Array[Byte]): Unit = {
+    try {
+      zip.putNextEntry(new ZipEntry(name))
+      zip.write(bytes)
+    } catch {
+      case e: IOException =>
+        // Log a warning, leave empty entry 
+        val msg = "Failed to write bytes to the zip entry"
+        logger.warn(msg, e)
+    }
+    zip.closeEntry //finalize the zip entry
+  }
+
+  /**
+   * Adds an entry to the ZipOutputStream by reading bytes from the url.
+   */
+  def zipFromUrl(zip: ZipOutputStream, name: String, url: String): Unit = {
+    // Open the URL input stream
+    val bis: InputStream = try {
+      new BufferedInputStream(new URL(url).openStream())
+    } catch {
+      case e: Exception =>
+        val msg = s"Failed to open the URL: $url"
+        throw new RuntimeException(msg, e)
+    }
+    // Write the zip entry
+    try {
+      zip.putNextEntry(new ZipEntry(name))
+      Stream.continually(bis.read).takeWhile(_ != -1).foreach(zip.write(_))
+    } catch {
+      case e: IOException =>
+        // Log a warning, leave empty entry //TODO: add error message to entry?
+        val msg = s"Failed to read the URL: $url"
+        logger.warn(msg, e)
+    } finally {
+      bis.close //make sure we release the file resource
+    }
+    zip.closeEntry //finalize the zip entry
   }
 
   /**
