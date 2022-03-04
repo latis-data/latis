@@ -149,9 +149,7 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
     // our search value.
     if (! withBounds.hasNext) Iterator.empty else withBounds.next() match {
       case first @ (s, (b1, _)) =>
-        val v = Scalar(b1.getMetadata(), value)
-
-        if (v.compare(b1) < 0) {
+        if (b1.compare(value) > 0) {
           // If the search value falls before the start of the first
           // granule, we're already done.
           Iterator(s)
@@ -191,7 +189,7 @@ class FileJoinAdapter(tsml: Tsml) extends TsmlAdapter(tsml) {
           withBounds.foldLeft(z) {
             case (acc @ Right(_), _) => acc
             case (Left((s1, (b1, _))), cur @ (s2, (_, b2))) =>
-              if (v.compare(b1) >= 0 && v.compare(b2) < 0) {
+              if (b1.compare(value) <= 0 && b2.compare(value) > 0) {
                 // Our search value is either in s1 or s2, so return
                 // both.
                 Right((s1, s2))
