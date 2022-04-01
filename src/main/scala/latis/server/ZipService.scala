@@ -2,15 +2,19 @@ package latis.server
 
 import java.io.PrintWriter
 import java.io.ByteArrayInputStream
+import java.net.URI
 import com.typesafe.scalalogging.LazyLogging
+
 import javax.servlet.http._
 import latis.reader.JsonReader3
 import latis.server.ErrorWriter
 import latis.server.ZipService.validateRequest
+import latis.util.LatisProperties
 import latis.util.LatisServerProperties
 import latis.writer.HttpServletWriter
 import latis.writer.ZipWriter3
 import play.api.libs.json.Json
+
 import scala.io.Source
 
 class ZipService extends HttpServlet with LazyLogging {
@@ -63,10 +67,14 @@ class ZipService extends HttpServlet with LazyLogging {
 object ZipService {
 
   /**
-   * Validate the given URL by returning whether it contains the given context path.
-   * TODO: include "/latis/"? Anything else?
+   * Validate the given URL by returning whether it contains the given context path 
+   * or if its host has been whitelisted.
    */
-  def validateUrl(url: String, contextPath: String): Boolean = url.contains(contextPath)
+  def validateUrl(url: String, contextPath: String): Boolean = {
+    val host = new URI(url).getAuthority
+    val whiteList: Array[String] = LatisProperties.getOrElse("hosts.allowed", "").split(",") //TODO: what should property be named?
+    url.contains(contextPath) || whiteList.contains(host)
+  }
 
   /**
    * Validate the given (stringified) HTTP servlet request by validating any URLs it contains.
