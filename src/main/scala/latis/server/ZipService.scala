@@ -72,7 +72,7 @@ object ZipService {
    */
   def validateUrl(url: String, contextPath: String): Boolean = {
     val host = new URI(url).getAuthority
-    val whiteList: Array[String] = LatisProperties.getOrElse("hosts.allowed", "").split(",") //TODO: what should property be named?
+    val whiteList: Array[String] = LatisProperties.getOrElse("zip.hosts.allowed", "").split(",")
     url.contains(contextPath) || whiteList.contains(host)
   }
 
