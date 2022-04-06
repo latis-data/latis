@@ -17,6 +17,11 @@ import play.api.libs.json.Json
 
 import scala.io.Source
 
+/**
+ * Zip service with host validation for security.
+ * Note that requests will fail to validate if they contain any URLs from hosts not whitelisted
+ * by the zip.hosts.allowed property. If that property is not set then all requests will fail.
+ */
 class ZipService extends HttpServlet with LazyLogging {
   
   override def doGet(request: HttpServletRequest, response: HttpServletResponse): Unit = {
