@@ -42,12 +42,11 @@ class ZipService extends HttpServlet with LazyLogging {
 
     try {
       //Determine LaTiS service location and validate request
-      val ctxPath = getServletConfig.getServletContext().getContextPath()
       val requestStr = Source.fromInputStream(request.getInputStream) //Note: storing request so it can be read twice
         .getLines
         .mkString(sys.props("line.separator"))
 
-      validateRequest(requestStr, ctxPath)
+      validateRequest(requestStr)
 
       val ds = {
         val is = new ByteArrayInputStream(requestStr.getBytes())
@@ -70,21 +69,21 @@ object ZipService {
    * Validate the given URL by returning whether it contains the given context path 
    * or if its host has been whitelisted.
    */
-  def validateUrl(url: String, contextPath: String): Boolean = {
+  def validateUrl(url: String): Boolean = {
     val host = new URI(url).getAuthority
     val whiteList: Array[String] = LatisProperties.getOrElse("zip.hosts.allowed", "").split(",")
-    url.contains(contextPath) || whiteList.contains(host)
+    whiteList.contains(host)
   }
 
   /**
    * Validate the given (stringified) HTTP servlet request by validating any URLs it contains.
    */
-  def validateRequest(requestStr: String, contextPath: String): Unit = {
+  def validateRequest(requestStr: String): Unit = {
     val urls: Seq[String] = {
       val json = Json.parse(requestStr)
       (json \\ "url").map(_.toString) //assumes the key for every URL value is "url"
     }
-    urls.filter(!validateUrl(_, contextPath)) match {
+    urls.filter(!validateUrl(_)) match {
       case Seq() => //validated
       case Seq(url) =>
         val msg = s"ZipService cannot validate request with invalid URL: $url"
