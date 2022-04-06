@@ -66,8 +66,7 @@ class ZipService extends HttpServlet with LazyLogging {
 object ZipService {
 
   /**
-   * Validate the given URL by returning whether it contains the given context path 
-   * or if its host has been whitelisted.
+   * Validate the given URL by returning whether its host has been whitelisted.
    */
   def validateUrl(url: String): Boolean = {
     val host = new URI(url).getAuthority
