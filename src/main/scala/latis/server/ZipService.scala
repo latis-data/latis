@@ -78,7 +78,7 @@ object ZipService {
     //strip any whitespace and quotes, encode any query except for ampersands 
     val encodedUrl = if (url.contains('?')) {
       val split = url.trim.replaceAll("^\"|\"$", "").split('?') 
-      split(0) + URLEncoder.encode(split(1), "UTF-8").replaceAll("%26", "&")
+      split(0) + '?' + URLEncoder.encode(split(1), "UTF-8").replaceAll("%26", "&")
     } else url.trim.replaceAll("^\"|\"$", "")
     
     val host = new URI(encodedUrl).getAuthority
