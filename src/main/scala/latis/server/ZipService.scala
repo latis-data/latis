@@ -3,6 +3,7 @@ package latis.server
 import java.io.PrintWriter
 import java.io.ByteArrayInputStream
 import java.net.URI
+import java.net.URLEncoder
 import com.typesafe.scalalogging.LazyLogging
 
 import javax.servlet.http._
@@ -74,7 +75,13 @@ object ZipService {
    * Validate the given URL by returning whether its host has been whitelisted.
    */
   def validateUrl(url: String): Boolean = {
-    val host = new URI(url).getAuthority
+    //strip any whitespace and quotes, encode any query except for ampersands 
+    val encodedUrl = if (url.contains('?')) {
+      val split = url.trim.replaceAll("^\"|\"$", "").split('?') 
+      split(0) + URLEncoder.encode(split(1), "UTF-8").replaceAll("%26", "&")
+    } else url.trim.replaceAll("^\"|\"$", "")
+    
+    val host = new URI(encodedUrl).getAuthority
     val whiteList: Array[String] = LatisProperties.getOrElse("zip.hosts.allowed", "").split(",")
     whiteList.contains(host)
   }
