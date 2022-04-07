@@ -47,20 +47,19 @@ class TestZipService {
     val url1 = "http://lasp.colorado.edu/lisird/latis/dap/tsis_tsi_24hr.txt?time>2019-01-01&take(10)"
     val url2 = "http://lasp.colorado.edu/sensitive_data.txt"
     val url3 = "https://my.sensitive.data.edu/everything.csv"
-    val ctxPath = "lisird"
 
-    assertTrue(ZipService.validateUrl(url1, ctxPath))
-    assertFalse(ZipService.validateUrl(url2, ctxPath))
-    assertFalse(ZipService.validateUrl(url3, ctxPath))
+    assertTrue(ZipService.validateUrl(url1))
+    assertTrue(ZipService.validateUrl(url2))
+    assertFalse(ZipService.validateUrl(url3))
   }
 
   @Test
   def validRequest: Unit = {
-    ZipService.validateRequest(json, "lisird")
+    ZipService.validateRequest(json)
   }
 
   @Test(expected=classOf[UnsupportedOperationException])
   def invalidRequest: Unit = {
-    ZipService.validateRequest(badJson, "lisird")
+    ZipService.validateRequest(badJson)
   }
 }
