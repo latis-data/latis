@@ -1,5 +1,5 @@
 ThisBuild / organization := "io.latis-data"
-ThisBuild / scalaVersion := "2.12.8"
+ThisBuild / scalaVersion := "2.12.17"
 
 val nexus = "https://artifacts.pdmz.lasp.colorado.edu/repository/"
 
