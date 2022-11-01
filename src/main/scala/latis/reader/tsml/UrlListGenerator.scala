@@ -46,8 +46,11 @@ class UrlListGenerator(tsml: Tsml) extends IterativeAdapter2[Double](tsml) {
   def getRecordIterator: Iterator[Double] = {
     //now in given time units
     val now = Time(System.currentTimeMillis).convert(units).getNumberData.doubleValue
-    val n: Int = Math.floor(now / cadence).toInt  //number of samples //TODO: set length in Function metadata
-    //Iterator.iterate(0.0)(i => i * cadence) //infinite!
+    // Compute number of samples.
+    // Note that this violates our exclusive end bound policy.
+    // Better handling of bin semantics would address this, but
+    // most cases use the start of the bin which we want to include.
+    val n: Int = Math.floor(now / cadence).toInt + 1 //TODO: set length in Function metadata
     Iterator.tabulate(n)(i => cadence * i)
   }
   
