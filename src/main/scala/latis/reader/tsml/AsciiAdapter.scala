@@ -1,17 +1,19 @@
 package latis.reader.tsml
 
-import com.typesafe.scalalogging.LazyLogging
-import latis.data.Data
-import latis.reader.tsml.ml.Tsml
-import latis.util.StringUtils
-import java.security.cert.X509Certificate
-import scala.io.Source
 import java.net.URL
+import java.security.cert.X509Certificate
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
 import javax.net.ssl.X509TrustManager
+
+import scala.io.Source
+
+import com.typesafe.scalalogging.LazyLogging
+import latis.data.Data
+import latis.reader.tsml.ml.Tsml
+import latis.util.StringUtils
 import org.apache.commons.net.ftp.FTPClient
 
 
@@ -43,7 +45,9 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
             getUnsecuredHTTPSDataSource
           } else {
             try {
-              Source.fromURL(url)
+              val con = url.openConnection()
+              con.setRequestProperty("Accept", "text/plain, */*; q=.2")
+              Source.fromInputStream(con.getInputStream)
             } catch {
               case _: javax.net.ssl.SSLHandshakeException =>
                 logger.error("HTTPS certificate not recognized. To ignore this, the property 'trustAllHTTPS=\"true\"' can be added to your tsml configuration.")
