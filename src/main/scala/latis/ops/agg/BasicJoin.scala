@@ -53,11 +53,14 @@ class BasicJoin extends Join {
     if(fills.forall(_.nonEmpty)) Some(Tuple(fills.flatten, t.getMetadata))
     else None
   }
-  def getFillSample(s: Sample): Option[Sample] = 
-    getFillVariable(s.range) match {
-    case Some(r) => Some(Sample(s.domain,r))
-    case _ => None
+  def getFillSample(s: Sample): Option[Sample] = {
+    if (s == null) None
+    else getFillVariable(s.range) match {
+      case Some(r) => Some(Sample(s.domain,r))
+      case _ => None
+    }
   }
+
   def getFillFunction(f: Function): Option[Variable] = getFillSample(f.getSample) match {
     case Some(s) => Some(Function(Seq(s), f.getMetadata))
     case None => None
@@ -124,8 +127,10 @@ class BasicJoin extends Join {
        
         //TODO: make Function and Dataset metadata
         val pit = samples
-        val (domain, range) = pit.peek match {case Sample(d,r) => (d,r)}
-        Dataset(Function(domain, range, pit))
+        if (pit.isEmpty) Dataset.empty
+        else pit.peek match {
+          case Sample(d,r) => Dataset(Function(d, r, pit))
+        }
       }
     }
   }
