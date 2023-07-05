@@ -264,6 +264,7 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
       val datas: Seq[Data] = (values zip vars).map(p => {
         val value = tsml.findVariableAttribute(p._2.getName, "regex") match { //look for regex as tsml attribute
           case Some(s) => s.r.findFirstIn(p._1) match { //try to match the value with the regex
+            //TODO: this does not extract the matching group
             case Some(m) => m  //use the matching part
             case None => p._2.getFillValue.toString  //use a fill value since this doesn't match
           }
@@ -286,10 +287,3 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
   //Note, use "-1" so trailing ","s will yield empty strings.
 
 }
-
-
-
-
-
-
-
