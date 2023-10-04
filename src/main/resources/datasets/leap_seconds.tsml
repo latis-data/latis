@@ -5,7 +5,7 @@
            commentCharacter="#"
            delimiter="\s+"
            columns="0;1"
-           location="https://www.ietf.org/timezones/data/leap-seconds.list" />
+           location="https://artifacts.pdmz.lasp.colorado.edu/repository/datasystems/web-team/leap-seconds.list" />
              
   <time type="integer">
     <metadata units="seconds since 1900-01-01"/>
