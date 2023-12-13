@@ -2,8 +2,6 @@ package latis.writer
 
 import org.junit._
 import Assert._
-import org.apache.derby.iapi.services.io.ArrayUtil
-import scala.reflect.internal.util.StringOps
 
 class TestStringTemplate extends WriterTest {
   

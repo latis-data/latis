@@ -1,5 +1,5 @@
 ThisBuild / organization := "io.latis-data"
-ThisBuild / scalaVersion := "2.12.17"
+ThisBuild / scalaVersion := "2.12.18"
 
 val nexus = "https://artifacts.pdmz.lasp.colorado.edu/repository/"
 
@@ -10,18 +10,18 @@ lazy val latis = (project in file("."))
   .settings(
     name := "latis",
     libraryDependencies ++= Seq(
-      "javax.servlet"              %  "javax.servlet-api"        % "3.1.0" % "provided",
-      "org.scala-lang.modules"     %% "scala-parser-combinators" % "1.1.2",
-      "org.scala-lang.modules"     %% "scala-xml"       % "1.3.0",
-      "com.typesafe.scala-logging" %% "scala-logging"   % "3.9.2",
-      "com.typesafe.play"          %% "play-json"       % "2.9.2",
-      "com.lihaoyi"                %% "scalatags"       % "0.9.3",
-      "ch.qos.logback"             %  "logback-classic" % "1.2.3",
+      "javax.servlet"              %  "javax.servlet-api"        % "4.0.1" % "provided",
+      "org.scala-lang.modules"     %% "scala-parser-combinators" % "2.2.0",
+      "org.scala-lang.modules"     %% "scala-xml"       % "1.3.1",
+      "com.typesafe.scala-logging" %% "scala-logging"   % "3.9.5",
+      "com.typesafe.play"          %% "play-json"       % "2.9.4",
+      "com.lihaoyi"                %% "scalatags"       % "0.12.0",
+      "ch.qos.logback"             %  "logback-classic" % "1.3.14",
       "org.apache.commons"         %  "commons-math3"   % "3.6.1",
-      "commons-net"                %  "commons-net"     % "3.7.2",
-      "net.sf.ehcache"             %  "ehcache"         % "2.10.6",
-      "com.lihaoyi"                %% "requests"        % "0.6.5",
-      "org.codehaus.groovy"        %  "groovy-all"      % "3.0.7" % Runtime
+      "commons-net"                %  "commons-net"     % "3.10.0",
+      "net.sf.ehcache"             %  "ehcache"         % "2.10.9.2",
+      "com.lihaoyi"                %% "requests"        % "0.8.0",
+      "org.codehaus.groovy"        %  "groovy-all"      % "3.0.16" % Runtime
     ),
     // Some tests fail unless we set this.
     Test / parallelExecution := false,
@@ -38,8 +38,8 @@ lazy val commonSettings = compilerFlags ++ Seq(
   // Test suite dependencies
   libraryDependencies ++= Seq(
     "junit"            % "junit"           % "4.13.2"    % Test,
-    "com.github.sbt"   % "junit-interface" % "0.13.2"    % Test,
-    "org.apache.derby" % "derby"           % "10.10.1.1" % Test
+    "com.github.sbt"   % "junit-interface" % "0.13.3"    % Test,
+    "org.apache.derby" % "derby"           % "10.10.2.0" % Test
   ),
   // Resolvers for our Nexus repos
   resolvers ++= Seq(
