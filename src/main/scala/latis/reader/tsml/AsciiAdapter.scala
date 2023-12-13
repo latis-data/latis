@@ -9,6 +9,7 @@ import javax.net.ssl.SSLSession
 import javax.net.ssl.X509TrustManager
 
 import scala.io.Source
+import scala.util.Try
 
 import com.typesafe.scalalogging.LazyLogging
 import latis.data.Data
@@ -108,9 +109,12 @@ class AsciiAdapter(tsml: Tsml) extends IterativeAdapter2[String](tsml) with Lazy
     }
     val path = url.getPath()
 
-    ftpClient.connect(host, port)
-    ftpClient.enterLocalPassiveMode()
-    ftpClient.login("anonymous", "anonymous")
+    Try {
+      ftpClient.setConnectTimeout(15000) //15 seconds
+      ftpClient.connect(host, port)
+      ftpClient.enterLocalPassiveMode()
+      ftpClient.login("anonymous", "anonymous")
+    }.getOrElse(throw new RuntimeException("Failed to connect to source data server"))
 
     Source.fromInputStream(
       ftpClient.retrieveFileStream(path)
