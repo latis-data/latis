@@ -16,7 +16,7 @@ lazy val latis = (project in file("."))
       "com.typesafe.scala-logging" %% "scala-logging"   % "3.9.5",
       "com.typesafe.play"          %% "play-json"       % "2.9.4",
       "com.lihaoyi"                %% "scalatags"       % "0.12.0",
-      "ch.qos.logback"             %  "logback-classic" % "1.3.14",
+      "ch.qos.logback"             %  "logback-classic" % "1.2.8", //updating this will break groovy log config?
       "org.apache.commons"         %  "commons-math3"   % "3.6.1",
       "commons-net"                %  "commons-net"     % "3.10.0",
       "net.sf.ehcache"             %  "ehcache"         % "2.10.9.2",
