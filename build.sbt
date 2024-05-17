@@ -53,6 +53,7 @@ lazy val compilerFlags = Seq(
     "-deprecation",
     "-encoding", "utf-8",
     "-feature",
+    "-release", "8",
     "-unchecked",
     "-Xfuture",
     "-Xlint:-unused,_",
