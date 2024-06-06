@@ -1,6 +1,7 @@
 package latis.ops.filter
 
 import latis.dm.Function
+import latis.dm.Sample
 import latis.metadata.Metadata
 import latis.ops.OperationFactory
 import latis.util.LatisServiceException
@@ -16,7 +17,14 @@ class TakeRightOperation(val n: Int) extends Filter {
       case (i: Int, _) if (i <= 0) => Some(Function(function.getDomain, function.getRange, Iterator.empty, function.getMetadata()))
       case (i: Int, _) => {
         //get data with rightmost n samples
-        val samples = function.iterator.sliding(n).toList.last
+
+        // iterate through the sliding iterator to find the last window
+        val slidingIterator = function.iterator.sliding(n)
+        var samples: Seq[Sample] = Seq.empty
+        while (slidingIterator.hasNext) {
+            samples = slidingIterator.next()
+        }
+        
         //change length of Function in metadata
         val md = function.getMetadata + ("length" -> samples.length.toString)
         //make the new function with the updated metadata
