@@ -6,6 +6,7 @@ import latis.metadata.Metadata
 import latis.ops.OperationFactory
 import latis.util.LatisServiceException
 
+import scala.collection.mutable.ListBuffer
 
 class TakeRightOperation(val n: Int) extends Filter {
 
@@ -16,22 +17,24 @@ class TakeRightOperation(val n: Int) extends Filter {
       case (_, Function(it)) if it.isEmpty => Some(Function(function.getDomain, function.getRange, Iterator.empty, function.getMetadata()))
       case (i: Int, _) if (i <= 0) => Some(Function(function.getDomain, function.getRange, Iterator.empty, function.getMetadata()))
       case (i: Int, _) => {
-        //get data with rightmost n samples
+          val it = function.iterator
+          val buffer = ListBuffer[Sample]()
+          it.foreach { record =>
+            if (buffer.length >= n) {
+              buffer.remove(0)
+            }
+              buffer.append(record)
+          }
 
-        // iterate through the sliding iterator to find the last window
-        val slidingIterator = function.iterator.sliding(n)
-        var samples: Seq[Sample] = Seq.empty
-        while (slidingIterator.hasNext) {
-            samples = slidingIterator.next()
-        }
-        
-        //change length of Function in metadata
-        val md = function.getMetadata + ("length" -> samples.length.toString)
-        //make the new function with the updated metadata
-        samples.length match {
-          case 0 => Some(Function(function.getDomain, function.getRange, Iterator.empty, md)) //empty Function with type of original
-          case _ => Some(Function(samples, md))
-        }
+          val samples = buffer.toList
+            
+          //change length of Function in metadata
+          val md = function.getMetadata + ("length" -> samples.length.toString)
+          //make the new function with the updated metadata
+          samples.length match {
+            case 0 => Some(Function(function.getDomain, function.getRange, Iterator.empty, md)) //empty Function with type of original
+            case _ => Some(Function(samples, md))
+          }
       }
     }
   } 
