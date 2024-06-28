@@ -14,7 +14,7 @@ class TakeRightOperation(val n: Int) extends Filter {
     //Assume we can hold this all in memory.
 
     (n, function) match {
-      case (_, Function(it)) if it.isEmpty => Some(Function(function.getDomain, function.getRange, Iterator.empty, function.getMetadata()))
+      case (_, f) if f.isEmpty => Some(Function(function.getDomain, function.getRange, Iterator.empty, function.getMetadata()))
       case (i: Int, _) if (i <= 0) => Some(Function(function.getDomain, function.getRange, Iterator.empty, function.getMetadata()))
       case (i: Int, _) => {
           val it = function.iterator
