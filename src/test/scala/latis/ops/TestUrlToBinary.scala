@@ -16,7 +16,7 @@ class TestUrlToBinary {
     new UrlToBinary()(ds) match {
       case Dataset(s @ Binary(bytes: Array[Byte])) =>
         assertEquals("image/jpeg", s.getMetadata("mediaType").get)
-        assertEquals(349, bytes.length)
+        assertEquals(375, bytes.length)
     }
   }
 
