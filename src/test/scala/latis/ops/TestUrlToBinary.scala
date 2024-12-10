@@ -12,11 +12,11 @@ class TestUrlToBinary {
   @Test
   def image_url_to_binary(): Unit = {
     val md = Metadata("name" -> "url")
-    val ds = Dataset(Scalar(md, "https://placecats.com/10/10"))
+    val ds = Dataset(Scalar(md, "https://placehold.co/10"))
     new UrlToBinary()(ds) match {
       case Dataset(s @ Binary(bytes: Array[Byte])) =>
-        assertEquals("image/jpeg", s.getMetadata("mediaType").get)
-        assertEquals(375, bytes.length)
+        assertEquals("image/svg+xml; charset=utf-8", s.getMetadata("mediaType").get)
+        assertEquals(1390, bytes.length)
     }
   }
 
