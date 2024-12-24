@@ -3,6 +3,7 @@ package latis.ops
 import latis.data.Data
 import latis.dm._
 import latis.metadata.Metadata
+import latis.util.NetUtils
 
 /**
  * Operation to replace a URL variable with its contents in a Binary variable.
@@ -18,15 +19,15 @@ class UrlToBinary extends Operation {
   override def applyToScalar(scalar: Scalar): Option[Variable] = scalar.getName match {
     case "url" => scalar match {
       case Text(url) =>
-        val r = requests.get(url)
+        val (bytes, contentType) = NetUtils.readUrl(url)
         val mtype = scalar.getMetadata("mediaType")
-          .orElse(r.httpContentType)
+          .orElse(contentType)
           .getOrElse("application/octet-stream")
         val md = Metadata(
           "name" -> "image",
           "mediaType" -> mtype
         )
-        Some(Binary(md, Data(r.bytes)))
+        Some(Binary(md, Data(bytes)))
       case _ => throw new RuntimeException("UrlToBinary expects url variable to be of type text.")
     }
     case s => Some(scalar) //no-op for other variables
