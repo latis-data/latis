@@ -44,7 +44,7 @@ import latis.util.DataUtils
 import latis.util.StringUtils
 import latis.dm.Tuple
 
-/* 
+/*
  * TODO: release connection as soon as possible?
  * risky leaving it open waiting for client to iterate
  * cache eagerly?
@@ -136,18 +136,18 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
         logger.warn(msg)
         bytes = bytes.take(max_length) //truncate so we don't get buffer overflow
       }
-      
+
       //allocate a ByteBuffer for the max length
       val bb = ByteBuffer.allocate(max_length)
       //add the data
       bb.put(bytes)
       //add termination mark
       bb.put(DataUtils.nullMark)
-      
+
       //Set the "limit" to the end of the data and rewind the position to the start.
       //Note, the capacity will remain at the max length.
       bb.flip
-      
+
       (name, Data(bb))
     }
   }
@@ -210,7 +210,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     case p: Projection => handleProjection(p)
 
     //TODO: factor out handleSelection?
-    case sel @ Selection(name, op, value) => getOrigDataset match {
+    case sel @ Selection(name, op, value) if getProperty("sql").isEmpty => getOrigDataset match {
       case Dataset(v) => v.findVariableByName(name) match {
         //TODO: allow use of renamed variable? but sql where wants orig name
         case Some(v) if (v.isInstanceOf[Time]) => handleTimeSelection(name, op, value)
@@ -245,20 +245,20 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
 
     case _: FirstFilter => {
       //make sure we are using ascending order
-      order = "ASC"; 
+      order = "ASC";
       //add a limit property of one so we only get the first record
       setProperty("limit", "1")
       //let the caller know that we handled this operation
       true
     }
-      
+
     case _: LastFilter => {
       //get results in descending order so the first record is the "last" one
-      order = "DESC"; 
+      order = "DESC";
       //add a limit property of one so we only get the first (now last) record
       setProperty("limit", "1")
       //let the caller know that we handled this operation
-      true 
+      true
     }
 
     case LimitFilter(limit) => getProperty("limit") match {
@@ -274,7 +274,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       }
       case _ => throw new UnsupportedOperationException("Invalid limit specified");
     }
-      
+
     //Rename operation: apply in projection clause of sql: 'select origName as newName'
     //These will be combined with the projected variables in the select clause with "old as new".
     case RenameOperation(origName, newName) => {
@@ -294,18 +294,18 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     //don't add if it is already quoted
     "'" + s.replaceAll("^['\"]","").replaceAll("['\"]$","") + "'"
   }
-  
+
   /**
    * Handle a Projection clause.
    */
   def handleProjection(projection: Projection): Boolean = projection match {
     case p @ Projection(names) => {
       //only names that are found in the original dataset are included in the search query
-      projectedVariableNames = names.filterNot(getOrigDataset.findVariableByName(_) == None) 
+      projectedVariableNames = names.filterNot(getOrigDataset.findVariableByName(_) == None)
       false //this way the default Projection Operation will also be applied after derived fields are created.
     }
   }
-  
+
   /**
    * Special handling for a time selection since there are various formatting issues.
    */
@@ -323,7 +323,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       case _ => throw new RuntimeException("Time variable not found in dataset.")
     }
     val tvname = getVariableName(tvar)
-    
+
     //get time type from tsml
     val vtype = tsml.dataset.findVariableMl(tvname) match {
       case Some(ml) => ml.getAttribute("type") match {
@@ -332,7 +332,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       }
       case None => throw new Exception(s"Could not find variable with name $tvname in tsml.")
     }
-    
+
     vtype match {
       case "text" => {
         //A JDBC dataset with time defined as text implies the times are represented as a Timestamp.
@@ -385,7 +385,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
     getProjectedVariableNames.find(s.hasName(_)) match { //account for aliases
       case Some(_) => { //projected, see if it needs to be renamed
         val tmpScalar = renameMap.get(s.getName) match {
-          case Some(newName) => s.getMetadata("alias") match { //keep the old name as an alias to allow later projection. 
+          case Some(newName) => s.getMetadata("alias") match { //keep the old name as an alias to allow later projection.
             case Some(a) => s.updatedMetadata("alias" -> (a + "," + s.getName)).updatedMetadata("name" -> newName)
             case None => s.updatedMetadata("alias" -> s.getName).updatedMetadata("name" -> newName)
           }
@@ -448,16 +448,16 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   }
 
   /**
-   * Allow tsml to specify a "hint" property to add to the SQL between the "select" 
+   * Allow tsml to specify a "hint" property to add to the SQL between the "select"
    * and projection clause. Appropriate for Oracle, at least.
-   * For example: 
+   * For example:
    *   select /*+INDEX (TMDISCRETE TMDISCRETE_ALL_IDX)*/ * from TMDISCRETE ...
    */
   protected def makeHint: String = getProperty("hint") match {
     case Some(hint) => hint + " " //add white space so it plays nice in makeQuery
     case None => ""
   }
-  
+
   /**
    * Construct the SQL query.
    * Look for "sql" defined in the tsml, otherwise construct it.
@@ -473,7 +473,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
 
       val p = makePredicate
       if (p.nonEmpty) sb append " where " + p
-      
+
 
       //Sort by domain variable.
       //assume domain is scalar, for now
@@ -537,21 +537,21 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
    * Database connection from JNDI or JDBC properties.
    */
   private lazy val connection: Connection = {
-    
+
     val startsWithJavaRegex = "^(java:.+)".r
     val startsWithJdbcRegex = "^jdbc:(.+)".r
-    
+
     // location is the current standard for both jndi and jdbc connections,
     // but we still support the jndi attribute for historical reasons.
     // See LATIS-30 for more details
     val con = getProperty("location") match {
-      
+
       // if 'location' exists and starts with "java:", use jndi
       case Some(startsWithJavaRegex(location)) => getConnectionViaJndi(location)
-      
+
       // if 'location' exists and starts with 'jdbc:'
       case Some(startsWithJdbcRegex(_)) => getConnectionViaJdbc
-      
+
       // If we get here, we probably have a malformed tsml file. No conforming location attr was found.
       case _ => throw new RuntimeException(
         "Unable to find or parse tsml location attribute: location must exist and start with 'java:' (for JNDI) or 'jdbc:' (for JDBC)"
@@ -593,7 +593,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
       case None => throw new RuntimeException("JdbcAdapter needs to have a 'password' defined.")
     }
 
-    //Load the JDBC driver 
+    //Load the JDBC driver
     Class.forName(driver)
 
     //Make database connection
@@ -613,7 +613,7 @@ class JdbcAdapter(tsml: Tsml) extends IterativeAdapter[JdbcAdapter.JdbcRecord](t
   }
 }
 
-//=============================================================================  
+//=============================================================================
 
 /**
  * Define some inner classes to provide us with Record semantics for JDBC ResultSets.
@@ -624,7 +624,7 @@ object JdbcAdapter {
 
   class JdbcEmptyIterator() extends Iterator[JdbcAdapter.JdbcRecord] {
     private var _hasNext = false
-    
+
     def next(): JdbcRecord = null
     def hasNext(): Boolean = _hasNext
   }
