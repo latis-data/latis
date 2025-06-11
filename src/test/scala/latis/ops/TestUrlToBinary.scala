@@ -23,7 +23,7 @@ class TestUrlToBinary {
   @Test
   def override_media_type(): Unit = {
     val md = Metadata("name" -> "url", "mediaType" -> "text/plain")
-    val ds = Dataset(Scalar(md, "https://placecats.com/10/10"))
+    val ds = Dataset(Scalar(md, "https://placehold.co/10x10"))
     new UrlToBinary()(ds) match {
       case Dataset(b: Binary) =>
         assertEquals("text/plain", b.getMetadata("mediaType").get)
